@@ -176,7 +176,7 @@ See [docs/USER-GUIDE.md](docs/user-guide.md)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 <br />
 
