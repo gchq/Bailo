@@ -9,10 +9,10 @@ import { deploymentQueue } from '../../utils/queues'
 import { getRequest, readNumRequests, readRequests, RequestType } from '../../services/request'
 import { RequestStatusType } from '../../../types/interfaces'
 import { ObjectId } from 'mongoose'
-import UserModel from 'server/models/User'
-import { BadReq } from 'server/utils/result'
-import { reviewedRequest } from 'server/templates/reviewedRequest'
-import { sendEmail } from 'server/utils/smtp'
+import UserModel from '../../models/User'
+import { BadReq } from '../../utils/result'
+import { reviewedRequest } from '../../templates/reviewedRequest'
+import { sendEmail } from '../../utils/smtp'
 
 export const getRequests = [
   ensureUserRole('user'),

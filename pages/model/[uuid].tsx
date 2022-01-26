@@ -48,6 +48,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import { postEndpoint } from 'data/api'
 import dynamic from 'next/dynamic'
+import { Types } from 'mongoose'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -105,9 +106,9 @@ const Model = () => {
 
   useEffect(() => {
     if (!isCurrentUserLoading && currentUser !== undefined && version?.model !== undefined) {
-      setModelFavourited(currentUser.favourites.includes(version?.model))
+      setModelFavourited(currentUser.favourites.includes(version?.model as unknown as Types.ObjectId))
     }
-  }, [currentUser, version])
+  }, [currentUser, version, isCurrentUserLoading, setModelFavourited])
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isVersionsError,
@@ -137,7 +138,7 @@ const Model = () => {
 
   const toggleFavourite = async() => {
     if (version?.model !== undefined) {
-      const apiAddress = currentUser?.favourites.includes(version?.model) ? 'unfavourite' : 'favourite'
+      const apiAddress = currentUser?.favourites.includes(version?.model as unknown as Types.ObjectId) ? 'unfavourite' : 'favourite'
       await postEndpoint(`/api/v1/user/${apiAddress}/${version?.model}`, {}
       ).then(async (res) => {
         return res.text()
