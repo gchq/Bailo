@@ -1,14 +1,14 @@
-import { Document, Types } from "mongoose"
-import UserModel from "../models/User"
-import { Deployment, Request, User, Version } from "../../types/interfaces"
-import RequestModel from "../models/Request"
-import { BadReq } from "../utils/result"
-import { sendEmail } from "../utils/smtp"
-import { reviewRequest } from "../templates/reviewRequest"
+import { Document, Types } from 'mongoose'
+import UserModel from '../models/User'
+import { Deployment, Request, User, Version } from '../../types/interfaces'
+import RequestModel from '../models/Request'
+import { BadReq } from '../utils/result'
+import { sendEmail } from '../utils/smtp'
+import { reviewRequest } from '../templates/reviewRequest'
 
-export async function createDeploymentRequests({ version, deployment }: { version: Version, deployment: Deployment }) {
+export async function createDeploymentRequests({ version, deployment }: { version: Version; deployment: Deployment }) {
   const manager = await UserModel.findOne({
-    id: version.metadata.contacts.manager
+    id: version.metadata.contacts.manager,
   })
 
   if (!manager) {
@@ -21,7 +21,7 @@ export async function createDeploymentRequests({ version, deployment }: { versio
   const managerRequest = await createDeploymentRequest({
     user: manager,
     deployment: deployment,
-    approvalType: 'Manager'
+    approvalType: 'Manager',
   })
 
   return managerRequest
@@ -30,11 +30,11 @@ export async function createDeploymentRequests({ version, deployment }: { versio
 export async function createVersionRequests({ version }: { version: Version }) {
   const [manager, reviewer] = await Promise.all([
     UserModel.findOne({
-      id: version.metadata.contacts.manager
+      id: version.metadata.contacts.manager,
     }),
     UserModel.findOne({
-      id: version.metadata.contacts.reviewer
-    })
+      id: version.metadata.contacts.reviewer,
+    }),
   ])
 
   if (!manager) {
@@ -50,26 +50,30 @@ export async function createVersionRequests({ version }: { version: Version }) {
       `Unable to find reviewer with id: '${version.metadata.contacts.reviewer}'`
     )
   }
-  
+
   const managerRequest = createVersionRequest({
     user: manager,
     version: version,
-    approvalType: 'Manager'
+    approvalType: 'Manager',
   })
 
   const reviewRequest = createVersionRequest({
     user: reviewer,
     version: version,
-    approvalType: 'Reviewer'
+    approvalType: 'Reviewer',
   })
 
   return await Promise.all([managerRequest, reviewRequest])
 }
 
 type DeploymentApprovalType = 'Manager'
-async function createDeploymentRequest({ user, approvalType, deployment }: {
-  user: User,
-  approvalType: DeploymentApprovalType,
+async function createDeploymentRequest({
+  user,
+  approvalType,
+  deployment,
+}: {
+  user: User
+  approvalType: DeploymentApprovalType
   deployment: Deployment
 }): Promise<Request> {
   return createRequest({
@@ -78,34 +82,44 @@ async function createDeploymentRequest({ user, approvalType, deployment }: {
     user,
 
     approvalType,
-    requestType: 'Deployment'
+    requestType: 'Deployment',
   })
 }
 
 type VersionApprovalType = 'Manager' | 'Reviewer'
-async function createVersionRequest({ user, approvalType, version }: {
-  user: User,
-  approvalType: VersionApprovalType,
+async function createVersionRequest({
+  user,
+  approvalType,
+  version,
+}: {
+  user: User
+  approvalType: VersionApprovalType
   version: Version
 }): Promise<Request> {
   return createRequest({
     documentType: 'version',
-    document: (version as unknown as any),
+    document: version as unknown as any,
     user,
 
     approvalType,
-    requestType: 'Upload'
+    requestType: 'Upload',
   })
 }
 
 export type RequestDocumentType = 'version' | 'deployment'
 export type RequestType = 'Upload' | 'Deployment'
-async function createRequest({ documentType, document, user, approvalType, requestType }: {
-  documentType: RequestDocumentType,
-  document: Document & { model: any, uuid: string },
-  user: User,
+async function createRequest({
+  documentType,
+  document,
+  user,
+  approvalType,
+  requestType,
+}: {
+  documentType: RequestDocumentType
+  document: Document & { model: any; uuid: string }
+  user: User
 
-  approvalType: VersionApprovalType | DeploymentApprovalType,
+  approvalType: VersionApprovalType | DeploymentApprovalType
   requestType: RequestType
 }) {
   const doc = {
@@ -118,14 +132,18 @@ async function createRequest({ documentType, document, user, approvalType, reque
 
   // If a request already exists, we don't want to create a
   // duplicate request
-  const { value: request, lastErrorObject } = await RequestModel.findOneAndUpdate(doc, {
-    ...doc,
-    status: 'No Response'
-  }, {
-    upsert: true,
-    new: true,
-    rawResult: true
-  })
+  const { value: request, lastErrorObject } = await RequestModel.findOneAndUpdate(
+    doc,
+    {
+      ...doc,
+      status: 'No Response',
+    },
+    {
+      upsert: true,
+      new: true,
+      rawResult: true,
+    }
+  )
 
   if (!lastErrorObject?.updatedExisting && user.email) {
     // we created a new request, send out a notification.
@@ -133,8 +151,8 @@ async function createRequest({ documentType, document, user, approvalType, reque
       to: user.email,
       ...reviewRequest({
         document,
-        requestType
-      })
+        requestType,
+      }),
     })
   }
 
@@ -151,10 +169,7 @@ export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
 }
 
 export type RequestFilter = Types.ObjectId | undefined
-export async function readRequests({ type, filter }: {
-  type: RequestType,
-  filter: RequestFilter
-}) {
+export async function readRequests({ type, filter }: { type: RequestType; filter: RequestFilter }) {
   const query: any = {
     status: 'No Response',
     request: type,
@@ -179,13 +194,10 @@ export async function readRequests({ type, filter }: {
 }
 
 export async function getRequest({ requestId }: { requestId: string | Types.ObjectId }) {
-  const request = await RequestModel.findById(requestId) as Request
+  const request = (await RequestModel.findById(requestId)) as Request
 
   if (!request) {
-    throw BadReq(
-      { requestId },
-      `Unable to find request '${requestId}'`
-    )
+    throw BadReq({ requestId }, `Unable to find request '${requestId}'`)
   }
 
   return request

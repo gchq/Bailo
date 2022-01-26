@@ -1,4 +1,4 @@
-import dedent from "dedent-js"
+import dedent from 'dedent-js'
 
 export function wrapper(children: string) {
   return dedent(`

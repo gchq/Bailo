@@ -92,17 +92,18 @@ export default function processDeployments() {
       const internalImage = `${config.get('registry.host')}/internal/${tag}`
       const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
       dlog.info({ internalImage }, 'Pulling docker image')
-      
+
       deployment.log('info', 'Logging into docker')
-      await runCommand(`docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`, dlog.info.bind(dlog), dlog.error.bind(dlog))
+      await runCommand(
+        `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
+        dlog.info.bind(dlog),
+        dlog.error.bind(dlog)
+      )
       deployment.log('info', 'Successfully logged into docker')
-      
+
       await logCommand(`docker pull ${internalImage}`, deployment.log.bind(deployment))
       dlog.info({ internalImage, externalImage }, 'Retagging docker image')
-      await logCommand(
-        `docker tag ${internalImage} ${externalImage}`,
-        deployment.log.bind(deployment)
-      )
+      await logCommand(`docker tag ${internalImage} ${externalImage}`, deployment.log.bind(deployment))
       dlog.info({ externalImage }, 'Pushing docker image')
       await logCommand(`docker push ${externalImage}`, deployment.log.bind(deployment))
 

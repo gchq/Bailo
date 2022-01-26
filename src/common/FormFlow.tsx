@@ -71,7 +71,7 @@ export default function FormFlow({
     // When page loads, check if we need to edit an existing model
     if (modelToEdit !== undefined) {
       setFormData(modelToEdit.metadata)
-    }    
+    }
   }, [modelToEdit])
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function FormFlow({
       validateAllSteps()
     }
   }, [formData])
-  
+
   const schemaSteps = useMemo(
     () => getSchemaSteps(schema.schema, uiSchema, omitFields),
     [schema.schema, uiSchema, omitFields]
@@ -135,11 +135,9 @@ export default function FormFlow({
           if (checkAllStepsValidated()) {
             return onSubmit(formData, schema, { code, binary })
           } else {
-            setSubmissionErrorMessage(
-              'Please check that all steps are completed.'
-            )
+            setSubmissionErrorMessage('Please check that all steps are completed.')
           }
-        } else {          
+        } else {
           if (code !== undefined && binary !== undefined && checkAllStepsValidated()) {
             return onSubmit(formData, schema, { code, binary })
           } else {
@@ -188,7 +186,7 @@ export default function FormFlow({
         const sectionErrors = validator.validate((formData as any)[schemaSteps[index].stepName], schemaStep.schema)
         if (!sectionErrors.errors.length) {
           acc.push(index)
-        } 
+        }
       }
       return acc
     }, [])
@@ -214,9 +212,7 @@ export default function FormFlow({
           Submit
         </Button>
       </Box>
-      {name === 'Model' && 
-        <FormExport formData={formData} schema={schema} schemaSteps={schemaSteps} />
-      }
+      {name === 'Model' && <FormExport formData={formData} schema={schema} schemaSteps={schemaSteps} />}
     </>
   )
 
@@ -225,8 +221,20 @@ export default function FormFlow({
       {name === 'Model' && (
         <Box sx={{ pb: 4 }}>
           <Stack direction='row' spacing={2} alignItems='center'>
-            <FileInput disabled={mode === 'edit'} label={'Select Code'} file={code} onChange={handleCodeChange} accepts=".zip" />
-            <FileInput disabled={mode === 'edit'} label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts=".zip" />
+            <FileInput
+              disabled={mode === 'edit'}
+              label={'Select Code'}
+              file={code}
+              onChange={handleCodeChange}
+              accepts='.zip'
+            />
+            <FileInput
+              disabled={mode === 'edit'}
+              label={'Select Binary'}
+              file={binary}
+              onChange={handleBinaryChange}
+              accepts='.zip'
+            />
           </Stack>
         </Box>
       )}

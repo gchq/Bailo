@@ -5,18 +5,24 @@ import { clearStoredData } from '../../server/utils/clear'
 import { runCommand } from '../../server/utils/build'
 import log from '../../server/utils/logger'
 
-export async function clearData(){
+export async function clearData() {
   log.debug('running clearData')
   await clearStoredData()
 
   log.debug('removing local registry docker images')
   const imageIdentifier = `${config.get('registry.host')}/`
- 
-  const stopCmd = "docker stop $(docker ps --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" + imageIdentifier + "'))"
+
+  const stopCmd =
+    "docker stop $(docker ps --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
+    imageIdentifier +
+    "'))"
   log.debug(stopCmd)
   await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log))
 
-  const rmCmd = "docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" + imageIdentifier + "'))"
+  const rmCmd =
+    "docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
+    imageIdentifier +
+    "'))"
   log.debug(rmCmd)
   await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log))
 
@@ -36,7 +42,7 @@ export async function waitForElement(driver: WebDriver, selector: By) {
       // when this happens, retry
       await element.getText()
       return element
-    } catch(e: any) {
+    } catch (e: any) {
       if (e.name === 'StaleElementReferenceError') {
         continue
       }
@@ -52,12 +58,10 @@ export async function waitForElements(driver: WebDriver, selector: By) {
 }
 
 export async function getDriver() {
-  let builder = await new Builder()
-    .forBrowser('firefox')
+  let builder = await new Builder().forBrowser('firefox')
 
   if (process.env.HEADLESS === 'true') {
-    builder = builder
-      .setFirefoxOptions(new firefox.Options().headless())
+    builder = builder.setFirefoxOptions(new firefox.Options().headless())
   }
 
   return builder.build()
@@ -79,17 +83,17 @@ export async function sendKeys(driver: WebDriver, selector: By, keys: string) {
   return element
 }
 
-export async function selectOption(driver, parentSelector, childSelector, displayValue){
+export async function selectOption(driver, parentSelector, childSelector, displayValue) {
   const displayUpper = displayValue.toUpperCase()
 
   const selectList = await driver.findElement(parentSelector)
   await selectList.click()
 
   const options = await driver.findElements(childSelector)
-  for (let i = 0; i < options.length; i++){
+  for (let i = 0; i < options.length; i++) {
     const curOption = options[i]
     const curDisplay = await curOption.getText()
-    if (curDisplay.toUpperCase().includes(displayUpper)){
+    if (curDisplay.toUpperCase().includes(displayUpper)) {
       await curOption.click()
       break
     }

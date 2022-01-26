@@ -94,7 +94,7 @@ export const postUpload = [
 
     try {
       await version.save()
-    } catch(err: any) {
+    } catch (err: any) {
       if (err.toString().includes('duplicate key error')) {
         return res.status(409).json({
           message: `Duplicate version name found for model '${req.query.modelUuid}'`,
@@ -152,12 +152,15 @@ export const postUpload = [
 
     version.model = model._id
     await version.save()
-    
+
     req.log.info({ modelId: model._id }, 'Created model document')
 
     const [managerRequest, reviewerRequest] = await createVersionRequests({ version: await version.populate('model') })
-    req.log.info({ managerId: managerRequest._id, reviewRequest: reviewerRequest._id }, 'Successfully created requests for reviews')
-    
+    req.log.info(
+      { managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
+      'Successfully created requests for reviews'
+    )
+
     const job = await uploadQueue
       .createJob({
         versionId: version._id,

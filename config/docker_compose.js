@@ -1,6 +1,6 @@
 module.exports = {
   mongo: {
-    uri: 'mongodb://mongo:27017/model_management',
+    uri: 'mongodb://mongo:27017/bailo',
   },
 
   minio: {
@@ -34,5 +34,5 @@ module.exports = {
   smtp: {
     host: 'maildev',
     port: 25,
-  }
+  },
 }

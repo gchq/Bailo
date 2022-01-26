@@ -15,8 +15,8 @@ export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
     const hash = createHash('sha256').update(key).digest().slice(0, 16)
-    hash[6] = (hash[6] & 0x0f) | 0x40;
-    hash[8] = (hash[8] & 0x3f) | 0x80;
+    hash[6] = (hash[6] & 0x0f) | 0x40
+    hash[8] = (hash[8] & 0x3f) | 0x80
 
     adminToken = uuidStringify(hash)
   }
@@ -38,7 +38,7 @@ function getBit(buffer: Buffer, index: number) {
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  return Number((idByte & Math.pow(2, (7 - bit))) !== 0)
+  return Number((idByte & Math.pow(2, 7 - bit)) !== 0)
 }
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -74,41 +74,51 @@ async function getKid() {
 async function encodeToken(data, { expiresIn }) {
   const privateKey = await getPrivateKey()
 
-  return jwt.sign({
-    ...data,
-    jti: uuidv4()
-  }, privateKey, {
-    algorithm: 'RS256',
-    expiresIn,
+  return jwt.sign(
+    {
+      ...data,
+      jti: uuidv4(),
+    },
+    privateKey,
+    {
+      algorithm: 'RS256',
+      expiresIn,
 
-    audience: config.get('registry.service'),
-    issuer: config.get('registry.issuer'),
+      audience: config.get('registry.service'),
+      issuer: config.get('registry.issuer'),
 
-    header: {
-      kid: await getKid(),
-      alg: 'RS256'
+      header: {
+        kid: await getKid(),
+        alg: 'RS256',
+      },
     }
-  })
+  )
 }
 
 function getRefreshToken(user: any) {
-  return encodeToken({
-    sub: user.id,
-    user: String(user._id),
-    usage: 'refresh_token'
-  }, {
-    expiresIn: '30 days'
-  })
+  return encodeToken(
+    {
+      sub: user.id,
+      user: String(user._id),
+      usage: 'refresh_token',
+    },
+    {
+      expiresIn: '30 days',
+    }
+  )
 }
 
 function getAccessToken(user, access) {
-  return encodeToken({
-    sub: user.id,
-    user: String(user._id),
-    access
-  }, {
-    expiresIn: '1 hour'
-  })
+  return encodeToken(
+    {
+      sub: user.id,
+      user: String(user._id),
+      access,
+    },
+    {
+      expiresIn: '1 hour',
+    }
+  )
 }
 
 function generateAccess(scope: any) {
@@ -118,7 +128,7 @@ function generateAccess(scope: any) {
   return {
     type: typ,
     name: repository,
-    actions
+    actions,
   }
 }
 
@@ -155,7 +165,7 @@ export const getDockerRegistryAuth = [
     if (!authorization) {
       rlog.warn('No authorization header found')
       return res.status(403).json({
-        message: 'no authorization header found'
+        message: 'no authorization header found',
       })
     }
 
@@ -164,23 +174,26 @@ export const getDockerRegistryAuth = [
     if (error) {
       rlog.warn({ error }, 'User authentication failed')
       return res.status(403).json({
-        message: error
+        message: error,
       })
     }
 
     if (!user) {
       rlog.warn('User authentication failed')
       return res.status(403).json({
-        message: 'user authentication failed'
+        message: 'user authentication failed',
       })
     }
 
     rlog = rlog.child({ user })
-  
+
     if (service !== config.get('registry.service')) {
-      rlog.warn({ expectedService: config.get('registry.service') }, 'Received registry auth request from unexpected service')
+      rlog.warn(
+        { expectedService: config.get('registry.service') },
+        'Received registry auth request from unexpected service'
+      )
       return res.status(403).json({
-        message: 'invalid service'
+        message: 'invalid service',
       })
     }
 
@@ -193,7 +206,7 @@ export const getDockerRegistryAuth = [
     if (!scope) {
       rlog.warn('Scope is undefined')
       return res.status(403).json({
-        message: 'undefined scope'
+        message: 'undefined scope',
       })
     }
 
@@ -206,7 +219,7 @@ export const getDockerRegistryAuth = [
     } else {
       rlog.warn({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value')
       return res.status(403).json({
-        message: 'unexpected scope type'
+        message: 'unexpected scope type',
       })
     }
 
@@ -216,7 +229,7 @@ export const getDockerRegistryAuth = [
       if (!admin && !checkAccess(access, user)) {
         rlog.warn({ access }, 'User does not have permission to carry out request')
         return res.status(403).json({
-          message: 'invalid access'
+          message: 'invalid access',
         })
       }
     }

@@ -1,6 +1,6 @@
 # Getting started
 
-Bailo is an application to store, discover, and share machine learning models. 
+Bailo is an application to store, discover, and share machine learning models.
 
 ## Marketplace
 
@@ -8,13 +8,13 @@ The Marketplace is the default landing page when you access Bailo. You can retur
 
 <div><img src="images/MarketplaceIcon.png" width="250px" alt="Marketplace icon image"></img></div>
 
-Models in Bailo are viewable in the Marketplace, and you can use the "Filter Models" search bar to look for specific (types of) models. 
+Models in Bailo are viewable in the Marketplace, and you can use the "Filter Models" search bar to look for specific (types of) models.
 
-In the future, only approved models will be visible via the Marketplace. 
+In the future, only approved models will be visible via the Marketplace.
 
 ## Uploading models
 
-As a user with the Uploader role, you can submit a model by clicking on the Upload Model icon on the left-hand side of the screen: 
+As a user with the Uploader role, you can submit a model by clicking on the Upload Model icon on the left-hand side of the screen:
 
 <div><img src="images/UploadModel.png" width="250px" alt="Upload Model icon image"></img></div>
 
@@ -23,7 +23,6 @@ This will take you to a page to upload your model's code, binary, and model card
 You can get the json string containing a model's metadata from its "Settings" tab, then clicking "Copy Model Card to Clipboard":
 
 <div><img src="images/CopyModelMetadataJson.png" height="150px" alt="Copy model card metadata as json string image"></img></div>
-
 
 This json string can be used as a template for uploading additional models via the "Upload Model" tab.
 
@@ -37,21 +36,22 @@ As a model contributor you must develop your model code in Python and structure 
 
 The model code is uploaded as a <b>zip file</b> on the upload files section on the user interface upload form. The uploaded code must contain:
 
-  * The top-level model class
-  * Any supporting code
-  * An associated requirements.txt detailing any python library dependencies and their versions.
+- The top-level model class
+- Any supporting code
+- An associated requirements.txt detailing any python library dependencies and their versions.
 
 We provide a basemodel class that contains the functions:
 
-  * predict
-  * metrics
-  * metadata
+- predict
+- metrics
+- metadata
 
 As a model contributor, you need to import this and use it as a super class to your model code and, at minimum, instantiate the predict method in order to create a valid model. This approach allows you to test your model code externally, while ensuring minimal integration work is required when submitting the model to Bailo.
 
 The basemodel can be found [here](../examples/example_model_code/basemodel/basemodel.py), but the contents are also provided below for easy reference.
 
 **basemodel.py**
+
 ```python
 from abc import ABC, abstractmethod
 
@@ -102,6 +102,7 @@ class BaseModel(ABC):
 ```
 
 **Example - model.py**
+
 ```python
 import fasttext
 import numpy as np
@@ -176,17 +177,17 @@ If the supporting model code expects the trained model to be located at a partic
 
 ### Supported Models
 
-Bailo currently builds model images using [seldonio's Python 3.7 s2i image](https://hub.docker.com/r/seldonio/seldon-core-s2i-python37). This means Bailo currently only supports models that can be run with Python 3.7. Generally, the packages your model uses need to be pip-installable and listed in the [requirements.txt](../examples/example_model_code/requirements.txt) file. NumPy (1.21 as of this writing) is provided, by default. 
+Bailo currently builds model images using [seldonio's Python 3.7 s2i image](https://hub.docker.com/r/seldonio/seldon-core-s2i-python37). This means Bailo currently only supports models that can be run with Python 3.7. Generally, the packages your model uses need to be pip-installable and listed in the [requirements.txt](../examples/example_model_code/requirements.txt) file. NumPy (1.21 as of this writing) is provided, by default.
 
 ## Requesting a deloyment
 
-Once a model has been added to the marketplace, it can be found by other users. If the model matches a user's use case, they can request a deployment of the model (by clicking "Request Deployment" on a model's page). Similar to the model upload form, there's a deployment request form to fill out (along with an option to request a deployment with the form data populated in a json string, via the "Upload Deployment" tab). 
+Once a model has been added to the marketplace, it can be found by other users. If the model matches a user's use case, they can request a deployment of the model (by clicking "Request Deployment" on a model's page). Similar to the model upload form, there's a deployment request form to fill out (along with an option to request a deployment with the form data populated in a json string, via the "Upload Deployment" tab).
 
 Similar to the model upload form, you will need to supply a secondary POC for the deployment (someone to contact about the deployment if the deployment owner is unable to be reached).
 
 If your request is approved by the model's manager, then a Docker image corresponding to the requested model is made available. You are then able to pull this image and run it on your own infrastructure.
 
-## Updating a model 
+## Updating a model
 
 Updating a model is not yet implemented, however in the future models can be updated by going to the model's url, clicking the settings tab, then clicking "Upload New Version":
 
@@ -200,21 +201,19 @@ Models awaiting your approval are viewable on the Reviews page, which can be rea
 
 <div><img src="images/ReviewPage.png" height="200px" alt="Review Model Page image"></img></div>
 
-Approve or reject a model by clicking the associated button. 
+Approve or reject a model by clicking the associated button.
 
 ## FAQ
+
 ### When should I upload a model?
 
 You should consider uploading a model once you have trained and tested it in your own environment and you feel that it is production ready. Bailo is not intended to hold models until they have reached this point, so any development must be carried out in an external environment.
 
 ### What roles can a user have and how do they limit available actions?
 
-Currently, Bailo has **user** and **admin** roles. A **user** can upload and approve models (as both a manager and reviewer, as identifed during model upload). In the future, Bailo intends to support the following roles: 
+Currently, Bailo has **user** and **admin** roles. A **user** can upload and approve models (as both a manager and reviewer, as identifed during model upload). In the future, Bailo intends to support the following roles:
 
-* **Uploader**: This is the main role for users, it allows users to upload and explore models, as well as request deployments of models.
-* **Manager**: All models uploaded to Bailo are assigned a model manager. This person is responsible for the model and ensuring that it follows its lifecycle plan. The manager approves the upload of the model and all its deployments considering any business risks and costs associated with doing so.
-* **Reviewer**: Reviewer: All models uploaded to Bailo are assigned a model reviewer. The reviewer approves the upload of the model from a technical perspective considering the development details, the performance evaluation, assessed risks, limitations, bias and ethical considerations.
-* **Admin**: Has all accesses for the tool, but will only be used by a small number of permitted users.
-
-
-
+- **Uploader**: This is the main role for users, it allows users to upload and explore models, as well as request deployments of models.
+- **Manager**: All models uploaded to Bailo are assigned a model manager. This person is responsible for the model and ensuring that it follows its lifecycle plan. The manager approves the upload of the model and all its deployments considering any business risks and costs associated with doing so.
+- **Reviewer**: Reviewer: All models uploaded to Bailo are assigned a model reviewer. The reviewer approves the upload of the model from a technical perspective considering the development details, the performance evaluation, assessed risks, limitations, bias and ethical considerations.
+- **Admin**: Has all accesses for the tool, but will only be used by a small number of permitted users.

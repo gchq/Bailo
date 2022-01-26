@@ -1,6 +1,6 @@
 module.exports = {
   mongo: {
-    uri: 'mongodb://localhost:27017/model_management',
+    uri: 'mongodb://localhost:27017/bailo',
   },
 
   minio: {
@@ -10,7 +10,7 @@ module.exports = {
     accessKey: 'minioadmin',
     secretKey: 'minioadmin',
     region: '',
-  
+
     uploadBucket: 'uploads',
     registryBucket: 'registry',
   },
@@ -18,17 +18,17 @@ module.exports = {
   redis: {
     host: 'localhost',
   },
-  
+
   registry: {
     host: 'localhost:5000',
     port: 5000,
-  
+
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
-  
+
     insecure: true,
   },
-  
+
   s2i: {
     path: 's2i',
   },
@@ -52,8 +52,8 @@ module.exports = {
       documentationUrl: 'https://example.com',
     },
     registry: {
-      host: 'localhost:5000'
-    }
+      host: 'localhost:5000',
+    },
   },
 
   smtp: {
@@ -65,15 +65,15 @@ module.exports = {
       pass: 'mailpass',
     },
     tls: {
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
     },
 
-    from: '"Bailo 📝" <bailo@example.org>'
+    from: '"Bailo 📝" <bailo@example.org>',
   },
 
   app: {
     protocol: 'http',
     host: 'localhost',
-    port: 8080
+    port: 8080,
   },
 }

@@ -28,11 +28,7 @@ import Wrapper from 'src/Wrapper'
 import ModelOverview from 'src/ModelOverview'
 import createComplianceFlow from 'utils/complianceFlow'
 import { FlowElement } from 'react-flow-renderer'
-import {
-  useGetModelVersions,
-  useGetModelVersion,
-  useGetModelDeployments,
-} from 'data/model'
+import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
 import { getCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
@@ -66,9 +62,9 @@ const Model = () => {
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
-  const [anchorEl, setAnchorEl] = useState<any>(null);
+  const [anchorEl, setAnchorEl] = useState<any>(null)
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
-  const open = Boolean(anchorEl);
+  const open = Boolean(anchorEl)
 
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
 
@@ -126,26 +122,29 @@ const Model = () => {
 
   const uploadNewVersion = () => {
     router.push(`/upload?mode=newVersion&modelUuid=${uuid}`)
-  }  
+  }
 
   const actionMenuClicked = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
-  const toggleFavourite = async() => {
+  const toggleFavourite = async () => {
     if (version?.model !== undefined) {
-      const apiAddress = currentUser?.favourites.includes(version?.model as unknown as Types.ObjectId) ? 'unfavourite' : 'favourite'
-      await postEndpoint(`/api/v1/user/${apiAddress}/${version?.model}`, {}
-      ).then(async (res) => {
-        return res.text()
-      }).then(function(data) {
-        const updatedUser = JSON.parse(data);
-        setModelFavourited(updatedUser.favourites.includes(version?.model))
-      });
+      const apiAddress = currentUser?.favourites.includes(version?.model as unknown as Types.ObjectId)
+        ? 'unfavourite'
+        : 'favourite'
+      await postEndpoint(`/api/v1/user/${apiAddress}/${version?.model}`, {})
+        .then(async (res) => {
+          return res.text()
+        })
+        .then(function (data) {
+          const updatedUser = JSON.parse(data)
+          setModelFavourited(updatedUser.favourites.includes(version?.model))
+        })
     }
   }
 
@@ -155,78 +154,76 @@ const Model = () => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
-              <ApprovalsChip approvals={[version?.managerApproved, version?.reviewerApproved]}/>
+              <ApprovalsChip approvals={[version?.managerApproved, version?.reviewerApproved]} />
               <Button
-                id="model-actions-button"
-                aria-controls="model-actions-menu"
-                aria-haspopup="true"
+                id='model-actions-button'
+                aria-controls='model-actions-menu'
+                aria-haspopup='true'
                 aria-expanded={open ? 'true' : undefined}
                 onClick={actionMenuClicked}
                 variant='outlined'
-                data-test="requestDeploymentButton"
+                data-test='requestDeploymentButton'
                 endIcon={open ? <UpArrow /> : <DownArrow />}
               >
                 Actions
-              </Button>                         
+              </Button>
             </Stack>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-            >
+            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
                 <MenuItem
-                  onClick={requestDeployment} 
-                  disabled={!version!.built || version?.managerApproved !== 'Accepted' || version?.reviewerApproved !== 'Accepted'}
-                  data-test="submitDeployment"
+                  onClick={requestDeployment}
+                  disabled={
+                    !version!.built ||
+                    version?.managerApproved !== 'Accepted' ||
+                    version?.reviewerApproved !== 'Accepted'
+                  }
+                  data-test='submitDeployment'
                 >
                   <ListItemIcon>
-                    <UploadIcon fontSize="small" />
+                    <UploadIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText>Request deployment</ListItemText>                
+                  <ListItemText>Request deployment</ListItemText>
                 </MenuItem>
                 <Divider />
-                <MenuItem
-                  onClick={toggleFavourite}                  
-                >
-                  {!modelFavourited &&
+                <MenuItem onClick={toggleFavourite}>
+                  {!modelFavourited && (
                     <>
                       <ListItemIcon>
-                        <FavoriteBorder fontSize="small" />
+                        <FavoriteBorder fontSize='small' />
                       </ListItemIcon>
                       <ListItemText>Favourite</ListItemText>
                     </>
-                  }
-                  {modelFavourited &&
+                  )}
+                  {modelFavourited && (
                     <>
                       <ListItemIcon>
-                        <Favorite fontSize="small" />
+                        <Favorite fontSize='small' />
                       </ListItemIcon>
                       <ListItemText>Unfavourite</ListItemText>
                     </>
-                  }              
+                  )}
                 </MenuItem>
                 <MenuItem
-                  onClick={editModel} 
-                  disabled={(version?.managerApproved === 'Accepted' 
-                    && version?.reviewerApproved === 'Accepted') 
-                    || currentUser?.id !== version?.metadata?.contacts?.uploader
+                  onClick={editModel}
+                  disabled={
+                    (version?.managerApproved === 'Accepted' && version?.reviewerApproved === 'Accepted') ||
+                    currentUser?.id !== version?.metadata?.contacts?.uploader
                   }
                 >
                   <ListItemIcon>
-                    <EditIcon fontSize="small" />
+                    <EditIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>                
+                  <ListItemText>Edit</ListItemText>
                 </MenuItem>
                 <MenuItem
-                  onClick={uploadNewVersion} 
+                  onClick={uploadNewVersion}
                   disabled={currentUser?.id !== version?.metadata?.contacts?.uploader}
                 >
                   <ListItemIcon>
-                    <PostAddIcon fontSize="small" />
+                    <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
-                </MenuItem>              
+                </MenuItem>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>

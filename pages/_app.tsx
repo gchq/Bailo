@@ -24,7 +24,7 @@ export default function MyApp(props: MyAppProps) {
       <Head>
         <title>Bailo</title>
         <meta name='viewport' content='initial-scale=1, width=device-width' />
-        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel='shortcut icon' href='/favicon.png' />
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />

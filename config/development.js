@@ -5,5 +5,5 @@ module.exports = {
       text: 'ENVIRONMENT: DEVELOPMENT',
       colour: 'black',
     },
-  }
+  },
 }

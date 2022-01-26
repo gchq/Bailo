@@ -8,7 +8,7 @@ const Input = styled('input')({
   display: 'none',
 })
 
-export default function VersionInput( editMode, { codeFile, onCodeFileChange, binaryFile, onBinaryFileChange }: any) {
+export default function VersionInput(editMode, { codeFile, onCodeFileChange, binaryFile, onBinaryFileChange }: any) {
   return (
     <Grid item xs={12} sm={12}>
       <Stack direction='row' spacing={2} alignItems='center'>

@@ -1,8 +1,6 @@
 {
   "highLevelDetails": {
-    "tags": [
-      "Test"
-    ],
+    "tags": ["Test"],
     "name": "Minimal Model for Testing",
     "modelInASentence": "This \"model\" reverses its input.",
     "modelOverview": "This \"model\" reverses its input. It is a tiny model for testing Bailo functionality.",

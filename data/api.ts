@@ -3,8 +3,8 @@ export async function fetchEndpoint(url: string, method: string, data: any) {
     method: method,
     body: JSON.stringify(data),
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   })
 }
 

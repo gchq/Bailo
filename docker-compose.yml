@@ -53,7 +53,7 @@ services:
     ports:
       - 8080:8080
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
   maildev:
     image: maildev/maildev:latest

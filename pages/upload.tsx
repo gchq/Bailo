@@ -19,8 +19,8 @@ export default function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
   const { version, isVersionLoading } = useGetModelVersion(queryModelUuid, queryVersion)
-  
-  const [error, setError] = useState(undefined)  
+
+  const [error, setError] = useState(undefined)
   const [versionToEdit, setVersionToEdit] = useState<any>(undefined)
   const [showAlert, setShowAlert] = useState<boolean>(false)
   const [alertText, setAlertText] = useState<string>('')
@@ -54,23 +54,22 @@ export default function Upload() {
     const form = new FormData()
 
     if (router.query.mode === 'edit' && version !== undefined) {
-      const put = await putEndpoint(`/api/v1/version/${version._id}`, data)
-        .then(async (res) => {
-          if (res.status >= 400) {
-            try {
-              // try and parse error from body
-              return await res.json()
-            } catch(e) {
-              return {
-                message: res.statusText
-              }
+      const put = await putEndpoint(`/api/v1/version/${version._id}`, data).then(async (res) => {
+        if (res.status >= 400) {
+          try {
+            // try and parse error from body
+            return await res.json()
+          } catch (e) {
+            return {
+              message: res.statusText,
             }
-          } else {
-            if (res.status === 200) {
-              router.push(`/model/${router.query.modelUuid}`)
-            }
-          }        
-        })      
+          }
+        } else {
+          if (res.status === 200) {
+            router.push(`/model/${router.query.modelUuid}`)
+          }
+        }
+      })
     } else {
       form.append('code', code)
       form.append('binary', binary)
@@ -78,7 +77,8 @@ export default function Upload() {
 
       const mode: string = router.query.mode !== undefined ? router.query.mode.toString() : 'upload'
 
-      const uploadAddress = mode === 'newVersion' ? '/api/v1/model?mode=' + mode + '&modelUuid=' + router.query.modelUuid : '/api/v1/model'
+      const uploadAddress =
+        mode === 'newVersion' ? '/api/v1/model?mode=' + mode + '&modelUuid=' + router.query.modelUuid : '/api/v1/model'
       const upload = await fetch(uploadAddress, {
         method: 'POST',
         body: form,
@@ -87,15 +87,15 @@ export default function Upload() {
           setAlertText(res.statusText)
           setShowAlert(true)
           return {
-            message: res.statusText
+            message: res.statusText,
           }
         } else if (res.status >= 400) {
           try {
             // try and parse error from body
             return await res.json()
-          } catch(e) {
+          } catch (e) {
             return {
-              message: res.statusText
+              message: res.statusText,
             }
           }
         } else {
@@ -129,8 +129,12 @@ export default function Upload() {
           mode={router.query.mode}
           modelToEdit={versionToEdit}
         />
-        {showAlert && <Alert severity="error" onClose={() => setShowAlert(false)}>{alertText}</Alert>}
-      </Paper>      
+        {showAlert && (
+          <Alert severity='error' onClose={() => setShowAlert(false)}>
+            {alertText}
+          </Alert>
+        )}
+      </Paper>
     </Wrapper>
   )
 }

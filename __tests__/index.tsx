@@ -11,9 +11,11 @@ describe('Marketplace', () => {
     render(<Marketplace />)
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', {
-        name: /models/i
-      })).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', {
+          name: /models/i,
+        })
+      ).toBeInTheDocument()
     })
   })
 })

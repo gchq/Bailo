@@ -21,7 +21,7 @@ export default function FormTabs({
   omitFields,
   error,
   mode,
-  modelToEdit
+  modelToEdit,
 }: {
   defaultSchema: any
   schemas: any
@@ -82,7 +82,7 @@ export default function FormTabs({
 
   return (
     <>
-      {updatedSelectedSchema !== undefined &&
+      {updatedSelectedSchema !== undefined && (
         <>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Grid container justifyContent='space-between' alignItems='center'>
@@ -108,7 +108,7 @@ export default function FormTabs({
 
             <Tabs indicatorColor='secondary' value={tab} onChange={onTabChange}>
               <Tab label={'Create ' + name} value='generate' />
-              <Tab label={'Upload ' + name} value='upload' data-test="uploadJsonTab" />
+              <Tab label={'Upload ' + name} value='upload' data-test='uploadJsonTab' />
             </Tabs>
           </Box>
 
@@ -142,7 +142,7 @@ export default function FormTabs({
             </>
           )}
         </>
-      }
+      )}
     </>
   )
 }

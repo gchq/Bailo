@@ -24,7 +24,7 @@ export default function UploadDeployment({ onSubmit, schema }: { onSubmit: any; 
         onChange={handleDeploymentMetadataChange}
       />
 
-      <Button variant='contained' onClick={handleUpload} sx={{ mt: 3 }} data-test="submitButton">
+      <Button variant='contained' onClick={handleUpload} sx={{ mt: 3 }} data-test='submitButton'>
         {'Upload'}
       </Button>
     </>

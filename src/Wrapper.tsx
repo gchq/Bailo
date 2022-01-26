@@ -120,13 +120,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     <>
       {typeof title === 'string' ? (
         <>
-          <Typography 
-            component='h1' 
-            variant='h6' 
-            color='inherit' 
-            noWrap 
-            sx={{ mr: '55px', flexGrow: 1 }}
-          >
+          <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
             {title}
           </Typography>
         </>
@@ -174,7 +168,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               <MenuIcon />
             </IconButton>
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href="/" passHref>
+              <Link href='/' passHref>
                 <a>
                   <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
                 </a>
@@ -221,7 +215,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             </Link>
             <Link href='/upload' passHref>
               <ListItem button selected={page === 'upload'}>
-                <ListItemIcon data-test="uploadModelLink">
+                <ListItemIcon data-test='uploadModelLink'>
                   {!open ? (
                     <Tooltip title='Upload Model' arrow placement='right'>
                       <FileUploadIcon />
@@ -235,7 +229,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             </Link>
             <Link href='/review' passHref>
               <ListItem button selected={page === 'review'}>
-                <ListItemIcon data-test="reviewLink">
+                <ListItemIcon data-test='reviewLink'>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
                       <ListAltIcon />
@@ -264,7 +258,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             </Link>
             <Link href='/settings' passHref>
               <ListItem button selected={page === 'settings'}>
-                <ListItemIcon data-test="settingLink">
+                <ListItemIcon data-test='settingLink'>
                   {!open ? (
                     <Tooltip title='Settings' arrow placement='right'>
                       <Settings />
@@ -295,7 +289,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               {children}
             </Container>
             <Copyright sx={{ pb: 2 }} />
-          </Box>          
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

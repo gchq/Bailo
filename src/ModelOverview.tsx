@@ -30,11 +30,10 @@ const ModelOverview = (props: any) => {
                   flexWrap: 'wrap',
                 }}
               >
-                {version?.metadata?.highLevelDetails?.tags !== undefined && 
+                {version?.metadata?.highLevelDetails?.tags !== undefined &&
                   version?.metadata?.highLevelDetails?.tags.map((tag: any, index: number) => (
                     <Chip sx={{ color: 'white', m: 0.25 }} key={`chip-${index}`} label={tag} />
-                  ))
-                }
+                  ))}
               </Box>
             </Box>
             <Box sx={{ p: 2 }}>

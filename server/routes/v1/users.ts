@@ -9,7 +9,7 @@ import { BadReq } from '../../utils/result'
 export const getUsers = [
   ensureUserRole('user'),
   async (_req: Request, res: Response) => {
-    const users = await UserModel.find({}).select("-token")
+    const users = await UserModel.find({}).select('-token')
     return res.json({
       users,
     })
@@ -36,26 +36,24 @@ export const postRegenerateToken = [
     await req.user!.save()
 
     return res.json({ token })
-  }
+  },
 ]
 
 export const favouriteModel = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-
     const user = await UserModel.findOne({ id: req.user!.id })
     const modelId = req.params.id
     const model = await ModelModel.findById({ _id: modelId })
 
     if (model === undefined || user.favourites.includes(modelId)) {
-      throw BadReq({ modelId },
-        `Unable to favourite model '${modelId}'`) 
+      throw BadReq({ modelId }, `Unable to favourite model '${modelId}'`)
     } else {
       await user.favourites.push(modelId)
       await user.save()
       return res.json(user)
     }
-  }
+  },
 ]
 
 export const unfavouriteModel = [
@@ -65,12 +63,11 @@ export const unfavouriteModel = [
     const modelId: any = req.params.id
     const model = await ModelModel.findById({ _id: modelId })
     if (model === undefined || !user.favourites.includes(modelId)) {
-      throw BadReq({ modelId },
-        `Unable to unfavourite model '${modelId}'`)            
+      throw BadReq({ modelId }, `Unable to unfavourite model '${modelId}'`)
     } else {
       await user.favourites.pull(modelId)
       await user.save()
       return res.json(user)
     }
-  }
+  },
 ]

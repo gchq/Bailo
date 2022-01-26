@@ -34,16 +34,14 @@ function safelyCompareTokens(expected, actual) {
 
 // This is an authentication function.  Take care whilst editting it.  Notes:
 // - the password is not hashed, so comparisons _must_ be done in constant time
-export async function getUserFromAuthHeader(header: string): Promise<{ error?: string, user?: any, admin?: boolean }> {
+export async function getUserFromAuthHeader(header: string): Promise<{ error?: string; user?: any; admin?: boolean }> {
   const [method, code] = header.split(' ')
 
   if (method.toLowerCase() !== 'basic') {
     return { error: 'Incorrect authorization type' }
   }
 
-  const [username, token] = Buffer.from(code, 'base64')
-    .toString('utf-8')
-    .split(':')
+  const [username, token] = Buffer.from(code, 'base64').toString('utf-8').split(':')
 
   if (!username || !token) {
     return { error: 'Username and password not provided' }

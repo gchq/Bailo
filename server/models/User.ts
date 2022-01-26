@@ -11,14 +11,14 @@ const UserSchema = new Schema(
     favourites: [{ type: Schema.Types.ObjectId, ref: 'Model' }],
 
     // uuidv4() is cryptographically safe
-    token: { type: String, required: true, default: uuidv4(), select: false }
+    token: { type: String, required: true, default: uuidv4(), select: false },
   },
   {
     timestamps: true,
   }
 )
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   const user = this
   if (!user.isModified('token')) return next()
 
@@ -30,9 +30,9 @@ UserSchema.pre('save', function(next) {
   })
 })
 
-UserSchema.methods.compareToken = function(candidateToken) {
+UserSchema.methods.compareToken = function (candidateToken) {
   return new Promise((resolve, reject) => {
-    bcrypt.compare(candidateToken, this.token, function(err, isMatch) {
+    bcrypt.compare(candidateToken, this.token, function (err, isMatch) {
       if (err) return reject(err)
       resolve(isMatch)
     })

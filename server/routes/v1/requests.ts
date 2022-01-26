@@ -21,18 +21,12 @@ export const getRequests = [
     const filter = req.query.filter as string
 
     if (!['Upload', 'Deployment'].includes(type)) {
-      return res.error(400, [
-        { received: type },
-        `Expected 'Upload' / 'Deployment', received '${type}'`
-      ])
+      return res.error(400, [{ received: type }, `Expected 'Upload' / 'Deployment', received '${type}'`])
     }
 
     if (filter === 'all') {
       if (!hasRole(['admin'], req.user!)) {
-        return res.error(401, [
-          { roles: req.user?.roles },
-          'Unauthorised.  Your user does not have the "admin" role'
-        ])
+        return res.error(401, [{ roles: req.user?.roles }, 'Unauthorised.  Your user does not have the "admin" role'])
       }
     } else {
       req.log.info('Getting requests for user')
@@ -40,7 +34,7 @@ export const getRequests = [
 
     const requests = await readRequests({
       type: type as RequestType,
-      filter: filter === 'all' ? undefined : req.user!._id
+      filter: filter === 'all' ? undefined : req.user!._id,
     })
 
     return res.json({
@@ -53,7 +47,7 @@ export const getNumRequests = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const requests = await readNumRequests({
-      userId: req.user!._id
+      userId: req.user!._id,
     })
 
     return res.json({
@@ -72,7 +66,10 @@ export const postRequestResponse = [
     const request = await getRequest({ requestId: id })
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
-      req.log.warn({ id, userId: req.user?._id, requestUser: request.user }, 'User did not have permission to approve this request')
+      req.log.warn(
+        { id, userId: req.user?._id, requestUser: request.user },
+        'User did not have permission to approve this request'
+      )
       return res.status(401).json({
         message: `You do not have permissions to approve this`,
       })
@@ -97,7 +94,7 @@ export const postRequestResponse = [
 
     let userId: ObjectId
     let requestType: RequestType
-    let document: Document & { model: any, uuid: string }
+    let document: Document & { model: any; uuid: string }
     if (request.version) {
       const version = await VersionModel.findById(request.version).populate('model')
       userId = version.model.owner
@@ -106,7 +103,6 @@ export const postRequestResponse = [
 
       version[field] = choice
       await version.save()
-
     } else if (request.deployment) {
       const deployment = await DeploymentModel.findById(request.deployment).populate('model')
       userId = deployment.model.owner
@@ -139,8 +135,8 @@ export const postRequestResponse = [
         ...reviewedRequest({
           document,
           choice,
-          requestType
-        })
+          requestType,
+        }),
       })
     }
 

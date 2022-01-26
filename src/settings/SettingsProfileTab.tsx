@@ -7,7 +7,7 @@ import Divider from '@mui/material/Divider'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import ContentCopy from '@mui/icons-material/ContentCopy'
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from '@mui/material/Tooltip'
 
 const SettingsProfileTab = ({ user }: { user: any }) => {
   const [displayToken, setDisplayToken] = useState(false)
@@ -15,8 +15,8 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
 
   const regenerateToken = async () => {
     const { token } = await fetch('/api/v1/user/token', {
-      method: 'POST'
-    }).then((res => res.json()))
+      method: 'POST',
+    }).then((res) => res.json())
 
     return token
   }
@@ -29,55 +29,56 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
 
   return (
     <>
-      <Box sx={{ pt: 0,  pr: 2, pb: 2, pl: 2 }}>
-        <Typography variant="body1" sx={{ pr: 1, fontWeight: 'medium' }}>Name</Typography>
-        <Divider sx={{ pt: 1, mb: 1 }}/>
-        <Typography variant="body1">{user.id}</Typography>
+      <Box sx={{ pt: 0, pr: 2, pb: 2, pl: 2 }}>
+        <Typography variant='body1' sx={{ pr: 1, fontWeight: 'medium' }}>
+          Name
+        </Typography>
+        <Divider sx={{ pt: 1, mb: 1 }} />
+        <Typography variant='body1'>{user.id}</Typography>
       </Box>
-      <Box sx={{ p: 2 }}> 
-        <Typography variant="body1" sx={{ pr: 1, fontWeight: 'medium' }}>Roles</Typography>
-        <Divider sx={{ pt: 1, mb: 1 }}/>
+      <Box sx={{ p: 2 }}>
+        <Typography variant='body1' sx={{ pr: 1, fontWeight: 'medium' }}>
+          Roles
+        </Typography>
+        <Divider sx={{ pt: 1, mb: 1 }} />
         <Stack direction='row' sx={{ p: 1 }}>
-          {user.roles.map((role: any, index:number) => {
-            return (
-              <Chip key={'chip-role-' + index} sx={{ mr:1 }} label={role} />
-            )
-          })}            
+          {user.roles.map((role: any, index: number) => {
+            return <Chip key={'chip-role-' + index} sx={{ mr: 1 }} label={role} />
+          })}
         </Stack>
-      </Box> 
-      <Box sx={{ p: 2 }}> 
-        <Typography variant="body1" sx={{ pr: 1, fontWeight: 'medium' }}>User authentication token</Typography>
-        <Divider sx={{ pt: 1, mb: 2 }}/>
+      </Box>
+      <Box sx={{ p: 2 }}>
+        <Typography variant='body1' sx={{ pr: 1, fontWeight: 'medium' }}>
+          User authentication token
+        </Typography>
+        <Divider sx={{ pt: 1, mb: 2 }} />
         <Stack direction='row'>
-          <Button 
-            sx={{ mr:2 }} variant="outlined"
-            onClick={showToken}
-            data-test="showTokenButton"
-          >
+          <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='showTokenButton'>
             Regenerate Token
           </Button>
           <Box sx={{ backgroundColor: '#f5f5f5', pr: 2, pl: 2, display: 'flex', mr: 1 }}>
-            <Box component={Stack} direction="column" justifyContent="center">
-              <Typography variant="body1" data-test="dockerPassword">{displayToken ? displayedToken : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}</Typography>   
+            <Box component={Stack} direction='column' justifyContent='center'>
+              <Typography variant='body1' data-test='dockerPassword'>
+                {displayToken ? displayedToken : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}
+              </Typography>
             </Box>
           </Box>
-          <Tooltip title="Regenerate & Copy to clipboard">
-            <IconButton 
+          <Tooltip title='Regenerate & Copy to clipboard'>
+            <IconButton
               onClick={async () => {
                 const token = await regenerateToken()
                 setDisplayedToken(token)
                 navigator.clipboard.writeText(token)
               }}
-              aria-label="regenerate and copy to clipboard"
+              aria-label='regenerate and copy to clipboard'
             >
               <ContentCopy />
             </IconButton>
           </Tooltip>
         </Stack>
-      </Box>      
+      </Box>
     </>
   )
-
 }
 
 export default SettingsProfileTab

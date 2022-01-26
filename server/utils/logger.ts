@@ -17,13 +17,20 @@ class Writer {
 
   getLevel(level) {
     switch (level) {
-      case 10: return chalk.gray('trace')
-      case 20: return 'debug'
-      case 30: return chalk.cyan('info ')
-      case 40: return chalk.yellow('warn ')
-      case 50: return chalk.red('error')
-      case 60: return chalk.redBright('fatal')
-      default: return String(level)
+      case 10:
+        return chalk.gray('trace')
+      case 20:
+        return 'debug'
+      case 30:
+        return chalk.cyan('info ')
+      case 40:
+        return chalk.yellow('warn ')
+      case 50:
+        return chalk.red('error')
+      case 60:
+        return chalk.redBright('fatal')
+      default:
+        return String(level)
     }
   }
 
@@ -37,7 +44,7 @@ class Writer {
     let attributes = omit(data, ['name', 'hostname', 'pid', 'level', 'msg', 'time', 'src', 'v', 'user'])
     let keys = Object.keys(attributes)
 
-    if (['id', 'url', 'method', 'response-time', 'status'].every(k => keys.includes(k))) {
+    if (['id', 'url', 'method', 'response-time', 'status'].every((k) => keys.includes(k))) {
       // this is probably a req object.
       attributes = omit(attributes, ['id', 'url', 'method', 'response-time', 'status'])
       keys = Object.keys(attributes)
@@ -50,12 +57,12 @@ class Writer {
         keys = Object.keys(attributes)
       }
     }
-    
+
     if (!keys.length) {
       return ''
     }
 
-    return keys.map(key => `${key}=${String(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${String(attributes[key])}`).join(' ')
   }
 
   write(data) {
@@ -77,16 +84,16 @@ if (process.env.NODE_ENV !== 'production') {
     level: 'trace',
     type: 'raw',
     stream: new Writer({
-      basepath: join(__dirname, '..')
-    })
+      basepath: join(__dirname, '..'),
+    }),
   })
 }
 
 const log = bunyan.createLogger({
-  name: 'model_management',
+  name: 'bailo',
   level: 'trace',
   src: process.env.NODE_ENV !== 'production',
-  streams: streams.length ? streams : undefined
+  streams: streams.length ? streams : undefined,
 })
 
 const morganLog = morgan(
@@ -118,7 +125,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   req.reqId = (req.headers['x-request-id'] as string) || uuidv4()
   req.log = log.child({
     id: req.reqId,
-    user: req.user?.id
+    user: req.user?.id,
   })
 
   res.error = (code: number, error: any) => {

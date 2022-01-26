@@ -30,8 +30,7 @@ export const putVersion = [
     const { id } = req.params
     const metadata = req.body
 
-    const version = await VersionModel.findOne({ _id: id })
-      .populate('model')
+    const version = await VersionModel.findOne({ _id: id }).populate('model')
 
     if (!version) {
       return res.status(404).json({
@@ -41,14 +40,14 @@ export const putVersion = [
 
     if (req.user?.id !== version.metadata.contacts.uploader) {
       return res.status(403).json({
-        message: 'User does not have permission to edit another user\'s form.',
+        message: "User does not have permission to edit another user's form.",
       })
     }
-    
+
     version.metadata = metadata
     version.managerApproved = 'No Response'
     version.reviewerApproved = 'No Response'
-    
+
     await version.save()
 
     req.log.info('Creating version requests')

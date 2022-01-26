@@ -71,8 +71,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/request/${request!._id}/respond`, { choice })
-      .then((res) => res.json())
+    await postEndpoint(`/api/v1/request/${request!._id}/respond`, { choice }).then((res) => res.json())
 
     mutateRequests()
     setOpen(false)
@@ -111,53 +110,51 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
       </Typography>
       {requests!.map((requestObj: any, index) => (
         <Box sx={{ px: 3 }} key={`model-${index}`}>
-          <Grid 
-            container 
-            sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}
-            >
+          <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
             <Grid item xs={12} sm={8}>
-              {
-                type === 'Upload' && (
-                  <>
-                    <Link href={`/model/${requestObj.version.model.uuid}`} passHref>
-                      <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                        {requestObj.version.metadata.highLevelDetails.name}
+              {type === 'Upload' && (
+                <>
+                  <Link href={`/model/${requestObj.version.model.uuid}`} passHref>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                      {requestObj.version.metadata.highLevelDetails.name}
+                    </MuiLink>
+                  </Link>
+                  <Stack direction='row' spacing={2}>
+                    <Chip label={requestObj.approvalType} size='small' />
+                    <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
+                      <Typography variant='body1'>
+                        {requestObj.version.metadata.highLevelDetails.modelInASentence}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </>
+              )}
+              {type === 'Deployment' && (
+                <>
+                  <Link href={`/deployment/${requestObj.deployment.uuid}`} passHref>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                      {requestObj.deployment.metadata.highLevelDetails.name}
+                    </MuiLink>
+                  </Link>
+                  <Typography variant='body1'>
+                    Requesting deployment of{' '}
+                    <Link href={`/model/${requestObj.deployment.model.uuid}`} passHref>
+                      <MuiLink sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                        {requestObj.deployment.model.currentMetadata.highLevelDetails.name}
                       </MuiLink>
                     </Link>
-                    <Stack direction="row" spacing={2}>
-                      <Chip label={requestObj.approvalType} size='small' />
-                      <Box sx={{mt: 'auto !important', mb: 'auto !important'}}>
-                        <Typography variant='body1'>
-                          {requestObj.version.metadata.highLevelDetails.modelInASentence}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </>
-                )
-              }
-              {
-                type === 'Deployment' && (
-                  <>
-                    <Link href={`/deployment/${requestObj.deployment.uuid}`} passHref>
-                      <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                        {requestObj.deployment.metadata.highLevelDetails.name}
-                      </MuiLink>
-                    </Link>
-                    <Typography variant='body1'>
-                      Requesting deployment of{' '}
-                      <Link href={`/model/${requestObj.deployment.model.uuid}`} passHref>
-                        <MuiLink sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                          {requestObj.deployment.model.currentMetadata.highLevelDetails.name}
-                        </MuiLink>
-                      </Link>
-                    </Typography>
-                  </>
-                )
-              }
+                  </Typography>
+                </>
+              )}
             </Grid>
             <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
               <Box>
-                <Button sx={{ m: 1 }} onClick={() => changeState('Accepted', requestObj)} variant='contained' data-test="approveButton">
+                <Button
+                  sx={{ m: 1 }}
+                  onClick={() => changeState('Accepted', requestObj)}
+                  variant='contained'
+                  data-test='approveButton'
+                >
                   Approve
                 </Button>
                 <Button
@@ -180,7 +177,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
         </DialogContent>
         <DialogActions>
           <Button onClick={onCancel}>Cancel</Button>
-          <Button variant='outlined' onClick={onConfirm} autoFocus data-test="confirmButton">
+          <Button variant='outlined' onClick={onConfirm} autoFocus data-test='confirmButton'>
             Confirm
           </Button>
         </DialogActions>

@@ -147,7 +147,7 @@ Fix: Run `docker-compose down --rmi all` followed by `docker-compose up --build`
 
 _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
 
-Fix: Run `npm uninstall next && npm install next`.  Some users report still having issues.  If so, run: `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
+Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run: `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
 <br />
 

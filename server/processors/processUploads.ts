@@ -16,7 +16,7 @@ export default function processUploads() {
       const vlog = logger.child({ versionId: version._id })
 
       const { binary, code } = job.data
-      vlog.info({ binary, code }, "Starting image build")
+      vlog.info({ binary, code }, 'Starting image build')
       const tag = await buildPython(version, { binary, code })
 
       vlog.info('Marking build as successful')

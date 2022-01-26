@@ -7,7 +7,7 @@ export function useListUsers() {
   const { data, error, mutate } = useSWR<{
     users: Array<User>
   }>(`/api/v1/users`, fetcher)
-  
+
   return {
     mutateUsers: mutate,
     users: data ? data.users : undefined,
@@ -18,7 +18,7 @@ export function useListUsers() {
 
 export function getCurrentUser() {
   const { data, error, mutate } = useSWR<User>(`/api/v1/user`, fetcher)
-  
+
   return {
     mutateCurrentUser: mutate,
     currentUser: data ? data : undefined,

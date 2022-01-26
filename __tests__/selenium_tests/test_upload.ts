@@ -1,11 +1,19 @@
-import {By, until, WebDriver} from 'selenium-webdriver'
+import { By, until, WebDriver } from 'selenium-webdriver'
 import fs from 'fs/promises'
 import path from 'path'
 import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
 
-import { clearData, waitForElement, waitForElements, selectOption, getDriver, click, sendKeys } from '../__utils__/helpers'
+import {
+  clearData,
+  waitForElement,
+  waitForElements,
+  selectOption,
+  getDriver,
+  click,
+  sendKeys,
+} from '../__utils__/helpers'
 import logger from '../../server/utils/logger'
 
 //TODO read from config file/env
@@ -22,13 +30,13 @@ const BAILO_REGISTRY = `${config.get('app.host')}:${config.get('registry.port')}
 async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   let approvalButtons = await waitForElements(driver, By.css('[data-test="approveButton"]'))
   expect(approvalButtons.length).toEqual(expectedApprovals)
-  while (approvalButtons.length > 0){
+  while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
     await driver.sleep(500) // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
     const curApprovalButtons = await driver.findElements(By.css('[data-test="approveButton"]'))
-    expect(curApprovalButtons.length).toEqual(approvalButtons.length-1)
+    expect(curApprovalButtons.length).toEqual(approvalButtons.length - 1)
     approvalButtons = curApprovalButtons
   }
 }
@@ -46,7 +54,7 @@ describe('End to end test', () => {
 
       await click(driver, By.css('[data-test="uploadModelLink"]'))
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
-      
+
       await selectOption(driver, By.id('schema'), By.css('[role="option"]'), config.get('schemas.model'))
 
       await sendKeys(driver, By.id('selectcode-file'), codeFile)
@@ -67,7 +75,7 @@ describe('End to end test', () => {
     }
   }, 50000)
 
-  test('test can approve models', async ()=> {
+  test('test can approve models', async () => {
     const driver = await getDriver()
 
     try {
@@ -79,7 +87,7 @@ describe('End to end test', () => {
     }
   }, 25000)
 
-  test('test submit deployment for model', async ()=> {
+  test('test submit deployment for model', async () => {
     const driver = await getDriver()
 
     try {
@@ -92,12 +100,15 @@ describe('End to end test', () => {
       // Now need to find place to click get request via json blob
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
-
       await selectOption(driver, By.id('schema'), By.css('[role="option"]'), config.get('schemas.deployment'))
 
       const deploymentData = await fs.readFile(deploymentMetadataFile, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
-      await sendKeys(driver, By.css('textarea'), JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name })))
+      await sendKeys(
+        driver,
+        By.css('textarea'),
+        JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
+      )
 
       await click(driver, By.css('[data-test="submitButton"]'))
       await driver.wait(until.urlContains('/deployment/'))
@@ -106,20 +117,19 @@ describe('End to end test', () => {
     }
   }, 40000)
 
-  test('test can approve deployments', async ()=> {
+  test('test can approve deployments', async () => {
     const driver = await getDriver()
 
     try {
       await driver.get(BAILO_APP_URL)
       await click(driver, By.css('[data-test="reviewLink"]'))
       await approveRequests(driver, 1)
-
     } finally {
       await driver.quit()
     }
   }, 20000)
 
-  test('test built model runs as expected', async ()=> {
+  test('test built model runs as expected', async () => {
     const driver = await getDriver()
 
     let dockerPassword: string
@@ -134,15 +144,15 @@ describe('End to end test', () => {
     } finally {
       await driver.quit()
     }
-  
-    const docker = new Docker() 
+
+    const docker = new Docker()
     const auth = {
-      username: config.get('user.id'), 
-      password: dockerPassword
+      username: config.get('user.id'),
+      password: dockerPassword,
     }
-    
+
     const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
-    const dockerResp = await docker.createImage(auth, {fromImage: imageName})
+    const dockerResp = await docker.createImage(auth, { fromImage: imageName })
     expect(dockerResp.statusCode).toEqual(200)
     logger.info('created image')
 
@@ -155,25 +165,27 @@ describe('End to end test', () => {
       OpenStdin: false,
       StdinOnce: false,
       ExposedPorts: {
-        "5000/tcp": {},
-        "9000/tcp": {}
+        '5000/tcp': {},
+        '9000/tcp': {},
       },
       PortBindings: {
-        "9000/tcp": [
+        '9000/tcp': [
           {
-            "HostPort": "9999",
-            "HostIp": ""   
-          }
-        ]
-      } 
+            HostPort: '9999',
+            HostIp: '',
+          },
+        ],
+      },
     })
 
     await container.start()
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)) //give container time to start running
-      const resp = await axios.post('http://localhost:9999/predict', {"jsonData":{"data":["should be returned backwards"]}})
+      await new Promise((resolve) => setTimeout(resolve, 1500)) //give container time to start running
+      const resp = await axios.post('http://localhost:9999/predict', {
+        jsonData: { data: ['should be returned backwards'] },
+      })
       expect(resp.status).toEqual(200)
       expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
     } finally {
@@ -182,5 +194,3 @@ describe('End to end test', () => {
     }
   }, 40000)
 })
-
-

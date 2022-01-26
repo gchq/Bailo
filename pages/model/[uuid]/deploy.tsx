@@ -41,15 +41,14 @@ export default function Deploy() {
     data.highLevelDetails.initialVersionRequested = model!.currentMetadata.highLevelDetails.modelCardVersion
     data.schemaRef = schema.reference
 
-    const deployment = await postEndpoint('/api/v1/deployment', data)
-      .then((res) => {
-        setShowSubmissionAlert(false)
-        if (res.status >= 400) {
-          setShowSubmissionAlert(true)
-          setSubmissionAlertText(res.statusText)
-        }
-        return res.json()
-      })
+    const deployment = await postEndpoint('/api/v1/deployment', data).then((res) => {
+      setShowSubmissionAlert(false)
+      if (res.status >= 400) {
+        setShowSubmissionAlert(true)
+        setSubmissionAlertText(res.statusText)
+      }
+      return res.json()
+    })
 
     const { uuid: deploymentUuid } = deployment
 

@@ -19,7 +19,7 @@ export const getDeployment = [
     const deployment = await DeploymentModel.findOne({ uuid })
 
     if (!deployment) {
-      req.log.warn({ uuid }, "Unable to find deployment")
+      req.log.warn({ uuid }, 'Unable to find deployment')
       return res.status(404).json({
         message: `Unable to find deployment '${uuid}'`,
       })
@@ -33,7 +33,7 @@ export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    req.log.info({ user: req.user?.id }, "User requesting deployment")
+    req.log.info({ user: req.user?.id }, 'User requesting deployment')
     const body = req.body as any
 
     const schema = await SchemaModel.findOne({
@@ -41,7 +41,7 @@ export const postDeployment = [
     })
 
     if (!schema) {
-      req.log.warn({ schemaRef: body.schemaRef }, "Unable to find schema")
+      req.log.warn({ schemaRef: body.schemaRef }, 'Unable to find schema')
       return res.status(400).json({
         message: `Unable to find schema with name: '${body.schemaRef}'`,
       })
@@ -53,7 +53,7 @@ export const postDeployment = [
     // first, we verify the schema
     const schemaIsInvalid = validateSchema(body, schema.schema)
     if (schemaIsInvalid) {
-      req.log.warn({ errors: schemaIsInvalid }, "Rejected due to invalid schema")
+      req.log.warn({ errors: schemaIsInvalid }, 'Rejected due to invalid schema')
       return res.status(400).json({
         errors: schemaIsInvalid,
       })
@@ -64,7 +64,7 @@ export const postDeployment = [
     })
 
     if (!model) {
-      req.log.warn({ modelId: body.highLevelDetails.modelID }, "Unable to find model")
+      req.log.warn({ modelId: body.highLevelDetails.modelID }, 'Unable to find model')
       return res.status(400).json({
         message: `Unable to find model with name: '${body.highLevelDetails.modelID}'`,
       })
@@ -85,7 +85,7 @@ export const postDeployment = [
       model: model._id,
       metadata: body,
 
-      owner: req.user?._id
+      owner: req.user?._id,
     })
 
     req.log.info('Saving deployment model')
@@ -93,7 +93,7 @@ export const postDeployment = [
 
     const version = await VersionModel.findOne({
       model: model._id,
-      version: body.highLevelDetails.initialVersionRequested
+      version: body.highLevelDetails.initialVersionRequested,
     })
 
     if (!version) {

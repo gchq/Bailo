@@ -79,19 +79,19 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   const codePath = join(tmpDir, 'code.zip')
 
   // download code bundles
-  vlog.info({ builderFiles }, "Downloading code bundles")
+  vlog.info({ builderFiles }, 'Downloading code bundles')
   await Promise.all([downloadFile(builderFiles.binary, binaryPath), downloadFile(builderFiles.code, codePath)])
 
   // unzip both files
-  vlog.info({ binaryPath, codePath }, "Unzipping files")
+  vlog.info({ binaryPath, codePath }, 'Unzipping files')
   await Promise.all([unzipFile(binaryPath), unzipFile(codePath)])
 
   // remove zip files
-  vlog.info({ binaryPath, codePath }, "Removing temp files")
+  vlog.info({ binaryPath, codePath }, 'Removing temp files')
   rm(binaryPath, codePath)
 
   // add metadata
-  vlog.info("Adding in model environment data")
+  vlog.info('Adding in model environment data')
   const modelEnvs = dedent(`
     MODEL_NAME=Model
     API_TYPE=REST
@@ -109,19 +109,23 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   const builder = `seldonio/seldon-core-s2i-python37:1.10.0`
   const tag = `${config.get('registry.host')}/internal/${version.model.uuid}:${version.version}`
   const command = `${config.get('s2i.path')} build ${tmpDir} ${builder} ${tag}`
-  vlog.info({ builder, tag, command }, "Building image")
+  vlog.info({ builder, tag, command }, 'Building image')
   await logCommand(command, version.log.bind(version))
 
   // push image
-  vlog.info({ tag }, "Pushing image to docker")
+  vlog.info({ tag }, 'Pushing image to docker')
   version.log('info', 'Logging into docker')
-  await runCommand(`docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`, vlog.info.bind(vlog), vlog.error.bind(vlog))
+  await runCommand(
+    `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
+    vlog.info.bind(vlog),
+    vlog.error.bind(vlog)
+  )
   version.log('info', 'Successfully logged into docker')
 
   await logCommand(`docker push -q ${tag}`, version.log.bind(version))
 
   // tidy up
-  vlog.info({ tmpDir, builderFiles }, "Removing temp directory and Minio uploads")
+  vlog.info({ tmpDir, builderFiles }, 'Removing temp directory and Minio uploads')
   rm('-rf', tmpDir)
   await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
 

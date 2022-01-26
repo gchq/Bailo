@@ -34,8 +34,20 @@ export default function UploadFile({ onSubmit, schema }: { onSubmit: Function; s
   return (
     <>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <FileInput disabled={router.query.mode === 'edit'} label={'Select Code'} file={code} onChange={handleCodeChange} accepts=".zip" />
-        <FileInput disabled={router.query.mode === 'edit'} label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts=".zip" />
+        <FileInput
+          disabled={router.query.mode === 'edit'}
+          label={'Select Code'}
+          file={code}
+          onChange={handleCodeChange}
+          accepts='.zip'
+        />
+        <FileInput
+          disabled={router.query.mode === 'edit'}
+          label={'Select Binary'}
+          file={binary}
+          onChange={handleBinaryChange}
+          accepts='.zip'
+        />
       </Stack>
 
       <Box sx={{ py: 2 }} />
