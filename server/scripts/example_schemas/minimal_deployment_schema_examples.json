@@ -1,0 +1,15 @@
+[
+  {
+    "highLevelDetails": {
+      "name": "Sandy Road Production Deployment",
+      "endDate": {
+        "hasEndDate": true,
+        "date": "2022-11-16"
+      }
+    },
+    "contacts": {
+      "requester": "user",
+      "secondPOC": "user"
+    }
+  }
+]

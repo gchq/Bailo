@@ -1,0 +1,14 @@
+# Docker files aren't used in the application
+Dockerfile
+.dockerignore
+
+# Depdencies are installed inside of container
+node_modules
+
+# Temp files / logs
+npm-debug.log
+.next
+
+# Markdown files
+README.md
+CONTRIBUTING.md
