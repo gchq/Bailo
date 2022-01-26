@@ -1,0 +1,158 @@
+import Info from '@mui/icons-material/Info';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Paper from '@mui/material/Paper';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Tooltip from '@mui/material/Tooltip';
+import Box from '@mui/system/Box';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { FlowElement } from 'react-flow-renderer';
+
+import { useGetDeployment } from '../../data/deployment';
+import { useGetUiConfig } from '../../data/uiConfig';
+import { getCurrentUser } from '../../data/user';
+import CopiedSnackbar from '../../src/common/CopiedSnackbar';
+import DeploymentOverview from '../../src/DeploymentOverview';
+import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper';
+import TerminalLog from '../../src/TerminalLog';
+import Wrapper from '../../src/Wrapper';
+import { createDeploymentComplianceFlow } from '../../utils/complianceFlow';
+
+const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
+
+type TabOptions = 'overview' | 'compliance' | 'build'
+
+function CodeLine({ line }) {
+  const [openSnackbar, setOpenSnackbar] = useState(false)
+
+  return (
+    <>
+      <span style={{
+        cursor: 'pointer'
+      }} onClick={() => {
+        navigator.clipboard.writeText(line)
+        setOpenSnackbar(true)
+      }}>$ <Tooltip title="Copy to clipboard" arrow><b style={{
+        background: '#e0e0e0'
+      }}>{line}</b></Tooltip></span><br />
+      <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
+    </>
+  )
+}
+
+export default function Deployment() {
+  const router = useRouter()
+  const { uuid }: { uuid?: string } = router.query
+
+  const [tab, setTab] = useState<TabOptions>('overview')
+  const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
+  const [open, setOpen] = useState<boolean>(false)
+  const [tag, setTag] = useState<string>('')
+
+  const { currentUser } = getCurrentUser()
+  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  useEffect(() => {
+    if (deployment !== undefined) {
+      const { modelID, initialVersionRequested } = deployment?.metadata?.highLevelDetails
+      setTag(modelID + ':' + initialVersionRequested)
+    }
+  }, [deployment])
+
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
+    setTab(newValue)
+  }
+
+  useEffect(() => {
+    if (deployment) {
+      setComplianceFlow(createDeploymentComplianceFlow(deployment))
+    }
+  }, [deployment])
+
+  const handleClickOpen = () => {
+    if (!isDeploymentLoading && deployment !== undefined) {
+      setOpen(true);
+    }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const error = MultipleErrorWrapper(`Unable to load deployment page`, {
+    isDeploymentError,
+    isUiConfigError
+  })
+  if (error) return error
+
+  if (isDeploymentLoading || isUiConfigLoading) {
+    return <Wrapper title={'Loading...'} page={'deployment'} />
+  }
+
+  const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
+
+  return (
+    <>
+      <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page={'deployment'}>
+        <Box sx={{ textAlign: 'right', pb: 3 }}>
+          <Button 
+            variant='outlined' 
+            color='primary'
+            startIcon={<Info />}
+            onClick={handleClickOpen}
+          >
+            Show download commands
+          </Button>
+        </Box>
+        <Paper sx={{ p: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
+              <Tab label='Overview' value='overview' />
+              <Tab label='Compliance' value='compliance' />
+              <Tab label='Build Logs' value='build' />
+              <Tab label='Settings' value='settings' />
+            </Tabs>
+          </Box>
+          <Box sx={{ marginBottom: 3 }} />
+
+          {tab === 'overview' && <DeploymentOverview version={deployment} use={'DEPLOYMENT'} />}
+
+          {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+
+          {tab === 'build' && <TerminalLog logs={deployment!.logs} title='Deployment Build Logs' />}
+        </Paper>
+      </Wrapper>
+      <Dialog maxWidth='lg' onClose={handleClose} open={open}>
+        <DialogTitle>Pull from Docker</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
+            <pre>
+              <span># Pull model</span><br />
+              <CodeLine line={`docker pull ${deploymentTag}`} />
+              <br />
+
+              <span># Run Docker image</span><br />
+              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
+              <span># (the container exports port 9000, available on the host as port 9999)</span><br />
+              <br />
+
+              <span># Check that the Docker container is running</span><br />
+              <CodeLine line={`docker ps`} />
+              <br />
+
+              <span># The model is accessible at localhost:9999</span>
+            </pre>
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}

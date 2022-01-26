@@ -1,0 +1,15 @@
+{
+  "highLevelDetails": {
+    "endDate": {
+      "hasEndDate": false
+    },
+    "name": "Test Deployment",
+    "modelID": "REPLACE_ME",
+    "initialVersionRequested": "1"
+  },
+  "contacts": {
+    "requester": "user",
+    "secondPOC": "user"
+  },
+  "schemaRef": "/Minimal/Deployment/v6"
+}
