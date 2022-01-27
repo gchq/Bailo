@@ -65,8 +65,8 @@ export default function Deployment() {
   const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
-  const [anchorEl, setAnchorEl] = useState<any>(null);
-  const actionOpen = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = useState<any>(null)
+  const actionOpen = Boolean(anchorEl)
 
   const { currentUser } = getCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
