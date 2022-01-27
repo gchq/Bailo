@@ -64,7 +64,6 @@ export const resetVersionApprovals = [
     if (user?.id !== version.metadata.contacts.uploader) {
       throw UnAuthorised({}, 'User is not authorised to do this operation.')
     }
-    console.log(user)
     version.managerApproved = 'No Response'
     version.reviewerApproved = 'No Response'
     await version.save()

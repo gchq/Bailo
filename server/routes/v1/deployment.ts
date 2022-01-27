@@ -37,7 +37,6 @@ export const postDeployment = [
   async (req: Request, res: Response) => {
     req.log.info({ user: req.user?.id }, 'User requesting deployment')
     const body = req.body as any
-    console.log(body)
 
     const schema = await SchemaModel.findOne({
       reference: body.schemaRef,
@@ -133,7 +132,6 @@ export const resetDeploymentApprovals = [
       throw BadReq({}, 'Unabled to find version for requested deployment')
     }
     deployment.managerApproved = 'No Response'
-    console.log(deployment)
     await deployment.save()
     req.log.info('Creating deployment requests')
     const requests = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
