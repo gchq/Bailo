@@ -1,28 +1,39 @@
-import Info from '@mui/icons-material/Info'
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-import Paper from '@mui/material/Paper'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Tooltip from '@mui/material/Tooltip'
-import Box from '@mui/system/Box'
-import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
-import { FlowElement } from 'react-flow-renderer'
+import Info from '@mui/icons-material/Info';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Paper from '@mui/material/Paper';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Tooltip from '@mui/material/Tooltip';
+import Box from '@mui/system/Box';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { FlowElement } from 'react-flow-renderer';
+import Menu from '@mui/material/Menu'
+import MenuList from '@mui/material/MenuList'
+import ListItemText from '@mui/material/ListItemText'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import DownArrow from '@mui/icons-material/KeyboardArrowDown'
+import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import Stack from '@mui/material/Stack'
+import RestartAlt from '@mui/icons-material/RestartAlt'
+import MenuItem from '@mui/material/MenuItem';
 
-import { useGetDeployment } from '../../data/deployment'
-import { useGetUiConfig } from '../../data/uiConfig'
-import { getCurrentUser } from '../../data/user'
-import CopiedSnackbar from '../../src/common/CopiedSnackbar'
-import DeploymentOverview from '../../src/DeploymentOverview'
-import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import TerminalLog from '../../src/TerminalLog'
-import Wrapper from '../../src/Wrapper'
-import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
+import { useGetDeployment } from '../../data/deployment';
+import { useGetUiConfig } from '../../data/uiConfig';
+import { getCurrentUser } from '../../data/user';
+import CopiedSnackbar from '../../src/common/CopiedSnackbar';
+import DeploymentOverview from '../../src/DeploymentOverview';
+import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper';
+import TerminalLog from '../../src/TerminalLog';
+import Wrapper from '../../src/Wrapper';
+import { createDeploymentComplianceFlow } from '../../utils/complianceFlow';
+import ApprovalsChip from 'src/common/ApprovalsChip'
+import { postEndpoint } from '../../data/api'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -33,27 +44,14 @@ function CodeLine({ line }) {
 
   return (
     <>
-      <span
-        style={{
-          cursor: 'pointer',
-        }}
-        onClick={() => {
-          navigator.clipboard.writeText(line)
-          setOpenSnackbar(true)
-        }}
-      >
-        ${' '}
-        <Tooltip title='Copy to clipboard' arrow>
-          <b
-            style={{
-              background: '#e0e0e0',
-            }}
-          >
-            {line}
-          </b>
-        </Tooltip>
-      </span>
-      <br />
+      <span style={{
+        cursor: 'pointer'
+      }} onClick={() => {
+        navigator.clipboard.writeText(line)
+        setOpenSnackbar(true)
+      }}>$ <Tooltip title="Copy to clipboard" arrow><b style={{
+        background: '#e0e0e0'
+      }}>{line}</b></Tooltip></span><br />
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
     </>
   )
@@ -67,6 +65,8 @@ export default function Deployment() {
   const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
+  const [anchorEl, setAnchorEl] = useState<any>(null);
+  const actionOpen = Boolean(anchorEl);
 
   const { currentUser } = getCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
@@ -78,6 +78,7 @@ export default function Deployment() {
       setTag(modelID + ':' + initialVersionRequested)
     }
   }, [deployment])
+
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setTab(newValue)
@@ -91,17 +92,25 @@ export default function Deployment() {
 
   const handleClickOpen = () => {
     if (!isDeploymentLoading && deployment !== undefined) {
-      setOpen(true)
+      setOpen(true);
     }
-  }
+  };
 
   const handleClose = () => {
-    setOpen(false)
+    setOpen(false);
+  };
+
+  const actionMenuClicked = (event) => {
+    setAnchorEl(event.currentTarget);
   }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
     isDeploymentError,
-    isUiConfigError,
+    isUiConfigError
   })
   if (error) return error
 
@@ -111,15 +120,56 @@ export default function Deployment() {
 
   const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
 
+  const requestApprovalReset = async() => { 
+    await postEndpoint(`/api/v1/deployment/${deployment?.metadata?.highLevelDetails.modelID}/reset-approvals`, deployment)
+      .then((res) => res.json())
+  }
+
   return (
     <>
       <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page={'deployment'}>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
-          <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+          <Button 
+            variant='outlined' 
+            color='primary'
+            startIcon={<Info />}
+            onClick={handleClickOpen}
+          >
             Show download commands
           </Button>
         </Box>
         <Paper sx={{ p: 3 }}>
+          <Stack direction='row' spacing={2}>
+            <ApprovalsChip approvals={[deployment?.managerApproved]}/>
+            <Button
+              id="model-actions-button"
+              aria-controls="model-actions-menu"
+              aria-haspopup="true"
+              aria-expanded={actionOpen ? 'true' : undefined}
+              onClick={actionMenuClicked}
+              variant='outlined'
+              data-test="requestDeploymentButton"
+              endIcon={actionOpen ? <UpArrow /> : <DownArrow />}
+            >
+              Actions
+            </Button>                         
+          </Stack>
+          <Menu
+            anchorEl={anchorEl}
+            open={actionOpen}
+            onClose={handleMenuClose}
+          >
+            <MenuList>
+              <MenuItem
+                onClick={requestApprovalReset}
+              >
+                <ListItemIcon>
+                  <RestartAlt fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Reset approvals</ListItemText>                
+              </MenuItem>
+            </MenuList>
+          </Menu>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
@@ -142,20 +192,16 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <pre>
-              <span># Pull model</span>
-              <br />
+              <span># Pull model</span><br />
               <CodeLine line={`docker pull ${deploymentTag}`} />
               <br />
 
-              <span># Run Docker image</span>
-              <br />
+              <span># Run Docker image</span><br />
               <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <span># (the container exports port 9000, available on the host as port 9999)</span>
-              <br />
+              <span># (the container exports port 9000, available on the host as port 9999)</span><br />
               <br />
 
-              <span># Check that the Docker container is running</span>
-              <br />
+              <span># Check that the Docker container is running</span><br />
               <CodeLine line={`docker ps`} />
               <br />
 

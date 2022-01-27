@@ -22,6 +22,7 @@ import PostAddIcon from '@mui/icons-material/PostAdd'
 import Favorite from '@mui/icons-material/Favorite'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import RestartAlt from '@mui/icons-material/RestartAlt'
 
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
@@ -148,6 +149,11 @@ const Model = () => {
     }
   }
 
+  const requestApprovalReset = async() => { 
+    await postEndpoint(`/api/v1/version/${uuid}/reset-approvals`, {})
+      .then((res) => res.json())
+  }
+
   return (
     <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page={'model'}>
       <Paper sx={{ p: 3 }}>
@@ -223,6 +229,14 @@ const Model = () => {
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={requestApprovalReset}
+                >
+                  <ListItemIcon>
+                    <RestartAlt fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Reset approvals</ListItemText>                
                 </MenuItem>
               </MenuList>
             </Menu>

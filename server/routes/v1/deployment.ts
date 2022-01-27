@@ -8,6 +8,8 @@ import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
+import { BadReq, UnAuthorised } from '../../utils/result'
+import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -35,6 +37,7 @@ export const postDeployment = [
   async (req: Request, res: Response) => {
     req.log.info({ user: req.user?.id }, 'User requesting deployment')
     const body = req.body as any
+    console.log(body)
 
     const schema = await SchemaModel.findOne({
       reference: body.schemaRef,
@@ -109,5 +112,31 @@ export const postDeployment = [
     res.json({
       uuid,
     })
+  },
+]
+
+export const resetDeploymentApprovals = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const user = req.user
+    const body = req.body as any 
+    const deployment: Deployment = await DeploymentModel.findOne({ uuid: body.uuid })
+    if (user?.id !== deployment.metadata.contacts.requester) {
+      throw UnAuthorised({}, 'User is not authorised to do this operation.')
+    } 
+    const version = await VersionModel.findOne({
+      model: body.model,
+      version: body.metadata.highLevelDetails.initialVersionRequested,
+    })
+    if (!version) {
+      throw BadReq({}, 'Unabled to find version for requested deployment')
+    }
+    deployment.managerApproved = 'No Response'
+    console.log(deployment)
+    await deployment.save()
+    req.log.info('Creating deployment requests')
+    const requests = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    return res.json(deployment)
   },
 ]

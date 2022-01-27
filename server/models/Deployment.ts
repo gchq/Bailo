@@ -13,7 +13,7 @@ const DeploymentSchema = new Schema(
     managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
 
     logs: [{ timestamp: Date, level: String, msg: String }],
-    built: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    built: { type: Boolean, required: true, default: false },
 
     owner: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   },
