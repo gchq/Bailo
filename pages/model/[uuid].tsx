@@ -229,7 +229,10 @@ const Model = () => {
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={requestApprovalReset}>
+                <MenuItem
+                  onClick={requestApprovalReset}
+                  disabled={version?.managerApproved === 'No Response' && version?.reviewerApproved === 'No Response'}
+                >
                   <ListItemIcon>
                     <RestartAlt fontSize='small' />
                   </ListItemIcon>

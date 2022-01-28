@@ -165,7 +165,7 @@ export default function Deployment() {
           </Stack>
           <Menu anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
-              <MenuItem onClick={requestApprovalReset}>
+              <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
                 <ListItemIcon>
                   <RestartAlt fontSize='small' />
                 </ListItemIcon>
