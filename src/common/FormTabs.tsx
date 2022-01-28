@@ -112,35 +112,31 @@ export default function FormTabs({
             </Tabs>
           </Box>
 
-          {tab === 'generate' && (
-            <>
-              <Box sx={{ py: 2 }} />
-              <FormFlow
-                name={name}
-                schema={updatedSelectedSchema}
-                uiSchema={uiSchema}
-                onSubmit={onSubmit}
-                omitFields={omitFields}
-                mode={mode}
-                modelToEdit={modelToEdit}
-              />
-            </>
-          )}
+          <div style={{ display: tab === 'generate' ? 'block' : 'none' }}>
+            <Box sx={{ py: 2 }} />
+            <FormFlow
+              name={name}
+              schema={updatedSelectedSchema}
+              uiSchema={uiSchema}
+              onSubmit={onSubmit}
+              omitFields={omitFields}
+              mode={mode}
+              modelToEdit={modelToEdit}
+            />
+          </div>
 
-          {tab === 'upload' && (
-            <>
-              {error && (
-                <>
-                  <Box sx={{ py: 2 }} />
-                  <Alert severity='error' sx={{ mb: 2 }}>
-                    {error}
-                  </Alert>
-                </>
-              )}
-              <Box sx={{ py: 2 }} />
-              <UploadForm onSubmit={onSubmit} schema={updatedSelectedSchema} />
-            </>
-          )}
+          <div style={{ display: tab === 'upload' ? 'block' : 'none' }}>
+            {error && (
+              <>
+                <Box sx={{ py: 2 }} />
+                <Alert severity='error' sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              </>
+            )}
+            <Box sx={{ py: 2 }} />
+            <UploadForm onSubmit={onSubmit} schema={updatedSelectedSchema} />
+          </div>
         </>
       )}
     </>
