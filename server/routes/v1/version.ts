@@ -14,7 +14,7 @@ export const getVersion = [
 
     if (!version) {
       req.log.warn({ versionId: id }, 'Unable to find version')
-      throw NotFound({id : id}, 'Unable to find version')
+      throw NotFound({ id: id }, 'Unable to find version')
     }
 
     return res.json(version)
@@ -32,11 +32,11 @@ export const putVersion = [
     const version = await VersionModel.findOne({ _id: id }).populate('model')
 
     if (!version) {
-      throw NotFound({id : id}, 'Unable to find version')
+      throw NotFound({ id: id }, 'Unable to find version')
     }
 
     if (req.user?.id !== version.metadata.contacts.uploader) {
-      throw UnAuthorised({}, 'User is not authorised to do this operation.')  
+      throw UnAuthorised({}, 'User is not authorised to do this operation.')
     }
 
     version.metadata = metadata

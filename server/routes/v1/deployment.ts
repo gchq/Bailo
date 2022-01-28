@@ -119,11 +119,11 @@ export const resetDeploymentApprovals = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const user = req.user
-    const body = req.body as any 
+    const body = req.body as any
     const deployment: Deployment = await DeploymentModel.findOne({ uuid: body.uuid })
     if (user?.id !== deployment.metadata.contacts.requester) {
       throw UnAuthorised({}, 'User is not authorised to do this operation.')
-    } 
+    }
     const version = await VersionModel.findOne({
       model: body.model,
       version: body.metadata.highLevelDetails.initialVersionRequested,

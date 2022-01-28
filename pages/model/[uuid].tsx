@@ -149,9 +149,8 @@ const Model = () => {
     }
   }
 
-  const requestApprovalReset = async() => { 
-    await postEndpoint(`/api/v1/version/${uuid}/reset-approvals`, {})
-      .then((res) => res.json())
+  const requestApprovalReset = async () => {
+    await postEndpoint(`/api/v1/version/${uuid}/reset-approvals`, {}).then((res) => res.json())
   }
 
   return (
@@ -230,13 +229,11 @@ const Model = () => {
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <MenuItem
-                  onClick={requestApprovalReset}
-                >
+                <MenuItem onClick={requestApprovalReset}>
                   <ListItemIcon>
-                    <RestartAlt fontSize="small" />
+                    <RestartAlt fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText>Reset approvals</ListItemText>                
+                  <ListItemText>Reset approvals</ListItemText>
                 </MenuItem>
               </MenuList>
             </Menu>
