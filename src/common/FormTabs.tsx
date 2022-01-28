@@ -70,12 +70,20 @@ export default function FormTabs({
 
   useEffect(() => {
     formatUiWidgets()
-    if (mode === 'edit' || mode === 'newVersion') {
+    if (mode === 'edit') {
       let updatedSchema = cloneDeep(selectedSchema)
-      // Name should be disabled
+      // Version and name should be disabled in edit mode
+      updatedSchema.schema.properties.highLevelDetails.properties.name.readOnly = true
+      updatedSchema.schema.properties.highLevelDetails.properties.modelCardVersion.readOnly = true
+      setUpdatedSelectedSchema(updatedSchema)
+    }
+    if (mode === 'newVersion') {
+      let updatedSchema = cloneDeep(selectedSchema)
+      // Name should be disabled in edit and new version
       updatedSchema.schema.properties.highLevelDetails.properties.name.readOnly = true
       setUpdatedSelectedSchema(updatedSchema)
-    } else {
+    }
+    if (mode === undefined) {
       setUpdatedSelectedSchema(selectedSchema)
     }
   }, [selectedSchema])
