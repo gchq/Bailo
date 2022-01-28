@@ -32,7 +32,7 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
-import ApprovalsChip from 'src/common/ApprovalsChip'
+import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
