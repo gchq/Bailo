@@ -150,7 +150,7 @@ const Model = () => {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${uuid}/reset-approvals`, {}).then((res) => res.json())
+    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
   return (

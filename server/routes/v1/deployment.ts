@@ -119,17 +119,20 @@ export const resetDeploymentApprovals = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const user = req.user
-    const body = req.body as any
-    const deployment: Deployment = await DeploymentModel.findOne({ uuid: body.uuid })
+    const { uuid } = req.params
+    const deployment: any = await DeploymentModel.findOne({ uuid })
+    if (!deployment) {
+      throw BadReq({uuid}, `Unabled to find version for requested deployment: '${uuid}'`)
+    }
     if (user?.id !== deployment.metadata.contacts.requester) {
-      throw UnAuthorised({}, 'User is not authorised to do this operation.')
+      throw UnAuthorised({}, 'You cannot reset the approvals for a deployment you do not own.')
     }
     const version = await VersionModel.findOne({
-      model: body.model,
-      version: body.metadata.highLevelDetails.initialVersionRequested,
+      model: deployment.model,
+      version: deployment.metadata.highLevelDetails.initialVersionRequested,
     })
     if (!version) {
-      throw BadReq({}, 'Unabled to find version for requested deployment')
+      throw BadReq({uuid}, `Unabled to find version for requested deployment: '${uuid}'`)
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()

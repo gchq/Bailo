@@ -63,7 +63,7 @@ app.prepare().then(() => {
 
   server.post('/api/v1/deployment', ...postDeployment)
   server.get('/api/v1/deployment/:uuid', ...getDeployment)
-  server.post('/api/v1/deployment/:id/reset-approvals', ...resetDeploymentApprovals)
+  server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 
   server.get('/api/v1/version/:id', ...getVersion)
   server.put('/api/v1/version/:id', ...putVersion)

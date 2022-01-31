@@ -57,7 +57,7 @@ export const resetVersionApprovals = [
   async (req: Request, res: Response) => {
     const { id } = req.params
     const user = req.user
-    const version = await VersionModel.findOne({ id: id }).populate('model')
+    const version = await VersionModel.findOne({ _id: id }).populate('model')
     if (!version) {
       throw BadReq({}, 'Unabled to find version for requested deployment')
     }

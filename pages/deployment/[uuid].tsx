@@ -134,8 +134,7 @@ export default function Deployment() {
 
   const requestApprovalReset = async () => {
     await postEndpoint(
-      `/api/v1/deployment/${deployment?.metadata?.highLevelDetails.modelID}/reset-approvals`,
-      deployment
+      `/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}
     ).then((res) => res.json())
   }
 
