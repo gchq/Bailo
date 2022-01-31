@@ -200,7 +200,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
           <Divider />
           <StyledList>
             <Link href='/' passHref>
-              <ListItem button selected={page === 'marketplace'}>
+              <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Marketplace' arrow placement='right'>

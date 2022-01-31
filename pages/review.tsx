@@ -148,15 +148,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
               )}
             </Grid>
             <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>
-                <Button
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Accepted', requestObj)}
-                  variant='contained'
-                  data-test='approveButton'
-                >
-                  Approve
-                </Button>
+              <Box>                
                 <Button
                   color='secondary'
                   sx={{ m: 1 }}
@@ -164,6 +156,14 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
                   variant='outlined'
                 >
                   Reject
+                </Button>
+                <Button
+                  sx={{ m: 1 }}
+                  onClick={() => changeState('Accepted', requestObj)}
+                  variant='contained'
+                  data-test='approveButton'
+                >
+                  Approve
                 </Button>
               </Box>
             </Grid>
@@ -176,8 +176,8 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
           <DialogContentText id='alert-dialog-description'>{approvalModalText}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onCancel}>Cancel</Button>
-          <Button variant='outlined' onClick={onConfirm} autoFocus data-test='confirmButton'>
+          <Button color='secondary' variant='outlined'onClick={onCancel}>Cancel</Button>
+          <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
             Confirm
           </Button>
         </DialogActions>

@@ -313,7 +313,7 @@ const Model = () => {
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='outlined' color='error'>
+            <Button variant='contained' color='error'>
               Delete Model
             </Button>
           </>
