@@ -171,10 +171,17 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               <Link href='/' passHref>
                 <a>
                   <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
-                </a>
+                </a>                
               </Link>
             </Box>
-            {headerTitle}
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, mr: 2, ml: 2, display: { xs: 'none', md: 'flex' } }}
+            >
+              Bailo
+            </Typography>
             <Link href='/review' passHref>
               <IconButton color='inherit'>
                 <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
