@@ -122,7 +122,7 @@ export const resetDeploymentApprovals = [
     const { uuid } = req.params
     const deployment: any = await DeploymentModel.findOne({ uuid })
     if (!deployment) {
-      throw BadReq({uuid}, `Unabled to find version for requested deployment: '${uuid}'`)
+      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }
     if (user?.id !== deployment.metadata.contacts.requester) {
       throw UnAuthorised({}, 'You cannot reset the approvals for a deployment you do not own.')
@@ -132,7 +132,7 @@ export const resetDeploymentApprovals = [
       version: deployment.metadata.highLevelDetails.initialVersionRequested,
     })
     if (!version) {
-      throw BadReq({uuid}, `Unabled to find version for requested deployment: '${uuid}'`)
+      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()
