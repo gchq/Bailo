@@ -167,7 +167,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             >
               <MenuIcon />
             </IconButton>
-            <Box sx={{ flexGrow: 1, display: { xs: 'flex', cursor: 'pointer' } }}>
+            <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' passHref>
                 <a>
                   <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
