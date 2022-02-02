@@ -11,7 +11,7 @@ Contributors guide: ./docs/CONTRIBUTING.md
 ##### Checklist
 <!-- Remove items that do not apply. For completed items, change [ ] to [x]. -->
 
-- [ ] `npm run lint && npm run build` (UNIX) passes
+- [ ] `npm run lint && npm run build` passes
 - [ ] `npm run style` makes no changes
 
 <!-- _NOTE: these things are not required to open a PR and can be done afterwards / while the PR is open._ -->
