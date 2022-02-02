@@ -13,6 +13,15 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { FlowElement } from 'react-flow-renderer'
+import Menu from '@mui/material/Menu'
+import MenuList from '@mui/material/MenuList'
+import ListItemText from '@mui/material/ListItemText'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import DownArrow from '@mui/icons-material/KeyboardArrowDown'
+import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import Stack from '@mui/material/Stack'
+import RestartAlt from '@mui/icons-material/RestartAlt'
+import MenuItem from '@mui/material/MenuItem'
 
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -23,6 +32,8 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
+import ApprovalsChip from '../../src/common/ApprovalsChip'
+import { postEndpoint } from '../../data/api'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -67,6 +78,8 @@ export default function Deployment() {
   const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
+  const [anchorEl, setAnchorEl] = useState<any>(null)
+  const actionOpen = Boolean(anchorEl)
 
   const { currentUser } = getCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
@@ -99,6 +112,14 @@ export default function Deployment() {
     setOpen(false)
   }
 
+  const actionMenuClicked = (event) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
     isDeploymentError,
     isUiConfigError,
@@ -111,6 +132,10 @@ export default function Deployment() {
 
   const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
 
+  const requestApprovalReset = async () => {
+    await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
+  }
+
   return (
     <>
       <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page={'deployment'}>
@@ -120,6 +145,31 @@ export default function Deployment() {
           </Button>
         </Box>
         <Paper sx={{ p: 3 }}>
+          <Stack direction='row' spacing={2}>
+            <ApprovalsChip approvals={[deployment?.managerApproved]} />
+            <Button
+              id='model-actions-button'
+              aria-controls='model-actions-menu'
+              aria-haspopup='true'
+              aria-expanded={actionOpen ? 'true' : undefined}
+              onClick={actionMenuClicked}
+              variant='outlined'
+              data-test='requestDeploymentButton'
+              endIcon={actionOpen ? <UpArrow /> : <DownArrow />}
+            >
+              Actions
+            </Button>
+          </Stack>
+          <Menu anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
+            <MenuList>
+              <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
+                <ListItemIcon>
+                  <RestartAlt fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Reset approvals</ListItemText>
+              </MenuItem>
+            </MenuList>
+          </Menu>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />

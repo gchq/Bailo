@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { ensureUserRole } from '../../utils/user'
 import bodyParser from 'body-parser'
 import { createVersionRequests } from '../../services/request'
+import { UnAuthorised, NotFound, BadReq } from '../../utils/result'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -13,9 +14,7 @@ export const getVersion = [
 
     if (!version) {
       req.log.warn({ versionId: id }, 'Unable to find version')
-      return res.status(404).json({
-        message: `Unable to find version '${id}'`,
-      })
+      throw NotFound({ id: id }, 'Unable to find version')
     }
 
     return res.json(version)
@@ -33,15 +32,11 @@ export const putVersion = [
     const version = await VersionModel.findOne({ _id: id }).populate('model')
 
     if (!version) {
-      return res.status(404).json({
-        message: `Unable to find version '${id}'`,
-      })
+      throw NotFound({ id: id }, 'Unable to find version')
     }
 
     if (req.user?.id !== version.metadata.contacts.uploader) {
-      return res.status(403).json({
-        message: "User does not have permission to edit another user's form.",
-      })
+      throw UnAuthorised({}, 'User is not authorised to do this operation.')
     }
 
     version.metadata = metadata
@@ -53,6 +48,27 @@ export const putVersion = [
     req.log.info('Creating version requests')
     const requests = await createVersionRequests({ version })
 
+    return res.json(version)
+  },
+]
+
+export const resetVersionApprovals = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const user = req.user
+    const version = await VersionModel.findOne({ _id: id }).populate('model')
+    if (!version) {
+      throw BadReq({}, 'Unabled to find version for requested deployment')
+    }
+    if (user?.id !== version.metadata.contacts.uploader) {
+      throw UnAuthorised({}, 'User is not authorised to do this operation.')
+    }
+    version.managerApproved = 'No Response'
+    version.reviewerApproved = 'No Response'
+    await version.save()
+    req.log.info('Creating version requests')
+    const requests = await createVersionRequests({ version })
     return res.json(version)
   },
 ]

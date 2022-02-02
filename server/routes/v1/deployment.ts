@@ -8,6 +8,8 @@ import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
+import { BadReq, UnAuthorised } from '../../utils/result'
+import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -109,5 +111,33 @@ export const postDeployment = [
     res.json({
       uuid,
     })
+  },
+]
+
+export const resetDeploymentApprovals = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const user = req.user
+    const { uuid } = req.params
+    const deployment: any = await DeploymentModel.findOne({ uuid })
+    if (!deployment) {
+      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
+    }
+    if (user?.id !== deployment.metadata.contacts.requester) {
+      throw UnAuthorised({}, 'You cannot reset the approvals for a deployment you do not own.')
+    }
+    const version = await VersionModel.findOne({
+      model: deployment.model,
+      version: deployment.metadata.highLevelDetails.initialVersionRequested,
+    })
+    if (!version) {
+      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
+    }
+    deployment.managerApproved = 'No Response'
+    await deployment.save()
+    req.log.info('Creating deployment requests')
+    const requests = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    return res.json(deployment)
   },
 ]
