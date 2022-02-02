@@ -79,9 +79,9 @@ export default function Deployment() {
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
   const [anchorEl, setAnchorEl] = useState<any>(null)
-  const actionOpen = Boolean(anchorEl)
+  const actionOpen = anchorEl !== null
 
-  const { currentUser } = getCurrentUser()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = getCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -112,7 +112,7 @@ export default function Deployment() {
     setOpen(false)
   }
 
-  const actionMenuClicked = (event) => {
+  const actionMenuClicked = (event: any) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -123,10 +123,11 @@ export default function Deployment() {
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
     isDeploymentError,
     isUiConfigError,
+    isCurrentUserError
   })
   if (error) return error
 
-  if (isDeploymentLoading || isUiConfigLoading) {
+  if (isDeploymentLoading || isUiConfigLoading || isCurrentUserLoading) {
     return <Wrapper title={'Loading...'} page={'deployment'} />
   }
 
