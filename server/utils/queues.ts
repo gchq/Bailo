@@ -6,7 +6,6 @@ export const uploadQueue = new Queue('UPLOAD_QUEUE', {
 
   // model building may take a minutes, especially when the cache is cold
   stallInterval: 120000,
-  
 })
 
 export const deploymentQueue = new Queue('DEPLOYMENT_QUEUE', {
