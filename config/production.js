@@ -2,16 +2,16 @@ module.exports = {
   // explicitly remove default passwords in production
   minio: {
     accessKey: '',
-    secretKey: ''
+    secretKey: '',
   },
 
   smtp: {
     auth: {
       user: '',
-      pass: ''
+      pass: '',
     },
     tls: {
       rejectUnauthorized: false,
-    }
-  }
+    },
+  },
 }
