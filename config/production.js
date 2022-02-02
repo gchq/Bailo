@@ -1,3 +1,17 @@
 module.exports = {
-  // no custom production variables yet
+  // explicitly remove default passwords in production
+  minio: {
+    accessKey: '',
+    secretKey: '',
+  },
+
+  smtp: {
+    auth: {
+      user: '',
+      pass: '',
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  },
 }
