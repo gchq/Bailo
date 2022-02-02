@@ -13,6 +13,7 @@ Contributors guide: ./docs/CONTRIBUTING.md
 
 - [ ] `npm run lint && npm run build` passes
 - [ ] `npm run style` makes no changes
+- [ ] `npm run test` succeeds both unit and integration testing.
 
 <!-- _NOTE: these things are not required to open a PR and can be done afterwards / while the PR is open._ -->
 
