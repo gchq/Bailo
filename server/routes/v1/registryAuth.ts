@@ -95,7 +95,7 @@ async function encodeToken(data, { expiresIn }) {
   )
 }
 
-function getRefreshToken(user: any) {
+export function getRefreshToken(user: any) {
   return encodeToken(
     {
       sub: user.id,
@@ -108,7 +108,7 @@ function getRefreshToken(user: any) {
   )
 }
 
-function getAccessToken(user, access) {
+export function getAccessToken(user, access) {
   return encodeToken(
     {
       sub: user.id,
@@ -154,6 +154,10 @@ function checkAccess(access, user) {
 export const getDockerRegistryAuth = [
   bodyParser.urlencoded({ extended: true }),
   async (req: Request, res: Response) => {
+    for (let i = 0; i < 25; i++) {
+      console.log('here')
+    }
+
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
 
@@ -170,6 +174,8 @@ export const getDockerRegistryAuth = [
     }
 
     const { error, user, admin } = await getUserFromAuthHeader(authorization)
+
+    console.log(error, user, admin)
 
     if (error) {
       rlog.warn({ error }, 'User authentication failed')
