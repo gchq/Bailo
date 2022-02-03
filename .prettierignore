@@ -19,3 +19,5 @@ yarn-error.log*
 
 /dist
 /certs
+
+public/css/fonts.css
