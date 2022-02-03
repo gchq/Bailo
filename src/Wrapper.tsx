@@ -178,10 +178,11 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               variant="h6"
               noWrap
               component="div"
-              sx={{ flexGrow: 1, mr: 2, ml: 2, display: { xs: 'none', md: 'flex' } }}
+              sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex' } }}
             >
               Bailo
             </Typography>
+            {headerTitle}
             <Link href='/review' passHref>
               <IconButton color='inherit'>
                 <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>

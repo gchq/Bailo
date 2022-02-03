@@ -17,9 +17,6 @@ export interface Theme {
 
 // Create a theme instance.
 const theme = createTheme({
-  typography: {
-    fontFamily: "Montserrat",
-  },
   palette: {
     primary: {
       main: '#27598e',
