@@ -123,7 +123,7 @@ export default function Deployment() {
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
     isDeploymentError,
     isUiConfigError,
-    isCurrentUserError
+    isCurrentUserError,
   })
   if (error) return error
 

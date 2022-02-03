@@ -95,7 +95,7 @@ async function encodeToken(data, { expiresIn }) {
   )
 }
 
-function getRefreshToken(user: any) {
+export function getRefreshToken(user: any) {
   return encodeToken(
     {
       sub: user.id,
@@ -108,7 +108,7 @@ function getRefreshToken(user: any) {
   )
 }
 
-function getAccessToken(user, access) {
+export function getAccessToken(user, access) {
   return encodeToken(
     {
       sub: user.id,
