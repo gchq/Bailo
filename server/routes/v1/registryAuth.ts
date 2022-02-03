@@ -154,10 +154,6 @@ function checkAccess(access, user) {
 export const getDockerRegistryAuth = [
   bodyParser.urlencoded({ extended: true }),
   async (req: Request, res: Response) => {
-    for (let i = 0; i < 25; i++) {
-      console.log('here')
-    }
-
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
 
@@ -174,8 +170,6 @@ export const getDockerRegistryAuth = [
     }
 
     const { error, user, admin } = await getUserFromAuthHeader(authorization)
-
-    console.log(error, user, admin)
 
     if (error) {
       rlog.warn({ error }, 'User authentication failed')
