@@ -1,11 +1,10 @@
 import DeploymentModel from '../models/Deployment'
-import { logCommand, runCommand } from '../utils/build'
 import { deploymentQueue } from '../utils/queues'
 import config from 'config'
 import prettyMs from 'pretty-ms'
 import https from 'https'
 import logger from '../utils/logger'
-import { getAdminToken } from '../routes/v1/registryAuth'
+import { getAccessToken } from '../routes/v1/registryAuth'
 import UserModel from '../models/User'
 
 const httpsAgent = new https.Agent({
@@ -37,76 +36,81 @@ export default function processDeployments() {
 
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
-      const _registry = `https://${config.get('registry.host')}/v2`
+      const registry = `https://${config.get('registry.host')}/v2`
       const tag = `${modelID}:${initialVersionRequested}`
+      const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
 
       deployment.log('info', `Retagging image.  Current: internal/${tag}`)
       deployment.log('info', `New: ${user.id}/${tag}`)
 
-      // const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
-      //   headers: {
-      //     'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
-      //   },
-      //   agent: httpsAgent
-      // }).then((res: any) => res.json())
+      const authorisation = `Bearer ${await getAccessToken({ id: 'admin', _id: 'admin' }, [
+        { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
+        { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull'] },
+      ])}`
 
-      // deployment.log('info', `manifest ${JSON.stringify(manifest, null, 4)}`)
+      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
+        headers: {
+          Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+          Authorization: authorisation,
+        },
+        agent: httpsAgent,
+      } as RequestInit).then((res: any) => res.json())
 
-      // for (let layer of manifest.layers) {
-      //   const layerPost = await fetch(`${registry}/user/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`, {
-      //     method: 'POST',
-      //     agent: httpsAgent
-      //   })
-      //   .then((res: any) => { console.log('mountPost', res.status); return res })
-      //   .then((res: any) => res.text())
+      deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
 
-      //   console.log('layerPost', layerPost)
-      // }
+      await Promise.all(
+        manifest.layers.map(async (layer: any) => {
+          const res = await fetch(
+            `${registry}/user/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: authorisation,
+              },
+              agent: httpsAgent,
+            } as RequestInit
+          )
 
-      // const mountPost = await fetch(`${registry}/user/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`, {
-      //   method: 'POST',
-      //   agent: httpsAgent
-      // })
-      //   .then((res: any) => { console.log('mountPost', res.status); return res })
-      //   .then((res: any) => res.text())
+          if (res.status >= 400) {
+            throw new Error('Invalid status response: ' + res.status)
+          }
 
-      // console.log('mountPost', mountPost)
-
-      // deployment.log('info', `Received remote manifest.`)
-
-      // const manifestPut: any = await fetch(`${registry}/user/${modelID}/manifests/${initialVersionRequested}`, {
-      //   method: 'PUT',
-      //   body: manifest,
-      //   headers: {
-      //     'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json'
-      //   },
-      //   agent: httpsAgent
-      // }).then((res: any) => res.text())
-
-      // console.log('manifestPut', manifestPut)
-
-      // deployment.log('info', `Updated remote manifest.`)
-
-      // for now, we just carry out the deployment...
-
-      const internalImage = `${config.get('registry.host')}/internal/${tag}`
-      const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
-      dlog.info({ internalImage }, 'Pulling docker image')
-
-      deployment.log('info', 'Logging into docker')
-      await runCommand(
-        `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
-        dlog.info.bind(dlog),
-        dlog.error.bind(dlog)
+          deployment.log('info', `Copied layer ${layer.digest}`)
+        })
       )
-      deployment.log('info', 'Successfully logged into docker')
 
-      await logCommand(`docker pull ${internalImage}`, deployment.log.bind(deployment))
-      dlog.info({ internalImage, externalImage }, 'Retagging docker image')
-      await logCommand(`docker tag ${internalImage} ${externalImage}`, deployment.log.bind(deployment))
-      dlog.info({ externalImage }, 'Pushing docker image')
-      await logCommand(`docker push ${externalImage}`, deployment.log.bind(deployment))
+      const mountPostRes = await fetch(
+        `${registry}/user/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: authorisation,
+          },
+          agent: httpsAgent,
+        } as RequestInit
+      )
 
+      if (mountPostRes.status >= 400) {
+        throw new Error('Invalid status response in mount post: ' + mountPostRes.status)
+      }
+
+      deployment.log('info', `Copied manifest to new repository`)
+
+      const manifestPutRes = await fetch(`${registry}/user/${modelID}/manifests/${initialVersionRequested}`, {
+        method: 'PUT',
+        body: JSON.stringify(manifest),
+        headers: {
+          Authorization: authorisation,
+          'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
+        },
+        agent: httpsAgent,
+      } as RequestInit)
+
+      if (manifestPutRes.status >= 400) {
+        throw new Error('Invalid status response in manifest put: ' + manifestPutRes.status)
+      }
+
+      deployment.log('info', 'Finalised new manifest')
       dlog.info('Marking build as successful')
       await DeploymentModel.findOneAndUpdate({ _id: deployment._id }, { built: true })
 
