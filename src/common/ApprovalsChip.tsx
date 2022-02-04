@@ -1,28 +1,31 @@
 import Close from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import DoneAll from '@mui/icons-material/DoneAll'
-import { Chip } from '@mui/material'
+import Chip from '@mui/material/Chip'
 import React from 'react'
 
-const ApprovalsChip = (props: any) => {
-  const { approvals } = props
-  const [approvedCount, setApprovedCount] = React.useState<number>(0)
+export default function ApprovalsChip({ approvals }: { approvals: any }) {
+  const numApprovals = approvals.filter((e: string) => e === 'Accepted').length
+  const totalApprovals = approvals.length
 
-  React.useEffect(() => {
-    setApprovedCount(approvals.filter((e) => e === 'Accepted').length)
-  }, [approvals])
-
-  const returnApprovals = () => {
-    if (approvals.filter((e) => e === 'Accepted').length === approvals.length) {
-      return <Chip icon={<DoneAll />} color='success' label={'Approvals ' + approvedCount + '/' + approvals.length} />
-    } else if (approvedCount < approvals.length && approvedCount !== 0) {
-      return <Chip icon={<Done />} color='warning' label={'Approvals ' + approvedCount + '/' + approvals.length} />
-    } else {
-      return <Chip icon={<Close />} color='error' label={'Approvals ' + approvedCount + '/' + approvals.length} />
-    }
+  let Icon
+  let backgroundColor
+  if (numApprovals === 0) {
+    Icon = Close
+    backgroundColor = '#d63b3b'
+  } else if (numApprovals < totalApprovals) {
+    Icon = Done
+    backgroundColor = '#dc851b'
+  } else {
+    Icon = DoneAll
+    backgroundColor = '#4c8a4c'
   }
 
-  return <>{returnApprovals()}</>
+  return (
+    <Chip 
+      icon={<Icon sx={{ color: 'white !important', pl: 1 }} />}  
+      sx={{ borderRadius: 1, color: 'white', height: 'auto', backgroundColor }} 
+      label={`Approvals ${numApprovals}/${totalApprovals}`} 
+    />
+  )
 }
-
-export default ApprovalsChip
