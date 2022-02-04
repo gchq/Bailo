@@ -16,7 +16,7 @@ export function useListUsers() {
   }
 }
 
-export function getCurrentUser() {
+export function useGetCurrentUser() {
   const { data, error, mutate } = useSWR<User>(`/api/v1/user`, fetcher)
 
   return {

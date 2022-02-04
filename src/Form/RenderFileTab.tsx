@@ -26,3 +26,7 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
     </Box>
   )
 }
+
+export function FileTabComplete(step: Step) {
+  return step.state.binary && step.state.code
+}

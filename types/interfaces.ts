@@ -170,5 +170,5 @@ export interface Step {
 
   render: Function
   shouldValidate: boolean
-  // isComplete: Function
+  isComplete: Function
 }

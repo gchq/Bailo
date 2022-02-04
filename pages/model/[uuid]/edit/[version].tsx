@@ -5,20 +5,20 @@ import Paper from '@mui/material/Paper'
 import { useGetModel } from '../../../../data/model'
 
 import Wrapper from '../../../../src/Wrapper'
-import { useGetDefaultSchema, useGetSchema, useGetSchemas } from '../../../../data/schema'
+import { useGetSchema } from '../../../../data/schema'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
-import { Schema, Step } from '../../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../../../../utils/formUtils'
-import FileInput from '../../../../src/common/FileInput'
+import { Step } from '../../../../types/interfaces'
+import { getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
 
-import SchemaSelector from '../../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
-import FormExport from '../../../../src/common/FormExport'
 import { useGetModelVersion } from 'data/model'
 import { putEndpoint } from 'data/api'
 
 const uiSchema = {
+  highLevelDetails: {
+    modelCardVersion: { 'ui:widget': 'nothing' }
+  },
   contacts: {
     uploader: { 'ui:widget': 'userSelector' },
     reviewer: { 'ui:widget': 'userSelector' },
@@ -38,13 +38,11 @@ function Upload() {
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
-    if (!schema || !version) return
-    const steps = getStepsFromSchema(schema.schema, uiSchema, [
-      'properties.highLevelDetails.properties.modelCardVersion'
-    ], version.metadata)
+    if (!schema || !version || steps.length) return
 
-    setSteps(steps)
-  }, [schema])
+    const schemaSteps = getStepsFromSchema(schema.schema, uiSchema, [], version.metadata)
+    setSteps(schemaSteps)
+  }, [schema, version])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
