@@ -23,6 +23,8 @@ export default function Form({
     setTab(newValue)
   }
 
+  console.log('current tab', tab)
+
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

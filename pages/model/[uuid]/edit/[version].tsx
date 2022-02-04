@@ -14,6 +14,7 @@ import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
 import { useGetModelVersion } from 'data/model'
 import { putEndpoint } from 'data/api'
+import useCacheVariable from 'utils/useCacheVariable'
 
 const uiSchema = {
   highLevelDetails: {
@@ -37,12 +38,15 @@ function Upload() {
   const [steps, setSteps] = useState<Array<Step>>([])
   const [error, setError] = useState<string | undefined>(undefined)
 
-  useEffect(() => {
-    if (!schema || !version || steps.length) return
+  const cVersion = useCacheVariable(version)
+  const cSchema = useCacheVariable(schema)
 
-    const schemaSteps = getStepsFromSchema(schema.schema, uiSchema, [], version.metadata)
+  useEffect(() => {
+    if (!cSchema || !cVersion || steps.length) return
+    
+    const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cVersion.metadata)
     setSteps(schemaSteps)
-  }, [schema, version, steps])
+  }, [cSchema, cVersion, steps.length])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
@@ -52,11 +56,11 @@ function Upload() {
   if (errorWrapper) return errorWrapper
 
   if (isModelLoading || isVersionLoading || isSchemaLoading) {
-    return <></>
+    return <>Loading</>
   }
 
   if (!version || !model || !schema) {
-    return <></>
+    return <>Not Found</>
   }
 
   const onSubmit = async () => {
