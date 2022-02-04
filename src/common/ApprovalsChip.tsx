@@ -1,7 +1,7 @@
 import Close from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import DoneAll from '@mui/icons-material/DoneAll'
-import { Chip } from '@mui/material'
+import Chip from '@mui/material/Chip'
 import React from 'react'
 
 const ApprovalsChip = (props: any) => {
