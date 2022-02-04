@@ -81,12 +81,8 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    console.log(steps)
-
     const data = getStepsData(steps, true)
     const form = new FormData()
-
-    console.log(data)
 
     data.schemaRef = model?.schemaRef
 

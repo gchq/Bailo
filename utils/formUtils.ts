@@ -140,7 +140,5 @@ export function validateForm(step: Step) {
   const validator = new Validator()
   const sectionErrors = validator.validate(step.state, step.schema)
 
-  console.log(sectionErrors)
-
   return sectionErrors.errors.length === 0
 }
