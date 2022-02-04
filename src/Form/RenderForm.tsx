@@ -19,7 +19,6 @@ export default function RenderForm(step: Step, steps: Array<Step>, setSteps: Fun
     widgets={{
       userSelector: UserSelector
     }}
-    liveValidate
   >
     <></>
   </SchemaForm>
