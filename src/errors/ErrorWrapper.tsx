@@ -10,7 +10,5 @@ export default function ErrorWrapper({ message }: { message?: string }) {
 }
 
 export function MinimalErrorWrapper({ message }: { message?: string }) {
-  return (
-    <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
-  )
+  return <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
 }

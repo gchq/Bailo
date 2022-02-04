@@ -65,12 +65,19 @@ export default function FormDesigner({
         {steps.map((step, index) => (
           <MaterialStep key={step.schema.title}>
             <StepButton onClick={() => setActiveStep(index)}>{step.schema.title}</StepButton>
-            {step.type !== 'Message' && <Box sx={{ textAlign: 'center' }}>
-              {step.isComplete(step) ? 
-                (<Typography sx={{ color: 'green' }} variant='caption'>Complete</Typography>) :
-                (<Typography sx={{ color: 'orange' }} variant='caption'>In progress</Typography>)
-              }
-            </Box>}
+            {step.type !== 'Message' && (
+              <Box sx={{ textAlign: 'center' }}>
+                {step.isComplete(step) ? (
+                  <Typography sx={{ color: 'green' }} variant='caption'>
+                    Complete
+                  </Typography>
+                ) : (
+                  <Typography sx={{ color: 'orange' }} variant='caption'>
+                    In progress
+                  </Typography>
+                )}
+              </Box>
+            )}
           </MaterialStep>
         ))}
       </Stepper>
