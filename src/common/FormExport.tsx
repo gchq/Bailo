@@ -103,7 +103,7 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
 
   return (
     <>
-      <Grid container justifyContent="center">
+      <Grid container justifyContent='center'>
         <Stack direction='row' spacing={2}>
           <Button startIcon={<OpenInNew />} variant='outlined' onClick={onShowHtmlView}>
             View HTML

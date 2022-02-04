@@ -17,7 +17,7 @@ import { putEndpoint } from 'data/api'
 
 const uiSchema = {
   highLevelDetails: {
-    modelCardVersion: { 'ui:widget': 'nothing' }
+    modelCardVersion: { 'ui:widget': 'nothing' },
   },
   contacts: {
     uploader: { 'ui:widget': 'userSelector' },
@@ -28,7 +28,7 @@ const uiSchema = {
 
 function Upload() {
   const router = useRouter()
-  const { uuid: modelUuid, version: versionString }: { uuid?: string, version?: string } = router.query
+  const { uuid: modelUuid, version: versionString }: { uuid?: string; version?: string } = router.query
 
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { version, isVersionLoading, isVersionError } = useGetModelVersion(modelUuid, versionString)
@@ -47,7 +47,7 @@ function Upload() {
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
     isVersionError,
-    isSchemaError
+    isSchemaError,
   })
   if (errorWrapper) return errorWrapper
 

@@ -39,7 +39,7 @@ export function createStep({
     schemaRef,
 
     shouldValidate: false,
-    
+
     isComplete,
     render,
   }
@@ -67,7 +67,12 @@ export function setStepValidate(steps: Array<Step>, setSteps: Function, step: St
   setSteps(duplicatedSteps)
 }
 
-export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array<string> = [], state: any = {}): Array<Step> {
+export function getStepsFromSchema(
+  schema: any,
+  uiSchema: any,
+  omitFields: Array<string> = [],
+  state: any = {}
+): Array<Step> {
   const schemaDupe = omit(schema, omitFields) as any
 
   for (let field of omitFields) {
@@ -87,7 +92,7 @@ export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array
         ...schemaDupe.properties[prop],
       },
       uiSchema: {
-        ...uiSchema[prop]
+        ...uiSchema[prop],
       },
       state: state[prop] || {},
       type: 'Form',
@@ -96,7 +101,7 @@ export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array
 
       section: prop,
       render: RenderForm,
-      isComplete: validateForm
+      isComplete: validateForm,
     })
 
     steps.push(createdStep)

@@ -27,11 +27,7 @@ export default function FormUpload({
       setValidationErrorText('')
       const parsed = JSON.parse(e.target.value)
 
-      if (
-        typeof parsed !== 'object' ||
-        Array.isArray(parsed) ||
-        parsed === null
-      ) {
+      if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
         setValidationErrorText('Invalid metadata')
         return
       }
@@ -54,7 +50,7 @@ export default function FormUpload({
         label='Metadata'
         value={metadata}
         onChange={handleMetadataChange}
-        error={validationErrorText !== ""}
+        error={validationErrorText !== ''}
         helperText={validationErrorText}
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>

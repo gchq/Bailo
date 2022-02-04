@@ -53,7 +53,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
-        isComplete: FileTabComplete
+        isComplete: FileTabComplete,
       })
     )
 
@@ -62,7 +62,7 @@ function Upload() {
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
-    isSchemaError
+    isSchemaError,
   })
   if (errorWrapper) return errorWrapper
 

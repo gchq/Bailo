@@ -8,7 +8,7 @@ import Box from '@mui/material/Box'
 import Wrapper from '../src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { Schema, Step } from '../types/interfaces'
+import { Schema, Step, User } from '../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../utils/formUtils'
 
 import SchemaSelector from '../src/Form/SchemaSelector'
@@ -19,12 +19,14 @@ import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
 import { useGetCurrentUser } from 'data/user'
 import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
-function renderSubmissionTab(step: Step, steps: Array<Step>, setSteps: Function) {
+function renderSubmissionTab(step: Step, steps: Array<Step>, _setSteps: Function) {
   const data = getStepsData(steps)
-  
-  return <>
-    <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
-  </>
+
+  return (
+    <>
+      <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
+    </>
+  )
 }
 
 const uiSchema = {
@@ -43,6 +45,7 @@ function Upload() {
   const router = useRouter()
 
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
+  const [user, setUser] = useState<User | undefined>(undefined)
   const [steps, setSteps] = useState<Array<Step>>([])
   const [error, setError] = useState<string | undefined>(undefined)
 
@@ -50,14 +53,20 @@ function Upload() {
     if (currentSchema) return
 
     setCurrentSchema(defaultSchema)
-  }, [defaultSchema])
+  }, [defaultSchema, currentSchema])
 
   useEffect(() => {
-    if (!currentSchema || !currentUser) return
+    if (user) return
+
+    setUser(currentUser)
+  }, [user, currentUser])
+
+  useEffect(() => {
+    if (!currentSchema || !user) return
 
     const { schema, reference } = currentSchema
     const defaultState = {
-      contacts: { uploader: currentUser.id }
+      contacts: { uploader: user.id },
     }
 
     const steps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
@@ -78,7 +87,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
-        isComplete: FileTabComplete
+        isComplete: FileTabComplete,
       })
     )
 
@@ -95,18 +104,22 @@ function Upload() {
         section: 'submission',
 
         render: renderSubmissionTab,
-        isComplete: () => true
+        isComplete: () => true,
       })
     )
 
     setSteps(steps)
-  }, [currentSchema])
+  }, [currentSchema, user])
 
-  const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
-    isDefaultSchemaError,
-    isSchemasError,
-    isCurrentUserError
-  }, MinimalErrorWrapper)
+  const errorWrapper = MultipleErrorWrapper(
+    `Unable to load upload page`,
+    {
+      isDefaultSchemaError,
+      isSchemasError,
+      isCurrentUserError,
+    },
+    MinimalErrorWrapper
+  )
   if (errorWrapper) return errorWrapper
 
   if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
