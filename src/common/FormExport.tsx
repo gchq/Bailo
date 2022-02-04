@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import Divider from '@mui/material/Divider'
+import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import OpenInNew from '@mui/icons-material/OpenInNew'
@@ -12,6 +12,7 @@ import Download from '@mui/icons-material/Download'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import React, { createRef, useState } from 'react'
 import ModelOverview from 'src/ModelOverview'
+import { Step } from '../../types/interfaces'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')
@@ -23,7 +24,7 @@ const downloadToFile = (blob, filename) => {
   URL.revokeObjectURL(a.href)
 }
 
-const FormExport = ({ formData, schema, schemaSteps }: { formData: any; schema: any; schemaSteps: any }) => {
+const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: string; steps: Array<Step> }) => {
   const [ref] = useState<any>(createRef())
   const [wrappedMetadata, setWrappedMetadata] = useState<any>({ metadata: {} })
   const [showHtmlView, setShowHtmlView] = useState<boolean>(false)
@@ -55,13 +56,13 @@ const FormExport = ({ formData, schema, schemaSteps }: { formData: any; schema: 
 
   const onShowHtmlView = () => {
     const defaults = {}
-    schemaSteps.forEach((step) => (defaults[step.stepName] = {}))
+    steps.forEach((step) => (defaults[step.section] = {}))
 
     setWrappedMetadata({
       metadata: {
         ...defaults,
         ...formData,
-        schemaRef: schema.reference,
+        schemaRef,
       },
     })
     setShowHtmlView(true)
@@ -102,24 +103,25 @@ const FormExport = ({ formData, schema, schemaSteps }: { formData: any; schema: 
 
   return (
     <>
-      <Divider sx={{ pt: 3, pb: 3 }}>Export metadata</Divider>
-      <Stack direction='row' spacing={2}>
-        <Button startIcon={<OpenInNew />} variant='outlined' onClick={onShowHtmlView}>
-          View HTML
-        </Button>
-        <Button
-          aria-label='download JSON'
-          href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(formData, null, 2))}`}
-          download={`${formData?.highLevelDetails?.name}.json`}
-          startIcon={<Download />}
-          variant='outlined'
-        >
-          Download JSON
-        </Button>
-        <Button variant='outlined' startIcon={<ContentCopy />} onClick={onCopyToClipboard}>
-          Copy from data to clipboard
-        </Button>
-      </Stack>
+      <Grid container justifyContent="center">
+        <Stack direction='row' spacing={2}>
+          <Button startIcon={<OpenInNew />} variant='outlined' onClick={onShowHtmlView}>
+            View HTML
+          </Button>
+          <Button
+            aria-label='download JSON'
+            href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(formData, null, 2))}`}
+            download={`${formData?.highLevelDetails?.name}.json`}
+            startIcon={<Download />}
+            variant='outlined'
+          >
+            Download JSON
+          </Button>
+          <Button variant='outlined' startIcon={<ContentCopy />} onClick={onCopyToClipboard}>
+            Copy from data to clipboard
+          </Button>
+        </Stack>
+      </Grid>
       <Dialog
         open={showHtmlView}
         onClose={handleModelClose}
