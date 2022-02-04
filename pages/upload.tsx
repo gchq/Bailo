@@ -59,8 +59,6 @@ function Upload() {
   const [steps, setSteps] = useState<Array<Step>>([])
   const [error, setError] = useState<string | undefined>(undefined)
 
-  console.log('outer steps', steps)
-
   const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
     isDefaultSchemaError,
     isSchemasError,
@@ -105,9 +103,6 @@ function Upload() {
 
     const data = getStepsData(steps)
     const form = new FormData()
-
-    console.log('data', data)
-    console.log('steps', steps)
 
     data.schemaRef = currentSchema?.reference
 
