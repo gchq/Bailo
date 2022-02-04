@@ -3,26 +3,32 @@ import RenderForm from '../src/Form/RenderForm'
 
 export function createStep({
   schema,
+  uiSchema,
   state,
   type,
   section,
   render,
   index,
+  schemaRef,
 }: {
   schema: any
+  uiSchema?: any
   state: any
   type: StepType
   section: string
   render: Function
   index: number
+  schemaRef: string
 }) {
   const step: Step = {
     schema,
+    uiSchema,
     state,
     type,
     index,
 
     section,
+    schemaRef,
 
     render: (step: Step, steps: Array<Step>, setSteps: Function) => render(step, steps, setSteps),
   }
@@ -42,7 +48,7 @@ export function setStepState(steps: Array<Step>, setSteps: Function, step: Step,
   setSteps(duplicatedSteps)
 }
 
-export function getStepsFromSchema(schema: any, state: any = {}): Array<Step> {
+export function getStepsFromSchema(schema: any, uiSchema: any, state: any = {}): Array<Step> {
   const props = Object.keys(schema.properties).filter((key) =>
     ['object', 'array'].includes(schema.properties[key].type)
   )
@@ -54,9 +60,13 @@ export function getStepsFromSchema(schema: any, state: any = {}): Array<Step> {
         definitions: schema.definitions,
         ...schema.properties[prop],
       },
+      uiSchema: {
+        ...uiSchema[prop]
+      },
       state: state[prop] || {},
       type: 'Form',
       index,
+      schemaRef: schema.reference,
 
       section: prop,
       render: (step: Step, steps: Array<Step>, setSteps: Function) => RenderForm(step, steps, setSteps),

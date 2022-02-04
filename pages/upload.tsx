@@ -16,6 +16,7 @@ import FileInput from '../src/common/FileInput'
 import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
+import FormExport from '../src/common/FormExport'
 
 function renderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
   const { state } = step
@@ -39,6 +40,22 @@ function renderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
   )
 }
 
+function renderSubmissionTab(step: Step, steps: Array<Step>, setSteps: Function) {
+  const data = getStepsData(steps)
+  
+  return <>
+    <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
+  </>
+}
+
+const uiSchema = {
+  contacts: {
+    uploader: { 'ui:widget': 'userSelector' },
+    reviewer: { 'ui:widget': 'userSelector' },
+    manager: { 'ui:widget': 'userSelector' },
+  },
+}
+
 function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
@@ -56,8 +73,8 @@ function Upload() {
   useEffect(() => {
     if (!currentSchema) return
 
-    const { schema } = currentSchema
-    const steps = getStepsFromSchema(schema)
+    const { schema, reference } = currentSchema
+    const steps = getStepsFromSchema(schema, uiSchema)
 
     steps.push(
       createStep({
@@ -68,12 +85,29 @@ function Upload() {
           binary: undefined,
           code: undefined,
         },
+        schemaRef: reference,
 
         type: 'Data',
         index: steps.length,
         section: 'files',
 
         render: renderFileTab,
+      })
+    )
+
+    steps.push(
+      createStep({
+        schema: {
+          title: 'Submission',
+        },
+        state: {},
+        schemaRef: reference,
+
+        type: 'Data',
+        index: steps.length,
+        section: 'submission',
+
+        render: renderSubmissionTab,
       })
     )
 
