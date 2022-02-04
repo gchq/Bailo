@@ -8,9 +8,6 @@ import { setStepState } from '../../utils/formUtils'
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function RenderForm(step: Step, steps: Array<Step>, setSteps: Function) {
-  console.log('rendering state', step.state)
-  console.log('rendering step', step)
-
   const onFormChange = (form) => {
     setStepState(steps, setSteps, step, { ...step.state, ...form.formData })
   }

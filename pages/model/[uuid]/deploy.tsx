@@ -55,8 +55,6 @@ export default function Deploy() {
     if (deploymentUuid) {
       router.push(`/deployment/${deploymentUuid}`)
     }
-
-    console.log('onSubmit', data)
   }
 
   return (

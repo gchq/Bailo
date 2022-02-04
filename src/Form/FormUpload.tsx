@@ -21,10 +21,8 @@ export default function FormUpload({ steps, setSteps, onSubmit }: {
     try {
       const parsed = JSON.parse(e.target.value)
       setStepsData(steps, setSteps, parsed)
-      console.log('updated steps', steps)
     } catch(e) {
       // not valid JSON
-      console.log("didn't update due to invalid json")
     }
   }
 

@@ -24,8 +24,6 @@ export default function FormDesigner({ steps, setSteps, onSubmit }: {
     return <></>
   }
 
-  console.log('currentStep', currentStep)
-
   return <>
     <Stepper sx={{ mt: 4, mb: 4 }} activeStep={activeStep} nonLinear alternativeLabel>
       {steps.map((step, index) => (
