@@ -80,7 +80,7 @@ function Upload() {
         state: {},
         schemaRef: reference,
 
-        type: 'Data',
+        type: 'Message',
         index: steps.length,
         section: 'submission',
 
