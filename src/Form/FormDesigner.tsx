@@ -8,6 +8,8 @@ import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import Typography from '@mui/material/Typography'
+import Stack from '@mui/material/Stack'
 
 import { Step } from '../../types/interfaces'
 import { setStepState, setStepValidate, validateForm } from 'utils/formUtils'
@@ -63,6 +65,12 @@ export default function FormDesigner({
         {steps.map((step, index) => (
           <MaterialStep key={step.schema.title}>
             <StepButton onClick={() => setActiveStep(index)}>{step.schema.title}</StepButton>
+            {step.type !== 'Message' && <Box sx={{ textAlign: 'center' }}>
+              {step.isComplete(step) ? 
+                (<Typography sx={{ color: 'green' }} variant='caption'>Complete</Typography>) :
+                (<Typography sx={{ color: 'orange' }} variant='caption'>In progress</Typography>)
+              }
+            </Box>}
           </MaterialStep>
         ))}
       </Stepper>

@@ -15,7 +15,9 @@ import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
 import FormExport from '../src/common/FormExport'
-import RenderFileTab from '../src/Form/RenderFileTab'
+import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
+import { useGetCurrentUser } from 'data/user'
+import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
 function renderSubmissionTab(step: Step, steps: Array<Step>, setSteps: Function) {
   const data = getStepsData(steps)
@@ -36,6 +38,7 @@ const uiSchema = {
 function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const router = useRouter()
 
@@ -44,14 +47,20 @@ function Upload() {
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
+    if (currentSchema) return
+
     setCurrentSchema(defaultSchema)
   }, [defaultSchema])
 
   useEffect(() => {
-    if (!currentSchema) return
+    if (!currentSchema || !currentUser) return
 
     const { schema, reference } = currentSchema
-    const steps = getStepsFromSchema(schema, uiSchema)
+    const defaultState = {
+      contacts: { uploader: currentUser.id }
+    }
+
+    const steps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
 
     steps.push(
       createStep({
@@ -69,6 +78,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        isComplete: FileTabComplete
       })
     )
 
@@ -85,6 +95,7 @@ function Upload() {
         section: 'submission',
 
         render: renderSubmissionTab,
+        isComplete: () => true
       })
     )
 
@@ -94,10 +105,11 @@ function Upload() {
   const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
     isDefaultSchemaError,
     isSchemasError,
-  })
+    isCurrentUserError
+  }, MinimalErrorWrapper)
   if (errorWrapper) return errorWrapper
 
-  if (isDefaultSchemaLoading || isSchemasLoading) {
+  if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
     return <></>
   }
 

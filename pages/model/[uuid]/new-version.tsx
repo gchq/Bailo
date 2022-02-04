@@ -12,7 +12,7 @@ import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../.
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
-import RenderFileTab from '../../../src/Form/RenderFileTab'
+import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import { putEndpoint } from 'data/api'
 
 const uiSchema = {
@@ -53,6 +53,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        isComplete: FileTabComplete
       })
     )
 

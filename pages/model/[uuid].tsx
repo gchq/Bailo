@@ -30,7 +30,7 @@ import ModelOverview from 'src/ModelOverview'
 import createComplianceFlow from 'utils/complianceFlow'
 import { FlowElement } from 'react-flow-renderer'
 import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
-import { getCurrentUser } from 'data/user'
+import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
@@ -59,7 +59,7 @@ const Model = () => {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
-  const { currentUser, isCurrentUserLoading } = getCurrentUser()
+  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)

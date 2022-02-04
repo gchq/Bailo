@@ -16,6 +16,7 @@ export function createStep({
   render,
   index,
   schemaRef,
+  isComplete,
 }: {
   schema: any
   uiSchema?: any
@@ -25,6 +26,7 @@ export function createStep({
   render: Function
   index: number
   schemaRef: string
+  isComplete: Function
 }) {
   const step: Step = {
     schema,
@@ -37,8 +39,9 @@ export function createStep({
     schemaRef,
 
     shouldValidate: false,
-
-    render: (step: Step, steps: Array<Step>, setSteps: Function) => render(step, steps, setSteps),
+    
+    isComplete,
+    render,
   }
 
   return step
@@ -69,7 +72,7 @@ export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array
 
   for (let field of omitFields) {
     const fields = field.split('.')
-    remove(get(schema, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])
+    remove(get(schemaDupe, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])
   }
 
   const props = Object.keys(schemaDupe.properties).filter((key) =>
@@ -92,7 +95,8 @@ export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array
       schemaRef: schema.reference,
 
       section: prop,
-      render: (step: Step, steps: Array<Step>, setSteps: Function) => RenderForm(step, steps, setSteps),
+      render: RenderForm,
+      isComplete: validateForm
     })
 
     steps.push(createdStep)
@@ -130,6 +134,8 @@ export function setStepsData(steps: Array<Step>, setSteps: Function, data: any) 
 export function validateForm(step: Step) {
   const validator = new Validator()
   const sectionErrors = validator.validate(step.state, step.schema)
+
+  console.log(sectionErrors)
 
   return sectionErrors.errors.length === 0
 }
