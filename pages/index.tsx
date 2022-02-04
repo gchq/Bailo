@@ -60,7 +60,7 @@ export default function ExploreModels() {
         }}
       >
         <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
-        <IconButton type='submit' sx={{ p: '10px' }} aria-label='filter'>
+        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
           <SearchIcon />
         </IconButton>
       </Paper>
@@ -90,7 +90,7 @@ export default function ExploreModels() {
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string, tagIndex: number) => (
-                    <Chip key={`chip-${tagIndex}`} label={tag} size='small' variant='outlined' />
+                    <Chip color='primary' key={`chip-${tagIndex}`} label={tag} size='small' variant='outlined' />
                   ))}
                 </Stack>
 
