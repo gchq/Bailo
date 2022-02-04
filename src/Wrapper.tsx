@@ -167,13 +167,21 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             >
               <MenuIcon />
             </IconButton>
-            <Box sx={{ flexGrow: 1, display: { xs: 'flex', cursor: 'pointer' } }}>
+            <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' passHref>
                 <a>
                   <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
-                </a>
+                </a>                
               </Link>
             </Box>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex' } }}
+            >
+              Bailo
+            </Typography>
             {headerTitle}
             <Link href='/review' passHref>
               <IconButton color='inherit'>
@@ -200,7 +208,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
           <Divider />
           <StyledList>
             <Link href='/' passHref>
-              <ListItem button selected={page === 'marketplace'}>
+              <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Marketplace' arrow placement='right'>
