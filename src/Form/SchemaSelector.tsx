@@ -5,9 +5,13 @@ import MenuItem from '@mui/material/MenuItem'
 
 import { Schema } from '../../types/interfaces'
 
-export default function SchemaSelector({ currentSchema, setCurrentSchema, schemas }: {
-  currentSchema: Schema,
-  setCurrentSchema: Function,
+export default function SchemaSelector({
+  currentSchema,
+  setCurrentSchema,
+  schemas,
+}: {
+  currentSchema: Schema
+  setCurrentSchema: Function
   schemas: Array<Schema>
 }) {
   const onSchemaChange = (event: any) => {
@@ -15,22 +19,24 @@ export default function SchemaSelector({ currentSchema, setCurrentSchema, schema
     setCurrentSchema(schema)
   }
 
-  return <>
-    <FormControl sx={{ minWidth: 300 }}>
-      <InputLabel id='schema-label'>Schema</InputLabel>
-      <Select
-        labelId='schema-selector-label'
-        id='schema-selector'
-        value={currentSchema.name}
-        label='Schema'
-        onChange={onSchemaChange}
-      >
-        {schemas.map((schema: Schema, index: number) => (
-          <MenuItem key={`schema-${index}`} value={schema.name}>
-            {schema.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  </>
+  return (
+    <>
+      <FormControl sx={{ minWidth: 300 }}>
+        <InputLabel id='schema-label'>Schema</InputLabel>
+        <Select
+          labelId='schema-selector-label'
+          id='schema-selector'
+          value={currentSchema.name}
+          label='Schema'
+          onChange={onSchemaChange}
+        >
+          {schemas.map((schema: Schema, index: number) => (
+            <MenuItem key={`schema-${index}`} value={schema.name}>
+              {schema.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </>
+  )
 }

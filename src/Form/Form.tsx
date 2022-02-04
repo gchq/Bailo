@@ -9,9 +9,13 @@ import { Step } from '../../types/interfaces'
 import FormDesigner from './FormDesigner'
 import FormUpload from './FormUpload'
 
-export default function Form({ steps, setSteps, onSubmit }: {
-  steps: Array<Step>,
-  onSubmit: Function,
+export default function Form({
+  steps,
+  setSteps,
+  onSubmit,
+}: {
+  steps: Array<Step>
+  onSubmit: Function
   setSteps: Function
 }) {
   const [tab, setTab] = useState('designer')
@@ -28,10 +32,8 @@ export default function Form({ steps, setSteps, onSubmit }: {
         </Tabs>
       </Box>
 
-      {tab === 'designer' && 
-        <FormDesigner steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
-      {tab === 'upload' &&
-        <FormUpload steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
+      {tab === 'designer' && <FormDesigner steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
+      {tab === 'upload' && <FormUpload steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
     </>
   )
 }

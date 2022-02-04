@@ -32,18 +32,8 @@ function renderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
   return (
     <Box sx={{ pb: 4, pt: 4 }}>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <FileInput
-          label={'Select Code'}
-          file={code}
-          onChange={handleCodeChange}
-          accepts='.zip'
-        />
-        <FileInput
-          label={'Select Binary'}
-          file={binary}
-          onChange={handleBinaryChange}
-          accepts='.zip'
-        />
+        <FileInput label={'Select Code'} file={code} onChange={handleCodeChange} accepts='.zip' />
+        <FileInput label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts='.zip' />
       </Stack>
     </Box>
   )
@@ -54,16 +44,10 @@ function Upload() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
 
   const router = useRouter()
-  
+
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
   const [steps, setSteps] = useState<Array<Step>>([])
   const [error, setError] = useState<string | undefined>(undefined)
-
-  const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
-    isDefaultSchemaError,
-    isSchemasError,
-  })
-  if (errorWrapper) return errorWrapper
 
   useEffect(() => {
     setCurrentSchema(defaultSchema)
@@ -71,28 +55,36 @@ function Upload() {
 
   useEffect(() => {
     if (!currentSchema) return
-    
+
     const { schema } = currentSchema
     const steps = getStepsFromSchema(schema)
 
-    steps.push(createStep({
-      schema: {
-        title: 'Files'
-      },
-      state: {
-        binary: undefined,
-        code: undefined
-      },
+    steps.push(
+      createStep({
+        schema: {
+          title: 'Files',
+        },
+        state: {
+          binary: undefined,
+          code: undefined,
+        },
 
-      type: 'Data',
-      index: steps.length,
-      section: 'files',
+        type: 'Data',
+        index: steps.length,
+        section: 'files',
 
-      render: renderFileTab
-    }))
+        render: renderFileTab,
+      })
+    )
 
     setSteps(steps)
   }, [currentSchema])
+
+  const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
+    isDefaultSchemaError,
+    isSchemasError,
+  })
+  if (errorWrapper) return errorWrapper
 
   if (isDefaultSchemaLoading || isSchemasLoading) {
     return <></>
@@ -122,11 +114,11 @@ function Upload() {
       let error = upload.statusText
       try {
         error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch(e) {}
+      } catch (e) {}
 
       return setError(error)
     }
-    
+
     const { uuid } = await upload.json()
     router.push(`/model/${uuid}`)
   }
@@ -135,15 +127,15 @@ function Upload() {
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <Grid container justifyContent='space-between' alignItems='center'>
         <Box />
-        <SchemaSelector currentSchema={currentSchema || defaultSchema!} setCurrentSchema={setCurrentSchema} schemas={schemas} />
+        <SchemaSelector
+          currentSchema={currentSchema ?? defaultSchema!}
+          setCurrentSchema={setCurrentSchema}
+          schemas={schemas!}
+        />
       </Grid>
 
       <SubmissionError error={error} />
-      <Form
-        steps={steps}
-        setSteps={setSteps}
-        onSubmit={onSubmit}
-      />
+      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
     </Paper>
   )
 }
