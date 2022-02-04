@@ -14,6 +14,7 @@ import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import { putEndpoint } from 'data/api'
+import useCacheVariable from 'utils/useCacheVariable'
 
 const uiSchema = {
   contacts: {
@@ -30,12 +31,15 @@ function Upload() {
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
 
+  const cModel = useCacheVariable(model)
+  const cSchema = useCacheVariable(schema)
+
   const [steps, setSteps] = useState<Array<Step>>([])
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
-    if (!schema || !model) return
-    const steps = getStepsFromSchema(schema.schema, uiSchema, [], model.currentMetadata)
+    if (!cSchema || !cModel) return
+    const steps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
 
     steps.push(
       createStep({
@@ -46,7 +50,7 @@ function Upload() {
           binary: undefined,
           code: undefined,
         },
-        schemaRef: model.schemaRef,
+        schemaRef: cModel.schemaRef,
 
         type: 'Data',
         index: steps.length,
@@ -58,7 +62,7 @@ function Upload() {
     )
 
     setSteps(steps)
-  }, [schema])
+  }, [cModel, cSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,

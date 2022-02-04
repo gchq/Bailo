@@ -42,7 +42,7 @@ function Upload() {
 
     const schemaSteps = getStepsFromSchema(schema.schema, uiSchema, [], version.metadata)
     setSteps(schemaSteps)
-  }, [schema, version])
+  }, [schema, version, steps])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
