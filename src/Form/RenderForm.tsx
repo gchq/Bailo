@@ -1,4 +1,5 @@
 import { withTheme } from '@rjsf/core'
+import get from 'lodash/get'
 
 import { Step } from '../../types/interfaces'
 import UserSelector from '../MuiForms/UserSelector'
@@ -21,6 +22,7 @@ export default function RenderForm(step: Step, steps: Array<Step>, setSteps: Fun
         userSelector: UserSelector,
       }}
       uiSchema={step.uiSchema}
+      liveValidate={step.shouldValidate}
     >
       <></>
     </SchemaForm>

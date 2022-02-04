@@ -1,3 +1,9 @@
+import omit from 'lodash/omit'
+import get from 'lodash/get'
+import dropRight from 'lodash/dropRight'
+import remove from 'lodash/remove'
+import { Validator } from 'jsonschema'
+
 import { Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
 
@@ -30,6 +36,8 @@ export function createStep({
     section,
     schemaRef,
 
+    shouldValidate: false,
+
     render: (step: Step, steps: Array<Step>, setSteps: Function) => render(step, steps, setSteps),
   }
 
@@ -48,17 +56,32 @@ export function setStepState(steps: Array<Step>, setSteps: Function, step: Step,
   setSteps(duplicatedSteps)
 }
 
-export function getStepsFromSchema(schema: any, uiSchema: any, state: any = {}): Array<Step> {
-  const props = Object.keys(schema.properties).filter((key) =>
-    ['object', 'array'].includes(schema.properties[key].type)
+export function setStepValidate(steps: Array<Step>, setSteps: Function, step: Step, validate: boolean) {
+  const index = steps.findIndex((iStep) => step.section === iStep.section)
+
+  const duplicatedSteps = [...steps]
+  duplicatedSteps[index].shouldValidate = validate
+  setSteps(duplicatedSteps)
+}
+
+export function getStepsFromSchema(schema: any, uiSchema: any, omitFields: Array<string> = [], state: any = {}): Array<Step> {
+  const schemaDupe = omit(schema, omitFields) as any
+
+  for (let field of omitFields) {
+    const fields = field.split('.')
+    remove(get(schema, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])
+  }
+
+  const props = Object.keys(schemaDupe.properties).filter((key) =>
+    ['object', 'array'].includes(schemaDupe.properties[key].type)
   )
 
   const steps: Array<Step> = []
   props.forEach((prop: any, index: number) => {
     const createdStep = createStep({
       schema: {
-        definitions: schema.definitions,
-        ...schema.properties[prop],
+        definitions: schemaDupe.definitions,
+        ...schemaDupe.properties[prop],
       },
       uiSchema: {
         ...uiSchema[prop]
@@ -78,11 +101,11 @@ export function getStepsFromSchema(schema: any, uiSchema: any, state: any = {}):
   return steps
 }
 
-export function getStepsData(steps: Array<Step>) {
+export function getStepsData(steps: Array<Step>, includeAll: boolean = false) {
   const data: any = {}
 
   steps.forEach((step) => {
-    if (step.type !== 'Form') return
+    if (!includeAll && step.type !== 'Form') return
 
     data[step.section] = step.state
   })
@@ -102,4 +125,11 @@ export function setStepsData(steps: Array<Step>, setSteps: Function, data: any) 
   })
 
   setSteps(newSteps)
+}
+
+export function validateForm(step: Step) {
+  const validator = new Validator()
+  const sectionErrors = validator.validate(step.state, step.schema)
+
+  return sectionErrors.errors.length === 0
 }

@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper'
 import { ErrorListProps } from '@rjsf/core'
 
 const ErrorList = ({ errors }: ErrorListProps) => (
-  <Paper elevation={2}>
+  <Paper elevation={2} sx={{ display: 'none' }}>
     <Box mb={2} p={2}>
       <Typography variant='h6'>Errors</Typography>
       <List dense={true}>

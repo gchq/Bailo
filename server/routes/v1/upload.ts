@@ -142,6 +142,7 @@ export const postUpload = [
       const modelUuid = req.query.modelUuid
       model = await ModelModel.findOne({ uuid: modelUuid })
       model.versions.push(version._id)
+      model.currentMetadata = metadata
     } else {
       // Save a new model, and add the uploaded version to its array
       model = new ModelModel({
