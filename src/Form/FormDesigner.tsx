@@ -6,8 +6,11 @@ import StepButton from '@mui/material/StepButton'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 import { Step } from '../../types/interfaces'
+import { setStepState, setStepValidate, validateForm } from 'utils/formUtils'
 
 export default function FormDesigner({
   steps,
@@ -19,6 +22,8 @@ export default function FormDesigner({
   onSubmit: Function
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  const [openValidateError, setOpenValidateError] = useState(false)
+
   const currentStep = steps[activeStep]
 
   const isFirstStep = activeStep === 0
@@ -26,6 +31,30 @@ export default function FormDesigner({
 
   if (!currentStep) {
     return <></>
+  }
+
+  const onClickNextSection = () => {
+    const isValid = validateForm(currentStep)
+
+    if (!isValid) {
+      setStepValidate(steps, setSteps, currentStep, true)
+      setOpenValidateError(true)
+      return
+    }
+
+    setActiveStep(activeStep + 1)
+  }
+
+  const onClickSubmit = () => {
+    const isValid = validateForm(currentStep)
+
+    if (!isValid) {
+      setStepValidate(steps, setSteps, currentStep, true)
+      setOpenValidateError(true)
+      return
+    }
+
+    onSubmit()
   }
 
   return (
@@ -51,16 +80,22 @@ export default function FormDesigner({
         </Grid>
         <Grid item>
           {isLastStep ? (
-            <Button variant='contained' onClick={() => onSubmit()}>
+            <Button variant='contained' onClick={onClickSubmit}>
               Submit
             </Button>
           ) : (
-            <Button variant='contained' onClick={() => setActiveStep(activeStep + 1)}>
+            <Button variant='contained' onClick={onClickNextSection}>
               Next Section
             </Button>
           )}
         </Grid>
       </Grid>
+
+      <Snackbar open={openValidateError} autoHideDuration={6000} onClose={() => setOpenValidateError(false)}>
+        <Alert onClose={() => setOpenValidateError(false)} severity='error' sx={{ width: '100%' }}>
+          This tab is not complete.
+        </Alert>
+      </Snackbar>
     </>
   )
 }

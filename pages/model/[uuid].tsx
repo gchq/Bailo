@@ -118,11 +118,11 @@ const Model = () => {
   }
 
   const editModel = () => {
-    router.push(`/upload?mode=edit&modelUuid=${uuid}&version=${version?.version}`)
+    router.push(`/model/${uuid}/edit/${version?.version}`)
   }
 
   const uploadNewVersion = () => {
-    router.push(`/upload?mode=newVersion&modelUuid=${uuid}`)
+    router.push(`/model/${uuid}/new-version`)
   }
 
   const actionMenuClicked = (event) => {

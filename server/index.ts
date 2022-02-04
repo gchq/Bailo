@@ -14,7 +14,7 @@ import { postUpload } from './routes/v1/upload'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchemas } from './routes/v1/schema'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import { getDeployment, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
@@ -74,6 +74,7 @@ app.prepare().then(() => {
 
   server.get('/api/v1/schemas', ...getSchemas)
   server.get('/api/v1/schema/default', ...getDefaultSchema)
+  server.get('/api/v1/schema/:ref', ...getSchema)
 
   server.get('/api/v1/config', ...getUiConfig)
   server.get('/api/v1/users', ...getUsers)

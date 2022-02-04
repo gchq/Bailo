@@ -4,41 +4,18 @@ import { useRouter } from 'next/router'
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
 
 import Wrapper from '../src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Schema, Step } from '../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../utils/formUtils'
-import FileInput from '../src/common/FileInput'
 
 import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
 import FormExport from '../src/common/FormExport'
-
-function renderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
-  const { state } = step
-  const { binary, code } = state
-
-  const handleCodeChange = (e: any) => {
-    setStepState(steps, setSteps, step, { ...state, code: e.target.files[0] })
-  }
-
-  const handleBinaryChange = (e: any) => {
-    setStepState(steps, setSteps, step, { ...state, binary: e.target.files[0] })
-  }
-
-  return (
-    <Box sx={{ pb: 4, pt: 4 }}>
-      <Stack direction='row' spacing={2} alignItems='center'>
-        <FileInput label={'Select Code'} file={code} onChange={handleCodeChange} accepts='.zip' />
-        <FileInput label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts='.zip' />
-      </Stack>
-    </Box>
-  )
-}
+import RenderFileTab from '../src/Form/RenderFileTab'
 
 function renderSubmissionTab(step: Step, steps: Array<Step>, setSteps: Function) {
   const data = getStepsData(steps)
@@ -91,7 +68,7 @@ function Upload() {
         index: steps.length,
         section: 'files',
 
-        render: renderFileTab,
+        render: RenderFileTab,
       })
     )
 
@@ -127,7 +104,7 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps)
+    const data = getStepsData(steps, true)
     const form = new FormData()
 
     data.schemaRef = currentSchema?.reference
