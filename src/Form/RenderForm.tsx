@@ -11,15 +11,17 @@ export default function RenderForm(step: Step, steps: Array<Step>, setSteps: Fun
   const onFormChange = (form) => {
     setStepState(steps, setSteps, step, { ...step.state, ...form.formData })
   }
-  
-  return <SchemaForm
-    schema={step.schema}
-    formData={step.state}
-    onChange={onFormChange}
-    widgets={{
-      userSelector: UserSelector
-    }}
-  >
-    <></>
-  </SchemaForm>
+
+  return (
+    <SchemaForm
+      schema={step.schema}
+      formData={step.state}
+      onChange={onFormChange}
+      widgets={{
+        userSelector: UserSelector,
+      }}
+    >
+      <></>
+    </SchemaForm>
+  )
 }

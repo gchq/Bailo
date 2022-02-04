@@ -1,8 +1,20 @@
 import { Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
 
-export function createStep({ schema, state, type, section, render, index }: { 
-  schema: any, state: any, type: StepType, section: string, render: Function, index: number
+export function createStep({
+  schema,
+  state,
+  type,
+  section,
+  render,
+  index,
+}: {
+  schema: any
+  state: any
+  type: StepType
+  section: string
+  render: Function
+  index: number
 }) {
   const step: Step = {
     schema,
@@ -11,7 +23,7 @@ export function createStep({ schema, state, type, section, render, index }: {
     index,
 
     section,
-    
+
     render: (step: Step, steps: Array<Step>, setSteps: Function) => render(step, steps, setSteps),
   }
 
@@ -19,12 +31,12 @@ export function createStep({ schema, state, type, section, render, index }: {
 }
 
 export function setStepState(steps: Array<Step>, setSteps: Function, step: Step, state: any) {
-  const index = steps.findIndex(iStep => step.section === iStep.section)
+  const index = steps.findIndex((iStep) => step.section === iStep.section)
 
   const duplicatedSteps = [...steps]
   duplicatedSteps[index].state = {
     ...(steps[index].state || {}),
-    ...state
+    ...state,
   }
 
   setSteps(duplicatedSteps)
@@ -40,14 +52,14 @@ export function getStepsFromSchema(schema: any, state: any = {}): Array<Step> {
     const createdStep = createStep({
       schema: {
         definitions: schema.definitions,
-        ...schema.properties[prop]
+        ...schema.properties[prop],
       },
       state: state[prop] || {},
       type: 'Form',
       index,
 
       section: prop,
-      render: (step: Step, steps: Array<Step>, setSteps: Function) => RenderForm(step, steps, setSteps)
+      render: (step: Step, steps: Array<Step>, setSteps: Function) => RenderForm(step, steps, setSteps),
     })
 
     steps.push(createdStep)
@@ -59,7 +71,7 @@ export function getStepsFromSchema(schema: any, state: any = {}): Array<Step> {
 export function getStepsData(steps: Array<Step>) {
   const data: any = {}
 
-  steps.forEach(step => {
+  steps.forEach((step) => {
     if (step.type !== 'Form') return
 
     data[step.section] = step.state
@@ -69,15 +81,15 @@ export function getStepsData(steps: Array<Step>) {
 }
 
 export function setStepsData(steps: Array<Step>, setSteps: Function, data: any) {
-  const newSteps = steps.map(step => {
+  const newSteps = steps.map((step) => {
     if (!data[step.section]) return { ...step }
     if (step.type !== 'Form') return { ...step }
 
     return {
       ...step,
-      state: data[step.section]
+      state: data[step.section],
     }
   })
-  
+
   setSteps(newSteps)
 }
