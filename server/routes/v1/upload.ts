@@ -11,11 +11,10 @@ import MinioStore from '../../utils/MinioStore'
 import { uploadQueue } from '../../utils/queues'
 import VersionModel from '../../models/Version'
 import { ensureUserRole } from '../../utils/user'
-import logger from '../../utils/logger'
 import { Request, Response } from 'express'
 
 import { createVersionRequests } from '../../services/request'
-import { Version } from 'types/interfaces'
+import { BadReq, Conflict } from 'server/utils/result'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -40,17 +39,17 @@ export const postUpload = [
     const mode = req.query.mode
 
     if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
-      req.log.warn({ filename: files.binary[0].originalname }, 'Binary is not a zip file')
-      return res.status(400).json({
-        message: `Unable to process binary, file not a zip.`,
-      })
+      throw BadReq(
+        { filename: files.binary[0].originalname },
+        `Unable to process binary, file not a zip.`
+      )
     }
 
     if (!files.code[0].originalname.toLowerCase().endsWith('.zip')) {
-      req.log.warn({ filename: files.code[0].originalname }, 'Code is not a zip file')
-      return res.status(400).json({
-        message: `Unable to process code, file not a zip.`,
-      })
+      throw BadReq(
+        { filename: files.code[0].originalname },
+        `Unable to process code, file not a zip.`
+      )
     }
 
     let metadata
@@ -58,10 +57,10 @@ export const postUpload = [
     try {
       metadata = JSON.parse(req.body.metadata)
     } catch (e) {
-      req.log.warn({ metadata: req.body.metadata }, 'Metadata is not valid JSON')
-      return res.status(400).json({
-        message: `Unable to parse schema as JSON`,
-      })
+      throw BadReq(
+        { metadata: req.body.metadata },
+        `Unable to parse schema as JSON`
+      )
     }
 
     const schema = await SchemaModel.findOne({
@@ -69,10 +68,10 @@ export const postUpload = [
     })
 
     if (!schema) {
-      req.log.warn({ schemaRef: metadata.schemaRef }, 'Schema not found')
-      return res.status(400).json({
-        message: `Unable to find schema with name: '${metadata.schemaRef}'`,
-      })
+      throw BadReq(
+        { schemaRef: metadata.schemaRef },
+        `Unable to find schema with name: '${metadata.schemaRef}'`
+      )
     }
 
     metadata.timeStamp = new Date().toISOString()
@@ -96,9 +95,10 @@ export const postUpload = [
       await version.save()
     } catch (err: any) {
       if (err.toString().includes('duplicate key error')) {
-        return res.status(409).json({
-          message: `Duplicate version name found for model '${req.query.modelUuid}'`,
-        })
+        throw Conflict(
+          {},
+          `Duplicate version name found for model '${req.query.modelUuid}'`
+        )
       }
     }
     req.log.info({ versionId: version._id }, 'Created model version')
@@ -116,10 +116,10 @@ export const postUpload = [
       })
 
       if (!parentModel) {
-        req.log.warn({ parent: req.body.parent }, 'Could not find parent')
-        return res.status(400).json({
-          message: `Unable to find parent with uuid: '${req.body.parent}'`,
-        })
+        throw BadReq(
+          { parent: req.body.parent },
+          `Unable to find parent with uuid: '${req.body.parent}'`
+        )
       }
 
       parentId = parentModel._id

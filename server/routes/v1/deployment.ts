@@ -8,7 +8,7 @@ import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
-import { BadReq, UnAuthorised } from '../../utils/result'
+import { BadReq, NotFound, Forbidden } from '../../utils/result'
 import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
@@ -21,10 +21,7 @@ export const getDeployment = [
     const deployment = await DeploymentModel.findOne({ uuid })
 
     if (!deployment) {
-      req.log.warn({ uuid }, 'Unable to find deployment')
-      return res.status(404).json({
-        message: `Unable to find deployment '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
     }
 
     return res.json(deployment)
@@ -43,10 +40,7 @@ export const postDeployment = [
     })
 
     if (!schema) {
-      req.log.warn({ schemaRef: body.schemaRef }, 'Unable to find schema')
-      return res.status(400).json({
-        message: `Unable to find schema with name: '${body.schemaRef}'`,
-      })
+      throw NotFound({ schemaRef: body.schemaRef }, `Unable to find schema with name: '${body.schemaRef}'`)
     }
 
     body.user = req.user?.id
@@ -55,10 +49,7 @@ export const postDeployment = [
     // first, we verify the schema
     const schemaIsInvalid = validateSchema(body, schema.schema)
     if (schemaIsInvalid) {
-      req.log.warn({ errors: schemaIsInvalid }, 'Rejected due to invalid schema')
-      return res.status(400).json({
-        errors: schemaIsInvalid,
-      })
+      throw NotFound({ errors: schemaIsInvalid }, 'Rejected due to invalid schema')
     }
 
     const model = await ModelModel.findOne({
@@ -66,10 +57,10 @@ export const postDeployment = [
     })
 
     if (!model) {
-      req.log.warn({ modelId: body.highLevelDetails.modelID }, 'Unable to find model')
-      return res.status(400).json({
-        message: `Unable to find model with name: '${body.highLevelDetails.modelID}'`,
-      })
+      throw NotFound(
+        { modelId: body.highLevelDetails.modelID },
+        `Unable to find model with name: '${body.highLevelDetails.modelID}'`
+      )
     }
 
     const name = body.highLevelDetails.name
@@ -99,10 +90,10 @@ export const postDeployment = [
     })
 
     if (!version) {
-      req.log.warn({ version: body.highLevelDetails.initialVersionRequested }, 'Unable to find version')
-      return res.status(400).json({
-        message: `Unable to find version: '${body.highLevelDetails.initialVersionRequested}'`,
-      })
+      throw NotFound(
+        { version: body.highLevelDetails.initialVersionRequested },
+        `Unable to find version: '${body.highLevelDetails.initialVersionRequested}'`
+      )
     }
 
     const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
@@ -125,7 +116,7 @@ export const resetDeploymentApprovals = [
       throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }
     if (user?.id !== deployment.metadata.contacts.requester) {
-      throw UnAuthorised({}, 'You cannot reset the approvals for a deployment you do not own.')
+      throw Forbidden({}, 'You cannot reset the approvals for a deployment you do not own.')
     }
     const version = await VersionModel.findOne({
       model: deployment.model,
