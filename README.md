@@ -184,7 +184,7 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 ## License
 
-Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `LICENSE.txt` for more information.
+Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `docs/LICENSE.txt` for more information.
 
 <br />
 
@@ -208,5 +208,5 @@ Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright
 [issues-shield]: https://img.shields.io/github/issues/gchq/bailo.svg?style=for-the-badge
 [issues-url]: https://github.com/gchq/bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
-[license-url]: https://github.com/gchq/bailo/blob/master/LICENSE.txt
+[license-url]: https://github.com/gchq/bailo/blob/main/docs/LICENSE.txt
 [product-screenshot]: docs/images/ProductScreenshot.png

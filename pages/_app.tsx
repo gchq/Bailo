@@ -24,7 +24,7 @@ export default function MyApp(props: MyAppProps) {
     <CacheProvider value={emotionCache}>
       <Head>
         <title>Bailo</title>
-        <meta name="description" content="Making it easy to compliantly manage the machine learning lifecycle." />
+        <meta name='description' content='Making it easy to compliantly manage the machine learning lifecycle.' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
         <link rel='shortcut icon' href='/favicon.png' />
       </Head>
