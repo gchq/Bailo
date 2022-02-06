@@ -52,7 +52,6 @@ jobs:
           ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
           ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
-
       # Start app and wait for it to start
       - run: npm start &
       - name: Wait for app to start
