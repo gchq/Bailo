@@ -28,7 +28,7 @@ export default function Form({
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs indicatorColor='secondary' value={tab} onChange={onTabChange}>
           <Tab label='Designer' value='designer' />
-          <Tab label='Upload Existing' value='upload' />
+          <Tab label='Upload Existing' value='upload' data-test='uploadJsonTab' />
         </Tabs>
       </Box>
 
