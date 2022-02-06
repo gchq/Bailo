@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     strategy:
       matrix:
@@ -46,5 +47,6 @@ jobs:
       # Start app
       - name: Run tests
         run: |
-          npm start &
+          screen -d -m npm start
           npm test
+          kill -9 `top -n 1 | pgrep screen`
