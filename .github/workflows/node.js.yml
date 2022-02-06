@@ -56,9 +56,9 @@ jobs:
           ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
       # Start app and wait for it to start
-      - run: npm start &
+      - run: cd ~ && npm start &
       - name: Wait for app to start
         run: docker run appropriate/curl -s --connect-timeout 5 --max-time 5 --retry 10 --retry-delay 0 --retry-max-time 50 --retry-connrefused http://localhost:8080/
 
       # Run tests
-      - run: HEADLESS=true npm test -- -t "renders a heading"
+      - run: HEADLESS=true cd ~ && npm test -- -t "renders a heading"
