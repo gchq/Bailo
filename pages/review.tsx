@@ -148,7 +148,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
               )}
             </Grid>
             <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>                
+              <Box>
                 <Button
                   color='secondary'
                   sx={{ m: 1 }}
@@ -176,7 +176,9 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
           <DialogContentText id='alert-dialog-description'>{approvalModalText}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button color='secondary' variant='outlined'onClick={onCancel}>Cancel</Button>
+          <Button color='secondary' variant='outlined' onClick={onCancel}>
+            Cancel
+          </Button>
           <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
             Confirm
           </Button>
