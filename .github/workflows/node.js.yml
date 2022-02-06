@@ -46,6 +46,7 @@ jobs:
 
       # Start app
       - name: Run tests
+        # Run using screen, otherwise we can't kill app.
         run: |
           screen -d -m npm start
           npm test
