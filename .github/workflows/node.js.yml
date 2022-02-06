@@ -45,9 +45,7 @@ jobs:
         run: docker-compose up -d
 
       # Start app
-      - name: Run tests
-        # Run using screen, otherwise we can't kill app.
-        run: |
-          screen -d -m npm start
-          npm test
-          kill -9 `top -n 1 | pgrep screen`
+      - run: npm start &
+
+      # Run tests
+      - run: npm test
