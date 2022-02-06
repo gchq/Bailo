@@ -120,7 +120,7 @@ export const resetDeploymentApprovals = [
   async (req: Request, res: Response) => {
     const user = req.user
     const { uuid } = req.params
-    const deployment: any = await DeploymentModel.findOne({ uuid })
+    const deployment = await DeploymentModel.findOne({ uuid })
     if (!deployment) {
       throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }
