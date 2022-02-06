@@ -47,7 +47,10 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
+          pwd
+          ls
           cd ~
+          ls
           mkdir certs
           chmod -R 755 certs/
           npm run certs
