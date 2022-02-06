@@ -78,9 +78,17 @@ export async function click(driver: WebDriver, selector: By) {
 
 export async function sendKeys(driver: WebDriver, selector: By, keys: string) {
   const element = await waitForElement(driver, selector)
+
+  if (['text', 'textarea'].includes(await element.getAttribute('type'))) {
+    await element.clear()
+  }
   await element.sendKeys(keys)
 
   return element
+}
+
+export function pause(time) {
+  return new Promise(resolve => setTimeout(resolve, time))
 }
 
 export async function selectOption(driver, parentSelector, childSelector, displayValue) {

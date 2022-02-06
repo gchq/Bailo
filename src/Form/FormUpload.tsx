@@ -54,7 +54,7 @@ export default function FormUpload({
         helperText={validationErrorText}
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-        <Button variant='contained' onClick={onSubmit} sx={{ mt: 3 }}>
+        <Button variant='contained' onClick={onSubmit} sx={{ mt: 3 }} data-test='submitButton'>
           Submit
         </Button>
       </Box>

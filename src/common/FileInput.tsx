@@ -19,7 +19,7 @@ export default function FileInput({
   accepts?: string
   disabled?: boolean
 }) {
-  const id = `${label.replace(/ /g, '').toLowerCase()}-file`
+  const id = `${label.replace(/ /g, '-').toLowerCase()}-file`
 
   return (
     <>
