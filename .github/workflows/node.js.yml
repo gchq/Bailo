@@ -44,10 +44,19 @@ jobs:
       - name: Build the stack
         run: docker-compose up -d
 
+      # Setup app
+      - name: Setup app
+        run: |
+          npm run certs
+          npm i -g ts-node
+          ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
+          ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
+
+
       # Start app and wait for it to start
       - run: npm start &
       - name: Wait for app to start
-        run: docker run appropriate/curl -s --retry 10 --retry-connrefused http://localhost:8080/
+        run: docker run appropriate/curl -s --connect-timeout 5 --max-time 5 --retry 10 --retry-delay 0 --retry-max-time 50 --retry-connrefused http://localhost:8080/
 
       # Run tests
-      - run: npm test
+      - run: HEADLESS=true npm test -- -t "renders a heading"
