@@ -11,7 +11,7 @@ export default function UserSelector(props: any) {
   const { onChange, value: currentValue, required } = props
 
   const _onChange = (_event: any, newValue: any) => {
-    onChange(newValue.id)
+    onChange(newValue?.id)
   }
 
   return (

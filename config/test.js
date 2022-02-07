@@ -4,7 +4,7 @@ module.exports = {
   },
 
   schemas: {
-    model: 'Minimal Schema v8',
+    model: 'Minimal Schema v10',
     deployment: 'Minimal Deployment Schema v6',
   },
 }
