@@ -28,7 +28,7 @@ async function sendUploadEmail(jobId: string, state: string) {
     return
   }
 
-  const message = state === 'retrying' ? 'failed but retrying' : state
+  const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   await sendEmail({
@@ -70,7 +70,7 @@ async function sendDeploymentEmail(jobId: string, state: string) {
     return
   }
 
-  const message = state === 'retrying' ? 'failed but retrying' : state
+  const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   await sendEmail({
