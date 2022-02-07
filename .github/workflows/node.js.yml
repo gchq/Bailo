@@ -18,6 +18,8 @@ jobs:
     steps:
       # Initial setup
       - run: docker-compose --version && docker --version
+      - run: sudo apt --only-upgrade install docker-compose docker
+      - run: docker-compose --version && docker --version
 
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
