@@ -47,8 +47,6 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
-          mkdir -p certs && chmod -R 755 certs
-          npm run certs
           npm i -g ts-node
           ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
           ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
