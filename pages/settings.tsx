@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import SettingsProfileTab from '../src/settings/SettingsProfileTab'
-import { getCurrentUser } from '../data/user'
+import { useGetCurrentUser } from '../data/user'
 
 function TabPanel({ children, value, index, ...rest }) {
   return (
@@ -30,7 +30,7 @@ function a11yProps(index) {
 export default function Settings() {
   const [tab, setTab] = useState(0)
 
-  const { currentUser, isCurrentUserLoading } = getCurrentUser()
+  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
   const onTabChange = (_event: any, newValue: any) => {
     setTab(newValue)

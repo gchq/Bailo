@@ -14,7 +14,7 @@ import { postUpload } from './routes/v1/upload'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchemas } from './routes/v1/schema'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import { getDeployment, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
@@ -53,6 +53,9 @@ app.prepare().then(() => {
   server.use(expressLogger)
 
   server.post('/api/v1/model', ...postUpload)
+
+  server.use(expressErrorHandler)
+
   server.get('/api/v1/models', ...getModels)
   server.get('/api/v1/model/:uuid', ...getModel)
   server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
@@ -70,6 +73,7 @@ app.prepare().then(() => {
 
   server.get('/api/v1/schemas', ...getSchemas)
   server.get('/api/v1/schema/default', ...getDefaultSchema)
+  server.get('/api/v1/schema/:ref', ...getSchema)
 
   server.get('/api/v1/config', ...getUiConfig)
   server.get('/api/v1/users', ...getUsers)
@@ -84,14 +88,14 @@ app.prepare().then(() => {
 
   server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
-  server.use('/api', expressErrorHandler)
-
   processUploads()
   processDeployments()
 
   server.all('*', (req, res) => {
     return handle(req, res)
   })
+
+  server.use('/api', expressErrorHandler)
 
   http.createServer(server).listen(port)
 

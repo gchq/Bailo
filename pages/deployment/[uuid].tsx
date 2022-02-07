@@ -25,7 +25,7 @@ import MenuItem from '@mui/material/MenuItem'
 
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
-import { getCurrentUser } from '../../data/user'
+import { useGetCurrentUser } from '../../data/user'
 import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
@@ -81,7 +81,7 @@ export default function Deployment() {
   const [anchorEl, setAnchorEl] = useState<any>(null)
   const actionOpen = anchorEl !== null
 
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = getCurrentUser()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 

@@ -15,7 +15,7 @@ import logger from '../../utils/logger'
 import { Request, Response } from 'express'
 
 import { createVersionRequests } from '../../services/request'
-import { Version } from 'types/interfaces'
+import { BadReq } from '../../utils/result'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -38,6 +38,14 @@ export const postUpload = [
   async (req: Request, res: Response) => {
     const files = req.files as unknown as MinioFile
     const mode = req.query.mode
+
+    if (!files.binary) {
+      throw BadReq({}, 'Unable to find binary file')
+    }
+
+    if (!files.code) {
+      throw BadReq({}, 'Unable to find code file')
+    }
 
     if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
       req.log.warn({ filename: files.binary[0].originalname }, 'Binary is not a zip file')
@@ -134,6 +142,7 @@ export const postUpload = [
       const modelUuid = req.query.modelUuid
       model = await ModelModel.findOne({ uuid: modelUuid })
       model.versions.push(version._id)
+      model.currentMetadata = metadata
     } else {
       // Save a new model, and add the uploaded version to its array
       model = new ModelModel({

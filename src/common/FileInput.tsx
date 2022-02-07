@@ -17,9 +17,9 @@ export default function FileInput({
   onChange: React.ChangeEventHandler<HTMLInputElement>
   file?: File
   accepts?: string
-  disabled: boolean
+  disabled?: boolean
 }) {
-  const id = `${label.replace(/ /g, '').toLowerCase()}-file`
+  const id = `${label.replace(/ /g, '-').toLowerCase()}-file`
 
   return (
     <>

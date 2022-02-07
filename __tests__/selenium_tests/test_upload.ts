@@ -13,6 +13,7 @@ import {
   getDriver,
   click,
   sendKeys,
+  pause,
 } from '../__utils__/helpers'
 import logger from '../../server/utils/logger'
 
@@ -55,10 +56,10 @@ describe('End to end test', () => {
       await click(driver, By.css('[data-test="uploadModelLink"]'))
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
-      await selectOption(driver, By.id('schema'), By.css('[role="option"]'), config.get('schemas.model'))
+      await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
 
-      await sendKeys(driver, By.id('selectcode-file'), codeFile)
-      await sendKeys(driver, By.id('selectbinary-file'), binaryFile)
+      await sendKeys(driver, By.id('select-code-file'), codeFile)
+      await sendKeys(driver, By.id('select-binary-file'), binaryFile)
 
       const metadata = await fs.readFile(metadataFile, { encoding: 'utf-8' })
       await sendKeys(driver, By.css('textarea'), metadata)
@@ -70,10 +71,12 @@ describe('End to end test', () => {
       const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
       modelInfo.url = modelUrl
       modelInfo.name = mName
+
+      logger.info(modelInfo, 'Received model information')
     } finally {
       await driver.quit()
     }
-  }, 50000)
+  }, 70000)
 
   test('test can approve models', async () => {
     const driver = await getDriver()
@@ -100,7 +103,7 @@ describe('End to end test', () => {
       // Now need to find place to click get request via json blob
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
-      await selectOption(driver, By.id('schema'), By.css('[role="option"]'), config.get('schemas.deployment'))
+      await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
 
       const deploymentData = await fs.readFile(deploymentMetadataFile, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
@@ -179,10 +182,10 @@ describe('End to end test', () => {
     })
 
     await container.start()
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await pause(500)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500)) //give container time to start running
+      await pause(1500) //give container time to start running
       const resp = await axios.post('http://localhost:9999/predict', {
         jsonData: { data: ['should be returned backwards'] },
       })
