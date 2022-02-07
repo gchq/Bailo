@@ -11,7 +11,7 @@ module.exports = {
       pass: '',
     },
     tls: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     },
   },
 }
