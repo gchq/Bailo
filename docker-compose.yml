@@ -40,7 +40,7 @@ services:
       REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
 
       REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_REALM: http://host-gateway:3000/api/v1/registry_auth
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
