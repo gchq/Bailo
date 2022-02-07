@@ -47,6 +47,7 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
+          sudo chown -R runner:docker certs
           ls -la certs
           ls -la ../
           whoami
