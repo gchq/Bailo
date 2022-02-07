@@ -44,6 +44,28 @@ jobs:
       - name: Build the stack
         run: docker-compose up -d
 
+      # Add configuration
+      - run: |
+        cat <<EOT >> config/local.js
+        module.exports = {
+          minio: {
+            accessKey: 'minioadmin',
+            secretKey: 'minioadmin',
+          },
+
+          smtp: {
+            auth: {
+              user: 'mailuser',
+              pass: 'mailpass',
+            },
+            tls: {
+              rejectUnauthorized: false,
+            },
+          }
+        }
+        EOT
+
+
       # Setup app
       - name: Setup app
         run: |
@@ -56,8 +78,12 @@ jobs:
 
       # Start app and wait for it to start
       - run: npm start &
-      - name: Wait for app to start
-        run: docker run appropriate/curl -s --connect-timeout 5 --max-time 5 --retry 10 --retry-delay 0 --retry-max-time 50 --retry-connrefused http://localhost:8080/
+      - uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: 'http://localhost:8080/'
+          responseCode: '200'
+          timeout: 10000
+          interval: 500
 
       # Run tests
       - run: HEADLESS=true npm test -- -t "renders a heading"
