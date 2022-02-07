@@ -86,4 +86,4 @@ jobs:
           interval: 500
 
       # Run tests
-      - run: HEADLESS=true npm test -- -t "renders a heading"
+      - run: HEADLESS=true npm test
