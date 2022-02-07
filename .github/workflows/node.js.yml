@@ -47,7 +47,9 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
+          ls -la ../
           whoami
+          ls -la .
           npm run certs
           ls -la certs
 
