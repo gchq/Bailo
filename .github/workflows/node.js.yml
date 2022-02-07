@@ -47,6 +47,7 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
+          ls -la certs
           ls -la ../
           whoami
           ls -la .
