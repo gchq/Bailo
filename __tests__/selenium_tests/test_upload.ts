@@ -72,7 +72,7 @@ describe('End to end test', () => {
       modelInfo.url = modelUrl
       modelInfo.name = mName
 
-      logger.info(modelInfo, "Received model information")
+      logger.info(modelInfo, 'Received model information')
     } finally {
       await driver.quit()
     }

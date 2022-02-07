@@ -88,7 +88,7 @@ export async function sendKeys(driver: WebDriver, selector: By, keys: string) {
 }
 
 export function pause(time) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 export async function selectOption(driver, parentSelector, childSelector, displayValue) {
