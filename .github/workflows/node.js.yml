@@ -47,9 +47,8 @@ jobs:
       # Setup app
       - name: Setup app
         run: |
-          mkdir -p certs
-          openssl genrsa -out certs/key.pem 2048
-          openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -days 360 -subj '/C=XX/CN=Registry Auth CA'
+          sudo npm run certs
+          sudo chmod -R 755 certs
 
           npm i -g ts-node
           ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
