@@ -171,13 +171,13 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               <Link href='/' passHref>
                 <a>
                   <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
-                </a>                
+                </a>
               </Link>
             </Box>
             <Typography
-              variant="h6"
+              variant='h6'
               noWrap
-              component="div"
+              component='div'
               sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex' } }}
             >
               Bailo

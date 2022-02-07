@@ -43,7 +43,7 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cVersion || steps.length) return
-    
+
     const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cVersion.metadata)
     setSteps(schemaSteps)
   }, [cSchema, cVersion, steps.length])
