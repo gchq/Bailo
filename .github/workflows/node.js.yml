@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu-latest
+      image: ubuntu:latest
       options: --user root
 
     timeout-minutes: 10
