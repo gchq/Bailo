@@ -1,83 +1,103 @@
-import Wrapper from 'src/Wrapper'
+import Wrapper from '../../../src/Wrapper'
 import { useRouter } from 'next/router'
 import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Paper from '@mui/material/Paper'
-import Alert from '@mui/material/Alert'
-import FormTabs from '../../../src/common/FormTabs'
-import UploadDeployment from '../../../src/UploadDeployment'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../../../data/api'
+import { Schema, Step } from '../../../types/interfaces'
+import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+import SchemaSelector from '../../../src/Form/SchemaSelector'
+import SubmissionError from '../../../src/Form/SubmissionError'
+import Form from '../../../src/Form/Form'
+
+const uiSchema = {
+  contacts: {
+    requester: { 'ui:widget': 'userSelector' },
+    secondPOC: { 'ui:widget': 'userSelector' },
+  },
+}
 
 export default function Deploy() {
   const router = useRouter()
-  const { uuid }: { uuid?: string } = router.query
+  const { uuid: modelUuid }: { uuid?: string } = router.query
 
-  const { model, isModelLoading, isModelError } = useGetModel(uuid)
+  const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('DEPLOYMENT')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('DEPLOYMENT')
 
-  const [submissionAlertText, setSubmissionAlertText] = useState('')
-  const [showSubmissionAlert, setShowSubmissionAlert] = useState(false)
+  const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
+  const [steps, setSteps] = useState<Array<Step>>([])
+  const [error, setError] = useState<string | undefined>(undefined)
 
-  const error = MultipleErrorWrapper(`Unable to load deploy page`, {
+  useEffect(() => {
+    setCurrentSchema(defaultSchema)
+  }, [defaultSchema])
+
+  useEffect(() => {
+    if (!currentSchema) return
+
+    const { schema, reference } = currentSchema
+    const steps = getStepsFromSchema(schema, uiSchema, [
+      'properties.highLevelDetails.properties.modelID',
+      'properties.highLevelDetails.properties.initialVersionRequested',
+    ])
+
+    setSteps(steps)
+  }, [currentSchema])
+
+  const errorWrapper = MultipleErrorWrapper(`Unable to load deploy page`, {
     isModelError,
     isDefaultSchemaError,
     isSchemasError,
   })
-  if (error) return error
+  if (errorWrapper) return errorWrapper
 
   if (isDefaultSchemaLoading || isSchemasLoading || isModelLoading) {
     return <Wrapper title='Loading...' page='upload' />
   }
 
-  const onSubmit = async (data: any, schema: any) => {
-    for (const meta of ['required', '$schema', 'definitions', 'type', 'properties']) {
-      delete data[meta]
-    }
+  const onSubmit = async () => {
+    setError(undefined)
 
-    data.highLevelDetails.modelID = uuid
+    const data = getStepsData(steps)
+
+    data.highLevelDetails.modelID = modelUuid
     data.highLevelDetails.initialVersionRequested = model!.currentMetadata.highLevelDetails.modelCardVersion
-    data.schemaRef = schema.reference
+    data.schemaRef = currentSchema?.reference
 
-    const deployment = await postEndpoint('/api/v1/deployment', data).then((res) => {
-      setShowSubmissionAlert(false)
-      if (res.status >= 400) {
-        setShowSubmissionAlert(true)
-        setSubmissionAlertText(res.statusText)
-      }
-      return res.json()
-    })
+    const deploy = await postEndpoint(`/api/v1/deployment`, data)
 
-    const { uuid: deploymentUuid } = deployment
+    if (deploy.status >= 400) {
+      let error = deploy.statusText
+      try {
+        error = `${deploy.statusText}: ${(await deploy.json()).message}`
+      } catch (e) {}
 
-    if (deploymentUuid) {
-      router.push(`/deployment/${deploymentUuid}`)
+      return setError(error)
     }
 
-    console.log('onSubmit', data)
+    const { uuid } = await deploy.json()
+    router.push(`/deployment/${uuid}`)
   }
 
   return (
     <Wrapper title={'Deploy: ' + model!.currentMetadata.highLevelDetails.name} page={'model'}>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        {showSubmissionAlert && (
-          <Alert sx={{ mb: 2 }} severity='error'>
-            {submissionAlertText}
-          </Alert>
-        )}
-        <FormTabs
-          defaultSchema={defaultSchema}
-          schemas={schemas}
-          onSubmit={onSubmit}
-          name={'Deployment'}
-          omitFields={[
-            'properties.highLevelDetails.properties.modelID',
-            'properties.highLevelDetails.properties.initialVersionRequested',
-          ]}
-          UploadForm={UploadDeployment}
-        />
+        <Grid container justifyContent='space-between' alignItems='center'>
+          <Box />
+          <SchemaSelector
+            currentSchema={currentSchema ?? defaultSchema!}
+            setCurrentSchema={setCurrentSchema}
+            schemas={schemas!}
+          />
+        </Grid>
+
+        <SubmissionError error={error} />
+        <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
       </Paper>
     </Wrapper>
   )
