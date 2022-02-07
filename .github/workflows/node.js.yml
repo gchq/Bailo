@@ -45,26 +45,26 @@ jobs:
         run: docker-compose up -d
 
       # Add configuration
-      - run: |
-        cat <<EOT >> config/local.js
-        module.exports = {
-          minio: {
-            accessKey: 'minioadmin',
-            secretKey: 'minioadmin',
-          },
+      - shell: bash
+        run: |
+          cat <<EOT >> config/local.js
+          module.exports = {
+            minio: {
+              accessKey: 'minioadmin',
+              secretKey: 'minioadmin',
+            },
 
-          smtp: {
-            auth: {
-              user: 'mailuser',
-              pass: 'mailpass',
-            },
-            tls: {
-              rejectUnauthorized: false,
-            },
+            smtp: {
+              auth: {
+                user: 'mailuser',
+                pass: 'mailpass',
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+            }
           }
-        }
-        EOT
-
+          EOT
 
       # Setup app
       - name: Setup app
