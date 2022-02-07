@@ -48,12 +48,7 @@ jobs:
       - name: Setup app
         run: |
           sudo chown -R runner:docker certs
-          ls -la certs
-          ls -la ../
-          whoami
-          ls -la .
           npm run certs
-          ls -la certs
 
           npm i -g ts-node
           ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
