@@ -3,9 +3,7 @@
     "endDate": {
       "hasEndDate": false
     },
-    "name": "Test Deployment",
-    "modelID": "REPLACE_ME",
-    "initialVersionRequested": "1"
+    "name": "Test Deployment"
   },
   "contacts": {
     "requester": "user",
