@@ -24,6 +24,7 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { createIndexes } from './models/Model'
 
 const port = parseInt(process.env.PORT || '3000', 10)
 const dev = process.env.NODE_ENV !== 'production'
@@ -42,6 +43,9 @@ connectToMongoose()
 // within the first few milliseconds of the _first_ time it's run
 ensureBucketExists(config.get('minio.uploadBucket'))
 ensureBucketExists(config.get('minio.registryBucket'))
+
+// lazily create indexes for full text search
+createIndexes()
 
 app.prepare().then(() => {
   const server = express()
