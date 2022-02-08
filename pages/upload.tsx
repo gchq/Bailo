@@ -34,13 +34,14 @@ function renderSubmissionTab(
 
   return (
     <>
-      <ModelExportAndSubmission 
-        formData={data} 
-        steps={steps} 
-        schemaRef={step.schemaRef} 
-        onSubmit={onSubmit} 
-        setActiveStep={setActiveStep} 
-        activeStep={activeStep}/>
+      <ModelExportAndSubmission
+        formData={data}
+        steps={steps}
+        schemaRef={step.schemaRef}
+        onSubmit={onSubmit}
+        setActiveStep={setActiveStep}
+        activeStep={activeStep}
+      />
     </>
   )
 }

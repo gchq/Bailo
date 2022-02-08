@@ -57,6 +57,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        renderBasic: () => <></>,
         isComplete: FileTabComplete,
       })
     )
