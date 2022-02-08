@@ -10,7 +10,7 @@ import { getRequest, readNumRequests, readRequests, RequestType } from '../../se
 import { RequestStatusType } from '../../../types/interfaces'
 import { ObjectId } from 'mongoose'
 import UserModel from '../../models/User'
-import { BadReq } from '../../utils/result'
+import { BadReq, Unauthorised } from '../../utils/result'
 import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
 
@@ -26,7 +26,7 @@ export const getRequests = [
 
     if (filter === 'all') {
       if (!hasRole(['admin'], req.user!)) {
-        return res.error(401, [{ roles: req.user?.roles }, 'Unauthorised.  Your user does not have the "admin" role'])
+        return res.error(401, [{ roles: req.user?.roles }, 'Forbidden.  Your user does not have the "admin" role'])
       }
     } else {
       req.log.info('Getting requests for user')
@@ -66,20 +66,14 @@ export const postRequestResponse = [
     const request = await getRequest({ requestId: id })
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
-      req.log.warn(
+      throw Unauthorised(
         { id, userId: req.user?._id, requestUser: request.user },
-        'User did not have permission to approve this request'
+        'You do not have permissions to approve this'
       )
-      return res.status(401).json({
-        message: `You do not have permissions to approve this`,
-      })
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
-      req.log.warn({ choice }, 'Received invalid request choice')
-      return res.status(400).json({
-        message: `Invalid choice, received '${choice}'`,
-      })
+      throw BadReq({ choice }, `Received invalid request choice, received '${choice}'`)
     }
 
     request.status = choice as RequestStatusType

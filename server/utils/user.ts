@@ -5,6 +5,7 @@ import memoize from 'memoizee'
 import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
 import { getAdminToken } from '../routes/v1/registryAuth'
+import { Forbidden, Unauthorised } from './result'
 
 export async function findUser(userId: string, email?: string) {
   // findOneAndUpdate is atomic, so we don't need to worry about
@@ -102,20 +103,14 @@ export function hasRole(roles: Array<string> | string, user: User) {
 export function ensureUserRole(roles: Array<string> | string) {
   return function (req: Request, res: Response, next: NextFunction) {
     if (!req.user) {
-      req.log.warn('Unable to authenticate request')
-      return res.status(403).json({
-        message: `Unable to authenticate request`,
-      })
+      throw Forbidden({}, `Unable to authenticate request`)
     }
 
     const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
     for (let role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
-        req.log.warn({ requestedRole: role, currentRoles: req.user.roles }, 'User does not have required role')
-        return res.status(401).json({
-          message: `You do not have the '${role}' role`,
-        })
+        throw Unauthorised({ requestedRole: role, currentRoles: req.user!.roles }, `You do not have the '${role}' role`)
       }
     }
 
