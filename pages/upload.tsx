@@ -19,12 +19,21 @@ import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
 import { useGetCurrentUser } from 'data/user'
 import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
-function renderSubmissionTab(step: Step, steps: Array<Step>, _setSteps: Function) {
+function renderSubmissionTab(
+  step: Step,
+  steps: Array<Step>,
+  _setSteps: Function,
+  _activeStep: number,
+  _setActiveStep: Function,
+  onSubmit: Function,
+  _openValidateError: Boolean,
+  _setOpenValidateError: Function
+) {
   const data = getStepsData(steps)
 
   return (
     <>
-      <ModelSubmission formData={data} steps={steps} schemaRef={step.schemaRef} />
+      <ModelSubmission formData={data} steps={steps} schemaRef={step.schemaRef} onSubmit={onSubmit} />
     </>
   )
 }
@@ -103,7 +112,8 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: renderSubmissionTab,
+        render: () => <></>,
+        renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
     )
