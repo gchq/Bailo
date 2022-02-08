@@ -26,16 +26,20 @@ const downloadToFile = (blob, filename) => {
   URL.revokeObjectURL(a.href)
 }
 
-const FormExport = ({
+const ModelExportAndSubmission = ({
   formData,
   schemaRef,
   steps,
   onSubmit,
+  activeStep, 
+  setActiveStep,
 }: {
   formData: any
   schemaRef: string
   steps: Array<Step>
   onSubmit: any
+  activeStep: number
+  setActiveStep: Function
 }) => {
   const [ref] = useState<any>(createRef())
   const [wrappedMetadata, setWrappedMetadata] = useState<any>({ metadata: {} })
@@ -143,11 +147,11 @@ const FormExport = ({
               download={`${formData?.highLevelDetails?.name}.json`}
               variant='text'
             >
-              Download JSON
+              Download
             </Button>
           </Box>
           <Divider orientation='vertical' flexItem>
-            Or
+            OR
           </Divider>
           <Box sx={{ textAlign: 'center' }}>
             <Upload color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
@@ -161,8 +165,13 @@ const FormExport = ({
               Submit
             </Button>
           </Box>
-        </Stack>
+        </Stack>        
       </Grid>
+      <Box sx={{ textAlign: 'left' }}>
+          <Button variant='outlined' onClick={() => setActiveStep(activeStep - 1)}>
+            Previous Section
+          </Button>
+        </Box>
       <Dialog
         open={showHtmlView}
         onClose={handleModelClose}
@@ -197,4 +206,4 @@ const FormExport = ({
   )
 }
 
-export default FormExport
+export default ModelExportAndSubmission

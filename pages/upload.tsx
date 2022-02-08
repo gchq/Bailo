@@ -14,8 +14,9 @@ import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../u
 import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
-import ModelSubmission from '../src/Form/ModelSubmission'
+import ModelExportAndSubmission from '../src/Form/ModelExportAndSubmission'
 import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
+import RenderBasicFileTab, { BasicFileTabComplete } from '../src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from 'data/user'
 import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
@@ -23,8 +24,8 @@ function renderSubmissionTab(
   step: Step,
   steps: Array<Step>,
   _setSteps: Function,
-  _activeStep: number,
-  _setActiveStep: Function,
+  activeStep: number,
+  setActiveStep: Function,
   onSubmit: Function,
   _openValidateError: Boolean,
   _setOpenValidateError: Function
@@ -33,7 +34,13 @@ function renderSubmissionTab(
 
   return (
     <>
-      <ModelSubmission formData={data} steps={steps} schemaRef={step.schemaRef} onSubmit={onSubmit} />
+      <ModelExportAndSubmission 
+        formData={data} 
+        steps={steps} 
+        schemaRef={step.schemaRef} 
+        onSubmit={onSubmit} 
+        setActiveStep={setActiveStep} 
+        activeStep={activeStep}/>
     </>
   )
 }
@@ -96,6 +103,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        renderBasic: RenderBasicFileTab,
         isComplete: FileTabComplete,
       })
     )
@@ -113,6 +121,7 @@ function Upload() {
         section: 'submission',
 
         render: () => <></>,
+        renderBasic: () => <></>,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })

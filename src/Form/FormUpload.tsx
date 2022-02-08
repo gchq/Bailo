@@ -41,7 +41,7 @@ export default function FormUpload({
   return (
     <>
       {dataSteps.map((step, index) => (
-        <Box key={`${index}`}>{step.render(step, steps, setSteps)}</Box>
+        <Box key={`${index}`}>{step.renderBasic(step, steps, setSteps)}</Box>
       ))}
       <TextField
         fullWidth
