@@ -72,7 +72,8 @@ services:
       dockerfile: Dockerfile.dev
     #network_mode: "host"
     volumes:
-      - ./certs/cert.pem:/tmp/bailo_public.pem
+      # cert location assumed by registryAuth.ts
+      - ./certs:/home/user/app/certs 
     ports:
        - '3000:3000'
     depends_on:
@@ -84,7 +85,7 @@ services:
       - apparmor:unconfined
     environment:
       - NODE_CONFIG_ENV=docker_compose
-      - ADD_CA_CERT=/tmp/bailo_public.pem
+      - ADD_CA_CERT=/home/user/app/certs/cert.pem
 
   # app:
   #   build:
