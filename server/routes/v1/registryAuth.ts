@@ -182,7 +182,8 @@ export const getDockerRegistryAuth = [
     if (service !== config.get('registry.service')) {
       throw Forbidden(
         { expectedService: config.get('registry.service') },
-        'Received registry auth request from unexpected service', rlog
+        'Received registry auth request from unexpected service',
+        rlog
       )
     }
 
