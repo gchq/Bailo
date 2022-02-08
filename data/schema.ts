@@ -35,3 +35,17 @@ export function useGetSchemas(use: SchemaUse) {
     isSchemasError: error,
   }
 }
+
+export function useGetSchema(schemaRef?: string) {
+  const { data, error, mutate } = useSWR<Schema>(
+    schemaRef ? `/api/v1/schema/${encodeURIComponent(schemaRef)}` : null,
+    fetcher
+  )
+
+  return {
+    mutateSchema: mutate,
+    schema: data,
+    isSchemaLoading: !error && !data,
+    isSchemaError: error,
+  }
+}

@@ -61,7 +61,7 @@
           "uniqueItems": true
         }
       },
-      "required": ["name", "modelInASentence", "modelOverview", "tags"],
+      "required": ["name", "modelInASentence", "modelOverview", "modelCardVersion", "tags"],
       "additionalProperties": false
     },
     "contacts": {

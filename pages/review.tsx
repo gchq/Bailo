@@ -19,7 +19,7 @@ import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
 import EmptyBlob from '../src/common/EmptyBlob'
 import { Request } from '../types/interfaces'
-import { RequestType, ReviewFilterType, useListRequests } from '../data/requests'
+import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } from '../data/requests'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../data/api'
 
@@ -58,6 +58,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
+  const { mutateNumRequests } = useGetNumRequests()
 
   const managerStyling = { mb: 2, borderLeft: '.3rem solid #283593', p: 2, backgroundColor: 'whitesmoke' }
   const reviewerStyling = { mb: 2, borderLeft: '.3rem solid #de3c30', p: 2, backgroundColor: 'whitesmoke' }
@@ -74,6 +75,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
     await postEndpoint(`/api/v1/request/${request!._id}/respond`, { choice }).then((res) => res.json())
 
     mutateRequests()
+    mutateNumRequests()
     setOpen(false)
   }
 
@@ -148,7 +150,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
               )}
             </Grid>
             <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>                
+              <Box>
                 <Button
                   color='secondary'
                   sx={{ m: 1 }}
@@ -176,7 +178,9 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
           <DialogContentText id='alert-dialog-description'>{approvalModalText}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button color='secondary' variant='outlined'onClick={onCancel}>Cancel</Button>
+          <Button color='secondary' variant='outlined' onClick={onCancel}>
+            Cancel
+          </Button>
           <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
             Confirm
           </Button>

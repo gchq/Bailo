@@ -1,140 +1,185 @@
 import { useEffect, useState } from 'react'
-import Wrapper from 'src/Wrapper'
+import { useRouter } from 'next/router'
+
 import Paper from '@mui/material/Paper'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+
+import Wrapper from '../src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import FormTabs from '../src/common/FormTabs'
-import { useRouter } from 'next/router'
-import UploadFile from '../src/UploadFlow/UploadFile'
-import Alert from '@mui/material/Alert'
-import { putEndpoint } from '../data/api'
-import { useGetModelVersion } from '../data/model'
+import { Schema, Step, User } from '../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../utils/formUtils'
 
-export default function Upload() {
-  const router = useRouter()
+import SchemaSelector from '../src/Form/SchemaSelector'
+import SubmissionError from '../src/Form/SubmissionError'
+import Form from '../src/Form/Form'
+import FormExport from '../src/common/FormExport'
+import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
+import { useGetCurrentUser } from 'data/user'
+import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
-  const queryModelUuid = router.query.modelUuid as string
-  const queryVersion = router.query.version as string
+function renderSubmissionTab(step: Step, steps: Array<Step>, _setSteps: Function) {
+  const data = getStepsData(steps)
 
+  return (
+    <>
+      <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
+    </>
+  )
+}
+
+const uiSchema = {
+  contacts: {
+    uploader: { 'ui:widget': 'userSelector' },
+    reviewer: { 'ui:widget': 'userSelector' },
+    manager: { 'ui:widget': 'userSelector' },
+  },
+}
+
+function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
-  const { version, isVersionLoading } = useGetModelVersion(queryModelUuid, queryVersion)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const [error, setError] = useState(undefined)
-  const [versionToEdit, setVersionToEdit] = useState<any>(undefined)
-  const [showAlert, setShowAlert] = useState<boolean>(false)
-  const [alertText, setAlertText] = useState<string>('')
+  const router = useRouter()
+
+  const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
+  const [user, setUser] = useState<User | undefined>(undefined)
+  const [steps, setSteps] = useState<Array<Step>>([])
+  const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
-    if (!isVersionLoading && version !== undefined) {
-      setVersionToEdit(version)
-    }
-  }, [isVersionLoading, version])
+    if (currentSchema) return
 
-  const errorWrapper = MultipleErrorWrapper(`Unable to load upload page`, {
-    isDefaultSchemaError,
-    isSchemasError,
-  })
+    setCurrentSchema(defaultSchema)
+  }, [defaultSchema, currentSchema])
+
+  useEffect(() => {
+    if (user) return
+
+    setUser(currentUser)
+  }, [user, currentUser])
+
+  useEffect(() => {
+    if (!currentSchema || !user) return
+
+    const { schema, reference } = currentSchema
+    const defaultState = {
+      contacts: { uploader: user.id },
+    }
+
+    const steps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
+
+    steps.push(
+      createStep({
+        schema: {
+          title: 'Files',
+        },
+        state: {
+          binary: undefined,
+          code: undefined,
+        },
+        schemaRef: reference,
+
+        type: 'Data',
+        index: steps.length,
+        section: 'files',
+
+        render: RenderFileTab,
+        isComplete: FileTabComplete,
+      })
+    )
+
+    steps.push(
+      createStep({
+        schema: {
+          title: 'Submission',
+        },
+        state: {},
+        schemaRef: reference,
+
+        type: 'Message',
+        index: steps.length,
+        section: 'submission',
+
+        render: renderSubmissionTab,
+        isComplete: () => true,
+      })
+    )
+
+    setSteps(steps)
+  }, [currentSchema, user])
+
+  const errorWrapper = MultipleErrorWrapper(
+    `Unable to load upload page`,
+    {
+      isDefaultSchemaError,
+      isSchemasError,
+      isCurrentUserError,
+    },
+    MinimalErrorWrapper
+  )
   if (errorWrapper) return errorWrapper
 
-  if (isDefaultSchemaLoading || isSchemasLoading) {
-    return <Wrapper title='Loading...' page={'upload'} />
+  if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
+    return <></>
   }
 
-  const onSubmit = async (data: any, schema: any, { code, binary }: { code: File; binary: File }) => {
+  const onSubmit = async () => {
     setError(undefined)
-    setShowAlert(false)
 
-    for (const meta of ['required', '$schema', 'definitions', 'type', 'properties']) {
-      delete data[meta]
-    }
-
-    data.schemaRef = schema.reference
-
+    const data = getStepsData(steps, true)
     const form = new FormData()
 
-    if (router.query.mode === 'edit' && version !== undefined) {
-      const put = await putEndpoint(`/api/v1/version/${version._id}`, data).then(async (res) => {
-        if (res.status >= 400) {
-          try {
-            // try and parse error from body
-            return await res.json()
-          } catch (e) {
-            return {
-              message: res.statusText,
-            }
-          }
-        } else {
-          if (res.status === 200) {
-            router.push(`/model/${router.query.modelUuid}`)
-          }
-        }
-      })
-    } else {
-      form.append('code', code)
-      form.append('binary', binary)
-      form.append('metadata', JSON.stringify(data))
+    data.schemaRef = currentSchema?.reference
 
-      const mode: string = router.query.mode !== undefined ? router.query.mode.toString() : 'upload'
+    form.append('code', data.files.code)
+    form.append('binary', data.files.binary)
 
-      const uploadAddress =
-        mode === 'newVersion' ? '/api/v1/model?mode=' + mode + '&modelUuid=' + router.query.modelUuid : '/api/v1/model'
-      const upload = await fetch(uploadAddress, {
-        method: 'POST',
-        body: form,
-      }).then(async (res) => {
-        if (res.status === 409) {
-          setAlertText(res.statusText)
-          setShowAlert(true)
-          return {
-            message: res.statusText,
-          }
-        } else if (res.status >= 400) {
-          try {
-            // try and parse error from body
-            return await res.json()
-          } catch (e) {
-            return {
-              message: res.statusText,
-            }
-          }
-        } else {
-          return res.json()
-        }
-      })
-      const { uuid: uploadUuid, message: uploadError } = upload
-      if (uploadError) {
-        setError(uploadError)
-      }
-      if (uploadUuid) {
-        router.push(`/model/${uploadUuid}`)
-      }
+    delete data.files
+
+    form.append('metadata', JSON.stringify(data))
+
+    const upload = await fetch('/api/v1/model', {
+      method: 'POST',
+      body: form,
+    })
+
+    if (upload.status >= 400) {
+      let error = upload.statusText
+      try {
+        error = `${upload.statusText}: ${(await upload.json()).message}`
+      } catch (e) {}
+
+      return setError(error)
     }
+
+    const { uuid } = await upload.json()
+    router.push(`/model/${uuid}`)
   }
 
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
-      <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        <FormTabs
-          defaultSchema={defaultSchema}
-          error={error}
-          schemas={schemas}
-          onSubmit={onSubmit}
-          name={'Model'}
-          omitFields={[
-            'properties.highLevelDetails.properties.modelID',
-            'properties.highLevelDetails.properties.initialVersionRequested',
-          ]}
-          UploadForm={UploadFile}
-          mode={router.query.mode}
-          modelToEdit={versionToEdit}
+    <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
+      <Grid container justifyContent='space-between' alignItems='center'>
+        <Box />
+        <SchemaSelector
+          currentSchema={currentSchema ?? defaultSchema!}
+          setCurrentSchema={setCurrentSchema}
+          schemas={schemas!}
         />
-        {showAlert && (
-          <Alert severity='error' onClose={() => setShowAlert(false)}>
-            {alertText}
-          </Alert>
-        )}
-      </Paper>
+      </Grid>
+
+      <SubmissionError error={error} />
+      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+    </Paper>
+  )
+}
+
+export default function Outer() {
+  return (
+    <Wrapper title={'Upload Model'} page={'upload'}>
+      <Upload />
     </Wrapper>
   )
 }
