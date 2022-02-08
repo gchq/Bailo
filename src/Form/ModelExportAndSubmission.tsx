@@ -31,7 +31,7 @@ const ModelExportAndSubmission = ({
   schemaRef,
   steps,
   onSubmit,
-  activeStep, 
+  activeStep,
   setActiveStep,
 }: {
   formData: any
@@ -165,13 +165,13 @@ const ModelExportAndSubmission = ({
               Submit
             </Button>
           </Box>
-        </Stack>        
+        </Stack>
       </Grid>
       <Box sx={{ textAlign: 'left' }}>
-          <Button variant='outlined' onClick={() => setActiveStep(activeStep - 1)}>
-            Previous Section
-          </Button>
-        </Box>
+        <Button variant='outlined' onClick={() => setActiveStep(activeStep - 1)}>
+          Previous Section
+        </Button>
+      </Box>
       <Dialog
         open={showHtmlView}
         onClose={handleModelClose}
