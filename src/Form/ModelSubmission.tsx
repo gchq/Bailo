@@ -7,11 +7,13 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import OpenInNew from '@mui/icons-material/OpenInNew'
 import Download from '@mui/icons-material/Download'
-import ContentCopy from '@mui/icons-material/ContentCopy'
+import Upload from '@mui/icons-material/Upload'
+import Divider from '@mui/material/Divider'
 import React, { createRef, useState } from 'react'
-import ModelOverview from 'src/ModelOverview'
+import ModelOverview from '../../src/ModelOverview'
 import { Step } from '../../types/interfaces'
 
 const downloadToFile = (blob, filename) => {
@@ -104,22 +106,51 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
   return (
     <>
       <Grid container justifyContent='center'>
-        <Stack direction='row' spacing={2}>
-          <Button startIcon={<OpenInNew />} variant='outlined' onClick={onShowHtmlView}>
-            View HTML
-          </Button>
-          <Button
-            aria-label='download JSON'
-            href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(formData, null, 2))}`}
-            download={`${formData?.highLevelDetails?.name}.json`}
-            startIcon={<Download />}
-            variant='outlined'
-          >
-            Download JSON
-          </Button>
-          <Button variant='outlined' startIcon={<ContentCopy />} onClick={onCopyToClipboard}>
-            Copy from data to clipboard
-          </Button>
+        <Stack direction='row' spacing={2} sx={{ mt: 5, mb: 5 }}>
+          <Box sx={{ textAlign:'center' }}>
+            <OpenInNew color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
+            <Typography sx={{ p: 1 }} variant='h6'>
+              Export as HTML
+            </Typography>
+            <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
+              Click below to render your metadata in a HTML component.
+            </Typography>
+            <Button variant='text' onClick={onShowHtmlView}>
+              View
+            </Button>
+          </Box>
+          <Box sx={{textAlign:'center'}}>
+            <Download color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
+            <Typography sx={{ p: 1 }} variant='h6'>
+              Export as JSON
+            </Typography>
+            <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
+              Click below to download your metadata as a JSON file for easy distribution.
+            </Typography>
+            <Button
+              aria-label='download JSON'
+              href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(formData, null, 2))}`}
+              download={`${formData?.highLevelDetails?.name}.json`}
+              variant='text'
+            >
+              Download JSON
+            </Button>
+          </Box>
+          <Divider orientation="vertical" flexItem>
+            Or
+          </Divider>
+          <Box sx={{textAlign:'center'}}>
+            <Upload color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
+            <Typography sx={{ p: 1 }} variant='h6'>
+              Upload Model
+            </Typography>
+            <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
+              If you are happy with your submission click below to upload your model to Bailo.
+            </Typography>
+            <Button variant='contained' onClick={onShowHtmlView}>
+              Submit
+            </Button>
+          </Box>
         </Stack>
       </Grid>
       <Dialog

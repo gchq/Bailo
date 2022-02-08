@@ -14,7 +14,7 @@ import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../u
 import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
-import FormExport from '../src/common/FormExport'
+import ModelSubmission from '../src/Form/ModelSubmission'
 import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
 import { useGetCurrentUser } from 'data/user'
 import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
@@ -24,7 +24,7 @@ function renderSubmissionTab(step: Step, steps: Array<Step>, _setSteps: Function
 
   return (
     <>
-      <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
+      <ModelSubmission formData={data} steps={steps} schemaRef={step.schemaRef} />
     </>
   )
 }
