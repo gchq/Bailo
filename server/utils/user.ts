@@ -101,7 +101,7 @@ export function hasRole(roles: Array<string> | string, user: User) {
 }
 
 export function ensureUserRole(roles: Array<string> | string) {
-  return function (req: Request, res: Response, next: NextFunction) {
+  return function (req: Request, _res: Response, next: NextFunction) {
     if (!req.user) {
       throw Forbidden({}, `Unable to authenticate request`)
     }
