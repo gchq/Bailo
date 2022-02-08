@@ -6,6 +6,7 @@ import { Validator } from 'jsonschema'
 
 import { Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
+import RenderButtons from '../src/Form/RenderButtons'
 
 export function createStep({
   schema,
@@ -14,6 +15,7 @@ export function createStep({
   type,
   section,
   render,
+  renderButtons = RenderButtons,
   index,
   schemaRef,
   isComplete,
@@ -24,6 +26,7 @@ export function createStep({
   type: StepType
   section: string
   render: Function
+  renderButtons?: Function
   index: number
   schemaRef: string
   isComplete: Function
@@ -42,6 +45,7 @@ export function createStep({
 
     isComplete,
     render,
+    renderButtons,
   }
 
   return step

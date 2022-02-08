@@ -26,7 +26,17 @@ const downloadToFile = (blob, filename) => {
   URL.revokeObjectURL(a.href)
 }
 
-const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: string; steps: Array<Step> }) => {
+const FormExport = ({
+  formData,
+  schemaRef,
+  steps,
+  onSubmit,
+}: {
+  formData: any
+  schemaRef: string
+  steps: Array<Step>
+  onSubmit: any
+}) => {
   const [ref] = useState<any>(createRef())
   const [wrappedMetadata, setWrappedMetadata] = useState<any>({ metadata: {} })
   const [showHtmlView, setShowHtmlView] = useState<boolean>(false)
@@ -107,7 +117,7 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
     <>
       <Grid container justifyContent='center'>
         <Stack direction='row' spacing={2} sx={{ mt: 5, mb: 5 }}>
-          <Box sx={{ textAlign:'center' }}>
+          <Box sx={{ textAlign: 'center' }}>
             <OpenInNew color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
             <Typography sx={{ p: 1 }} variant='h6'>
               Export as HTML
@@ -119,7 +129,7 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
               View
             </Button>
           </Box>
-          <Box sx={{textAlign:'center'}}>
+          <Box sx={{ textAlign: 'center' }}>
             <Download color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
             <Typography sx={{ p: 1 }} variant='h6'>
               Export as JSON
@@ -136,10 +146,10 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
               Download JSON
             </Button>
           </Box>
-          <Divider orientation="vertical" flexItem>
+          <Divider orientation='vertical' flexItem>
             Or
           </Divider>
-          <Box sx={{textAlign:'center'}}>
+          <Box sx={{ textAlign: 'center' }}>
             <Upload color='primary' sx={{ pt: 1, color: 'primary', fontSize: 75 }} />
             <Typography sx={{ p: 1 }} variant='h6'>
               Upload Model
@@ -147,7 +157,7 @@ const FormExport = ({ formData, schemaRef, steps }: { formData: any; schemaRef: 
             <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
               If you are happy with your submission click below to upload your model to Bailo.
             </Typography>
-            <Button variant='contained' onClick={onShowHtmlView}>
+            <Button variant='contained' onClick={onSubmit}>
               Submit
             </Button>
           </Box>
