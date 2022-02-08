@@ -20,7 +20,7 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
   return (
     <Box sx={{ pb: 4, pt: 4 }}>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <FileInput label={'Select Code'} file={code} onChange={handleCodeChange} accepts='.zip' />
+        <FileInput label={'Select Codes'} file={code} onChange={handleCodeChange} accepts='.zip' />
         <FileInput label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts='.zip' />
       </Stack>
     </Box>
