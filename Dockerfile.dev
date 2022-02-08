@@ -15,11 +15,14 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
   && adduser -D -u 1111 user \
   && mkdir -p /run/user/1111 \
   && chown -R user /run/user/1111 /home/user \
-  && chmod -R 777 /s2i \
+  && chmod -R 777 /s2i \ 
+  && addgroup -S certs \
+  && addgroup user certs \
+  && chgrp certs /etc/ssl/certs \
+  && chmod 775 /etc/ssl/certs \
+  && chgrp certs /usr/local/share/ca-certificates \
+  && chmod 775 /usr/local/share/ca-certificates \
   && echo user:100000:65536 | tee /etc/subuid | tee /etc/subgid 
-
-COPY certs/cert.pem /usr/local/share/ca-certificates/registry.pem
-RUN update-ca-certificates
 
 ADD . / /home/user/app/
 
@@ -39,4 +42,5 @@ RUN npm install
 # RUN img pull seldonio/seldon-core-s2i-python37:1.10.0
 
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
+CMD ./run_app.sh
