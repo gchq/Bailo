@@ -142,9 +142,13 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   next()
 }
 
-export async function expressErrorHandler(err: StatusError, req: Request, res: Response, _next: NextFunction) {
-  req.log.warn(err.data, err.message)
-  return res.status(err.code).json({
+export async function expressErrorHandler(err: StatusError & { logger: any }, req: Request, res: Response, _next: NextFunction) {
+  if (!err.code) {
+    throw err
+  }
+  
+  (err.logger || req.log).warn(err.data, err.message)
+  return res.status(err.code || 500).json({
     message: err.message,
   })
 }
