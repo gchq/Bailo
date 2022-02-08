@@ -4,6 +4,7 @@ import SchemaModel from '../../models/Schema'
 import VersionModel from '../../models/Version'
 import DeploymentModel from '../../models/Deployment'
 import { ensureUserRole } from '../../utils/user'
+import { NotFound } from 'server/utils/result'
 
 export const getModels = [
   ensureUserRole('user'),
@@ -39,10 +40,7 @@ export const getModel = [
     const model = await ModelModel.findOne({ uuid })
 
     if (!model) {
-      req.log.warn({ uuid }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find model '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
     return res.json(model)
@@ -57,10 +55,7 @@ export const getModelDeployments = [
     const model = await ModelModel.findOne({ uuid })
 
     if (!model) {
-      req.log.warn({ uuid }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find model '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
     const deployments = await DeploymentModel.find({
@@ -79,19 +74,16 @@ export const getModelSchema = [
     const model = await ModelModel.findOne({ uuid })
 
     if (!model) {
-      req.log.warn({ uuid }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find model '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
     const schema = await SchemaModel.findOne({ reference: model.schemaRef })
 
     if (!schema) {
-      req.log.warn({ uuid, schemaRef: model.schemaRef }, 'Unable to find schema')
-      return res.status(404).json({
-        message: `Unable to find schema '${model.schemaRef}'`,
-      })
+      throw NotFound(
+        { uuid, schemaRef: model.schemaRef },
+        `Unable to find schema '${model.schemaRef}'`
+      )
     }
 
     return res.json(schema)
@@ -106,10 +98,7 @@ export const getModelVersions = [
     const model = await ModelModel.findOne({ uuid })
 
     if (!model) {
-      req.log.warn({ uuid }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find model '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
     const versions = await VersionModel.find({ model: model._id }, { state: 0, logs: 0, metadata: 0 })
@@ -126,10 +115,7 @@ export const getModelVersion = [
     const model = await ModelModel.findOne({ uuid })
 
     if (!model) {
-      req.log.warn({ uuid }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find model '${uuid}'`,
-      })
+      throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
     let version
@@ -140,10 +126,7 @@ export const getModelVersion = [
     }
 
     if (!version) {
-      req.log.warn({ versionName }, 'Unable to find model')
-      return res.status(404).json({
-        message: `Unable to find version '${versionName}'`,
-      })
+      throw NotFound({ versionName }, `Unable to find verison '${versionName}'`)
     }
 
     return res.json(version)
