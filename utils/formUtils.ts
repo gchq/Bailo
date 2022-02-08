@@ -15,6 +15,7 @@ export function createStep({
   type,
   section,
   render,
+  renderBasic,
   renderButtons = RenderButtons,
   index,
   schemaRef,
@@ -26,6 +27,7 @@ export function createStep({
   type: StepType
   section: string
   render: Function
+  renderBasic: Function
   renderButtons?: Function
   index: number
   schemaRef: string
@@ -45,6 +47,7 @@ export function createStep({
 
     isComplete,
     render,
+    renderBasic,
     renderButtons,
   }
 
@@ -105,6 +108,7 @@ export function getStepsFromSchema(
 
       section: prop,
       render: RenderForm,
+      renderBasic: RenderForm,
       isComplete: validateForm,
     })
 
