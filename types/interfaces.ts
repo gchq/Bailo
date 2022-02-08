@@ -155,3 +155,20 @@ export interface Request extends Document {
   approvalType: RequestApprovalType
   request: RequestType
 }
+
+export type StepType = 'Form' | 'Data' | 'Message'
+export interface Step {
+  schema: any
+  uiSchema?: any
+
+  state: any
+  index: number
+
+  type: StepType
+  section: string
+  schemaRef: string
+
+  render: Function
+  shouldValidate: boolean
+  isComplete: Function
+}

@@ -32,3 +32,21 @@ export const getDefaultSchema = [
     return res.json(schema[0])
   },
 ]
+
+export const getSchema = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { ref } = req.params
+
+    const schema = await SchemaModel.findOne({ reference: decodeURIComponent(ref) })
+
+    if (!schema) {
+      req.log.warn({ use: req.query.use }, `Could not find given schema`)
+      return res.status(404).json({
+        message: 'No schema found.',
+      })
+    }
+
+    return res.json(schema)
+  },
+]

@@ -11,6 +11,7 @@
     "lint": "next lint",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -days 360 -subj '/C=XX/CN=Registry Auth CA'",
     "style": "prettier --write .",
+    "check-style": "prettier --check .",
     "test": "jest",
     "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts"
   },

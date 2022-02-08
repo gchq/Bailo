@@ -30,7 +30,7 @@ import ModelOverview from 'src/ModelOverview'
 import createComplianceFlow from 'utils/complianceFlow'
 import { FlowElement } from 'react-flow-renderer'
 import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
-import { getCurrentUser } from 'data/user'
+import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
@@ -59,7 +59,7 @@ const Model = () => {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
-  const { currentUser, isCurrentUserLoading } = getCurrentUser()
+  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
@@ -118,11 +118,11 @@ const Model = () => {
   }
 
   const editModel = () => {
-    router.push(`/upload?mode=edit&modelUuid=${uuid}&version=${version?.version}`)
+    router.push(`/model/${uuid}/edit/${version?.version}`)
   }
 
   const uploadNewVersion = () => {
-    router.push(`/upload?mode=newVersion&modelUuid=${uuid}`)
+    router.push(`/model/${uuid}/new-version`)
   }
 
   const actionMenuClicked = (event) => {
