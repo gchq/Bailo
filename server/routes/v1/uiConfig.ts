@@ -1,6 +1,7 @@
 import { ensureUserRole } from '../../utils/user'
 import config from 'config'
 import { Request, Response } from 'express'
+import { NotFound } from 'server/utils/result'
 
 export const getUiConfig = [
   ensureUserRole('user'),
@@ -8,10 +9,7 @@ export const getUiConfig = [
     const uiConfig = await config.get('uiConfig')
 
     if (!uiConfig) {
-      req.log.error(`No UI config found`)
-      return res.status(404).json({
-        message: `Unable to find UI config'`,
-      })
+      throw NotFound({}, `Unable to find UI Config`)
     }
 
     return res.json(uiConfig)

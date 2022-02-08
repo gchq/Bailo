@@ -8,6 +8,7 @@ import { v4 as uuidv4, stringify as uuidStringify } from 'uuid'
 import logger from '../../utils/logger'
 import isEqual from 'lodash/isEqual'
 import { getUserFromAuthHeader } from '../../utils/user'
+import { Forbidden } from 'server/utils/result'
 
 let adminToken: string | undefined = undefined
 
@@ -163,38 +164,27 @@ export const getDockerRegistryAuth = [
     const authorization = req.get('authorization')
 
     if (!authorization) {
-      rlog.warn('No authorization header found')
-      return res.status(403).json({
-        message: 'no authorization header found',
-      })
+      throw Forbidden({}, 'No authorisation header found', rlog)
     }
 
     const { error, user, admin } = await getUserFromAuthHeader(authorization)
 
     if (error) {
-      rlog.warn({ error }, 'User authentication failed')
-      return res.status(403).json({
-        message: error,
-      })
+      throw Forbidden({ error }, error, rlog)
     }
 
     if (!user) {
-      rlog.warn('User authentication failed')
-      return res.status(403).json({
-        message: 'user authentication failed',
-      })
+      throw Forbidden({}, 'User authentication failed', rlog)
     }
 
     rlog = rlog.child({ user })
 
     if (service !== config.get('registry.service')) {
-      rlog.warn(
+      throw Forbidden(
         { expectedService: config.get('registry.service') },
-        'Received registry auth request from unexpected service'
+        'Received registry auth request from unexpected service',
+        rlog
       )
-      return res.status(403).json({
-        message: 'invalid service',
-      })
     }
 
     if (isOfflineToken) {
@@ -204,10 +194,7 @@ export const getDockerRegistryAuth = [
     }
 
     if (!scope) {
-      rlog.warn('Scope is undefined')
-      return res.status(403).json({
-        message: 'undefined scope',
-      })
+      throw Forbidden({}, 'Undefined scope', rlog)
     }
 
     let scopes: Array<string> = []
@@ -217,20 +204,14 @@ export const getDockerRegistryAuth = [
     } else if (typeof scope === 'string') {
       scopes = scope.split(' ')
     } else {
-      rlog.warn({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value')
-      return res.status(403).json({
-        message: 'unexpected scope type',
-      })
+      throw Forbidden({ scope, typeOfScope: typeof scope }, 'Scope is an unexpected value', rlog)
     }
 
     const accesses = scopes.map(generateAccess)
 
     for (let access of accesses) {
       if (!admin && !checkAccess(access, user)) {
-        rlog.warn({ access }, 'User does not have permission to carry out request')
-        return res.status(403).json({
-          message: 'invalid access',
-        })
+        throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }
     }
 
