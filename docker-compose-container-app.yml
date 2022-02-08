@@ -1,0 +1,107 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongoVolume:/data/db
+    command: --quiet
+
+  minio:
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    command: server /data --console-address ":9001"
+    volumes:
+      - minioVolume:/data
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisVolume:/data
+
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/key.pem
+
+      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+
+      REGISTRY_AUTH: token
+      #REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_REALM: http://app:3000/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
+      REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
+    volumes:
+      - ./config/registry.conf:/etc/docker/registry/config.yml
+      - ./certs:/certs
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:8080
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  maildev:
+    image: maildev/maildev:latest
+    ports:
+      - '1080:80'
+      - '1025:25'
+    environment:
+      MAILDEV_INCOMING_USER: mailuser
+      MAILDEV_INCOMING_PASS: mailpass
+
+  app:
+    #image: app_with_img:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    #network_mode: "host"
+    ports:
+       - '3000:3000'
+    depends_on:
+      - mongo
+      - minio
+      - redis
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      - NODE_CONFIG_ENV=docker_compose
+
+  # app:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #      - ./:/app
+  #      - /app/node_modules
+  #      - /app/.next
+  #      - ./certs:/certs
+  #   depends_on:
+  #     - mongo
+  #     - minio
+  #     - redis
+  #   environment:
+  #     - NODE_CONFIG_ENV=docker_compose
+
+volumes:
+  minioVolume:
+  redisVolume:
+  mongoVolume:

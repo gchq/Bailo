@@ -176,7 +176,7 @@ export const postUpload = [
         binary: normalizeMulterFile(files.binary[0]),
         code: normalizeMulterFile(files.code[0]),
       })
-      .timeout(60000)
+      .timeout(60000*8)
       .retries(2)
       .save()
     req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')
