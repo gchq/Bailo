@@ -73,10 +73,7 @@ export const postRequestResponse = [
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
-      throw BadReq(
-        { choice },
-        `Received invalid request choice, received '${choice}'`
-      )
+      throw BadReq({ choice }, `Received invalid request choice, received '${choice}'`)
     }
 
     request.status = choice as RequestStatusType
