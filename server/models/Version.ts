@@ -13,7 +13,7 @@ const VersionSchema = new Schema(
     managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
     reviewerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
 
-    state: { type: Schema.Types.Mixed },
+    state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],
   },
   {
