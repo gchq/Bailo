@@ -27,7 +27,7 @@ export function createStep({
   type: StepType
   section: string
   render: Function
-  renderBasic: Function
+  renderBasic?: Function
   renderButtons?: Function
   index: number
   schemaRef: string
@@ -47,7 +47,7 @@ export function createStep({
 
     isComplete,
     render,
-    renderBasic,
+    renderBasic: renderBasic ?? render,
     renderButtons,
   }
 
