@@ -16,13 +16,25 @@ export const deploymentQueue = new Queue('DEPLOYMENT_QUEUE', {
   redis: config.get('redis'),
 })
 
-async function sendUploadEmail(jobId: string, state: string) {
+async function setUploadState(jobId: string, state: string) {
   const job = await uploadQueue.getJob(jobId)
   const version = await VersionModel.findById(job.data.versionId)
     .populate({
       path: 'model',
       populate: { path: 'owner' },
     })
+
+  version.state.build = {
+    ...(version.state.build || {}),
+    state
+  }
+
+  if (state === 'succeeded') {
+    version.state.build.reason = undefined
+  }
+
+  version.markModified('state');
+  await version.save()
 
   if (!version.model.owner.email) {
     return
@@ -49,15 +61,15 @@ async function sendUploadEmail(jobId: string, state: string) {
 }
 
 uploadQueue.on('job succeeded', async (jobId) => {
-  await sendUploadEmail(jobId, 'succeeded')
+  await setUploadState(jobId, 'succeeded')
 })
 
 uploadQueue.on('job retrying', async (jobId) => {
-  await sendUploadEmail(jobId, 'retrying')
+  await setUploadState(jobId, 'retrying')
 })
 
 uploadQueue.on('job failed', async (jobId) => {
-  await sendUploadEmail(jobId, 'failed')
+  await setUploadState(jobId, 'failed')
 })
 
 async function sendDeploymentEmail(jobId: string, state: string) {
