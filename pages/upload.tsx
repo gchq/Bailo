@@ -14,17 +14,34 @@ import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../u
 import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Form from '../src/Form/Form'
-import FormExport from '../src/common/FormExport'
+import ModelExportAndSubmission from '../src/Form/ModelExportAndSubmission'
 import RenderFileTab, { FileTabComplete } from '../src/Form/RenderFileTab'
+import RenderBasicFileTab, { BasicFileTabComplete } from '../src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from 'data/user'
 import { MinimalErrorWrapper } from 'src/errors/ErrorWrapper'
 
-function renderSubmissionTab(step: Step, steps: Array<Step>, _setSteps: Function) {
+function renderSubmissionTab(
+  step: Step,
+  steps: Array<Step>,
+  _setSteps: Function,
+  activeStep: number,
+  setActiveStep: Function,
+  onSubmit: Function,
+  _openValidateError: Boolean,
+  _setOpenValidateError: Function
+) {
   const data = getStepsData(steps)
 
   return (
     <>
-      <FormExport formData={data} steps={steps} schemaRef={step.schemaRef} />
+      <ModelExportAndSubmission
+        formData={data}
+        steps={steps}
+        schemaRef={step.schemaRef}
+        onSubmit={onSubmit}
+        setActiveStep={setActiveStep}
+        activeStep={activeStep}
+      />
     </>
   )
 }
@@ -87,6 +104,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        renderBasic: RenderBasicFileTab,
         isComplete: FileTabComplete,
       })
     )
@@ -103,7 +121,8 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: renderSubmissionTab,
+        render: () => <></>,
+        renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
     )
@@ -128,6 +147,10 @@ function Upload() {
 
   const onSubmit = async () => {
     setError(undefined)
+
+    if (!steps.every((e) => e.isComplete(e))) {
+      return setError('Ensure all steps are complete before submitting')
+    }
 
     const data = getStepsData(steps, true)
     const form = new FormData()

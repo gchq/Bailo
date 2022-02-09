@@ -5,7 +5,7 @@ import { NotFound } from 'server/utils/result'
 
 export const getUiConfig = [
   ensureUserRole('user'),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     const uiConfig = await config.get('uiConfig')
 
     if (!uiConfig) {
