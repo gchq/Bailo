@@ -170,7 +170,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' passHref>
                 <a>
-                  <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
+                  <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
                 </a>
               </Link>
             </Box>
@@ -201,7 +201,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               px: [1],
             }}
           >
-            <IconButton onClick={toggleDrawer}>
+            <IconButton aria-label='close drawer' onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
