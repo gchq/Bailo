@@ -35,15 +35,18 @@ export default function processUploads() {
         await version.log('error', `Failed to process job due to error: '${e}'`)
         version.state.build = {
           state: 'failed',
-          reason: e
+          reason: e,
         }
 
         console.log('mark modified')
 
-        version.markModified('state');
+        version.markModified('state')
         await version.save()
-      } catch(e) {
-        logger.error({ error: e, versionId: job.data.versionId }, 'Error occurred whilst logging processing error occurred')
+      } catch (e) {
+        logger.error(
+          { error: e, versionId: job.data.versionId },
+          'Error occurred whilst logging processing error occurred'
+        )
       }
 
       throw e
