@@ -29,8 +29,10 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
   }
 
   const displayFilename = (filename: string) => {
-    let filenameSplit = filename.split('.')
-    return filenameSplit[0].length > 12 ? filenameSplit[0].substring(0, 12) + '...' + filenameSplit[1] : filename
+    const parts = filename.split('.')
+    const ext = parts.pop()
+    const base = parts.join('.')  
+    return base.length > 12 ? `${base}...${ext}` : filename
   }
 
   return (
