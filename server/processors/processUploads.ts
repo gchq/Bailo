@@ -37,9 +37,7 @@ export default function processUploads() {
           state: 'failed',
           reason: e,
         }
-
-        console.log('mark modified')
-
+        
         version.markModified('state')
         await version.save()
       } catch (e) {
