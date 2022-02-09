@@ -148,9 +148,9 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    if (!steps.every(e => e.isComplete(e))) {
-      return setError("Ensure all steps are complete before submitting")
-    } 
+    if (!steps.every((e) => e.isComplete(e))) {
+      return setError('Ensure all steps are complete before submitting')
+    }
 
     const data = getStepsData(steps, true)
     const form = new FormData()
