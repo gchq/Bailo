@@ -122,7 +122,6 @@ function Upload() {
         section: 'submission',
 
         render: () => <></>,
-        renderBasic: () => <></>,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
@@ -149,34 +148,38 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps, true)
-    const form = new FormData()
+    if (steps.filter((e) => !e.isComplete(e)).length === 0) {
+      const data = getStepsData(steps, true)
+      const form = new FormData()
 
-    data.schemaRef = currentSchema?.reference
+      data.schemaRef = currentSchema?.reference
 
-    form.append('code', data.files.code)
-    form.append('binary', data.files.binary)
+      form.append('code', data.files.code)
+      form.append('binary', data.files.binary)
 
-    delete data.files
+      delete data.files
 
-    form.append('metadata', JSON.stringify(data))
+      form.append('metadata', JSON.stringify(data))
 
-    const upload = await fetch('/api/v1/model', {
-      method: 'POST',
-      body: form,
-    })
+      const upload = await fetch('/api/v1/model', {
+        method: 'POST',
+        body: form,
+      })
 
-    if (upload.status >= 400) {
-      let error = upload.statusText
-      try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
+      if (upload.status >= 400) {
+        let error = upload.statusText
+        try {
+          error = `${upload.statusText}: ${(await upload.json()).message}`
+        } catch (e) {}
 
-      return setError(error)
+        return setError(error)
+      }
+
+      const { uuid } = await upload.json()
+      router.push(`/model/${uuid}`)
+    } else {
+      setError('Make sure all steps are completed before submitting.')
     }
-
-    const { uuid } = await upload.json()
-    router.push(`/model/${uuid}`)
   }
 
   return (

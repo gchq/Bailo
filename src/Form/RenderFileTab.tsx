@@ -8,7 +8,6 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import FileInput from '../common/FileInput'
 
 export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
   const { state } = step
@@ -30,7 +29,8 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
   }
 
   const displayFilename = (filename: string) => {
-    return filename.length > 12 ? filename.split('.')[0].substring(0, 12) + '...' + filename.split('.')[1] : filename
+    let filenameSplit = filename.split('.')
+    return filenameSplit[0].length > 12 ? filenameSplit[0].substring(0, 12) + '...' + filenameSplit[1] : filename
   }
 
   return (
@@ -51,7 +51,7 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
         <Box sx={{ textAlign: 'center' }}>
           <label htmlFor={binaryId}>
             <Typography sx={{ p: 1 }} variant='h5'>
-              Uploade a binary file (.zip)
+              Upload a binary file (.zip)
             </Typography>
             <Input style={{ margin: '10px' }} id={binaryId} type='file' onChange={handleBinaryChange} accept={'.zip'} />
             <Button variant='outlined' component='span'>
