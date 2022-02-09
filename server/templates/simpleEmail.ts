@@ -18,7 +18,7 @@ export interface SimpleEmail {
   subject: string
 }
 
-export function html({ text, columns, buttons } : SimpleEmail) {
+export function html({ text, columns, buttons }: SimpleEmail) {
   return mjml2html(
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
@@ -29,7 +29,9 @@ export function html({ text, columns, buttons } : SimpleEmail) {
       </mj-column>
     </mj-section>
     <mj-section background-color="#356cc7" padding-bottom="15px">
-      ${columns.map(column => `
+      ${columns
+        .map(
+          (column) => `
         <mj-column>
           <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px">
             <strong>
@@ -40,10 +42,13 @@ export function html({ text, columns, buttons } : SimpleEmail) {
             ${column.value}  
           </mj-text>
         </mj-column>
-      `).join('\n')}
+      `
+        )
+        .join('\n')}
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
-      ${buttons.map(button => `
+      ${buttons.map(
+        (button) => `
         <mj-column width="${100 / buttons.length}%">
           <mj-button
             background-color="#f37f58"
@@ -62,7 +67,8 @@ export function html({ text, columns, buttons } : SimpleEmail) {
             ${button.text}
           </mj-button>
         </mj-column>      
-      `)}
+      `
+      )}
     </mj-section>
   `)
   ).html

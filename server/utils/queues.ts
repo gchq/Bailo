@@ -18,22 +18,21 @@ export const deploymentQueue = new Queue('DEPLOYMENT_QUEUE', {
 
 async function setUploadState(jobId: string, state: string) {
   const job = await uploadQueue.getJob(jobId)
-  const version = await VersionModel.findById(job.data.versionId)
-    .populate({
-      path: 'model',
-      populate: { path: 'owner' },
-    })
+  const version = await VersionModel.findById(job.data.versionId).populate({
+    path: 'model',
+    populate: { path: 'owner' },
+  })
 
   version.state.build = {
     ...(version.state.build || {}),
-    state
+    state,
   }
 
   if (state === 'succeeded') {
     version.state.build.reason = undefined
   }
 
-  version.markModified('state');
+  version.markModified('state')
   await version.save()
 
   if (!version.model.owner.email) {
@@ -50,12 +49,10 @@ async function setUploadState(jobId: string, state: string) {
       columns: [
         { header: 'Model Name', value: version.model.currentMetadata.highLevelDetails.name },
         { header: 'Build Type', value: 'Model' },
-        { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) }
+        { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
       ],
-      buttons: [
-        { text: 'Build Logs', href: `${base}/model/${version.model.uuid}` }
-      ],
-      subject: `Your model build for '${version.model.currentMetadata.highLevelDetails.name}' has ${message}`
+      buttons: [{ text: 'Build Logs', href: `${base}/model/${version.model.uuid}` }],
+      subject: `Your model build for '${version.model.currentMetadata.highLevelDetails.name}' has ${message}`,
     }),
   })
 }
@@ -74,9 +71,7 @@ uploadQueue.on('job failed', async (jobId) => {
 
 async function sendDeploymentEmail(jobId: string, state: string) {
   const job = await deploymentQueue.getJob(jobId)
-  const deployment = await DeploymentModel.findById(job.data.deploymentId)
-    .populate('owner')
-    .populate('model')
+  const deployment = await DeploymentModel.findById(job.data.deploymentId).populate('owner').populate('model')
 
   if (!deployment.owner.email) {
     return
@@ -92,12 +87,10 @@ async function sendDeploymentEmail(jobId: string, state: string) {
       columns: [
         { header: 'Model Name', value: deployment.model.currentMetadata.highLevelDetails.name },
         { header: 'Build Type', value: 'Deployment' },
-        { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) }
+        { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
       ],
-      buttons: [
-        { text: 'Build Logs', href: `${base}/deployment/${deployment.uuid}` }
-      ],
-      subject: `Your deployment for '${deployment.model.currentMetadata.highLevelDetails.name}' has ${message}`
+      buttons: [{ text: 'Build Logs', href: `${base}/deployment/${deployment.uuid}` }],
+      subject: `Your deployment for '${deployment.model.currentMetadata.highLevelDetails.name}' has ${message}`,
     }),
   })
 }

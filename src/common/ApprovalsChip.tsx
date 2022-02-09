@@ -22,10 +22,10 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
   }
 
   return (
-    <Chip 
-      icon={<Icon sx={{ color: 'white !important', pl: 1 }} />}  
-      sx={{ borderRadius: 1, color: 'white', height: 'auto', backgroundColor }} 
-      label={`Approvals ${numApprovals}/${totalApprovals}`} 
+    <Chip
+      icon={<Icon sx={{ color: 'white !important', pl: 1 }} />}
+      sx={{ borderRadius: 1, color: 'white', height: 'auto', backgroundColor }}
+      label={`Approvals ${numApprovals}/${totalApprovals}`}
     />
   )
 }
