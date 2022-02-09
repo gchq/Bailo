@@ -1,0 +1,9 @@
+{
+  "files.exclude": {
+    "**/.github": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/.vscode": true
+  }
+}

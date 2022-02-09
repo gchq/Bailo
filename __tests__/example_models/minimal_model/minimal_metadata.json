@@ -10,7 +10,5 @@
     "uploader": "user",
     "reviewer": "user",
     "manager": "user"
-  },
-  "schemaRef": "/Minimal/General/v8",
-  "timeStamp": "2022-01-11T11:46:14.700Z"
+  }
 }
