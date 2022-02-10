@@ -83,8 +83,8 @@ jobs:
       # Start app and wait for it to start
       - run: npm start &
       - run: |
-        chmod +x ./server/scripts/waitForIt.sh
-        ./server/scripts/waitForIt.sh localhost:8080 -t 10
+          chmod +x ./server/scripts/waitForIt.sh
+          ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
       # Run tests
       - run: HEADLESS=true npm test
