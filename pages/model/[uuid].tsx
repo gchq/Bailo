@@ -155,7 +155,7 @@ const Model = () => {
 
   return (
     <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page={'model'}>
-      <Paper sx={{ p: 3 }}>        
+      <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
@@ -271,13 +271,21 @@ const Model = () => {
         </Box>
         <Box sx={{ marginBottom: 3 }} />
 
-        {group === 'overview' && 
+        {group === 'overview' && (
           <>
-            {version?.state?.build?.state === 'failed' && <Alert sx={{ mb: 3 }} severity='error'>Build Status: Failed</Alert> }
-            {version?.state?.build?.state === 'retrying' && <Alert sx={{ mb: 3 }} severity='warning'>Build Status: Retrying</Alert> }
+            {version?.state?.build?.state === 'failed' && (
+              <Alert sx={{ mb: 3 }} severity='error'>
+                Build Status: Failed
+              </Alert>
+            )}
+            {version?.state?.build?.state === 'retrying' && (
+              <Alert sx={{ mb: 3 }} severity='warning'>
+                Build Status: Retrying
+              </Alert>
+            )}
             <ModelOverview version={version} />
           </>
-        }
+        )}
 
         {group === 'compliance' && (
           <>
