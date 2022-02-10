@@ -31,8 +31,9 @@ jobs:
 
       # Install s2i
       - run: |
-          wget https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -P /tmp
-          tar -xvf /tmp/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -C /tmp/
+          wget https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -P ~
+          tar -xvf ~/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -C $HOME/
+          echo "$HOME/" >> $GITHUB_PATH
 
       # Linting
       - run: npm run check-style
@@ -71,9 +72,6 @@ jobs:
               },
             },
 
-            s2i: {
-              path: '/tmp/s2i',
-            },
           }
           EOT
 
