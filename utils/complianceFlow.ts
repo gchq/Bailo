@@ -26,7 +26,7 @@ export default function createComplianceFlow(version: Version) {
   }
 
   let availableStyle =
-    version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted' ? success : undefined
+    version.built && version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted' ? success : undefined
 
   return [
     {
