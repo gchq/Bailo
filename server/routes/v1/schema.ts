@@ -1,7 +1,7 @@
 import SchemaModel from '../../models/Schema'
 import { Request, Response } from 'express'
 import { ensureUserRole } from '../../utils/user'
-import { NotFound } from 'server/utils/result'
+import { NotFound } from '../../utils/result'
 
 export const getSchemas = [
   ensureUserRole('user'),
