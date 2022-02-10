@@ -82,12 +82,7 @@ jobs:
 
       # Start app and wait for it to start
       - run: npm start &
-      - uses: cygnetdigital/wait_for_response@v2.0.0
-        with:
-          url: 'http://localhost:8080/'
-          responseCode: '200'
-          timeout: 10000
-          interval: 500
+      - run: bash ./server/scripts/waitForIt.sh localhost:8080 -z 10
 
       # Run tests
       - run: HEADLESS=true npm test
