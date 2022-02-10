@@ -80,11 +80,22 @@ jobs:
           ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
           ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
+          mkdir logs
+
       # Start app and wait for it to start
-      - run: npm start &
+      - run: npm start |& tee logs/app.log &
       - run: |
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
       # Run tests
       - run: HEADLESS=true npm test
+
+      - name: Dump docker-compose logs
+        if: always()
+        run: docker-compose logs > logs/stack.log
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: logs
