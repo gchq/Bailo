@@ -29,6 +29,11 @@ jobs:
       # Install dependencies
       - run: npm ci
 
+      # Install s2i
+      - run: |
+          wget https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -P /tmp
+          tar -xvf source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
+
       # Linting
       - run: npm run check-style
       - run: npm run lint
@@ -64,7 +69,11 @@ jobs:
               tls: {
                 rejectUnauthorized: false,
               },
-            }
+            },
+
+            s2i: {
+              path: '/tmp/s2i',
+            },
           }
           EOT
 
