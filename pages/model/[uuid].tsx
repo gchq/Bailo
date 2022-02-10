@@ -155,11 +155,12 @@ const Model = () => {
 
   return (
     <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page={'model'}>
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: 3 }}>        
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
               <ApprovalsChip approvals={[version?.managerApproved, version?.reviewerApproved]} />
+              <Divider orientation='vertical' flexItem />
               <Button
                 id='model-actions-button'
                 aria-controls='model-actions-menu'
@@ -270,7 +271,13 @@ const Model = () => {
         </Box>
         <Box sx={{ marginBottom: 3 }} />
 
-        {group === 'overview' && <ModelOverview version={version} />}
+        {group === 'overview' && 
+          <>
+            {version?.state?.build?.state === 'failed' && <Alert sx={{ mb: 3 }} severity='error'>Build Status: Failed</Alert> }
+            {version?.state?.build?.state === 'retrying' && <Alert sx={{ mb: 3 }} severity='warning'>Build Status: Retrying</Alert> }
+            <ModelOverview version={version} />
+          </>
+        }
 
         {group === 'compliance' && (
           <>

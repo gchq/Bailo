@@ -12,7 +12,7 @@ import ArticleIcon from '@mui/icons-material/Article'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import useTheme from '@mui/styles/useTheme'
-import { Theme } from 'src/theme'
+import { Theme } from '../src/theme'
 
 export default function Help() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
