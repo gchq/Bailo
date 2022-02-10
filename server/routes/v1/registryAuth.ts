@@ -8,7 +8,7 @@ import { v4 as uuidv4, stringify as uuidStringify } from 'uuid'
 import logger from '../../utils/logger'
 import isEqual from 'lodash/isEqual'
 import { getUserFromAuthHeader } from '../../utils/user'
-import { Forbidden } from 'server/utils/result'
+import { Forbidden } from '../../utils/result'
 
 let adminToken: string | undefined = undefined
 

@@ -4,7 +4,7 @@ import SchemaModel from '../../models/Schema'
 import VersionModel from '../../models/Version'
 import DeploymentModel from '../../models/Deployment'
 import { ensureUserRole } from '../../utils/user'
-import { NotFound } from 'server/utils/result'
+import { NotFound } from '../../utils/result'
 
 export const getModels = [
   ensureUserRole('user'),
