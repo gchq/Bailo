@@ -3,16 +3,20 @@ import Done from '@mui/icons-material/Done'
 import DoneAll from '@mui/icons-material/DoneAll'
 import Chip from '@mui/material/Chip'
 import React from 'react'
+import useTheme from '@mui/styles/useTheme'
+import { Theme } from '../../src/theme'
 
 export default function ApprovalsChip({ approvals }: { approvals: any }) {
   const numApprovals = approvals.filter((e: string) => e === 'Accepted').length
   const totalApprovals = approvals.length
 
+  const theme = useTheme<Theme>()
+
   let Icon
   let backgroundColor
   if (numApprovals === 0) {
     Icon = Close
-    backgroundColor = '#d63b3b'
+    backgroundColor = theme.palette.error.main
   } else if (numApprovals < totalApprovals) {
     Icon = Done
     backgroundColor = '#dc851b'

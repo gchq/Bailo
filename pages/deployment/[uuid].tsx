@@ -193,6 +193,11 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <pre>
+              <span># Login to Docker</span>
+              <br />
+              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
+              <br />
+
               <span># Pull model</span>
               <br />
               <CodeLine line={`docker pull ${deploymentTag}`} />
