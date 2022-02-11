@@ -38,7 +38,8 @@ services:
       REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
 
       REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      #REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_REALM: http://app:3000/api/v1/registry_auth
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
@@ -64,23 +65,27 @@ services:
       MAILDEV_INCOMING_USER: mailuser
       MAILDEV_INCOMING_PASS: mailpass
 
-  # app:
-  #   build:
-  #     context: ./
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #      - ./:/app
-  #      - /app/node_modules
-  #      - /app/.next
-  #      - ./certs:/certs
-  #   depends_on:
-  #     - mongo
-  #     - minio
-  #     - redis
-  #   environment:
-  #     - NODE_CONFIG_ENV=docker_compose
+  app:
+    #image: app_with_img:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    #network_mode: "host"
+    volumes:
+      # cert location assumed by registryAuth.ts
+      - ./certs:/app/certs 
+    ports:
+       - '3000:3000'
+    depends_on:
+      - mongo
+      - minio
+      - redis
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      - NODE_CONFIG_ENV=docker_compose_prod
+      - ADD_CA_CERT=/app/certs/cert.pem
 
 volumes:
   minioVolume:
