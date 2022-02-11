@@ -66,14 +66,21 @@ services:
       MAILDEV_INCOMING_PASS: mailpass
 
   app:
-    #image: app_with_img:latest
     build:
+      args:
+        # set to your uid (get by running `id` or `echo ${UID}`)
+        # We do this so that you can mount the app directory into the container
+        # and the container user can access the files (and populate node_modules via npm install)
+        # This is only for developer convenience so that changes on host files are immediately 
+        # reflected in the running app
+        - user_id=REPLACE_WITH_UID
       context: .
       dockerfile: Dockerfile.dev
     #network_mode: "host"
     volumes:
       # cert location assumed by registryAuth.ts
       - ./certs:/home/user/app/certs 
+      - ./:/home/user/app
     ports:
        - '3000:3000'
     depends_on:
@@ -86,24 +93,6 @@ services:
     environment:
       - NODE_CONFIG_ENV=docker_compose
       - ADD_CA_CERT=/home/user/app/certs/cert.pem
-
-  # app:
-  #   build:
-  #     context: ./
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #      - ./:/app
-  #      - /app/node_modules
-  #      - /app/.next
-  #      - ./certs:/certs
-  #   depends_on:
-  #     - mongo
-  #     - minio
-  #     - redis
-  #   environment:
-  #     - NODE_CONFIG_ENV=docker_compose
 
 volumes:
   minioVolume:

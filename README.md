@@ -86,13 +86,16 @@ Bailo helps you manage the lifecycle of machine learning to support scalability,
 
 ### Installation:
 
+To run in development mode (modified files on your host machine will be reloaded into the running application):
+
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
 npm install
 npm run certs
-docker-compose up -d
-npm run dev
+sed "s/user_id=REPLACE_WITH_UID/user_id=$UID/" docker-compose-dev.yml > docker-compose-dev-personal.yml
+docker-compose -f docker-compose-dev-personal.yml up --force-recreate --build -d
 ```
+The creation of docker-compose-dev-personal.yml gives the application user the same uid as you on your host machine. This allows the application to run the app from the files on your host machine, and populate node_modules (via npm install).
 
 On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous.
 
