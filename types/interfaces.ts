@@ -169,6 +169,9 @@ export interface Step {
   schemaRef: string
 
   render: Function
+  renderBasic: Function
+  renderButtons: Function
+
   shouldValidate: boolean
   isComplete: Function
 }
