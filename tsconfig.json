@@ -27,7 +27,7 @@
       "@/data/*": ["data/*"],
       "@/src/*": ["src/*"],
       "@/types/*": ["types/*"],
-      "@/utils/*": ["utils/*"],
+      "@/utils/*": ["utils/*"]
     }
   },
   "exclude": ["dist", ".next", "out", "next.config.js", "node_modules"],
