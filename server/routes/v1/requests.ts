@@ -89,6 +89,7 @@ export const postRequestResponse = [
     let userId: ObjectId
     let requestType: RequestType
     let document: Document & { model: any; uuid: string }
+    
     if (request.version) {
       const version = await VersionModel.findById(request.version).populate('model')
       userId = version.model.owner

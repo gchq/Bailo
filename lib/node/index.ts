@@ -1,6 +1,10 @@
 import fetch from 'cross-fetch'
 import qs from 'qs'
+import { FormData } from 'formdata-node'
+import { FormDataEncoder } from 'form-data-encoder'
+import { Readable } from 'stream'
 
+type Response = 'Accepted' | 'Declined'
 class Request {
   request: any
   api: API
@@ -8,6 +12,12 @@ class Request {
   constructor(api: API, request: any) {
     this.request = request
     this.api = api
+  }
+
+  respond(response: Response) {
+    return this.api.apiPost(`/request/${this.request._id}/respond`, {
+      choice: response
+    })
   }
 }
 
@@ -91,7 +101,9 @@ type SchemaUse = 'UPLOAD' | 'DEPLOYMENT'
 
 type RequestUse = 'Upload' | 'Deployment'
 type RequestFilter = 'all' | 'mine'
-class API {
+
+interface File { stream: any }
+export default class API {
   base: string
 
   constructor(base: string) {
@@ -100,6 +112,17 @@ class API {
 
   apiGet(endpoint: string) {
     return fetch(`${this.base}${endpoint}`)
+      .then(res => res.json())
+  }
+
+  apiPost(endpoint: string, body: any) {
+    return fetch(`${this.base}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body),
+    })
       .then(res => res.json())
   }
 
@@ -115,6 +138,24 @@ class API {
     const model = await this.apiGet(`/model/${uuid}`)
 
     return new Model(this, model)
+  }
+
+  async postModel(code: File, binary: File, metadata: any) {
+    const form = new FormData()
+
+    form.append('code', code)
+    form.append('binary', binary)
+    form.append('metadata', JSON.stringify(metadata))
+
+    const encoder = new FormDataEncoder(form)
+    const res = await fetch(`${this.base}/model`, {
+      method: 'POST',
+      headers: encoder.headers,
+      body: Readable.from(encoder) as any
+    })
+      .then(res => res.json())
+
+    return res
   }
 
   async getDeployment(uuid: string) {
@@ -163,7 +204,7 @@ class API {
     return new User(this, user)
   }
 
-  async getRequests(type: RequestUse, filter: RequestFilter) {
+  async getRequests(type: RequestUse, filter?: RequestFilter): Promise<Array<Request>> {
     const { requests } = await this.apiGet(`/requests?${qs.stringify({
       type, filter
     })}`)
@@ -177,11 +218,3 @@ class API {
     return count
   }
 }
-
-async function main() {
-  const api = new API('http://localhost:8080/api/v1')
-
-  console.log(await api.getRequestCount())
-}
-
-main()
