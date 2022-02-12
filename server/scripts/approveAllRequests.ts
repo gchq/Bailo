@@ -15,7 +15,6 @@ async function approveAllRequests() {
   for (let upload of uploads) {
     const response = await upload.respond('Accepted')
     logger.info(response, 'Responded to upload')
-
   }
 
   const numRequests = uploads.length + deployments.length
