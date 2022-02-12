@@ -13,7 +13,8 @@
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "test": "jest",
-    "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts"
+    "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts",
+    "script": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tsconfig.server.json node --trace-warnings -r ts-node/register -r tsconfig-paths/register server/scripts/runScript.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.7.1",
@@ -43,6 +44,8 @@
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
     "express": "^4.17.2",
+    "form-data-encoder": "^1.7.1",
+    "formdata-node": "^4.3.2",
     "handlebars": "^4.7.7",
     "json-schema": "^0.4.0",
     "jsonschema": "^1.4.0",
@@ -58,6 +61,7 @@
     "node-fetch": "^3.1.0",
     "nodemailer": "^6.7.2",
     "nodemon": "^2.0.15",
+    "open": "^8.4.0",
     "pretty-ms": "^7.0.1",
     "qs": "^6.10.3",
     "react": "^17.0.2",
