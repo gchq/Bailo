@@ -73,9 +73,9 @@ services:
     #network_mode: "host"
     volumes:
       # cert location assumed by registryAuth.ts
-      - ./certs:/app/certs 
+      - ./certs:/app/certs
     ports:
-       - '3000:3000'
+      - '3000:3000'
     depends_on:
       - mongo
       - minio
