@@ -16,7 +16,10 @@ export default function createComplianceFlow(version: Version) {
   const success = green['A200']
   const inProgress = yellow['200']
 
-  const imageBuiltStyle = version.built ? success : inProgress
+  let imageBuiltStyle: string = version.built ? success : inProgress
+  if (version.state?.build?.state === 'failed') {
+    imageBuiltStyle = red['200']
+  }
 
   let managerApprovedStyle
   let reviewerApprovedStyle

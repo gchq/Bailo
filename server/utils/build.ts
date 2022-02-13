@@ -67,7 +67,16 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
     onStderr(data.trim())
   })
 
-  await new Promise((resolve) => childProcess.stdout!.on('close', resolve))
+  await new Promise((resolve, reject) => {
+    childProcess.on('exit', () => {
+      console.log('exit')
+      if (childProcess.exitCode !== 0) {
+        return reject(`Failed with status code ${childProcess.exitCode}`)
+      }
+
+      resolve({})
+    })
+  })
 }
 
 export async function buildPython(version: HydratedDocument<any>, builderFiles: BuilderFiles): Promise<string> {
