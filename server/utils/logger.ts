@@ -81,7 +81,7 @@ const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'trace',
+    level: 'info',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
