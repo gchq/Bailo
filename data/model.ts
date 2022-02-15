@@ -25,7 +25,18 @@ export function useListModels(type: ListModelType, filter?: string) {
 }
 
 export function useGetModel(uuid?: string) {
-  const { data, error, mutate } = useSWR<Model>(uuid ? `/api/v1/model/${uuid}` : null, fetcher)
+  const { data, error, mutate } = useSWR<Model>(uuid ? `/api/v1/model/uuid/${uuid}` : null, fetcher)
+
+  return {
+    mutateModel: mutate,
+    model: data,
+    isModelLoading: !error && !data,
+    isModelError: error,
+  }
+}
+
+export function useGetModelById(id?: string) {
+  const { data, error, mutate } = useSWR<Model>(id ? `/api/v1/model/id/${id}` : null, fetcher)
 
   return {
     mutateModel: mutate,
