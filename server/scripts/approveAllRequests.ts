@@ -2,7 +2,7 @@ import Bailo from '../../lib/node'
 import logger from '../utils/logger'
 
 async function approveAllRequests() {
-  const api = new Bailo('http://localhost:8080/api/v1')
+  const api = new Bailo('https://localhost:8080/api/v1')
 
   const deployments = await api.getRequests('Deployment')
   const uploads = await api.getRequests('Upload')

@@ -6,7 +6,7 @@ import logger from '../utils/logger'
 import open from 'open'
 
 async function uploadExampleModel() {
-  const api = new Bailo('http://localhost:8080/api/v1')
+  const api = new Bailo('https://localhost:8080/api/v1')
 
   const defaultSchema = await api.getDefaultSchema('UPLOAD')
 

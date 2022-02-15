@@ -96,7 +96,7 @@ const log = bunyan.createLogger({
   streams: streams.length ? streams : undefined,
 })
 
-const morganLog = morgan(
+const morganLog = morgan<any, any>(
   (tokens, req, res) => {
     req.log.trace(
       {
