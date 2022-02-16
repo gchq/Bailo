@@ -16,6 +16,7 @@ import { Deployment } from 'types/interfaces'
 import _, { Dictionary } from 'lodash'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
+import EmptyBlob from '../src/common/EmptyBlob'
 
 const ModelNameFromKey = ({ modelId }: { modelId: string }) => {
   const { model, isModelLoading } = useGetModelById(modelId)
@@ -28,7 +29,7 @@ const ModelNameFromKey = ({ modelId }: { modelId: string }) => {
 
 const Deployments = () => {
   const { currentUser } = useGetCurrentUser()
-  const { userDeployments, isUserDeploymentsLoading } = useGetUserDeployments(currentUser?._id)
+  const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
   const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
   const [groupedDeployments, setGroupedDeployments] = React.useState<
@@ -37,7 +38,7 @@ const Deployments = () => {
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
 
   React.useEffect(() => {
-    if (!isUserDeploymentsLoading && userDeployments !== undefined) {
+    if (!isUserDeploymentsLoading && !isUserDeploymentsError && userDeployments !== undefined) {
       const groups: Dictionary<[Deployment, ...Deployment[]]> = _.groupBy(
         userDeployments,
         (deployment) => deployment.model
@@ -59,7 +60,7 @@ const Deployments = () => {
   }
 
   React.useEffect(() => {
-    if (selectedOrder === 'name' && userDeployments !== undefined) {
+    if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
       let sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
         a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1
       )
@@ -141,6 +142,9 @@ const Deployments = () => {
                   })}
               </Box>
             )}
+            <Box>
+              {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
+            </Box>
           </Paper>
         </Box>
       </Wrapper>
