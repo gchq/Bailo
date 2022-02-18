@@ -2,7 +2,7 @@
 
 If you’re looking for an existing issue to help with, check out the [help wanted tickets](https://github.com/gchq/bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on GitHub. If you see any that you’re interested in working on, comment on it to let everyone know you’re working on it. If there’s no ticket for what you want to contribute, start a [new issue](https://github.com/gchq/bailo/issues) to discuss whether it follows the aims of this project. We ask this even for bugs, as there may be multiple solutions to be considered.
 
-Prior to us accepting any work, you must sign the [GCHQ CLA Agreement](). We follow a branching strategy for handling contributions:
+Prior to us accepting any work, you must sign the [GCHQ CLA Agreement](https://cla-assistant.io/gchq/Bailo). We follow a branching strategy for handling contributions:
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/new_thing`)
