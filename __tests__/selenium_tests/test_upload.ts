@@ -4,6 +4,7 @@ import path from 'path'
 import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
+import Bailo from '../../lib/node'
 
 import {
   clearData,
@@ -34,7 +35,7 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
-    await driver.sleep(500) // give some time for page to refresh
+    await driver.sleep(1000) // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
     const curApprovalButtons = await driver.findElements(By.css('[data-test="approveButton"]'))
     expect(curApprovalButtons.length).toEqual(approvalButtons.length - 1)
@@ -72,11 +73,25 @@ describe('End to end test', () => {
       modelInfo.url = modelUrl
       modelInfo.name = mName
 
+      const api = new Bailo(`${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`)
+      const model = await api.getModel(modelInfo.name)
+
+      while(true) {
+        const version = await model.getVersion('1')
+        
+        if (version.version.built) {
+          break
+        }
+
+        logger.info('Model not built, retrying in 2 seconds.')
+        await pause(2000)
+      }
+
       logger.info(modelInfo, 'Received model information')
     } finally {
       await driver.quit()
     }
-  }, 70000)
+  }, 120000)
 
   test('test can approve models', async () => {
     const driver = await getDriver()
