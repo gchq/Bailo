@@ -6,8 +6,11 @@ import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
 import { getAdminToken } from '../routes/v1/registryAuth'
 import { Forbidden, Unauthorised } from './result'
+import Authorisation from '../external/Authorisation'
 
-export async function findUser(userId: string, email?: string) {
+const authorisation = new Authorisation()
+
+export async function findUser({ userId, email, data }: { userId: string, email?: string, data?: any }) {
   // findOneAndUpdate is atomic, so we don't need to worry about
   // multiple threads calling this simultaneously.
   return await UserModel.findOneAndUpdate(
@@ -77,12 +80,11 @@ const findUserCached = memoize(findUser, {
 })
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {
-  const userId = req.get('x-userid')
-  const email = req.get('x-email')
+  const userInfo = await authorisation.getUserFromReq(req)
 
-  if (!userId || !email) return next()
+  if (!userInfo.userId || !userInfo.email) return next()
 
-  const user = await findUserCached(userId, email)
+  const user = await findUserCached(userInfo)
   req.user = user
 
   next()
