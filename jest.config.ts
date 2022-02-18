@@ -14,6 +14,7 @@ const customJestConfig: Config.InitialOptions = {
     '^@/components/(.*)$': '<rootDir>/components/$1',
   },
   testPathIgnorePatterns: ['__tests__/__utils__', 'config'],
+  bail: true,
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

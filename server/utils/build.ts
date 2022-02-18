@@ -57,7 +57,7 @@ export async function logCommand(command: string, log: Function) {
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
+export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {  
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout!.on('data', (data) => {
     onStdout(data.trim())
