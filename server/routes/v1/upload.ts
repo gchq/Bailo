@@ -157,6 +157,8 @@ export const postUpload = [
           currentMetadata: metadata,
 
           owner: req.user?._id,
+        }, null, {
+          user: req.user
         })
       }
 
