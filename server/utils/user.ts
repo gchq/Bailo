@@ -75,7 +75,7 @@ const findUserCached = memoize(findUser, {
   maxAge: 5000,
   normalizer: (args: any) => {
     return JSON.stringify(args[0])
-  }
+  },
 })
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {

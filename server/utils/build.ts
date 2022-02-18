@@ -57,7 +57,7 @@ export async function logCommand(command: string, log: Function) {
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {  
+export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout!.on('data', (data) => {
     onStdout(data.trim())
@@ -71,7 +71,9 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
     childProcess.on('exit', () => {
       console.log('exit')
       if (childProcess.exitCode !== 0 && !opts.silentErrors) {
-        return reject(`Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`)
+        return reject(
+          `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+        )
       }
 
       resolve({})
