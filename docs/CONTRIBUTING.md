@@ -17,7 +17,7 @@ This is a list of steps you should make prior to making a pull request
 ##### Pre Coding
 
 - Make sure the PR links to an issue.
-- Sign the CLA ([GCHQ CLA Agreement]())
+- Sign the CLA ([GCHQ CLA Agreement](https://cla-assistant.io/gchq/Bailo))
 
 ##### Post Coding
 
