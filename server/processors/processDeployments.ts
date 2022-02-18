@@ -2,14 +2,14 @@ import DeploymentModel from '../models/Deployment'
 import { deploymentQueue } from '../utils/queues'
 import config from 'config'
 import prettyMs from 'pretty-ms'
-// import https from 'https'
+import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
 import UserModel from '../models/User'
 
-// const httpsAgent = new https.Agent({
-//   rejectUnauthorized: !config.get('registry.insecure'),
-// })
+const _httpsAgent = new https.Agent({
+  rejectUnauthorized: !config.get('registry.insecure'),
+})
 
 export default function processDeployments() {
   deploymentQueue.process(async (job) => {
