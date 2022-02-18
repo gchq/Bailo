@@ -73,12 +73,14 @@ describe('End to end test', () => {
       modelInfo.url = modelUrl
       modelInfo.name = mName
 
-      const api = new Bailo(`${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`)
+      const api = new Bailo(
+        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+      )
       const model = await api.getModel(modelInfo.name)
 
-      while(true) {
+      while (true) {
         const version = await model.getVersion('1')
-        
+
         if (version.version.built) {
           break
         }
