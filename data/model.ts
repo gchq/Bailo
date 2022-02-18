@@ -4,7 +4,7 @@ import qs from 'qs'
 import { fetcher } from '../utils/fetcher'
 import { Deployment, Model, Schema, Version } from '../types/interfaces'
 
-export type ListModelType = 'starred' | 'mine' | 'all'
+export type ListModelType = 'favourites' | 'mine' | 'all'
 export function useListModels(type: ListModelType, filter?: string) {
   const { data, error, mutate } = useSWR<{
     models: Array<Model>

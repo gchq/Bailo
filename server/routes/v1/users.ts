@@ -45,7 +45,7 @@ export const favouriteModel = [
     const user = await UserModel.findOne({ id: req.user!.id })
     const modelId = req.params.id
     const model = await ModelModel.findById({ _id: modelId })
-
+    console.log(user.favourites.includes(modelId))
     if (model === undefined || user.favourites.includes(modelId)) {
       throw BadReq({ modelId }, `Unable to favourite model '${modelId}'`)
     } else {
