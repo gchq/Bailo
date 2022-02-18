@@ -22,7 +22,7 @@ const RadioWidget = ({
 }: WidgetProps) => {
   const { enumOptions, enumDisabled } = options
 
-  const _onChange = ({}, value: any) => onChange(schema.type == 'boolean' ? value !== 'false' : value)
+  const _onChange = (_: any, value: any) => onChange(schema.type == 'boolean' ? value !== 'false' : value)
   const _onBlur = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, value)
   const _onFocus = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value)
 
