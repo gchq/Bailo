@@ -97,7 +97,7 @@ const log = bunyan.createLogger({
 })
 
 const morganLog = morgan(
-  (tokens, req, res) => {
+  (tokens: any, req: any, res: any) => {
     req.log.trace(
       {
         url: tokens.url(req, res),
