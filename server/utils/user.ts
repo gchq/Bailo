@@ -72,8 +72,10 @@ export async function getUserFromAuthHeader(header: string): Promise<{ error?: s
 // cache user status for
 const findUserCached = memoize(findUser, {
   promise: true,
-  primitive: true,
   maxAge: 5000,
+  normalizer: (args: any) => {
+    return JSON.stringify(args[0])
+  }
 })
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {
