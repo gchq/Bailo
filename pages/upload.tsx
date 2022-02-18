@@ -9,14 +9,14 @@ import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
 import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
 import { Schema, Step, User } from '@/types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '@/utils/formUtils'
+import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
-import RenderBasicFileTab, { BasicFileTabComplete } from '@/src/Form/RenderBasicFileTab'
+import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 
@@ -27,7 +27,7 @@ function renderSubmissionTab(
   activeStep: number,
   setActiveStep: Function,
   onSubmit: Function,
-  _openValidateError: Boolean,
+  _openValidateError: boolean,
   _setOpenValidateError: Function
 ) {
   const data = getStepsData(steps)

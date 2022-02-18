@@ -37,7 +37,6 @@ const TextWidget = ({
   const displayLabel = getDisplayLabel(
     schema,
     uiSchema
-    /* TODO: , rootSchema */
   )
   const inputType = (type || schema.type) === 'string' ? 'text' : `${type || schema.type}`
 
