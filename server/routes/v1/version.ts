@@ -45,7 +45,7 @@ export const putVersion = [
     await version.save()
 
     req.log.info('Creating version requests')
-    const requests = await createVersionRequests({ version })
+    await createVersionRequests({ version })
 
     return res.json(version)
   },
@@ -67,7 +67,8 @@ export const resetVersionApprovals = [
     version.reviewerApproved = 'No Response'
     await version.save()
     req.log.info('Creating version requests')
-    const requests = await createVersionRequests({ version })
+    await createVersionRequests({ version })
+    
     return res.json(version)
   },
 ]

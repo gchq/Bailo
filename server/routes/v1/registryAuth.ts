@@ -66,10 +66,9 @@ function formatKid(keyBuffer: Buffer) {
 async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha512').update(der).digest().slice(0, 30)
-  const kid = formatKid(hash)
+  const hash = createHash('sha512').update(der).digest().slice(0, 30) 
 
-  return kid
+  return formatKid(hash)
 }
 
 async function encodeToken(data, { expiresIn }) {

@@ -18,13 +18,11 @@ export async function createDeploymentRequests({ version, deployment }: { versio
     )
   }
 
-  const managerRequest = await createDeploymentRequest({
+  return await createDeploymentRequest({
     user: manager,
     deployment: deployment,
     approvalType: 'Manager',
   })
-
-  return managerRequest
 }
 
 export async function createVersionRequests({ version }: { version: Version }) {
@@ -57,13 +55,13 @@ export async function createVersionRequests({ version }: { version: Version }) {
     approvalType: 'Manager',
   })
 
-  const reviewRequest = createVersionRequest({
+  const reviewerRequest = createVersionRequest({
     user: reviewer,
     version: version,
     approvalType: 'Reviewer',
   })
 
-  return await Promise.all([managerRequest, reviewRequest])
+  return await Promise.all([managerRequest, reviewerRequest])
 }
 
 type DeploymentApprovalType = 'Manager'

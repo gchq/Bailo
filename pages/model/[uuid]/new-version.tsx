@@ -5,15 +5,14 @@ import Paper from '@mui/material/Paper'
 import { useGetModel } from '../../../data/model'
 
 import Wrapper from '../../../src/Wrapper'
-import { useGetDefaultSchema, useGetSchema, useGetSchemas } from '../../../data/schema'
+import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { Schema, Step } from '../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../../../utils/formUtils'
+import { Step } from '../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
-import { putEndpoint } from 'data/api'
 import useCacheVariable from 'utils/useCacheVariable'
 
 const uiSchema = {
@@ -99,12 +98,12 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let error = upload.statusText
+      let errorMessage = upload.statusText
       try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
+        errorMessage = `${upload.statusText}: ${(await upload.json()).message}`
       } catch (e) {}
 
-      return setError(error)
+      return setError(errorMessage)
     }
 
     const { uuid } = await upload.json()

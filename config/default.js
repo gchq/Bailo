@@ -76,4 +76,6 @@ module.exports = {
     host: 'localhost',
     port: 8080,
   },
+
+  listen: 3000
 }
