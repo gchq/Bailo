@@ -96,7 +96,7 @@ class Model {
   }
 }
 
-type ModelsType = 'starred' | 'mine' | 'all'
+type ModelsType = 'favourites' | 'mine' | 'all'
 type SchemaUse = 'UPLOAD' | 'DEPLOYMENT'
 
 type RequestUse = 'Upload' | 'Deployment'

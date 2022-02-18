@@ -12,8 +12,8 @@ export const getModels = [
     const { type, logs, filter } = req.query
     const query: any = filter ? { $text: { $search: filter as string } } : {}
 
-    if (type === 'starred') {
-      req.log.info('Limiting model requests to starred')
+    if (type === 'favourites') {
+      req.log.info('Limiting model requests to favourites')
       query._id = {
         $in: req.user?.favourites,
       }

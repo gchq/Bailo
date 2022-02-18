@@ -36,7 +36,7 @@ import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { Deployment, Version } from '../../types/interfaces'
+import { Deployment, User, Version } from '../../types/interfaces'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
@@ -59,21 +59,19 @@ const Model = () => {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
-  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<any>(null)
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
+  const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
 
+  const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
-  const { deployments, isDeploymentsLoading } = useGetModelDeployments(uuid)
-
-  const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
+  const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
 
@@ -99,7 +97,7 @@ const Model = () => {
     if (version) {
       setComplianceFlow(createComplianceFlow(version))
     }
-  }, [version])
+  }, [version, setComplianceFlow])
 
   useEffect(() => {
     if (!isCurrentUserLoading && currentUser !== undefined && version?.model !== undefined) {
@@ -110,10 +108,12 @@ const Model = () => {
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isVersionsError,
     isVersionError,
+    isDeploymentsError,
+    isCurrentUserError,
   })
   if (error) return error
 
-  if (isVersionsLoading || isVersionLoading || isDeploymentsLoading) {
+  if (isVersionsLoading || isVersionLoading || isDeploymentsLoading || isCurrentUserLoading) {
     return <Wrapper title={'Loading...'} page={'model'} />
   }
 
@@ -133,18 +133,14 @@ const Model = () => {
     setAnchorEl(null)
   }
 
-  const toggleFavourite = async () => {
+  const setModelFavourite = async (favourite: boolean) => {
     if (version?.model !== undefined) {
-      const apiAddress = currentUser?.favourites.includes(version?.model as unknown as Types.ObjectId)
-        ? 'unfavourite'
-        : 'favourite'
-      await postEndpoint(`/api/v1/user/${apiAddress}/${version?.model}`, {})
-        .then(async (res) => {
-          return res.text()
-        })
-        .then(function (data) {
-          const updatedUser = JSON.parse(data)
-          setModelFavourited(updatedUser.favourites.includes(version?.model))
+      setFavouriteButtonDisabled(true)
+      await postEndpoint(`/api/v1/user/${favourite ? 'favourite' : 'unfavourite'}/${version?.model}`, {})
+        .then((res) => res.json())
+        .then((user: User) => {
+          setFavouriteButtonDisabled(false)
+          mutateCurrentUser(user)
         })
     }
   }
@@ -191,24 +187,26 @@ const Model = () => {
                   <ListItemText>Request deployment</ListItemText>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={toggleFavourite}>
-                  {!modelFavourited && (
+                {!modelFavourited && (
+                  <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
                     <>
                       <ListItemIcon>
                         <FavoriteBorder fontSize='small' />
                       </ListItemIcon>
                       <ListItemText>Favourite</ListItemText>
                     </>
-                  )}
-                  {modelFavourited && (
+                  </MenuItem>
+                )}
+                {modelFavourited && (
+                  <MenuItem onClick={() => setModelFavourite(false)} disabled={favouriteButtonDisabled}>
                     <>
                       <ListItemIcon>
                         <Favorite fontSize='small' />
                       </ListItemIcon>
                       <ListItemText>Unfavourite</ListItemText>
                     </>
-                  )}
-                </MenuItem>
+                  </MenuItem>
+                )}
                 <MenuItem
                   onClick={editModel}
                   disabled={
