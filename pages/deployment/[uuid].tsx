@@ -171,7 +171,7 @@ export default function Deployment() {
               </MenuItem>
             </MenuList>
           </Menu>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
             <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
