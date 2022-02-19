@@ -153,7 +153,7 @@ export async function expressErrorHandler(
   }
 
   const localLogger = err.logger || req.log
-  
+
   localLogger.warn(err.data, err.message)
   return res.status(err.code || 500).json({
     message: err.message,
