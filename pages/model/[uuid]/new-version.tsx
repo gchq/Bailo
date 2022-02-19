@@ -39,9 +39,9 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
+    const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
 
-    steps.push(
+    schemaSteps.push(
       createStep({
         schema: {
           title: 'Files',
@@ -53,7 +53,7 @@ function Upload() {
         schemaRef: cModel.schemaRef,
 
         type: 'Data',
-        index: steps.length,
+        index: schemaSteps.length,
         section: 'files',
 
         render: RenderFileTab,
@@ -61,7 +61,7 @@ function Upload() {
       })
     )
 
-    setSteps(steps)
+    setSteps(schemaSteps)
   }, [cModel, cSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
