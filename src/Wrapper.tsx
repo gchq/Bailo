@@ -138,7 +138,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     paddingBottom: 0,
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
-        color: theme.palette.secondary.main,
+        color: globalTheme.palette.secondary.main,
       },
     },
   })

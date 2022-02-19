@@ -5,7 +5,6 @@ import Box from '@mui/material/Box'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 import { useGetSchemas } from '../data/schema'
-import { Schema } from '../types/interfaces'
 
 const MetadataDisplay = ({
   item,
@@ -16,7 +15,7 @@ const MetadataDisplay = ({
   tabsDisplaySequentially: boolean
   use: any
 }) => {
-  const { schemas, isSchemasLoading } = useGetSchemas(use)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(use)
   const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
 
   const [schema, setSchema] = useState<any | undefined>(undefined)
@@ -25,8 +24,7 @@ const MetadataDisplay = ({
   useEffect(() => {
     if (!schemas) return
 
-    const currentSchema = schemas!.filter((schema) => schema.reference == item.schemaRef)[0].schema
-
+    const currentSchema = schemas.filter(({ reference }) => reference == item.schemaRef)[0].schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) => !propertiesToIgnore.includes(sectionName)
     )
@@ -34,6 +32,18 @@ const MetadataDisplay = ({
     setSchema(currentSchema)
     setSectionKeys(keys)
   }, [schemas, setSchema, setSectionKeys])
+
+  if (isSchemasLoading) {
+    return <Typography variant='body1' component='p'>
+      Loading Schemas
+    </Typography>
+  }
+
+  if (isSchemasError) {
+    return <Typography variant='body1' component='p'>
+      Error Loading Schemas
+    </Typography>
+  }
 
   const heading = (text: any) => (
     <Typography variant='h4' color='textPrimary'>
