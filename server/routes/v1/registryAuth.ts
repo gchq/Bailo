@@ -187,9 +187,9 @@ export const getDockerRegistryAuth = [
     }
 
     if (isOfflineToken) {
-      const offlineToken = await getRefreshToken(user)
+      const refreshToken = await getRefreshToken(user)
       rlog.info('Successfully generated offline token')
-      return res.json({ token: offlineToken })
+      return res.json({ token: refreshToken })
     }
 
     if (!scope) {
