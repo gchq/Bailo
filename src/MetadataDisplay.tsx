@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 import { useGetSchemas } from '../data/schema'
+import { Schema } from '../types/interfaces'
 
 const MetadataDisplay = ({
   item,
@@ -17,14 +18,23 @@ const MetadataDisplay = ({
 }) => {
   const { schemas, isSchemasLoading } = useGetSchemas(use)
   const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
-  let schema: any = undefined
-  let sectionKeys: any = []
 
-  if (!isSchemasLoading) {
-    schema = schemas!.filter((schema) => schema.reference == item.schemaRef)[0].schema
-    sectionKeys = Object.keys(schema.properties)
-    sectionKeys = sectionKeys.filter((sectionName: any) => !propertiesToIgnore.includes(sectionName))
-  }
+  const [schema, setSchema] = useState<any | undefined>(undefined)
+  const [sectionKeys, setSectionKeys] = useState<string[]>([])
+
+  useEffect(() => {
+    if (!schemas) return
+
+    const currentSchema = schemas!.filter(
+      (schema) => schema.reference == item.schemaRef
+    )[0].schema
+
+    const keys = Object.keys(currentSchema.properties)
+      .filter(sectionName => !propertiesToIgnore.includes(sectionName))
+    
+    setSchema(currentSchema)
+    setSectionKeys(keys)    
+  }, [schemas, setSchema, setSectionKeys])
 
   const heading = (text: any) => (
     <Typography variant='h4' color='textPrimary'>
@@ -108,14 +118,16 @@ const MetadataDisplay = ({
       return null
     }
 
-    return sectionKeys.map((key: any, i: any) => {
+    return sectionKeys.map((key, i) => {
+      const divider = i + 1 < sectionKeys.length ? <Divider variant='middle' sx={{ mt: 2, mb: 4 }} /> : null
+
       return schema.properties[key] ? (
         <div key={key}>
           <div id={`${key}-section-id`}>
             {heading(`${schema.properties[key].title}`)}
             {printProps(schema.properties[key], item[key])}
           </div>
-          {i + 1 < sectionKeys.length ? <Divider variant='middle' sx={{ mt: 2, mb: 4 }} /> : null}
+          {divider}
         </div>
       ) : null
     })

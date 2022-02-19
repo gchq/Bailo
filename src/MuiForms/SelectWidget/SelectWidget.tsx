@@ -59,11 +59,11 @@ const SelectWidget = ({
 
   const emptyValue = multiple ? [] : ''
 
-  const _onChange = ({ target: { value } }: React.ChangeEvent<{ name?: string; value: unknown }>) =>
-    onChange(processValue(schema, value))
-  const _onBlur = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, processValue(schema, value))
-  const _onFocus = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) =>
-    onFocus(id, processValue(schema, value))
+  const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<{ name?: string; value: unknown }>) =>
+    onChange(processValue(schema, newValue))
+  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, processValue(schema, newValue))
+  const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) =>
+    onFocus(id, processValue(schema, newValue))
 
   return (
     <TextField
@@ -85,10 +85,10 @@ const SelectWidget = ({
         multiple: typeof multiple === 'undefined' ? false : multiple,
       }}
     >
-      {(enumOptions as any).map(({ value, label }: any, i: number) => {
-        const disabled: any = enumDisabled && (enumDisabled as any).indexOf(value) != -1
+      {(enumOptions as any).map(({ value: optionValue, label }: any, i: number) => {
+        const disabled: any = enumDisabled && (enumDisabled as any).indexOf(optionValue) != -1
         return (
-          <MenuItem key={i} value={value} disabled={disabled}>
+          <MenuItem key={i} value={optionValue} disabled={disabled}>
             {label}
           </MenuItem>
         )

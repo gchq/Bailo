@@ -19,6 +19,7 @@ import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
 import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
+import { getErrorMessage } from '@/utils/fetcher'
 
 function renderSubmissionTab(
   step: Step,
@@ -86,9 +87,9 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const steps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
+    const schemaSteps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
 
-    steps.push(
+    schemaSteps.push(
       createStep({
         schema: {
           title: 'Files',
@@ -100,7 +101,7 @@ function Upload() {
         schemaRef: reference,
 
         type: 'Data',
-        index: steps.length,
+        index: schemaSteps.length,
         section: 'files',
 
         render: RenderFileTab,
@@ -109,7 +110,7 @@ function Upload() {
       })
     )
 
-    steps.push(
+    schemaSteps.push(
       createStep({
         schema: {
           title: 'Submission',
@@ -118,7 +119,7 @@ function Upload() {
         schemaRef: reference,
 
         type: 'Message',
-        index: steps.length,
+        index: schemaSteps.length,
         section: 'submission',
 
         render: () => <></>,
@@ -127,7 +128,7 @@ function Upload() {
       })
     )
 
-    setSteps(steps)
+    setSteps(schemaSteps)
   }, [currentSchema, user])
 
   const errorWrapper = MultipleErrorWrapper(
@@ -170,12 +171,7 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let error = upload.statusText
-      try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
-
-      return setError(error)
+      return setError(await getErrorMessage(upload))
     }
 
     const { uuid } = await upload.json()

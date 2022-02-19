@@ -77,5 +77,5 @@ module.exports = {
     port: 8080,
   },
 
-  listen: 3000
+  listen: 3000,
 }

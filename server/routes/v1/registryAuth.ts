@@ -66,7 +66,7 @@ function formatKid(keyBuffer: Buffer) {
 async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha512').update(der).digest().slice(0, 30) 
+  const hash = createHash('sha512').update(der).digest().slice(0, 30)
 
   return formatKid(hash)
 }
@@ -187,9 +187,9 @@ export const getDockerRegistryAuth = [
     }
 
     if (isOfflineToken) {
-      const token = await getRefreshToken(user)
+      const offlineToken = await getRefreshToken(user)
       rlog.info('Successfully generated offline token')
-      return res.json({ token })
+      return res.json({ token: offlineToken })
     }
 
     if (!scope) {

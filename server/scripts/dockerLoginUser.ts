@@ -1,5 +1,4 @@
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
-
 ;(async () => {
   await connectToMongoose()
 

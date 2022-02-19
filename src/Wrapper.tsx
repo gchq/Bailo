@@ -27,7 +27,7 @@ import Banner from './Banner'
 import { useGetNumRequests } from '../data/requests'
 import Image from 'next/image'
 import Tooltip from '@mui/material/Tooltip'
-import theme from '../src/theme'
+import globalTheme from '../src/theme'
 import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
 
@@ -144,7 +144,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
   })
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={globalTheme}>
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />

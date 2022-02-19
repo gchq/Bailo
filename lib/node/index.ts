@@ -153,7 +153,7 @@ export default class API {
       method: 'POST',
       headers: encoder.headers,
       body: Readable.from(encoder) as any,
-    }).then(res => res.json())
+    }).then((res) => res.json())
   }
 
   async getDeployment(uuid: string) {
