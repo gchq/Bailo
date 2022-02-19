@@ -61,7 +61,8 @@ const SelectWidget = ({
 
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<{ name?: string; value: unknown }>) =>
     onChange(processValue(schema, newValue))
-  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, processValue(schema, newValue))
+  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) =>
+    onBlur(id, processValue(schema, newValue))
   const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) =>
     onFocus(id, processValue(schema, newValue))
 

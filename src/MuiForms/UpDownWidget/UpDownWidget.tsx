@@ -23,10 +23,7 @@ const UpDownWidget = ({
   const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, newValue)
 
   return (
-    <FormControl
-      fullWidth={true}
-      required={required}
-    >
+    <FormControl fullWidth={true} required={required}>
       <InputLabel>{label}</InputLabel>
       <Input
         id={id}
