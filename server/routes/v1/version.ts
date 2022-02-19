@@ -68,7 +68,7 @@ export const resetVersionApprovals = [
     await version.save()
     req.log.info('Creating version requests')
     await createVersionRequests({ version })
-    
+
     return res.json(version)
   },
 ]

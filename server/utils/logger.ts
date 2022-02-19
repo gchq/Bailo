@@ -37,7 +37,6 @@ class Writer {
   getSrc(src) {
     const line = src.file.replace(this.basepath, '')
     return `${line}:${src.line}`
-    // return `${line}:${src.line}${src.func ? ` in ${src.func}` : ''}`
   }
 
   getAttributes(data) {
@@ -69,8 +68,9 @@ class Writer {
     const level = this.getLevel(data.level)
     const src = this.getSrc(data.src)
     const attributes = this.getAttributes(data)
+    const formattedAttributes = attributes.length ? ` (${attributes})` : ''
 
-    const message = `${level} - (${src}): ${data.msg}${attributes.length ? ` (${attributes})` : ''}`
+    const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
     process[pipe].write(message + '\n')
@@ -152,7 +152,9 @@ export async function expressErrorHandler(
     throw err
   }
 
-  ;(err.logger || req.log).warn(err.data, err.message)
+  const localLogger = err.logger || req.log
+  
+  localLogger.warn(err.data, err.message)
   return res.status(err.code || 500).json({
     message: err.message,
   })

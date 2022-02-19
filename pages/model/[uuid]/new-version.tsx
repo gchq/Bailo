@@ -13,7 +13,8 @@ import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/for
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
-import useCacheVariable from 'utils/useCacheVariable'
+import useCacheVariable from '../../../utils/useCacheVariable'
+import { getErrorMessage } from '../../../utils/fetcher'
 
 const uiSchema = {
   contacts: {
@@ -98,12 +99,7 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let errorMessage = upload.statusText
-      try {
-        errorMessage = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
-
-      return setError(errorMessage)
+      return setError(await getErrorMessage(upload))
     }
 
     const { uuid } = await upload.json()

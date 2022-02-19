@@ -1,6 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
 import fs from 'fs/promises'
-import path from 'path'
 import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
@@ -34,8 +33,10 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
-    await driver.sleep(500) // give some time for page to refresh
+    // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
+    await driver.sleep(500)
+
     const curApprovalButtons = await driver.findElements(By.css('[data-test="approveButton"]'))
     expect(curApprovalButtons.length).toEqual(approvalButtons.length - 1)
     approvalButtons = curApprovalButtons

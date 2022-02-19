@@ -4,7 +4,6 @@ import packageInfo from '../../package.json'
 // This script requires 'license-checker'
 //   npm i -g license-checker
 export default async function runScript() {
-
   const { stdout } = exec('license-checker --json', { silent: true })
   const licenses = JSON.parse(stdout)
 

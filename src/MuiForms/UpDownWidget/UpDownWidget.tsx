@@ -18,14 +18,13 @@ const UpDownWidget = ({
   onFocus,
   autofocus,
 }: WidgetProps) => {
-  const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => onChange(value)
-  const _onBlur = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, value)
-  const _onFocus = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value)
+  const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) => onChange(newValue)
+  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
+  const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, newValue)
 
   return (
     <FormControl
       fullWidth={true}
-      //error={!!rawErrors}
       required={required}
     >
       <InputLabel>{label}</InputLabel>

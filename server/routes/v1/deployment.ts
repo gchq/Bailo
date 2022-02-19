@@ -128,7 +128,7 @@ export const resetDeploymentApprovals = [
     await deployment.save()
     req.log.info('Creating deployment requests')
     await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
-    
+
     return res.json(deployment)
   },
 ]

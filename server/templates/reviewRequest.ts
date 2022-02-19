@@ -55,9 +55,21 @@ export function html({ document, requestType }: ReviewRequestContext) {
   ).html
 }
 
-export function text({ document }: ReviewRequestContext) {
+export function text({ document, requestType }: ReviewRequestContext) {
+  const { requester, uploader } = document.model.currentMetadata.contacts
+  const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
+
+  const requestUrl =
+    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+
   return dedent(`
-    You have been requested to review '${document.model.currentMetadata.highLevelDetails.name}' on Bailo
+    You have been requested to review '${document.model.currentMetadata.highLevelDetails.name}' on Bailo.
+
+    RequestType: '${requestType}'
+    Uploader: '${uploader ?? requester}'
+
+    Open ${requestType}: ${requestUrl}
+    See Reviews: ${base}/review
   `)
 }
 
