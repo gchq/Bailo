@@ -25,15 +25,14 @@ const MetadataDisplay = ({
   useEffect(() => {
     if (!schemas) return
 
-    const currentSchema = schemas!.filter(
-      (schema) => schema.reference == item.schemaRef
-    )[0].schema
+    const currentSchema = schemas!.filter((schema) => schema.reference == item.schemaRef)[0].schema
 
-    const keys = Object.keys(currentSchema.properties)
-      .filter(sectionName => !propertiesToIgnore.includes(sectionName))
-    
+    const keys = Object.keys(currentSchema.properties).filter(
+      (sectionName) => !propertiesToIgnore.includes(sectionName)
+    )
+
     setSchema(currentSchema)
-    setSectionKeys(keys)    
+    setSectionKeys(keys)
   }, [schemas, setSchema, setSectionKeys])
 
   const heading = (text: any) => (
