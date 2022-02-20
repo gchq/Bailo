@@ -10,7 +10,7 @@ imagePullSecrets: []
 
 # Instance scaling
 # ReplicateCount ignored if autoscaling is enabled
-replicaCount: 1 
+replicaCount: 1
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -21,10 +21,10 @@ autoscaling:
 # Pod Security
 podSecurityContext: {}
   # fsGroup: 2000
-securityContext: 
+securityContext:
   capabilities:
-   drop:
-     - ALL
+    drop:
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
