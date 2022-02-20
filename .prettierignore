@@ -19,5 +19,6 @@ yarn-error.log*
 
 /dist
 /certs
+/.scannerwork
 
 public/css/fonts.css
