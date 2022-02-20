@@ -34,15 +34,19 @@ const MetadataDisplay = ({
   }, [schemas, setSchema, setSectionKeys])
 
   if (isSchemasLoading) {
-    return <Typography variant='body1' component='p'>
-      Loading Schemas
-    </Typography>
+    return (
+      <Typography variant='body1' component='p'>
+        Loading Schemas
+      </Typography>
+    )
   }
 
   if (isSchemasError) {
-    return <Typography variant='body1' component='p'>
-      Error Loading Schemas
-    </Typography>
+    return (
+      <Typography variant='body1' component='p'>
+        Error Loading Schemas
+      </Typography>
+    )
   }
 
   const heading = (text: any) => (
