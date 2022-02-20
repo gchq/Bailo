@@ -21,3 +21,4 @@ yarn-error.log*
 /certs
 
 public/css/fonts.css
+helm/**/*.yaml
