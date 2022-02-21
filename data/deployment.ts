@@ -17,10 +17,8 @@ export function useGetDeployment(uuid?: string) {
   }
 }
 
-export function useGetUserDeployments(_id?: Types.ObjectId) {
-  const { data, error, mutate } = useSWR<Array<Deployment>>(_id ? `/api/v1/deployment/user/${_id}` : null, fetcher, {
-    refreshInterval: 1000,
-  })
+export function useGetUserDeployments(_id?: string | Types.ObjectId) {
+  const { data, error, mutate } = useSWR<Array<Deployment>>(_id ? `/api/v1/deployment/user/${_id}` : null, fetcher)
 
   return {
     mutateUserDeployments: mutate,

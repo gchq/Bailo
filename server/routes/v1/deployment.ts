@@ -35,10 +35,6 @@ export const getUserDeployments = [
 
     const deployment = await DeploymentModel.find({ owner: id })
 
-    if (!deployment) {
-      throw NotFound({ id }, `Unable to find deployments for '${id}'`)
-    }
-
     return res.json(deployment)
   },
 ]
