@@ -13,7 +13,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
 import FormLabel from '@mui/material/FormLabel'
 import { Deployment } from '../types/interfaces'
-import _, { Dictionary } from 'lodash'
+import _ from 'lodash'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
 import EmptyBlob from '../src/common/EmptyBlob'
@@ -27,19 +27,21 @@ const ModelNameFromKey = ({ modelId }: { modelId: string }) => {
   }
 }
 
+interface GroupedDeployments {
+  [key: string]: Deployment[]
+}
+
 const Deployments = () => {
   const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
   const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
-  const [groupedDeployments, setGroupedDeployments] = React.useState<
-    Dictionary<[Deployment, ...Deployment[]]> | undefined
-  >(undefined)
+  const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
 
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
-      const groups: Dictionary<[Deployment, ...Deployment[]]> = _.groupBy(
+      const groups: GroupedDeployments = _.groupBy(
         userDeployments,
         (deployment) => deployment.model
       )
