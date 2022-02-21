@@ -39,7 +39,7 @@ const CheckboxesWidget = ({
   const _onChange =
     (option: any) =>
     ({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
-      const all = (enumOptions as any).map(({ value }: any) => value)
+      const all = (enumOptions as any).map(({ value: newValue }: any) => newValue)
 
       if (checked) {
         onChange(selectValue(option.value, value, all))
@@ -48,8 +48,8 @@ const CheckboxesWidget = ({
       }
     }
 
-  const _onBlur = ({ target: { value } }: React.FocusEvent<HTMLButtonElement>) => onBlur(id, value)
-  const _onFocus = ({ target: { value } }: React.FocusEvent<HTMLButtonElement>) => onFocus(id, value)
+  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLButtonElement>) => onBlur(id, newValue)
+  const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLButtonElement>) => onFocus(id, newValue)
 
   return (
     <>

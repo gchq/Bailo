@@ -29,16 +29,12 @@ const TextWidget = ({
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
 }: TextWidgetProps) => {
-  const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) =>
-    onChange(value === '' ? options.emptyValue : value)
-  const _onBlur = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, value)
-  const _onFocus = ({ target: { value } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value)
+  const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
+    onChange(newValue === '' ? options.emptyValue : newValue)
+  const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
+  const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, newValue)
 
-  const displayLabel = getDisplayLabel(
-    schema,
-    uiSchema
-    /* TODO: , rootSchema */
-  )
+  const displayLabel = getDisplayLabel(schema, uiSchema)
   const inputType = (type || schema.type) === 'string' ? 'text' : `${type || schema.type}`
 
   return (
