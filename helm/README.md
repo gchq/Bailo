@@ -7,7 +7,7 @@ Helm allows us to manage Kubernetes applications. We define a 'Helm chart' and t
 - An existing AWS EKS cluster
 - Kubectl pointing to EKS cluster (check with `kubectl cluster-info`)
 
-All commands assume they are run in `helm/bailo` in the right context. Context can be set with:
+All commands assume they are run in the `helm/bailo` directory with the right context. Context can be set with:
 
 1. `kubectl config set-context --current --namespace=bailo`
 
