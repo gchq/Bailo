@@ -13,7 +13,7 @@ All commands assume they are run in `helm/bailo` in the right context. Context c
 
 #### Configuration
 
-Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by using `--set <option>=<value>`.  
+Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by using `--set <option>=<value>`.
 
 We do not host built images of Bailo, thus at the very minimum the configuration should include the location of a Bailo image:
 
@@ -24,7 +24,7 @@ image:
   tag: 'latest'
 ```
 
-This image can be built with `docker build -t bailo .` in the root directory.  This guide assumes the overrides file is called `local.yaml` in the `helm/bailo` folder.
+This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is called `local.yaml` in the `helm/bailo` folder.
 
 #### Install Bailo
 
