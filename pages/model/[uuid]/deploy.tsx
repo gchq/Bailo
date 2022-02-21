@@ -40,13 +40,13 @@ export default function Deploy() {
   useEffect(() => {
     if (!currentSchema) return
 
-    const { schema, reference } = currentSchema
-    const steps = getStepsFromSchema(schema, uiSchema, [
+    const { schema } = currentSchema
+    const newSteps = getStepsFromSchema(schema, uiSchema, [
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
     ])
 
-    setSteps(steps)
+    setSteps(newSteps)
   }, [currentSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load deploy page`, {
@@ -72,12 +72,12 @@ export default function Deploy() {
     const deploy = await postEndpoint(`/api/v1/deployment`, data)
 
     if (deploy.status >= 400) {
-      let error = deploy.statusText
+      let errorMessage = deploy.statusText
       try {
-        error = `${deploy.statusText}: ${(await deploy.json()).message}`
+        errorMessage = `${deploy.statusText}: ${(await deploy.json()).message}`
       } catch (e) {}
 
-      return setError(error)
+      return setError(errorMessage)
     }
 
     const { uuid } = await deploy.json()

@@ -26,11 +26,11 @@ import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/re
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { createIndexes } from './models/Model'
 
-const port = parseInt(process.env.PORT || '3000', 10)
+const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({
   dev,
-  dir: process.env.NODE_ENV === 'production' ? '.' : '.',
+  dir: '.',
 })
 const handle = app.getRequestHandler()
 

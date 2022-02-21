@@ -72,12 +72,12 @@ function Upload() {
     const edit = await putEndpoint(`/api/v1/version/${version._id}`, data)
 
     if (edit.status >= 400) {
-      let error = edit.statusText
+      let errorMessage = edit.statusText
       try {
-        error = `${edit.statusText}: ${(await edit.json()).message}`
+        errorMessage = `${edit.statusText}: ${(await edit.json()).message}`
       } catch (e) {}
 
-      return setError(error)
+      return setError(errorMessage)
     }
 
     const response = await edit.json()

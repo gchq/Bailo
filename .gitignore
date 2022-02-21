@@ -30,3 +30,6 @@ certs/key.pem
 
 # Sonar Scanner
 .scannerwork/
+
+helm/bailo/charts
+helm/bailo/local.yaml

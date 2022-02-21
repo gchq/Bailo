@@ -43,10 +43,11 @@ export default function processDeployments() {
       deployment.log('info', `Retagging image.  Current: internal/${tag}`)
       deployment.log('info', `New: ${user.id}/${tag}`)
 
-      const authorisation = `Bearer ${await getAccessToken({ id: 'admin', _id: 'admin' }, [
+      const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
         { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
         { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull'] },
-      ])}`
+      ])
+      const authorisation = `Bearer ${token}`
 
       deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
       const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {

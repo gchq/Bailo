@@ -2,6 +2,12 @@ import json
 
 from basemodel import BaseModel
 
+class FileNotFoundError(Exception):
+    """
+    File not found error
+    """
+    pass
+
 class Model(BaseModel):
     """
     This class loads the example language ID model.
@@ -16,7 +22,7 @@ class Model(BaseModel):
         """
         with open("model.bin", "r") as f:
             if not "" in f.readlines()[0]:
-                raise Exception("Failed to find model binary")
+                raise FileNotFoundError("Failed to find model binary")
 
     def predict(self, input, features_names=None):
         data = input["data"]

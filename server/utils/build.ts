@@ -43,8 +43,6 @@ async function unzipFile(zipPath: string) {
   const outputDir = dirname(zipPath)
 
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
-
-  return
 }
 
 export async function logCommand(command: string, log: Function) {
