@@ -32,8 +32,8 @@ export function createStep({
   index: number
   schemaRef: string
   isComplete: Function
-}) {
-  const step: Step = {
+}): Step {
+  return {
     schema,
     uiSchema,
     state,
@@ -50,8 +50,6 @@ export function createStep({
     renderBasic: renderBasic ?? render,
     renderButtons,
   }
-
-  return step
 }
 
 export function setStepState(steps: Array<Step>, setSteps: Function, step: Step, state: any) {

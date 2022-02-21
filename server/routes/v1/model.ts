@@ -9,7 +9,7 @@ import { NotFound } from '../../utils/result'
 export const getModels = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const { type, logs, filter } = req.query
+    const { type, filter } = req.query
     const query: any = filter ? { $text: { $search: filter as string } } : {}
 
     if (type === 'favourites') {

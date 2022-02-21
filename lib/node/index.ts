@@ -78,9 +78,7 @@ class Model {
   }
 
   async getSchema() {
-    const schema = await this.api.apiGet(`/model/${this.model.uuid}/schema`)
-
-    return schema
+    return await this.api.apiGet(`/model/${this.model.uuid}/schema`)
   }
 
   async getVersions() {
@@ -151,13 +149,11 @@ export default class API {
     form.append('metadata', JSON.stringify(metadata))
 
     const encoder = new FormDataEncoder(form)
-    const res = await fetch(`${this.base}/model`, {
+    return await fetch(`${this.base}/model`, {
       method: 'POST',
       headers: encoder.headers,
       body: Readable.from(encoder) as any,
     }).then((res) => res.json())
-
-    return res
   }
 
   async getDeployment(uuid: string) {

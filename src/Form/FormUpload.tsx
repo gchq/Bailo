@@ -20,12 +20,12 @@ export default function FormUpload({
   const [metadata, setMetadata] = useState(JSON.stringify(getStepsData(steps), null, 4))
   const [validationErrorText, setValidationErrorText] = useState<string>('')
 
-  const handleMetadataChange = (e: any) => {
-    setMetadata(e.target.value)
+  const handleMetadataChange = (event: any) => {
+    setMetadata(event.target.value)
 
     try {
       setValidationErrorText('')
-      const parsed = JSON.parse(e.target.value)
+      const parsed = JSON.parse(event.target.value)
 
       if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
         setValidationErrorText('Invalid metadata')
@@ -33,7 +33,7 @@ export default function FormUpload({
       }
 
       setStepsData(steps, setSteps, parsed)
-    } catch (e) {
+    } catch (error) {
       setValidationErrorText('Invalid JSON')
     }
   }

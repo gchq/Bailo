@@ -40,9 +40,9 @@ export default function processUploads() {
 
         version.markModified('state')
         await version.save()
-      } catch (e) {
+      } catch (e2) {
         logger.error(
-          { error: e, versionId: job.data.versionId },
+          { error: e2, versionId: job.data.versionId },
           'Error occurred whilst logging processing error occurred'
         )
       }
