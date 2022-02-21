@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import { Document } from 'mongoose'
+import { Document, ObjectId } from 'mongoose'
 import { ensureUserRole, hasRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import DeploymentModel from '../../models/Deployment'
@@ -8,7 +8,6 @@ import DeploymentModel from '../../models/Deployment'
 import { deploymentQueue } from '../../utils/queues'
 import { getRequest, readNumRequests, readRequests, RequestType } from '../../services/request'
 import { RequestStatusType } from '../../../types/interfaces'
-import { ObjectId } from 'mongoose'
 import UserModel from '../../models/User'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { reviewedRequest } from '../../templates/reviewedRequest'
@@ -111,7 +110,7 @@ export const postRequestResponse = [
       if (choice === 'Accepted') {
         // run deployment
         req.log.info({ deploymentId: deployment._id }, 'Triggered deployment')
-        const job = await deploymentQueue
+        await deploymentQueue
           .createJob({
             deploymentId: deployment._id,
           })

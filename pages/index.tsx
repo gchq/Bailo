@@ -70,7 +70,7 @@ export default function ExploreModels() {
             <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example' indicatorColor='secondary'>
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='mine' />
-              <Tab label='Starred Models' value='starred' />
+              <Tab label='Favourites' value='favourites' />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 2 }} />

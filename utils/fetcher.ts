@@ -15,3 +15,12 @@ export const fetcher = async (input: RequestInfo, init: RequestInit) => {
 
   return res.json()
 }
+
+export const getErrorMessage = async (res: Response) => {
+  let messageError = res.statusText
+  try {
+    messageError = `${res.statusText}: ${(await res.json()).message}`
+  } catch (e) {}
+
+  return messageError
+}

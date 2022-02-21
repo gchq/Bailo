@@ -18,7 +18,7 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
     throw new Error('Unable to find deployment')
   }
 
-  const job = await deploymentQueue
+  await deploymentQueue
     .createJob({
       deploymentId: deployment._id,
     })
