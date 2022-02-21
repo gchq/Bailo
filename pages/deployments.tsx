@@ -108,36 +108,37 @@ const Deployments = () => {
                         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                       )}
                     </Box>
-                    )
-                  })}
+                  )
+                })}
               </Box>
             )}
             {selectedOrder === 'model' && (
               <Box>
-                {groupedDeployments !== undefined && Object.keys(groupedDeployments).map((key) => {
-                  return (
-                    <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                      <ModelNameFromKey modelId={key} />
-                      <Divider flexItem />
-                      {groupedDeployments[key].map((deployment, index) => {
-                        return (
-                          <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
-                            <Box>
-                              <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                                <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                                  {deployment?.metadata?.highLevelDetails?.name}
-                                </MuiLink>
-                              </Link>
+                {groupedDeployments !== undefined &&
+                  Object.keys(groupedDeployments).map((key) => {
+                    return (
+                      <Box sx={{ mt: 3, mb: 3 }} key={key}>
+                        <ModelNameFromKey modelId={key} />
+                        <Divider flexItem />
+                        {groupedDeployments[key].map((deployment, index) => {
+                          return (
+                            <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
+                              <Box>
+                                <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                                    {deployment?.metadata?.highLevelDetails?.name}
+                                  </MuiLink>
+                                </Link>
+                              </Box>
+                              <Box>
+                                <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
+                              </Box>
                             </Box>
-                            <Box>
-                              <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
-                            </Box>
-                          </Box>
-                        )
-                      })}
-                    </Box>
-                  )
-                })}
+                          )
+                        })}
+                      </Box>
+                    )
+                  })}
               </Box>
             )}
             <Box>

@@ -18,7 +18,12 @@ import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
-import { getDeployment, getCurrentUserDeployments, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
+import {
+  getDeployment,
+  getCurrentUserDeployments,
+  postDeployment,
+  resetDeploymentApprovals,
+} from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
 import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
