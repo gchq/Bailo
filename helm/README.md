@@ -24,7 +24,7 @@ image:
   tag: 'latest'
 ```
 
-This image can be built with `docker build -t bailo .` in the root directory.
+This image can be built with `docker build -t bailo .` in the root directory.  This guide assumes the overrides file is called `local.yaml` in the `helm/bailo` folder.
 
 #### Install Bailo
 
