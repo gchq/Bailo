@@ -12,7 +12,7 @@ import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
 import FormLabel from '@mui/material/FormLabel'
-import { Deployment } from 'types/interfaces'
+import { Deployment } from '../types/interfaces'
 import _, { Dictionary } from 'lodash'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
@@ -28,7 +28,7 @@ const ModelNameFromKey = ({ modelId }: { modelId: string }) => {
 }
 
 const Deployments = () => {
-  const { currentUser } = useGetCurrentUser()
+  const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
   const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
@@ -38,18 +38,18 @@ const Deployments = () => {
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
 
   React.useEffect(() => {
-    if (!isUserDeploymentsLoading && !isUserDeploymentsError && userDeployments !== undefined) {
+    if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
       const groups: Dictionary<[Deployment, ...Deployment[]]> = _.groupBy(
         userDeployments,
         (deployment) => deployment.model
       )
       setGroupedDeployments(groups)
       // Default the ordered deployment list to date
-      let sortedArray: Deployment[] = [...userDeployments]
+      let sortedArray = [...userDeployments]
       sortedArray.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
-  }, [userDeployments])
+  }, [userDeployments, setOrderedDeployments, isCurrentUserError, isUserDeploymentsError, isUserDeploymentsLoading])
 
   const handleOrderChange = (event: any) => {
     setSelectedOrder(event.target.value)
@@ -66,10 +66,10 @@ const Deployments = () => {
       )
       setOrderedDeployments(sortedArray)
     } else if (selectedOrder === 'date' && userDeployments !== undefined) {
-      let sortedArray: Deployment[] = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      let sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
-  }, [selectedOrder])
+  }, [selectedOrder, setOrderedDeployments, isUserDeploymentsError, userDeployments])
 
   return (
     <>
@@ -97,17 +97,18 @@ const Deployments = () => {
                 {orderedDeployments !== undefined &&
                   orderedDeployments.map((deployment, index) => {
                     return (
-                      <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
-                        <Box>
-                          <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                              {deployment?.metadata?.highLevelDetails?.name}
-                            </MuiLink>
-                          </Link>
-                        </Box>
-                        <Box>
-                          <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
-                        </Box>
+                      <Box key={`deployment-${index}`} sx={{ mt: 2 }}>
+                        <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                          <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                            {deployment?.metadata?.highLevelDetails?.name}
+                          </MuiLink>
+                        </Link>
+                        <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                          {displayDate(deployment?.createdAt)}
+                        </Typography>
+                        {index !== orderedDeployments!.length - 1 && (
+                          <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                        )}
                       </Box>
                     )
                   })}
