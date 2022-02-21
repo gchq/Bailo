@@ -34,7 +34,7 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
-    
+
     // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
     await driver.sleep(1000)
