@@ -5,9 +5,7 @@ import { fetcher } from 'utils/fetcher'
 import { Types } from 'mongoose'
 
 export function useGetDeployment(uuid?: string) {
-  const { data, error, mutate } = useSWR<Deployment>(uuid ? `/api/v1/deployment/${uuid}` : null, fetcher, {
-    refreshInterval: 1000,
-  })
+  const { data, error, mutate } = useSWR<Deployment>(uuid ? `/api/v1/deployment/${uuid}` : null, fetcher)
 
   return {
     mutateDeployment: mutate,

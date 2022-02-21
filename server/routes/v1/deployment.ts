@@ -9,7 +9,6 @@ import { ensureUserRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
 import { BadReq, NotFound, Forbidden } from '../../utils/result'
-import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -28,7 +27,7 @@ export const getDeployment = [
   },
 ]
 
-export const getUserDeployments = [
+export const getCurrentUserDeployments = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params

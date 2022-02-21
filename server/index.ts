@@ -18,7 +18,7 @@ import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
-import { getDeployment, getUserDeployments, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
+import { getDeployment, getCurrentUserDeployments, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
 import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
@@ -67,7 +67,7 @@ app.prepare().then(() => {
 
   server.post('/api/v1/deployment', ...postDeployment)
   server.get('/api/v1/deployment/:uuid', ...getDeployment)
-  server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
+  server.get('/api/v1/deployment/user/:id', ...getCurrentUserDeployments)
   server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 
   server.get('/api/v1/version/:id', ...getVersion)
