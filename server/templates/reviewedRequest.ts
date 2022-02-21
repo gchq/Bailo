@@ -50,9 +50,19 @@ export function html({ document, requestType, choice }: ReviewedRequestContext) 
   ).html
 }
 
-export function text({ document }: ReviewedRequestContext) {
+export function text({ document, requestType, choice }: ReviewedRequestContext) {
+  const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
+
+  const requestUrl =
+    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+
   return dedent(`
     '${document.model.currentMetadata.highLevelDetails.name}' has been reviewed
+
+    Request Type: '${requestType}'
+    Response: '${choice}'
+
+    Open ${requestType}: ${requestUrl}
   `)
 }
 

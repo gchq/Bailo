@@ -171,7 +171,7 @@ export default function Deployment() {
               </MenuItem>
             </MenuList>
           </Menu>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
             <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
@@ -193,6 +193,11 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <pre>
+              <span># Login to Docker</span>
+              <br />
+              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
+              <br />
+
               <span># Pull model</span>
               <br />
               <CodeLine line={`docker pull ${deploymentTag}`} />

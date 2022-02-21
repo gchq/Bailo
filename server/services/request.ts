@@ -18,13 +18,11 @@ export async function createDeploymentRequests({ version, deployment }: { versio
     )
   }
 
-  const managerRequest = await createDeploymentRequest({
+  return await createDeploymentRequest({
     user: manager,
     deployment: deployment,
     approvalType: 'Manager',
   })
-
-  return managerRequest
 }
 
 export async function createVersionRequests({ version }: { version: Version }) {
@@ -57,13 +55,13 @@ export async function createVersionRequests({ version }: { version: Version }) {
     approvalType: 'Manager',
   })
 
-  const reviewRequest = createVersionRequest({
+  const reviewerRequest = createVersionRequest({
     user: reviewer,
     version: version,
     approvalType: 'Reviewer',
   })
 
-  return await Promise.all([managerRequest, reviewRequest])
+  return await Promise.all([managerRequest, reviewerRequest])
 }
 
 type DeploymentApprovalType = 'Manager'
@@ -160,12 +158,10 @@ async function createRequest({
 }
 
 export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
-  const requests = await RequestModel.countDocuments({
+  return await RequestModel.countDocuments({
     status: 'No Response',
     user: userId,
   })
-
-  return requests
 }
 
 export type RequestFilter = Types.ObjectId | undefined
@@ -179,7 +175,7 @@ export async function readRequests({ type, filter }: { type: RequestType; filter
     query.user = filter
   }
 
-  const results = await RequestModel.find(query)
+  return await RequestModel.find(query)
     .populate({
       path: 'version',
       populate: { path: 'model' },
@@ -189,8 +185,6 @@ export async function readRequests({ type, filter }: { type: RequestType; filter
       populate: { path: 'model' },
     })
     .sort({ updatedAt: -1 })
-
-  return results
 }
 
 export async function getRequest({ requestId }: { requestId: string | Types.ObjectId }) {
