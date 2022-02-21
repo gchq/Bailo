@@ -11,6 +11,21 @@ All commands assume they are run in `helm/bailo` in the right context. Context c
 
 1. `kubectl config set-context --current --namespace=bailo`
 
+#### Configuration
+
+Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by using `--set <option>=<value>`.  
+
+We do not host built images of Bailo, thus at the very minimum the configuration should include the location of a Bailo image:
+
+```
+---
+image:
+  repository: some.repository.com/bailo
+  tag: 'latest'
+```
+
+This image can be built with `docker build -t bailo .` in the root directory.
+
 #### Install Bailo
 
 1. `helm dependency update`
