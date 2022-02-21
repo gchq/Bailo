@@ -22,3 +22,5 @@ yarn-error.log*
 /.scannerwork
 
 public/css/fonts.css
+
+helm/**/*.yaml
