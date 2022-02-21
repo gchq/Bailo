@@ -41,10 +41,7 @@ const Deployments = () => {
 
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
-      const groups: GroupedDeployments = _.groupBy(
-        userDeployments,
-        (deployment) => deployment.model
-      )
+      const groups: GroupedDeployments = _.groupBy(userDeployments, (deployment) => deployment.model)
       setGroupedDeployments(groups)
       // Default the ordered deployment list to date
       let sortedArray = [...userDeployments]
