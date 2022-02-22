@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose'
+import { Date, Document, Types } from 'mongoose'
 import Logger from 'bunyan'
 
 declare global {
@@ -103,6 +103,9 @@ export interface Deployment extends Document {
   built: boolean
 
   owner: User
+
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface UiConfig {
