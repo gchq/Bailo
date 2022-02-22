@@ -3,7 +3,8 @@ import next from 'next'
 import http from 'http'
 import processUploads from './processors/processUploads'
 import {
-  getModel,
+  getModelByUuid,
+  getModelById,
   getModelDeployments,
   getModels,
   getModelSchema,
@@ -17,7 +18,12 @@ import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
-import { getDeployment, postDeployment, resetDeploymentApprovals } from './routes/v1/deployment'
+import {
+  getDeployment,
+  getCurrentUserDeployments,
+  postDeployment,
+  resetDeploymentApprovals,
+} from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
 import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
@@ -57,7 +63,8 @@ app.prepare().then(() => {
   server.use(expressErrorHandler)
 
   server.get('/api/v1/models', ...getModels)
-  server.get('/api/v1/model/:uuid', ...getModel)
+  server.get('/api/v1/model/uuid/:uuid', ...getModelByUuid)
+  server.get('/api/v1/model/id/:id', ...getModelById)
   server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
   server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
   server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
@@ -65,6 +72,7 @@ app.prepare().then(() => {
 
   server.post('/api/v1/deployment', ...postDeployment)
   server.get('/api/v1/deployment/:uuid', ...getDeployment)
+  server.get('/api/v1/deployment/user/:id', ...getCurrentUserDeployments)
   server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 
   server.get('/api/v1/version/:id', ...getVersion)

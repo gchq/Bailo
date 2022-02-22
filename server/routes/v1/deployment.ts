@@ -27,6 +27,17 @@ export const getDeployment = [
   },
 ]
 
+export const getCurrentUserDeployments = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const deployment = await DeploymentModel.find({ owner: id })
+
+    return res.json(deployment)
+  },
+]
+
 export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
