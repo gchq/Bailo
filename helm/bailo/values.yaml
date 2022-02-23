@@ -101,6 +101,7 @@ minio:
 
 redis:
   enabled: true
+  architecture: standalone
   auth:
     enabled: true
     password: ""
@@ -110,6 +111,8 @@ redis:
   master:
     service:
       port: 6379
+  replica:
+    replicaCount: 0
   
 registry:
   enabled: true
