@@ -32,7 +32,7 @@ export const getModels = [
   },
 ]
 
-export const getModel = [
+export const getModelByUuid = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -41,6 +41,21 @@ export const getModel = [
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
+    }
+
+    return res.json(model)
+  },
+]
+
+export const getModelById = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const model = await ModelModel.findOne({ _id: id })
+
+    if (!model) {
+      throw NotFound({ id }, `Unable to find model '${id}'`)
     }
 
     return res.json(model)

@@ -13,6 +13,7 @@ import Container from '@mui/material/Container'
 import MenuIcon from '@mui/icons-material/Menu'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import ViewList from '@mui/icons-material/ViewList'
 import Link from 'next/link'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -219,6 +220,20 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                   )}
                 </ListItemIcon>
                 <ListItemText primary='Marketplace' />
+              </ListItem>
+            </Link>
+            <Link href='/deployments' passHref>
+              <ListItem button selected={page === 'deployments'}>
+                <ListItemIcon>
+                  {!open ? (
+                    <Tooltip title='My Deployments' arrow placement='right'>
+                      <ViewList />
+                    </Tooltip>
+                  ) : (
+                    <ViewList />
+                  )}
+                </ListItemIcon>
+                <ListItemText primary='Upload' />
               </ListItem>
             </Link>
             <Link href='/upload' passHref>
