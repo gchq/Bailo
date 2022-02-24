@@ -31,7 +31,7 @@ module.exports = {
 
   s2i: {
     path: '/s2i/s2i',
-    builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0'
+    builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
   },
 
   kaniko: {

@@ -71,7 +71,7 @@ services:
         # set to your uid (get by running `id` or `echo ${UID}`)
         # We do this so that you can mount the app directory into the container
         # and the container user can access the files (and populate node_modules via npm install)
-        # This is only for developer convenience so that changes on host files are immediately 
+        # This is only for developer convenience so that changes on host files are immediately
         # reflected in the running app
         - user_id=REPLACE_WITH_UID
       context: .
@@ -85,7 +85,7 @@ services:
       - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
       - ./:/home/user/app
     ports:
-       - '3000:3000'
+      - '3000:3000'
     depends_on:
       - mongo
       - minio

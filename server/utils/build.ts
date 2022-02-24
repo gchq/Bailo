@@ -27,7 +27,7 @@ export async function pullBuilderImage() {
 }
 
 pullBuilderImage() // pull image on startup so we don't
-  // waste time pulling it on model build
+// waste time pulling it on model build
 
 async function createWorkingDirectory(): Promise<string> {
   const directory = join(tmpdir(), uuidv4())
@@ -131,7 +131,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   // push image
   vlog.info({ tag }, 'Pushing image to docker')
   version.log('info', 'Logging into docker')
-  // using docker instead of img login because img reads from ~/.docker/config and 
+  // using docker instead of img login because img reads from ~/.docker/config and
   // does not fully populate authorization headers (clientId and account) in authorization
   // requests like docker does. docker login doesn't require docker to be running in host
   await runCommand(
