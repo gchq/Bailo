@@ -15,7 +15,7 @@ let adminToken: string | undefined = undefined
 export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
-    const hash = createHash('sha512').update(key).digest().slice(0, 16)
+    const hash = createHash('sha256').update(key).digest().slice(0, 16)
     hash[6] = (hash[6] & 0x0f) | 0x40
     hash[8] = (hash[8] & 0x3f) | 0x80
 
@@ -66,7 +66,7 @@ function formatKid(keyBuffer: Buffer) {
 async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha512').update(der).digest().slice(0, 30)
+  const hash = createHash('sha256').update(der).digest().slice(0, 30)
 
   return formatKid(hash)
 }
