@@ -53,15 +53,17 @@ export function createStep({
 }
 
 export function setStepState(steps: Array<Step>, setSteps: Function, step: Step, state: any) {
-  const index = steps.findIndex((iStep) => step.section === iStep.section)
+  if (step.schemaRef !== steps[0].schemaRef) {
+    const index = steps.findIndex((iStep) => step.section === iStep.section)
 
-  const duplicatedSteps = [...steps]
-  duplicatedSteps[index].state = {
-    ...(steps[index].state || {}),
-    ...state,
+    const duplicatedSteps = [...steps]
+    duplicatedSteps[index].state = {
+      ...(steps[index].state || {}),
+      ...state,
+    }
+
+    setSteps(duplicatedSteps)
   }
-
-  setSteps(duplicatedSteps)
 }
 
 export function setStepValidate(steps: Array<Step>, setSteps: Function, step: Step, validate: boolean) {
