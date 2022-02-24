@@ -80,6 +80,9 @@ services:
     volumes:
       # cert location assumed by registryAuth.ts
       - ./certs:/home/user/app/certs 
+      # put public key into location to be added to system trusted CA 
+      # (only needed for self-signed certs) 
+      - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
       - ./:/home/user/app
     ports:
        - '3000:3000'
@@ -92,7 +95,8 @@ services:
       - apparmor:unconfined
     environment:
       - NODE_CONFIG_ENV=docker_compose
-      - ADD_CA_CERT=/home/user/app/certs/cert.pem
+      # if set, run script to set the schemas on startup
+      - SCHEMA_SETUP_SCRIPT=server/scripts/exampleSetAllSchemas.ts
 
 volumes:
   minioVolume:
