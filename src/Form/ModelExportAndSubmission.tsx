@@ -47,14 +47,13 @@ const ModelExportAndSubmission = ({
 
   const getGlobalCss = () => {
     let css: Array<string> = []
-    for (let i = 0; i < document.styleSheets.length; i++) {
-      let sheet = document.styleSheets[i]
+
+    for (let sheet of document.styleSheets as unknown as Array<CSSStyleSheet>) {
       try {
         let rules = 'cssRules' in sheet ? sheet.cssRules : sheet.rules
         if (rules) {
           css.push('\n/* Stylesheet : ' + (sheet.href || '[inline styles]') + ' */')
-          for (let j = 0; j < rules.length; j++) {
-            let rule = rules[j]
+          for (let rule of rules as any) {
             if ('cssText' in rule) {
               css.push(rule.cssText)
             } else {
@@ -86,10 +85,6 @@ const ModelExportAndSubmission = ({
 
   const handleClose = () => {
     setShowHtmlView(false)
-  }
-
-  const onCopyToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(formData))
   }
 
   const handleModelClose = () => setShowHtmlView(false)

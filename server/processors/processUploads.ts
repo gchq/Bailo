@@ -26,6 +26,27 @@ export default function processUploads() {
       await version.log('info', `Processed job with tag ${tag} in ${time}`)
     } catch (e) {
       logger.error({ error: e, versionId: job.data.versionId }, 'Error occurred whilst processing upload')
+
+      try {
+        const version = await VersionModel.findOne({
+          _id: job.data.versionId,
+        }).populate('model')
+
+        await version.log('error', `Failed to process job due to error: '${e}'`)
+        version.state.build = {
+          state: 'failed',
+          reason: e,
+        }
+
+        version.markModified('state')
+        await version.save()
+      } catch (e2) {
+        logger.error(
+          { error: e2, versionId: job.data.versionId },
+          'Error occurred whilst logging processing error occurred'
+        )
+      }
+
       throw e
     }
   })

@@ -5,16 +5,16 @@ import Paper from '@mui/material/Paper'
 import { useGetModel } from '../../../data/model'
 
 import Wrapper from '../../../src/Wrapper'
-import { useGetDefaultSchema, useGetSchema, useGetSchemas } from '../../../data/schema'
+import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { Schema, Step } from '../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../../../utils/formUtils'
+import { Step } from '../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
-import { putEndpoint } from 'data/api'
-import useCacheVariable from 'utils/useCacheVariable'
+import useCacheVariable from '../../../utils/useCacheVariable'
+import { getErrorMessage } from '../../../utils/fetcher'
 
 const uiSchema = {
   contacts: {
@@ -39,9 +39,9 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
+    const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
 
-    steps.push(
+    schemaSteps.push(
       createStep({
         schema: {
           title: 'Files',
@@ -53,7 +53,7 @@ function Upload() {
         schemaRef: cModel.schemaRef,
 
         type: 'Data',
-        index: steps.length,
+        index: schemaSteps.length,
         section: 'files',
 
         render: RenderFileTab,
@@ -61,7 +61,7 @@ function Upload() {
       })
     )
 
-    setSteps(steps)
+    setSteps(schemaSteps)
   }, [cModel, cSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
@@ -99,12 +99,7 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let error = upload.statusText
-      try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
-
-      return setError(error)
+      return setError(await getErrorMessage(upload))
     }
 
     const { uuid } = await upload.json()

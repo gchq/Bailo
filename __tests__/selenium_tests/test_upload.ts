@@ -1,6 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
 import fs from 'fs/promises'
-import path from 'path'
 import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
@@ -14,14 +13,14 @@ import {
   click,
   sendKeys,
   pause,
+  fromRelative,
 } from '../__utils__/helpers'
 import logger from '../../server/utils/logger'
 
-//TODO read from config file/env
-const metadataFile = path.join(__dirname, '..', 'example_models', 'minimal_model', 'minimal_metadata.json')
-const binaryFile = path.join(__dirname, '..', 'example_models', 'minimal_model', 'minimal_binary.zip')
-const codeFile = path.join(__dirname, '..', 'example_models', 'minimal_model', 'minimal_code.zip')
-const deploymentMetadataFile = path.join(__dirname, '..', 'samples', 'deployment.json')
+const binaryPath = fromRelative(config.get('samples.binary'))
+const codePath = fromRelative(config.get('samples.code'))
+const metadataPath = fromRelative(config.get('samples.uploadMetadata'))
+const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetadata'))
 
 const modelInfo: any = {}
 
@@ -34,8 +33,10 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
-    await driver.sleep(500) // give some time for page to refresh
+    // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
+    await driver.sleep(500)
+
     const curApprovalButtons = await driver.findElements(By.css('[data-test="approveButton"]'))
     expect(curApprovalButtons.length).toEqual(approvalButtons.length - 1)
     approvalButtons = curApprovalButtons
@@ -58,10 +59,10 @@ describe('End to end test', () => {
 
       await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
 
-      await sendKeys(driver, By.id('select-code-file'), codeFile)
-      await sendKeys(driver, By.id('select-binary-file'), binaryFile)
+      await sendKeys(driver, By.id('select-code-file'), codePath)
+      await sendKeys(driver, By.id('select-binary-file'), binaryPath)
 
-      const metadata = await fs.readFile(metadataFile, { encoding: 'utf-8' })
+      const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
       await sendKeys(driver, By.css('textarea'), metadata)
 
       await click(driver, By.css('[data-test="submitButton"]'))
@@ -105,7 +106,7 @@ describe('End to end test', () => {
 
       await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
 
-      const deploymentData = await fs.readFile(deploymentMetadataFile, { encoding: 'utf-8' })
+      const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
       await sendKeys(
         driver,
