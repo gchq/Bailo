@@ -26,6 +26,13 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
   && chmod 775 /usr/local/share/ca-certificates \
   && echo user:100000:65536 | tee /etc/subuid | tee /etc/subgid 
 
+
+COPY package.json /home/user/app/package.json
+COPY package-lock.json /home/user/app/package-lock.json
+
+WORKDIR /home/user/app
+RUN npm install
+
 ADD . / /home/user/app/
 
 RUN chown -R user /home/user/app
@@ -34,10 +41,6 @@ USER user
 ENV USER user
 ENV HOME /home/user
 ENV XDG_RUNTIME_DIR=/run/user/$user_id
-
-WORKDIR /home/user/app
-
-RUN npm install
 
 ## We don't pull the image here because there's no way to turn off 
 ## seccomp/apparmor in a build like we can during run
