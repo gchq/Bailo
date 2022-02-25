@@ -106,8 +106,8 @@ spec:
               - key: custom-environment-variables.js
                 path: custom-environment-variables.js
         - name: certs
-          configMap:
-            name: {{ include "bailo.fullname" . }}
+          secret:
+            secretName: {{ include "bailo.fullname" . }}
             items:
               - key: cert.pem
                 path: cert.pem
