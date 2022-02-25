@@ -48,4 +48,4 @@ ENV XDG_RUNTIME_DIR=/run/user/$user_id
 
 EXPOSE 3000
 #CMD ["npm", "run", "dev"]
-CMD ./run_app_dev.sh
+CMD ./scripts/run_app_dev.sh
