@@ -79,9 +79,9 @@ services:
     #network_mode: "host"
     volumes:
       # cert location assumed by registryAuth.ts
-      - ./certs:/home/user/app/certs 
-      # put public key into location to be added to system trusted CA 
-      # (only needed for self-signed certs) 
+      - ./certs:/home/user/app/certs
+      # put public key into location to be added to system trusted CA
+      # (only needed for self-signed certs)
       - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
       - ./:/home/user/app
     ports:

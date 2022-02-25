@@ -23,9 +23,8 @@ interface BuilderFiles {
 }
 
 export async function pullBuilderImage() {
-  await logCommand(
-    `img pull ${config.get('s2i.builderImage')}`, 
-    (level: string, message: string) => logger[level](message)
+  await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
+    logger[level](message)
   )
 }
 
