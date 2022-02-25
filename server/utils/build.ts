@@ -26,9 +26,6 @@ export async function pullBuilderImage() {
   await logCommand(`img pull ${config.get('s2i.builderImage')}`, console.log.bind(console))
 }
 
-pullBuilderImage() // pull image on startup so we don't
-// waste time pulling it on model build
-
 async function createWorkingDirectory(): Promise<string> {
   const directory = join(tmpdir(), uuidv4())
   await mkdir(directory)
