@@ -8,8 +8,18 @@ export function getClient(): Minio.Client {
 
 export async function ensureBucketExists(bucket: string) {
   const client = new Minio.Client(config.get('minio'))
-  const exists = await client.bucketExists(bucket)
-
+  
+  let waitForMinio = true
+  let exists = false
+  while (waitForMinio){
+    try {
+      exists = await client.bucketExists(bucket)
+      waitForMinio = false
+    } catch (e) {
+      logger.error({e}, 'Could not check bucket exists. Sleeping then trying again.')
+      await new Promise(r => setTimeout(r, 1000))
+    }
+  }
   if (!exists) {
     logger.info({ bucket }, 'Bucket does not exist, creating.')
     await client.makeBucket(bucket, (config.get('minio') as any).region)
