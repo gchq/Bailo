@@ -144,11 +144,14 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await logCommand(`img push ${tag}`, version.log.bind(version))
 
   // tidy up
-  vlog.info(s2iDir)
-  vlog.info({ tmpDir, builderFiles }, 'Removing temp directory and Minio uploads')
+  vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
   rm('-rf', tmpDir)
   rm('-rf', buildDir)
+  rm('-rf', s2iDir)
+
   await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
+  const removeImageCmd = `img rm ${tag}`
+  await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
 
   return tag
 }
