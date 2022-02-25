@@ -1,8 +1,8 @@
 import Queue from 'bee-queue'
 import config from 'config'
-import DeploymentModel from 'server/models/Deployment'
-import VersionModel from 'server/models/Version'
-import { simpleEmail } from 'server/templates/simpleEmail'
+import DeploymentModel from '../models/Deployment'
+import VersionModel from '../models/Version'
+import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
 
 export const uploadQueue = new Queue('UPLOAD_QUEUE', {
