@@ -74,6 +74,9 @@ services:
     volumes:
       # cert location assumed by registryAuth.ts
       - ./certs:/app/certs
+      # put public key into location to be added to system trusted CA 
+      # (only needed for self-signed certs) 
+      - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
     ports:
       - '3000:3000'
     depends_on:
