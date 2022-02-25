@@ -91,6 +91,7 @@ app.prepare().then(() => {
 
   processUploads()
   processDeployments()
+  pullBuilderImage()
 
   server.all('*', (req, res) => {
     return handle(req, res)
