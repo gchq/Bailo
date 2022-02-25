@@ -17,7 +17,7 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
   && adduser -D -u $user_id user \
   && mkdir -p /run/user/$user_id \
   && chown -R user /run/user/$user_id /home/user \
-  && chmod -R 777 /s2i \ 
+  && chmod -R o+x /s2i \ 
   && addgroup -S certs \
   && addgroup user certs \
   && chgrp certs /etc/ssl/certs \
