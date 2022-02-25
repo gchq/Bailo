@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
+import { styled, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import MuiDrawer from '@mui/material/Drawer'
 import Box from '@mui/material/Box'
@@ -13,6 +13,7 @@ import Container from '@mui/material/Container'
 import MenuIcon from '@mui/icons-material/Menu'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import ViewList from '@mui/icons-material/ViewList'
 import Link from 'next/link'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -27,7 +28,7 @@ import Banner from './Banner'
 import { useGetNumRequests } from '../data/requests'
 import Image from 'next/image'
 import Tooltip from '@mui/material/Tooltip'
-import theme from '../src/theme'
+import globalTheme from '../src/theme'
 import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
 
@@ -138,13 +139,13 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     paddingBottom: 0,
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
-        color: theme.palette.secondary.main,
+        color: globalTheme.palette.secondary.main,
       },
     },
   })
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={globalTheme}>
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
@@ -219,6 +220,20 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                   )}
                 </ListItemIcon>
                 <ListItemText primary='Marketplace' />
+              </ListItem>
+            </Link>
+            <Link href='/deployments' passHref>
+              <ListItem button selected={page === 'deployments'}>
+                <ListItemIcon>
+                  {!open ? (
+                    <Tooltip title='My Deployments' arrow placement='right'>
+                      <ViewList />
+                    </Tooltip>
+                  ) : (
+                    <ViewList />
+                  )}
+                </ListItemIcon>
+                <ListItemText primary='Upload' />
               </ListItem>
             </Link>
             <Link href='/upload' passHref>

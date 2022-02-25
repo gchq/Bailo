@@ -11,7 +11,6 @@ import MinioStore from '../../utils/MinioStore'
 import { uploadQueue } from '../../utils/queues'
 import VersionModel from '../../models/Version'
 import { ensureUserRole } from '../../utils/user'
-import logger from '../../utils/logger'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 

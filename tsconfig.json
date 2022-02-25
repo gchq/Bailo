@@ -22,7 +22,13 @@
     "resolveJsonModule": true,
     "incremental": true,
     "noImplicitAny": false,
-    "skipDefaultLibCheck": true
+    "skipDefaultLibCheck": true,
+    "paths": {
+      "@/data/*": ["data/*"],
+      "@/src/*": ["src/*"],
+      "@/types/*": ["types/*"],
+      "@/utils/*": ["utils/*"]
+    }
   },
   "exclude": ["dist", ".next", "out", "next.config.js", "node_modules"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
