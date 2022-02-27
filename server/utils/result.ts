@@ -7,8 +7,8 @@ export function GenericError(data: any, message: string, code: number, logger?: 
 
   Object.defineProperty(err, 'logger', {
     value: logger,
-    enumerable: false
-  });
+    enumerable: false,
+  })
 
   return err
 }
