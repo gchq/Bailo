@@ -78,6 +78,7 @@ describe('End to end test', () => {
       const api = new Bailo(
         `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
       )
+
       const model = await api.getModel(modelInfo.name)
 
       while (true) {
