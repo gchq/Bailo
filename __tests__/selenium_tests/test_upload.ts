@@ -119,6 +119,20 @@ describe('End to end test', () => {
       await driver.get(modelInfo.url)
       logger.trace(`getting model page '${modelInfo.url}'`)
 
+      // sanity checks
+      const api = new Bailo(
+        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+      )
+
+      // ensure it's built
+      const model = await api.getModel(modelInfo.name)
+      const version = await model.getVersion('1')
+      expect(version.version.built).toBeTruthy()
+
+      // ensure it's approved
+      expect(version.version.managerApproved).toBe('Accepted')
+      expect(version.version.reviewerApproved).toBe('Accepted')
+
       await click(driver, By.css('[data-test="requestDeploymentButton"]'))
       await click(driver, By.css('[data-test="submitDeployment"]'))
       logger.trace(`requested deployment`)
