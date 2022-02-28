@@ -104,7 +104,7 @@ jobs:
 
       - name: App Logs
         if: always()
-        run: cat logs/app.log
+        run: cat logs/app.log | ./node_modules/.bin/bunyan --color -o short
 
       - uses: actions/upload-artifact@v2
         if: always()
