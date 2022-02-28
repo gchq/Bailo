@@ -69,7 +69,6 @@ function Upload() {
 
   useEffect(() => {
     if (currentSchema) return
-
     setCurrentSchema(defaultSchema)
   }, [defaultSchema, currentSchema])
 
@@ -87,7 +86,7 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const schemaSteps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
+    const schemaSteps = getStepsFromSchema(currentSchema, uiSchema, undefined, defaultState)
 
     schemaSteps.push(
       createStep({
@@ -127,7 +126,6 @@ function Upload() {
         isComplete: () => true,
       })
     )
-
     setSteps(schemaSteps)
   }, [currentSchema, user])
 

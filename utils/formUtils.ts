@@ -53,7 +53,10 @@ export function createStep({
 }
 
 export function setStepState(steps: Array<Step>, setSteps: Function, step: Step, state: any) {
-  if (step.schemaRef !== steps[0].schemaRef) {
+  /*console.log(steps)
+  console.log(step.schemaRef)
+  console.log(steps[0].schemaRef)*/
+  if (step.schemaRef === steps[0].schemaRef) {
     const index = steps.findIndex((iStep) => step.section === iStep.section)
 
     const duplicatedSteps = [...steps]
@@ -80,7 +83,9 @@ export function getStepsFromSchema(
   omitFields: Array<string> = [],
   state: any = {}
 ): Array<Step> {
-  const schemaDupe = omit(schema, omitFields) as any
+  const schemaDupe = omit(schema.schema, omitFields) as any
+
+  console.log(schema)
 
   for (let field of omitFields) {
     const fields = field.split('.')
