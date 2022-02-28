@@ -1,4 +1,4 @@
-name: Build UI
+name: Build / Test
 
 on:
   push:
@@ -9,25 +9,105 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     strategy:
       matrix:
         node-version: [16.x]
 
     steps:
+      # Initial setup
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+
+      - run: mkdir logs
+
+      # Install dependencies
       - run: npm ci
+
+      # Install s2i
+      - run: |
+          wget https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -P ~
+          tar -xvf ~/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz -C $HOME/
+          echo "$HOME/" >> $GITHUB_PATH
+
+      # Linting
       - run: npm run check-style
       - run: npm run lint
+
+      # Build image
       - run: npm run build
       - uses: actions/cache@v2
         with:
-          path: ~/.next
+          path: .next
           key: ${{ runner.os }}-next
           restore-keys: |
             ${{ runner.os }}-next
+
+      # Setup dependencies
+      - name: Build the stack
+        run: docker-compose up -d
+
+      # Add configuration
+      - shell: bash
+        run: |
+          cat <<EOT >> config/local.js
+          module.exports = {
+            minio: {
+              accessKey: 'minioadmin',
+              secretKey: 'minioadmin',
+            },
+
+            smtp: {
+              auth: {
+                user: 'mailuser',
+                pass: 'mailpass',
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+            },
+
+          }
+          EOT
+
+      # Setup app
+      - name: Setup app
+        run: |
+          sudo chown -R runner:docker certs
+          npm run certs
+
+          npm i -g ts-node
+          ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
+          ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
+
+      # Start app and wait for it to start
+      - run: npm start |& tee logs/app.log &
+      - run: |
+          chmod +x ./server/scripts/waitForIt.sh
+          ./server/scripts/waitForIt.sh localhost:8080 -t 10
+
+      # Run tests
+      # - run: HEADLESS=true npm test
+
+      - name: Dump docker-compose logs
+        if: always()
+        run: docker-compose logs > logs/stack.log
+
+      - name: Docker Compose Logs
+        if: always()
+        run: cat logs/stack.log
+
+      - name: App Logs
+        if: always()
+        run: cat logs/app.log | ./node_modules/.bin/bunyan --color -o short
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: logs
