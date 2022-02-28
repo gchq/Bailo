@@ -55,7 +55,7 @@ export async function logCommand(command: string, log: Function) {
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function) {
+export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout!.on('data', (data) => {
     onStdout(data.trim())
@@ -67,9 +67,10 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
 
   await new Promise((resolve, reject) => {
     childProcess.on('exit', () => {
-      console.log('exit')
-      if (childProcess.exitCode !== 0) {
-        return reject(`Failed with status code ${childProcess.exitCode}`)
+      if (childProcess.exitCode !== 0 && !opts.silentErrors) {
+        return reject(
+          `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+        )
       }
 
       resolve({})
@@ -125,11 +126,12 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await runCommand(
     `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
     vlog.info.bind(vlog),
-    vlog.error.bind(vlog)
+    vlog.error.bind(vlog),
+    { hide: true }
   )
   version.log('info', 'Successfully logged into docker')
 
-  await logCommand(`docker push -q ${tag}`, version.log.bind(version))
+  await logCommand(`docker push ${tag}`, version.log.bind(version))
 
   // tidy up
   vlog.info({ tmpDir, builderFiles }, 'Removing temp directory and Minio uploads')
