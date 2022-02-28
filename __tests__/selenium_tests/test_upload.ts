@@ -112,18 +112,23 @@ describe('End to end test', () => {
 
   test('test submit deployment for model', async () => {
     const driver = await getDriver()
+    logger.trace('got selenium driver')
 
     try {
       expect(modelInfo.url).not.toBeNull()
       await driver.get(modelInfo.url)
+      logger.trace(`getting model page '${modelInfo.url}'`)
 
       await click(driver, By.css('[data-test="requestDeploymentButton"]'))
       await click(driver, By.css('[data-test="submitDeployment"]'))
+      logger.trace(`requested deployment`)
 
       // Now need to find place to click get request via json blob
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
+      logger.trace(`switch to json view`)
 
       await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
+      logger.trace(`selected current schema`)
 
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
@@ -132,9 +137,13 @@ describe('End to end test', () => {
         By.css('textarea'),
         JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
       )
+      logger.trace(`set json body to deployment metadata`)
 
       await click(driver, By.css('[data-test="submitButton"]'))
+      logger.trace(`clicked submit button`)
+
       await driver.wait(until.urlContains('/deployment/'))
+      logger.trace(`found url contains deployment`)
     } finally {
       await driver.quit()
     }
