@@ -57,25 +57,21 @@ export function setStepState(_splitSchema: SplitSchema, setSplitSchema: Function
     if (oldSchema.reference !== step.schemaRef) {
       return oldSchema
     }
-  
-    const index = oldSchema.steps.findIndex(
-      (iStep) => step.section === iStep.section
-    )
-  
+
+    const index = oldSchema.steps.findIndex((iStep) => step.section === iStep.section)
+
     const duplicatedSteps = [...oldSchema.steps]
     duplicatedSteps[index].state = {
       ...(oldSchema.steps[index].state || {}),
       ...state,
     }
-  
+
     return { ...oldSchema, steps: duplicatedSteps }
   })
 }
 
 export function setStepValidate(splitSchema: SplitSchema, setSplitSchema: Function, step: Step, validate: boolean) {
-  const index = splitSchema.steps.findIndex(
-    (iStep) => step.section === iStep.section
-  )
+  const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
   const duplicatedSteps = [...splitSchema.steps]
   duplicatedSteps[index].shouldValidate = validate

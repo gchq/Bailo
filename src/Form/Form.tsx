@@ -32,7 +32,9 @@ export default function Form({
         </Tabs>
       </Box>
 
-      {tab === 'designer' && <FormDesigner splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
+      {tab === 'designer' && (
+        <FormDesigner splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      )}
       {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
     </>
   )
