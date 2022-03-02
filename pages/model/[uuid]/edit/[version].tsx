@@ -7,7 +7,7 @@ import { useGetModel } from '../../../../data/model'
 import Wrapper from '../../../../src/Wrapper'
 import { useGetSchema } from '../../../../data/schema'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
-import { Step } from '../../../../types/interfaces'
+import { SplitSchema, Step } from '../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
 
 import SubmissionError from '../../../../src/Form/SubmissionError'
@@ -35,18 +35,18 @@ function Upload() {
   const { version, isVersionLoading, isVersionError } = useGetModelVersion(modelUuid, versionString)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
 
-  const [steps, setSteps] = useState<Array<Step>>([])
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
 
   const cVersion = useCacheVariable(version)
   const cSchema = useCacheVariable(schema)
 
   useEffect(() => {
-    if (!cSchema || !cVersion || steps.length) return
+    if (!cSchema || !cVersion || splitSchema.steps.length) return
 
     const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cVersion.metadata)
-    setSteps(schemaSteps)
-  }, [cSchema, cVersion, steps.length])
+    setSplitSchema({ reference: cSchema.reference, steps: schemaSteps })
+  }, [cSchema, cVersion, splitSchema.steps.length])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
@@ -66,7 +66,7 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps)
+    const data = getStepsData(splitSchema)
     data.schemaRef = schema?.reference
 
     const edit = await putEndpoint(`/api/v1/version/${version._id}`, data)
@@ -87,7 +87,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
     </Paper>
   )
 }
