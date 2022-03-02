@@ -178,3 +178,9 @@ export interface Step {
   shouldValidate: boolean
   isComplete: Function
 }
+
+export interface SplitSchema {
+  reference: string
+
+  steps: Array<Step>
+}
