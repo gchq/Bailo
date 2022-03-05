@@ -148,18 +148,22 @@ export const postUpload = [
         model.currentMetadata = metadata
       } else {
         // Save a new model, and add the uploaded version to its array
-        model = new ModelModel({
-          schemaRef: metadata.schemaRef,
-          uuid: `${name}-${nanoid()}`,
+        model = new ModelModel(
+          {
+            schemaRef: metadata.schemaRef,
+            uuid: `${name}-${nanoid()}`,
 
-          parent: parentId,
-          versions: [version._id],
-          currentMetadata: metadata,
+            parent: parentId,
+            versions: [version._id],
+            currentMetadata: metadata,
 
-          owner: req.user?._id,
-        }, null, {
-          user: req.user
-        })
+            owner: req.user?._id,
+          },
+          null,
+          {
+            user: req.user,
+          }
+        )
       }
 
       await model.save()

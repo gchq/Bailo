@@ -112,7 +112,7 @@ export const getModelVersion = [
     console.log('calling findOne')
     const model = await ModelModel.findOne({ uuid })
     console.log('result', model)
-    
+
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }

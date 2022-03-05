@@ -1,7 +1,7 @@
-import { Schema, Document } from "mongoose"
+import { Schema, Document } from 'mongoose'
 import { castArray } from 'lodash'
 
-import { Forbidden } from "./result"
+import { Forbidden } from './result'
 
 async function hasPermission(schema: Schema, options: any, doc: Document, authFunc: Function) {
   if (options.dangerouslyOverrideAuth) {
@@ -24,13 +24,13 @@ async function asyncFilter(arr, predicate) {
 
 export default function createAuthPlugin(authFunc: Function) {
   return (schema: Schema) => {
-    schema.post('findOne', function(docs, next) {
-      const options = this.getOptions()
+    // schema.post('findOne', function (docs, next) {
+    //   const options = this.getOptions()
 
-      console.log('called find / findOne')
-    
-      return []
-    })
+    //   console.log('called find / findOne')
+
+    //   return []
+    // })
   }
 }
 
@@ -50,7 +50,7 @@ export default function createAuthPlugin(authFunc: Function) {
 
 //     async function find(query: any, doc: Document | Array<Document>, next: Function) {
 //       console.log('find func')
-      
+
 //       const isArray = Array.isArray(doc)
 //       const docArray = castArray(doc)
 
@@ -67,7 +67,7 @@ export default function createAuthPlugin(authFunc: Function) {
 //       const options = this.getOptions()
 
 //       console.log('called find / findOne')
-    
+
 //       return next(undefined)
 //     })
 
