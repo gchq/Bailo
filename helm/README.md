@@ -11,6 +11,10 @@ All commands assume they are run in the `helm/bailo` directory with the right co
 
 1. `kubectl config set-context --current --namespace=bailo`
 
+All commands also assume that the namespace is already created, a namespace can be created with:
+
+1. `kubectl create namespace bailo`
+
 #### Configuration
 
 Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by using `--set <option>=<value>`.
@@ -29,16 +33,13 @@ This image can be built with `docker build -t bailo .` in the root directory. Th
 #### Install Bailo
 
 1. `helm dependency update`
-2. `helm install --create-namespace --values ./local.yaml bailo .`
-3. `helm list # list current deployments`
+2. `ts-node --project ../../tsconfig.server.json createSecrets.ts`
+3. `helm install --values ./local.yaml bailo .`
+4. `helm list # list current deployments`
 
 #### Upgrade Bailo
 
-Initially get the existing secrets used for the cluster. These are needed to bring up the new containers.
-
-1. `export ROOT_USER=$(kubectl get secret bailo-minio -o jsonpath="{.data.root-user}" | base64 --decode)`
-2. `export ROOT_PASSWORD=$(kubectl get secret bailo-minio -o jsonpath="{.data.root-password}" | base64 --decode)`
-3. `helm upgrade --values ./local.yaml bailo . --set minio.auth.rootUser=$ROOT_USER --set minio.auth.rootPassword=$ROOT_PASSWORD`
+1. `helm upgrade --values ./local.yaml bailo .`
 
 #### Removing Bailo
 
