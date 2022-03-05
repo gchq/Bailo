@@ -1,20 +1,18 @@
-import { User, Model, Deployment } from "../../types/interfaces";
-import { Request } from "express";
+import { User, Model, Deployment } from '../../types/interfaces'
+import { Request } from 'express'
 
 export default class AuthorisationBase {
-  constructor() {
-
-  }
+  constructor() {}
 
   async getUserFromReq(req: Request) {
-    // this function must never fail to call next, even when
-    // no user is found.
     const userId = req.get('x-userid')
     const email = req.get('x-email')
+    const data = JSON.parse(req.get('x-user') ?? '{}')
 
     return {
       userId,
-      email
+      email,
+      data,
     }
   }
 
