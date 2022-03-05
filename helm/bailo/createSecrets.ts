@@ -7,7 +7,7 @@ export default async function createSecrets() {
   // minio secrets
   const rootUser = uuidv4()
   const rootPassword = uuidv4()
-  
+
   exec(`kubectl create secret generic ${prefix}-minio \
     --from-literal=root-user='${rootUser}' \
     --from-literal=root-password='${rootPassword}'
