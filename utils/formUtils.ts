@@ -86,8 +86,6 @@ export function getStepsFromSchema(
 ): Array<Step> {
   const schemaDupe = omit(schema.schema, omitFields) as any
 
-  console.log(schema)
-
   for (let field of omitFields) {
     const fields = field.split('.')
     remove(get(schemaDupe, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])

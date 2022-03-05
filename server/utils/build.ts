@@ -67,7 +67,6 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
 
   await new Promise((resolve, reject) => {
     childProcess.on('exit', () => {
-      console.log('exit')
       if (childProcess.exitCode !== 0) {
         return reject(`Failed with status code ${childProcess.exitCode}`)
       }
