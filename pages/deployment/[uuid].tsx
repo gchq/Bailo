@@ -34,6 +34,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
+import Link from 'next/link'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -193,7 +194,7 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <pre>
-              <span># Login to Docker</span>
+              <span># Login to Docker (your token can be found on the <Link href="/settings">/settings</Link> page)</span>
               <br />
               <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
               <br />
@@ -206,7 +207,7 @@ export default function Deployment() {
               <span># Run Docker image</span>
               <br />
               <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <span># (the container exports port 9000, available on the host as port 9999)</span>
+              <span># (the container exposes on port 9000, available on the host as port 9999)</span>
               <br />
               <br />
 
