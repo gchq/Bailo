@@ -1,5 +1,5 @@
-import { Step } from 'types/interfaces'
-import { setStepState } from 'utils/formUtils'
+import { SplitSchema, Step } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
 
 import { styled } from '@mui/system'
 import Box from '@mui/material/Box'
@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
-export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: Function) {
+export default function RenderFileTab(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
   const { state } = step
   const { binary, code } = state
 
@@ -21,11 +21,11 @@ export default function RenderFileTab(step: Step, steps: Array<Step>, setSteps: 
   })
 
   const handleCodeChange = (e: any) => {
-    setStepState(steps, setSteps, step, { ...state, code: e.target.files[0] })
+    setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
   }
 
   const handleBinaryChange = (e: any) => {
-    setStepState(steps, setSteps, step, { ...state, binary: e.target.files[0] })
+    setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
   }
 
   const displayFilename = (filename: string) => {

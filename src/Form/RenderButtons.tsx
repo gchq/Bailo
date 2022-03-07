@@ -5,12 +5,12 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 import { setStepValidate, validateForm } from 'utils/formUtils'
-import { Step } from '../../types/interfaces'
+import { SplitSchema, Step } from '../../types/interfaces'
 
 export default function RenderButtons(
   currentStep: Step,
-  steps: Array<Step>,
-  setSteps: Function,
+  splitSchema: SplitSchema,
+  setSplitSchema: Function,
   activeStep: number,
   setActiveStep: Function,
   onSubmit: Function,
@@ -18,13 +18,13 @@ export default function RenderButtons(
   setOpenValidateError: Function
 ) {
   const isFirstStep = activeStep === 0
-  const isLastStep = activeStep === steps.length - 1
+  const isLastStep = activeStep === splitSchema.steps.length - 1
 
   const onClickNextSection = () => {
     const isValid = validateForm(currentStep)
 
     if (!isValid) {
-      setStepValidate(steps, setSteps, currentStep, true)
+      setStepValidate(splitSchema, setSplitSchema, currentStep, true)
       setOpenValidateError(true)
       return
     }
@@ -36,7 +36,7 @@ export default function RenderButtons(
     const isValid = validateForm(currentStep)
 
     if (!isValid) {
-      setStepValidate(steps, setSteps, currentStep, true)
+      setStepValidate(splitSchema, setSplitSchema, currentStep, true)
       setOpenValidateError(true)
       return
     }
