@@ -14,7 +14,7 @@ import Upload from '@mui/icons-material/Upload'
 import Divider from '@mui/material/Divider'
 import React, { createRef, useState } from 'react'
 import ModelOverview from '../../src/ModelOverview'
-import { Step } from '../../types/interfaces'
+import { SplitSchema } from '../../types/interfaces'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')
@@ -29,14 +29,14 @@ const downloadToFile = (blob, filename) => {
 const ModelExportAndSubmission = ({
   formData,
   schemaRef,
-  steps,
+  splitSchema,
   onSubmit,
   activeStep,
   setActiveStep,
 }: {
   formData: any
   schemaRef: string
-  steps: Array<Step>
+  splitSchema: SplitSchema
   onSubmit: any
   activeStep: number
   setActiveStep: Function
@@ -71,7 +71,7 @@ const ModelExportAndSubmission = ({
 
   const onShowHtmlView = () => {
     const defaults = {}
-    steps.forEach((step) => (defaults[step.section] = {}))
+    splitSchema.steps.forEach((step) => (defaults[step.section] = {}))
 
     setWrappedMetadata({
       metadata: {

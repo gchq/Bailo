@@ -4,14 +4,14 @@ import { Theme as MaterialUITheme } from '../MuiForms'
 import UserSelector from '../MuiForms/UserSelector'
 import Nothing from '../MuiForms/Nothing'
 
-import { Step } from '../../types/interfaces'
+import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
-export default function RenderForm(step: Step, steps: Array<Step>, setSteps: Function) {
+export default function RenderForm(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
   const onFormChange = (form) => {
-    setStepState(steps, setSteps, step, { ...step.state, ...form.formData })
+    setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
   return (
