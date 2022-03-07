@@ -15,7 +15,7 @@ let adminToken: string | undefined = undefined
 export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
-    const hash = createHash('sha512').update(key).digest().slice(0, 16)
+    const hash = createHash('sha256').update(key).digest().slice(0, 16)
     hash[6] = (hash[6] & 0x0f) | 0x40
     hash[8] = (hash[8] & 0x3f) | 0x80
 
@@ -24,8 +24,8 @@ export async function getAdminToken() {
 
   return adminToken
 }
-// On startup get admin token
-getAdminToken()
+
+getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
 async function getPrivateKey() {
   return await readFile('./certs/key.pem', { encoding: 'utf-8' })
@@ -66,7 +66,7 @@ function formatKid(keyBuffer: Buffer) {
 async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha512').update(der).digest().slice(0, 30)
+  const hash = createHash('sha256').update(der).digest().slice(0, 30)
 
   return formatKid(hash)
 }
@@ -158,7 +158,7 @@ export const getDockerRegistryAuth = [
     const isOfflineToken = offlineToken === 'true'
 
     let rlog = logger.child({ account, clientId, isOfflineToken, service, scope })
-    rlog.info({ url: req.originalUrl }, 'Received docker registry authentication request')
+    rlog.trace({ url: req.originalUrl }, 'Received docker registry authentication request')
 
     const authorization = req.get('authorization')
 
@@ -188,7 +188,7 @@ export const getDockerRegistryAuth = [
 
     if (isOfflineToken) {
       const refreshToken = await getRefreshToken(user)
-      rlog.info('Successfully generated offline token')
+      rlog.trace('Successfully generated offline token')
       return res.json({ token: refreshToken })
     }
 
@@ -215,7 +215,7 @@ export const getDockerRegistryAuth = [
     }
 
     const token = await getAccessToken(user, accesses)
-    rlog.info('Successfully generated access token')
+    rlog.trace('Successfully generated access token')
 
     return res.json({ token })
   },
