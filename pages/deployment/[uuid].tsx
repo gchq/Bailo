@@ -45,7 +45,7 @@ function CodeLine({ line }) {
 
   return (
     <>
-      <span
+      <div
         style={{
           cursor: 'pointer',
         }}
@@ -64,8 +64,7 @@ function CodeLine({ line }) {
             {line}
           </b>
         </Tooltip>
-      </span>
-      <br />
+      </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
     </>
   )
