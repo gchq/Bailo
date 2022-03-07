@@ -92,7 +92,7 @@ jobs:
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
       # Run tests
-      # - run: HEADLESS=true npm test
+      - run: HEADLESS=true npm test
 
       - name: Dump docker-compose logs
         if: always()
