@@ -7,7 +7,7 @@ import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
 import UserModel from '../models/User'
 
-const httpsAgent = new https.Agent({
+const _httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
 })
 
@@ -36,7 +36,7 @@ export default function processDeployments() {
 
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
-      const registry = `https://${config.get('registry.host')}/v2`
+      const registry = `http://${config.get('registry.host')}/v2`
       const tag = `${modelID}:${initialVersionRequested}`
       const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
 
@@ -49,12 +49,13 @@ export default function processDeployments() {
       ])
       const authorisation = `Bearer ${token}`
 
+      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
       const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
         headers: {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
         },
-        agent: httpsAgent,
+        // agent: httpsAgent,
       } as RequestInit).then((res: any) => res.json())
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
@@ -68,7 +69,7 @@ export default function processDeployments() {
               headers: {
                 Authorization: authorisation,
               },
-              agent: httpsAgent,
+              // agent: httpsAgent,
             } as RequestInit
           )
 
@@ -87,7 +88,7 @@ export default function processDeployments() {
           headers: {
             Authorization: authorisation,
           },
-          agent: httpsAgent,
+          // agent: httpsAgent,
         } as RequestInit
       )
 
@@ -104,7 +105,7 @@ export default function processDeployments() {
           Authorization: authorisation,
           'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
         },
-        agent: httpsAgent,
+        // agent: httpsAgent,
       } as RequestInit)
 
       if (manifestPutRes.status >= 400) {

@@ -3,6 +3,7 @@ import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
+import Bailo from '../../lib/node'
 
 import {
   clearData,
@@ -33,9 +34,10 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
   while (approvalButtons.length > 0) {
     approvalButtons[0].click()
     await click(driver, By.css('[data-test="confirmButton"]'))
+
     // give some time for page to refresh
     // not using waitForElements b/c looping until no longer exists on page
-    await driver.sleep(500)
+    await driver.sleep(1000)
 
     const curApprovalButtons = await driver.findElements(By.css('[data-test="approveButton"]'))
     expect(curApprovalButtons.length).toEqual(approvalButtons.length - 1)
@@ -73,11 +75,28 @@ describe('End to end test', () => {
       modelInfo.url = modelUrl
       modelInfo.name = mName
 
+      const api = new Bailo(
+        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+      )
+
+      const model = await api.getModel(modelInfo.name)
+
+      while (true) {
+        const version = await model.getVersion('1')
+
+        if (version.version.built) {
+          break
+        }
+
+        logger.info('Model not built, retrying in 2 seconds.')
+        await pause(2000)
+      }
+
       logger.info(modelInfo, 'Received model information')
     } finally {
       await driver.quit()
     }
-  }, 70000)
+  }, 120000)
 
   test('test can approve models', async () => {
     const driver = await getDriver()
@@ -93,18 +112,37 @@ describe('End to end test', () => {
 
   test('test submit deployment for model', async () => {
     const driver = await getDriver()
+    logger.trace('got selenium driver')
 
     try {
       expect(modelInfo.url).not.toBeNull()
       await driver.get(modelInfo.url)
+      logger.trace(`getting model page '${modelInfo.url}'`)
+
+      // sanity checks
+      const api = new Bailo(
+        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+      )
+
+      // ensure it's built
+      const model = await api.getModel(modelInfo.name)
+      const version = await model.getVersion('1')
+      expect(version.version.built).toBeTruthy()
+
+      // ensure it's approved
+      expect(version.version.managerApproved).toBe('Accepted')
+      expect(version.version.reviewerApproved).toBe('Accepted')
 
       await click(driver, By.css('[data-test="requestDeploymentButton"]'))
       await click(driver, By.css('[data-test="submitDeployment"]'))
+      logger.trace(`requested deployment`)
 
       // Now need to find place to click get request via json blob
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
+      logger.trace(`switch to json view`)
 
       await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
+      logger.trace(`selected current schema`)
 
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
@@ -113,9 +151,13 @@ describe('End to end test', () => {
         By.css('textarea'),
         JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
       )
+      logger.trace(`set json body to deployment metadata`)
 
       await click(driver, By.css('[data-test="submitButton"]'))
+      logger.trace(`clicked submit button`)
+
       await driver.wait(until.urlContains('/deployment/'))
+      logger.trace(`found url contains deployment`)
     } finally {
       await driver.quit()
     }

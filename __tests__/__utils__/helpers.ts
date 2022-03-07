@@ -18,18 +18,18 @@ export async function clearData() {
     imageIdentifier +
     "'))"
   log.debug(stopCmd)
-  await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
   const rmCmd =
     "docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
     imageIdentifier +
     "'))"
   log.debug(rmCmd)
-  await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
   const cmd = "docker rmi $(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" + imageIdentifier + "')"
   log.debug(cmd)
-  await runCommand(cmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(cmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
   log.debug('clearData complete')
 }
 
