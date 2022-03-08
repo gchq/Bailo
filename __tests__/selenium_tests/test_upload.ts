@@ -1,4 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
+import { runCommand } from '../../server/utils/build'
 import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
@@ -190,7 +191,7 @@ describe('End to end test', () => {
     } finally {
       await driver.quit()
     }
-
+    
     const docker = new Docker()
     const auth = {
       username: config.get('user.id'),
@@ -198,9 +199,10 @@ describe('End to end test', () => {
     }
 
     const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
-    const dockerResp = await docker.createImage(auth, { fromImage: imageName })
-    expect(dockerResp.statusCode).toEqual(200)
-    logger.info('created image')
+    await runCommand(`docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`, 
+      logger.debug.bind(logger), logger.error.bind(logger), { silentErrors: true })
+    await runCommand(`docker pull ${imageName}`, 
+      logger.debug.bind(logger), logger.error.bind(logger), { silentErrors: true })
 
     const container = await docker.createContainer({
       Image: imageName,
