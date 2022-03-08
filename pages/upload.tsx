@@ -22,9 +22,9 @@ import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import { getErrorMessage } from '@/utils/fetcher'
 
 function renderSubmissionTab(
+  _currentStep: Step,
   splitSchema: SplitSchema,
   _setSplitSchema: Function,
-  _setSteps: Function,
   activeStep: number,
   setActiveStep: Function,
   onSubmit: Function,

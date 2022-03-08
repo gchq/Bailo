@@ -41,7 +41,7 @@ export default function Deploy() {
     if (!currentSchema) return
 
     const { schema, reference } = currentSchema
-    const newSteps = getStepsFromSchema(schema, uiSchema, [
+    const newSteps = getStepsFromSchema(currentSchema, uiSchema, [
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
     ])
