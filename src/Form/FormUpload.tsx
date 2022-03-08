@@ -1,23 +1,23 @@
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 
-import { Step } from '../../types/interfaces'
+import { SplitSchema } from '../../types/interfaces'
 import { getStepsData, setStepsData } from '../../utils/formUtils'
 
 export default function FormUpload({
-  steps,
-  setSteps,
+  splitSchema,
+  setSplitSchema,
   onSubmit,
 }: {
-  steps: Array<Step>
-  setSteps: Function
+  splitSchema: SplitSchema
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: any
 }) {
-  const dataSteps = steps.filter((step) => step.type === 'Data')
-  const [metadata, setMetadata] = useState(JSON.stringify(getStepsData(steps), null, 4))
+  const dataSteps = splitSchema.steps.filter((step) => step.type === 'Data')
+  const [metadata, setMetadata] = useState(JSON.stringify(getStepsData(splitSchema), null, 4))
   const [validationErrorText, setValidationErrorText] = useState<string>('')
 
   const handleMetadataChange = (event: any) => {
@@ -32,7 +32,7 @@ export default function FormUpload({
         return
       }
 
-      setStepsData(steps, setSteps, parsed)
+      setStepsData(splitSchema, setSplitSchema, parsed)
     } catch (error) {
       setValidationErrorText('Invalid JSON')
     }
@@ -41,7 +41,7 @@ export default function FormUpload({
   return (
     <>
       {dataSteps.map((step, index) => (
-        <Box key={`${index}`}>{step.renderBasic(step, steps, setSteps)}</Box>
+        <Box key={`${index}`}>{step.renderBasic(step, splitSchema, setSplitSchema)}</Box>
       ))}
       <TextField
         fullWidth

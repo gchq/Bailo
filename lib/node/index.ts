@@ -136,7 +136,7 @@ export default class API {
   }
 
   async getModel(uuid: string) {
-    const model = await this.apiGet(`/model/${uuid}`)
+    const model = await this.apiGet(`/model/uuid/${uuid}`)
 
     return new Model(this, model)
   }

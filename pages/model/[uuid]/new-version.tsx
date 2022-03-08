@@ -7,7 +7,7 @@ import { useGetModel } from '../../../data/model'
 import Wrapper from '../../../src/Wrapper'
 import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { Step } from '../../../types/interfaces'
+import { SplitSchema, Step } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
@@ -34,14 +34,14 @@ function Upload() {
   const cModel = useCacheVariable(model)
   const cSchema = useCacheVariable(schema)
 
-  const [steps, setSteps] = useState<Array<Step>>([])
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
+    const steps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
 
-    schemaSteps.push(
+    steps.push(
       createStep({
         schema: {
           title: 'Files',
@@ -53,7 +53,7 @@ function Upload() {
         schemaRef: cModel.schemaRef,
 
         type: 'Data',
-        index: schemaSteps.length,
+        index: steps.length,
         section: 'files',
 
         render: RenderFileTab,
@@ -61,7 +61,7 @@ function Upload() {
       })
     )
 
-    setSteps(schemaSteps)
+    setSplitSchema({ reference: cSchema.reference, steps })
   }, [cModel, cSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
@@ -81,7 +81,7 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps, true)
+    const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
     data.schemaRef = model?.schemaRef
@@ -109,7 +109,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
     </Paper>
   )
 }

@@ -22,6 +22,8 @@ export default async function runScript() {
   for (let [name, unknownLicense] of Object.entries(dependencies)) {
     let license = unknownLicense as any
     const version = packageLock.packages[`node_modules/${name}`].version
+
+    // console.log([name, version, license.licenses, license.repository].join(','))
     console.log(`${name} v${version} <${license.licenses}>: ${license.repository}`)
   }
 }
