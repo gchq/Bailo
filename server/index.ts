@@ -53,6 +53,16 @@ ensureBucketExists(config.get('minio.registryBucket'))
 // lazily create indexes for full text search
 createIndexes()
 
+logger.trace({
+  someObject: {
+    a: 234,
+    anotherField: "234",
+    somethingLong: "t943jt9034jg9 4j9034 g3j904gj3"
+  },
+  anotherValue: 2,
+  more: "jg903j"
+}, 'Some example message')
+
 app.prepare().then(() => {
   const server = express()
 
