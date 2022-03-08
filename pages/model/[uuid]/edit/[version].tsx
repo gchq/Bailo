@@ -44,7 +44,7 @@ function Upload() {
   useEffect(() => {
     if (!cSchema || !cVersion || splitSchema.steps.length) return
 
-    const schemaSteps = getStepsFromSchema(cSchema.schema, uiSchema, [], cVersion.metadata)
+    const schemaSteps = getStepsFromSchema(cSchema, uiSchema, [], cVersion.metadata)
     setSplitSchema({ reference: cSchema.reference, steps: schemaSteps })
   }, [cSchema, cVersion, splitSchema.steps.length])
 
