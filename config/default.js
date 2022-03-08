@@ -20,8 +20,8 @@ module.exports = {
   },
 
   registry: {
-    host: 'localhost:5000',
-    port: 5000,
+    host: 'localhost:8080',
+    port: 8080,
 
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
@@ -53,7 +53,7 @@ module.exports = {
       documentationUrl: 'https://example.com',
     },
     registry: {
-      host: 'localhost:5000',
+      host: 'localhost:8080',
     },
   },
 

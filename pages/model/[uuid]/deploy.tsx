@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react'
 import Paper from '@mui/material/Paper'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../../../data/api'
-import { Schema, Step } from '../../../types/interfaces'
+import { Schema, SplitSchema, Step } from '../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
@@ -30,7 +30,7 @@ export default function Deploy() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('DEPLOYMENT')
 
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
-  const [steps, setSteps] = useState<Array<Step>>([])
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
@@ -40,13 +40,13 @@ export default function Deploy() {
   useEffect(() => {
     if (!currentSchema) return
 
-    const { schema } = currentSchema
+    const { schema, reference } = currentSchema
     const newSteps = getStepsFromSchema(schema, uiSchema, [
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
     ])
 
-    setSteps(newSteps)
+    setSplitSchema({ reference, steps: newSteps })
   }, [currentSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load deploy page`, {
@@ -63,7 +63,7 @@ export default function Deploy() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps)
+    const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
     data.highLevelDetails.initialVersionRequested = model!.currentMetadata.highLevelDetails.modelCardVersion
@@ -97,7 +97,7 @@ export default function Deploy() {
         </Grid>
 
         <SubmissionError error={error} />
-        <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+        <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
       </Paper>
     </Wrapper>
   )

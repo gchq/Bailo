@@ -74,6 +74,7 @@ mongodb:
     enabled: true
     rootUser: ""
     rootPassword: ""
+    existingSecret: "bailo-mongodb"
     usernames:
       - mongodb
     passwords: []
@@ -89,7 +90,7 @@ minio:
   auth:
     rootUser: ""
     rootPassword: ""
-    existingSecret: ""
+    existingSecret: "bailo-minio"
   defaultBuckets: "uploads,registry"
   uploadBucket: uploads
   registryBucket: registry
@@ -101,15 +102,18 @@ minio:
 
 redis:
   enabled: true
+  architecture: standalone
   auth:
     enabled: true
     password: ""
-    existingSecret: ""
-    existingSecretPasswordKey: ""
+    existingSecret: "bailo-redis"
+    existingSecretPasswordKey: "redis-password"
   host: ""
   master:
     service:
       port: 6379
+  replica:
+    replicaCount: 0
   
 registry:
   enabled: true
