@@ -94,7 +94,7 @@ services:
       - apparmor:unconfined
     environment:
       - NODE_CONFIG_ENV=docker_compose_prod
-      - SCHEMA_SETUP_SCRIPT=server/scripts/exampleSetAllSchemas.ts
+      - SCHEMA_SETUP_SCRIPT=/app/server/scripts/exampleSetAllSchemas.ts
 
 volumes:
   minioVolume:
