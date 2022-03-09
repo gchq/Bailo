@@ -7,9 +7,7 @@ import config from 'config'
 import Bailo from '../../lib/node'
 
 import {
-  clearData,
-  waitForElement,
-  waitForElements,
+  clearData,  waitForElement, waitForElements,
   selectOption,
   getDriver,
   click,
