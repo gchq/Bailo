@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-next
 
       # Setup dependencies
-      - name: Build the stack 
+      - name: Build the stack
         run: |
           sudo chown -R runner:docker certs
           npm run certs
@@ -68,7 +68,6 @@ jobs:
           EOT
 
           docker-compose up --force-recreate --build -d
-
 
       # wait for app to start
       - run: |
