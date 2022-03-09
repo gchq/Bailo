@@ -70,9 +70,6 @@ jobs:
           docker-compose up --force-recreate --build -d
 
 
-      # Setup app
-      - name: Setup app
-
       # wait for app to start
       - run: |
           chmod +x ./server/scripts/waitForIt.sh
