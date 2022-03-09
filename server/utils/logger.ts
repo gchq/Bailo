@@ -40,9 +40,7 @@ class Writer {
   }
 
   representValue(value: any) {
-    return typeof value === 'object' ?
-      JSON.stringify(value, null, 2) :
-      String(value)
+    return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
   }
 
   getAttributes(data) {
@@ -67,9 +65,7 @@ class Writer {
       return ''
     }
 
-    return keys.map(
-      (key) => `${key}=${this.representValue(attributes[key])}`
-    ).join(' ')
+    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
