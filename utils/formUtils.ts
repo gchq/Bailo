@@ -7,6 +7,7 @@ import { Validator } from 'jsonschema'
 import { SplitSchema, Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
 import RenderButtons from '../src/Form/RenderButtons'
+import { compose } from '@mui/system'
 
 export function createStep({
   schema,
@@ -150,7 +151,16 @@ export function setStepsData(splitSchema: SplitSchema, setSplitSchema: Function,
 
 export function validateForm(step: Step) {
   const validator = new Validator()
-  const sectionErrors = validator.validate(step.state, step.schema)
+  let sectionErrors = validator.validate(step.state, step.schema).errors.length
+  Object.keys(step.schema.properties ?? {}).map((nestedObjectKey: string) => {
+    if (step.schema.properties[nestedObjectKey].properties !== undefined) {
+      // Check for a nested object (sub-heading) and validate inner properties.
+      sectionErrors += validator.validate(
+        step.state[nestedObjectKey],
+        step.schema.properties[nestedObjectKey].properties
+      ).errors.length
+    }
+  })
 
-  return sectionErrors.errors.length === 0
+  return sectionErrors === 0
 }
