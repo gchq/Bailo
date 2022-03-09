@@ -56,7 +56,12 @@ export default function processDeployments() {
           Authorization: authorisation,
         },
         agent: httpsAgent,
-      } as RequestInit).then((res: any) => res.json())
+      } as RequestInit).then((res: any) => {
+        logger.info({
+          status: res.status,
+        })
+        return res.json()
+      })
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
 

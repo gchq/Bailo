@@ -4,8 +4,8 @@ update-ca-certificates
 if [[ -z "${SCHEMA_SETUP_SCRIPT}" ]]; then
   echo "No schemas setup script set; You will have to add schemas after startup"
 else
-  echo "Running npx ts-node --project tsconfig.server.json $SCHEMA_SETUP_SCRIPT"
-  npx ts-node --project tsconfig.server.json $SCHEMA_SETUP_SCRIPT
+  echo "Running node $SCHEMA_SETUP_SCRIPT"
+  node $SCHEMA_SETUP_SCRIPT
 fi
 
 echo "Running 'npm run start'"
