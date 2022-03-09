@@ -191,7 +191,7 @@ describe('End to end test', () => {
     } finally {
       await driver.quit()
     }
-    
+
     const docker = new Docker()
     const auth = {
       username: config.get('user.id'),
@@ -199,10 +199,15 @@ describe('End to end test', () => {
     }
 
     const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
-    await runCommand(`docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`, 
-      logger.debug.bind(logger), logger.error.bind(logger), { silentErrors: true })
-    await runCommand(`docker pull ${imageName}`, 
-      logger.debug.bind(logger), logger.error.bind(logger), { silentErrors: true })
+    await runCommand(
+      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
+      logger.debug.bind(logger),
+      logger.error.bind(logger),
+      { silentErrors: true }
+    )
+    await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
+      silentErrors: true,
+    })
 
     const container = await docker.createContainer({
       Image: imageName,
