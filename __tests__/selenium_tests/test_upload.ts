@@ -7,7 +7,9 @@ import config from 'config'
 import Bailo from '../../lib/node'
 
 import {
-  clearData,  waitForElement, waitForElements,
+  clearData,
+  waitForElement,
+  waitForElements,
   selectOption,
   getDriver,
   click,
@@ -95,7 +97,7 @@ describe('End to end test', () => {
     } finally {
       await driver.quit()
     }
-  }, 120000)
+  }, 200000)
 
   test('test can approve models', async () => {
     const driver = await getDriver()
@@ -198,7 +200,9 @@ describe('End to end test', () => {
 
     const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
     await runCommand(
-      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`, logger.debug.bind(logger), logger.error.bind(logger),
+      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
+      logger.debug.bind(logger),
+      logger.error.bind(logger),
       { silentErrors: true }
     )
     await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
