@@ -198,9 +198,7 @@ describe('End to end test', () => {
 
     const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
     await runCommand(
-      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
-      logger.debug.bind(logger),
-      logger.error.bind(logger),
+      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`, logger.debug.bind(logger), logger.error.bind(logger),
       { silentErrors: true }
     )
     await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
