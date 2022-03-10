@@ -1,4 +1,3 @@
----
 version: '3.9'
 services:
   mongo:
@@ -8,12 +7,6 @@ services:
     volumes:
       - mongoVolume:/data/db
     command: --quiet
-
-  docker-host:
-    image: qoomon/docker-host
-    cap_add: ['NET_ADMIN', 'NET_RAW']
-    mem_limit: 8M
-    restart: on-failure
 
   minio:
     image: minio/minio
@@ -58,7 +51,6 @@ services:
     image: nginx:alpine
     volumes:
       - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/certs:ro
     ports:
       - 8080:8080
     depends_on:
@@ -74,17 +66,24 @@ services:
       MAILDEV_INCOMING_PASS: mailpass
 
   app:
-    #image: app_with_img:latest
     build:
+      args:
+        # set to your uid (get by running `id` or `echo ${UID}`)
+        # We do this so that you can mount the app directory into the container
+        # and the container user can access the files (and populate node_modules via npm install)
+        # This is only for developer convenience so that changes on host files are immediately
+        # reflected in the running app
+        - user_id=REPLACE_WITH_UID
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.dev
     #network_mode: "host"
     volumes:
       # cert location assumed by registryAuth.ts
-      - ./certs:/app/certs
+      - ./certs:/home/user/app/certs
       # put public key into location to be added to system trusted CA
       # (only needed for self-signed certs)
       - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
+      - ./:/home/user/app
     ports:
       - '3000:3000'
     depends_on:
@@ -95,8 +94,9 @@ services:
       - seccomp:unconfined
       - apparmor:unconfined
     environment:
-      - NODE_CONFIG_ENV=docker_compose_prod
-      - SCHEMA_SETUP_SCRIPT=dist/server/scripts/exampleSetAllSchemas.js
+      - NODE_CONFIG_ENV=docker_compose
+      # if set, run script to set the schemas on startup
+      - SCHEMA_SETUP_SCRIPT=server/scripts/exampleSetAllSchemas.ts
 
 volumes:
   minioVolume:
