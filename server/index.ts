@@ -110,7 +110,6 @@ app.prepare().then(() => {
   })
 
   server.use('/api', expressErrorHandler)
-
   http.createServer(server).listen(port)
 
   logger.info({ port }, `Listening on port ${port}`)
