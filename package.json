@@ -9,7 +9,7 @@
     "build_server": "tsc --project tsconfig.server.json",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "lint": "next lint",
-    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -days 360 -subj '/C=XX/CN=Registry Auth CA'",
+    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "test": "jest",
@@ -72,7 +72,7 @@
     "shelljs": "^0.8.5",
     "swr": "^1.1.1",
     "ts-jest": "^27.1.3",
-    "ts-node": "^10.4.0",
+    "ts-node": "^10.5.0",
     "unzipper": "^0.10.11",
     "uuid": "^8.3.2",
     "yargs": "^17.3.1"

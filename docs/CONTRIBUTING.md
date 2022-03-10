@@ -22,6 +22,9 @@ This is a list of steps you should make prior to making a pull request
 ##### Post Coding
 
 - `npm run style` (code format)
+
+  You can install [pre-commit](https://pre-commit.com/#install) and run `pre-commit install` in the project root to have this done automatically.
+
 - `npm run lint` (eslint checker)
 - `npm run build` (ensure code can be built)
 - `npm run test` (unit tests)
