@@ -181,74 +181,78 @@ describe('End to end test', () => {
     }
   }, 20000)
 
-  test('test built model runs as expected', async () => {
-    const driver = await getDriver()
+  test(
+    'test built model runs as expected',
+    async () => {
+      const driver = await getDriver()
 
-    let dockerPassword: string
+      let dockerPassword: string
 
-    try {
-      await driver.get(BAILO_APP_URL)
-      await click(driver, By.css('[data-test="settingLink"]'))
-      await click(driver, By.css('[data-test="showTokenButton"]'))
+      try {
+        await driver.get(BAILO_APP_URL)
+        await click(driver, By.css('[data-test="settingLink"]'))
+        await click(driver, By.css('[data-test="showTokenButton"]'))
 
-      const dockerPasswordEl = await waitForElement(driver, By.css('[data-test="dockerPassword"]'))
-      dockerPassword = await dockerPasswordEl.getText()
-    } finally {
-      await driver.quit()
-    }
+        const dockerPasswordEl = await waitForElement(driver, By.css('[data-test="dockerPassword"]'))
+        dockerPassword = await dockerPasswordEl.getText()
+      } finally {
+        await driver.quit()
+      }
 
-    const docker = new Docker()
-    const auth = {
-      username: config.get('user.id'),
-      password: dockerPassword,
-    }
+      const docker = new Docker()
+      const auth = {
+        username: config.get('user.id'),
+        password: dockerPassword,
+      }
 
-    const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
-    await runCommand(
-      `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
-      logger.debug.bind(logger),
-      logger.error.bind(logger),
-      { silentErrors: true }
-    )
-    await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
-      silentErrors: true,
-    })
-
-    const container = await docker.createContainer({
-      Image: imageName,
-      AttachStdin: false,
-      AttachStdout: false,
-      AttachStderr: false,
-      Tty: false,
-      OpenStdin: false,
-      StdinOnce: false,
-      ExposedPorts: {
-        '5000/tcp': {},
-        '9000/tcp': {},
-      },
-      PortBindings: {
-        '9000/tcp': [
-          {
-            HostPort: '9999',
-            HostIp: '',
-          },
-        ],
-      },
-    })
-
-    await container.start()
-    await pause(500)
-
-    try {
-      await pause(1500) //give container time to start running
-      const resp = await axios.post('http://localhost:9999/predict', {
-        jsonData: { data: ['should be returned backwards'] },
+      const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
+      await runCommand(
+        `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
+        logger.debug.bind(logger),
+        logger.error.bind(logger),
+        { silentErrors: true }
+      )
+      await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
+        silentErrors: true,
       })
-      expect(resp.status).toEqual(200)
-      expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
-    } finally {
-      await container.stop()
-      await container.remove()
-    }
-  }, 40000)
+
+      const container = await docker.createContainer({
+        Image: imageName,
+        AttachStdin: false,
+        AttachStdout: false,
+        AttachStderr: false,
+        Tty: false,
+        OpenStdin: false,
+        StdinOnce: false,
+        ExposedPorts: {
+          '5000/tcp': {},
+          '9000/tcp': {},
+        },
+        PortBindings: {
+          '9000/tcp': [
+            {
+              HostPort: '9999',
+              HostIp: '',
+            },
+          ],
+        },
+      })
+
+      await container.start()
+      await pause(500)
+
+      try {
+        await pause(1500) //give container time to start running
+        const resp = await axios.post('http://localhost:9999/predict', {
+          jsonData: { data: ['should be returned backwards'] },
+        })
+        expect(resp.status).toEqual(200)
+        expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
+      } finally {
+        await container.stop()
+        await container.remove()
+      }
+    },
+    1000 * 5 * 60
+  )
 })
