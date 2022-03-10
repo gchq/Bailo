@@ -39,6 +39,10 @@ class Writer {
     return `${line}:${src.line}`
   }
 
+  representValue(value: any) {
+    return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
+  }
+
   getAttributes(data) {
     let attributes = omit(data, ['name', 'hostname', 'pid', 'level', 'msg', 'time', 'src', 'v', 'user'])
     let keys = Object.keys(attributes)
@@ -61,7 +65,7 @@ class Writer {
       return ''
     }
 
-    return keys.map((key) => `${key}=${String(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
