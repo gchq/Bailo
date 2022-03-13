@@ -23,6 +23,10 @@ const ModelSchema = new Schema(
 ModelSchema.plugin(createAuthPlugin(authorisation.canUserSeeModel))
 
 const ModelModel = model('Model', ModelSchema)
-ModelModel.createIndexes()
+
+export async function createIndexes() {
+  ModelSchema.index({ '$**': 'text' })
+  await ModelModel.createIndexes()
+}
 
 export default ModelModel

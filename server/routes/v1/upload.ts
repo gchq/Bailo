@@ -11,7 +11,6 @@ import MinioStore from '../../utils/MinioStore'
 import { uploadQueue } from '../../utils/queues'
 import VersionModel from '../../models/Version'
 import { ensureUserRole } from '../../utils/user'
-import logger from '../../utils/logger'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 
@@ -187,7 +186,7 @@ export const postUpload = [
           binary: normalizeMulterFile(files.binary[0]),
           code: normalizeMulterFile(files.code[0]),
         })
-        .timeout(60000)
+        .timeout(60000 * 8)
         .retries(2)
         .save()
       req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')

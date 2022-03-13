@@ -14,7 +14,7 @@ import Upload from '@mui/icons-material/Upload'
 import Divider from '@mui/material/Divider'
 import React, { createRef, useState } from 'react'
 import ModelOverview from '../../src/ModelOverview'
-import { Step } from '../../types/interfaces'
+import { SplitSchema } from '../../types/interfaces'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')
@@ -29,14 +29,14 @@ const downloadToFile = (blob, filename) => {
 const ModelExportAndSubmission = ({
   formData,
   schemaRef,
-  steps,
+  splitSchema,
   onSubmit,
   activeStep,
   setActiveStep,
 }: {
   formData: any
   schemaRef: string
-  steps: Array<Step>
+  splitSchema: SplitSchema
   onSubmit: any
   activeStep: number
   setActiveStep: Function
@@ -47,14 +47,13 @@ const ModelExportAndSubmission = ({
 
   const getGlobalCss = () => {
     let css: Array<string> = []
-    for (let i = 0; i < document.styleSheets.length; i++) {
-      let sheet = document.styleSheets[i]
+
+    for (let sheet of document.styleSheets as unknown as Array<CSSStyleSheet>) {
       try {
         let rules = 'cssRules' in sheet ? sheet.cssRules : sheet.rules
         if (rules) {
           css.push('\n/* Stylesheet : ' + (sheet.href || '[inline styles]') + ' */')
-          for (let j = 0; j < rules.length; j++) {
-            let rule = rules[j]
+          for (let rule of rules as any) {
             if ('cssText' in rule) {
               css.push(rule.cssText)
             } else {
@@ -72,7 +71,7 @@ const ModelExportAndSubmission = ({
 
   const onShowHtmlView = () => {
     const defaults = {}
-    steps.forEach((step) => (defaults[step.section] = {}))
+    splitSchema.steps.forEach((step) => (defaults[step.section] = {}))
 
     setWrappedMetadata({
       metadata: {
@@ -86,10 +85,6 @@ const ModelExportAndSubmission = ({
 
   const handleClose = () => {
     setShowHtmlView(false)
-  }
-
-  const onCopyToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(formData))
   }
 
   const handleModelClose = () => setShowHtmlView(false)

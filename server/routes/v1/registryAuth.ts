@@ -24,8 +24,8 @@ export async function getAdminToken() {
 
   return adminToken
 }
-// On startup get admin token
-getAdminToken()
+
+getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
 async function getPrivateKey() {
   return await readFile('./certs/key.pem', { encoding: 'utf-8' })
@@ -67,9 +67,8 @@ async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
   const hash = createHash('sha256').update(der).digest().slice(0, 30)
-  const kid = formatKid(hash)
 
-  return kid
+  return formatKid(hash)
 }
 
 async function encodeToken(data, { expiresIn }) {
@@ -159,7 +158,7 @@ export const getDockerRegistryAuth = [
     const isOfflineToken = offlineToken === 'true'
 
     let rlog = logger.child({ account, clientId, isOfflineToken, service, scope })
-    rlog.info({ url: req.originalUrl }, 'Received docker registry authentication request')
+    rlog.trace({ url: req.originalUrl }, 'Received docker registry authentication request')
 
     const authorization = req.get('authorization')
 
@@ -188,9 +187,9 @@ export const getDockerRegistryAuth = [
     }
 
     if (isOfflineToken) {
-      const token = await getRefreshToken(user)
-      rlog.info('Successfully generated offline token')
-      return res.json({ token })
+      const refreshToken = await getRefreshToken(user)
+      rlog.trace('Successfully generated offline token')
+      return res.json({ token: refreshToken })
     }
 
     if (!scope) {
@@ -216,7 +215,7 @@ export const getDockerRegistryAuth = [
     }
 
     const token = await getAccessToken(user, accesses)
-    rlog.info('Successfully generated access token')
+    rlog.trace('Successfully generated access token')
 
     return res.json({ token })
   },

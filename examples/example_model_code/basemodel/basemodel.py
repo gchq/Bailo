@@ -11,8 +11,10 @@ class BaseModel(ABC):
         """
         The model should be loaded here in the Model sub-class generated 
         from the BaseModel abstract class
+
+        Example:
+            self.model = load_model("model")
         """
-        # self.model = load_model("model")
         super().__init__()
    
     @abstractmethod
@@ -22,27 +24,33 @@ class BaseModel(ABC):
         :param input: Prediction input containing a data component
         :param feature_names: Optional set of feature names
         :return: JSON serialisable numpy array, list of values, string or bytes
+        
+        Example:
+            data = input["data"]
+            result = self.model.predict(data)
+            return result
         """
-        # data = input["data"]
-        # result = self.model.predict(data)
-        # return result
         pass
   
     def metrics(self):
         """
         Optional method for adding additional metrics
         :return:
+
+        Example:
+            return an array of metrics tuples
+            metrics =  [{"type": "COUNTER", "key": "metric_1", "value": 1}]
+            return metrics
         """
-        # return an array of metrics tuples
-        # metrics =  [{"type": "COUNTER", "key": "metric_1", "value": 1}]
-        # return metrics
         pass
    
     def metadata(self):
         """
         Optional metadata method.
         :return:
+
+        Example:
+            meta = {"field": "value"}
+            return meta
         """
-        # meta = {"field": "value"}
-        # return meta
         pass

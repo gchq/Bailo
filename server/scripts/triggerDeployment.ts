@@ -15,10 +15,10 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
   })
 
   if (!deployment) {
-    throw new Error('Unable to find model')
+    throw new Error('Unable to find deployment')
   }
 
-  const job = await deploymentQueue
+  await deploymentQueue
     .createJob({
       deploymentId: deployment._id,
     })

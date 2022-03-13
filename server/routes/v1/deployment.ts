@@ -9,7 +9,6 @@ import { ensureUserRole } from '../../utils/user'
 import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
 import { BadReq, NotFound, Forbidden } from '../../utils/result'
-import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -23,6 +22,17 @@ export const getDeployment = [
     if (!deployment) {
       throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
     }
+
+    return res.json(deployment)
+  },
+]
+
+export const getCurrentUserDeployments = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const deployment = await DeploymentModel.find({ owner: id })
 
     return res.json(deployment)
   },
@@ -128,7 +138,8 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = 'No Response'
     await deployment.save()
     req.log.info('Creating deployment requests')
-    const requests = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+
     return res.json(deployment)
   },
 ]

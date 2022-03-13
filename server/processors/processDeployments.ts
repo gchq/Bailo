@@ -43,18 +43,25 @@ export default function processDeployments() {
       deployment.log('info', `Retagging image.  Current: internal/${tag}`)
       deployment.log('info', `New: ${user.id}/${tag}`)
 
-      const authorisation = `Bearer ${await getAccessToken({ id: 'admin', _id: 'admin' }, [
+      const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
         { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
         { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull'] },
-      ])}`
+      ])
+      const authorisation = `Bearer ${token}`
 
+      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
       const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
         headers: {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
         },
         agent: httpsAgent,
-      } as RequestInit).then((res: any) => res.json())
+      } as RequestInit).then((res: any) => {
+        logger.info({
+          status: res.status,
+        })
+        return res.json()
+      })
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
 

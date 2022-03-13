@@ -1,3 +1,4 @@
+---
 version: '3.9'
 services:
   mongo:
@@ -7,6 +8,12 @@ services:
     volumes:
       - mongoVolume:/data/db
     command: --quiet
+
+  docker-host:
+    image: qoomon/docker-host
+    cap_add: ['NET_ADMIN', 'NET_RAW']
+    mem_limit: 8M
+    restart: on-failure
 
   minio:
     image: minio/minio
@@ -38,7 +45,8 @@ services:
       REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
 
       REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      #REGISTRY_AUTH_TOKEN_REALM: http://host.docker.internal:3000/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_REALM: http://app:3000/api/v1/registry_auth
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
@@ -50,10 +58,11 @@ services:
     image: nginx:alpine
     volumes:
       - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/certs:ro
     ports:
       - 8080:8080
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
+    depends_on:
+      - app
 
   maildev:
     image: maildev/maildev:latest
@@ -64,23 +73,30 @@ services:
       MAILDEV_INCOMING_USER: mailuser
       MAILDEV_INCOMING_PASS: mailpass
 
-  # app:
-  #   build:
-  #     context: ./
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #      - ./:/app
-  #      - /app/node_modules
-  #      - /app/.next
-  #      - ./certs:/certs
-  #   depends_on:
-  #     - mongo
-  #     - minio
-  #     - redis
-  #   environment:
-  #     - NODE_CONFIG_ENV=docker_compose
+  app:
+    #image: app_with_img:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    #network_mode: "host"
+    volumes:
+      # cert location assumed by registryAuth.ts
+      - ./certs:/app/certs
+      # put public key into location to be added to system trusted CA
+      # (only needed for self-signed certs)
+      - ./certs/cert.pem:/usr/local/share/ca-certificates/bailo.pem
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+      - minio
+      - redis
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      - NODE_CONFIG_ENV=docker_compose_prod
+      - SCHEMA_SETUP_SCRIPT=dist/server/scripts/exampleSetAllSchemas.js
 
 volumes:
   minioVolume:

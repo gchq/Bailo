@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express'
-import config from 'config'
 import UserModel from '../models/User'
 import memoize from 'memoizee'
 import { User } from '../../types/interfaces'
@@ -115,7 +114,7 @@ export function ensureUserRole(roles: Array<string> | string) {
 
     for (let role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
-        throw Unauthorised({ requestedRole: role, currentRoles: req.user!.roles }, `You do not have the '${role}' role`)
+        throw Unauthorised({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
       }
     }
 

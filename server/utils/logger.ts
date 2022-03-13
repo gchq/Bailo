@@ -37,7 +37,10 @@ class Writer {
   getSrc(src) {
     const line = src.file.replace(this.basepath, '')
     return `${line}:${src.line}`
-    // return `${line}:${src.line}${src.func ? ` in ${src.func}` : ''}`
+  }
+
+  representValue(value: any) {
+    return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
   }
 
   getAttributes(data) {
@@ -62,15 +65,16 @@ class Writer {
       return ''
     }
 
-    return keys.map((key) => `${key}=${String(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
     const level = this.getLevel(data.level)
     const src = this.getSrc(data.src)
     const attributes = this.getAttributes(data)
+    const formattedAttributes = attributes.length ? ` (${attributes})` : ''
 
-    const message = `${level} - (${src}): ${data.msg}${attributes.length ? ` (${attributes})` : ''}`
+    const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
     process[pipe].write(message + '\n')
@@ -96,8 +100,8 @@ const log = bunyan.createLogger({
   streams: streams.length ? streams : undefined,
 })
 
-const morganLog = morgan(
-  (tokens: any, req: any, res: any) => {
+const morganLog = morgan<any, any>(
+  (tokens, req, res) => {
     req.log.trace(
       {
         url: tokens.url(req, res),
@@ -152,7 +156,9 @@ export async function expressErrorHandler(
     throw err
   }
 
-  ;(err.logger || req.log).warn(err.data, err.message)
+  const localLogger = err.logger || req.log
+
+  localLogger.warn(err.data, err.message)
   return res.status(err.code || 500).json({
     message: err.message,
   })

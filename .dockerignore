@@ -1,6 +1,7 @@
 # Docker files aren't used in the application
-Dockerfile
+Dockerfile*
 .dockerignore
+docker-compose*
 
 # Depdencies are installed inside of container
 node_modules
@@ -12,3 +13,9 @@ npm-debug.log
 # Markdown files
 README.md
 docs/CONTRIBUTING.md
+
+# Certificates will be explicity mounted
+certs 
+
+# Ignore .git folders
+.git
