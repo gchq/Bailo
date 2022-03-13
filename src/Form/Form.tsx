@@ -1,22 +1,22 @@
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
 
-import { Step } from '../../types/interfaces'
+import { SplitSchema, Step } from '../../types/interfaces'
 
 import FormDesigner from './FormDesigner'
 import FormUpload from './FormUpload'
 
 export default function Form({
-  steps,
-  setSteps,
+  splitSchema,
+  setSplitSchema,
   onSubmit,
 }: {
-  steps: Array<Step>
+  splitSchema: SplitSchema
   onSubmit: Function
-  setSteps: Function
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
 }) {
   const [tab, setTab] = useState('designer')
   const onTabChange = (_event: any, newValue: any) => {
@@ -32,8 +32,10 @@ export default function Form({
         </Tabs>
       </Box>
 
-      {tab === 'designer' && <FormDesigner steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
-      {tab === 'upload' && <FormUpload steps={steps} setSteps={setSteps} onSubmit={onSubmit} />}
+      {tab === 'designer' && (
+        <FormDesigner splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      )}
+      {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
     </>
   )
 }

@@ -4,7 +4,11 @@ export function GenericError(data: any, message: string, code: number, logger?: 
   const err = Error(message) as StatusError & { logger: any }
   err.data = data
   err.code = code
-  err.logger = logger
+
+  Object.defineProperty(err, 'logger', {
+    value: logger,
+    enumerable: false,
+  })
 
   return err
 }

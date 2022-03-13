@@ -8,36 +8,37 @@ import Box from '@mui/material/Box'
 import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
 import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
-import { Schema, Step, User } from '@/types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '@/utils/formUtils'
+import { Schema, SplitSchema, Step, User } from '@/types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
-import RenderBasicFileTab, { BasicFileTabComplete } from '@/src/Form/RenderBasicFileTab'
+import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
+import { getErrorMessage } from '@/utils/fetcher'
 
 function renderSubmissionTab(
-  step: Step,
-  steps: Array<Step>,
-  _setSteps: Function,
+  _currentStep: Step,
+  splitSchema: SplitSchema,
+  _setSplitSchema: Function,
   activeStep: number,
   setActiveStep: Function,
   onSubmit: Function,
-  _openValidateError: Boolean,
+  _openValidateError: boolean,
   _setOpenValidateError: Function
 ) {
-  const data = getStepsData(steps)
+  const data = getStepsData(splitSchema)
 
   return (
     <>
       <ModelExportAndSubmission
         formData={data}
-        steps={steps}
-        schemaRef={step.schemaRef}
+        splitSchema={splitSchema}
+        schemaRef={splitSchema.reference}
         onSubmit={onSubmit}
         setActiveStep={setActiveStep}
         activeStep={activeStep}
@@ -63,12 +64,11 @@ function Upload() {
 
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
   const [user, setUser] = useState<User | undefined>(undefined)
-  const [steps, setSteps] = useState<Array<Step>>([])
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (currentSchema) return
-
     setCurrentSchema(defaultSchema)
   }, [defaultSchema, currentSchema])
 
@@ -86,7 +86,7 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const steps = getStepsFromSchema(schema, uiSchema, undefined, defaultState)
+    const steps = getStepsFromSchema(currentSchema, uiSchema, undefined, defaultState)
 
     steps.push(
       createStep({
@@ -127,7 +127,7 @@ function Upload() {
       })
     )
 
-    setSteps(steps)
+    setSplitSchema({ reference, steps })
   }, [currentSchema, user])
 
   const errorWrapper = MultipleErrorWrapper(
@@ -148,11 +148,11 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    if (!steps.every((e) => e.isComplete(e))) {
+    if (!splitSchema.steps.every((e) => e.isComplete(e))) {
       return setError('Ensure all steps are complete before submitting')
     }
 
-    const data = getStepsData(steps, true)
+    const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
     data.schemaRef = currentSchema?.reference
@@ -170,12 +170,7 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let error = upload.statusText
-      try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
-
-      return setError(error)
+      return setError(await getErrorMessage(upload))
     }
 
     const { uuid } = await upload.json()
@@ -194,7 +189,7 @@ function Upload() {
       </Grid>
 
       <SubmissionError error={error} />
-      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
     </Paper>
   )
 }

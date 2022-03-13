@@ -1,6 +1,7 @@
 import { until, By, WebDriver, Builder } from 'selenium-webdriver'
 import firefox from 'selenium-webdriver/firefox'
 import config from 'config'
+import path from 'path'
 import { clearStoredData } from '../../server/utils/clear'
 import { runCommand } from '../../server/utils/build'
 import log from '../../server/utils/logger'
@@ -17,18 +18,18 @@ export async function clearData() {
     imageIdentifier +
     "'))"
   log.debug(stopCmd)
-  await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
   const rmCmd =
     "docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
     imageIdentifier +
     "'))"
   log.debug(rmCmd)
-  await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
   const cmd = "docker rmi $(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" + imageIdentifier + "')"
   log.debug(cmd)
-  await runCommand(cmd, log.debug.bind(log), log.error.bind(log))
+  await runCommand(cmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
   log.debug('clearData complete')
 }
 
@@ -91,6 +92,10 @@ export function pause(time) {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
+export function fromRelative(relative: string) {
+  return path.join(__dirname, '..', '..', relative)
+}
+
 export async function selectOption(driver, parentSelector, childSelector, displayValue) {
   const displayUpper = displayValue.toUpperCase()
 
@@ -98,11 +103,11 @@ export async function selectOption(driver, parentSelector, childSelector, displa
   await selectList.click()
 
   const options = await driver.findElements(childSelector)
-  for (let i = 0; i < options.length; i++) {
-    const curOption = options[i]
-    const curDisplay = await curOption.getText()
-    if (curDisplay.toUpperCase().includes(displayUpper)) {
-      await curOption.click()
+  for (let option of options) {
+    const display = await option.getText()
+
+    if (display.toUpperCase().includes(displayUpper)) {
+      await option.click()
       break
     }
   }

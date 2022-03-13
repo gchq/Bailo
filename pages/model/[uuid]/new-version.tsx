@@ -5,16 +5,16 @@ import Paper from '@mui/material/Paper'
 import { useGetModel } from '../../../data/model'
 
 import Wrapper from '../../../src/Wrapper'
-import { useGetDefaultSchema, useGetSchema, useGetSchemas } from '../../../data/schema'
+import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { Schema, Step } from '../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema, setStepState } from '../../../utils/formUtils'
+import { SplitSchema, Step } from '../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
-import { putEndpoint } from 'data/api'
-import useCacheVariable from 'utils/useCacheVariable'
+import useCacheVariable from '../../../utils/useCacheVariable'
+import { getErrorMessage } from '../../../utils/fetcher'
 
 const uiSchema = {
   contacts: {
@@ -34,12 +34,12 @@ function Upload() {
   const cModel = useCacheVariable(model)
   const cSchema = useCacheVariable(schema)
 
-  const [steps, setSteps] = useState<Array<Step>>([])
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema.schema, uiSchema, [], cModel.currentMetadata)
+    const steps = getStepsFromSchema(cSchema, uiSchema, [], cModel.currentMetadata)
 
     steps.push(
       createStep({
@@ -61,7 +61,7 @@ function Upload() {
       })
     )
 
-    setSteps(steps)
+    setSplitSchema({ reference: cSchema.reference, steps })
   }, [cModel, cSchema])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
@@ -81,7 +81,7 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = getStepsData(steps, true)
+    const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
     data.schemaRef = model?.schemaRef
@@ -99,12 +99,7 @@ function Upload() {
     })
 
     if (upload.status >= 400) {
-      let error = upload.statusText
-      try {
-        error = `${upload.statusText}: ${(await upload.json()).message}`
-      } catch (e) {}
-
-      return setError(error)
+      return setError(await getErrorMessage(upload))
     }
 
     const { uuid } = await upload.json()
@@ -114,7 +109,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form steps={steps} setSteps={setSteps} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
     </Paper>
   )
 }

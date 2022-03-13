@@ -1,12 +1,7 @@
-// import Ajv from 'ajv'
 import { Validator } from 'jsonschema'
 import logger from './logger'
 
 const validator = new Validator()
-
-// import addFormats from 'ajv-formats'
-// const ajv = new Ajv({ strict: false })
-// addFormats(ajv)
 
 export function validateSchema(data: any, schema: any) {
   const props = Object.keys(schema.properties).filter((key) =>
@@ -30,16 +25,4 @@ export function validateSchema(data: any, schema: any) {
   }
 
   return null
-
-  // this compilation is cached, so will only run once per schema
-  // const validate = ajv.compile(schema)
-
-  // const valid = validate(data)
-
-  // if (!valid) return validate.errors
-
-  // const result = validator.validate(data, schema)
-  // if (!result.valid) return result.errors
-
-  // return null
 }

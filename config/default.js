@@ -20,8 +20,8 @@ module.exports = {
   },
 
   registry: {
-    host: 'localhost:5000',
-    port: 5000,
+    host: 'localhost:8080',
+    port: 8080,
 
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
@@ -30,7 +30,8 @@ module.exports = {
   },
 
   s2i: {
-    path: 's2i',
+    path: '/s2i/s2i',
+    builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
   },
 
   kaniko: {
@@ -52,7 +53,7 @@ module.exports = {
       documentationUrl: 'https://example.com',
     },
     registry: {
-      host: 'localhost:5000',
+      host: 'localhost:8080',
     },
   },
 
@@ -76,4 +77,6 @@ module.exports = {
     host: 'localhost',
     port: 8080,
   },
+
+  listen: 3000,
 }

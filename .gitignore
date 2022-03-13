@@ -30,3 +30,9 @@ certs/key.pem
 
 # Sonar Scanner
 .scannerwork/
+
+# User's personal docker-compose-dev file
+docker-compose-dev-personal.yml 
+
+helm/bailo/charts
+helm/bailo/local.yaml
