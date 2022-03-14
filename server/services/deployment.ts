@@ -15,7 +15,9 @@ interface GetDeploymentOptions {
 export async function filterDeployment<T>(user: User, unfiltered: T): Promise<T> {
   const deployments = castArray(unfiltered)
 
-  const filtered = await asyncFilter(deployments, (deployment: Deployment) => authorisation.canUserSeeDeployment(user, deployment))
+  const filtered = await asyncFilter(deployments, (deployment: Deployment) =>
+    authorisation.canUserSeeDeployment(user, deployment)
+  )
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -54,11 +56,11 @@ export async function markDeploymentBuilt(_id: ModelId) {
 }
 
 interface CreateDeployment {
-  schemaRef: string,
-  uuid: string,
+  schemaRef: string
+  uuid: string
 
-  model: ModelId,
-  metadata: any,
+  model: ModelId
+  metadata: any
 
   owner: ModelId
 }

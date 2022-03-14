@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import logger from '../utils/logger'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
 import DeploymentModel from '../models/Deployment'
-(async () => {
+;(async () => {
   await connectToMongoose()
 
   const argv = await yargs(hideBin(process.argv)).usage('Usage: $0 [uuid]').argv

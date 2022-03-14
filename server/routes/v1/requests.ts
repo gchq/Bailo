@@ -113,7 +113,7 @@ export const postRequestResponse = [
         await deploymentQueue
           .createJob({
             deploymentId: deployment._id,
-            userId
+            userId,
           })
           .timeout(60000)
           .retries(2)
