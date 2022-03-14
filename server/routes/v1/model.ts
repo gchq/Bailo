@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 import SchemaModel from '../../models/Schema'
-import DeploymentModel from '../../models/Deployment'
 import { ensureUserRole } from '../../utils/user'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
+import { findDeployments } from '../../services/deployment'
 
 export const getModels = [
   ensureUserRole('user'),
@@ -68,9 +68,7 @@ export const getModelDeployments = [
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const deployments = await DeploymentModel.find({
-      model: model._id,
-    })
+    const deployments = await findDeployments(req.user!, { model: model._id })
 
     return res.json(deployments)
   },

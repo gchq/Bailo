@@ -1,10 +1,10 @@
 import Queue from 'bee-queue'
 import config from 'config'
-import DeploymentModel from '../models/Deployment'
 import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
 import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
+import { findDeploymentById } from '../services/deployment'
 
 export const uploadQueue = new Queue('UPLOAD_QUEUE', {
   redis: config.get('redis'),
@@ -61,9 +61,11 @@ uploadQueue.on('job failed', async (jobId) => {
 
 async function sendDeploymentEmail(jobId: string, state: string) {
   const job = await deploymentQueue.getJob(jobId)
-  const deployment = await DeploymentModel.findById(job.data.deploymentId).populate('owner').populate('model')
 
-  if (!deployment.owner.email) {
+  const user = await getUserByInternalId(job.data.userId)
+  const deployment = await findDeploymentById(user, job.data.deploymentId, { populate: true })
+
+  if (!user.email) {
     return
   }
 
@@ -71,7 +73,7 @@ async function sendDeploymentEmail(jobId: string, state: string) {
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   await sendEmail({
-    to: deployment.owner.email,
+    to: user.email,
     ...simpleEmail({
       text: `Your deployment for '${deployment.model.currentMetadata.highLevelDetails.name}' has ${message}`,
       columns: [

@@ -2,13 +2,13 @@ import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import SchemaModel from '../../models/Schema'
 import { validateSchema } from '../../utils/validateSchema'
-import DeploymentModel from '../../models/Deployment'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import { createDeploymentRequests } from '../../services/request'
 import { BadReq, NotFound, Forbidden } from '../../utils/result'
-import { findModelByUuid } from 'server/services/model'
-import { findVersionByName } from 'server/services/version'
+import { findModelByUuid } from '../../services/model'
+import { findVersionByName } from '../../services/version'
+import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -17,7 +17,7 @@ export const getDeployment = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const deployment = await DeploymentModel.findOne({ uuid })
+    const deployment = await findDeploymentByUuid(req.user!, uuid)
 
     if (!deployment) {
       throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
@@ -32,9 +32,9 @@ export const getCurrentUserDeployments = [
   async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const deployment = await DeploymentModel.find({ owner: id })
+    const deployments = await findDeployments(req.user!, { owner: id })
 
-    return res.json(deployment)
+    return res.json(deployments)
   },
 ]
 
@@ -79,14 +79,14 @@ export const postDeployment = [
     const uuid = `${name}-${nanoid()}`
     req.log.info({ uuid }, `Named deployment '${uuid}'`)
 
-    const deployment = new DeploymentModel({
+    const deployment = await createDeployment(req.user!, {
       schemaRef: body.schemaRef,
       uuid: uuid,
 
       model: model._id,
       metadata: body,
 
-      owner: req.user?._id,
+      owner: req.user!._id,
     })
 
     req.log.info('Saving deployment model')
@@ -116,7 +116,7 @@ export const resetDeploymentApprovals = [
   async (req: Request, res: Response) => {
     const user = req.user
     const { uuid } = req.params
-    const deployment = await DeploymentModel.findOne({ uuid })
+    const deployment = await findDeploymentByUuid(req.user!, uuid)
     if (!deployment) {
       throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }

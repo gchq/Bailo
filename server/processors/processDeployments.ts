@@ -1,11 +1,11 @@
-import DeploymentModel from '../models/Deployment'
 import { deploymentQueue } from '../utils/queues'
 import config from 'config'
 import prettyMs from 'pretty-ms'
 import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
-import { getUserById } from '../services/user'
+import { getUserByInternalId } from '../services/user'
+import { findDeploymentById, markDeploymentBuilt } from '../services/deployment'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
@@ -17,22 +17,23 @@ export default function processDeployments() {
     try {
       const startTime = new Date()
 
-      const { deploymentId } = job.data
-      const deployment = await DeploymentModel.findById(deploymentId).populate('model')
+      const { deploymentId, userId } = job.data
 
-      const dlog = logger.child({ deploymentId: deployment._id })
+      const user = await getUserByInternalId(userId)
+
+      if (!user) {
+        logger.error('Unable to find deployment owner')
+        throw new Error('Unable to find deployment owner')
+      }
+
+      const deployment = await findDeploymentById(user, deploymentId, { populate: true })
 
       if (!deployment) {
-        dlog.error('Unable to find deployment')
+        logger.error('Unable to find deployment')
         throw new Error('Unable to find deployment')
       }
 
-      const user = await getUserById(deployment.owner)
-
-      if (!user) {
-        dlog.error('Unable to find deployment owner')
-        throw new Error('Unable to find deployment owner')
-      }
+      const dlog = logger.child({ deploymentId: deployment._id })
 
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
@@ -119,7 +120,7 @@ export default function processDeployments() {
 
       deployment.log('info', 'Finalised new manifest')
       dlog.info('Marking build as successful')
-      await DeploymentModel.findOneAndUpdate({ _id: deployment._id }, { built: true })
+      await markDeploymentBuilt(deployment._id)
 
       const time = prettyMs(new Date().getTime() - startTime.getTime())
       await deployment.log('info', `Processed deployment with tag '${externalImage}' in ${time}`)
