@@ -19,7 +19,6 @@ export default function RenderForm({
   setSplitSchema: Function
 }) {
   const onFormChange = (form) => {
-    console.log(form)
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
