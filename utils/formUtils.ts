@@ -151,6 +151,9 @@ export function setStepsData(splitSchema: SplitSchema, setSplitSchema: Function,
 export function validateForm(step: Step) {
   const validator = new Validator()
   const sectionErrors = validator.validate(step.state, step.schema)
+  // This is temporay validation fix - dependency questions that rely on yes or no answers in the schema
+  // will have their data persist in the form object, even if the parent question's answer has been changed
+  sectionErrors.errors.filter((e) => e.name !== 'dependencies')
 
   return sectionErrors.errors.length === 0
 }
