@@ -28,8 +28,6 @@ export default function RenderForm({
       schema={step.schema}
       formData={step.state}
       onChange={onFormChange}
-      omitExtraData
-      liveOmit
       widgets={{
         userSelector: UserSelector,
         nothing: Nothing,
