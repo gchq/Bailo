@@ -12,6 +12,6 @@ module.exports = {
     binary: '__tests__/example_models/minimal_model/minimal_binary.zip',
     code: '__tests__/example_models/minimal_model/minimal_code.zip',
     uploadMetadata: '__tests__/example_models/minimal_model/minimal_metadata.json',
-    deploymentMetadata: '__tests__/samples/deployment.json',
+    deploymentMetadata: '__tests__/example_models/minimal_model/deployment.json',
   },
 }
