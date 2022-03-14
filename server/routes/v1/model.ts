@@ -1,30 +1,25 @@
-import ModelModel from '../../models/Model'
 import { Request, Response } from 'express'
 import SchemaModel from '../../models/Schema'
-import VersionModel from '../../models/Version'
-import DeploymentModel from '../../models/Deployment'
 import { ensureUserRole } from '../../utils/user'
-import { NotFound } from '../../utils/result'
+import { BadReq, NotFound } from '../../utils/result'
+import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
+import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
+import { findDeployments } from '../../services/deployment'
 
 export const getModels = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { type, filter } = req.query
-    const query: any = filter ? { $text: { $search: filter as string } } : {}
 
-    if (type === 'favourites') {
-      req.log.info('Limiting model requests to favourites')
-      query._id = {
-        $in: req.user?.favourites,
-      }
+    if (!isValidType(type)) {
+      throw BadReq({ type }, `Provided invalid type '${type}'`)
     }
 
-    if (type === 'mine') {
-      req.log.info('Limiting model requests to mine')
-      query.owner = req.user?._id
+    if (!isValidFilter(filter)) {
+      throw BadReq({ filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await ModelModel.find(query).sort({ updatedAt: -1 })
+    const models = await findModels(req.user!, { filter: filter as string, type })
 
     return res.json({
       models,
@@ -37,7 +32,7 @@ export const getModelByUuid = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await ModelModel.findOne({ uuid })
+    const model = await findModelByUuid(req.user!, uuid)
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
@@ -52,7 +47,7 @@ export const getModelById = [
   async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const model = await ModelModel.findOne({ _id: id })
+    const model = await findModelById(req.user!, id)
 
     if (!model) {
       throw NotFound({ id }, `Unable to find model '${id}'`)
@@ -67,15 +62,13 @@ export const getModelDeployments = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await ModelModel.findOne({ uuid })
+    const model = await findModelByUuid(req.user!, uuid)
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const deployments = await DeploymentModel.find({
-      model: model._id,
-    })
+    const deployments = await findDeployments(req.user!, { model: model._id })
 
     return res.json(deployments)
   },
@@ -86,7 +79,7 @@ export const getModelSchema = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await ModelModel.findOne({ uuid })
+    const model = await findModelByUuid(req.user!, uuid)
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
@@ -107,13 +100,13 @@ export const getModelVersions = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await ModelModel.findOne({ uuid })
+    const model = await findModelByUuid(req.user!, uuid)
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const versions = await VersionModel.find({ model: model._id }, { state: 0, logs: 0, metadata: 0 })
+    const versions = await findModelVersions(req.user!, model._id, { thin: true })
 
     return res.json(versions)
   },
@@ -124,7 +117,7 @@ export const getModelVersion = [
   async (req: Request, res: Response) => {
     const { uuid, version: versionName } = req.params
 
-    const model = await ModelModel.findOne({ uuid })
+    const model = await findModelByUuid(req.user!, uuid)
 
     if (!model) {
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
@@ -132,9 +125,9 @@ export const getModelVersion = [
 
     let version
     if (versionName === 'latest') {
-      version = await VersionModel.findOne({ _id: model.versions[model.versions.length - 1] })
+      version = await findVersionById(req.user!, model.versions[model.versions.length - 1])
     } else {
-      version = await VersionModel.findOne({ model: model._id, version: versionName })
+      version = await findVersionByName(req.user!, model._id, versionName)
     }
 
     if (!version) {

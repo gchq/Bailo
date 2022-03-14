@@ -184,3 +184,5 @@ export interface SplitSchema {
 
   steps: Array<Step>
 }
+
+export type ModelId = string | Types.ObjectId

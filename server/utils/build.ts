@@ -22,6 +22,12 @@ interface BuilderFiles {
   code: FileRef
 }
 
+export async function pullBuilderImage() {
+  await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
+    logger[level](message)
+  )
+}
+
 async function createWorkingDirectory(): Promise<string> {
   const directory = join(tmpdir(), uuidv4())
   await mkdir(directory)
@@ -113,16 +119,28 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   mkdir('-p', s2iDir)
   await writeFile(join(s2iDir, 'environment'), modelEnvs)
 
-  // build image
-  const builder = `seldonio/seldon-core-s2i-python37:1.10.0`
+  // make Dockerfile
+  const builder = config.get('s2i.builderImage')
+  const builderScriptsUrl = '/s2i/bin'
+  const buildDir = await createWorkingDirectory()
+  const buildDockerfile = join(buildDir, 'Dockerfile')
   const tag = `${config.get('registry.host')}/internal/${version.model.uuid}:${version.version}`
-  const command = `${config.get('s2i.path')} build ${tmpDir} ${builder} ${tag}`
-  vlog.info({ builder, tag, command }, 'Building image')
+  const toDockerfileTags = `--copy --as-dockerfile ${buildDockerfile} --scripts-url image://${builderScriptsUrl} --assemble-user root`
+  const command = `${config.get('s2i.path')} build ${tmpDir} ${builder} ${toDockerfileTags}`
+  vlog.info({ builder, tag, command }, 'Making Dockerfile')
   await logCommand(command, version.log.bind(version))
+
+  // build image
+  const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
+  vlog.info({ buildCommand }, 'Building')
+  await logCommand(buildCommand, version.log.bind(version))
 
   // push image
   vlog.info({ tag }, 'Pushing image to docker')
   version.log('info', 'Logging into docker')
+  // using docker instead of img login because img reads from ~/.docker/config and
+  // does not fully populate authorization headers (clientId and account) in authorization
+  // requests like docker does. docker login doesn't require docker to be running in host
   await runCommand(
     `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
     vlog.info.bind(vlog),
@@ -131,12 +149,17 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   )
   version.log('info', 'Successfully logged into docker')
 
-  await logCommand(`docker push ${tag}`, version.log.bind(version))
+  await logCommand(`img push ${tag}`, version.log.bind(version))
 
   // tidy up
-  vlog.info({ tmpDir, builderFiles }, 'Removing temp directory and Minio uploads')
+  vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
   rm('-rf', tmpDir)
+  rm('-rf', buildDir)
+  rm('-rf', s2iDir)
+
   await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
+  const removeImageCmd = `img rm ${tag}`
+  await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
 
   return tag
 }

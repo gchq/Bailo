@@ -30,6 +30,7 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { pullBuilderImage } from './utils/build'
 import { createIndexes } from './models/Model'
 
 const port = config.get('listen')
@@ -102,13 +103,13 @@ app.prepare().then(() => {
 
   processUploads()
   processDeployments()
+  pullBuilderImage()
 
   server.all('*', (req, res) => {
     return handle(req, res)
   })
 
   server.use('/api', expressErrorHandler)
-
   http.createServer(server).listen(port)
 
   logger.info({ port }, `Listening on port ${port}`)

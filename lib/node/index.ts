@@ -94,11 +94,11 @@ class Model {
   }
 }
 
-type ModelsType = 'favourites' | 'mine' | 'all'
+type ModelsType = 'favourites' | 'user' | 'all'
 type SchemaUse = 'UPLOAD' | 'DEPLOYMENT'
 
 type RequestUse = 'Upload' | 'Deployment'
-type RequestFilter = 'all' | 'mine'
+type RequestFilter = 'all' | 'user'
 
 interface File {
   stream: any

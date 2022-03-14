@@ -1,0 +1,25 @@
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+C = XX
+CN = Registry Auth CA
+
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[v3_ca]
+subjectAltName = @alt_names
+keyUsage = digitalSignature, keyEncipherment
+
+[alt_names]
+IP.1 = 127.0.0.1
+DNS.1 = localhost
+DNS.2 = registry
+
+[CA_default]
+copy_extensions = copy
