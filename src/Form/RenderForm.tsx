@@ -9,7 +9,7 @@ import { setStepState } from '../../utils/formUtils'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
-export default function RenderForm(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
+export default function RenderForm({ currentStep: step, splitSchema, setSplitSchema } : { currentStep: Step, splitSchema: SplitSchema, setSplitSchema: Function }) {
   const onFormChange = (form) => {
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
