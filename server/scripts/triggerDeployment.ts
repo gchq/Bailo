@@ -1,10 +1,10 @@
-import DeploymentModel from '../models/Deployment'
 import { deploymentQueue } from '../utils/queues'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import logger from '../utils/logger'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
-;(async () => {
+import DeploymentModel from '../models/Deployment'
+(async () => {
   await connectToMongoose()
 
   const argv = await yargs(hideBin(process.argv)).usage('Usage: $0 [uuid]').argv
