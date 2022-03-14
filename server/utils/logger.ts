@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import devnull from 'dev-null'
 import { join, sep } from 'path'
+import { inspect } from 'util'
 import omit from 'lodash/omit'
 import chalk from 'chalk'
 import { StatusError } from '../../types/interfaces'
@@ -40,7 +41,7 @@ class Writer {
   }
 
   representValue(value: any) {
-    return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
+    return typeof value === 'object' ? inspect(value) : String(value)
   }
 
   getAttributes(data) {
