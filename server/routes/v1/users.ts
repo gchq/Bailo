@@ -1,15 +1,15 @@
 import { ensureUserRole } from '../../utils/user'
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-import UserModel from '../../models/User'
 import logger from '../../utils/logger'
-import ModelModel from '../../models/Model'
 import { BadReq, NotFound } from '../../utils/result'
+import { findModelById } from '../../services/model'
+import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
 
 export const getUsers = [
   ensureUserRole('user'),
   async (_req: Request, res: Response) => {
-    const users = await UserModel.find({}).select('-token')
+    const users = await findUsers()
     return res.json({
       users,
     })
@@ -20,7 +20,7 @@ export const getLoggedInUser = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const _id = req.user!._id
-    const user = await UserModel.findOne({ _id })
+    const user = await getUserByInternalId(_id)
     return res.json(user)
   },
 ]
@@ -48,8 +48,8 @@ export const favouriteModel = [
       throw BadReq({}, `Model ID must be a string`)
     }
 
-    const user = await UserModel.findOne({ id: req.user!.id })
-    const model = await ModelModel.findById({ _id: modelId })
+    const user = await getUserById(req.user!.id)
+    const model = await findModelById(req.user!, modelId)
 
     if (user.favourites.includes(modelId)) {
       // model already favourited
@@ -75,8 +75,8 @@ export const unfavouriteModel = [
       throw BadReq({}, `Model ID must be a string`)
     }
 
-    const user = await UserModel.findOne({ id: req.user!.id })
-    const model = await ModelModel.findById({ _id: modelId })
+    const user = await getUserById(req.user!.id)
+    const model = await findModelById(req.user!, modelId)
 
     if (!user.favourites.includes(modelId)) {
       // model not favourited
