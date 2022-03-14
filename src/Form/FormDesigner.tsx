@@ -26,6 +26,8 @@ export default function FormDesigner({
     return <></>
   }
 
+  const Render = currentStep.render
+
   return (
     <>
       <Stepper sx={{ mt: 4, mb: 4 }} activeStep={activeStep} nonLinear alternativeLabel>
@@ -49,7 +51,7 @@ export default function FormDesigner({
         ))}
       </Stepper>
 
-      {currentStep.render(currentStep, splitSchema, setSplitSchema)}
+      <Render currentStep={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
       {currentStep.renderButtons(
         currentStep,
         splitSchema,

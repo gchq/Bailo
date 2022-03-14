@@ -1,13 +1,13 @@
-import DeploymentModel from '../models/Deployment'
 import { deploymentQueue } from '../utils/queues'
 import config from 'config'
 import prettyMs from 'pretty-ms'
 import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
-import UserModel from '../models/User'
+import { getUserByInternalId } from '../services/user'
+import { findDeploymentById, markDeploymentBuilt } from '../services/deployment'
 
-const _httpsAgent = new https.Agent({
+const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
 })
 
@@ -17,26 +17,27 @@ export default function processDeployments() {
     try {
       const startTime = new Date()
 
-      const { deploymentId } = job.data
-      const deployment = await DeploymentModel.findById(deploymentId).populate('model')
+      const { deploymentId, userId } = job.data
 
-      const dlog = logger.child({ deploymentId: deployment._id })
-
-      if (!deployment) {
-        dlog.error('Unable to find deployment')
-        throw new Error('Unable to find deployment')
-      }
-
-      const user = await UserModel.findById(deployment.owner)
+      const user = await getUserByInternalId(userId)
 
       if (!user) {
-        dlog.error('Unable to find deployment owner')
+        logger.error('Unable to find deployment owner')
         throw new Error('Unable to find deployment owner')
       }
 
+      const deployment = await findDeploymentById(user, deploymentId, { populate: true })
+
+      if (!deployment) {
+        logger.error('Unable to find deployment')
+        throw new Error('Unable to find deployment')
+      }
+
+      const dlog = logger.child({ deploymentId: deployment._id })
+
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
-      const registry = `http://${config.get('registry.host')}/v2`
+      const registry = `https://${config.get('registry.host')}/v2`
       const tag = `${modelID}:${initialVersionRequested}`
       const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
 
@@ -55,8 +56,13 @@ export default function processDeployments() {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
         },
-        // agent: httpsAgent,
-      } as RequestInit).then((res: any) => res.json())
+        agent: httpsAgent,
+      } as RequestInit).then((res: any) => {
+        logger.info({
+          status: res.status,
+        })
+        return res.json()
+      })
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
 
@@ -69,7 +75,7 @@ export default function processDeployments() {
               headers: {
                 Authorization: authorisation,
               },
-              // agent: httpsAgent,
+              agent: httpsAgent,
             } as RequestInit
           )
 
@@ -88,7 +94,7 @@ export default function processDeployments() {
           headers: {
             Authorization: authorisation,
           },
-          // agent: httpsAgent,
+          agent: httpsAgent,
         } as RequestInit
       )
 
@@ -105,7 +111,7 @@ export default function processDeployments() {
           Authorization: authorisation,
           'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
         },
-        // agent: httpsAgent,
+        agent: httpsAgent,
       } as RequestInit)
 
       if (manifestPutRes.status >= 400) {
@@ -114,7 +120,7 @@ export default function processDeployments() {
 
       deployment.log('info', 'Finalised new manifest')
       dlog.info('Marking build as successful')
-      await DeploymentModel.findOneAndUpdate({ _id: deployment._id }, { built: true })
+      await markDeploymentBuilt(deployment._id)
 
       const time = prettyMs(new Date().getTime() - startTime.getTime())
       await deployment.log('info', `Processed deployment with tag '${externalImage}' in ${time}`)

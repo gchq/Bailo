@@ -1,9 +1,9 @@
-import DeploymentModel from '../models/Deployment'
 import { deploymentQueue } from '../utils/queues'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import logger from '../utils/logger'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
+import DeploymentModel from '../models/Deployment'
 ;(async () => {
   await connectToMongoose()
 

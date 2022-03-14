@@ -12,6 +12,9 @@ const UserSchema = new Schema(
 
     // uuidv4() is cryptographically safe
     token: { type: String, required: true, default: uuidv4(), select: false },
+
+    // mixed user information provided by authorisation
+    data: { type: Schema.Types.Mixed },
   },
   {
     timestamps: true,

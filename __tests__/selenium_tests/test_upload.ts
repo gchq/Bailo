@@ -1,4 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
+import { runCommand } from '../../server/utils/build'
 import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
@@ -50,53 +51,58 @@ describe('End to end test', () => {
     await clearData()
   }, 40000)
 
-  test('Test can upload a model with a metadata blob', async () => {
-    const driver = await getDriver()
+  test(
+    'Test can upload a model with a metadata blob',
+    async () => {
+      const driver = await getDriver()
 
-    try {
-      await driver.get(BAILO_APP_URL)
+      try {
+        await driver.get(BAILO_APP_URL)
 
-      await click(driver, By.css('[data-test="uploadModelLink"]'))
-      await click(driver, By.css('[data-test="uploadJsonTab"]'))
+        await click(driver, By.css('[data-test="uploadModelLink"]'))
+        await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
-      await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
+        await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
 
-      await sendKeys(driver, By.id('select-code-file'), codePath)
-      await sendKeys(driver, By.id('select-binary-file'), binaryPath)
+        await sendKeys(driver, By.id('select-code-file'), codePath)
+        await sendKeys(driver, By.id('select-binary-file'), binaryPath)
 
-      const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
-      await sendKeys(driver, By.css('textarea'), metadata)
+        const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
+        await sendKeys(driver, By.css('textarea'), metadata)
 
-      await click(driver, By.css('[data-test="submitButton"]'))
+        await click(driver, By.css('[data-test="submitButton"]'))
 
-      await driver.wait(until.urlContains('/model/'))
-      const modelUrl = await driver.getCurrentUrl()
-      const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
-      modelInfo.url = modelUrl
-      modelInfo.name = mName
+        await driver.wait(until.urlContains('/model/'))
+        const modelUrl = await driver.getCurrentUrl()
+        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+        modelInfo.url = modelUrl
+        modelInfo.name = mName
 
-      const api = new Bailo(
-        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
-      )
+        const api = new Bailo(
+          `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+        )
 
-      const model = await api.getModel(modelInfo.name)
+        const model = await api.getModel(modelInfo.name)
 
-      while (true) {
-        const version = await model.getVersion('1')
+        while (true) {
+          const version = await model.getVersion('1')
 
-        if (version.version.built) {
-          break
+          if (version.version.built) {
+            break
+          }
+
+          logger.info('Model not built, retrying in 2 seconds.')
+          await pause(2000)
         }
 
-        logger.info('Model not built, retrying in 2 seconds.')
-        await pause(2000)
+        logger.info(modelInfo, 'Received model information')
+      } finally {
+        await driver.quit()
       }
-
-      logger.info(modelInfo, 'Received model information')
-    } finally {
-      await driver.quit()
-    }
-  }, 120000)
+    },
+    1000 * 9 * 60
+  ) // give it up to 9 minutes since Github tests will run with a pull of seldon image (3-5 min)
+  // then another 3-ish minutes for initial image build (no existing cache)
 
   test('test can approve models', async () => {
     const driver = await getDriver()
@@ -175,68 +181,78 @@ describe('End to end test', () => {
     }
   }, 20000)
 
-  test('test built model runs as expected', async () => {
-    const driver = await getDriver()
+  test(
+    'test built model runs as expected',
+    async () => {
+      const driver = await getDriver()
 
-    let dockerPassword: string
+      let dockerPassword: string
 
-    try {
-      await driver.get(BAILO_APP_URL)
-      await click(driver, By.css('[data-test="settingLink"]'))
-      await click(driver, By.css('[data-test="showTokenButton"]'))
+      try {
+        await driver.get(BAILO_APP_URL)
+        await click(driver, By.css('[data-test="settingLink"]'))
+        await click(driver, By.css('[data-test="showTokenButton"]'))
 
-      const dockerPasswordEl = await waitForElement(driver, By.css('[data-test="dockerPassword"]'))
-      dockerPassword = await dockerPasswordEl.getText()
-    } finally {
-      await driver.quit()
-    }
+        const dockerPasswordEl = await waitForElement(driver, By.css('[data-test="dockerPassword"]'))
+        dockerPassword = await dockerPasswordEl.getText()
+      } finally {
+        await driver.quit()
+      }
 
-    const docker = new Docker()
-    const auth = {
-      username: config.get('user.id'),
-      password: dockerPassword,
-    }
+      const docker = new Docker()
+      const auth = {
+        username: config.get('user.id'),
+        password: dockerPassword,
+      }
 
-    const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
-    const dockerResp = await docker.createImage(auth, { fromImage: imageName })
-    expect(dockerResp.statusCode).toEqual(200)
-    logger.info('created image')
-
-    const container = await docker.createContainer({
-      Image: imageName,
-      AttachStdin: false,
-      AttachStdout: false,
-      AttachStderr: false,
-      Tty: false,
-      OpenStdin: false,
-      StdinOnce: false,
-      ExposedPorts: {
-        '5000/tcp': {},
-        '9000/tcp': {},
-      },
-      PortBindings: {
-        '9000/tcp': [
-          {
-            HostPort: '9999',
-            HostIp: '',
-          },
-        ],
-      },
-    })
-
-    await container.start()
-    await pause(500)
-
-    try {
-      await pause(1500) //give container time to start running
-      const resp = await axios.post('http://localhost:9999/predict', {
-        jsonData: { data: ['should be returned backwards'] },
+      const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
+      await runCommand(
+        `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
+        logger.debug.bind(logger),
+        logger.error.bind(logger),
+        { silentErrors: true }
+      )
+      await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
+        silentErrors: true,
       })
-      expect(resp.status).toEqual(200)
-      expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
-    } finally {
-      await container.stop()
-      await container.remove()
-    }
-  }, 40000)
+
+      const container = await docker.createContainer({
+        Image: imageName,
+        AttachStdin: false,
+        AttachStdout: false,
+        AttachStderr: false,
+        Tty: false,
+        OpenStdin: false,
+        StdinOnce: false,
+        ExposedPorts: {
+          '5000/tcp': {},
+          '9000/tcp': {},
+        },
+        PortBindings: {
+          '9000/tcp': [
+            {
+              HostPort: '9999',
+              HostIp: '',
+            },
+          ],
+        },
+      })
+
+      await container.start()
+      await pause(500)
+
+      try {
+        await pause(1500) //give container time to start running
+        const resp = await axios.post('http://localhost:9999/predict', {
+          jsonData: { data: ['should be returned backwards'] },
+        })
+        expect(resp.status).toEqual(200)
+        expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
+      } finally {
+        await container.stop()
+        await container.remove()
+      }
+    },
+    1000 * 5 * 60
+  )
 })
