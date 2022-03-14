@@ -1,17 +1,18 @@
 import { buildPython } from '../utils/build'
 import { uploadQueue } from '../utils/queues'
 import prettyMs from 'pretty-ms'
-import VersionModel from '../models/Version'
+import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'
+import { getUserById } from '../services/user'
 
 export default function processUploads() {
   uploadQueue.process(async (job) => {
     logger.info({ job: job.data }, 'Started processing upload')
     try {
       const startTime = new Date()
-      const version = await VersionModel.findOne({
-        _id: job.data.versionId,
-      }).populate('model')
+
+      const user = await getUserById(job.data.userId)
+      const version = await findVersionById(user, job.data.versionId, { populate: true })
 
       const vlog = logger.child({ versionId: version._id })
 
@@ -20,7 +21,7 @@ export default function processUploads() {
       const tag = await buildPython(version, { binary, code })
 
       vlog.info('Marking build as successful')
-      await VersionModel.findOneAndUpdate({ _id: version._id }, { built: true })
+      await markVersionBuilt(version._id)
 
       const time = prettyMs(new Date().getTime() - startTime.getTime())
       await version.log('info', `Processed job with tag ${tag} in ${time}`)
@@ -28,9 +29,8 @@ export default function processUploads() {
       logger.error({ error: e, versionId: job.data.versionId }, 'Error occurred whilst processing upload')
 
       try {
-        const version = await VersionModel.findOne({
-          _id: job.data.versionId,
-        }).populate('model')
+        const user = await getUserById(job.data.userId)
+        const version = await findVersionById(user, job.data.versionId, { populate: true })
 
         await version.log('error', `Failed to process job due to error: '${e}'`)
         version.state.build = {

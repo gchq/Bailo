@@ -1,14 +1,14 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import ModelModel from '../../models/Model'
 import SchemaModel from '../../models/Schema'
 import { validateSchema } from '../../utils/validateSchema'
 import DeploymentModel from '../../models/Deployment'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
-import VersionModel from '../../models/Version'
 import { createDeploymentRequests } from '../../services/request'
 import { BadReq, NotFound, Forbidden } from '../../utils/result'
+import { findModelByUuid } from 'server/services/model'
+import { findVersionByName } from 'server/services/version'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -62,9 +62,7 @@ export const postDeployment = [
       throw NotFound({ errors: schemaIsInvalid }, 'Rejected due to invalid schema')
     }
 
-    const model = await ModelModel.findOne({
-      uuid: body.highLevelDetails.modelID,
-    })
+    const model = await findModelByUuid(req.user!, body.highLevelDetails.modelID)
 
     if (!model) {
       throw NotFound(
@@ -94,10 +92,7 @@ export const postDeployment = [
     req.log.info('Saving deployment model')
     await deployment.save()
 
-    const version = await VersionModel.findOne({
-      model: model._id,
-      version: body.highLevelDetails.initialVersionRequested,
-    })
+    const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
       throw NotFound(
@@ -128,10 +123,12 @@ export const resetDeploymentApprovals = [
     if (user?.id !== deployment.metadata.contacts.requester) {
       throw Forbidden({}, 'You cannot reset the approvals for a deployment you do not own.')
     }
-    const version = await VersionModel.findOne({
-      model: deployment.model,
-      version: deployment.metadata.highLevelDetails.initialVersionRequested,
-    })
+
+    const version = await findVersionByName(
+      user!,
+      deployment.model,
+      deployment.metadata.highLevelDetails.initialVersionRequested
+    )
     if (!version) {
       throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }

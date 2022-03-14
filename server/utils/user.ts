@@ -1,23 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-import UserModel from '../models/User'
-import memoize from 'memoizee'
 import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
 import { getAdminToken } from '../routes/v1/registryAuth'
 import { Forbidden, Unauthorised } from './result'
 import Authorisation from '../external/Authorisation'
+import { findAndUpdateUser, findUserCached, getUserById } from '../services/user'
 
 const authorisation = new Authorisation()
-
-export async function findUser({ userId, email, data }: { userId: string; email?: string; data?: any }) {
-  // findOneAndUpdate is atomic, so we don't need to worry about
-  // multiple threads calling this simultaneously.
-  return await UserModel.findOneAndUpdate(
-    { $or: [{ id: userId }, { email }] },
-    { id: userId, email, data }, // upsert docs
-    { new: true, upsert: true }
-  )
-}
 
 function safelyCompareTokens(expected, actual) {
   // This is not constant time, which will allow a user to calculate the length
@@ -54,9 +43,7 @@ export async function getUserFromAuthHeader(header: string): Promise<{ error?: s
     return { user: { _id: '', id: '' }, admin: true }
   }
 
-  const user = await UserModel.findOne({
-    id: username,
-  }).select('+token')
+  const user = await getUserById(username, { includeToken: true })
 
   if (!user) {
     return { error: 'User not found' }
@@ -70,13 +57,6 @@ export async function getUserFromAuthHeader(header: string): Promise<{ error?: s
 
   return { user }
 }
-
-// cache user status for
-const findUserCached = memoize(findUser, {
-  promise: true,
-  maxAge: 5000,
-  normalizer: (args) => JSON.stringify(args),
-})
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {
   // this function must never fail to call next, even when
