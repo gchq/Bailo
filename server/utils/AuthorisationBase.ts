@@ -1,4 +1,4 @@
-import { User, Model, Deployment } from '../../types/interfaces'
+import { User, Model, Deployment, Version } from '../../types/interfaces'
 import { Request } from 'express'
 
 export default class AuthorisationBase {
@@ -17,6 +17,10 @@ export default class AuthorisationBase {
   }
 
   async canUserSeeModel(_user: User, _model: Model) {
+    return true
+  }
+
+  async canUserSeeVersion(_user: User, _model: Version) {
     return true
   }
 

@@ -1,9 +1,10 @@
 import Queue from 'bee-queue'
 import config from 'config'
 import DeploymentModel from '../models/Deployment'
-import VersionModel from '../models/Version'
 import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
+import { findVersionById, markVersionState } from '../services/version'
+import { getUserByInternalId } from '../services/user'
 
 export const uploadQueue = new Queue('UPLOAD_QUEUE', {
   redis: config.get('redis'),
@@ -18,22 +19,11 @@ export const deploymentQueue = new Queue('DEPLOYMENT_QUEUE', {
 
 async function setUploadState(jobId: string, state: string) {
   const job = await uploadQueue.getJob(jobId)
-  const version = await VersionModel.findById(job.data.versionId).populate({
-    path: 'model',
-    populate: { path: 'owner' },
-  })
 
-  version.state.build = {
-    ...(version.state.build || {}),
-    state,
-  }
+  const user = await getUserByInternalId(job.data.userId)
+  const version = await findVersionById(user, job.data.versionId, { populate: true })
 
-  if (state === 'succeeded') {
-    version.state.build.reason = undefined
-  }
-
-  version.markModified('state')
-  await version.save()
+  await markVersionState(user, job.data.versionId, state)
 
   if (!version.model.owner.email) {
     return

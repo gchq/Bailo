@@ -1,8 +1,4 @@
 import { Schema, model } from 'mongoose'
-import createAuthPlugin from '../utils/mongooseAuth'
-import Authorisation from '../external/Authorisation'
-
-const authorisation = new Authorisation()
 
 const ModelSchema = new Schema(
   {
@@ -19,8 +15,6 @@ const ModelSchema = new Schema(
     timestamps: true,
   }
 )
-
-ModelSchema.plugin(createAuthPlugin(authorisation.canUserSeeModel))
 
 const ModelModel = model('Model', ModelSchema)
 

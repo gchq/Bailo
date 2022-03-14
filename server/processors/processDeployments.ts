@@ -5,7 +5,7 @@ import prettyMs from 'pretty-ms'
 import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
-import UserModel from '../models/User'
+import { getUserById } from '../services/user'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
@@ -27,7 +27,7 @@ export default function processDeployments() {
         throw new Error('Unable to find deployment')
       }
 
-      const user = await UserModel.findById(deployment.owner)
+      const user = await getUserById(deployment.owner)
 
       if (!user) {
         dlog.error('Unable to find deployment owner')
