@@ -5,7 +5,7 @@ import qs from 'qs'
 import { fetcher } from '../utils/fetcher'
 
 export type RequestType = 'Upload' | 'Deployment'
-export type ReviewFilterType = 'mine' | 'all'
+export type ReviewFilterType = 'user' | 'all'
 export function useListRequests(type: RequestType, filter: ReviewFilterType) {
   const { data, error, mutate } = useSWR<{
     requests: Array<Request>

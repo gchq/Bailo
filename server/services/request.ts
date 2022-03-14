@@ -1,15 +1,13 @@
 import { Document, Types } from 'mongoose'
-import UserModel from '../models/User'
 import { Deployment, Request, User, Version } from '../../types/interfaces'
 import RequestModel from '../models/Request'
 import { BadReq } from '../utils/result'
 import { sendEmail } from '../utils/smtp'
 import { reviewRequest } from '../templates/reviewRequest'
+import { getUserById } from './user'
 
 export async function createDeploymentRequests({ version, deployment }: { version: Version; deployment: Deployment }) {
-  const manager = await UserModel.findOne({
-    id: version.metadata.contacts.manager,
-  })
+  const manager = await getUserById(version.metadata.contacts.manager)
 
   if (!manager) {
     throw BadReq(
@@ -27,12 +25,8 @@ export async function createDeploymentRequests({ version, deployment }: { versio
 
 export async function createVersionRequests({ version }: { version: Version }) {
   const [manager, reviewer] = await Promise.all([
-    UserModel.findOne({
-      id: version.metadata.contacts.manager,
-    }),
-    UserModel.findOne({
-      id: version.metadata.contacts.reviewer,
-    }),
+    getUserById(version.metadata.contacts.manager),
+    getUserById(version.metadata.contacts.reviewer),
   ])
 
   if (!manager) {

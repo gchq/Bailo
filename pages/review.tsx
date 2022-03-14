@@ -24,7 +24,7 @@ import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../data/api'
 
 export default function Review() {
-  const [value, setValue] = useState<ReviewFilterType>('mine')
+  const [value, setValue] = useState<ReviewFilterType>('user')
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -34,7 +34,7 @@ export default function Review() {
     <Wrapper title='Reviews' page={'review'}>
       <>
         <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
-          <Tab value='mine' label='My approvals' />
+          <Tab value='user' label='My approvals' />
           <Tab value='all' label='All approvals (Admin)' />
         </Tabs>
         <ApprovalList type={'Upload'} category={value} />
