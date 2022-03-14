@@ -19,6 +19,7 @@ export default function RenderForm({
   setSplitSchema: Function
 }) {
   const onFormChange = (form) => {
+    console.log(form)
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
@@ -27,6 +28,8 @@ export default function RenderForm({
       schema={step.schema}
       formData={step.state}
       onChange={onFormChange}
+      omitExtraData
+      liveOmit
       widgets={{
         userSelector: UserSelector,
         nothing: Nothing,
