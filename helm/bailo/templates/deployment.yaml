@@ -1,6 +1,135 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: registry
+  template:
+    metadata:
+      labels:
+        name: registry
+    spec:
+      containers:
+      - name: registry
+        image: registry:2
+        ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+        env:
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_HTTP_TLS_CERTIFICATE
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_HTTP_TLS_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_HTTP_TLS_KEY
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_STORAGE_S3_ACCESSKEY
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_STORAGE_S3_ACCESSKEY
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_STORAGE_S3_SECRETKEY
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_STORAGE_S3_SECRETKEY
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_AUTH
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_AUTH
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_AUTH_TOKEN_REALM
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_AUTH_TOKEN_REALM
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_AUTH_TOKEN_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_AUTH_TOKEN_SERVICE
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_AUTH_TOKEN_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_AUTH_TOKEN_ISSUER
+              name: {{ include "bailo.fullname" . }}
+        - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
+              name: {{ include "bailo.fullname" . }}
+        volumeMounts:
+        - name: config-map-vol
+          mountPath: /etc/docker/registry/config.yml
+          subPath: config.yml
+        - name: certs
+          mountPath: /certs
+      volumes:
+      - name: config-map-vol    
+        configMap:
+          name: {{ include "bailo.fullname" . }}
+          items:
+          - key: registry.conf
+            path: config.yml
+      - name: certs
+        secret:
+          secretName: {{ include "bailo.fullname" . }}
+          items:
+            - key: cert.pem
+              path: cert.pem
+            - key: key.pem
+              path: key.pem
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nginx
+  template:
+    metadata:
+      labels:
+        name: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+        volumeMounts:
+        - name: config-map-vol
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: certs
+          mountPath: /certs
+      volumes:
+      - name: config-map-vol    
+        configMap:
+          name: {{ include "bailo.fullname" . }}
+      - name: certs
+        secret:
+          secretName: {{ include "bailo.fullname" . }}
+          items:
+            - key: cert.pem
+              path: cert.pem
+            - key: key.pem
+              path: key.pem
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: {{ include "bailo.fullname" . }}
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
@@ -57,18 +186,20 @@ spec:
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
               value: {{ include "bailo.mongoConnectionURI" . | quote }}
+            - name: SCHEMA_SETUP_SCRIPT
+              value: dist/server/scripts/exampleSetAllSchemas.js
           ports:
             - name: http
               containerPort: 3000
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -84,6 +215,9 @@ spec:
               mountPath: /tmp
             - name: cache
               mountPath: /app/.next/cache
+            - name: certs
+              mountPath: /usr/local/share/ca-certificates/bailo.pem
+              subPath: cert.pem
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
