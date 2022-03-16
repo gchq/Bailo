@@ -28,3 +28,22 @@ spec:
       name: http
   selector:
     name: registry
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  labels:
+    name: maildev
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 25
+      targetPort: smtp
+      protocol: TCP
+      name: smtp
+  selector:
+    name: maildev

@@ -65,7 +65,12 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
       redis: {
-          host: '{{ include "bailo.redis.host" . }}',
+        host: '{{ include "bailo.redis.host" . }}',
+      },
+      smtp: {
+        host: '{{ .Values.smtp.host }}',
+        port: {{ .Values.smtp.port }},
+        insecure: {{ .Values.smtp.insecure }},
       },
       mongo: {
           uri: `mongodb://mongodb:${process.env.MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}`,
