@@ -1,6 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: maildev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: maildev
+  template:
+    metadata:
+      labels:
+        name: maildev
+    spec:
+      containers:
+      - name: maildev
+        image: maildev/maildev:latest
+        ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: smtp
+              containerPort: 25
+              protocol: TCP
+        env:
+        - name: MAILDEV_INCOMING_USER
+          value: "mailuser"
+        - name: MAILDEV_INCOMING_PASS
+          value: "mailpass"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: registry
 spec:
   replicas: 1

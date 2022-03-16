@@ -122,6 +122,11 @@ redis:
   
 registry:
   enabled: true
-  host: ""
+  host: "registry"
   port: 5000
+  insecure: true
+
+smtp:
+  host: "maildev"
+  port: 25
   insecure: true
