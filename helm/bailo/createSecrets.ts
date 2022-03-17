@@ -5,8 +5,8 @@ const prefix = 'bailo'
 
 export default async function createSecrets() {
   // minio secrets
-  const rootUser = uuidv4()
-  const rootPassword = uuidv4()
+  const rootUser = 'minioadmin'
+  const rootPassword = 'minioadmin'
 
   exec(`kubectl create secret generic ${prefix}-minio \
     --from-literal=root-user='${rootUser}' \

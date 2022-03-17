@@ -93,8 +93,8 @@ mongodb:
 minio:
   enabled: true
   auth:
-    rootUser: ""
-    rootPassword: ""
+    rootUser: "minioadmin"
+    rootPassword: "minioadmin"
     existingSecret: "bailo-minio"
   defaultBuckets: "uploads,registry"
   uploadBucket: uploads
