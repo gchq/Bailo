@@ -17,13 +17,14 @@ data:
   registry.conf: |
     version: 0.1
     log:
+      level: debug
       fields:
         service: registry
     storage:
       cache:
         blobdescriptor: inmemory
       s3:
-        regionendpoint: http://minio:9000
+        regionendpoint: http://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
         bucket: registry
         secure: false
         region: ignored-for-minio
