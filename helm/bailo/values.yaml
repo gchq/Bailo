@@ -93,8 +93,8 @@ mongodb:
 minio:
   enabled: true
   auth:
-    rootUser: "minioadmin"
-    rootPassword: "minioadmin"
+    rootUser: ""
+    rootPassword: ""
     existingSecret: "bailo-minio"
   defaultBuckets: "uploads,registry"
   uploadBucket: uploads
@@ -121,12 +121,29 @@ redis:
     replicaCount: 0
   
 registry:
+  repository: "registry"
+  tag: "2"
   enabled: true
   host: "registry"
   port: 5000
   insecure: true
+  certDir: "/certs"
+  certFile: "cert.pem"
+  keyFile: "key.pem"
 
 smtp:
-  host: "maildev"
+  repository: "maildev/maildev"
+  tag: "latest"
+  host: "smtp"
   port: 25
   insecure: true
+
+nginx:
+  repository: "nginx"
+  tag: "alpine"
+  host: "nginx"
+  port: 8080
+  certDir: "/certs"
+  certFile: "cert.pem"
+  keyFile: "key.pem"
+  
