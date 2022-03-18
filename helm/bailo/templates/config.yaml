@@ -5,15 +5,6 @@ metadata:
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
 data:
-  REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/cert.pem"
-  REGISTRY_HTTP_TLS_KEY: "/certs/key.pem"
-  REGISTRY_STORAGE_S3_ACCESSKEY: "minioadmin"
-  REGISTRY_STORAGE_S3_SECRETKEY: "minioadmin"
-  REGISTRY_AUTH: "token"
-  REGISTRY_AUTH_TOKEN_REALM: "http://bailo:3000/api/v1/registry_auth"
-  REGISTRY_AUTH_TOKEN_SERVICE: "RegistryAuth"
-  REGISTRY_AUTH_TOKEN_ISSUER: "RegistryIssuer"
-  REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: "/certs/cert.pem"
   registry.conf: |
     version: 0.1
     log:
@@ -25,7 +16,7 @@ data:
         blobdescriptor: inmemory
       s3:
         regionendpoint: http://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
-        bucket: registry
+        bucket: {{ .Values.minio.registryBucket }}
         secure: false
         region: ignored-for-minio
       redirect:
@@ -41,7 +32,7 @@ data:
         readonly:
           enabled: false
     http:
-      addr: :5000
+      addr: :{{ .Values.registry.port }}
       relativeurls: true
       headers:
         X-Content-Type-Options: [nosniff]
@@ -94,7 +85,7 @@ data:
 
     http {
         upstream host_service {
-          server bailo:3000;
+          server {{ .Chart.Name }}:{{ .Values.service.port }};
         }
 
         sendfile on;
@@ -110,7 +101,7 @@ data:
         }
 
         server {
-            listen 8080;
+            listen {{ .Values.nginx.port }};
 
             location / {
                 # a bunch of boilerplate proxy configuration
@@ -138,7 +129,7 @@ data:
               proxy_hide_header WWW-Authenticate;
               add_header WWW-Authenticate $new_www_authenticate always;
 
-              proxy_pass         https://registry:5000;
+              proxy_pass         https://{{ .Values.registry.host }}:{{ .Values.registry.port }};
               proxy_redirect     off;
               proxy_set_header   Host $host;
               proxy_set_header   X-Real-IP $remote_addr;

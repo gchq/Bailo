@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: maildev
+  name: {{ .Values.smtp.host }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: maildev
+      name: {{ .Values.smtp.host }}
   template:
     metadata:
       labels:
-        name: maildev
+        name: {{ .Values.smtp.host }}
     spec:
       containers:
-      - name: maildev
-        image: maildev/maildev:latest
+      - name: {{ .Values.smtp.host }}
+        image: {{ .Values.smtp.repository }}:{{ .Values.smtp.tag }}
         ports:
             - name: http
               containerPort: 80
               protocol: TCP
             - name: smtp
-              containerPort: 25
+              containerPort: {{ .Values.smtp.port }}
               protocol: TCP
         env:
         - name: MAILDEV_INCOMING_USER
@@ -31,76 +31,55 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: registry
+  name: {{ .Values.registry.host }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: registry
+      name: {{ .Values.registry.host }}
   template:
     metadata:
       labels:
-        name: registry
+        name: {{ .Values.registry.host }}
     spec:
       containers:
-      - name: registry
-        image: registry:2
+      - name: {{ .Values.registry.host }}
+        image: {{ .Values.registry.repository }}:{{ .Values.registry.tag }}
         ports:
             - name: http
-              containerPort: 5000
+              containerPort: {{ .Values.registry.port }}
               protocol: TCP
         env:
         - name: REGISTRY_HTTP_TLS_CERTIFICATE
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_HTTP_TLS_CERTIFICATE
-              name: {{ include "bailo.fullname" . }}
+          value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
         - name: REGISTRY_HTTP_TLS_KEY
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_HTTP_TLS_KEY
-              name: {{ include "bailo.fullname" . }}
+          value: {{ .Values.registry.certDir }}/{{ .Values.registry.keyFile }}
         - name: REGISTRY_STORAGE_S3_ACCESSKEY
           valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_STORAGE_S3_ACCESSKEY
-              name: {{ include "bailo.fullname" . }}
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-minio
+                  key: root-user
         - name: REGISTRY_STORAGE_S3_SECRETKEY
           valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_STORAGE_S3_SECRETKEY
-              name: {{ include "bailo.fullname" . }}
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-minio
+                  key: root-password
         - name: REGISTRY_AUTH
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_AUTH
-              name: {{ include "bailo.fullname" . }}
+          value: "token"
         - name: REGISTRY_AUTH_TOKEN_REALM
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_AUTH_TOKEN_REALM
-              name: {{ include "bailo.fullname" . }}
+          value: "http://{{ .Chart.Name }}:{{ .Values.service.port }}/api/v1/registry_auth"
         - name: REGISTRY_AUTH_TOKEN_SERVICE
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_AUTH_TOKEN_SERVICE
-              name: {{ include "bailo.fullname" . }}
+          value: "RegistryAuth"
         - name: REGISTRY_AUTH_TOKEN_ISSUER
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_AUTH_TOKEN_ISSUER
-              name: {{ include "bailo.fullname" . }}
+          value: "RegistryIssuer"
         - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
-          valueFrom:
-            configMapKeyRef:
-              key: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
-              name: {{ include "bailo.fullname" . }}
+          value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
         volumeMounts:
         - name: config-map-vol
           mountPath: /etc/docker/registry/config.yml
           subPath: config.yml
         - name: certs
-          mountPath: /certs
+          mountPath: {{ .Values.registry.certDir }}
       volumes:
       - name: config-map-vol    
         configMap:
@@ -113,37 +92,37 @@ spec:
           secretName: {{ include "bailo.fullname" . }}
           items:
             - key: cert.pem
-              path: cert.pem
+              path: {{ .Values.registry.certFile }}
             - key: key.pem
-              path: key.pem
+              path: {{ .Values.registry.keyFile }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: {{ .Values.nginx.host }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: nginx
+      name: {{ .Values.nginx.host }}
   template:
     metadata:
       labels:
-        name: nginx
+        name: {{ .Values.nginx.host }}
     spec:
       containers:
-      - name: nginx
-        image: nginx:alpine
+      - name: {{ .Values.nginx.host }}
+        image: {{ .Values.nginx.repository }}:{{ .Values.nginx.tag }}
         ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.nginx.port }}
               protocol: TCP
         volumeMounts:
         - name: config-map-vol
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
         - name: certs
-          mountPath: /certs
+          mountPath: {{ .Values.nginx.certDir }}
       volumes:
       - name: config-map-vol    
         configMap:
@@ -153,9 +132,9 @@ spec:
           secretName: {{ include "bailo.fullname" . }}
           items:
             - key: cert.pem
-              path: cert.pem
+              path: {{ .Values.nginx.certFile }}
             - key: key.pem
-              path: key.pem
+              path: {{ .Values.nginx.keyFile }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -220,16 +199,16 @@ spec:
               value: dist/server/scripts/exampleSetAllSchemas.js
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

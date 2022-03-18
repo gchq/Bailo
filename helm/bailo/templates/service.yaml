@@ -22,28 +22,28 @@ metadata:
     name: registry
 spec:
   ports:
-    - port: 5000
+    - port: {{ .Values.registry.port }}
       targetPort: http
       protocol: TCP
       name: http
   selector:
-    name: registry
+    name: {{ .Values.registry.host }}
 --- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: maildev
+  name: smtp
   labels:
-    name: maildev
+    name: smtp
 spec:
   ports:
     - port: 80
       targetPort: http
       protocol: TCP
       name: http
-    - port: 25
+    - port: {{ .Values.smtp.port }}
       targetPort: smtp
       protocol: TCP
       name: smtp
   selector:
-    name: maildev
+    name: {{ .Values.smtp.host }}
