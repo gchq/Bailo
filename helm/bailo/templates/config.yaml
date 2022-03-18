@@ -101,7 +101,13 @@ data:
         }
 
         server {
-            listen {{ .Values.nginx.port }};
+            listen {{ .Values.nginx.port }} ssl http2;
+            server_name localhost;
+
+            ssl_certificate {{ .Values.nginx.certDir }}/{{ .Values.nginx.certFile }};
+            ssl_certificate_key {{ .Values.nginx.certDir }}/{{ .Values.nginx.keyFile }};
+        
+            ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
 
             location / {
                 # a bunch of boilerplate proxy configuration
