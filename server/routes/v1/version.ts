@@ -4,6 +4,12 @@ import bodyParser from 'body-parser'
 import { createVersionRequests } from '../../services/request'
 import { Forbidden, NotFound, BadReq } from '../../utils/result'
 import { findVersionById } from '../../services/version'
+import _ from 'lodash'
+import { Version } from '../../../types/interfaces'
+
+const versionSubset = (version: Version) => {
+  return _.pick(version, [ '_id', 'version', 'metadata.highLevelDetails.name', 'model' ])
+}
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -16,6 +22,7 @@ export const getVersion = [
       throw NotFound({ versionId: id }, 'Unable to find version')
     }
 
+    req.log.info({version: versionSubset(version)}, 'User fetching version')
     return res.json(version)
   },
 ]
@@ -43,10 +50,9 @@ export const putVersion = [
     version.reviewerApproved = 'No Response'
 
     await version.save()
-
-    req.log.info('Creating version requests')
     await createVersionRequests({ version })
 
+    req.log.info({version: versionSubset(version)}, 'User updating version')
     return res.json(version)
   },
 ]
@@ -66,9 +72,9 @@ export const resetVersionApprovals = [
     version.managerApproved = 'No Response'
     version.reviewerApproved = 'No Response'
     await version.save()
-    req.log.info('Creating version requests')
     await createVersionRequests({ version })
 
+    req.log.info({version: versionSubset(version)}, 'User reset version approvals')
     return res.json(version)
   },
 ]

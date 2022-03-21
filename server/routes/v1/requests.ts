@@ -12,6 +12,7 @@ import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
 import { findDeploymentById } from '../../services/deployment'
+import _ from 'lodash'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -36,6 +37,7 @@ export const getRequests = [
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
+    req.log.info({requests: requests}, 'User fetching requests')
     return res.json({
       requests,
     })
@@ -49,6 +51,7 @@ export const getNumRequests = [
       userId: req.user!._id,
     })
 
+    req.log.info({requestCount: requests}, 'Fetching the number of requests')
     return res.json({
       count: requests,
     })
@@ -65,6 +68,7 @@ export const postRequestResponse = [
     const request = await getRequest({ requestId: id })
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
+      req.log.warn({id: id}, 'User does not have permission to approve this')
       throw Unauthorised(
         { id, userId: req.user?._id, requestUser: request.user },
         'You do not have permissions to approve this'
@@ -109,7 +113,7 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ deploymentId: deployment._id }, 'Triggered deployment')
+        req.log.info({ deployment: _.pick(deployment, [ '_id', 'uuid', 'nane', 'model' ]) }, 'Triggered deployment')
         await deploymentQueue
           .createJob({
             deploymentId: deployment._id,
@@ -135,7 +139,7 @@ export const postRequestResponse = [
       })
     }
 
-    req.log.info({ id, choice }, 'Successfully set approval response')
+    req.log.info({ id: id, choice: choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',

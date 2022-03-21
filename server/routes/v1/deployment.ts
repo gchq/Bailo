@@ -9,8 +9,14 @@ import { BadReq, NotFound, Forbidden } from '../../utils/result'
 import { findModelByUuid } from '../../services/model'
 import { findVersionByName } from '../../services/version'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import _ from 'lodash'
+import { Deployment } from '../../../types/interfaces'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
+
+const deploymentSubset = ((deployment: Deployment) => {
+  return _.pick(deployment, [ '_id', 'uuid', 'name', 'model' ])
+}) 
 
 export const getDeployment = [
   ensureUserRole('user'),
@@ -23,6 +29,7 @@ export const getDeployment = [
       throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
     }
 
+    req.log.info({deployment: deploymentSubset(deployment)}, 'Fetching deployment by a given UUID')
     return res.json(deployment)
   },
 ]
@@ -31,8 +38,13 @@ export const getCurrentUserDeployments = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
-
+    
     const deployments = await findDeployments(req.user!, { owner: id })
+    const deploymentSubsets = deployments.map((deployment) => {
+      return deploymentSubset(deployment)
+    })
+
+    req.log.info({deployments: deploymentSubsets}, 'Fetching deployment by a given UUID')
 
     return res.json(deployments)
   },
@@ -42,7 +54,7 @@ export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    req.log.info({ user: req.user?.id }, 'User requesting deployment')
+    req.log.info('User requesting deployment')
     const body = req.body as any
 
     const schema = await SchemaModel.findOne({
@@ -89,9 +101,10 @@ export const postDeployment = [
       owner: req.user!._id,
     })
 
-    req.log.info('Saving deployment model')
+    req.log.info({deployment: deploymentSubset(deployment)}, 'Saving deployment model')
     await deployment.save()
 
+    req.log.info({modelId: model._id, version: body.highLevelDetails.initialVersionRequested}, 'Requesting model version')
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
@@ -134,7 +147,7 @@ export const resetDeploymentApprovals = [
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()
-    req.log.info('Creating deployment requests')
+    req.log.info({deployment: deploymentSubset(deployment)}, 'User resetting deployment approvals')
     await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
 
     return res.json(deployment)

@@ -2,6 +2,12 @@ import SchemaModel from '../../models/Schema'
 import { Request, Response } from 'express'
 import { ensureUserRole } from '../../utils/user'
 import { NotFound } from '../../utils/result'
+import _ from 'lodash'
+import { Schema } from '../../../types/interfaces'
+
+const schemaSubset = ((schema: Schema) => {
+  return _.pick(schema, [ '_id', 'reference', 'name', 'use' ])
+}) 
 
 export const getSchemas = [
   ensureUserRole('user'),
@@ -11,7 +17,11 @@ export const getSchemas = [
     }
 
     const schemas = await SchemaModel.find({ use: req.query.use })
+    const schemaSubets = schemas.map((schema) => {
+      return schemaSubset(schema)
+    })
 
+    req.log.info({schemas: schemaSubets}, 'User fetching schemas')
     return res.json(schemas)
   },
 ]
@@ -29,6 +39,7 @@ export const getDefaultSchema = [
       throw NotFound({}, `Could not find default schema`)
     }
 
+    req.log.info({schema: schemaSubset(schema[0])}, 'User fetching default schema')
     return res.json(schema[0])
   },
 ]
@@ -47,6 +58,7 @@ export const getSchema = [
       })
     }
 
+    req.log.info({schema: schemaSubset(schema)}, 'User fetching schema using specified reference')
     return res.json(schema)
   },
 ]
