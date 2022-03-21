@@ -8,7 +8,7 @@ import _ from 'lodash'
 import { Version } from '../../../types/interfaces'
 
 const versionSubset = (version: Version) => {
-  return _.pick(version, [ '_id', 'version', 'metadata.highLevelDetails.name', 'model' ])
+  return _.pick(version, ['_id', 'version', 'metadata.highLevelDetails.name', 'model'])
 }
 
 export const getVersion = [
@@ -22,7 +22,7 @@ export const getVersion = [
       throw NotFound({ versionId: id }, 'Unable to find version')
     }
 
-    req.log.info({version: versionSubset(version)}, 'User fetching version')
+    req.log.info({ version: versionSubset(version) }, 'User fetching version')
     return res.json(version)
   },
 ]
@@ -52,7 +52,7 @@ export const putVersion = [
     await version.save()
     await createVersionRequests({ version })
 
-    req.log.info({version: versionSubset(version)}, 'User updating version')
+    req.log.info({ version: versionSubset(version) }, 'User updating version')
     return res.json(version)
   },
 ]
@@ -74,7 +74,7 @@ export const resetVersionApprovals = [
     await version.save()
     await createVersionRequests({ version })
 
-    req.log.info({version: versionSubset(version)}, 'User reset version approvals')
+    req.log.info({ version: versionSubset(version) }, 'User reset version approvals')
     return res.json(version)
   },
 ]

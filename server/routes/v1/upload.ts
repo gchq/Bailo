@@ -110,7 +110,10 @@ export const postUpload = [
           })
         }
       }
-      req.log.info({ version: _.pick(version, [ '_id', 'version', 'metadata.highLevelDetails.name', 'model' ]) }, 'Created model version')
+      req.log.info(
+        { version: _.pick(version, ['_id', 'version', 'metadata.highLevelDetails.name', 'model']) },
+        'Created model version'
+      )
 
       const name = metadata.highLevelDetails.name
         .toLowerCase()
@@ -162,7 +165,7 @@ export const postUpload = [
       version.model = model._id
       await version.save()
 
-      req.log.info({ model: _.pick(model, [ '_id', 'uuid', 'schemaRef' ]) }, 'Created model document')
+      req.log.info({ model: _.pick(model, ['_id', 'uuid', 'schemaRef']) }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
@@ -182,7 +185,7 @@ export const postUpload = [
         .timeout(60000 * 8)
         .retries(2)
         .save()
-      req.log.info({jobId: job.id }, 'Successfully created job in upload queue')
+      req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')
 
       // then return reference to user
       res.json({
