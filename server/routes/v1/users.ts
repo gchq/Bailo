@@ -34,7 +34,7 @@ export const getLoggedInUser = [
   async (req: Request, res: Response) => {
     const _id = req.user!._id
     const user = await getUserByInternalId(_id)
-    req.log.info({ loggedInUser: userSubset(user) }, 'Getting logged in user details')
+    req.log.info('Getting logged in user details')
     return res.json(user)
   },
 ]
