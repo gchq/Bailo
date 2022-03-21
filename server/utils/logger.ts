@@ -132,7 +132,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
     id: req.reqId,
     user: req.user?.id,
     timestamp: new Date().toISOString(),
-    clientIp: req.ip,
+    clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 
   res.error = (code: number, error: any) => {

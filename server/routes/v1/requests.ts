@@ -68,7 +68,6 @@ export const postRequestResponse = [
     const request = await getRequest({ requestId: id })
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
-      req.log.warn({ id: id }, 'User does not have permission to approve this')
       throw Unauthorised(
         { id, userId: req.user?._id, requestUser: request.user },
         'You do not have permissions to approve this'
@@ -139,7 +138,7 @@ export const postRequestResponse = [
       })
     }
 
-    req.log.info({ id: id, choice: choice }, 'Successfully set approval response')
+    req.log.info({ id, choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',
