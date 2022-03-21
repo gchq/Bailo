@@ -9,7 +9,7 @@ import _ from 'lodash'
 import { Model } from '../../../types/interfaces'
 
 const modelSubset = (model: Model) => {
-  return _.pick(model, [ '_id', 'uuid', 'schemaRef' ])
+  return _.pick(model, ['_id', 'uuid', 'schemaRef'])
 }
 
 export const getModels = [
@@ -30,7 +30,7 @@ export const getModels = [
       return modelSubset(model)
     })
 
-    req.log.info({models: modelSubsets}, 'User fetching all models')
+    req.log.info({ models: modelSubsets }, 'User fetching all models')
 
     return res.json({
       models,
@@ -49,7 +49,7 @@ export const getModelByUuid = [
       throw NotFound({ uuid }, `Unable to find model '${uuid}'`)
     }
 
-    req.log.info({model: modelSubset(model)}, 'User fetching model by given UUID')
+    req.log.info({ model: modelSubset(model) }, 'User fetching model by given UUID')
     return res.json(model)
   },
 ]
@@ -65,7 +65,7 @@ export const getModelById = [
       throw NotFound({ id }, `Unable to find model '${id}'`)
     }
 
-    req.log.info({model: modelSubset(model)}, 'User fetching model by given ID')
+    req.log.info({ model: modelSubset(model) }, 'User fetching model by given ID')
     return res.json(model)
   },
 ]
@@ -83,7 +83,7 @@ export const getModelDeployments = [
 
     const deployments = await findDeployments(req.user!, { model: model._id })
 
-    req.log.info({model: modelSubset(model)}, 'User fetching all deployments for model')
+    req.log.info({ model: modelSubset(model) }, 'User fetching all deployments for model')
     return res.json(deployments)
   },
 ]
@@ -105,7 +105,7 @@ export const getModelSchema = [
       throw NotFound({ uuid, schemaRef: model.schemaRef }, `Unable to find schema '${model.schemaRef}'`)
     }
 
-    req.log.info({model: modelSubset(model)}, 'User fetching model schema')
+    req.log.info({ model: modelSubset(model) }, 'User fetching model schema')
     return res.json(schema)
   },
 ]
@@ -123,7 +123,7 @@ export const getModelVersions = [
 
     const versions = await findModelVersions(req.user!, model._id, { thin: true })
 
-    req.log.info({model: modelSubset(model)}, 'User fetching versions for specified model')
+    req.log.info({ model: modelSubset(model) }, 'User fetching versions for specified model')
     return res.json(versions)
   },
 ]
@@ -150,7 +150,10 @@ export const getModelVersion = [
       throw NotFound({ versionName }, `Unable to find verison '${versionName}'`)
     }
 
-    req.log.info({model: modelSubset(model), version: version._id.toString()}, 'User finding specific version for model')
+    req.log.info(
+      { model: modelSubset(model), version: version._id.toString() },
+      'User finding specific version for model'
+    )
     return res.json(version)
   },
 ]

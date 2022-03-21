@@ -12,7 +12,7 @@ export const getUiConfig = [
       throw NotFound({}, `Unable to find UI Config`)
     }
 
-    req.log.info({uiConfig: uiConfig}, 'User fetching UI config')
+    req.log.info({ uiConfig: uiConfig }, 'User fetching UI config')
     return res.json(uiConfig)
   },
 ]

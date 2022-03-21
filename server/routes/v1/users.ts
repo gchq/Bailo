@@ -8,11 +8,11 @@ import _ from 'lodash'
 import { Model, User } from '../../../types/interfaces'
 
 const modelSubset = (model: Model) => {
-  return _.pick(model, [ '_id', 'uuid', 'schemaRef' ])
+  return _.pick(model, ['_id', 'uuid', 'schemaRef'])
 }
 
 const userSubset = (user: User) => {
-  return _.pick(user, [ '_id', 'id', 'email' ])
+  return _.pick(user, ['_id', 'id', 'email'])
 }
 
 export const getUsers = [
@@ -22,11 +22,11 @@ export const getUsers = [
     const userSubsets = users.map((user) => {
       return userSubset(user)
     })
-    req.log.info({users: userSubsets}, 'Getting list of all users')
+    req.log.info({ users: userSubsets }, 'Getting list of all users')
     return res.json({
       users,
     })
-  },  
+  },
 ]
 
 export const getLoggedInUser = [
@@ -34,7 +34,7 @@ export const getLoggedInUser = [
   async (req: Request, res: Response) => {
     const _id = req.user!._id
     const user = await getUserByInternalId(_id)
-    req.log.info({loggedInUser: userSubset(user)}, 'Getting logged in user details')
+    req.log.info({ loggedInUser: userSubset(user) }, 'Getting logged in user details')
     return res.json(user)
   },
 ]
@@ -76,7 +76,7 @@ export const favouriteModel = [
 
     await user.favourites.push(modelId)
     await user.save()
-    req.log.info({model: modelSubset(model)}, 'User favourites model')
+    req.log.info({ model: modelSubset(model) }, 'User favourites model')
     return res.json(user)
   },
 ]
@@ -104,7 +104,7 @@ export const unfavouriteModel = [
 
     await user.favourites.pull(modelId)
     await user.save()
-    req.log.info({model: modelSubset(model)}, 'User unfavourites model')
+    req.log.info({ model: modelSubset(model) }, 'User unfavourites model')
     return res.json(user)
   },
 ]
