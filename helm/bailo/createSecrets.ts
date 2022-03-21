@@ -30,7 +30,6 @@ export default async function createSecrets() {
   exec(`kubectl create secret generic ${prefix}-redis \
     --from-literal=redis-password='${redisPassword}'
   `)
-
 }
 
 createSecrets()
