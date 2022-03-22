@@ -12,7 +12,6 @@ import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
 import { findDeploymentById } from '../../services/deployment'
-import _ from 'lodash'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -37,7 +36,7 @@ export const getRequests = [
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
-    req.log.info({ requests: requests }, 'User fetching requests')
+    req.log.info({ requests }, 'User fetching requests')
     return res.json({
       requests,
     })
@@ -112,7 +111,7 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ deployment: _.pick(deployment, ['_id', 'uuid', 'nane', 'model']) }, 'Triggered deployment')
+        req.log.info({ deployment }, 'Triggered deployment')
         await deploymentQueue
           .createJob({
             deploymentId: deployment._id,

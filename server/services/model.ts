@@ -12,7 +12,7 @@ const authorisation = new AuthorisationBase()
 
 export function serializedModelFields(): SerializerOptions {
   return {
-    mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name'],
+    mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'],
   }
 }
 
