@@ -7,10 +7,6 @@ import { findVersionById } from '../../services/version'
 import _ from 'lodash'
 import { Version } from '../../../types/interfaces'
 
-const versionSubset = (version: Version) => {
-  return _.pick(version, ['_id', 'version', 'metadata.highLevelDetails.name', 'model'])
-}
-
 export const getVersion = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
