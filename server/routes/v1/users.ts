@@ -4,25 +4,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById } from '../../services/model'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
-import _ from 'lodash'
-import { Model, User } from '../../../types/interfaces'
-
-const modelSubset = (model: Model) => {
-  return _.pick(model, ['_id', 'uuid', 'schemaRef'])
-}
-
-const userSubset = (user: User) => {
-  return _.pick(user, ['_id', 'id', 'email'])
-}
 
 export const getUsers = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const users = await findUsers()
-    const userSubsets = users.map((user) => {
-      return userSubset(user)
-    })
-    req.log.info({ users: userSubsets }, 'Getting list of all users')
+    req.log.info({ users }, 'Getting list of all users')
     return res.json({
       users,
     })
@@ -76,7 +63,7 @@ export const favouriteModel = [
 
     await user.favourites.push(modelId)
     await user.save()
-    req.log.info({ model: modelSubset(model) }, 'User favourites model')
+    req.log.info({ model }, 'User favourites model')
     return res.json(user)
   },
 ]
@@ -104,7 +91,7 @@ export const unfavouriteModel = [
 
     await user.favourites.pull(modelId)
     await user.save()
-    req.log.info({ model: modelSubset(model) }, 'User unfavourites model')
+    req.log.info({ model }, 'User unfavourites model')
     return res.json(user)
   },
 ]

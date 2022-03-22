@@ -19,9 +19,7 @@ export function serializedVersionFields(): SerializerOptions {
   return {
     mandatory: ['_id', 'version', 'metadata.highLevelDetails.name'],
     optional: [],
-    serializable: [
-      { type: createSerializer(serializedModelFields()), field: 'model' }
-    ]
+    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
   }
 }
 
