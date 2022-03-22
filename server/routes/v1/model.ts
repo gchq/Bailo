@@ -151,7 +151,7 @@ export const getModelVersion = [
     }
 
     req.log.info(
-      { model: modelSubset(model), version: version._id.toString() },
+      { model: modelSubset(model), version },
       'User finding specific version for model'
     )
     return res.json(version)

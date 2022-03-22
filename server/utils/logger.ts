@@ -7,7 +7,9 @@ import { join, sep } from 'path'
 import { inspect } from 'util'
 import omit from 'lodash/omit'
 import chalk from 'chalk'
+import { castArray, set, get, pick } from 'lodash'
 import { StatusError } from '../../types/interfaces'
+import { serializedVersionFields } from '../services/version'
 
 class Writer {
   basepath: string
@@ -45,7 +47,7 @@ class Writer {
   }
 
   getAttributes(data) {
-    let attributes = omit(data, ['name', 'hostname', 'pid', 'level', 'msg', 'time', 'src', 'v', 'user'])
+    let attributes = omit(data, ['name', 'hostname', 'pid', 'level', 'msg', 'time', 'src', 'v', 'user', 'timestamp', 'clientIp'])
     let keys = Object.keys(attributes)
 
     if (['id', 'url', 'method', 'response-time', 'status'].every((k) => keys.includes(k))) {
@@ -82,6 +84,43 @@ class Writer {
   }
 }
 
+export interface SerializerOptions {
+  mandatory?: Array<string>
+  optional?: Array<string>
+  serializable?: Array<any>
+}
+
+export function createSerializer(options: SerializerOptions) {
+  const mandatory = options.mandatory || []
+  const optional = options.optional || []
+  const serializable = options.serializable || []
+  
+  return function(unserialized: any) {
+    if (!unserialized) {
+      return unserialized
+    }
+
+    const asArray = castArray(unserialized)
+
+    if (!asArray.every(item => mandatory.every(value => get(item, value) !== undefined))) {
+      return unserialized
+    }
+
+    const serialized = asArray.map(item => {
+      const segments = pick(item, mandatory.concat(optional))
+      const remotes = {}
+
+      serializable.forEach(({ type, field }) => {
+        set(remotes, field, type(get(item, field)))
+      })
+
+      return { ...segments, ...remotes }
+    })
+
+    return Array.isArray(unserialized) ? serialized : serialized[0]
+  }
+}
+
 const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
@@ -99,6 +138,10 @@ const log = bunyan.createLogger({
   level: 'trace',
   src: process.env.NODE_ENV !== 'production',
   streams: streams.length ? streams : undefined,
+  serializers: {
+    version: createSerializer(serializedVersionFields()),
+    versions: createSerializer(serializedVersionFields())
+  }
 })
 
 const morganLog = morgan<any, any>(
