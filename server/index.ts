@@ -105,7 +105,7 @@ app.prepare().then(() => {
   processDeployments()
   pullBuilderImage()
 
-  server.all('*', (req, res) => {
+  server.use((req, res) => {
     return handle(req, res)
   })
 
