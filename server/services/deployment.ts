@@ -16,7 +16,7 @@ interface GetDeploymentOptions {
 
 export function serializedDeploymentFields(): SerializerOptions {
   return {
-    mandatory: ['_id', 'uuid', 'name', 'model'],
+    mandatory: ['_id', 'uuid', 'name'],
     optional: [],
     serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
   }
