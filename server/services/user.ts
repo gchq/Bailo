@@ -11,7 +11,7 @@ interface GetUserOptions {
 
 export function serializedUserFields(): SerializerOptions {
   return {
-    mandatory: ['_id', 'reference', 'name', 'use'],
+    mandatory: ['_id', 'id', 'email'],
   }
 }
 

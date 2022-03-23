@@ -4,8 +4,6 @@ import bodyParser from 'body-parser'
 import { createVersionRequests } from '../../services/request'
 import { Forbidden, NotFound, BadReq } from '../../utils/result'
 import { findVersionById } from '../../services/version'
-import _ from 'lodash'
-import { Version } from '../../../types/interfaces'
 
 export const getVersion = [
   ensureUserRole('user'),

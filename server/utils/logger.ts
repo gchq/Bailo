@@ -198,7 +198,6 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   req.log = log.child({
     id: req.reqId,
     user: req.user?.id,
-    timestamp: new Date().toISOString(),
     clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 
