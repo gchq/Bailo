@@ -16,6 +16,7 @@ export const getVersion = [
       throw NotFound({ versionId: id }, 'Unable to find version')
     }
 
+    req.log.info({ version }, 'User fetching version')
     return res.json(version)
   },
 ]
@@ -43,10 +44,9 @@ export const putVersion = [
     version.reviewerApproved = 'No Response'
 
     await version.save()
-
-    req.log.info('Creating version requests')
     await createVersionRequests({ version })
 
+    req.log.info({ version }, 'User updating version')
     return res.json(version)
   },
 ]
@@ -66,9 +66,9 @@ export const resetVersionApprovals = [
     version.managerApproved = 'No Response'
     version.reviewerApproved = 'No Response'
     await version.save()
-    req.log.info('Creating version requests')
     await createVersionRequests({ version })
 
+    req.log.info({ version }, 'User reset version approvals')
     return res.json(version)
   },
 ]
