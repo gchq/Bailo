@@ -13,6 +13,10 @@ export async function sendEmail({
   text: string
   html?: string
 }) {
+  if (!config.get('smtp.enabled')) {
+    logger.info({ subject, to }, 'Not sending email due to SMTP disabled')
+  }
+
   const transporter = nodemailer.createTransport({
     host: config.get('smtp.host'),
     port: config.get('smtp.port'),
