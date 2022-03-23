@@ -110,10 +110,7 @@ export const postUpload = [
           })
         }
       }
-      req.log.info(
-        { version: _.pick(version, ['_id', 'version', 'metadata.highLevelDetails.name', 'model']) },
-        'Created model version'
-      )
+      req.log.info({ version }, 'Created model version')
 
       const name = metadata.highLevelDetails.name
         .toLowerCase()
@@ -165,7 +162,7 @@ export const postUpload = [
       version.model = model._id
       await version.save()
 
-      req.log.info({ model: _.pick(model, ['_id', 'uuid', 'schemaRef']) }, 'Created model document')
+      req.log.info({ model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),

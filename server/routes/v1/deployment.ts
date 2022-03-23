@@ -35,7 +35,7 @@ export const getCurrentUserDeployments = [
 
     const deployments = await findDeployments(req.user!, { owner: id })
 
-    req.log.info({ deployments }, 'Fetching deployment by a given UUID')
+    req.log.info({ deployments }, 'Fetching deployments by user')
 
     return res.json(deployments)
   },
@@ -95,10 +95,7 @@ export const postDeployment = [
     req.log.info({ deployment }, 'Saving deployment model')
     await deployment.save()
 
-    req.log.info(
-      { modelId: model._id, version: body.highLevelDetails.initialVersionRequested },
-      'Requesting model version'
-    )
+    req.log.info({ model, version: body.highLevelDetails.initialVersionRequested }, 'Requesting model version')
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {

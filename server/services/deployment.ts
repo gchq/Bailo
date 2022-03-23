@@ -5,7 +5,8 @@ import DeploymentModel from '../models/Deployment'
 import { Deployment, User, ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
-import { SerializerOptions } from '../utils/logger'
+import { createSerializer, SerializerOptions } from '../utils/logger'
+import { serializedModelFields } from './model'
 
 const authorisation = new AuthorisationBase()
 
@@ -16,6 +17,8 @@ interface GetDeploymentOptions {
 export function serializedDeploymentFields(): SerializerOptions {
   return {
     mandatory: ['_id', 'uuid', 'name', 'model'],
+    optional: [],
+    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
   }
 }
 
