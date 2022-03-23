@@ -15,6 +15,7 @@ export async function sendEmail({
 }) {
   if (!config.get('smtp.enabled')) {
     logger.info({ subject, to }, 'Not sending email due to SMTP disabled')
+    return
   }
 
   const transporter = nodemailer.createTransport({
