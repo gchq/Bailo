@@ -12,6 +12,7 @@ export const getSchemas = [
 
     const schemas = await SchemaModel.find({ use: req.query.use })
 
+    req.log.info({ schemas }, 'User fetching schemas')
     return res.json(schemas)
   },
 ]
@@ -29,6 +30,7 @@ export const getDefaultSchema = [
       throw NotFound({}, `Could not find default schema`)
     }
 
+    req.log.info({ schema }, 'User fetching default schema')
     return res.json(schema[0])
   },
 ]
@@ -47,6 +49,7 @@ export const getSchema = [
       })
     }
 
+    req.log.info({ schema }, 'User fetching schema using specified reference')
     return res.json(schema)
   },
 ]

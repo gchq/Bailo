@@ -3,9 +3,16 @@ import memoize from 'memoizee'
 
 import UserModel from '../models/User'
 import { ModelId } from '../../types/interfaces'
+import { SerializerOptions } from '../utils/logger'
 
 interface GetUserOptions {
   includeToken?: boolean
+}
+
+export function serializedUserFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'id', 'email'],
+  }
 }
 
 export async function getUserById(id: ModelId, opts?: GetUserOptions) {

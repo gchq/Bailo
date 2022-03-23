@@ -5,11 +5,21 @@ import DeploymentModel from '../models/Deployment'
 import { Deployment, User, ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
+import { createSerializer, SerializerOptions } from '../utils/logger'
+import { serializedModelFields } from './model'
 
 const authorisation = new AuthorisationBase()
 
 interface GetDeploymentOptions {
   populate?: boolean
+}
+
+export function serializedDeploymentFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'uuid', 'name'],
+    optional: [],
+    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
+  }
 }
 
 export async function filterDeployment<T>(user: User, unfiltered: T): Promise<T> {
