@@ -32,7 +32,7 @@ COPY package-lock.json /home/user/app/package-lock.json
 WORKDIR /home/user/app
 RUN npm install
 
-ADD --chown=user . / /home/user/app/
+COPY --chown=user . / /home/user/app/
 
 USER user
 ENV USER user
