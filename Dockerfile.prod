@@ -26,10 +26,10 @@ ARG user_id=1004520004
 #1001
 
 RUN apk update \
-    && apk add ca-certificates img docker \
+    && apk add ca-certificates img docker shadow \
     && rm -rf /var/cache/apk/* \
     && chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
-    && adduser -D -u $user_id nextjs \
+    && /usr/sbin/useradd -s /bin/sh -u $user_id -m nextjs \
     && mkdir -p /run/user/$user_id \
     && chown -R nextjs /run/user/$user_id /home/nextjs \
     && addgroup -S certs \
