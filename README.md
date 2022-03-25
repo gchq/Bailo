@@ -98,13 +98,13 @@ docker-compose -f docker-compose-dev-personal.yml up --force-recreate --build -d
 
 The creation of docker-compose-dev-personal.yml gives the application user the same uid as you on your host machine. This allows the application to run the app from the files on your host machine, and populate node_modules (via npm install).
 
-On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous.  You should access the site via [localhost:8080](http://localhost:8080) which provides authentication as a test user.
+On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous. You should access the site via [localhost:8080](http://localhost:8080) which provides authentication as a test user.
 
 <br />
 
 ### Setup:
 
-Some example schemas are installed by default.  More schemas can be added by altering and running the `addDeploymentSchema.ts` and `addUploadSchema.ts` files.
+Some example schemas are installed by default. More schemas can be added by altering and running the `addDeploymentSchema.ts` and `addUploadSchema.ts` files.
 
 ```bash
 ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
