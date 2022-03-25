@@ -98,13 +98,13 @@ docker-compose -f docker-compose-dev-personal.yml up --force-recreate --build -d
 
 The creation of docker-compose-dev-personal.yml gives the application user the same uid as you on your host machine. This allows the application to run the app from the files on your host machine, and populate node_modules (via npm install).
 
-On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous.
+On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous.  You should access the site via [localhost:8080](http://localhost:8080) which provides authentication as a test user.
 
 <br />
 
 ### Setup:
 
-No schemas are installed by default. To add an example one, run:
+Some example schemas are installed by default.  More schemas can be added by altering and running the `addDeploymentSchema.ts` and `addUploadSchema.ts` files.
 
 ```bash
 ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
@@ -117,14 +117,15 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
 ### Service Ports:
 
-| Service    | Host  | Notes                 |
-| ---------- | ----- | --------------------- |
-| NodeJS App | 3000  |                       |
-| Mongo      | 27017 | No credentials        |
-| Redis      | 6379  | No credentials        |
-| Registry   | 5000  | HTTPS only, no UI     |
-| Minio UI   | 9001  | minioadmin:minioadmin |
-| Minio      | 9000  | minioadmin:minioadmin |
+| Service    | Host  | Notes                  |
+| ---------- | ----- | ---------------------- |
+| NodeJS App | 3000  | Internal only port     |
+| Nginx      | 8080  | Access the UI via this |
+| Mongo      | 27017 | No credentials         |
+| Redis      | 6379  | No credentials         |
+| Registry   | 5000  | HTTPS only, no UI      |
+| Minio UI   | 9001  | minioadmin:minioadmin  |
+| Minio      | 9000  | minioadmin:minioadmin  |
 
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to something more secure.
 
