@@ -10,7 +10,7 @@ imagePullSecrets: []
 
 podAnnotations: 
   container.apparmor.security.beta.kubernetes.io/bailo: unconfined
-  container.seccomp.security.alpha.kubernetes.io/bailo: unconfined
+  #container.seccomp.security.alpha.kubernetes.io/bailo: unconfined
 
 # Instance scaling
 # ReplicateCount ignored if autoscaling is enabled
@@ -53,7 +53,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: #{}
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -61,8 +61,8 @@ resources: #{}
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-   requests:
-     ephemeral-storage: "2Gi"
+  #  requests:
+  #    ephemeral-storage: "2Gi"
   #   cpu: 100m
   #   memory: 128Mi
 
@@ -86,10 +86,16 @@ mongodb:
     databases:
       - bailo
   service:
-    port: 27017
+    port: 31110 #27017
   host: ""
-  collectionName: bailo
-    
+  collectionName: bailo\
+  persistence:
+    size: 1Gi
+  containerSecurityContext:
+    runAsUser: 1004520001
+  podSecurityContext:
+    fsGroup: 1004520001
+
 minio:
   enabled: true
   auth:
@@ -102,8 +108,14 @@ minio:
   host: ""
   service:
     ports:
-      api: 9000
+      api: 31111 #9000
   useSSL: false
+  persistence:
+    size: 3Gi
+  containerSecurityContext:
+    runAsUser: 1004520002
+  podSecurityContext:
+    fsGroup: 1004520002
 
 redis:
   enabled: true
@@ -116,16 +128,22 @@ redis:
   host: ""
   master:
     service:
-      port: 6379
+      port: 31112 #6379
   replica:
     replicaCount: 0
+  persistence:
+    size: 1Gi
+  containerSecurityContext:
+    runAsUser: 1004520003
+  podSecurityContext:
+    fsGroup: 1004520003
   
 registry:
   repository: "registry"
   tag: "2"
   enabled: true
   host: "registry"
-  port: 5000
+  port: 31113 #5000
   insecure: true
   certDir: "/certs"
   certFile: "cert.pem"
@@ -135,14 +153,14 @@ smtp:
   repository: "maildev/maildev"
   tag: "latest"
   host: "smtp"
-  port: 25
+  port: 31114 #25
   insecure: true
 
 nginx:
   repository: "nginx"
   tag: "alpine"
   host: "nginx"
-  port: 8080
+  port: 31115 #8080
   certDir: "/certs"
   certFile: "cert.pem"
   keyFile: "key.pem"

@@ -28,22 +28,22 @@ spec:
       name: http
   selector:
     name: {{ .Values.registry.host }}
---- 
-apiVersion: v1
-kind: Service
-metadata:
-  name: smtp
-  labels:
-    name: smtp
-spec:
-  ports:
-    - port: 80
-      targetPort: http
-      protocol: TCP
-      name: http
-    - port: {{ .Values.smtp.port }}
-      targetPort: smtp
-      protocol: TCP
-      name: smtp
-  selector:
-    name: {{ .Values.smtp.host }}
+# --- 
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: smtp
+#   labels:
+#     name: smtp
+# spec:
+#   ports:
+#     - port: 80
+#       targetPort: http
+#       protocol: TCP
+#       name: http
+#     - port: {{ .Values.smtp.port }}
+#       targetPort: smtp
+#       protocol: TCP
+#       name: smtp
+#   selector:
+#     name: {{ .Values.smtp.host }}

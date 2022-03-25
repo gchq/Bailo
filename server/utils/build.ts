@@ -10,6 +10,8 @@ import config from 'config'
 import dedent from 'dedent-js'
 import logger from './logger'
 import { getAdminToken } from '../routes/v1/registryAuth'
+import { env } from 'process'
+import * as osClient from 'openshift-rest-client'
 
 interface FileRef {
   path: string
@@ -23,9 +25,15 @@ interface BuilderFiles {
 }
 
 export async function pullBuilderImage() {
-  await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
-    logger[level](message)
-  )
+  if (env.OPENSHIFT){
+    logger.info('Running in OpenShift, so not pulling base image')
+    const openshiftRestClient = osClient.OpenshiftClient
+    console.dir(openshiftRestClient)
+  }else{ 
+    await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
+      logger[level](message)
+    )
+  }
 }
 
 async function createWorkingDirectory(): Promise<string> {
@@ -131,6 +139,11 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await logCommand(command, version.log.bind(version))
 
   // build image
+  if (env.OPENSHIFT){
+    vlog.info('Running in openshift. In process of using rest api to build')
+    const openshiftRestClient = osClient.OpenshiftClient
+    console.dir(openshiftRestClient)
+  }else{
   const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
   vlog.info({ buildCommand }, 'Building')
   await logCommand(buildCommand, version.log.bind(version))
@@ -160,6 +173,6 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
   const removeImageCmd = `img rm ${tag}`
   await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
-
+  }
   return tag
 }
