@@ -92,9 +92,9 @@ mongodb:
   persistence:
     size: 1Gi
   containerSecurityContext:
-    runAsUser: 1004520001
+    enabled: false
   podSecurityContext:
-    fsGroup: 1004520001
+    enabled: false
 
 minio:
   enabled: true
@@ -113,9 +113,9 @@ minio:
   persistence:
     size: 3Gi
   containerSecurityContext:
-    runAsUser: 1004520002
+    enabled: false
   podSecurityContext:
-    fsGroup: 1004520002
+    enabled: false
 
 redis:
   enabled: true
@@ -128,15 +128,21 @@ redis:
   host: ""
   master:
     service:
-      port: 31112 #6379
+      port: 6379
+    persistence:
+      size: 0.1Gi
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
   replica:
     replicaCount: 0
-  persistence:
-    size: 1Gi
-  containerSecurityContext:
-    runAsUser: 1004520003
-  podSecurityContext:
-    fsGroup: 1004520003
+    persistence:
+      size: 0.1Gi
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
   
 registry:
   repository: "registry"

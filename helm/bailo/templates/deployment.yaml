@@ -148,6 +148,8 @@ spec:
     spec:
       containers:
       - name: {{ .Values.nginx.host }}
+        securityContext:
+            readOnlyRootFilesystem: false
         image: {{ .Values.nginx.repository }}:{{ .Values.nginx.tag }}
         ports:
             - name: http
