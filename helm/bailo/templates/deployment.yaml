@@ -34,36 +34,36 @@ roleRef:
   name: bailo-builder
   apiGroup: rbac.authorization.k8s.io
 ---
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: {{ .Values.smtp.host }}
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       name: {{ .Values.smtp.host }}
-#   template:
-#     metadata:
-#       labels:
-#         name: {{ .Values.smtp.host }}
-#     spec:
-#       containers:
-#       - name: {{ .Values.smtp.host }}
-#         image: {{ .Values.smtp.repository }}:{{ .Values.smtp.tag }}
-#         ports:
-#             - name: http
-#               containerPort: 80
-#               protocol: TCP
-#             - name: smtp
-#               containerPort: {{ .Values.smtp.port }}
-#               protocol: TCP
-#         env:
-#         - name: MAILDEV_INCOMING_USER
-#           value: "mailuser"
-#         - name: MAILDEV_INCOMING_PASS
-#           value: "mailpass"
-# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.smtp.host }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .Values.smtp.host }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.smtp.host }}
+    spec:
+      containers:
+      - name: {{ .Values.smtp.host }}
+        image: {{ .Values.smtp.repository }}:{{ .Values.smtp.tag }}
+        ports:
+            - name: http
+              containerPort: 8888
+              protocol: TCP
+            - name: smtp
+              containerPort: {{ .Values.smtp.port }}
+              protocol: TCP
+        env:
+        - name: MAILDEV_INCOMING_USER
+          value: "mailuser"
+        - name: MAILDEV_INCOMING_PASS
+          value: "mailpass"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

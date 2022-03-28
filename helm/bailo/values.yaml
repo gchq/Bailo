@@ -31,7 +31,7 @@ securityContext:
   #     - ALL
   readOnlyRootFilesystem: false
   runAsNonRoot: true
-  runAsUser: 1001
+  runAsUser: 1004520004 #built app with this uid
 
 # Networking
 service:
