@@ -8,5 +8,7 @@ else
   node $SCHEMA_SETUP_SCRIPT
 fi
 
+echo "sleeping"
+sleep 99999
 echo "Running 'npm run start'"
 npm run start
