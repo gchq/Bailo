@@ -21,6 +21,7 @@ export default function RenderButtons(
   const isLastStep = activeStep === splitSchema.steps.length - 1
 
   const onClickNextSection = () => {
+    console.log(currentStep)
     const isValid = validateForm(currentStep)
 
     if (!isValid) {

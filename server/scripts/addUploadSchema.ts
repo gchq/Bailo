@@ -6,8 +6,8 @@ import minimal from './example_schemas/minimal_upload_schema.json'
   await connectToMongoose()
 
   const schema = new SchemaModel({
-    name: 'Minimal Schema v10',
-    reference: '/Minimal/General/v10',
+    name: 'Test Schema v5',
+    reference: '/Test/General/v5',
     schema: minimal,
     use: 'UPLOAD',
   })
