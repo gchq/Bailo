@@ -63,6 +63,10 @@ spec:
           value: "mailuser"
         - name: MAILDEV_INCOMING_PASS
           value: "mailpass"
+        - name: MAILDEV_SMTP_PORT
+          value: "{{ .Values.smtp.port }}"
+        - name: MAILDEV_WEB_PORT
+          value: "8888" 
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -242,14 +246,14 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
