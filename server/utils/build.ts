@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
 import { join, dirname } from 'path'
 import { writeFile } from 'fs/promises'
+import { createReadStream } from 'fs'
 import { getClient } from './minio'
 import unzip from 'unzipper'
 import config from 'config'
@@ -11,7 +12,8 @@ import dedent from 'dedent-js'
 import logger from './logger'
 import { getAdminToken } from '../routes/v1/registryAuth'
 import { env } from 'process'
-import * as osClient from 'openshift-rest-client'
+import { OpenshiftClient } from 'openshift-rest-client'
+import AdmZip from 'adm-zip'
 
 interface FileRef {
   path: string
@@ -27,8 +29,6 @@ interface BuilderFiles {
 export async function pullBuilderImage() {
   if (env.OPENSHIFT){
     logger.info('Running in OpenShift, so not pulling base image')
-    const openshiftRestClient = osClient.OpenshiftClient
-    console.dir(openshiftRestClient)
   }else{ 
     await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
       logger[level](message)
@@ -141,8 +141,45 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   // build image
   if (env.OPENSHIFT){
     vlog.info('Running in openshift. In process of using rest api to build')
-    const openshiftRestClient = osClient.OpenshiftClient
-    console.dir(openshiftRestClient)
+    const client = await OpenshiftClient()
+    const namespace = 'bailo'
+    // TODO make a new buildConfig
+    const buildConfigName = 'test2'
+    const zipFile = `${buildDir}.zip`
+    const zip = new AdmZip()
+    zip.addLocalFolder(`${buildDir}`)
+    await zip.writeZip(zipFile)
+    
+    const binaryResponse = await client.apis.build.v1.ns(namespace).buildconfigs(buildConfigName).instantiatebinary.post(
+      { body: createReadStream(zipFile), json: false})
+    logger.info(binaryResponse.statusCode)
+    logger.info(binaryResponse.body)
+    const buildName = JSON.parse(binaryResponse.body).metadata.name
+    // TODO wait until build no longer running -> failed or complete state
+    let curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
+    logger.info(curBuild.statusCode)
+    logger.info(curBuild.body)
+    let buildJson = curBuild.body
+    if (typeof buildJson === 'string'){
+      buildJson = JSON.parse(buildJson)
+    }
+    logger.info(buildJson)
+    while (['Running', 'New'].includes(buildJson.status.phase)){
+      logger.info('Waiting for build to finish')
+      await new Promise(r => setTimeout(r, 2000)); 
+      curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
+      logger.info(curBuild.statusCode)
+      logger.info(curBuild.body)
+      buildJson = curBuild.body
+      if (typeof buildJson === 'string'){
+        buildJson = JSON.parse(buildJson)
+      }
+    }
+    let buildLog = await client.apis.build.v1.ns(namespace).builds(buildName).log.get()
+    console.dir(buildLog)
+    version.log('info', buildLog.body)
+    // TODO delete new buildConfig on success
+    
   }else{
   const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
   vlog.info({ buildCommand }, 'Building')
