@@ -64,50 +64,6 @@
       "required": ["name", "modelInASentence", "modelOverview", "modelCardVersion", "tags"],
       "additionalProperties": false
     },
-    "highLevelDetails2": {
-      "title": "Overview2",
-      "description": "Summary of the model functionality.",
-      "type": "object",
-      "properties": {
-        "name2": {
-          "title": "Name of the Machine Learning Model",
-          "description": "This should be descriptive name, such as 'Arabic - English Translation', and will be visible in the model marketplace.",
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 140
-        },
-        "modelInASentence2": {
-          "title": "Summarise the model in a sentence",
-          "description": "This sentence will allow an individual to decide if they want to open the model card to read further Example: 'Takes Arabic text snippet inputs and outputs an English translation.'",
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 140
-        },
-        "modelOverview2": {
-          "title": "What does the model do?",
-          "description": "A description of what the model does.",
-          "type": "string",
-          "minLength": 1
-        },
-        "modelCardVersion2": {
-          "type": "string",
-          "title": "Model version"
-        },
-        "tags2": {
-          "title": "Descriptive tags for the model.",
-          "description": "These tags will be searchable and will help others find this model.",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
-          },
-          "uniqueItems": true
-        }
-      },
-      "required": ["name2", "modelInASentence2", "modelOverview2", "modelCardVersion2", "tags2"],
-      "additionalProperties": false
-    },
     "contacts": {
       "title": "Contacts",
       "description": "Details of those individuals responsible for the model, the detail in this card and the risk involved in using the model and its continued alignment with policy.",
