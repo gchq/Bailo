@@ -36,6 +36,7 @@ export const getRequests = [
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
+    req.log.info({ requests }, 'User fetching requests')
     return res.json({
       requests,
     })
@@ -49,6 +50,7 @@ export const getNumRequests = [
       userId: req.user!._id,
     })
 
+    req.log.info({ requestCount: requests }, 'Fetching the number of requests')
     return res.json({
       count: requests,
     })
@@ -109,7 +111,7 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ deploymentId: deployment._id }, 'Triggered deployment')
+        req.log.info({ deployment }, 'Triggered deployment')
         await deploymentQueue
           .createJob({
             deploymentId: deployment._id,

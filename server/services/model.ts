@@ -6,8 +6,15 @@ import ModelModel from '../models/Model'
 import { Model, User } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
+import { SerializerOptions } from '../utils/logger'
 
 const authorisation = new AuthorisationBase()
+
+export function serializedModelFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'],
+  }
+}
 
 export async function filterModel<T>(user: User, unfiltered: T): Promise<T> {
   const models = castArray(unfiltered)

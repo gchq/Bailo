@@ -1,15 +1,15 @@
 import { ensureUserRole } from '../../utils/user'
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-import logger from '../../utils/logger'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById } from '../../services/model'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
 
 export const getUsers = [
   ensureUserRole('user'),
-  async (_req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const users = await findUsers()
+    req.log.info({ users }, 'Getting list of all users')
     return res.json({
       users,
     })
@@ -21,6 +21,7 @@ export const getLoggedInUser = [
   async (req: Request, res: Response) => {
     const _id = req.user!._id
     const user = await getUserByInternalId(_id)
+    req.log.info('Getting logged in user details')
     return res.json(user)
   },
 ]
@@ -30,7 +31,7 @@ export const postRegenerateToken = [
   async (req: Request, res: Response) => {
     const token = uuidv4()
 
-    logger.info({ userId: req.user!.id }, 'User requested token')
+    req.log.info('User requested token')
 
     req.user!.token = token
     await req.user!.save()
@@ -62,6 +63,7 @@ export const favouriteModel = [
 
     await user.favourites.push(modelId)
     await user.save()
+    req.log.info({ model }, 'User favourites model')
     return res.json(user)
   },
 ]
@@ -89,6 +91,7 @@ export const unfavouriteModel = [
 
     await user.favourites.pull(modelId)
     await user.save()
+    req.log.info({ model }, 'User unfavourites model')
     return res.json(user)
   },
 ]

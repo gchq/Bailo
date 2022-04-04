@@ -23,6 +23,7 @@ export const getDeployment = [
       throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
     }
 
+    req.log.info({ deployment }, 'Fetching deployment by a given UUID')
     return res.json(deployment)
   },
 ]
@@ -34,6 +35,8 @@ export const getCurrentUserDeployments = [
 
     const deployments = await findDeployments(req.user!, { owner: id })
 
+    req.log.info({ deployments }, 'Fetching deployments by user')
+
     return res.json(deployments)
   },
 ]
@@ -42,7 +45,7 @@ export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    req.log.info({ user: req.user?.id }, 'User requesting deployment')
+    req.log.info('User requesting deployment')
     const body = req.body as any
 
     const schema = await SchemaModel.findOne({
@@ -89,9 +92,10 @@ export const postDeployment = [
       owner: req.user!._id,
     })
 
-    req.log.info('Saving deployment model')
+    req.log.info({ deployment }, 'Saving deployment model')
     await deployment.save()
 
+    req.log.info({ model, version: body.highLevelDetails.initialVersionRequested }, 'Requesting model version')
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
@@ -134,7 +138,7 @@ export const resetDeploymentApprovals = [
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()
-    req.log.info('Creating deployment requests')
+    req.log.info({ deployment }, 'User resetting deployment approvals')
     await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
 
     return res.json(deployment)
