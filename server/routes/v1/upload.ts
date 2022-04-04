@@ -16,6 +16,7 @@ import { createVersionRequests } from '../../services/request'
 import { BadReq } from '../../utils/result'
 import { findModelByUuid, createModel } from '../../services/model'
 import { createVersion } from '../../services/version'
+import _ from 'lodash'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -109,7 +110,7 @@ export const postUpload = [
           })
         }
       }
-      req.log.info({ versionId: version._id }, 'Created model version')
+      req.log.info({ version }, 'Created model version')
 
       const name = metadata.highLevelDetails.name
         .toLowerCase()
@@ -161,7 +162,7 @@ export const postUpload = [
       version.model = model._id
       await version.save()
 
-      req.log.info({ modelId: model._id }, 'Created model document')
+      req.log.info({ model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),

@@ -5,12 +5,22 @@ import { Version, User, ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { Forbidden } from '../utils/result'
+import { createSerializer, SerializerOptions } from '../utils/logger'
+import { serializedModelFields } from './model'
 
 const authorisation = new AuthorisationBase()
 
 interface GetVersionOptions {
   thin?: boolean
   populate?: boolean
+}
+
+export function serializedVersionFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'version', 'metadata.highLevelDetails.name'],
+    optional: [],
+    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
+  }
 }
 
 export async function filterVersion<T>(user: User, unfiltered: T): Promise<T> {
