@@ -37,6 +37,7 @@ export const postUpload = [
   ensureUserRole('user'),
   upload.fields([{ name: 'binary' }, { name: 'code' }]),
   async (req: Request, res: Response) => {
+    console.log('user starting model upload process')
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
