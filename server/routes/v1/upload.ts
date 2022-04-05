@@ -43,16 +43,21 @@ export const postUpload = [
       const files = req.files as unknown as MinioFile
       const mode = req.query.mode
 
+      console.log('loading files')
+
       if (!files.binary) {
+        console.log('unable to find binary file')
         throw BadReq({}, 'Unable to find binary file')
       }
 
       if (!files.code) {
+        console.log('unable to find code file')
         throw BadReq({}, 'Unable to find code file')
       }
 
       if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
         req.log.warn({ filename: files.binary[0].originalname }, 'Binary is not a zip file')
+        console.log('Unable to process binary')
         return res.status(400).json({
           message: `Unable to process binary, file not a zip.`,
         })
@@ -60,6 +65,7 @@ export const postUpload = [
 
       if (!files.code[0].originalname.toLowerCase().endsWith('.zip')) {
         req.log.warn({ filename: files.code[0].originalname }, 'Code is not a zip file')
+        console.log('unable to process code')
         return res.status(400).json({
           message: `Unable to process code, file not a zip.`,
         })
@@ -71,6 +77,7 @@ export const postUpload = [
         metadata = JSON.parse(req.body.metadata)
       } catch (e) {
         req.log.warn({ metadata: req.body.metadata }, 'Metadata is not valid JSON')
+        console.log('metadata not valid json')
         return res.status(400).json({
           message: `Unable to parse schema as JSON`,
         })
@@ -82,6 +89,7 @@ export const postUpload = [
 
       if (!schema) {
         req.log.warn({ schemaRef: metadata.schemaRef }, 'Schema not found')
+        console.log('schema not found')
         return res.status(400).json({
           message: `Unable to find schema with name: '${metadata.schemaRef}'`,
         })
@@ -93,6 +101,7 @@ export const postUpload = [
       const schemaIsInvalid = validateSchema(metadata, schema.schema)
       if (schemaIsInvalid) {
         req.log.warn({ errors: schemaIsInvalid }, 'Metadata did not validate correctly')
+        console.log('metadata did not validate correctly')
         return res.status(400).json({
           errors: schemaIsInvalid,
         })
@@ -106,6 +115,7 @@ export const postUpload = [
         })
       } catch (err: any) {
         if (err.toString().includes('duplicate key error')) {
+          console.log('duplicate version name found for model')
           return res.status(409).json({
             message: `Duplicate version name found for model '${req.query.modelUuid}'`,
           })
@@ -125,6 +135,7 @@ export const postUpload = [
 
         if (!parentModel) {
           req.log.warn({ parent: req.body.parent }, 'Could not find parent')
+          console.log('could not find parent')
           return res.status(400).json({
             message: `Unable to find parent with uuid: '${req.body.parent}'`,
           })
@@ -158,13 +169,16 @@ export const postUpload = [
         })
       }
 
+      console.log('saving model')
       await model.save()
 
+      console.log('saving version')
       version.model = model._id
       await version.save()
 
       req.log.info({ model }, 'Created model document')
 
+      console.log('creating requests for reviews')
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
       })
@@ -173,6 +187,7 @@ export const postUpload = [
         'Successfully created requests for reviews'
       )
 
+      console.log('starting uplod queue job')
       const job = await uploadQueue
         .createJob({
           versionId: version._id,
