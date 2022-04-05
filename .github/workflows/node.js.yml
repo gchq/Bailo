@@ -64,6 +64,7 @@ jobs:
       - run: |
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
+          sleep 60
 
       # Run tests
       - run: HEADLESS=true npm test
