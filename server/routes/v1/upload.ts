@@ -188,6 +188,10 @@ export const postUpload = [
       res.json({
         uuid: model.uuid,
       })
+
+      console.log('model finished uploading')
+      console.log(model)
+      console.log(version)
     })
   },
 ]
