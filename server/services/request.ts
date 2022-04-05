@@ -24,12 +24,15 @@ export async function createDeploymentRequests({ version, deployment }: { versio
 }
 
 export async function createVersionRequests({ version }: { version: Version }) {
+  console.log('start of create version requests function')
   const [manager, reviewer] = await Promise.all([
     getUserById(version.metadata.contacts.manager),
     getUserById(version.metadata.contacts.reviewer),
   ])
+  console.log('end of promise')
 
   if (!manager) {
+    console.log('unable to find manager')
     throw BadReq(
       { managerId: version.metadata.contacts.manager },
       `Unable to find manager with id: '${version.metadata.contacts.manager}'`
@@ -37,6 +40,7 @@ export async function createVersionRequests({ version }: { version: Version }) {
   }
 
   if (!reviewer) {
+    console.log('unable to find reviewer')
     throw BadReq(
       { reviewerId: version.metadata.contacts.reviewer },
       `Unable to find reviewer with id: '${version.metadata.contacts.reviewer}'`
