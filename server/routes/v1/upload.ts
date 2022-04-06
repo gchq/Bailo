@@ -182,6 +182,9 @@ export const postUpload = [
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
       })
+      console.log('successfully created requests')
+      console.log(managerRequest)
+      console.log(reviewerRequest)
       req.log.info(
         { managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
         'Successfully created requests for reviews'
