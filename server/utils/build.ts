@@ -14,6 +14,7 @@ import { getAdminToken } from '../routes/v1/registryAuth'
 import { env } from 'process'
 import { OpenshiftClient } from 'openshift-rest-client'
 import AdmZip from 'adm-zip'
+import { findSafariDriver } from 'selenium-webdriver/safari'
 
 interface FileRef {
   path: string
@@ -142,9 +143,93 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   if (env.OPENSHIFT){
     vlog.info('Running in openshift. In process of using rest api to build')
     const client = await OpenshiftClient()
+    // TODO put into config
     const namespace = 'bailo'
-    // TODO make a new buildConfig
-    const buildConfigName = 'test2'
+    const dockerPushSecretName = 'registryPushSecret'
+    logger.info(`Version id: ${version._id}`)
+    // see if docker push secret already exists
+    try {
+      const existingSecrets = await client.api.v1.ns(namespace).secret(dockerPushSecretName).get()
+      logger.info(existingSecrets.statusCode)
+      logger.info(existingSecrets.body)
+    } catch (error){
+      // need to create new secret
+      const token = await getAdminToken()
+      console.log(`admin token: ${token}`)
+      const creds = `admin:${token}`
+      console.log(creds)
+      const b64Cred = Buffer.from(creds).toString('base64')
+      console.log(b64Cred)
+      const registryUrl = `${config.get('registry.host')}`
+      const dockerConfig = {
+        "auths": {
+          registryUrl: {
+            "auth": b64Cred
+          }
+        }
+      }
+      
+      console.log(dockerConfig)
+      const dockerSecret = {
+        kind: 'Secret',
+        apiVersion: 'v1',
+        metadata: {
+          name: dockerPushSecretName
+        },
+        data: {
+          '.dockerconfigjson': Buffer.from(JSON.stringify(dockerConfig)).toString('base64')
+        },
+        type: 'kubernetes.io/dockerconfigjson'
+      }
+      console.log(dockerSecret)
+      const createSecret = await client.client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
+      console.log(createSecret.statusCode)
+      console.log(createSecret.body)
+    }
+      
+    
+    let buildConfig = {
+      "kind": "BuildConfig",
+      "apiVersion": "build.openshift.io/v1",
+      "metadata": {
+        "name": "fromcontainer"
+      },
+      "spec": {
+        "triggers": [
+          {
+            "type": "GitHub",
+            "github": {
+              "secret": "notreallyvalid"
+            }
+          }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+          "type": "Binary",
+          "binary": {}
+        },
+        "strategy": {
+          "type": "Docker",
+          "dockerStrategy": {}
+        },
+        "output": {
+          "to": {
+            "kind": "ImageStreamTag",
+            "name": "test2:latest"
+          }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
+      }  
+    }
+    const buildConfigName = buildConfig.metadata.name
+    let bc_create = await client.apis['build.openshift.io'].v1.namespaces(
+      namespace).buildconfigs.post({ body: buildConfig })
+    logger.info(bc_create.statusCode)
+    logger.info(bc_create.body)
     const zipFile = `${buildDir}.zip`
     const zip = new AdmZip()
     zip.addLocalFolder(`${buildDir}`)
@@ -155,7 +240,6 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     logger.info(binaryResponse.statusCode)
     logger.info(binaryResponse.body)
     const buildName = JSON.parse(binaryResponse.body).metadata.name
-    // TODO wait until build no longer running -> failed or complete state
     let curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
     logger.info(curBuild.statusCode)
     logger.info(curBuild.body)
@@ -166,7 +250,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     logger.info(buildJson)
     while (['Running', 'New'].includes(buildJson.status.phase)){
       logger.info('Waiting for build to finish')
-      await new Promise(r => setTimeout(r, 2000)); 
+      await new Promise(r => setTimeout(r, 10000)); 
       curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
       logger.info(curBuild.statusCode)
       logger.info(curBuild.body)
@@ -179,7 +263,12 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     console.dir(buildLog)
     version.log('info', buildLog.body)
     // TODO delete new buildConfig on success
-    
+    // logger.info(`Deleting build config ${buildName}`)
+    // const delete_bc = await client.apis['build.openshift.io'].v1.namespaces(
+    //   namespace).buildconfigs(buildConfig.metadata.name).delete()
+    // logger.info(delete_bc.statusCode)
+    // logger.info(delete_bc.body)
+
   }else{
   const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
   vlog.info({ buildCommand }, 'Building')

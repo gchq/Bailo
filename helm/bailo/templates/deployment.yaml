@@ -23,6 +23,9 @@ rules:
 - apiGroups: ["build.openshift.io"]
   resources: ["builds"]
   verbs: ["get"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "create", "list"]  
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
