@@ -201,6 +201,9 @@ export const postUpload = [
         .timeout(60000 * 8)
         .retries(2)
         .save()
+      job.on('failed', (err) => {
+        console.log(`Job ${job.id} failed with error ${err.message}`);
+      });
       req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')
 
       // then return reference to user
