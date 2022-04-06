@@ -29,7 +29,6 @@ export async function createVersionRequests({ version }: { version: Version }) {
     getUserById(version.metadata.contacts.manager),
     getUserById(version.metadata.contacts.reviewer),
   ])
-  console.log('end of promise')
 
   if (!manager) {
     console.log('unable to find manager')
@@ -58,6 +57,8 @@ export async function createVersionRequests({ version }: { version: Version }) {
     version: version,
     approvalType: 'Reviewer',
   })
+
+  console.log('end of request review function')
 
   return await Promise.all([managerRequest, reviewerRequest])
 }
@@ -125,6 +126,8 @@ async function createRequest({
     approvalType,
     request: requestType,
   }
+
+  console.log('checking for duplicate request')
 
   // If a request already exists, we don't want to create a
   // duplicate request
