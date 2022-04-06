@@ -180,16 +180,16 @@ export const postUpload = [
         req.log.info({ model }, 'Created model document')
 
         console.log('creating requests for reviews')
-        const [managerRequest, reviewerRequest] = await createVersionRequests({
+        /*const [managerRequest, reviewerRequest] = await createVersionRequests({
           version: await version.populate('model'),
-        })
+        })*/
         console.log('successfully created requests')
-        console.log(managerRequest)
+        /*console.log(managerRequest)
         console.log(reviewerRequest)
         req.log.info(
           { managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
           'Successfully created requests for reviews'
-        )
+        )*/
 
         console.log('starting uplod queue job')
         const job = await uploadQueue
