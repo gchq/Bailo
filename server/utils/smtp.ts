@@ -13,7 +13,6 @@ export async function sendEmail({
   text: string
   html?: string
 }) {
-
   console.log('sending email')
 
   if (!config.get('smtp.enabled')) {
