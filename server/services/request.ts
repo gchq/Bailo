@@ -141,7 +141,7 @@ async function createRequest({
       rawResult: true,
     }
   )
-  
+
   console.log('calling sendEmail')
 
   if (!lastErrorObject?.updatedExisting && user.email) {
