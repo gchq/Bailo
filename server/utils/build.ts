@@ -145,13 +145,12 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     const client = await OpenshiftClient()
     // TODO put into config
     const namespace = 'bailo'
-    const dockerPushSecretName = 'registryPushSecret'
+    const dockerPushSecretName = 'registry-push-secret'
     logger.info(`Version id: ${version._id}`)
     // see if docker push secret already exists
     try {
       const existingSecrets = await client.api.v1.ns(namespace).secret(dockerPushSecretName).get()
-      logger.info(existingSecrets.statusCode)
-      logger.info(existingSecrets.body)
+      logger.info(`docker config secret ${dockerPushSecretName} already exists. No need to create`)
     } catch (error){
       // need to create new secret
       const token = await getAdminToken()
@@ -163,7 +162,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       const registryUrl = `${config.get('registry.host')}`
       const dockerConfig = {
         "auths": {
-          registryUrl: {
+          [registryUrl]: {
             "auth": b64Cred
           }
         }
@@ -182,12 +181,11 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
         type: 'kubernetes.io/dockerconfigjson'
       }
       console.log(dockerSecret)
-      const createSecret = await client.client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
+      const createSecret = await client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
       console.log(createSecret.statusCode)
       console.log(createSecret.body)
     }
       
-    
     let buildConfig = {
       "kind": "BuildConfig",
       "apiVersion": "build.openshift.io/v1",
@@ -226,10 +224,18 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       }  
     }
     const buildConfigName = buildConfig.metadata.name
-    let bc_create = await client.apis['build.openshift.io'].v1.namespaces(
-      namespace).buildconfigs.post({ body: buildConfig })
-    logger.info(bc_create.statusCode)
-    logger.info(bc_create.body)
+    try {
+      const bc = await client.apis['build.openshift.io'].v1.namespaces(
+        namespace).buildconfigs(buildConfigName).get()
+      logger.info(`buildConfig ${buildConfigName} already exists. Not creating.`)
+    } catch(error){
+      //need to create the build config
+      let bc_create = await client.apis['build.openshift.io'].v1.namespaces(
+        namespace).buildconfigs.post({ body: buildConfig })
+      logger.info(bc_create.statusCode)
+      logger.info(bc_create.body)
+    }
+    
     const zipFile = `${buildDir}.zip`
     const zip = new AdmZip()
     zip.addLocalFolder(`${buildDir}`)
