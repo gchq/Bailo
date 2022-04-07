@@ -55,8 +55,6 @@ export async function createVersionRequests({ version }: { version: Version }) {
     approvalType: 'Reviewer',
   })
 
-  console.log(managerRequest)
-
   return await Promise.all([managerRequest, reviewerRequest])
 }
 
@@ -90,7 +88,6 @@ async function createVersionRequest({
   approvalType: VersionApprovalType
   version: Version
 }): Promise<Request> {
-  console.log('creating version request..')
   return createRequest({
     documentType: 'version',
     document: version as unknown as any,
@@ -125,8 +122,6 @@ async function createRequest({
     request: requestType,
   }
 
-  console.log('checking for duplicate request')
-
   // If a request already exists, we don't want to create a
   // duplicate request
   const { value: request, lastErrorObject } = await RequestModel.findOneAndUpdate(
@@ -141,8 +136,6 @@ async function createRequest({
       rawResult: true,
     }
   )
-
-  console.log('calling sendEmail')
 
   if (!lastErrorObject?.updatedExisting && user.email) {
     // we created a new request, send out a notification.
