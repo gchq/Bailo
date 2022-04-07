@@ -13,7 +13,6 @@ export async function sendEmail({
   text: string
   html?: string
 }) {
-
   if (!config.get('smtp.enabled')) {
     logger.info({ subject, to }, 'Not sending email due to SMTP disabled')
     return
@@ -38,7 +37,7 @@ export async function sendEmail({
       text,
       html,
     })
-  } catch(err) {
+  } catch (err) {
     console.log('error sending email')
     console.log(err)
   }
