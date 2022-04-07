@@ -15,9 +15,9 @@ export async function sendEmail({
 }) {
   console.log(config.get('smtp.host'))
   console.log(config.get('smtp.port'))
-  
 
   if (!config.get('smtp.enabled')) {
+    console.log('not sending email')
     logger.info({ subject, to }, 'Not sending email due to SMTP disabled')
     return
   }
@@ -32,8 +32,6 @@ export async function sendEmail({
     },
     tls: config.get('smtp.tls'),
   })
-
-  console.log(transporter)
 
   const info = await transporter.sendMail({
     from: config.get('smtp.from'), // sender address
