@@ -41,5 +41,5 @@ export async function sendEmail({
     logger.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
     throw GenericError({}, 'Error sending email to reviewers', 500)
-  }  
+  }
 }
