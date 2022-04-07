@@ -24,14 +24,12 @@ export async function createDeploymentRequests({ version, deployment }: { versio
 }
 
 export async function createVersionRequests({ version }: { version: Version }) {
-  console.log('start of create version requests function')
   const [manager, reviewer] = await Promise.all([
     getUserById(version.metadata.contacts.manager),
     getUserById(version.metadata.contacts.reviewer),
   ])
 
   if (!manager) {
-    console.log('unable to find manager')
     throw BadReq(
       { managerId: version.metadata.contacts.manager },
       `Unable to find manager with id: '${version.metadata.contacts.manager}'`
@@ -39,7 +37,6 @@ export async function createVersionRequests({ version }: { version: Version }) {
   }
 
   if (!reviewer) {
-    console.log('unable to find reviewer')
     throw BadReq(
       { reviewerId: version.metadata.contacts.reviewer },
       `Unable to find reviewer with id: '${version.metadata.contacts.reviewer}'`
@@ -58,7 +55,7 @@ export async function createVersionRequests({ version }: { version: Version }) {
     approvalType: 'Reviewer',
   })
 
-  console.log('end of request review function')
+  console.log(managerRequest)
 
   return await Promise.all([managerRequest, reviewerRequest])
 }
@@ -93,6 +90,7 @@ async function createVersionRequest({
   approvalType: VersionApprovalType
   version: Version
 }): Promise<Request> {
+  console.log('creating version request..')
   return createRequest({
     documentType: 'version',
     document: version as unknown as any,
@@ -143,6 +141,8 @@ async function createRequest({
       rawResult: true,
     }
   )
+  
+  console.log('calling sendEmail')
 
   if (!lastErrorObject?.updatedExisting && user.email) {
     // we created a new request, send out a notification.
