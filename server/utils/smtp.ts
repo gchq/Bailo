@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import config from 'config'
 import logger from './logger'
+import { GenericError } from './result'
 
 export async function sendEmail({
   to,
@@ -37,12 +38,8 @@ export async function sendEmail({
       text,
       html,
     })
+    logger.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
-    console.log('error sending email')
-    console.log(err)
-  }
-
-  console.log('email sent')
-
-  //logger.info({ messageId: info.messageId }, 'Email sent')
+    throw GenericError({}, 'Error sending email to reviewers', 500)
+  }  
 }
