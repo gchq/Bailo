@@ -33,6 +33,6 @@ module.exports = {
 
   smtp: {
     host: 'maildev',
-    port: 25,
+    port: 1025,
   },
 }
