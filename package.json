@@ -26,7 +26,7 @@
     "@mui/styles": "^5.2.3",
     "@mui/system": "^5.2.8",
     "@next/bundle-analyzer": "^12.0.8",
-    "@rjsf/core": "^3.2.1",
+    "@rjsf/core": "^4.1.1",
     "ajv": "^8.8.2",
     "ajv-formats": "^2.1.1",
     "bcryptjs": "^2.4.3",
