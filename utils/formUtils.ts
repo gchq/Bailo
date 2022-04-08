@@ -7,7 +7,6 @@ import { Validator } from 'jsonschema'
 import { SplitSchema, Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
 import RenderButtons from '../src/Form/RenderButtons'
-import { compose } from '@mui/system'
 
 export function createStep({
   schema,
