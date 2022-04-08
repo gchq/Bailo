@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import config from 'config'
 import logger from './logger'
+import { GenericError } from './result'
 
 export async function sendEmail({
   to,
@@ -29,13 +30,17 @@ export async function sendEmail({
     tls: config.get('smtp.tls'),
   })
 
-  const info = await transporter.sendMail({
-    from: config.get('smtp.from'), // sender address
-    to,
-    subject,
-    text,
-    html,
-  })
-
-  logger.info({ messageId: info.messageId }, 'Email sent')
+  try {
+    const info = await transporter.sendMail({
+      from: config.get('smtp.from'), // sender address
+      to,
+      subject,
+      text,
+      html,
+    })
+    logger.info({ messageId: info.messageId }, 'Email sent')
+  } catch (err) {
+    logger.error(err, 'Error sending email notification to reviewers')
+    throw GenericError({}, 'Error sending email notification to reviewers', 500)
+  }
 }
