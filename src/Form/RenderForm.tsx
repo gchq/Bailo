@@ -19,6 +19,9 @@ export default function RenderForm({
   setSplitSchema: Function
 }) {
   const onFormChange = (form) => {
+    if (form.schema.title !== step.schema.title) {
+      return
+    }
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
@@ -33,6 +36,8 @@ export default function RenderForm({
       }}
       uiSchema={step.uiSchema}
       liveValidate={step.shouldValidate}
+      omitExtraData
+      liveOmit
     >
       <></>
     </SchemaForm>
