@@ -31,7 +31,7 @@ export async function getUploadQueue() {
     uploadQueue = new pMongoQueue(client.db(), 'queue-uploads', {
       deadQueue: uploadDeadQueue,
       maxRetries: 2,
-      visibility: 120,
+      visibility: 60 * 9,
     })
 
     uploadQueue.on('succeeded', async (message: QueueMessage) => {
