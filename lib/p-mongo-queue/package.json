@@ -1,0 +1,30 @@
+{
+  "name": "p-mongo-queue",
+  "version": "6.0.0",
+  "description": "Message queues which uses MongoDB.",
+  "main": "mongodb-queue.mjs",
+  "types": "mongodb-queue.d.ts",
+  "files": [
+    "mongodb-queue.mjs",
+    "mongodb-queue.d.ts"
+  ],
+  "scripts": {
+    "test": "uvu tests",
+    "test:coverage": "c8 npm test"
+  },
+  "devDependencies": {
+    "c8": "^7.11.0",
+    "mongodb": "^4.5.0",
+    "uvu": "^0.5.3"
+  },
+  "homepage": "https://github.com/gchq/p-mongo-queue",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gchq/p-mongo-queue.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mongodb",
+    "queue"
+  ]
+}

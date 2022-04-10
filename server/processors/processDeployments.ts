@@ -1,4 +1,4 @@
-import { deploymentQueue } from '../utils/queues'
+import { getDeploymentQueue } from '../utils/queues'
 import config from 'config'
 import prettyMs from 'pretty-ms'
 import https from 'https'
@@ -11,13 +11,13 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
 })
 
-export default function processDeployments() {
-  deploymentQueue.process(async (job) => {
-    logger.info({ job: job.data }, 'Started processing deployment')
+export default async function processDeployments() {
+  ;(await getDeploymentQueue()).process(async (msg) => {
+    logger.info({ job: msg.payload }, 'Started processing deployment')
     try {
       const startTime = new Date()
 
-      const { deploymentId, userId } = job.data
+      const { deploymentId, userId } = msg.payload
 
       const user = await getUserByInternalId(userId)
 
@@ -125,7 +125,7 @@ export default function processDeployments() {
       const time = prettyMs(new Date().getTime() - startTime.getTime())
       await deployment.log('info', `Processed deployment with tag '${externalImage}' in ${time}`)
     } catch (e) {
-      logger.error({ error: e, deploymentId: job.data.deploymentId }, 'Error occurred whilst processing deployment')
+      logger.error({ error: e, deploymentId: msg.payload.deploymentId }, 'Error occurred whilst processing deployment')
       throw e
     }
   })

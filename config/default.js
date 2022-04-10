@@ -15,10 +15,6 @@ module.exports = {
     registryBucket: 'registry',
   },
 
-  redis: {
-    host: 'localhost',
-  },
-
   registry: {
     host: 'localhost:8080',
     port: 8080,

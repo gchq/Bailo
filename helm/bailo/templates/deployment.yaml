@@ -43,13 +43,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-minio
                   key: root-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bailo.fullname" . }}-redis
-                  key: redis-password
-            - name: REDIS_CONNECTION_URI
-              value: {{ include "bailo.redisConnectionURI" . | quote }}
             - name: MONGO_PASSWORD
               valueFrom: 
                 secretKeyRef:
