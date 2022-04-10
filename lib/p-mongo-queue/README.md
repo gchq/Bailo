@@ -1,4 +1,4 @@
-# mongodb-queue-up
+# p-mongo-queue
 
 A light-weight way to create queues using MongoDB. Forked from `mhassan1/mongodb-queue-up`, which itself is a fork of `chilts/mongodb-queue`. This fork enforces modern code standards and
 replaces previous callback-based approaches with promises.
@@ -7,7 +7,7 @@ replaces previous callback-based approaches with promises.
 
 ```js
 import { MongoClient } from 'mongodb'
-import mongodbQueue from 'p-mongo-queue'
+import pMongoQueue from 'p-mongo-queue'
 
 const url = 'mongodb://localhost:27017/'
 const client = new MongoClient(url)
@@ -15,7 +15,7 @@ await client.connect()
 
 // Create a queue
 const db = client.db('test')
-const queue = mongodbQueue(db, 'my-queue')
+const queue = PMongoQueue(db, 'my-queue')
 
 // One time operation to create the required indexes
 await queue.createIndexes()
@@ -43,17 +43,17 @@ await queue.clean()
 
 # API
 
-### `mongodbQueue(db, name, [, options])`
+### `PMongoQueue(db, name, [, options])`
 
 - `db` MongoDB client
 - `name` Queue name
-- `options` [Options](#mongodbQueue-options) for the queue
+- `options` [Options](#pMongoQueue-options) for the queue
 
 Creates a queue instance.
 
 `db` should be a v4 compatible client. `name` is used for both the queue name and collection name.
 
-<a id="mongodbQueue-options"></a>
+<a id="pMongoQueue-options"></a>
 
 ### Options
 
@@ -79,7 +79,7 @@ The default values are shown after each option key.
 
 #### `Queue.add(payload[, options]): Promise<string | string[]>`
 
-Add items to the queue. `payload` can either be a single value, or an array of values. [Options](#mongodbQueue-options) are identical to queue options.
+Add items to the queue. `payload` can either be a single value, or an array of values. [Options](#pMongoQueue-options) are identical to queue options.
 
 The return value is an ID for each item provided. This can be used for tracking the item between functions.
 
@@ -99,7 +99,7 @@ await queue.add('Hello', { delay: 120 })
 
 #### `get([options]): Promise<QueueMessage | undefined>`
 
-Add items to the queue. `payload` can either be a single value, or an array of values. [Options](#mongodbQueue-options) are identical to queue options. [QueueMessage](#mongodbQueue-message) is a representation of the message on the queue.
+Add items to the queue. `payload` can either be a single value, or an array of values. [Options](#pMongoQueue-options) are identical to queue options. [QueueMessage](#pMongoQueue-message) is a representation of the message on the queue.
 
 ```js
 // get one item
@@ -121,7 +121,7 @@ await queue.ack(msg.ack)
 
 #### `ping(ack, options): Promise<string>`
 
-Extends the processing time of an item. `ack` should be the `msg.ack` value. [Options](#mongodbQueue-options) are identical to queue options.
+Extends the processing time of an item. `ack` should be the `msg.ack` value. [Options](#pMongoQueue-options) are identical to queue options.
 
 ```js
 const msg = await queue.get()
@@ -129,7 +129,7 @@ await queue.ack(msg.ack)
 // message removed from queue
 ```
 
-<a id="mongodbQueue-message"></a>
+<a id="pMongoQueue-message"></a>
 
 ### Queue Message
 
@@ -148,7 +148,7 @@ A queue message is a representation of a message on the queue.
 
 #### `Queue.process([parallelism=1], processor): void`
 
-Parallelism is an optimal parameter to specify the number of simultaneous jobs to be processed. Processor is a function to be called to process each item. The function should take in as a single parameter a [QueueMessage](#mongodbQueue-message).
+Parallelism is an optimal parameter to specify the number of simultaneous jobs to be processed. Processor is a function to be called to process each item. The function should take in as a single parameter a [QueueMessage](#pMongoQueue-message).
 
 ```js
 queue.process((msg) => {

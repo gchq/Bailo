@@ -2,11 +2,11 @@
   "name": "p-mongo-queue",
   "version": "6.0.0",
   "description": "Message queues which uses MongoDB.",
-  "main": "mongodb-queue.js",
-  "types": "mongodb-queue.d.ts",
+  "main": "pMongoQueue.js",
+  "types": "pMongoQueue.d.ts",
   "files": [
-    "mongodb-queue.js",
-    "mongodb-queue.d.ts"
+    "pMongoQueue.js",
+    "pMongoQueue.d.ts"
   ],
   "scripts": {
     "test": "uvu tests",

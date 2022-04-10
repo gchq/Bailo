@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb'
 import config from 'config'
 import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
-import pMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/mongodb-queue'
+import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
@@ -27,8 +27,8 @@ export async function getMongoInstance() {
 export async function getUploadQueue() {
   if (!uploadQueue) {
     const client = await getMongoInstance()
-    const uploadDeadQueue = new pMongoQueue(client.db(), 'queue-uploads-dead')
-    uploadQueue = new pMongoQueue(client.db(), 'queue-uploads', {
+    const uploadDeadQueue = new PMongoQueue(client.db(), 'queue-uploads-dead')
+    uploadQueue = new PMongoQueue(client.db(), 'queue-uploads', {
       deadQueue: uploadDeadQueue,
       maxRetries: 2,
       visibility: 60 * 9,
@@ -53,8 +53,8 @@ export async function getUploadQueue() {
 export async function getDeploymentQueue() {
   if (!deploymentQueue) {
     const client = await getMongoInstance()
-    const deploymentDeadQueue = new pMongoQueue(client.db(), 'queue-deployments-dead')
-    deploymentQueue = new pMongoQueue(client.db(), 'queue-deployments', {
+    const deploymentDeadQueue = new PMongoQueue(client.db(), 'queue-deployments-dead')
+    deploymentQueue = new PMongoQueue(client.db(), 'queue-deployments', {
       deadQueue: deploymentDeadQueue,
       maxRetries: 2,
       visibility: 15,

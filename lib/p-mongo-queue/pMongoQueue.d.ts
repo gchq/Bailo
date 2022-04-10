@@ -22,6 +22,8 @@ export default class Queue extends EventEmitter {
   done(): Promise<number>
   process(processor: (msg: QueueMessage) => ProcessResponse): void
   process(parallelism: number, processor: (msg: QueueMessage) => ProcessResponse): void
+  start(): Promise<void>
+  stop(): Promise<void>
 }
 
 export type ProcessResponse = void | Promise<void>

@@ -4,7 +4,7 @@ import prettyMs from 'pretty-ms'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'
 import { getUserById } from '../services/user'
-import { QueueMessage } from '../../lib/p-mongo-queue/mongodb-queue'
+import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 
 export default async function processUploads() {
   ;(await getUploadQueue()).process(async (msg: QueueMessage) => {
