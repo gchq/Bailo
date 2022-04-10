@@ -7,8 +7,8 @@ import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
 
-let uploadQueue: pMongoQueue | undefined = undefined
-let deploymentQueue: pMongoQueue | undefined = undefined
+let uploadQueue: PMongoQueue | undefined = undefined
+let deploymentQueue: PMongoQueue | undefined = undefined
 let mongoClient: MongoClient | undefined = undefined
 
 export async function closeMongoInstance() {
