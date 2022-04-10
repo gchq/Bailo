@@ -57,7 +57,7 @@ export async function logCommand(command: string, log: Function) {
   return await runCommand(
     command,
     (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg)),
-    (data: string) => data.split(/\r?\n/).map((msg: string) => log('error', msg))
+    (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg))
   )
 }
 
@@ -144,7 +144,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await runCommand(
     `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
     vlog.info.bind(vlog),
-    vlog.error.bind(vlog),
+    vlog.info.bind(vlog),
     { hide: true }
   )
   version.log('info', 'Successfully logged into docker')
