@@ -54,7 +54,7 @@ ensureBucketExists(config.get('minio.registryBucket'))
 // lazily create indexes for full text search
 createIndexes()
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const server = express()
 
   // we want to authenticate most requests, so include it here.
@@ -101,8 +101,11 @@ app.prepare().then(() => {
 
   server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
-  processUploads()
-  processDeployments()
+  await Promise.all([
+    processUploads(),
+    processDeployments()
+  ])
+
   pullBuilderImage()
 
   server.use((req, res) => {
