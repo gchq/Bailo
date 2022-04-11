@@ -8,10 +8,8 @@ image:
   pullPolicy: Always
 imagePullSecrets: []
 
-podAnnotations: 
-  container.apparmor.security.beta.kubernetes.io/bailo: unconfined
-  #container.seccomp.security.alpha.kubernetes.io/bailo: unconfined
-
+podAnnotations: {}
+  
 # Instance scaling
 # ReplicateCount ignored if autoscaling is enabled
 replicaCount: 1
