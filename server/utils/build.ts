@@ -28,9 +28,9 @@ interface BuilderFiles {
 }
 
 export async function pullBuilderImage() {
-  if (env.OPENSHIFT){
+  if (env.OPENSHIFT) {
     logger.info('Running in OpenShift, so not pulling base image')
-  }else{ 
+  } else {
     await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
       logger[level](message)
     )
@@ -140,20 +140,20 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   await logCommand(command, version.log.bind(version))
 
   // build image
-  if (env.OPENSHIFT){
+  if (env.OPENSHIFT) {
     vlog.info('Running in openshift. In process of using rest api to build')
     const client = await OpenshiftClient()
     // TODO put into config
     const namespace = 'bailo'
     const dockerPushSecretName = 'registry-push-secret'
     const registryUrl = 'nginx-bailo.apps.os1.uksouth.gss.gov.uk'
-    
+
     logger.info(`Version id: ${version._id}`)
     // see if docker push secret already exists
     try {
       const existingSecrets = await client.api.v1.ns(namespace).secret(dockerPushSecretName).get()
       logger.info(`docker config secret ${dockerPushSecretName} already exists. No need to create`)
-    } catch (error){
+    } catch (error) {
       // need to create new secret
       const token = await getAdminToken()
       console.log(`admin token: ${token}`)
@@ -162,26 +162,26 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       const b64Cred = Buffer.from(creds).toString('base64')
       console.log(b64Cred)
       // openshift route
-       
+
       const dockerConfig = {
-        "auths": {
+        auths: {
           [registryUrl]: {
-            "auth": b64Cred
-          }
-        }
+            auth: b64Cred,
+          },
+        },
       }
-      
+
       console.log(dockerConfig)
       const dockerSecret = {
         kind: 'Secret',
         apiVersion: 'v1',
         metadata: {
-          name: dockerPushSecretName
+          name: dockerPushSecretName,
         },
         data: {
-          '.dockerconfigjson': Buffer.from(JSON.stringify(dockerConfig)).toString('base64')
+          '.dockerconfigjson': Buffer.from(JSON.stringify(dockerConfig)).toString('base64'),
         },
-        type: 'kubernetes.io/dockerconfigjson'
+        type: 'kubernetes.io/dockerconfigjson',
       }
       console.log(dockerSecret)
       const createSecret = await client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
@@ -189,67 +189,69 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       console.log(createSecret.body)
       // TODO add secret to openshift builder service account (currently done via OS console)
     }
-    const buildConfigName = `${version.model.uuid}-${version.version}`  
+    const buildConfigName = `${version.model.uuid}-${version.version}`
     let buildConfig = {
-      "kind": "BuildConfig",
-      "apiVersion": "build.openshift.io/v1",
-      "metadata": {
-        "name": buildConfigName
+      kind: 'BuildConfig',
+      apiVersion: 'build.openshift.io/v1',
+      metadata: {
+        name: buildConfigName,
       },
-      "spec": {
-        "triggers": [
+      spec: {
+        triggers: [
           {
-            "type": "GitHub",
-            "github": {
-              "secret": "notreallyvalid"
-            }
-          }
-        ],
-        "runPolicy": "Serial",
-        "source": {
-          "type": "Binary",
-          "binary": {}
-        },
-        "strategy": {
-          "type": "Docker",
-          "dockerStrategy": {}
-        },
-        "output": {
-          "to": {
-            "kind": "DockerImage",
-            "name": `${registryUrl}/internal/${version.model.uuid}:${version.version}`
+            type: 'GitHub',
+            github: {
+              secret: 'notreallyvalid',
+            },
           },
-          "pushSecret": {
-            "name": `${dockerPushSecretName}`
-          }
+        ],
+        runPolicy: 'Serial',
+        source: {
+          type: 'Binary',
+          binary: {},
         },
-        "resources": {},
-        "postCommit": {},
-        "nodeSelector": null,
-        "successfulBuildsHistoryLimit": 5,
-        "failedBuildsHistoryLimit": 5
-      }  
+        strategy: {
+          type: 'Docker',
+          dockerStrategy: {},
+        },
+        output: {
+          to: {
+            kind: 'DockerImage',
+            name: `${registryUrl}/internal/${version.model.uuid}:${version.version}`,
+          },
+          pushSecret: {
+            name: `${dockerPushSecretName}`,
+          },
+        },
+        resources: {},
+        postCommit: {},
+        nodeSelector: null,
+        successfulBuildsHistoryLimit: 5,
+        failedBuildsHistoryLimit: 5,
+      },
     }
-    
+
     try {
-      const bc = await client.apis['build.openshift.io'].v1.namespaces(
-        namespace).buildconfigs(buildConfigName).get()
+      const bc = await client.apis['build.openshift.io'].v1.namespaces(namespace).buildconfigs(buildConfigName).get()
       logger.info(`buildConfig ${buildConfigName} already exists. Not creating.`)
-    } catch(error){
+    } catch (error) {
       //need to create the build config
-      let bc_create = await client.apis['build.openshift.io'].v1.namespaces(
-        namespace).buildconfigs.post({ body: buildConfig })
+      let bc_create = await client.apis['build.openshift.io'].v1
+        .namespaces(namespace)
+        .buildconfigs.post({ body: buildConfig })
       logger.info(bc_create.statusCode)
       logger.info(bc_create.body)
     }
-    
+
     const zipFile = `${buildDir}.zip`
     const zip = new AdmZip()
     zip.addLocalFolder(`${buildDir}`)
     await zip.writeZip(zipFile)
-    
-    const binaryResponse = await client.apis.build.v1.ns(namespace).buildconfigs(buildConfigName).instantiatebinary.post(
-      { body: createReadStream(zipFile), json: false})
+
+    const binaryResponse = await client.apis.build.v1
+      .ns(namespace)
+      .buildconfigs(buildConfigName)
+      .instantiatebinary.post({ body: createReadStream(zipFile), json: false })
     logger.info(binaryResponse.statusCode)
     logger.info(binaryResponse.body)
     const buildName = JSON.parse(binaryResponse.body).metadata.name
@@ -257,18 +259,18 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     logger.info(curBuild.statusCode)
     logger.info(curBuild.body)
     let buildJson = curBuild.body
-    if (typeof buildJson === 'string'){
+    if (typeof buildJson === 'string') {
       buildJson = JSON.parse(buildJson)
     }
     logger.info(buildJson)
-    while (['Running', 'New'].includes(buildJson.status.phase)){
+    while (['Running', 'New'].includes(buildJson.status.phase)) {
       logger.info('Waiting for build to finish')
-      await new Promise(r => setTimeout(r, 10000)); 
+      await new Promise((r) => setTimeout(r, 10000))
       curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
       logger.info(curBuild.statusCode)
       logger.info(curBuild.body)
       buildJson = curBuild.body
-      if (typeof buildJson === 'string'){
+      if (typeof buildJson === 'string') {
         buildJson = JSON.parse(buildJson)
       }
     }
@@ -281,37 +283,36 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     //   namespace).buildconfigs(buildConfig.metadata.name).delete()
     // logger.info(delete_bc.statusCode)
     // logger.info(delete_bc.body)
+  } else {
+    const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
+    vlog.info({ buildCommand }, 'Building')
+    await logCommand(buildCommand, version.log.bind(version))
 
-  }else{
-  const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
-  vlog.info({ buildCommand }, 'Building')
-  await logCommand(buildCommand, version.log.bind(version))
+    // push image
+    vlog.info({ tag }, 'Pushing image to docker')
+    version.log('info', 'Logging into docker')
+    // using docker instead of img login because img reads from ~/.docker/config and
+    // does not fully populate authorization headers (clientId and account) in authorization
+    // requests like docker does. docker login doesn't require docker to be running in host
+    await runCommand(
+      `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
+      vlog.info.bind(vlog),
+      vlog.error.bind(vlog),
+      { hide: true }
+    )
+    version.log('info', 'Successfully logged into docker')
 
-  // push image
-  vlog.info({ tag }, 'Pushing image to docker')
-  version.log('info', 'Logging into docker')
-  // using docker instead of img login because img reads from ~/.docker/config and
-  // does not fully populate authorization headers (clientId and account) in authorization
-  // requests like docker does. docker login doesn't require docker to be running in host
-  await runCommand(
-    `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
-    vlog.info.bind(vlog),
-    vlog.error.bind(vlog),
-    { hide: true }
-  )
-  version.log('info', 'Successfully logged into docker')
+    await logCommand(`img push ${tag}`, version.log.bind(version))
 
-  await logCommand(`img push ${tag}`, version.log.bind(version))
+    // tidy up
+    vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
+    rm('-rf', tmpDir)
+    rm('-rf', buildDir)
+    rm('-rf', s2iDir)
 
-  // tidy up
-  vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
-  rm('-rf', tmpDir)
-  rm('-rf', buildDir)
-  rm('-rf', s2iDir)
-
-  await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
-  const removeImageCmd = `img rm ${tag}`
-  await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
+    await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
+    const removeImageCmd = `img rm ${tag}`
+    await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
   }
   return tag
 }
