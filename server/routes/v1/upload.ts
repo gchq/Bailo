@@ -3,19 +3,20 @@ import config from 'config'
 import { v4 as uuidv4 } from 'uuid'
 import { customAlphabet } from 'nanoid'
 
-import ModelModel from '../../models/Model'
 import { validateSchema } from '../../utils/validateSchema'
 import SchemaModel from '../../models/Schema'
 import { normalizeMulterFile } from '../../utils/multer'
 import MinioStore from '../../utils/MinioStore'
 import { uploadQueue } from '../../utils/queues'
-import VersionModel from '../../models/Version'
 import { ensureUserRole } from '../../utils/user'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 
 import { createVersionRequests } from '../../services/request'
 import { BadReq } from '../../utils/result'
+import { findModelByUuid, createModel } from '../../services/model'
+import { createVersion } from '../../services/version'
+import _ from 'lodash'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -96,14 +97,12 @@ export const postUpload = [
         })
       }
 
-      // create a version instance
-      const version = new VersionModel({
-        version: metadata.highLevelDetails.modelCardVersion,
-        metadata: metadata,
-      })
-
+      let version
       try {
-        await version.save()
+        version = await createVersion(req.user!, {
+          version: metadata.highLevelDetails.modelCardVersion,
+          metadata: metadata,
+        })
       } catch (err: any) {
         if (err.toString().includes('duplicate key error')) {
           return res.status(409).json({
@@ -111,7 +110,7 @@ export const postUpload = [
           })
         }
       }
-      req.log.info({ versionId: version._id }, 'Created model version')
+      req.log.info({ version }, 'Created model version')
 
       const name = metadata.highLevelDetails.name
         .toLowerCase()
@@ -121,9 +120,7 @@ export const postUpload = [
       let parentId
       if (req.body.parent) {
         req.log.info({ parent: req.body.parent }, 'Uploaded model has parent')
-        const parentModel = await ModelModel.findOne({
-          uuid: req.body.parent,
-        })
+        const parentModel = await findModelByUuid(req.user!, req.body.parent)
 
         if (!parentModel) {
           req.log.warn({ parent: req.body.parent }, 'Could not find parent')
@@ -142,12 +139,13 @@ export const postUpload = [
       if (mode === 'newVersion') {
         // Update an existing model's version array
         const modelUuid = req.query.modelUuid
-        model = await ModelModel.findOne({ uuid: modelUuid })
+
+        model = await findModelByUuid(req.user!, modelUuid as string)
         model.versions.push(version._id)
         model.currentMetadata = metadata
       } else {
         // Save a new model, and add the uploaded version to its array
-        model = new ModelModel({
+        model = await createModel(req.user!, {
           schemaRef: metadata.schemaRef,
           uuid: `${name}-${nanoid()}`,
 
@@ -155,7 +153,7 @@ export const postUpload = [
           versions: [version._id],
           currentMetadata: metadata,
 
-          owner: req.user?._id,
+          owner: req.user!._id,
         })
       }
 
@@ -164,7 +162,7 @@ export const postUpload = [
       version.model = model._id
       await version.save()
 
-      req.log.info({ modelId: model._id }, 'Created model document')
+      req.log.info({ model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
@@ -177,6 +175,7 @@ export const postUpload = [
       const job = await uploadQueue
         .createJob({
           versionId: version._id,
+          userId: req.user?._id,
           binary: normalizeMulterFile(files.binary[0]),
           code: normalizeMulterFile(files.code[0]),
         })

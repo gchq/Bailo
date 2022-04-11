@@ -9,8 +9,19 @@ import { setStepState } from '../../utils/formUtils'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
-export default function RenderForm(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
+export default function RenderForm({
+  currentStep: step,
+  splitSchema,
+  setSplitSchema,
+}: {
+  currentStep: Step
+  splitSchema: SplitSchema
+  setSplitSchema: Function
+}) {
   const onFormChange = (form) => {
+    if (form.schema.title !== step.schema.title) {
+      return
+    }
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
@@ -25,6 +36,8 @@ export default function RenderForm(step: Step, splitSchema: SplitSchema, setSpli
       }}
       uiSchema={step.uiSchema}
       liveValidate={step.shouldValidate}
+      omitExtraData
+      liveOmit
     >
       <></>
     </SchemaForm>

@@ -4,9 +4,16 @@ import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import devnull from 'dev-null'
 import { join, sep } from 'path'
+import { inspect } from 'util'
 import omit from 'lodash/omit'
 import chalk from 'chalk'
+import { castArray, set, get, pick } from 'lodash'
 import { StatusError } from '../../types/interfaces'
+import { serializedVersionFields } from '../services/version'
+import { serializedModelFields } from '../services/model'
+import { serializedDeploymentFields } from '../services/deployment'
+import { serializedSchemaFields } from '../services/schema'
+import { serializedUserFields } from '../services/user'
 
 class Writer {
   basepath: string
@@ -40,11 +47,23 @@ class Writer {
   }
 
   representValue(value: any) {
-    return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
+    return typeof value === 'object' ? inspect(value) : String(value)
   }
 
   getAttributes(data) {
-    let attributes = omit(data, ['name', 'hostname', 'pid', 'level', 'msg', 'time', 'src', 'v', 'user'])
+    let attributes = omit(data, [
+      'name',
+      'hostname',
+      'pid',
+      'level',
+      'msg',
+      'time',
+      'src',
+      'v',
+      'user',
+      'timestamp',
+      'clientIp',
+    ])
     let keys = Object.keys(attributes)
 
     if (['id', 'url', 'method', 'response-time', 'status'].every((k) => keys.includes(k))) {
@@ -81,6 +100,43 @@ class Writer {
   }
 }
 
+export interface SerializerOptions {
+  mandatory?: Array<string>
+  optional?: Array<string>
+  serializable?: Array<any>
+}
+
+export function createSerializer(options: SerializerOptions) {
+  const mandatory = options.mandatory || []
+  const optional = options.optional || []
+  const serializable = options.serializable || []
+
+  return function (unserialized: any) {
+    if (!unserialized) {
+      return unserialized
+    }
+
+    const asArray = castArray(unserialized)
+
+    if (!asArray.every((item) => mandatory.every((value) => get(item, value) !== undefined))) {
+      return unserialized
+    }
+
+    const serialized = asArray.map((item) => {
+      const segments = pick(item, mandatory.concat(optional))
+      const remotes = {}
+
+      serializable.forEach(({ type, field }) => {
+        set(remotes, field, type(get(item, field)))
+      })
+
+      return { ...segments, ...remotes }
+    })
+
+    return Array.isArray(unserialized) ? serialized : serialized[0]
+  }
+}
+
 const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
@@ -98,6 +154,18 @@ const log = bunyan.createLogger({
   level: 'trace',
   src: process.env.NODE_ENV !== 'production',
   streams: streams.length ? streams : undefined,
+  serializers: {
+    version: createSerializer(serializedVersionFields()),
+    versions: createSerializer(serializedVersionFields()),
+    model: createSerializer(serializedModelFields()),
+    models: createSerializer(serializedModelFields()),
+    deployment: createSerializer(serializedDeploymentFields()),
+    deployments: createSerializer(serializedDeploymentFields()),
+    schema: createSerializer(serializedSchemaFields()),
+    schemas: createSerializer(serializedSchemaFields()),
+    user: createSerializer(serializedUserFields()),
+    users: createSerializer(serializedUserFields()),
+  },
 })
 
 const morganLog = morgan<any, any>(
@@ -130,6 +198,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   req.log = log.child({
     id: req.reqId,
     user: req.user?.id,
+    clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 
   res.error = (code: number, error: any) => {

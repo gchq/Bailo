@@ -1,17 +1,17 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import { Document, ObjectId } from 'mongoose'
+import { Document, Types } from 'mongoose'
 import { ensureUserRole, hasRole } from '../../utils/user'
-import VersionModel from '../../models/Version'
-import DeploymentModel from '../../models/Deployment'
 
 import { deploymentQueue } from '../../utils/queues'
 import { getRequest, readNumRequests, readRequests, RequestType } from '../../services/request'
 import { RequestStatusType } from '../../../types/interfaces'
-import UserModel from '../../models/User'
+import { getUserById, getUserByInternalId } from '../../services/user'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
+import { findVersionById } from '../../services/version'
+import { findDeploymentById } from '../../services/deployment'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -36,6 +36,7 @@ export const getRequests = [
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
+    req.log.info({ requests }, 'User fetching requests')
     return res.json({
       requests,
     })
@@ -49,6 +50,7 @@ export const getNumRequests = [
       userId: req.user!._id,
     })
 
+    req.log.info({ requestCount: requests }, 'Fetching the number of requests')
     return res.json({
       count: requests,
     })
@@ -85,12 +87,12 @@ export const postRequestResponse = [
       field = 'reviewerApproved'
     }
 
-    let userId: ObjectId
+    let userId: Types.ObjectId
     let requestType: RequestType
     let document: Document & { model: any; uuid: string }
 
     if (request.version) {
-      const version = await VersionModel.findById(request.version).populate('model')
+      const version = await findVersionById(req.user!, request.version._id, { populate: true })
       userId = version.model.owner
       requestType = 'Upload'
       document = version
@@ -98,7 +100,7 @@ export const postRequestResponse = [
       version[field] = choice
       await version.save()
     } else if (request.deployment) {
-      const deployment = await DeploymentModel.findById(request.deployment).populate('model')
+      const deployment = await findDeploymentById(req.user!, request.deployment._id, { populate: true })
       userId = deployment.model.owner
       requestType = 'Deployment'
       document = deployment
@@ -109,10 +111,11 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ deploymentId: deployment._id }, 'Triggered deployment')
+        req.log.info({ deployment }, 'Triggered deployment')
         await deploymentQueue
           .createJob({
             deploymentId: deployment._id,
+            userId,
           })
           .timeout(60000)
           .retries(2)
@@ -122,7 +125,7 @@ export const postRequestResponse = [
       throw BadReq({ requestId: request._id }, 'Unable to determine request type')
     }
 
-    const user = await UserModel.findById(userId)
+    const user = await getUserByInternalId(userId)
     if (user.email) {
       await sendEmail({
         to: user.email,
