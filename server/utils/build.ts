@@ -14,7 +14,6 @@ import { getAdminToken } from '../routes/v1/registryAuth'
 import { env } from 'process'
 import { OpenshiftClient } from 'openshift-rest-client'
 import AdmZip from 'adm-zip'
-import { findSafariDriver } from 'selenium-webdriver/safari'
 
 interface FileRef {
   path: string
@@ -143,12 +142,11 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   if (env.OPENSHIFT) {
     vlog.info('Running in openshift. In process of using rest api to build')
     const client = await OpenshiftClient()
-    // TODO put into config
-    const namespace = 'bailo'
-    const dockerPushSecretName = 'registry-push-secret'
-    const registryUrl = 'nginx-bailo.apps.os1.uksouth.gss.gov.uk'
 
-    logger.info(`Version id: ${version._id}`)
+    const namespace = `${config.get('openshift.namespace')}`
+    const dockerPushSecretName = `${config.get('openshift.dockerPushSecretName')}`
+    const registryUrl = `${config.get('openshift.appPublicRoute')}`
+
     // see if docker push secret already exists
     try {
       const existingSecrets = await client.api.v1.ns(namespace).secret(dockerPushSecretName).get()
@@ -156,12 +154,8 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     } catch (error) {
       // need to create new secret
       const token = await getAdminToken()
-      console.log(`admin token: ${token}`)
       const creds = `admin:${token}`
-      console.log(creds)
       const b64Cred = Buffer.from(creds).toString('base64')
-      console.log(b64Cred)
-      // openshift route
 
       const dockerConfig = {
         auths: {
@@ -171,7 +165,6 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
         },
       }
 
-      console.log(dockerConfig)
       const dockerSecret = {
         kind: 'Secret',
         apiVersion: 'v1',
@@ -183,10 +176,9 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
         },
         type: 'kubernetes.io/dockerconfigjson',
       }
-      console.log(dockerSecret)
       const createSecret = await client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
-      console.log(createSecret.statusCode)
-      console.log(createSecret.body)
+      logger.info(createSecret.statusCode)
+      logger.info(createSecret.body)
       // TODO add secret to openshift builder service account (currently done via OS console)
     }
     const buildConfigName = `${version.model.uuid}-${version.version}`
@@ -275,9 +267,9 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       }
     }
     let buildLog = await client.apis.build.v1.ns(namespace).builds(buildName).log.get()
-    console.dir(buildLog)
     version.log('info', buildLog.body)
-    // TODO delete new buildConfig on success
+    // TODO delete new buildConfig on success -- uncomment after confirming buildConfig
+    // created as expected
     // logger.info(`Deleting build config ${buildName}`)
     // const delete_bc = await client.apis['build.openshift.io'].v1.namespaces(
     //   namespace).buildconfigs(buildConfig.metadata.name).delete()

@@ -64,6 +64,11 @@ data:
         port: {{ .Values.smtp.port }},
         insecure: {{ .Values.smtp.insecure }},
       },
+      openshift: {
+        namespace: '{{ .Values.openshift.namespace }}',
+        appPublicRoute: '{{ .Values.openshift.appPublicRoute }}',
+        dockerPushSecretName: '{{ .Values.openshift.dockerPushSecretName }}',
+      },
       mongo: {
           uri: `mongodb://mongodb:${process.env.MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}`,
       }

@@ -168,4 +168,9 @@ nginx:
   certDir: "/certs"
   certFile: "cert.pem"
   keyFile: "key.pem"
+
+openshift:
+  namespace: "bailo"
+  appPublicRoute: "*****" #set via Route 
+  dockerPushSecretName: "registry-push-secret" 
   
