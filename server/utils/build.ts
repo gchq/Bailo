@@ -146,6 +146,8 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
     // TODO put into config
     const namespace = 'bailo'
     const dockerPushSecretName = 'registry-push-secret'
+    const registryUrl = 'nginx-bailo.apps.os1.uksouth.gss.gov.uk'
+    
     logger.info(`Version id: ${version._id}`)
     // see if docker push secret already exists
     try {
@@ -159,7 +161,8 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       console.log(creds)
       const b64Cred = Buffer.from(creds).toString('base64')
       console.log(b64Cred)
-      const registryUrl = `${config.get('registry.host')}`
+      // openshift route
+       
       const dockerConfig = {
         "auths": {
           [registryUrl]: {
@@ -184,13 +187,14 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
       const createSecret = await client.api.v1.ns('bailo').secret.post({ body: dockerSecret })
       console.log(createSecret.statusCode)
       console.log(createSecret.body)
+      // TODO add secret to openshift builder service account (currently done via OS console)
     }
-      
+    const buildConfigName = `${version.model.uuid}-${version.version}`  
     let buildConfig = {
       "kind": "BuildConfig",
       "apiVersion": "build.openshift.io/v1",
       "metadata": {
-        "name": "fromcontainer"
+        "name": buildConfigName
       },
       "spec": {
         "triggers": [
@@ -212,8 +216,11 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
         },
         "output": {
           "to": {
-            "kind": "ImageStreamTag",
-            "name": "test2:latest"
+            "kind": "DockerImage",
+            "name": `${registryUrl}/internal/${version.model.uuid}:${version.version}`
+          },
+          "pushSecret": {
+            "name": `${dockerPushSecretName}`
           }
         },
         "resources": {},
@@ -223,7 +230,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
         "failedBuildsHistoryLimit": 5
       }  
     }
-    const buildConfigName = buildConfig.metadata.name
+    
     try {
       const bc = await client.apis['build.openshift.io'].v1.namespaces(
         namespace).buildconfigs(buildConfigName).get()
