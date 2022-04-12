@@ -38,6 +38,7 @@ jobs:
         run: |
           sudo chown -R runner:docker certs
           npm run certs
+          chmod 644 certs/*
           cat <<EOT >> config/local.js
           module.exports = {
             minio: {
