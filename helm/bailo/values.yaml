@@ -171,6 +171,6 @@ nginx:
 
 openshift:
   namespace: "bailo"
-  appPublicRoute: "*****" #set via Route 
+  appPublicRoute: "example" #set via Route 
   dockerPushSecretName: "registry-push-secret" 
   
