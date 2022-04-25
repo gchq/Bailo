@@ -49,7 +49,7 @@ await queue.clean()
 
 # API
 
-### `PMongoQueue(db, name, [, options])`
+### `PMongoQueue(db, name[, options])`
 
 - `db` MongoDB client
 - `name` Queue name
