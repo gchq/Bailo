@@ -33,6 +33,12 @@ console.log(`msg.tries = ${msg.tries}`)
 
 // Remove a message from the queue
 await queue.ping(msg.ack)
+
+// Process all messages from the queue, two at a time
+queue.process(2, (msg) => {
+  console.log(`msg.payload = ${msg.payload}`)
+  // At the end of this function the message is automatically removed from the queue.
+})
 ```
 
 Messages are never removed from the queue, even if processed. To remove messages that have successfully completed:
@@ -61,8 +67,8 @@ The default values are shown after each option key.
 
 ```js
 {
-	// Another queue instance to place dead items on after `maxRetries` has been reached
-	deadQueue: undefined,
+    // Another queue instance to place dead items on after `maxRetries` has been reached
+    deadQueue: undefined,
 
     // Maximum retries before stopping processing of an item
     maxRetries: 5,
