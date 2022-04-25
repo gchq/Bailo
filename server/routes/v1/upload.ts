@@ -7,7 +7,7 @@ import { validateSchema } from '../../utils/validateSchema'
 import SchemaModel from '../../models/Schema'
 import { normalizeMulterFile } from '../../utils/multer'
 import MinioStore from '../../utils/MinioStore'
-import { uploadQueue } from '../../utils/queues'
+import { getUploadQueue } from '../../utils/queues'
 import { ensureUserRole } from '../../utils/user'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
@@ -172,17 +172,15 @@ export const postUpload = [
         'Successfully created requests for reviews'
       )
 
-      const job = await uploadQueue
-        .createJob({
-          versionId: version._id,
-          userId: req.user?._id,
-          binary: normalizeMulterFile(files.binary[0]),
-          code: normalizeMulterFile(files.code[0]),
-        })
-        .timeout(60000 * 8)
-        .retries(2)
-        .save()
-      req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')
+      const jobId = await (
+        await getUploadQueue()
+      ).add({
+        versionId: version._id,
+        userId: req.user?._id,
+        binary: normalizeMulterFile(files.binary[0]),
+        code: normalizeMulterFile(files.code[0]),
+      })
+      req.log.info({ jobId }, 'Successfully created job in upload queue')
 
       // then return reference to user
       res.json({

@@ -122,7 +122,6 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 | NodeJS App | 3000  | Internal only port     |
 | Nginx      | 8080  | Access the UI via this |
 | Mongo      | 27017 | No credentials         |
-| Redis      | 6379  | No credentials         |
 | Registry   | 5000  | HTTPS only, no UI      |
 | Minio UI   | 9001  | minioadmin:minioadmin  |
 | Minio      | 9000  | minioadmin:minioadmin  |
@@ -140,7 +139,7 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 3. Requests to the backend get routed through [express](https://expressjs.com/) within `server/index.ts`. Each route is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
 4. Routes interact with the database via `mongoose`, which stores models in `./server/models`.
 
-Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are posted to a `redis` queue and processed by handlers in the `server/processors` folder. Redis queues are handled invisibly by `bee-queue` (`server/utils/queues.ts`).
+Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are posted to a `mongodb` queue and processed by handlers in the `server/processors` folder. Mongodb queues are handled invisibly by `p-mongo-queue` (`server/utils/queues.ts`).
 
 <br />
 

@@ -1,29 +1,86 @@
-import Queue from 'bee-queue'
+import { MongoClient } from 'mongodb'
 import config from 'config'
 import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
+import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
 
-export const uploadQueue = new Queue('UPLOAD_QUEUE', {
-  redis: config.get('redis'),
+let uploadQueue: PMongoQueue | undefined = undefined
+let deploymentQueue: PMongoQueue | undefined = undefined
+let mongoClient: MongoClient | undefined = undefined
 
-  // model building may take a few minutes, especially when the cache is cold
-  stallInterval: 120000,
-})
+export async function closeMongoInstance() {
+  return mongoClient?.close()
+}
 
-export const deploymentQueue = new Queue('DEPLOYMENT_QUEUE', {
-  redis: config.get('redis'),
-})
+export async function getMongoInstance() {
+  if (mongoClient === undefined) {
+    mongoClient = new MongoClient(await config.get('mongo.uri'))
+    await mongoClient.connect()
+  }
 
-async function setUploadState(jobId: string, state: string) {
-  const job = await uploadQueue.getJob(jobId)
+  return mongoClient
+}
 
-  const user = await getUserByInternalId(job.data.userId)
-  const version = await findVersionById(user, job.data.versionId, { populate: true })
+export async function getUploadQueue() {
+  if (!uploadQueue) {
+    const client = await getMongoInstance()
+    const uploadDeadQueue = new PMongoQueue(client.db(), 'queue-uploads-dead')
+    uploadQueue = new PMongoQueue(client.db(), 'queue-uploads', {
+      deadQueue: uploadDeadQueue,
+      maxRetries: 2,
+      visibility: 60 * 9,
+    })
 
-  await markVersionState(user, job.data.versionId, state)
+    uploadQueue.on('succeeded', async (message: QueueMessage) => {
+      await setUploadState(message, 'succeeded')
+    })
+
+    uploadQueue.on('retrying', async (message: QueueMessage, e: any) => {
+      await setUploadState(message, 'retrying', e)
+    })
+
+    uploadQueue.on('failed', async (message: QueueMessage, e: any) => {
+      await setUploadState(message, 'failed', e)
+    })
+  }
+
+  return uploadQueue
+}
+
+export async function getDeploymentQueue() {
+  if (!deploymentQueue) {
+    const client = await getMongoInstance()
+    const deploymentDeadQueue = new PMongoQueue(client.db(), 'queue-deployments-dead')
+    deploymentQueue = new PMongoQueue(client.db(), 'queue-deployments', {
+      deadQueue: deploymentDeadQueue,
+      maxRetries: 2,
+      visibility: 15,
+    })
+
+    deploymentQueue.on('succeeded', async (message: QueueMessage) => {
+      await sendDeploymentEmail(message, 'succeeded')
+    })
+
+    deploymentQueue.on('retrying', async (message: QueueMessage, e: any) => {
+      await sendDeploymentEmail(message, 'retrying', e)
+    })
+
+    deploymentQueue.on('failed', async (message: QueueMessage, e: any) => {
+      await sendDeploymentEmail(message, 'failed', e)
+    })
+  }
+
+  return deploymentQueue
+}
+
+async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
+  const user = await getUserByInternalId(msg.payload.userId)
+  const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+
+  await markVersionState(user, msg.payload.versionId, state)
 
   if (!version.model.owner.email) {
     return
@@ -47,23 +104,9 @@ async function setUploadState(jobId: string, state: string) {
   })
 }
 
-uploadQueue.on('job succeeded', async (jobId) => {
-  await setUploadState(jobId, 'succeeded')
-})
-
-uploadQueue.on('job retrying', async (jobId) => {
-  await setUploadState(jobId, 'retrying')
-})
-
-uploadQueue.on('job failed', async (jobId) => {
-  await setUploadState(jobId, 'failed')
-})
-
-async function sendDeploymentEmail(jobId: string, state: string) {
-  const job = await deploymentQueue.getJob(jobId)
-
-  const user = await getUserByInternalId(job.data.userId)
-  const deployment = await findDeploymentById(user, job.data.deploymentId, { populate: true })
+async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
+  const user = await getUserByInternalId(msg.payload.userId)
+  const deployment = await findDeploymentById(user, msg.payload.deploymentId, { populate: true })
 
   if (!user.email) {
     return
@@ -86,15 +129,3 @@ async function sendDeploymentEmail(jobId: string, state: string) {
     }),
   })
 }
-
-deploymentQueue.on('job succeeded', async (jobId) => {
-  await sendDeploymentEmail(jobId, 'succeeded')
-})
-
-deploymentQueue.on('job retrying', async (jobId) => {
-  await sendDeploymentEmail(jobId, 'retrying')
-})
-
-deploymentQueue.on('job failed', async (jobId) => {
-  await sendDeploymentEmail(jobId, 'failed')
-})

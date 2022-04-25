@@ -1,9 +1,10 @@
-import { deploymentQueue } from '../utils/queues'
+import { closeMongoInstance, getDeploymentQueue } from '../utils/queues'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import logger from '../utils/logger'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
 import DeploymentModel from '../models/Deployment'
+import { getDeployment } from 'server/routes/v1/deployment'
 ;(async () => {
   await connectToMongoose()
 
@@ -18,19 +19,17 @@ import DeploymentModel from '../models/Deployment'
     throw new Error('Unable to find deployment')
   }
 
-  await deploymentQueue
-    .createJob({
-      deploymentId: deployment._id,
-    })
-    .timeout(60000)
-    .retries(2)
-    .save()
+  await (
+    await getDeploymentQueue()
+  ).add({
+    deploymentId: deployment._id,
+  })
 
   logger.info('Started deployment')
 
   setTimeout(async () => {
     disconnectFromMongoose()
-    await deploymentQueue.close(0)
+    await closeMongoInstance()
     process.exit(0)
   }, 50)
 })()

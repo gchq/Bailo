@@ -25,10 +25,6 @@ appVersion: "0.1.0"
 
 
 dependencies:
-- name: redis
-  version: "~15.7.5"
-  repository: "https://charts.bitnami.com/bitnami"
-  condition: redis.enabled
 - name: minio
   version: "~10.0.1"
   repository: "https://charts.bitnami.com/bitnami"

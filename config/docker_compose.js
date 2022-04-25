@@ -7,10 +7,6 @@ module.exports = {
     endPoint: 'minio',
   },
 
-  redis: {
-    host: 'redis',
-  },
-
   registry: {
     host: 'registry:5000',
   },
