@@ -81,7 +81,7 @@ The default values are shown after each option key.
 }
 ```
 
-### Operations
+### Operations
 
 #### `Queue.add(payload[, options]): Promise<string | string[]>`
 
