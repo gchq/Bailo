@@ -20,12 +20,18 @@ export const getRequests = [
     const filter = req.query.filter as string
 
     if (!['Upload', 'Deployment'].includes(type)) {
-      return res.error(400, [{ received: type }, `Expected 'Upload' / 'Deployment', received '${type}'`])
+      return res.error(400, [
+        { code: 'invalid_object_type', received: type },
+        `Expected 'Upload' / 'Deployment', received '${type}'`,
+      ])
     }
 
     if (filter === 'all') {
       if (!hasRole(['admin'], req.user!)) {
-        return res.error(401, [{ roles: req.user?.roles }, 'Forbidden.  Your user does not have the "admin" role'])
+        return res.error(401, [
+          { code: 'unauthorised_admin_role_missing', roles: req.user?.roles },
+          'Forbidden.  Your user does not have the "admin" role',
+        ])
       }
     } else {
       req.log.info('Getting requests for user')
@@ -36,7 +42,7 @@ export const getRequests = [
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
-    req.log.info({ requests }, 'User fetching requests')
+    req.log.info({ code: 'fetching_requests', requests }, 'User fetching requests')
     return res.json({
       requests,
     })
@@ -50,7 +56,7 @@ export const getNumRequests = [
       userId: req.user!._id,
     })
 
-    req.log.info({ requestCount: requests }, 'Fetching the number of requests')
+    req.log.info({ code: 'fetching_request_count', requestCount: requests }, 'Fetching the number of requests')
     return res.json({
       count: requests,
     })
@@ -68,13 +74,13 @@ export const postRequestResponse = [
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
       throw Unauthorised(
-        { id, userId: req.user?._id, requestUser: request.user },
+        { code: 'unauthorised_to_approve', id, userId: req.user?._id, requestUser: request.user },
         'You do not have permissions to approve this'
       )
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
-      throw BadReq({ choice }, `Received invalid request choice, received '${choice}'`)
+      throw BadReq({ code: 'invalid_request_choice', choice }, `Received invalid request choice, received '${choice}'`)
     }
 
     request.status = choice as RequestStatusType
@@ -111,7 +117,7 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ deployment }, 'Triggered deployment')
+        req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
         await (
           await getDeploymentQueue()
         ).add({
@@ -120,7 +126,7 @@ export const postRequestResponse = [
         })
       }
     } else {
-      throw BadReq({ requestId: request._id }, 'Unable to determine request type')
+      throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')
     }
 
     const user = await getUserByInternalId(userId)
@@ -135,7 +141,7 @@ export const postRequestResponse = [
       })
     }
 
-    req.log.info({ id, choice }, 'Successfully set approval response')
+    req.log.info({ code: 'approval_response_set', id, choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',

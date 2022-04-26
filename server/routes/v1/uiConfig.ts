@@ -9,10 +9,10 @@ export const getUiConfig = [
     const uiConfig = await config.get('uiConfig')
 
     if (!uiConfig) {
-      throw NotFound({}, `Unable to find UI Config`)
+      throw NotFound({ code: 'ui_config_not_found' }, `Unable to find UI Config`)
     }
 
-    req.log.info({ uiConfig }, 'User fetching UI config')
+    req.log.info({ code: 'fetching_ui_config', uiConfig }, 'User fetching UI config')
     return res.json(uiConfig)
   },
 ]
