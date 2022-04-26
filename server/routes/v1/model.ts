@@ -93,7 +93,10 @@ export const getModelSchema = [
     const schema = await SchemaModel.findOne({ reference: model.schemaRef })
 
     if (!schema) {
-      throw NotFound({ code: 'schema_not_found', uuid, schemaRef: model.schemaRef }, `Unable to find schema '${model.schemaRef}'`)
+      throw NotFound(
+        { code: 'schema_not_found', uuid, schemaRef: model.schemaRef },
+        `Unable to find schema '${model.schemaRef}'`
+      )
     }
 
     req.log.info({ code: 'fetch_model_schema', model }, 'User fetching model schema')

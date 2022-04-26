@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import { Document, Types } from 'mongoose'
 import { ensureUserRole, hasRole } from '../../utils/user'
 
-import { deploymentQueue } from '../../utils/queues'
+import { getDeploymentQueue } from '../../utils/queues'
 import { getRequest, readNumRequests, readRequests, RequestType } from '../../services/request'
 import { RequestStatusType } from '../../../types/interfaces'
 import { getUserById, getUserByInternalId } from '../../services/user'
@@ -20,12 +20,18 @@ export const getRequests = [
     const filter = req.query.filter as string
 
     if (!['Upload', 'Deployment'].includes(type)) {
-      return res.error(400, [{ code: 'invalid_object_type', received: type }, `Expected 'Upload' / 'Deployment', received '${type}'`])
+      return res.error(400, [
+        { code: 'invalid_object_type', received: type },
+        `Expected 'Upload' / 'Deployment', received '${type}'`,
+      ])
     }
 
     if (filter === 'all') {
       if (!hasRole(['admin'], req.user!)) {
-        return res.error(401, [{ code: 'unauthorised_admin_role_missing', roles: req.user?.roles }, 'Forbidden.  Your user does not have the "admin" role'])
+        return res.error(401, [
+          { code: 'unauthorised_admin_role_missing', roles: req.user?.roles },
+          'Forbidden.  Your user does not have the "admin" role',
+        ])
       }
     } else {
       req.log.info('Getting requests for user')
@@ -111,15 +117,13 @@ export const postRequestResponse = [
 
       if (choice === 'Accepted') {
         // run deployment
-        req.log.info({ code: 'triggered_deployment', deployment }, 'Triggered deployment')
-        await deploymentQueue
-          .createJob({
-            deploymentId: deployment._id,
-            userId,
-          })
-          .timeout(60000)
-          .retries(2)
-          .save()
+        req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
+        await (
+          await getDeploymentQueue()
+        ).add({
+          deploymentId: deployment._id,
+          userId,
+        })
       }
     } else {
       throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')

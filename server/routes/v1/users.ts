@@ -46,7 +46,7 @@ export const favouriteModel = [
     const modelId = req.params.id
 
     if (typeof modelId !== 'string') {
-      throw BadReq({code: 'model_id_incorrect_type' }, `Model ID must be a string`)
+      throw BadReq({ code: 'model_id_incorrect_type' }, `Model ID must be a string`)
     }
 
     const user = await getUserById(req.user!.id)

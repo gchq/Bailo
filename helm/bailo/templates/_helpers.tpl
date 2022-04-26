@@ -84,19 +84,3 @@ mongodb://mongodb:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}:{{ .Value
 {{ .Values.minio.host }}
 {{- end -}}
 {{- end -}}
-
-
-{{- define "bailo.redis.host" -}}
-{{- if .Values.redis.enabled -}}
-{{ include "bailo.fullname" . }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local
-{{- else -}}
-{{ .Values.redis.host }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create the redis connection URI
-*/}}
-{{- define "bailo.redisConnectionURI" -}}
-redis://:${REDIS_PASSWORD}@{{ include "bailo.redis.host" . }}:{{ .Values.redis.master.service.port }}
-{{- end }}

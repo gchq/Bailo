@@ -23,13 +23,6 @@ export default async function createSecrets() {
     --from-literal=mongodb-root-password='${mongodbRootPassword}' \
     --from-literal=mongodb-replica-set-key='${mongodbReplicaSetKey}'
   `)
-
-  // redis secrets
-  const redisPassword = uuidv4()
-
-  exec(`kubectl create secret generic ${prefix}-redis \
-    --from-literal=redis-password='${redisPassword}'
-  `)
 }
 
 createSecrets()

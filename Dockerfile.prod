@@ -43,6 +43,7 @@ RUN apk update \
 # You only need to copy next.config.js if you are NOT using the default configuration
 # COPY --from=builder /app/next.config.js ./
 COPY --from=builder --chown=nextjs:nextjs /app/dist ./dist
+COPY --from=builder --chown=nextjs:nextjs /app/lib/p-mongo-queue ./dist/lib/p-mongo-queue
 COPY --from=builder --chown=nextjs:nextjs /app/config ./config
 COPY --from=builder --chown=nextjs:nextjs /app/public ./public
 

@@ -24,14 +24,6 @@ services:
     volumes:
       - minioVolume:/data
 
-  redis:
-    image: redis:6.2-alpine
-    ports:
-      - '6379:6379'
-    command: redis-server --save 60 1 --loglevel warning
-    volumes:
-      - redisVolume:/data
-
   registry:
     restart: always
     image: registry:2.8.1
@@ -90,7 +82,6 @@ services:
     depends_on:
       - mongo
       - minio
-      - redis
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
@@ -100,5 +91,4 @@ services:
 
 volumes:
   minioVolume:
-  redisVolume:
   mongoVolume:

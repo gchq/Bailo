@@ -7,7 +7,7 @@ import { validateSchema } from '../../utils/validateSchema'
 import SchemaModel from '../../models/Schema'
 import { normalizeMulterFile } from '../../utils/multer'
 import MinioStore from '../../utils/MinioStore'
-import { uploadQueue } from '../../utils/queues'
+import { getUploadQueue } from '../../utils/queues'
 import { ensureUserRole } from '../../utils/user'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
@@ -51,7 +51,10 @@ export const postUpload = [
       }
 
       if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
-        req.log.warn({ code: 'binary_wrong_file_type', filename: files.binary[0].originalname }, 'Binary is not a zip file')
+        req.log.warn(
+          { code: 'binary_wrong_file_type', filename: files.binary[0].originalname },
+          'Binary is not a zip file'
+        )
         return res.status(400).json({
           message: `Unable to process binary, file not a zip.`,
         })
@@ -91,7 +94,10 @@ export const postUpload = [
       // first, we verify the schema
       const schemaIsInvalid = validateSchema(metadata, schema.schema)
       if (schemaIsInvalid) {
-        req.log.warn({ code: 'metadata_did_not_validate', errors: schemaIsInvalid }, 'Metadata did not validate correctly')
+        req.log.warn(
+          { code: 'metadata_did_not_validate', errors: schemaIsInvalid },
+          'Metadata did not validate correctly'
+        )
         return res.status(400).json({
           errors: schemaIsInvalid,
         })
@@ -167,21 +173,20 @@ export const postUpload = [
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
       })
-      req.log.info({ code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
+      req.log.info(
+        { code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
         'Successfully created requests for reviews'
       )
 
-      const job = await uploadQueue
-        .createJob({
-          versionId: version._id,
-          userId: req.user?._id,
-          binary: normalizeMulterFile(files.binary[0]),
-          code: normalizeMulterFile(files.code[0]),
-        })
-        .timeout(60000 * 8)
-        .retries(2)
-        .save()
-      req.log.info({ code: 'created_job_upload_queue', jobId: job.id }, 'Successfully created job in upload queue')
+      const jobId = await (
+        await getUploadQueue()
+      ).add({
+        versionId: version._id,
+        userId: req.user?._id,
+        binary: normalizeMulterFile(files.binary[0]),
+        code: normalizeMulterFile(files.code[0]),
+      })
+      req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
 
       // then return reference to user
       res.json({

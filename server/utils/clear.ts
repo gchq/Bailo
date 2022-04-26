@@ -4,7 +4,6 @@ import ModelModel from '../models/Model'
 import UserModel from '../models/User'
 import VersionModel from '../models/Version'
 
-import { createClient } from 'redis'
 import { connectToMongoose, disconnectFromMongoose } from './database'
 
 import config from 'config'
@@ -28,13 +27,7 @@ export async function clearStoredData() {
     emptyBucket(config.get('minio.registryBucket')),
   ])
 
-  // clear down redis queues
-  const client = createClient(config.get('redis'))
-  await client.connect()
-  await client.flushAll()
-
   // small pause to ensure Mongoose has finished
   await pause(250)
   await disconnectFromMongoose()
-  await client.disconnect()
 }

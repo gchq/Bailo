@@ -7,7 +7,7 @@ export const getSchemas = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     if (!req.query.use) {
-      throw NotFound({code: 'use_field_missing_in_request'}, `Requires 'use' field to be provided.`)
+      throw NotFound({ code: 'use_field_missing_in_request' }, `Requires 'use' field to be provided.`)
     }
 
     const schemas = await SchemaModel.find({ use: req.query.use })

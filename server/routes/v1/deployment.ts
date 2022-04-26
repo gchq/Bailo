@@ -45,7 +45,7 @@ export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    req.log.info({code: 'requesting_deployment', }, 'User requesting deployment')
+    req.log.info({ code: 'requesting_deployment' }, 'User requesting deployment')
     const body = req.body as any
 
     const schema = await SchemaModel.findOne({
@@ -53,7 +53,10 @@ export const postDeployment = [
     })
 
     if (!schema) {
-      throw NotFound({ code: 'schema_not_found', schemaRef: body.schemaRef }, `Unable to find schema with name: '${body.schemaRef}'`)
+      throw NotFound(
+        { code: 'schema_not_found', schemaRef: body.schemaRef },
+        `Unable to find schema with name: '${body.schemaRef}'`
+      )
     }
 
     body.user = req.user?.id
@@ -95,7 +98,10 @@ export const postDeployment = [
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
     await deployment.save()
 
-    req.log.info({ code: 'requesting_model_version', model, version: body.highLevelDetails.initialVersionRequested }, 'Requesting model version')
+    req.log.info(
+      { code: 'requesting_model_version', model, version: body.highLevelDetails.initialVersionRequested },
+      'Requesting model version'
+    )
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
@@ -125,7 +131,10 @@ export const resetDeploymentApprovals = [
       throw BadReq({ code: 'deployment_not_found', uuid }, `Unabled to find requested deployment: '${uuid}'`)
     }
     if (user?.id !== deployment.metadata.contacts.requester) {
-      throw Forbidden({ code: 'not_allowed_to_reset_approvals' }, 'You cannot reset the approvals for a deployment you do not own.')
+      throw Forbidden(
+        { code: 'not_allowed_to_reset_approvals' },
+        'You cannot reset the approvals for a deployment you do not own.'
+      )
     }
 
     const version = await findVersionByName(
@@ -134,7 +143,10 @@ export const resetDeploymentApprovals = [
       deployment.metadata.highLevelDetails.initialVersionRequested
     )
     if (!version) {
-      throw BadReq({ code: 'deployment_version_not_found', uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
+      throw BadReq(
+        { code: 'deployment_version_not_found', uuid },
+        `Unabled to find version for requested deployment: '${uuid}'`
+      )
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()
