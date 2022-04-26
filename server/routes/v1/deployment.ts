@@ -20,10 +20,10 @@ export const getDeployment = [
     const deployment = await findDeploymentByUuid(req.user!, uuid)
 
     if (!deployment) {
-      throw NotFound({ uuid }, `Unable to find deployment '${uuid}'`)
+      throw NotFound({ code: 'deployment_not_found', uuid }, `Unable to find deployment '${uuid}'`)
     }
 
-    req.log.info({ deployment }, 'Fetching deployment by a given UUID')
+    req.log.info({ code: 'get_deployment_by_uuid', deployment }, 'Fetching deployment by a given UUID')
     return res.json(deployment)
   },
 ]
@@ -35,7 +35,7 @@ export const getCurrentUserDeployments = [
 
     const deployments = await findDeployments(req.user!, { owner: id })
 
-    req.log.info({ deployments }, 'Fetching deployments by user')
+    req.log.info({ code: 'fetch_deployments_by_user', deployments }, 'Fetching deployments by user')
 
     return res.json(deployments)
   },
@@ -45,7 +45,7 @@ export const postDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    req.log.info('User requesting deployment')
+    req.log.info({code: 'requesting_deployment', }, 'User requesting deployment')
     const body = req.body as any
 
     const schema = await SchemaModel.findOne({
@@ -53,7 +53,7 @@ export const postDeployment = [
     })
 
     if (!schema) {
-      throw NotFound({ schemaRef: body.schemaRef }, `Unable to find schema with name: '${body.schemaRef}'`)
+      throw NotFound({ code: 'schema_not_found', schemaRef: body.schemaRef }, `Unable to find schema with name: '${body.schemaRef}'`)
     }
 
     body.user = req.user?.id
@@ -62,14 +62,14 @@ export const postDeployment = [
     // first, we verify the schema
     const schemaIsInvalid = validateSchema(body, schema.schema)
     if (schemaIsInvalid) {
-      throw NotFound({ errors: schemaIsInvalid }, 'Rejected due to invalid schema')
+      throw NotFound({ code: 'invalid_schema', errors: schemaIsInvalid }, 'Rejected due to invalid schema')
     }
 
     const model = await findModelByUuid(req.user!, body.highLevelDetails.modelID)
 
     if (!model) {
       throw NotFound(
-        { modelId: body.highLevelDetails.modelID },
+        { code: 'model_not_found', modelId: body.highLevelDetails.modelID },
         `Unable to find model with name: '${body.highLevelDetails.modelID}'`
       )
     }
@@ -92,21 +92,21 @@ export const postDeployment = [
       owner: req.user!._id,
     })
 
-    req.log.info({ deployment }, 'Saving deployment model')
+    req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
     await deployment.save()
 
-    req.log.info({ model, version: body.highLevelDetails.initialVersionRequested }, 'Requesting model version')
+    req.log.info({ code: 'requesting_model_version', model, version: body.highLevelDetails.initialVersionRequested }, 'Requesting model version')
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
       throw NotFound(
-        { version: body.highLevelDetails.initialVersionRequested },
+        { code: 'version_not_found', version: body.highLevelDetails.initialVersionRequested },
         `Unable to find version: '${body.highLevelDetails.initialVersionRequested}'`
       )
     }
 
     const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
-    req.log.info({ request: managerRequest._id, uuid }, 'Successfully created deployment')
+    req.log.info({ code: 'created_deployment', request: managerRequest._id, uuid }, 'Successfully created deployment')
 
     res.json({
       uuid,
@@ -122,10 +122,10 @@ export const resetDeploymentApprovals = [
     const { uuid } = req.params
     const deployment = await findDeploymentByUuid(req.user!, uuid)
     if (!deployment) {
-      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
+      throw BadReq({ code: 'deployment_not_found', uuid }, `Unabled to find requested deployment: '${uuid}'`)
     }
     if (user?.id !== deployment.metadata.contacts.requester) {
-      throw Forbidden({}, 'You cannot reset the approvals for a deployment you do not own.')
+      throw Forbidden({ code: 'not_allowed_to_reset_approvals' }, 'You cannot reset the approvals for a deployment you do not own.')
     }
 
     const version = await findVersionByName(
@@ -134,11 +134,11 @@ export const resetDeploymentApprovals = [
       deployment.metadata.highLevelDetails.initialVersionRequested
     )
     if (!version) {
-      throw BadReq({ uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
+      throw BadReq({ code: 'deployment_version_not_found', uuid }, `Unabled to find version for requested deployment: '${uuid}'`)
     }
     deployment.managerApproved = 'No Response'
     await deployment.save()
-    req.log.info({ deployment }, 'User resetting deployment approvals')
+    req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
     await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
 
     return res.json(deployment)

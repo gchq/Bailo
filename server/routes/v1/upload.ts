@@ -43,22 +43,22 @@ export const postUpload = [
       const mode = req.query.mode
 
       if (!files.binary) {
-        throw BadReq({}, 'Unable to find binary file')
+        throw BadReq({ code: 'binary_file_not_found' }, 'Unable to find binary file')
       }
 
       if (!files.code) {
-        throw BadReq({}, 'Unable to find code file')
+        throw BadReq({ code: 'code_file_not_found' }, 'Unable to find code file')
       }
 
       if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
-        req.log.warn({ filename: files.binary[0].originalname }, 'Binary is not a zip file')
+        req.log.warn({ code: 'binary_wrong_file_type', filename: files.binary[0].originalname }, 'Binary is not a zip file')
         return res.status(400).json({
           message: `Unable to process binary, file not a zip.`,
         })
       }
 
       if (!files.code[0].originalname.toLowerCase().endsWith('.zip')) {
-        req.log.warn({ filename: files.code[0].originalname }, 'Code is not a zip file')
+        req.log.warn({ code: 'code_wrong_file_type', filename: files.code[0].originalname }, 'Code is not a zip file')
         return res.status(400).json({
           message: `Unable to process code, file not a zip.`,
         })
@@ -69,7 +69,7 @@ export const postUpload = [
       try {
         metadata = JSON.parse(req.body.metadata)
       } catch (e) {
-        req.log.warn({ metadata: req.body.metadata }, 'Metadata is not valid JSON')
+        req.log.warn({ code: 'metadata_invalid_json', metadata: req.body.metadata }, 'Metadata is not valid JSON')
         return res.status(400).json({
           message: `Unable to parse schema as JSON`,
         })
@@ -80,7 +80,7 @@ export const postUpload = [
       })
 
       if (!schema) {
-        req.log.warn({ schemaRef: metadata.schemaRef }, 'Schema not found')
+        req.log.warn({ code: 'schema_not_found', schemaRef: metadata.schemaRef }, 'Schema not found')
         return res.status(400).json({
           message: `Unable to find schema with name: '${metadata.schemaRef}'`,
         })
@@ -91,7 +91,7 @@ export const postUpload = [
       // first, we verify the schema
       const schemaIsInvalid = validateSchema(metadata, schema.schema)
       if (schemaIsInvalid) {
-        req.log.warn({ errors: schemaIsInvalid }, 'Metadata did not validate correctly')
+        req.log.warn({ code: 'metadata_did_not_validate', errors: schemaIsInvalid }, 'Metadata did not validate correctly')
         return res.status(400).json({
           errors: schemaIsInvalid,
         })
@@ -110,7 +110,7 @@ export const postUpload = [
           })
         }
       }
-      req.log.info({ version }, 'Created model version')
+      req.log.info({ code: 'created_model_version', version }, 'Created model version')
 
       const name = metadata.highLevelDetails.name
         .toLowerCase()
@@ -119,11 +119,11 @@ export const postUpload = [
 
       let parentId
       if (req.body.parent) {
-        req.log.info({ parent: req.body.parent }, 'Uploaded model has parent')
+        req.log.info({ code: 'model_parent_already_exists', parent: req.body.parent }, 'Uploaded model has parent')
         const parentModel = await findModelByUuid(req.user!, req.body.parent)
 
         if (!parentModel) {
-          req.log.warn({ parent: req.body.parent }, 'Could not find parent')
+          req.log.warn({ code: 'model_parent_not_found', parent: req.body.parent }, 'Could not find parent')
           return res.status(400).json({
             message: `Unable to find parent with uuid: '${req.body.parent}'`,
           })
@@ -162,13 +162,12 @@ export const postUpload = [
       version.model = model._id
       await version.save()
 
-      req.log.info({ model }, 'Created model document')
+      req.log.info({ code: 'created_model', model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
         version: await version.populate('model'),
       })
-      req.log.info(
-        { managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
+      req.log.info({ code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
         'Successfully created requests for reviews'
       )
 
@@ -182,7 +181,7 @@ export const postUpload = [
         .timeout(60000 * 8)
         .retries(2)
         .save()
-      req.log.info({ jobId: job.id }, 'Successfully created job in upload queue')
+      req.log.info({ code: 'created_job_upload_queue', jobId: job.id }, 'Successfully created job in upload queue')
 
       // then return reference to user
       res.json({
