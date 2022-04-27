@@ -1,5 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
-import { runCommand } from '../../server/utils/build'
+import { runCommand, screenshot } from '../../server/utils/build'
 import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
@@ -59,12 +59,15 @@ describe('End to end test', () => {
       try {
         logger.info('getting bailo homepage')
         await driver.get(BAILO_APP_URL)
+        await screenshot('logs/a.png')
 
         logger.info('going to upload page')
         await click(driver, By.css('[data-test="uploadModelLink"]'))
+        await screenshot('logs/b.png')
 
         logger.info('going to json tab')
         await click(driver, By.css('[data-test="uploadJsonTab"]'))
+        await screenshot('logs/c.png')
 
         logger.info('selecting correct schema')
         await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))

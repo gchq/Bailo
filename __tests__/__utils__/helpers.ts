@@ -1,6 +1,7 @@
 import { until, By, WebDriver, Builder } from 'selenium-webdriver'
 import firefox from 'selenium-webdriver/firefox'
 import config from 'config'
+import fs from 'fs/promises'
 import path from 'path'
 import { clearStoredData } from '../../server/utils/clear'
 import { runCommand } from '../../server/utils/build'
@@ -31,6 +32,11 @@ export async function clearData() {
   log.debug(cmd)
   await runCommand(cmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
   log.debug('clearData complete')
+}
+
+export async function screenshot(driver: WebDriver, name: string) {
+  const image = await driver.takeScreenshot()
+  await fs.writeFile(name, image, 'base64')
 }
 
 export async function waitForElement(driver: WebDriver, selector: By) {
