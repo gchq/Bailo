@@ -1,20 +1,13 @@
 import { Schema, model, Document, Types } from 'mongoose'
 import { UserDoc } from './User'
-
-interface TempModel {
-  [attribute: string]: any
-}
-
-interface TempVersion {
-  [attribute: string]: any
-}
+import { VersionDoc } from './Version'
 
 export interface Model {
   schemaRef: string
   uuid: string
 
-  parent: TempModel
-  versions: Types.Array<TempVersion | Types.ObjectId>
+  parent: ModelDoc
+  versions: Types.Array<VersionDoc | Types.ObjectId>
   currentMetadata: any
 
   owner: UserDoc | Types.ObjectId

@@ -3,9 +3,10 @@ import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
-import { TempModel, VersionDoc } from '../models/Version'
+import { VersionDoc } from '../models/Version'
 import { DeploymentDoc } from '../models/Deployment'
 import { RequestTypes } from '../models/Request'
+import { ModelDoc } from '../models/Model'
 
 export interface ReviewedRequestContext {
   document: VersionDoc | DeploymentDoc
@@ -14,7 +15,7 @@ export interface ReviewedRequestContext {
 }
 
 export function html({ document, requestType, choice }: ReviewedRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = model.uuid
@@ -57,7 +58,7 @@ export function html({ document, requestType, choice }: ReviewedRequestContext) 
 }
 
 export function text({ document, requestType, choice }: ReviewedRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = model.uuid
@@ -77,7 +78,7 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
 }
 
 export function subject({ document }: ReviewedRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
 
   return dedent(`
     '${model.currentMetadata.highLevelDetails.name}' has been reviewed

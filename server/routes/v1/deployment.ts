@@ -112,7 +112,10 @@ export const postDeployment = [
       )
     }
 
-    const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
+    const managerRequest = await createDeploymentRequests({
+      version,
+      deployment: await deployment.populate('model').execPopulate(),
+    })
     req.log.info({ code: 'created_deployment', request: managerRequest._id, uuid }, 'Successfully created deployment')
 
     res.json({

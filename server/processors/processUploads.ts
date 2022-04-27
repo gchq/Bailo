@@ -38,7 +38,7 @@ export default async function processUploads() {
       logger.error({ error: e, versionId: msg.payload.versionId }, 'Error occurred whilst processing upload')
 
       try {
-        const user = await getUserById(msg.payload.userId)
+        const user = await getUserByInternalId(msg.payload.userId)
 
         if (!user) {
           throw new Error('Unable to find upload user')

@@ -3,9 +3,10 @@ import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
-import { TempModel, VersionDoc } from '../models/Version'
+import { VersionDoc } from '../models/Version'
 import { DeploymentDoc } from '../models/Deployment'
 import { RequestTypes } from '../models/Request'
+import { ModelDoc } from '../models/Model'
 import logger from '../utils/logger'
 
 export interface ReviewRequestContext {
@@ -14,7 +15,7 @@ export interface ReviewRequestContext {
 }
 
 export function html({ document, requestType }: ReviewRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
 
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -64,7 +65,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
 }
 
 export function text({ document, requestType }: ReviewRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
 
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -87,7 +88,7 @@ export function text({ document, requestType }: ReviewRequestContext) {
 }
 
 export function subject({ document }: ReviewRequestContext) {
-  const model = document.model as TempModel
+  const model = document.model as ModelDoc
 
   return dedent(`
     You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo

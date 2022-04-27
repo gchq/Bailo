@@ -6,7 +6,8 @@ import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
-import { TempModel } from '../models/Deployment'
+import { ModelDoc } from '../models/Model'
+import { UserDoc } from '../models/User'
 
 let uploadQueue: PMongoQueue | undefined = undefined
 let deploymentQueue: PMongoQueue | undefined = undefined
@@ -88,11 +89,11 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
     throw new Error(`Unable to find version '${msg.payload.versionId}'`)
   }
 
-  const model = version.model as TempModel
+  const model = version.model as ModelDoc
 
   await markVersionState(user, msg.payload.versionId, state)
 
-  if (!model.owner.email) {
+  if (!(model.owner as UserDoc).email) {
     return
   }
 
@@ -100,7 +101,7 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   await sendEmail({
-    to: model.owner.email,
+    to: (model.owner as UserDoc).email,
     ...simpleEmail({
       text: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
       columns: [
@@ -131,7 +132,7 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
-  const model = deployment.model as TempModel
+  const model = deployment.model as ModelDoc
 
   await sendEmail({
     to: user.email,

@@ -1,10 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose'
 import logger from '../utils/logger'
+import { ModelDoc } from './Model'
 import { UserDoc } from './User'
-
-export interface TempModel {
-  [attribute: string]: any
-}
 
 export const approvalStates = ['Accepted', 'Declined', 'No Response']
 
@@ -24,7 +21,7 @@ export interface Deployment {
   schemaRef: string
   uuid: string
 
-  model: Types.ObjectId | TempModel
+  model: Types.ObjectId | ModelDoc
   metadata: any
 
   managerApproved: ApprovalStates

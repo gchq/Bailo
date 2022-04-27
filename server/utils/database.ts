@@ -7,7 +7,7 @@ export async function connectToMongoose() {
     await mongoose.connect(await config.get('mongo.uri'), {
       useFindAndModify: false,
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     })
     logger.info('Connected to Mongoose')
   } catch (error) {

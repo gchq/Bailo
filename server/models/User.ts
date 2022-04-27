@@ -1,17 +1,14 @@
 import { Schema, model, Types, Document } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcryptjs'
-
-interface TempModel {
-  [attribute: string]: any
-}
+import { ModelDoc } from './Model'
 
 export interface User {
   id: string
   email: string
 
   roles: Types.Array<string>
-  favourites: Types.Array<TempModel | Types.ObjectId>
+  favourites: Types.Array<ModelDoc | Types.ObjectId>
 
   token: string | undefined
   data: any

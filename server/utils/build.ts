@@ -9,7 +9,8 @@ import config from 'config'
 import dedent from 'dedent-js'
 import logger from './logger'
 import { getAdminToken } from '../routes/v1/registryAuth'
-import { VersionDoc, TempModel } from '../models/Version'
+import { VersionDoc } from '../models/Version'
+import { ModelDoc } from '../models/Model'
 
 interface FileRef {
   path: string
@@ -124,7 +125,7 @@ export async function buildPython(version: VersionDoc, builderFiles: BuilderFile
   const builderScriptsUrl = '/s2i/bin'
   const buildDir = await createWorkingDirectory()
   const buildDockerfile = join(buildDir, 'Dockerfile')
-  const tag = `${config.get('registry.host')}/internal/${(version.model as TempModel).uuid}:${version.version}`
+  const tag = `${config.get('registry.host')}/internal/${(version.model as ModelDoc).uuid}:${version.version}`
   const toDockerfileTags = `--copy --as-dockerfile ${buildDockerfile} --scripts-url image://${builderScriptsUrl} --assemble-user root`
   const command = `${config.get('s2i.path')} build ${tmpDir} ${builder} ${toDockerfileTags}`
   vlog.info({ builder, tag, command }, 'Making Dockerfile')

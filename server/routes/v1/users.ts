@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById } from '../../services/model'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
-import { TempModel } from '../../models/Deployment'
 
 export const getUsers = [
   ensureUserRole('user'),

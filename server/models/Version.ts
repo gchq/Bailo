@@ -1,13 +1,10 @@
 import { Schema, model, Types, Document } from 'mongoose'
 import logger from '../utils/logger'
 import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
-
-export interface TempModel {
-  [attribute: string]: any
-}
+import { ModelDoc } from './Model'
 
 export interface Version {
-  model: Types.ObjectId | TempModel
+  model: ModelDoc | Types.ObjectId
   version: string
 
   metadata: any

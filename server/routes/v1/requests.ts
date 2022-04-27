@@ -1,19 +1,20 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import { Document, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { ensureUserRole, hasRole } from '../../utils/user'
 
 import { getDeploymentQueue } from '../../utils/queues'
 import { getRequest, readNumRequests, readRequests } from '../../services/request'
-import { getUserById, getUserByInternalId } from '../../services/user'
+import { getUserByInternalId } from '../../services/user'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
 import { findDeploymentById } from '../../services/deployment'
-import { TempModel, DeploymentDoc, ApprovalStates } from '../../models/Deployment'
+import { DeploymentDoc, ApprovalStates } from '../../models/Deployment'
 import { VersionDoc } from '../../models/Version'
 import { RequestTypes } from '../../models/Request'
+import { ModelDoc } from '../../models/Model'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -109,7 +110,7 @@ export const postRequestResponse = [
         )
       }
 
-      userId = (version.model as TempModel).owner
+      userId = (version.model as ModelDoc).owner
       requestType = RequestTypes.Upload
       document = version
 
@@ -125,7 +126,7 @@ export const postRequestResponse = [
         )
       }
 
-      userId = (deployment.model as TempModel).owner
+      userId = (deployment.model as ModelDoc).owner
       requestType = RequestTypes.Deployment
       document = deployment
 
