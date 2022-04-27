@@ -1,5 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
-import { runCommand, screenshot } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build'
 import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
@@ -16,6 +16,7 @@ import {
   sendKeys,
   pause,
   fromRelative,
+  screenshot
 } from '../__utils__/helpers'
 import logger from '../../server/utils/logger'
 
@@ -59,15 +60,12 @@ describe('End to end test', () => {
       try {
         logger.info('getting bailo homepage')
         await driver.get(BAILO_APP_URL)
-        await screenshot('logs/a.png')
 
         logger.info('going to upload page')
         await click(driver, By.css('[data-test="uploadModelLink"]'))
-        await screenshot('logs/b.png')
 
         logger.info('going to json tab')
         await click(driver, By.css('[data-test="uploadJsonTab"]'))
-        await screenshot('logs/c.png')
 
         logger.info('selecting correct schema')
         await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
@@ -78,7 +76,7 @@ describe('End to end test', () => {
 
         logger.info('setting metadata')
         const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
-        await sendKeys(driver, By.css('textarea'), metadata)
+        await sendKeys(driver, By.css('div[data-test="metadataTextarea"] div textarea:nth-child(1)'), metadata)
 
         logger.info('submitting upload')
         await click(driver, By.css('[data-test="submitButton"]'))

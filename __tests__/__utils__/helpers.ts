@@ -86,7 +86,11 @@ export async function click(driver: WebDriver, selector: By) {
 export async function sendKeys(driver: WebDriver, selector: By, keys: string) {
   const element = await waitForElement(driver, selector)
 
+  log.info(await element.getAttribute('type'))
+  log.info(selector)
+
   if (['text', 'textarea'].includes(await element.getAttribute('type'))) {
+    log.info('clearing text field')
     await element.clear()
   }
   await element.sendKeys(keys)

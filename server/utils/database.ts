@@ -8,6 +8,7 @@ export async function connectToMongoose() {
       useFindAndModify: false,
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useCreateIndex: true,
     })
     logger.info('Connected to Mongoose')
   } catch (error) {

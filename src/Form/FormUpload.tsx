@@ -52,6 +52,7 @@ export default function FormUpload({
         onChange={handleMetadataChange}
         error={validationErrorText !== ''}
         helperText={validationErrorText}
+        data-test='metadataTextarea'
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
         <Button variant='contained' onClick={onSubmit} sx={{ mt: 3 }} data-test='submitButton'>
