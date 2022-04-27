@@ -38,7 +38,7 @@ export async function findVersionById(user: UserDoc, id: ModelId, opts?: GetVers
   if (opts?.thin) version = version.select({ state: 0, logs: 0, metadata: 0 })
   if (opts?.populate) version = version.populate('model')
 
-  return filterVersion(user, version)
+  return filterVersion(user, await version)
 }
 
 export async function findVersionByName(user: UserDoc, model: ModelId, name: string, opts?: GetVersionOptions) {
@@ -46,7 +46,7 @@ export async function findVersionByName(user: UserDoc, model: ModelId, name: str
   if (opts?.thin) version = version.select({ state: 0, logs: 0, metadata: 0 })
   if (opts?.populate) version = version.populate('model')
 
-  return filterVersion(user, version)
+  return filterVersion(user, await version)
 }
 
 export async function findModelVersions(user: UserDoc, model: ModelId, opts?: GetVersionOptions) {
@@ -54,7 +54,7 @@ export async function findModelVersions(user: UserDoc, model: ModelId, opts?: Ge
   if (opts?.thin) versions = versions.select({ state: 0, logs: 0, metadata: 0 })
   if (opts?.populate) versions = versions.populate('model')
 
-  return filterVersion(user, versions)
+  return filterVersion(user, await versions)
 }
 
 export async function markVersionBuilt(_id: ModelId) {

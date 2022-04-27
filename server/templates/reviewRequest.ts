@@ -6,6 +6,7 @@ import { wrapper } from './partials'
 import { TempModel, VersionDoc } from '../models/Version'
 import { DeploymentDoc } from '../models/Deployment'
 import { RequestTypes } from '../models/Request'
+import logger from '../utils/logger'
 
 export interface ReviewRequestContext {
   document: VersionDoc | DeploymentDoc
@@ -14,7 +15,8 @@ export interface ReviewRequestContext {
 
 export function html({ document, requestType }: ReviewRequestContext) {
   const model = document.model as TempModel
-  const { requester, uploader } = model.currentMetadata.contacts
+
+  const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = model.uuid
@@ -64,7 +66,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
 export function text({ document, requestType }: ReviewRequestContext) {
   const model = document.model as TempModel
 
-  const { requester, uploader } = model.currentMetadata.contacts
+  const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = model.uuid

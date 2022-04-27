@@ -112,7 +112,7 @@ export const postDeployment = [
       )
     }
 
-    const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
     req.log.info({ code: 'created_deployment', request: managerRequest._id, uuid }, 'Successfully created deployment')
 
     res.json({
@@ -152,7 +152,7 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
   },

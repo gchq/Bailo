@@ -3,7 +3,7 @@ import { getUploadQueue } from '../utils/queues'
 import prettyMs from 'pretty-ms'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'
-import { getUserById } from '../services/user'
+import { getUserByInternalId } from '../services/user'
 import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 
 export default async function processUploads() {
@@ -12,7 +12,7 @@ export default async function processUploads() {
     try {
       const startTime = new Date()
 
-      const user = await getUserById(msg.payload.userId)
+      const user = await getUserByInternalId(msg.payload.userId)
 
       if (!user) {
         throw new Error(`Unable to find upload user '${msg.payload.userId}'`)

@@ -171,7 +171,7 @@ export const postUpload = [
       req.log.info({ code: 'created_model', model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
-        version: await version.populate('model'),
+        version: await version.populate('model').execPopulate(),
       })
       req.log.info(
         { code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },

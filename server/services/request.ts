@@ -98,7 +98,7 @@ async function createVersionRequest({
 }): Promise<Request> {
   return createRequest({
     documentType: 'version',
-    document: version as unknown as any,
+    document: version,
     user,
 
     approvalType,
