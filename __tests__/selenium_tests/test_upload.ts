@@ -16,7 +16,7 @@ import {
   sendKeys,
   pause,
   fromRelative,
-  screenshot
+  screenshot,
 } from '../__utils__/helpers'
 import logger from '../../server/utils/logger'
 
