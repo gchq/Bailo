@@ -294,7 +294,7 @@ describe('End to end test', () => {
       await container.start()
 
       logger.info('waiting for container to start')
-      await pause(2000)
+      await pause(5000)
 
       try {
         logger.info('making request to container')
