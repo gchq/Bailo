@@ -3,19 +3,25 @@ import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
-import { RequestType } from '../services/request'
+import { TempModel, VersionDoc } from '../models/Version'
+import { DeploymentDoc } from '../models/Deployment'
+import { RequestTypes } from '../models/Request'
 
 export interface ReviewRequestContext {
-  document: Document & { model: any; uuid: string }
-  requestType: RequestType
+  document: VersionDoc | DeploymentDoc
+  requestType: RequestTypes
 }
 
 export function html({ document, requestType }: ReviewRequestContext) {
-  const { requester, uploader } = document.model.currentMetadata.contacts
+  const model = document.model as TempModel
+  const { requester, uploader } = model.currentMetadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl =
-    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+  const requestUrl = model.uuid
+    ? `${base}/model/${model.uuid}`
+    : 'uuid' in document
+    ? `${base}/deployment/${document.uuid}`
+    : ''
 
   return mjml2html(
     wrapper(`
@@ -29,7 +35,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          document.model.currentMetadata.highLevelDetails.name
+          model.currentMetadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -56,14 +62,19 @@ export function html({ document, requestType }: ReviewRequestContext) {
 }
 
 export function text({ document, requestType }: ReviewRequestContext) {
-  const { requester, uploader } = document.model.currentMetadata.contacts
+  const model = document.model as TempModel
+
+  const { requester, uploader } = model.currentMetadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl =
-    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+  const requestUrl = model.uuid
+    ? `${base}/model/${model.uuid}`
+    : 'uuid' in document
+    ? `${base}/deployment/${document.uuid}`
+    : ''
 
   return dedent(`
-    You have been requested to review '${document.model.currentMetadata.highLevelDetails.name}' on Bailo.
+    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo.
 
     RequestType: '${requestType}'
     Uploader: '${uploader ?? requester}'
@@ -74,8 +85,10 @@ export function text({ document, requestType }: ReviewRequestContext) {
 }
 
 export function subject({ document }: ReviewRequestContext) {
+  const model = document.model as TempModel
+
   return dedent(`
-    You have been requested to review '${document.model.currentMetadata.highLevelDetails.name}' on Bailo
+    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo
   `)
 }
 

@@ -1,5 +1,4 @@
 import { mkdir, exec, rm } from 'shelljs'
-import { HydratedDocument } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
 import { join, dirname } from 'path'
@@ -10,6 +9,7 @@ import config from 'config'
 import dedent from 'dedent-js'
 import logger from './logger'
 import { getAdminToken } from '../routes/v1/registryAuth'
+import { VersionDoc, TempModel } from '../models/Version'
 
 interface FileRef {
   path: string
@@ -84,7 +84,7 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
   })
 }
 
-export async function buildPython(version: HydratedDocument<any>, builderFiles: BuilderFiles): Promise<string> {
+export async function buildPython(version: VersionDoc, builderFiles: BuilderFiles): Promise<string> {
   const vlog = logger.child({ versionId: version._id })
   const tmpDir = await createWorkingDirectory()
 
@@ -124,7 +124,7 @@ export async function buildPython(version: HydratedDocument<any>, builderFiles: 
   const builderScriptsUrl = '/s2i/bin'
   const buildDir = await createWorkingDirectory()
   const buildDockerfile = join(buildDir, 'Dockerfile')
-  const tag = `${config.get('registry.host')}/internal/${version.model.uuid}:${version.version}`
+  const tag = `${config.get('registry.host')}/internal/${(version.model as TempModel).uuid}:${version.version}`
   const toDockerfileTags = `--copy --as-dockerfile ${buildDockerfile} --scripts-url image://${builderScriptsUrl} --assemble-user root`
   const command = `${config.get('s2i.path')} build ${tmpDir} ${builder} ${toDockerfileTags}`
   vlog.info({ builder, tag, command }, 'Making Dockerfile')

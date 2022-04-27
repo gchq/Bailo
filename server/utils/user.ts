@@ -5,6 +5,7 @@ import { getAdminToken } from '../routes/v1/registryAuth'
 import { Forbidden, Unauthorised } from './result'
 import Authorisation from '../external/Authorisation'
 import { findAndUpdateUser, findUserCached, getUserById } from '../services/user'
+import { UserDoc } from '../models/User'
 
 const authorisation = new Authorisation()
 
@@ -72,7 +73,7 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   next()
 }
 
-export function hasRole(roles: Array<string> | string, user: User) {
+export function hasRole(roles: Array<string> | string, user: UserDoc) {
   const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
   for (let role of arrayRoles) {

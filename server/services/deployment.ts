@@ -1,12 +1,13 @@
 import { castArray } from 'lodash'
 
 import { Forbidden } from '../utils/result'
-import DeploymentModel from '../models/Deployment'
+import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { Deployment, User, ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
 import { serializedModelFields } from './model'
+import { UserDoc } from '../models/User'
 
 const authorisation = new AuthorisationBase()
 
@@ -22,28 +23,28 @@ export function serializedDeploymentFields(): SerializerOptions {
   }
 }
 
-export async function filterDeployment<T>(user: User, unfiltered: T): Promise<T> {
+export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const deployments = castArray(unfiltered)
 
-  const filtered = await asyncFilter(deployments, (deployment: Deployment) =>
+  const filtered = await asyncFilter(deployments, (deployment: DeploymentDoc) =>
     authorisation.canUserSeeDeployment(user, deployment)
   )
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findDeploymentByUuid(user: User, uuid: string, opts?: GetDeploymentOptions) {
-  let deployment = await DeploymentModel.findOne({ uuid })
+export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
+  let deployment = DeploymentModel.findOne({ uuid })
   if (opts?.populate) deployment = deployment.populate('model')
 
-  return filterDeployment(user, deployment)
+  return filterDeployment(user, await deployment)
 }
 
-export async function findDeploymentById(user: User, id: ModelId, opts?: GetDeploymentOptions) {
-  let deployment = await DeploymentModel.findById(id)
+export async function findDeploymentById(user: UserDoc, id: ModelId, opts?: GetDeploymentOptions) {
+  let deployment = DeploymentModel.findById(id)
   if (opts?.populate) deployment = deployment.populate('model')
 
-  return filterDeployment(user, deployment)
+  return filterDeployment(user, await deployment)
 }
 
 export interface DeploymentFilter {
@@ -51,7 +52,7 @@ export interface DeploymentFilter {
   model?: ModelId
 }
 
-export async function findDeployments(user: User, { owner, model }: DeploymentFilter) {
+export async function findDeployments(user: UserDoc, { owner, model }: DeploymentFilter) {
   const query: any = {}
 
   if (owner) query.owner = owner
@@ -75,7 +76,7 @@ interface CreateDeployment {
   owner: ModelId
 }
 
-export async function createDeployment(user: User, data: CreateDeployment) {
+export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   const deployment = new DeploymentModel(data)
 
   if (!authorisation.canUserSeeDeployment(user, deployment)) {

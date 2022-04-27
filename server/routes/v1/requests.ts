@@ -4,14 +4,16 @@ import { Document, Types } from 'mongoose'
 import { ensureUserRole, hasRole } from '../../utils/user'
 
 import { getDeploymentQueue } from '../../utils/queues'
-import { getRequest, readNumRequests, readRequests, RequestType } from '../../services/request'
-import { RequestStatusType } from '../../../types/interfaces'
+import { getRequest, readNumRequests, readRequests } from '../../services/request'
 import { getUserById, getUserByInternalId } from '../../services/user'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { reviewedRequest } from '../../templates/reviewedRequest'
 import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
 import { findDeploymentById } from '../../services/deployment'
+import { TempModel, DeploymentDoc, ApprovalStates } from '../../models/Deployment'
+import { VersionDoc } from '../../models/Version'
+import { RequestTypes } from '../../models/Request'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -38,7 +40,7 @@ export const getRequests = [
     }
 
     const requests = await readRequests({
-      type: type as RequestType,
+      type: type as RequestTypes,
       filter: filter === 'all' ? undefined : req.user!._id,
     })
 
@@ -83,7 +85,7 @@ export const postRequestResponse = [
       throw BadReq({ code: 'invalid_request_choice', choice }, `Received invalid request choice, received '${choice}'`)
     }
 
-    request.status = choice as RequestStatusType
+    request.status = choice as ApprovalStates
     await request.save()
 
     let field
@@ -94,21 +96,37 @@ export const postRequestResponse = [
     }
 
     let userId: Types.ObjectId
-    let requestType: RequestType
-    let document: Document & { model: any; uuid: string }
+    let requestType: RequestTypes
+    let document: VersionDoc | DeploymentDoc
 
     if (request.version) {
-      const version = await findVersionById(req.user!, request.version._id, { populate: true })
-      userId = version.model.owner
-      requestType = 'Upload'
+      const versionDoc = request.version as VersionDoc
+      const version = await findVersionById(req.user!, versionDoc._id, { populate: true })
+      if (!version) {
+        throw BadReq(
+          { code: 'version_not_found', version: versionDoc._id },
+          `Received invalid version '${versionDoc._id}'`
+        )
+      }
+
+      userId = (version.model as TempModel).owner
+      requestType = RequestTypes.Upload
       document = version
 
       version[field] = choice
       await version.save()
     } else if (request.deployment) {
-      const deployment = await findDeploymentById(req.user!, request.deployment._id, { populate: true })
-      userId = deployment.model.owner
-      requestType = 'Deployment'
+      const deploymentDoc = request.deployment as DeploymentDoc
+      const deployment = await findDeploymentById(req.user!, deploymentDoc._id, { populate: true })
+      if (!deployment) {
+        throw BadReq(
+          { code: 'deployment_not_found', deployment: deploymentDoc },
+          `Received invalid deployment '${deploymentDoc._id}'`
+        )
+      }
+
+      userId = (deployment.model as TempModel).owner
+      requestType = RequestTypes.Deployment
       document = deployment
 
       deployment[field] = choice
@@ -130,7 +148,7 @@ export const postRequestResponse = [
     }
 
     const user = await getUserByInternalId(userId)
-    if (user.email) {
+    if (user?.email) {
       await sendEmail({
         to: user.email,
         ...reviewedRequest({

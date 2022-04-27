@@ -1,8 +1,30 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model, Types, Document } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcryptjs'
 
-const UserSchema = new Schema(
+interface TempModel {
+  [attribute: string]: any
+}
+
+export interface User {
+  id: string
+  email: string
+
+  roles: Types.Array<string>
+  favourites: Types.Array<TempModel | Types.ObjectId>
+
+  token: string | undefined
+  data: any
+
+  createdAt: Date
+  updatedAt: Date
+
+  compareToken: (candidateToken: string) => Promise<boolean>
+}
+
+export type UserDoc = User & Document<any, any, User>
+
+const UserSchema = new Schema<User>(
   {
     id: { type: String, required: true, index: true, unique: true },
     email: { type: String },
@@ -22,19 +44,20 @@ const UserSchema = new Schema(
 )
 
 UserSchema.pre('save', function (next) {
-  const user = this
-  if (!user.isModified('token')) return next()
+  if (!this.isModified('token') || !this.token) return next()
 
-  bcrypt.hash(user.token, 10, (err, hash) => {
+  bcrypt.hash(this.token, 10, (err, hash) => {
     if (err) return next(err)
 
-    user.token = hash
+    this.token = hash
     next()
   })
 })
 
-UserSchema.methods.compareToken = function (candidateToken) {
+UserSchema.methods.compareToken = function (candidateToken: string) {
   return new Promise((resolve, reject) => {
+    if (!this.token) return resolve(false)
+
     bcrypt.compare(candidateToken, this.token, function (err, isMatch) {
       if (err) return reject(err)
       resolve(isMatch)
@@ -42,5 +65,5 @@ UserSchema.methods.compareToken = function (candidateToken) {
   })
 }
 
-const UserModel = model('User', UserSchema)
+const UserModel = model<User>('User', UserSchema)
 export default UserModel

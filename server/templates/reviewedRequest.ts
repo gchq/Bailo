@@ -3,19 +3,25 @@ import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
-import { RequestType } from '../services/request'
+import { TempModel, VersionDoc } from '../models/Version'
+import { DeploymentDoc } from '../models/Deployment'
+import { RequestTypes } from '../models/Request'
 
 export interface ReviewedRequestContext {
-  document: Document & { model: any; uuid: string }
+  document: VersionDoc | DeploymentDoc
   choice: string
-  requestType: RequestType
+  requestType: RequestTypes
 }
 
 export function html({ document, requestType, choice }: ReviewedRequestContext) {
+  const model = document.model as TempModel
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl =
-    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+  const requestUrl = model.uuid
+    ? `${base}/model/${model.uuid}`
+    : 'uuid' in document
+    ? `${base}/deployment/${document.uuid}`
+    : ''
 
   return mjml2html(
     wrapper(`
@@ -29,7 +35,7 @@ export function html({ document, requestType, choice }: ReviewedRequestContext) 
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          document.model.currentMetadata.highLevelDetails.name
+          model.currentMetadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -51,13 +57,17 @@ export function html({ document, requestType, choice }: ReviewedRequestContext) 
 }
 
 export function text({ document, requestType, choice }: ReviewedRequestContext) {
+  const model = document.model as TempModel
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl =
-    requestType === 'Upload' ? `${base}/model/${document.model.uuid}` : `${base}/deployment/${document.uuid}`
+  const requestUrl = model.uuid
+    ? `${base}/model/${model.uuid}`
+    : 'uuid' in document
+    ? `${base}/deployment/${document.uuid}`
+    : ''
 
   return dedent(`
-    '${document.model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
 
     Request Type: '${requestType}'
     Response: '${choice}'
@@ -67,8 +77,10 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
 }
 
 export function subject({ document }: ReviewedRequestContext) {
+  const model = document.model as TempModel
+
   return dedent(`
-    '${document.model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
   `)
 }
 

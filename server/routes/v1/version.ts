@@ -4,6 +4,7 @@ import bodyParser from 'body-parser'
 import { createVersionRequests } from '../../services/request'
 import { Forbidden, NotFound, BadReq } from '../../utils/result'
 import { findVersionById } from '../../services/version'
+import { ApprovalStates } from '../../models/Deployment'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -40,8 +41,8 @@ export const putVersion = [
     }
 
     version.metadata = metadata
-    version.managerApproved = 'No Response'
-    version.reviewerApproved = 'No Response'
+    version.managerApproved = ApprovalStates.NoResponse
+    version.reviewerApproved = ApprovalStates.NoResponse
 
     await version.save()
     await createVersionRequests({ version })
@@ -63,8 +64,8 @@ export const resetVersionApprovals = [
     if (user?.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
-    version.managerApproved = 'No Response'
-    version.reviewerApproved = 'No Response'
+    version.managerApproved = ApprovalStates.NoResponse
+    version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
     await createVersionRequests({ version })
 

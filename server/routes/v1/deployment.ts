@@ -9,6 +9,7 @@ import { BadReq, NotFound, Forbidden } from '../../utils/result'
 import { findModelByUuid } from '../../services/model'
 import { findVersionByName } from '../../services/version'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { ApprovalStates } from '../../models/Deployment'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -148,7 +149,7 @@ export const resetDeploymentApprovals = [
         `Unabled to find version for requested deployment: '${uuid}'`
       )
     }
-    deployment.managerApproved = 'No Response'
+    deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
     await createDeploymentRequests({ version, deployment: await deployment.populate('model') })

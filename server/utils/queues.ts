@@ -6,6 +6,7 @@ import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionState } from '../services/version'
 import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
+import { TempModel } from '../models/Deployment'
 
 let uploadQueue: PMongoQueue | undefined = undefined
 let deploymentQueue: PMongoQueue | undefined = undefined
@@ -78,11 +79,20 @@ export async function getDeploymentQueue() {
 
 async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
   const user = await getUserByInternalId(msg.payload.userId)
+  if (!user) {
+    throw new Error(`Unable to find user '${msg.payload.userId}'`)
+  }
+
   const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+  if (!version) {
+    throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+  }
+
+  const model = version.model as TempModel
 
   await markVersionState(user, msg.payload.versionId, state)
 
-  if (!version.model.owner.email) {
+  if (!model.owner.email) {
     return
   }
 
@@ -90,23 +100,30 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   await sendEmail({
-    to: version.model.owner.email,
+    to: model.owner.email,
     ...simpleEmail({
-      text: `Your model build for '${version.model.currentMetadata.highLevelDetails.name}' has ${message}`,
+      text: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
       columns: [
-        { header: 'Model Name', value: version.model.currentMetadata.highLevelDetails.name },
+        { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
         { header: 'Build Type', value: 'Model' },
         { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
       ],
-      buttons: [{ text: 'Build Logs', href: `${base}/model/${version.model.uuid}` }],
-      subject: `Your model build for '${version.model.currentMetadata.highLevelDetails.name}' has ${message}`,
+      buttons: [{ text: 'Build Logs', href: `${base}/model/${model.uuid}` }],
+      subject: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
     }),
   })
 }
 
 async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
   const user = await getUserByInternalId(msg.payload.userId)
+  if (!user) {
+    throw new Error(`Unable to find user '${msg.payload.userId}'`)
+  }
+
   const deployment = await findDeploymentById(user, msg.payload.deploymentId, { populate: true })
+  if (!deployment) {
+    throw new Error(`Unable to find deployment '${msg.payload.deploymentId}'`)
+  }
 
   if (!user.email) {
     return
@@ -114,18 +131,19 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
+  const model = deployment.model as TempModel
 
   await sendEmail({
     to: user.email,
     ...simpleEmail({
-      text: `Your deployment for '${deployment.model.currentMetadata.highLevelDetails.name}' has ${message}`,
+      text: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
       columns: [
-        { header: 'Model Name', value: deployment.model.currentMetadata.highLevelDetails.name },
+        { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
         { header: 'Build Type', value: 'Deployment' },
         { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
       ],
       buttons: [{ text: 'Build Logs', href: `${base}/deployment/${deployment.uuid}` }],
-      subject: `Your deployment for '${deployment.model.currentMetadata.highLevelDetails.name}' has ${message}`,
+      subject: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
     }),
   })
 }

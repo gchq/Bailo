@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById } from '../../services/model'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
+import { TempModel } from '../../models/Deployment'
 
 export const getUsers = [
   ensureUserRole('user'),
@@ -52,6 +53,10 @@ export const favouriteModel = [
     const user = await getUserById(req.user!.id)
     const model = await findModelById(req.user!, modelId)
 
+    if (!user) {
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user!.id}'`)
+    }
+
     if (user.favourites.includes(modelId)) {
       // model already favourited
       return res.json(user)
@@ -78,6 +83,10 @@ export const unfavouriteModel = [
     }
 
     const user = await getUserById(req.user!.id)
+    if (!user) {
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user!.id}'`)
+    }
+
     const model = await findModelById(req.user!, modelId)
 
     if (!user.favourites.includes(modelId)) {

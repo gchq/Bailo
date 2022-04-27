@@ -13,7 +13,15 @@ export default async function processUploads() {
       const startTime = new Date()
 
       const user = await getUserById(msg.payload.userId)
+
+      if (!user) {
+        throw new Error(`Unable to find upload user '${msg.payload.userId}'`)
+      }
+
       const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+      if (!version) {
+        throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+      }
 
       const vlog = logger.child({ versionId: version._id })
 
@@ -31,7 +39,15 @@ export default async function processUploads() {
 
       try {
         const user = await getUserById(msg.payload.userId)
+
+        if (!user) {
+          throw new Error('Unable to find upload user')
+        }
+
         const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+        if (!version) {
+          throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+        }
 
         await version.log('error', `Failed to process job due to error: '${e}'`)
         version.state.build = {
