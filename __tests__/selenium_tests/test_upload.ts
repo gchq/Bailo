@@ -57,34 +57,47 @@ describe('End to end test', () => {
       const driver = await getDriver()
 
       try {
+        logger.info('getting bailo homepage')
         await driver.get(BAILO_APP_URL)
 
+        logger.info('going to upload page')
         await click(driver, By.css('[data-test="uploadModelLink"]'))
+
+        logger.info('going to json tab')
         await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
+        logger.info('selecting correct schema')
         await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
 
+        logger.info('adding code files')
         await sendKeys(driver, By.id('select-code-file'), codePath)
         await sendKeys(driver, By.id('select-binary-file'), binaryPath)
 
+        logger.info('setting metadata')
         const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
         await sendKeys(driver, By.css('textarea'), metadata)
 
+        logger.info('submitting upload')
         await click(driver, By.css('[data-test="submitButton"]'))
 
+        logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
         const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
         modelInfo.url = modelUrl
         modelInfo.name = mName
 
+        logger.info({ modelInfo }, 'setting model info')
+
         const api = new Bailo(
           `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
         )
 
+        logger.info('getting api model')
         const model = await api.getModel(modelInfo.name)
 
         while (true) {
+          logger.info('')
           const version = await model.getVersion('1')
 
           if (version.version.built) {
@@ -95,8 +108,9 @@ describe('End to end test', () => {
           await pause(2000)
         }
 
-        logger.info(modelInfo, 'Received model information')
+        logger.info({ modelInfo }, 'Received model information')
       } finally {
+        logger.info('quitting driver')
         await driver.quit()
       }
     },
@@ -105,25 +119,33 @@ describe('End to end test', () => {
   // then another 3-ish minutes for initial image build (no existing cache)
 
   test('test can approve models', async () => {
+    logger.info('getting driver')
     const driver = await getDriver()
 
     try {
+      logger.info('getting bailo homepage')
       await driver.get(BAILO_APP_URL)
+
+      logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
+
+      logger.info('approving 2 requests')
       await approveRequests(driver, 2)
     } finally {
+      logger.info('quitting driver')
       await driver.quit()
     }
   }, 25000)
 
   test('test submit deployment for model', async () => {
+    logger.info('getting selenium driver')
     const driver = await getDriver()
-    logger.trace('got selenium driver')
 
     try {
       expect(modelInfo.url).not.toBeNull()
+
+      logger.info(`getting model page '${modelInfo.url}'`)
       await driver.get(modelInfo.url)
-      logger.trace(`getting model page '${modelInfo.url}'`)
 
       // sanity checks
       const api = new Bailo(
@@ -131,25 +153,34 @@ describe('End to end test', () => {
       )
 
       // ensure it's built
+      logger.info({ name: modelInfo.name }, 'getting model info')
       const model = await api.getModel(modelInfo.name)
+
+      logger.info('getting model version')
       const version = await model.getVersion('1')
+
+      logger.info('expecting model to be built')
       expect(version.version.built).toBeTruthy()
 
       // ensure it's approved
+      logger.info('ensure it is approved')
       expect(version.version.managerApproved).toBe('Accepted')
       expect(version.version.reviewerApproved).toBe('Accepted')
 
+      logger.info('opening deployment button')
       await click(driver, By.css('[data-test="requestDeploymentButton"]'))
+
+      logger.info('going to deployment')
       await click(driver, By.css('[data-test="submitDeployment"]'))
-      logger.trace(`requested deployment`)
 
       // Now need to find place to click get request via json blob
+      logger.info('getting json tab')
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
-      logger.trace(`switch to json view`)
 
+      logger.info(`selected current schema`)
       await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
-      logger.trace(`selected current schema`)
 
+      logger.info('sending deployment information')
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
       await sendKeys(
@@ -157,26 +188,33 @@ describe('End to end test', () => {
         By.css('textarea'),
         JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
       )
-      logger.trace(`set json body to deployment metadata`)
 
+      logger.info(`clicked submit button`)
       await click(driver, By.css('[data-test="submitButton"]'))
-      logger.trace(`clicked submit button`)
 
+      logger.info(`found url contains deployment`)
       await driver.wait(until.urlContains('/deployment/'))
-      logger.trace(`found url contains deployment`)
     } finally {
+      logger.info('quitting driver')
       await driver.quit()
     }
   }, 40000)
 
   test('test can approve deployments', async () => {
+    logger.info('getting driver')
     const driver = await getDriver()
 
     try {
+      logger.info('getting bailo homepage')
       await driver.get(BAILO_APP_URL)
+
+      logger.info('getting review link')
       await click(driver, By.css('[data-test="reviewLink"]'))
+
+      logger.info('approving 1 request')
       await approveRequests(driver, 1)
     } finally {
+      logger.info('quitting final')
       await driver.quit()
     }
   }, 20000)
@@ -184,21 +222,32 @@ describe('End to end test', () => {
   test(
     'test built model runs as expected',
     async () => {
+      logger.info('getting driver')
       const driver = await getDriver()
 
       let dockerPassword: string
 
       try {
+        logger.info('getting bailo homepage')
         await driver.get(BAILO_APP_URL)
+
+        logger.info('changing to settings page')
         await click(driver, By.css('[data-test="settingLink"]'))
+
+        logger.info('showing docker password')
         await click(driver, By.css('[data-test="showTokenButton"]'))
 
+        logger.info('getting docker password')
         const dockerPasswordEl = await waitForElement(driver, By.css('[data-test="dockerPassword"]'))
         dockerPassword = await dockerPasswordEl.getText()
+
+        logger.info({ dockerPassword }, 'got docker password')
       } finally {
+        logger.info('quitting driver')
         await driver.quit()
       }
 
+      logger.info('authenticating to docker')
       const docker = new Docker()
       const auth = {
         username: config.get('user.id'),
@@ -211,10 +260,13 @@ describe('End to end test', () => {
         logger.error.bind(logger),
         { silentErrors: true }
       )
+
+      logger.info('pulling container')
       await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
         silentErrors: true,
       })
 
+      logger.info('setting up container')
       const container = await docker.createContainer({
         Image: imageName,
         AttachStdin: false,
@@ -237,18 +289,25 @@ describe('End to end test', () => {
         },
       })
 
+      logger.info('starting container')
       await container.start()
-      await pause(500)
+
+      logger.info('waiting for container to start')
+      await pause(2000)
 
       try {
-        await pause(1500) //give container time to start running
+        logger.info('making request to container')
         const resp = await axios.post('http://localhost:9999/predict', {
           jsonData: { data: ['should be returned backwards'] },
         })
+        logger.info('expecting valid response')
         expect(resp.status).toEqual(200)
         expect(resp.data.data.ndarray[0]).toEqual('sdrawkcab denruter eb dluohs')
       } finally {
+        logger.info('stopping container')
         await container.stop()
+
+        logger.info('removing container')
         await container.remove()
       }
     },
