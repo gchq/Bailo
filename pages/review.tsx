@@ -22,9 +22,12 @@ import { Request } from '../types/interfaces'
 import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } from '../data/requests'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../data/api'
+import { useGetCurrentUser } from '../data/user'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
+
+  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -33,10 +36,12 @@ export default function Review() {
   return (
     <Wrapper title='Reviews' page={'review'}>
       <>
-        <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
-          <Tab value='user' label='My approvals' />
-          <Tab value='all' label='All approvals (Admin)' />
-        </Tabs>
+        {!isCurrentUserLoading && (
+          <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
+            <Tab value='user' label='My approvals' />
+            <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
+          </Tabs>
+        )}
         <ApprovalList type={'Upload'} category={value} />
         <ApprovalList type={'Deployment'} category={value} />
       </>
@@ -116,36 +121,50 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
             <Grid item xs={12} sm={8}>
               {type === 'Upload' && (
                 <>
-                  <Link href={`/model/${requestObj.version.model.uuid}`} passHref>
+                  <Link href={`/model/${requestObj?.version?.model?.uuid}`} passHref>
                     <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                      {requestObj.version.metadata.highLevelDetails.name}
+                      {requestObj?.version?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Stack direction='row' spacing={2}>
                     <Chip label={requestObj.approvalType} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
-                        {requestObj.version.metadata.highLevelDetails.modelInASentence}
+                        {requestObj?.version?.metadata?.highLevelDetails?.modelInASentence}
                       </Typography>
                     </Box>
                   </Stack>
+                  {requestObj?.version === undefined ||
+                    (requestObj?.version === null && (
+                      <Alert sx={{ mt: 2 }} severity='warning'>
+                        This model appears to have data missing - check with the uploader to make sure it was uploaded
+                        correctly
+                      </Alert>
+                    ))}
                 </>
               )}
               {type === 'Deployment' && (
                 <>
-                  <Link href={`/deployment/${requestObj.deployment.uuid}`} passHref>
+                  <Link href={`/deployment/${requestObj?.deployment?.uuid}`} passHref>
                     <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                      {requestObj.deployment.metadata.highLevelDetails.name}
+                      {requestObj?.deployment?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
-                    <Link href={`/model/${requestObj.deployment.model.uuid}`} passHref>
+                    <Link href={`/model/${requestObj?.deployment?.model?.uuid}`} passHref>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                        {requestObj.deployment.model.currentMetadata.highLevelDetails.name}
+                        {requestObj?.deployment?.model?.currentMetadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
                   </Typography>
+                  {requestObj?.deployment === undefined ||
+                    (requestObj?.deployment === null && (
+                      <Alert sx={{ mt: 2 }} severity='warning'>
+                        This deployment appears to have data missing - check with the requester to make sure it was
+                        requested correctly
+                      </Alert>
+                    ))}
                 </>
               )}
             </Grid>

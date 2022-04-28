@@ -11,7 +11,11 @@ import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
-import FormLabel from '@mui/material/FormLabel'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import DisplaySettings from '@mui/icons-material/DisplaySettings'
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import AccordionDetails from '@mui/material/AccordionDetails'
 import { Deployment } from '../types/interfaces'
 import _ from 'lodash'
 import Link from 'next/link'
@@ -73,79 +77,92 @@ const Deployments = () => {
   return (
     <>
       <Wrapper title='My Deployments' page={'deployments'}>
-        <Box>
-          <Paper sx={{ py: 2, px: 4 }}>
+        <Paper sx={{ py: 2, px: 4 }}>
+          <Box>
             <Box>
-              <FormControl component='fieldset'>
-                <FormLabel component='legend'>Organise by</FormLabel>
-                <RadioGroup
-                  defaultValue={'date'}
-                  row
-                  onChange={handleOrderChange}
-                  aria-label='order'
-                  name='row-radio-buttons-group'
+              <Accordion sx={{ boxShadow: 'none' }}>
+                <AccordionSummary
+                  aria-controls='panel1a-content'
+                  expandIcon={<ExpandMoreIcon />}
+                  id='panel1a-header'
+                  sx={{ p: 0 }}
                 >
-                  <FormControlLabel value='date' control={<Radio />} label='Date' />
-                  <FormControlLabel value='name' control={<Radio />} label='Name' />
-                  <FormControlLabel value='model' control={<Radio />} label='Model' />
-                </RadioGroup>
-              </FormControl>
+                  <DisplaySettings sx={{ color: '#757575', mr: 1 }} />
+                  <Typography>Arrange by</Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 2, backgroundColor: 'whitesmoke' }}>
+                  <FormControl component='fieldset'>
+                    <RadioGroup
+                      defaultValue={'date'}
+                      row
+                      onChange={handleOrderChange}
+                      aria-label='order'
+                      name='row-radio-buttons-group'
+                    >
+                      <FormControlLabel value='date' control={<Radio />} label='Date' />
+                      <FormControlLabel value='name' control={<Radio />} label='Name' />
+                      <FormControlLabel value='model' control={<Radio />} label='Model' />
+                    </RadioGroup>
+                  </FormControl>
+                </AccordionDetails>
+              </Accordion>
+              <Divider flexItem />
             </Box>
-            {(selectedOrder === 'date' || selectedOrder === 'name') && (
-              <Box>
-                {orderedDeployments?.map((deployment, index) => {
+          </Box>
+          {(selectedOrder === 'date' || selectedOrder === 'name') && (
+            <Box>
+              {orderedDeployments?.map((deployment, index) => {
+                return (
+                  <Box key={`deployment-${index}`} sx={{ mt: 2 }}>
+                    <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                      <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                        {deployment?.metadata?.highLevelDetails?.name}
+                      </MuiLink>
+                    </Link>
+                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                      {displayDate(deployment?.createdAt)}
+                    </Typography>
+                    {index !== orderedDeployments!.length - 1 && (
+                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                    )}
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+          {selectedOrder === 'model' && (
+            <Box>
+              {groupedDeployments !== undefined &&
+                Object.keys(groupedDeployments).map((key) => {
                   return (
-                    <Box key={`deployment-${index}`} sx={{ mt: 2 }}>
-                      <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                        <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                          {deployment?.metadata?.highLevelDetails?.name}
-                        </MuiLink>
-                      </Link>
-                      <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                        {displayDate(deployment?.createdAt)}
-                      </Typography>
-                      {index !== orderedDeployments!.length - 1 && (
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                      )}
+                    <Box sx={{ mt: 3, mb: 3 }} key={key}>
+                      <ModelNameFromKey modelId={key} />
+                      <Divider flexItem />
+                      {groupedDeployments[key].map((deployment, index) => {
+                        return (
+                          <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
+                            <Box>
+                              <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                                <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                                  {deployment?.metadata?.highLevelDetails?.name}
+                                </MuiLink>
+                              </Link>
+                            </Box>
+                            <Box>
+                              <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
+                            </Box>
+                          </Box>
+                        )
+                      })}
                     </Box>
                   )
                 })}
-              </Box>
-            )}
-            {selectedOrder === 'model' && (
-              <Box>
-                {groupedDeployments !== undefined &&
-                  Object.keys(groupedDeployments).map((key) => {
-                    return (
-                      <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                        <ModelNameFromKey modelId={key} />
-                        <Divider flexItem />
-                        {groupedDeployments[key].map((deployment, index) => {
-                          return (
-                            <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
-                              <Box>
-                                <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                                    {deployment?.metadata?.highLevelDetails?.name}
-                                  </MuiLink>
-                                </Link>
-                              </Box>
-                              <Box>
-                                <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
-                              </Box>
-                            </Box>
-                          )
-                        })}
-                      </Box>
-                    )
-                  })}
-              </Box>
-            )}
-            <Box>
-              {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
             </Box>
-          </Paper>
-        </Box>
+          )}
+          <Box>
+            {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
+          </Box>
+        </Paper>
       </Wrapper>
     </>
   )

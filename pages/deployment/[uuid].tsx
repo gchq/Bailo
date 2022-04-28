@@ -194,7 +194,7 @@ export default function Deployment() {
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <pre>
               <div>
-                # Login to Docker (your token can be found on the <Link href='/settings'>/settings</Link> page)
+                # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
               </div>
               <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
               <br />
