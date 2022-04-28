@@ -48,6 +48,7 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#breaking">Breaking Changes</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
@@ -181,6 +182,14 @@ See [docs/USER-GUIDE.md](docs/user-guide.md)
 ## Contributing
 
 See [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
+<br />
+
+<!-- BREAKING CHANGES -->
+
+## Breaking Changes
+
+**28-04-2022**: Changed 'schema' model to be stored as a string instead of an object. Delete & recreate your schemas.
 
 <br />
 
