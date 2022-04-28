@@ -3,7 +3,7 @@ import { getUploadQueue } from '../utils/queues'
 import prettyMs from 'pretty-ms'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'
-import { getUserById } from '../services/user'
+import { getUserByInternalId } from '../services/user'
 import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 
 export default async function processUploads() {
@@ -12,8 +12,16 @@ export default async function processUploads() {
     try {
       const startTime = new Date()
 
-      const user = await getUserById(msg.payload.userId)
+      const user = await getUserByInternalId(msg.payload.userId)
+
+      if (!user) {
+        throw new Error(`Unable to find upload user '${msg.payload.userId}'`)
+      }
+
       const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+      if (!version) {
+        throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+      }
 
       const vlog = logger.child({ versionId: version._id })
 
@@ -30,8 +38,16 @@ export default async function processUploads() {
       logger.error({ error: e, versionId: msg.payload.versionId }, 'Error occurred whilst processing upload')
 
       try {
-        const user = await getUserById(msg.payload.userId)
+        const user = await getUserByInternalId(msg.payload.userId)
+
+        if (!user) {
+          throw new Error('Unable to find upload user')
+        }
+
         const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+        if (!version) {
+          throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+        }
 
         await version.log('error', `Failed to process job due to error: '${e}'`)
         version.state.build = {

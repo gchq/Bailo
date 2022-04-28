@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import SchemaModel from '../../models/Schema'
 import { validateSchema } from '../../utils/validateSchema'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
@@ -9,6 +8,8 @@ import { BadReq, NotFound, Forbidden } from '../../utils/result'
 import { findModelByUuid } from '../../services/model'
 import { findVersionByName } from '../../services/version'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { ApprovalStates } from '../../models/Deployment'
+import { findSchemaByRef } from '../../services/schema'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -48,10 +49,7 @@ export const postDeployment = [
     req.log.info({ code: 'requesting_deployment' }, 'User requesting deployment')
     const body = req.body as any
 
-    const schema = await SchemaModel.findOne({
-      reference: body.schemaRef,
-    })
-
+    const schema = await findSchemaByRef(body.schemaRef)
     if (!schema) {
       throw NotFound(
         { code: 'schema_not_found', schemaRef: body.schemaRef },
@@ -111,7 +109,10 @@ export const postDeployment = [
       )
     }
 
-    const managerRequest = await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    const managerRequest = await createDeploymentRequests({
+      version,
+      deployment: await deployment.populate('model').execPopulate(),
+    })
     req.log.info({ code: 'created_deployment', request: managerRequest._id, uuid }, 'Successfully created deployment')
 
     res.json({
@@ -148,10 +149,10 @@ export const resetDeploymentApprovals = [
         `Unabled to find version for requested deployment: '${uuid}'`
       )
     }
-    deployment.managerApproved = 'No Response'
+    deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentRequests({ version, deployment: await deployment.populate('model') })
+    await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
   },

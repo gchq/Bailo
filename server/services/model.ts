@@ -7,6 +7,7 @@ import { Model, User } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
+import { UserDoc } from '../models/User'
 
 const authorisation = new AuthorisationBase()
 
@@ -16,7 +17,7 @@ export function serializedModelFields(): SerializerOptions {
   }
 }
 
-export async function filterModel<T>(user: User, unfiltered: T): Promise<T> {
+export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const models = castArray(unfiltered)
 
   const filtered = await asyncFilter(models, (model: Model) => authorisation.canUserSeeModel(user, model))
@@ -24,12 +25,12 @@ export async function filterModel<T>(user: User, unfiltered: T): Promise<T> {
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findModelByUuid(user: User, uuid: string) {
+export async function findModelByUuid(user: UserDoc, uuid: string) {
   const model = await ModelModel.findOne({ uuid })
   return filterModel(user, model)
 }
 
-export async function findModelById(user: User, id: string | Types.ObjectId) {
+export async function findModelById(user: UserDoc, id: string | Types.ObjectId) {
   const model = await ModelModel.findById(id)
   return filterModel(user, model)
 }
@@ -47,7 +48,7 @@ export function isValidFilter(filter: any): filter is string {
   return typeof filter === 'string'
 }
 
-export async function findModels(user: User, { filter, type }: ModelFilter) {
+export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
   const query: any = {}
 
   if (filter) query.$text = { $search: filter as string }
@@ -62,7 +63,7 @@ export async function findModels(user: User, { filter, type }: ModelFilter) {
   return filterModel(user, models)
 }
 
-export async function createModel(user: User, data: Model) {
+export async function createModel(user: UserDoc, data: Model) {
   const model = new ModelModel(data)
 
   if (!authorisation.canUserSeeModel(user, model)) {

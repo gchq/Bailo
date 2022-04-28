@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { customAlphabet } from 'nanoid'
 
 import { validateSchema } from '../../utils/validateSchema'
-import SchemaModel from '../../models/Schema'
 import { normalizeMulterFile } from '../../utils/multer'
 import MinioStore from '../../utils/MinioStore'
 import { getUploadQueue } from '../../utils/queues'
@@ -16,6 +15,7 @@ import { createVersionRequests } from '../../services/request'
 import { BadReq } from '../../utils/result'
 import { findModelByUuid, createModel } from '../../services/model'
 import { createVersion } from '../../services/version'
+import { findSchemaByRef } from '../../services/schema'
 import _ from 'lodash'
 
 export interface MinioFile {
@@ -78,10 +78,7 @@ export const postUpload = [
         })
       }
 
-      const schema = await SchemaModel.findOne({
-        reference: metadata.schemaRef,
-      })
-
+      const schema = await findSchemaByRef(metadata.schemaRef)
       if (!schema) {
         req.log.warn({ code: 'schema_not_found', schemaRef: metadata.schemaRef }, 'Schema not found')
         return res.status(400).json({
@@ -171,7 +168,7 @@ export const postUpload = [
       req.log.info({ code: 'created_model', model }, 'Created model document')
 
       const [managerRequest, reviewerRequest] = await createVersionRequests({
-        version: await version.populate('model'),
+        version: await version.populate('model').execPopulate(),
       })
       req.log.info(
         { code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },

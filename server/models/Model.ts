@@ -1,6 +1,24 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model, Document, Types } from 'mongoose'
+import { UserDoc } from './User'
+import { VersionDoc } from './Version'
 
-const ModelSchema = new Schema(
+export interface Model {
+  schemaRef: string
+  uuid: string
+
+  parent: ModelDoc
+  versions: Types.Array<VersionDoc | Types.ObjectId>
+  currentMetadata: any
+
+  owner: UserDoc | Types.ObjectId
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type ModelDoc = Model & Document<any, any, Model>
+
+const ModelSchema = new Schema<Model>(
   {
     schemaRef: { type: String, required: true },
     uuid: { type: String, required: true, index: true, unique: true },
@@ -16,7 +34,7 @@ const ModelSchema = new Schema(
   }
 )
 
-const ModelModel = model('Model', ModelSchema)
+const ModelModel = model<Model>('Model', ModelSchema)
 
 export async function createIndexes() {
   ModelSchema.index({ '$**': 'text' })

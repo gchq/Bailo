@@ -1,10 +1,18 @@
-import { Date, Document, Types } from 'mongoose'
+import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
+import { UserDoc } from '../server/models/User'
+
+export type { VersionDoc as Version } from '../server/models/Version'
+export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
+export type { RequestDoc as Request } from '../server/models/Request'
+export type { UserDoc as User } from '../server/models/User'
+
+export type { ApprovalStates } from '../server/models/Deployment'
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User
+      user: UserDoc
 
       reqId: string
       log: Logger
@@ -62,23 +70,6 @@ export interface LogStatement {
   msg: string
 }
 
-export type ApprovalStatus = 'Accepted' | 'Declined' | 'No Response'
-
-export interface Version extends Document {
-  _id: Types.ObjectId
-  model: Model
-  version: string
-
-  metadata: ModelMetadata
-
-  built: boolean
-  managerApproved: ApprovalStatus
-  reviewerApproved: ApprovalStatus
-
-  state: any
-  logs: Array<LogStatement>
-}
-
 export type SchemaType = 'UPLOAD' | 'DEPLOYMENT'
 
 export interface Schema {
@@ -86,26 +77,6 @@ export interface Schema {
   reference: string
   schema: any
   use: SchemaType
-}
-
-export interface Deployment extends Document {
-  _id: Types.ObjectId
-
-  schemaRef: string
-  uuid: string
-
-  model: Model
-  metadata: any
-
-  managerApproved: ApprovalStatus
-
-  logs: Array<LogStatement>
-  built: boolean
-
-  owner: User
-
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface UiConfig {
@@ -130,34 +101,7 @@ export interface UiConfig {
   }
 }
 
-export interface User {
-  _id: Types.ObjectId
-  id: string
-  roles: Array<string>
-  favourites: Array<Types.ObjectId>
-  token: string
-  email?: string
-
-  save: Function
-  toObject: Function
-}
-
-export type RequestStatusType = 'Accepted' | 'Declined' | 'No Response'
-export type RequestApprovalType = 'Manager' | 'Reviewer'
 export type RequestType = 'Upload' | 'Deployment'
-export interface Request extends Document {
-  _id: Types.ObjectId
-
-  version: Version
-  deployment: Deployment
-
-  user: Types.ObjectId
-
-  status: RequestStatusType
-
-  approvalType: RequestApprovalType
-  request: RequestType
-}
 
 export type StepType = 'Form' | 'Data' | 'Message'
 export interface Step {

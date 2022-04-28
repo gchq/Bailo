@@ -1,8 +1,45 @@
-import { Schema, model } from 'mongoose'
-import { approvalStates } from './Request'
+import { Schema, model, Document, Types } from 'mongoose'
 import logger from '../utils/logger'
+import { ModelDoc } from './Model'
+import { UserDoc } from './User'
 
-const DeploymentSchema = new Schema(
+export const approvalStates = ['Accepted', 'Declined', 'No Response']
+
+export enum ApprovalStates {
+  Accepted = 'Accepted',
+  Declined = 'Declined',
+  NoResponse = 'No Response',
+}
+
+export interface LogStatement {
+  timestamp: Date
+  level: string
+  msg: string
+}
+
+export interface Deployment {
+  schemaRef: string
+  uuid: string
+
+  model: Types.ObjectId | ModelDoc
+  metadata: any
+
+  managerApproved: ApprovalStates
+
+  logs: Types.Array<LogStatement>
+  built: boolean
+
+  owner: Types.ObjectId | UserDoc
+
+  createdAt: Date
+  updatedAt: Date
+
+  log: (level: string, msg: string) => Promise<void>
+}
+
+export type DeploymentDoc = Deployment & Document<any, any, Deployment>
+
+const DeploymentSchema = new Schema<Deployment>(
   {
     schemaRef: { type: String, required: true },
     uuid: { type: String, required: true, index: true, unique: true },
@@ -27,5 +64,5 @@ DeploymentSchema.methods.log = async function (level: string, msg: string) {
   await DeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
-const DeploymentModel = model('Deployment', DeploymentSchema)
+const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
 export default DeploymentModel
