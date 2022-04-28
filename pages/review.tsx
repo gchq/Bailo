@@ -162,7 +162,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
                     (requestObj?.deployment === null && (
                       <Alert sx={{ mt: 2 }} severity='warning'>
                         This deployment appears to have data missing - check with the requester to make sure it was
-                        requestded correctly
+                        requested correctly
                       </Alert>
                     ))}
                 </>
