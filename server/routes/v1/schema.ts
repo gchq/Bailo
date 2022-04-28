@@ -1,7 +1,7 @@
-import SchemaModel from '../../models/Schema'
 import { Request, Response } from 'express'
 import { ensureUserRole } from '../../utils/user'
 import { NotFound } from '../../utils/result'
+import { findSchemasByUse, findSchemaByRef } from '../../services/schema'
 
 export const getSchemas = [
   ensureUserRole('user'),
@@ -10,7 +10,7 @@ export const getSchemas = [
       throw NotFound({ code: 'use_field_missing_in_request' }, `Requires 'use' field to be provided.`)
     }
 
-    const schemas = await SchemaModel.find({ use: req.query.use })
+    const schemas = await findSchemasByUse(req.query.use as string)
 
     req.log.info({ code: 'fetching_schemas', schemas }, 'User fetching schemas')
     return res.json(schemas)
@@ -24,8 +24,7 @@ export const getDefaultSchema = [
       throw NotFound({ code: 'use_field_missing_in_request' }, `Requires 'use' field to be provided`)
     }
 
-    const schema = await SchemaModel.find({ use: req.query.use }).sort({ createdAt: -1 }).limit(1)
-
+    const schema = await findSchemasByUse(req.query.use as string, 1)
     if (!schema.length) {
       throw NotFound({ code: 'default_schema_not_found' }, `Could not find default schema`)
     }
@@ -40,7 +39,7 @@ export const getSchema = [
   async (req: Request, res: Response) => {
     const { ref } = req.params
 
-    const schema = await SchemaModel.findOne({ reference: decodeURIComponent(ref) })
+    const schema = await findSchemaByRef(decodeURIComponent(ref))
 
     if (!schema) {
       req.log.warn({ code: 'schema_not_found', use: req.query.use }, `Could not find given schema`)

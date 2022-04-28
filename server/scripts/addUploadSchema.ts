@@ -1,18 +1,16 @@
-import SchemaModel from '../models/Schema'
+import { createSchema } from '../services/schema'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
 
 import minimal from './example_schemas/minimal_upload_schema.json'
 ;(async () => {
   await connectToMongoose()
 
-  const schema = new SchemaModel({
+  await createSchema({
     name: 'Minimal Schema v10',
     reference: '/Minimal/General/v10',
     schema: minimal,
     use: 'UPLOAD',
   })
-
-  await schema.save()
 
   setTimeout(disconnectFromMongoose, 50)
 })()

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import SchemaModel from '../../models/Schema'
 import { ensureUserRole } from '../../utils/user'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
 import { findDeployments } from '../../services/deployment'
+import { findSchemaByRef } from '../../services/schema'
 
 export const getModels = [
   ensureUserRole('user'),
@@ -90,8 +90,7 @@ export const getModelSchema = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const schema = await SchemaModel.findOne({ reference: model.schemaRef })
-
+    const schema = await findSchemaByRef(model.schemaRef)
     if (!schema) {
       throw NotFound(
         { code: 'schema_not_found', uuid, schemaRef: model.schemaRef },
