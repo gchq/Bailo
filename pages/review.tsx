@@ -34,7 +34,7 @@ export default function Review() {
   }
 
   return (
-    <Wrapper title='Reviews' page={'review'}>
+    <Wrapper title='Reviews' page='review'>
       <>
         {!isCurrentUserLoading && (
           <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
@@ -42,20 +42,22 @@ export default function Review() {
             <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
           </Tabs>
         )}
-        <ApprovalList type={'Upload'} category={value} />
-        <ApprovalList type={'Deployment'} category={value} />
+        <ApprovalList type='Upload' category={value} />
+        <ApprovalList type='Deployment' category={value} />
       </>
     </Wrapper>
   )
 }
 
-const ErrorWrapper = ({ message }: { message: string | undefined }) => (
-  <Paper sx={{ mt: 2, mb: 2 }}>
-    <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
-  </Paper>
-)
+function ErrorWrapper({ message }: { message: string | undefined }) {
+  return (
+    <Paper sx={{ mt: 2, mb: 2 }}>
+      <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
+    </Paper>
+  )
+}
 
-const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewFilterType }) => {
+function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -206,9 +208,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
         </DialogActions>
       </Dialog>
       {requests!.length === 0 && (
-        <EmptyBlob
-          text={'All done! No ' + (type === 'Upload' ? 'models' : 'deployments') + ' are waiting for approvals'}
-        />
+        <EmptyBlob text={`All done! No ${type === 'Upload' ? 'models' : 'deployments'} are waiting for approvals`} />
       )}
     </Paper>
   )

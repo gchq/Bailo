@@ -2,19 +2,18 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 import Paper from '@mui/material/Paper'
-import { useGetModel } from '../../../../data/model'
+import { useGetModelVersion, useGetModel } from '../../../../data/model'
+import { putEndpoint } from '../../../../data/api'
+import useCacheVariable from '../../../../utils/useCacheVariable'
 
 import Wrapper from '../../../../src/Wrapper'
 import { useGetSchema } from '../../../../data/schema'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
-import { SplitSchema, Step } from '../../../../types/interfaces'
+import { SplitSchema } from '../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
 
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
-import { useGetModelVersion } from 'data/model'
-import { putEndpoint } from 'data/api'
-import useCacheVariable from 'utils/useCacheVariable'
 
 const uiSchema = {
   highLevelDetails: {
@@ -77,7 +76,8 @@ function Upload() {
         errorMessage = `${edit.statusText}: ${(await edit.json()).message}`
       } catch (e) {}
 
-      return setError(errorMessage)
+      setError(errorMessage)
+      return
     }
 
     const response = await edit.json()
@@ -94,7 +94,7 @@ function Upload() {
 
 export default function Outer() {
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
+    <Wrapper title='Upload Model' page='upload'>
       <Upload />
     </Wrapper>
   )

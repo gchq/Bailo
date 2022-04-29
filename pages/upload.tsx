@@ -34,16 +34,14 @@ function renderSubmissionTab(
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <ModelExportAndSubmission
-        formData={data}
-        splitSchema={splitSchema}
-        schemaRef={splitSchema.reference}
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-      />
-    </>
+    <ModelExportAndSubmission
+      formData={data}
+      splitSchema={splitSchema}
+      schemaRef={splitSchema.reference}
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+    />
   )
 }
 
@@ -121,7 +119,7 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
@@ -142,7 +140,7 @@ function Upload() {
   if (errorWrapper) return errorWrapper
 
   if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
-    return <></>
+    return null
   }
 
   const onSubmit = async () => {
@@ -196,7 +194,7 @@ function Upload() {
 
 export default function Outer() {
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
+    <Wrapper title='Upload Model' page='upload'>
       <Upload />
     </Wrapper>
   )

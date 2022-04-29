@@ -1,15 +1,15 @@
-import Wrapper from '../../../src/Wrapper'
 import { useRouter } from 'next/router'
-import { useGetModel } from '../../../data/model'
-import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
 import React, { useState, useEffect } from 'react'
 import Paper from '@mui/material/Paper'
-import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { postEndpoint } from '../../../data/api'
-import { Schema, SplitSchema, Step } from '../../../types/interfaces'
-import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
+import Wrapper from '../../../src/Wrapper'
+import { useGetModel } from '../../../data/model'
+import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
+import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
+import { postEndpoint } from '../../../data/api'
+import { Schema, SplitSchema } from '../../../types/interfaces'
+import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
@@ -40,7 +40,7 @@ export default function Deploy() {
   useEffect(() => {
     if (!currentSchema) return
 
-    const { schema, reference } = currentSchema
+    const { reference } = currentSchema
     const newSteps = getStepsFromSchema(currentSchema, uiSchema, [
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
@@ -75,9 +75,12 @@ export default function Deploy() {
       let errorMessage = deploy.statusText
       try {
         errorMessage = `${deploy.statusText}: ${(await deploy.json()).message}`
-      } catch (e) {}
+      } catch (e) {
+        // failed to get json from server
+      }
 
-      return setError(errorMessage)
+      setError(errorMessage)
+      return
     }
 
     const { uuid } = await deploy.json()
@@ -85,7 +88,7 @@ export default function Deploy() {
   }
 
   return (
-    <Wrapper title={'Deploy: ' + model!.currentMetadata.highLevelDetails.name} page={'model'}>
+    <Wrapper title={`Deploy: ${model!.currentMetadata.highLevelDetails.name}`} page='model'>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           <Box />

@@ -34,10 +34,6 @@ import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
-import EmptyBlob from '../../src/common/EmptyBlob'
-import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { Deployment, User, Version } from '../../types/interfaces'
-import ApprovalsChip from '../../src/common/ApprovalsChip'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
@@ -46,16 +42,20 @@ import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import { postEndpoint } from 'data/api'
 import dynamic from 'next/dynamic'
 import { Types } from 'mongoose'
+import ApprovalsChip from '../../src/common/ApprovalsChip'
+import { Deployment, User, Version } from '../../types/interfaces'
+import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
+import EmptyBlob from '../../src/common/EmptyBlob'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
-})
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
+))
 
-const Model = () => {
+function Model() {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -114,7 +114,7 @@ const Model = () => {
   if (error) return error
 
   if (isVersionsLoading || isVersionLoading || isDeploymentsLoading || isCurrentUserLoading) {
-    return <Wrapper title={'Loading...'} page={'model'} />
+    return <Wrapper title='Loading...' page='model' />
   }
 
   const editModel = () => {
@@ -150,7 +150,7 @@ const Model = () => {
   }
 
   return (
-    <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page={'model'}>
+    <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page='model'>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -285,11 +285,7 @@ const Model = () => {
           </>
         )}
 
-        {group === 'compliance' && (
-          <>
-            <ComplianceFlow initialElements={complianceFlow} />
-          </>
-        )}
+        {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
         {group === 'build' && <TerminalLog logs={version!.logs} title='Model Build Logs' />}
 

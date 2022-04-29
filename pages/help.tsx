@@ -6,12 +6,12 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
-import { useGetUiConfig } from '../data/uiConfig'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ArticleIcon from '@mui/icons-material/Article'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import useTheme from '@mui/styles/useTheme'
+import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
+import { useGetUiConfig } from '../data/uiConfig'
 import { Theme } from '../src/theme'
 
 export default function Help() {
@@ -25,7 +25,7 @@ export default function Help() {
   if (error) return error
 
   return (
-    <Wrapper title='Help' page={'help'}>
+    <Wrapper title='Help' page='help'>
       {!isUiConfigLoading && (
         <>
           <Box sx={{ p: 5, textAlign: 'center' }}>

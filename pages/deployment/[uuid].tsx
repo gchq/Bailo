@@ -23,6 +23,7 @@ import Stack from '@mui/material/Stack'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import MenuItem from '@mui/material/MenuItem'
 
+import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -34,7 +35,6 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
-import Link from 'next/link'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -88,7 +88,7 @@ export default function Deployment() {
   useEffect(() => {
     if (deployment !== undefined) {
       const { modelID, initialVersionRequested } = deployment?.metadata?.highLevelDetails
-      setTag(modelID + ':' + initialVersionRequested)
+      setTag(`${modelID}:${initialVersionRequested}`)
     }
   }, [deployment])
 
@@ -128,7 +128,7 @@ export default function Deployment() {
   if (error) return error
 
   if (isDeploymentLoading || isUiConfigLoading || isCurrentUserLoading) {
-    return <Wrapper title={'Loading...'} page={'deployment'} />
+    return <Wrapper title='Loading...' page='deployment' />
   }
 
   const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
@@ -139,7 +139,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page={'deployment'}>
+      <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page='deployment'>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -181,7 +181,7 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {tab === 'overview' && <DeploymentOverview version={deployment} use={'DEPLOYMENT'} />}
+          {tab === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
 
           {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
@@ -209,7 +209,7 @@ export default function Deployment() {
               <br />
 
               <div># Check that the Docker container is running</div>
-              <CodeLine line={`docker ps`} />
+              <CodeLine line='docker ps' />
               <br />
 
               <div># The model is accessible at localhost:9999</div>

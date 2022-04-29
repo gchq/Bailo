@@ -37,7 +37,7 @@ export default function Settings() {
   }
 
   return (
-    <Wrapper title='Settings' page={'settings'}>
+    <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
         <Tabs value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
           <Tab label='Profile' {...a11yProps(0)} />

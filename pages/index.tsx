@@ -2,7 +2,6 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Wrapper from '../src/Wrapper'
 import SearchIcon from '@mui/icons-material/Search'
 import InputBase from '@mui/material/InputBase'
 import { useState } from 'react'
@@ -12,6 +11,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
+import Wrapper from '../src/Wrapper'
 import useDebounce from '../utils/useDebounce'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
@@ -44,7 +44,7 @@ export default function ExploreModels() {
   }
 
   return (
-    <Wrapper title={'Explore Models'} page={'marketplace'}>
+    <Wrapper title='Explore Models' page='marketplace'>
       <Paper
         component='form'
         onSubmit={onFilterSubmit}

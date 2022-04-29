@@ -71,11 +71,11 @@ function Upload() {
   if (errorWrapper) return errorWrapper
 
   if (isModelLoading || isSchemaLoading) {
-    return <></>
+    return null
   }
 
   if (!model || !schema) {
-    return <></>
+    return null
   }
 
   const onSubmit = async () => {
@@ -116,7 +116,7 @@ function Upload() {
 
 export default function Outer() {
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
+    <Wrapper title='Upload Model' page='upload'>
       <Upload />
     </Wrapper>
   )
