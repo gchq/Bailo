@@ -53,8 +53,6 @@ module.exports = {
     },
     uploadWarning: {
       showWarning: true,
-      text: 'Make sure the information you have included is correct.',
-      showCheckbox: true,
       checkboxText: 'By checking here you confirm that the information is correct',
     },
   },

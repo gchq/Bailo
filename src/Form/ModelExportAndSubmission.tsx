@@ -129,16 +129,14 @@ const ModelExportAndSubmission = ({
           <Grid container justifyContent='center'>
             {uiConfig?.uploadWarning?.showWarning && (
               <Alert sx={{ width: '100%' }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-                {uiConfig.uploadWarning.showCheckbox && (
-                  <AlertTitle sx={{ m: 0 }}>
-                    <Checkbox
-                      sx={{ p: '0px !important', mr: 1 }}
-                      checked={warningCheckboxVal}
-                      onChange={handleCheckboxChange}
-                    />
-                    {uiConfig.uploadWarning.checkboxText}
-                  </AlertTitle>
-                )}
+                <AlertTitle sx={{ m: 0 }}>
+                  <Checkbox
+                    sx={{ p: '0px !important', mr: 1 }}
+                    checked={warningCheckboxVal}
+                    onChange={handleCheckboxChange}
+                  />
+                  {uiConfig.uploadWarning.checkboxText}
+                </AlertTitle>
               </Alert>
             )}
             <Stack direction='row' spacing={2} sx={{ mt: 5, mb: 5 }}>
@@ -185,7 +183,7 @@ const ModelExportAndSubmission = ({
                 <Button
                   variant='contained'
                   onClick={onSubmit}
-                  disabled={uiConfig?.uploadWarning.showCheckbox && !warningCheckboxVal}
+                  disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
                 >
                   Submit
                 </Button>

@@ -102,8 +102,6 @@ export interface UiConfig {
 
   uploadWarning: {
     showWarning: boolean
-    text: string
-    showCheckbox: boolean
     checkboxText: string
   }
 }
