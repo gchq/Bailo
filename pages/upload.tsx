@@ -20,6 +20,7 @@ import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import { getErrorMessage } from '@/utils/fetcher'
+import LinearProgress from '@mui/material/LinearProgress'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -66,6 +67,7 @@ function Upload() {
   const [user, setUser] = useState<User | undefined>(undefined)
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
+  const [loadingBar, setLoadingBar] = useState<boolean>(false)
 
   useEffect(() => {
     if (currentSchema) return
@@ -164,12 +166,14 @@ function Upload() {
 
     form.append('metadata', JSON.stringify(data))
 
+    setLoadingBar(true)
     const upload = await fetch('/api/v1/model', {
       method: 'POST',
       body: form,
     })
 
     if (upload.status >= 400) {
+      setLoadingBar(false)
       return setError(await getErrorMessage(upload))
     }
 
@@ -190,6 +194,7 @@ function Upload() {
 
       <SubmissionError error={error} />
       <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      {loadingBar && <LinearProgress sx={{ mt: 4, mb: 2, p: 1 }} />}
     </Paper>
   )
 }
