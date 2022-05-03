@@ -128,13 +128,16 @@ const ModelExportAndSubmission = ({
         <>
           <Grid container justifyContent='center'>
             {uiConfig?.uploadWarning?.showWarning && (
-              <Alert severity='warning'>
-                <AlertTitle>{uiConfig.uploadWarning.text}</AlertTitle>
+              <Alert sx={{ width: '100%' }} severity={warningCheckboxVal ? 'success' : 'warning'}>
                 {uiConfig.uploadWarning.showCheckbox && (
-                  <Box sx={{ textAlign: 'right' }}>
+                  <AlertTitle sx={{ m: 0 }}>
+                    <Checkbox
+                      sx={{ p: '0px !important', mr: 1 }}
+                      checked={warningCheckboxVal}
+                      onChange={handleCheckboxChange}
+                    />
                     {uiConfig.uploadWarning.checkboxText}
-                    <Checkbox checked={warningCheckboxVal} onChange={handleCheckboxChange} />
-                  </Box>
+                  </AlertTitle>
                 )}
               </Alert>
             )}
