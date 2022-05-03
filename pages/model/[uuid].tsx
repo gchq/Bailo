@@ -249,8 +249,8 @@ function Model() {
                   label='Version'
                   onChange={onVersionChange}
                 >
-                  {versions!.map((versionObj: Version, index: number) => (
-                    <MenuItem key={`item-${index}`} value={versionObj.version}>
+                  {versions!.map((versionObj: Version) => (
+                    <MenuItem key={`item-${versionObj._id}`} value={versionObj.version}>
                       {versionObj.version}
                     </MenuItem>
                   ))}
@@ -292,8 +292,8 @@ function Model() {
         {group === 'deployments' && (
           <>
             {deployments!.length === 0 && <EmptyBlob text='No deployments here' />}
-            {deployments!.map((deployment: Deployment, index: number) => (
-              <Box key={`deployment-${index}`}>
+            {deployments!.map((deployment: Deployment) => (
+              <Box key={`deployment-${deployment.uuid}`}>
                 <Link href={`/deployment/${deployment.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
                     {deployment.metadata.highLevelDetails.name}

@@ -7,7 +7,7 @@ import { useGetModel } from '../../../data/model'
 import Wrapper from '../../../src/Wrapper'
 import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { SplitSchema, Step } from '../../../types/interfaces'
+import { SplitSchema } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'

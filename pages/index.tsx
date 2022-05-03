@@ -77,7 +77,7 @@ export default function ExploreModels() {
 
           {!isModelsLoading &&
             models!.map((model: Model, index: number) => (
-              <Box key={`model-${index}`}>
+              <Box key={`model-${model.uuid}`}>
                 <Link href={`/model/${model.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
                     {model.currentMetadata.highLevelDetails.name}
@@ -89,8 +89,8 @@ export default function ExploreModels() {
                 </Typography>
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                  {model.currentMetadata.highLevelDetails.tags.map((tag: string, tagIndex: number) => (
-                    <Chip color='primary' key={`chip-${tagIndex}`} label={tag} size='small' variant='outlined' />
+                  {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
+                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                   ))}
                 </Stack>
 

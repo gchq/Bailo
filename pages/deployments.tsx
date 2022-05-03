@@ -47,8 +47,7 @@ function Deployments() {
       const groups: GroupedDeployments = _.groupBy(userDeployments, (deployment) => deployment.model)
       setGroupedDeployments(groups)
       // Default the ordered deployment list to date
-      let sortedArray = [...userDeployments]
-      sortedArray.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      const sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
   }, [userDeployments, setOrderedDeployments, isCurrentUserError, isUserDeploymentsError, isUserDeploymentsLoading])
@@ -61,12 +60,12 @@ function Deployments() {
 
   React.useEffect(() => {
     if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
-      let sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
+      const sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
         a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1
       )
       setOrderedDeployments(sortedArray)
     } else if (selectedOrder === 'date' && userDeployments !== undefined) {
-      let sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      const sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
   }, [selectedOrder, setOrderedDeployments, isUserDeploymentsError, userDeployments])
@@ -108,7 +107,7 @@ function Deployments() {
         {(selectedOrder === 'date' || selectedOrder === 'name') && (
           <Box>
             {orderedDeployments?.map((deployment, index) => (
-              <Box key={`deployment-${index}`} sx={{ mt: 2 }}>
+              <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                 <Link href={`/deployment/${deployment?.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
                     {deployment?.metadata?.highLevelDetails?.name}
@@ -131,8 +130,8 @@ function Deployments() {
                 <Box sx={{ mt: 3, mb: 3 }} key={key}>
                   <ModelNameFromKey modelId={key} />
                   <Divider flexItem />
-                  {groupedDeployments[key].map((deployment, index) => (
-                    <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
+                  {groupedDeployments[key].map((deployment) => (
+                    <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
                       <Box>
                         <Link href={`/deployment/${deployment?.uuid}`} passHref>
                           <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>

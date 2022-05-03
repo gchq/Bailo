@@ -40,7 +40,7 @@ const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build'
 
-function CodeLine({ line }) {
+function CodeLine({ line, index }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
 
   return (
@@ -49,7 +49,13 @@ function CodeLine({ line }) {
         style={{
           cursor: 'pointer',
         }}
+        role='button'
+        tabIndex={index}
         onClick={() => {
+          navigator.clipboard.writeText(line)
+          setOpenSnackbar(true)
+        }}
+        onKeyDown={() => {
           navigator.clipboard.writeText(line)
           setOpenSnackbar(true)
         }}
@@ -131,7 +137,7 @@ export default function Deployment() {
     return <Wrapper title='Loading...' page='deployment' />
   }
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${currentUser?.id}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -139,7 +145,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page='deployment'>
+      <Wrapper title={`Deployment: ${deployment?.metadata.highLevelDetails.name}`} page='deployment'>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -185,7 +191,7 @@ export default function Deployment() {
 
           {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-          {tab === 'build' && <TerminalLog logs={deployment!.logs} title='Deployment Build Logs' />}
+          {tab === 'build' && <TerminalLog logs={deployment?.logs} title='Deployment Build Logs' />}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
@@ -196,20 +202,20 @@ export default function Deployment() {
               <div>
                 # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
               </div>
-              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
+              <CodeLine index={1} line={`docker login ${uiConfig?.registry.host} -u ${currentUser?.id}`} />
               <br />
 
               <div># Pull model</div>
-              <CodeLine line={`docker pull ${deploymentTag}`} />
+              <CodeLine index={2} line={`docker pull ${deploymentTag}`} />
               <br />
 
               <div># Run Docker image</div>
-              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
+              <CodeLine index={3} line={`docker run -p 9999:9000 ${deploymentTag}`} />
               <div># (the container exposes on port 9000, available on the host as port 9999)</div>
               <br />
 
               <div># Check that the Docker container is running</div>
-              <CodeLine line='docker ps' />
+              <CodeLine index={4} line='docker ps' />
               <br />
 
               <div># The model is accessible at localhost:9999</div>
