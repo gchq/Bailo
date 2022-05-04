@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import axios from 'axios'
 
 import Paper from '@mui/material/Paper'
 import { useGetModel } from '../../../data/model'
@@ -14,7 +15,7 @@ import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
-import { getErrorMessage } from '../../../utils/fetcher'
+import LoadingBar from '../../../src/common/LoadingBar'
 
 const uiSchema = {
   contacts: {
@@ -36,6 +37,8 @@ function Upload() {
 
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
+  const [loadingBar, setLoadingBar] = useState<boolean>(false)
+  const [loadingPercentage, setUploadPercentage] = useState<number>(0)
 
   useEffect(() => {
     if (!cSchema || !cModel) return
@@ -92,24 +95,33 @@ function Upload() {
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
+    setLoadingBar(true)
 
-    const upload = await fetch(`/api/v1/model?mode=newVersion&modelUuid=${model.uuid}`, {
-      method: 'POST',
-      body: form,
+    await axios({
+      method: 'post',
+      url: `/api/v1/model?mode=newVersion&modelUuid=${model.uuid}`,
+      headers: { 'Content-Type': 'multipart/form-data' },
+      data: form,
+      onUploadProgress: function (progressEvent) {
+        setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
+      },
     })
-
-    if (upload.status >= 400) {
-      return setError(await getErrorMessage(upload))
-    }
-
-    const { uuid } = await upload.json()
-    router.push(`/model/${uuid}`)
+      .then((res) => {
+        setLoadingBar(false)
+        const uuid = res.data.uuid
+        return router.push(`/model/${uuid}`)
+      })
+      .catch((error) => {
+        setLoadingBar(false)
+        setError(error.response.data.message)
+      })
   }
 
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
       <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      <LoadingBar showLoadingBar={loadingBar} loadingPercentage={loadingPercentage} />
     </Paper>
   )
 }

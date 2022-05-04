@@ -5,8 +5,6 @@ import axios from 'axios'
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
 
 import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
@@ -22,6 +20,7 @@ import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
 import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
+import LoadingBar from '@/src/common/LoadingBar'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -202,16 +201,7 @@ function Upload() {
 
       <SubmissionError error={error} />
       <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
-      {loadingBar && (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ width: '100%', mr: 1 }}>
-            <LinearProgress variant='determinate' value={loadingPercentage} sx={{ mt: 4, mb: 2, p: 1 }} />
-          </Box>
-          <Box sx={{ minWidth: 35 }}>
-            <Typography variant='body2' color='text.secondary'>{`${Math.round(loadingPercentage)}%`}</Typography>
-          </Box>
-        </Box>
-      )}
+      <LoadingBar showLoadingBar={loadingBar} loadingPercentage={loadingPercentage} />
     </Paper>
   )
 }
