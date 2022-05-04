@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import axios from 'axios'
 
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import LinearProgress from '@mui/material/LinearProgress'
 
 import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
@@ -19,8 +22,6 @@ import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
 import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
-import { getErrorMessage } from '@/utils/fetcher'
-import LinearProgress from '@mui/material/LinearProgress'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -68,6 +69,7 @@ function Upload() {
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
   const [loadingBar, setLoadingBar] = useState<boolean>(false)
+  const [loadingPercentage, setUploadPercentage] = useState<number>(0)
 
   useEffect(() => {
     if (currentSchema) return
@@ -165,20 +167,30 @@ function Upload() {
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
-
     setLoadingBar(true)
-    const upload = await fetch('/api/v1/model', {
-      method: 'POST',
-      body: form,
-    })
 
-    if (upload.status >= 400) {
-      setLoadingBar(false)
-      return setError(await getErrorMessage(upload))
+    const config = {
+      onUploadProgress: (progressEvent) => console.log(progressEvent.loaded),
     }
 
-    const { uuid } = await upload.json()
-    router.push(`/model/${uuid}`)
+    await axios({
+      method: 'post',
+      url: '/api/v1/model',
+      headers: { 'Content-Type': 'multipart/form-data' },
+      data: form,
+      onUploadProgress: function (progressEvent) {
+        setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
+      },
+    })
+      .then((res) => {
+        setLoadingBar(false)
+        const uuid = res.data.uuid
+        return router.push(`/model/${uuid}`)
+      })
+      .catch((error) => {
+        setLoadingBar(false)
+        setError(error.response.data.message)
+      })
   }
 
   return (
@@ -194,7 +206,16 @@ function Upload() {
 
       <SubmissionError error={error} />
       <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
-      {loadingBar && <LinearProgress sx={{ mt: 4, mb: 2, p: 1 }} />}
+      {loadingBar && (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ width: '100%', mr: 1 }}>
+            <LinearProgress variant='determinate' value={loadingPercentage} sx={{ mt: 4, mb: 2, p: 1 }} />
+          </Box>
+          <Box sx={{ minWidth: 35 }}>
+            <Typography variant='body2' color='text.secondary'>{`${Math.round(loadingPercentage)}%`}</Typography>
+          </Box>
+        </Box>
+      )}
     </Paper>
   )
 }
