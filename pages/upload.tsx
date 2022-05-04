@@ -169,10 +169,6 @@ function Upload() {
     form.append('metadata', JSON.stringify(data))
     setLoadingBar(true)
 
-    const config = {
-      onUploadProgress: (progressEvent) => console.log(progressEvent.loaded),
-    }
-
     await axios({
       method: 'post',
       url: '/api/v1/model',
