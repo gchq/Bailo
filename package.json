@@ -22,6 +22,7 @@
     "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.5",
+    "@mui/lab": "^5.0.0-alpha.80",
     "@mui/material": "^5.2.8",
     "@mui/styles": "^5.2.3",
     "@mui/system": "^5.2.8",

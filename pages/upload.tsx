@@ -207,7 +207,7 @@ function Upload() {
         onSubmit={onSubmit}
         modelUploading={modelUploading}
       />
-      <LoadingBar showLoadingBar={true} loadingPercentage={loadingPercentage} />
+      <LoadingBar showLoadingBar={modelUploading} loadingPercentage={loadingPercentage} />
     </Paper>
   )
 }

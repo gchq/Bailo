@@ -14,6 +14,7 @@ import Upload from '@mui/icons-material/Upload'
 import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
+import LoadingButton from '@mui/lab/LoadingButton'
 import React, { createRef, useState } from 'react'
 import ModelOverview from '../../src/ModelOverview'
 import { SplitSchema } from '../../types/interfaces'
@@ -182,14 +183,14 @@ const ModelExportAndSubmission = ({
                 <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
                   If you are happy with your submission click below to upload your model to Bailo.
                 </Typography>
-                <Button
-                  variant='contained'
+                <LoadingButton
                   onClick={onSubmit}
-                  disabled={(uiConfig?.uploadWarning.showWarning && !warningCheckboxVal) || modelUploading}
+                  loading={modelUploading}
+                  variant='contained'
+                  disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
                 >
-                  {modelUploading}
                   Submit
-                </Button>
+                </LoadingButton>
               </Box>
             </Stack>
           </Grid>

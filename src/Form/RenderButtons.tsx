@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import LoadingButton from '@mui/lab/LoadingButton'
 
 import { setStepValidate, validateForm } from 'utils/formUtils'
 import { SplitSchema, Step } from '../../types/interfaces'
@@ -15,7 +16,8 @@ export default function RenderButtons(
   setActiveStep: Function,
   onSubmit: Function,
   openValidateError: boolean,
-  setOpenValidateError: Function
+  setOpenValidateError: Function,
+  modelUploading: boolean
 ) {
   const isFirstStep = activeStep === 0
   const isLastStep = activeStep === splitSchema.steps.length - 1
@@ -57,9 +59,9 @@ export default function RenderButtons(
         </Grid>
         <Grid item>
           {isLastStep ? (
-            <Button variant='contained' onClick={onClickSubmit}>
+            <LoadingButton onClick={onClickSubmit} loading={modelUploading} variant='contained'>
               Submit
-            </Button>
+            </LoadingButton>
           ) : (
             <Button variant='contained' onClick={onClickNextSection}>
               Next Section
