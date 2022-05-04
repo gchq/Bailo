@@ -99,6 +99,11 @@ export interface UiConfig {
   registry: {
     host: string
   }
+
+  uploadWarning: {
+    showWarning: boolean
+    checkboxText: string
+  }
 }
 
 export type RequestType = 'Upload' | 'Deployment'

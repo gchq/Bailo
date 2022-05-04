@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb'
 import config from 'config'
+import mongoose from 'mongoose'
 import { simpleEmail } from '../templates/simpleEmail'
 import { sendEmail } from './smtp'
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
@@ -8,10 +9,11 @@ import { getUserByInternalId } from '../services/user'
 import { findDeploymentById } from '../services/deployment'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
+import { connectToMongoose } from './database'
 
 let uploadQueue: PMongoQueue | undefined = undefined
 let deploymentQueue: PMongoQueue | undefined = undefined
-let mongoClient: MongoClient | undefined = undefined
+let mongoClient: mongoose.Connection | undefined = undefined
 
 export async function closeMongoInstance() {
   return mongoClient?.close()
@@ -19,8 +21,8 @@ export async function closeMongoInstance() {
 
 export async function getMongoInstance() {
   if (mongoClient === undefined) {
-    mongoClient = new MongoClient(await config.get('mongo.uri'))
-    await mongoClient.connect()
+    await connectToMongoose()
+    mongoClient = mongoose.connection
   }
 
   return mongoClient
@@ -29,8 +31,8 @@ export async function getMongoInstance() {
 export async function getUploadQueue() {
   if (!uploadQueue) {
     const client = await getMongoInstance()
-    const uploadDeadQueue = new PMongoQueue(client.db(), 'queue-uploads-dead')
-    uploadQueue = new PMongoQueue(client.db(), 'queue-uploads', {
+    const uploadDeadQueue = new PMongoQueue(client.db, 'queue-uploads-dead')
+    uploadQueue = new PMongoQueue(client.db, 'queue-uploads', {
       deadQueue: uploadDeadQueue,
       maxRetries: 2,
       visibility: 60 * 9,
@@ -55,8 +57,8 @@ export async function getUploadQueue() {
 export async function getDeploymentQueue() {
   if (!deploymentQueue) {
     const client = await getMongoInstance()
-    const deploymentDeadQueue = new PMongoQueue(client.db(), 'queue-deployments-dead')
-    deploymentQueue = new PMongoQueue(client.db(), 'queue-deployments', {
+    const deploymentDeadQueue = new PMongoQueue(client.db, 'queue-deployments-dead')
+    deploymentQueue = new PMongoQueue(client.db, 'queue-deployments', {
       deadQueue: deploymentDeadQueue,
       maxRetries: 2,
       visibility: 15,
