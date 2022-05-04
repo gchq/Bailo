@@ -30,7 +30,8 @@ function renderSubmissionTab(
   setActiveStep: Function,
   onSubmit: Function,
   _openValidateError: boolean,
-  _setOpenValidateError: Function
+  _setOpenValidateError: Function,
+  modelUploading: boolean
 ) {
   const data = getStepsData(splitSchema)
 
@@ -43,6 +44,7 @@ function renderSubmissionTab(
         onSubmit={onSubmit}
         setActiveStep={setActiveStep}
         activeStep={activeStep}
+        modelUploading={modelUploading}
       />
     </>
   )
@@ -67,7 +69,7 @@ function Upload() {
   const [user, setUser] = useState<User | undefined>(undefined)
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
-  const [loadingBar, setLoadingBar] = useState<boolean>(false)
+  const [modelUploading, setModelUploading] = useState<boolean>(false)
   const [loadingPercentage, setUploadPercentage] = useState<number>(0)
 
   useEffect(() => {
@@ -166,7 +168,7 @@ function Upload() {
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
-    setLoadingBar(true)
+    setModelUploading(true)
 
     await axios({
       method: 'post',
@@ -178,12 +180,11 @@ function Upload() {
       },
     })
       .then((res) => {
-        setLoadingBar(false)
-        const uuid = res.data.uuid
-        return router.push(`/model/${uuid}`)
+        setModelUploading(false)
+        return router.push(`/model/${res.data.uuid}`)
       })
       .catch((error) => {
-        setLoadingBar(false)
+        setModelUploading(false)
         setError(error.response.data.message)
       })
   }
@@ -200,8 +201,13 @@ function Upload() {
       </Grid>
 
       <SubmissionError error={error} />
-      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
-      <LoadingBar showLoadingBar={loadingBar} loadingPercentage={loadingPercentage} />
+      <Form
+        splitSchema={splitSchema}
+        setSplitSchema={setSplitSchema}
+        onSubmit={onSubmit}
+        modelUploading={modelUploading}
+      />
+      <LoadingBar showLoadingBar={true} loadingPercentage={loadingPercentage} />
     </Paper>
   )
 }

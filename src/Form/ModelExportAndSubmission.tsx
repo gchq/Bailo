@@ -37,6 +37,7 @@ const ModelExportAndSubmission = ({
   onSubmit,
   activeStep,
   setActiveStep,
+  modelUploading,
 }: {
   formData: any
   schemaRef: string
@@ -44,6 +45,7 @@ const ModelExportAndSubmission = ({
   onSubmit: any
   activeStep: number
   setActiveStep: Function
+  modelUploading: boolean
 }) => {
   const [ref] = useState<any>(createRef())
   const [wrappedMetadata, setWrappedMetadata] = useState<any>({ metadata: {} })
@@ -183,8 +185,9 @@ const ModelExportAndSubmission = ({
                 <Button
                   variant='contained'
                   onClick={onSubmit}
-                  disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
+                  disabled={(uiConfig?.uploadWarning.showWarning && !warningCheckboxVal) || modelUploading}
                 >
+                  {modelUploading}
                   Submit
                 </Button>
               </Box>

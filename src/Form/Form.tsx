@@ -13,10 +13,12 @@ export default function Form({
   splitSchema,
   setSplitSchema,
   onSubmit,
+  modelUploading,
 }: {
   splitSchema: SplitSchema
   onSubmit: Function
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+  modelUploading: boolean
 }) {
   const [tab, setTab] = useState('designer')
   const onTabChange = (_event: any, newValue: any) => {
@@ -33,7 +35,12 @@ export default function Form({
       </Box>
 
       {tab === 'designer' && (
-        <FormDesigner splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+        <FormDesigner
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          onSubmit={onSubmit}
+          modelUploading={modelUploading}
+        />
       )}
       {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
     </>
