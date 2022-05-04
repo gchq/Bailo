@@ -17,7 +17,7 @@ export default function RenderButtons(
   onSubmit: Function,
   openValidateError: boolean,
   setOpenValidateError: Function,
-  modelUploading: boolean
+  modelUploading?: boolean
 ) {
   const isFirstStep = activeStep === 0
   const isLastStep = activeStep === splitSchema.steps.length - 1
