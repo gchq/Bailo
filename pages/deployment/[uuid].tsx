@@ -35,13 +35,19 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
+import { User } from '@/types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build'
 
-function CodeLine({ line, index }) {
+function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
+
+  const handleButtonClick = () => {
+    navigator.clipboard.writeText(line)
+    setOpenSnackbar(true)
+  }
 
   return (
     <>
@@ -50,14 +56,14 @@ function CodeLine({ line, index }) {
           cursor: 'pointer',
         }}
         role='button'
-        tabIndex={index}
+        tabIndex={0}
         onClick={() => {
-          navigator.clipboard.writeText(line)
-          setOpenSnackbar(true)
+          handleButtonClick()
         }}
-        onKeyDown={() => {
-          navigator.clipboard.writeText(line)
-          setOpenSnackbar(true)
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleButtonClick()
+          }
         }}
       >
         ${' '}
@@ -137,7 +143,7 @@ export default function Deployment() {
     return <Wrapper title='Loading...' page='deployment' />
   }
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser?.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -198,28 +204,28 @@ export default function Deployment() {
         <DialogTitle>Pull from Docker</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
-            <pre>
-              <div>
+            <Box>
+              <p>
                 # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
-              </div>
-              <CodeLine index={1} line={`docker login ${uiConfig?.registry.host} -u ${currentUser?.id}`} />
+              </p>
+              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser?.id}`} />
               <br />
 
-              <div># Pull model</div>
-              <CodeLine index={2} line={`docker pull ${deploymentTag}`} />
+              <p># Pull model</p>
+              <CodeLine line={`docker pull ${deploymentTag}`} />
               <br />
 
-              <div># Run Docker image</div>
-              <CodeLine index={3} line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <div># (the container exposes on port 9000, available on the host as port 9999)</div>
+              <p># Run Docker image</p>
+              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
+              <p># (the container exposes on port 9000, available on the host as port 9999)</p>
               <br />
 
-              <div># Check that the Docker container is running</div>
-              <CodeLine index={4} line='docker ps' />
+              <p># Check that the Docker container is running</p>
+              <CodeLine line='docker ps' />
               <br />
 
-              <div># The model is accessible at localhost:9999</div>
-            </pre>
+              <p># The model is accessible at localhost:9999</p>
+            </Box>
           </DialogContentText>
         </DialogContent>
       </Dialog>
