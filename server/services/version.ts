@@ -9,7 +9,6 @@ import { createSerializer, SerializerOptions } from '../utils/logger'
 import { serializedModelFields } from './model'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
-import ModelModel from 'server/models/Model'
 
 const authorisation = new AuthorisationBase()
 
