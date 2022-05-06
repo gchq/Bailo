@@ -107,7 +107,7 @@ export const postUpload = [
           metadata: metadata,
         })
       } catch (err: any) {
-        if (err.toString().includes('duplicate key error')) {
+        if (err.toString().includes('Duplicate version name for model')) {
           return res.status(409).json({
             message: `Duplicate version name found for model '${req.query.modelUuid}'`,
           })
