@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import { NextRouter, useRouter } from 'next/router'
 import axios from 'axios'
 
 import Paper from '@mui/material/Paper'
@@ -25,28 +25,26 @@ import LoadingBar from '@/src/common/LoadingBar'
 function renderSubmissionTab(
   _currentStep: Step,
   splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => NextRouter,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean
 ) {
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <ModelExportAndSubmission
-        formData={data}
-        splitSchema={splitSchema}
-        schemaRef={splitSchema.reference}
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-        modelUploading={modelUploading}
-      />
-    </>
+    <ModelExportAndSubmission
+      formData={data}
+      splitSchema={splitSchema}
+      schemaRef={splitSchema.reference}
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+      modelUploading={modelUploading}
+    />
   )
 }
 
@@ -86,7 +84,7 @@ function Upload() {
   useEffect(() => {
     if (!currentSchema || !user) return
 
-    const { schema, reference } = currentSchema
+    const { reference } = currentSchema
     const defaultState = {
       contacts: { uploader: user.id },
     }
@@ -175,7 +173,7 @@ function Upload() {
       url: '/api/v1/model',
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
-      onUploadProgress: function (progressEvent) {
+      onUploadProgress: (progressEvent) => {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
@@ -183,10 +181,12 @@ function Upload() {
         setModelUploading(false)
         return router.push(`/model/${res.data.uuid}`)
       })
-      .catch((error) => {
+      .catch((e) => {
         setModelUploading(false)
-        setError(error.response.data.message)
+        setError(e.response.data.message)
+        return null
       })
+    return null
   }
 
   return (

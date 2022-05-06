@@ -56,7 +56,7 @@ function Deployments() {
     setSelectedOrder(event.target.value)
   }
 
-  const displayDate = (date: any) => new Date(date).toLocaleDateString('en-UK')
+  const displayDate = (date: Date) => new Date(date).toLocaleDateString('en-UK')
 
   React.useEffect(() => {
     if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
@@ -116,7 +116,7 @@ function Deployments() {
                 <Typography variant='body1' sx={{ marginBottom: 2 }}>
                   {displayDate(deployment?.createdAt)}
                 </Typography>
-                {index !== orderedDeployments!.length - 1 && (
+                {orderedDeployments !== undefined && index !== orderedDeployments.length - 1 && (
                   <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                 )}
               </Box>
@@ -149,7 +149,9 @@ function Deployments() {
           </Box>
         )}
         <Box>
-          {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
+          {userDeployments !== undefined && !isUserDeploymentsLoading && userDeployments.length === 0 && (
+            <EmptyBlob text='No deployments here' />
+          )}
         </Box>
       </Paper>
     </Wrapper>

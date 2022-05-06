@@ -32,9 +32,11 @@ module.exports = {
     'react/prop-types': 'off',
     'jsx-a11y/anchor-is-valid': 'off',
     'react/jsx-props-no-spreading': ['error', { custom: 'ignore' }],
+    'react/require-default-props': 'off',
     'prettier/prettier': 'error',
     'react/react-in-jsx-scope': 'off',
     'react/no-unescaped-entities': 'off',
+    'react/display-name': 'off',
     'import/no-cycle': [0, { ignoreExternal: true }],
     // needed because of https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md#how-to-use & https://stackoverflow.com/questions/63818415/react-was-used-before-it-was-defined
     'no-use-before-define': 'off',
@@ -52,4 +54,5 @@ module.exports = {
       typescript: {},
     },
   },
+  ignorePatterns: ['lib/**']
 }

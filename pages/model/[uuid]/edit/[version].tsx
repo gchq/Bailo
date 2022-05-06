@@ -75,7 +75,7 @@ function Upload() {
       try {
         errorMessage = `${edit.statusText}: ${(await edit.json()).message}`
       } catch (e) {
-        console.error(e)
+        errorMessage = 'There was a problem making the request.'
       }
 
       setError(errorMessage)
