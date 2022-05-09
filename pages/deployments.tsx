@@ -122,7 +122,7 @@ const Deployments = () => {
                     <Typography variant='body1' sx={{ marginBottom: 2 }}>
                       {displayDate(deployment?.createdAt)}
                     </Typography>
-                    {index !== orderedDeployments!.length - 1 && (
+                    {index !== orderedDeployments.length - 1 && (
                       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                     )}
                   </Box>
@@ -160,7 +160,7 @@ const Deployments = () => {
             </Box>
           )}
           <Box>
-            {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
+            {userDeployments?.length === 0 && <EmptyBlob text='No deployments here' />}
           </Box>
         </Paper>
       </Wrapper>

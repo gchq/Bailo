@@ -75,8 +75,8 @@ export default function ExploreModels() {
           </Box>
           <Box sx={{ marginBottom: 2 }} />
 
-          {!isModelsLoading &&
-            models!.map((model: Model, index: number) => (
+          {models &&
+            models.map((model: Model, index: number) => (
               <Box key={`model-${index}`}>
                 <Link href={`/model/${model.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
@@ -94,13 +94,13 @@ export default function ExploreModels() {
                   ))}
                 </Stack>
 
-                {index !== models!.length - 1 && (
+                {index !== models.length - 1 && (
                   <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                 )}
               </Box>
             ))}
 
-          {!isModelsLoading && models!.length === 0 && <EmptyBlob text='No models here' />}
+          {models?.length === 0 && <EmptyBlob text='No models here' />}
         </Paper>
       </Box>
     </Wrapper>

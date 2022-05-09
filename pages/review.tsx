@@ -93,7 +93,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
   )
   if (error) return error
 
-  if (isRequestsLoading) {
+  if (isRequestsLoading || !requests) {
     return <Paper sx={{ mt: 2, mb: 2 }} />
   }
 
@@ -115,7 +115,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
       <Typography sx={{ p: 3 }} variant='h4'>
         {type === 'Upload' ? 'Models' : 'Deployments'}
       </Typography>
-      {requests!.map((requestObj: any, index) => (
+      {requests.map((requestObj: any, index) => (
         <Box sx={{ px: 3 }} key={`model-${index}`}>
           <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
             <Grid item xs={12} sm={8}>
@@ -205,7 +205,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
           </Button>
         </DialogActions>
       </Dialog>
-      {requests!.length === 0 && (
+      {requests.length === 0 && (
         <EmptyBlob
           text={'All done! No ' + (type === 'Upload' ? 'models' : 'deployments') + ' are waiting for approvals'}
         />

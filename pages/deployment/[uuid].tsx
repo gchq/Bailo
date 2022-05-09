@@ -127,11 +127,13 @@ export default function Deployment() {
   })
   if (error) return error
 
-  if (isDeploymentLoading || isUiConfigLoading || isCurrentUserLoading) {
-    return <Wrapper title={'Loading...'} page={'deployment'} />
-  }
+  const Loading = <Wrapper title='Loading...' page='deployment' />
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
+  if (isDeploymentLoading || !deployment) return Loading
+  if (isUiConfigLoading || !uiConfig) return Loading
+  if (isCurrentUserLoading || !currentUser) return Loading
+
+  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -139,7 +141,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment!.metadata.highLevelDetails.name}`} page={'deployment'}>
+      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page={'deployment'}>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -185,7 +187,7 @@ export default function Deployment() {
 
           {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-          {tab === 'build' && <TerminalLog logs={deployment!.logs} title='Deployment Build Logs' />}
+          {tab === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
@@ -196,7 +198,7 @@ export default function Deployment() {
               <div>
                 # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
               </div>
-              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser!.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />
 
               <div># Pull model</div>
