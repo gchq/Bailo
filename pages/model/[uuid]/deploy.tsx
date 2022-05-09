@@ -56,9 +56,11 @@ export default function Deploy() {
   })
   if (errorWrapper) return errorWrapper
 
-  if (isDefaultSchemaLoading || isSchemasLoading || isModelLoading) {
-    return <Wrapper title='Loading...' page='upload' />
-  }
+  const Loading = <Wrapper title='Loading...' page='model' />
+
+  if (isSchemasLoading || !schemas) return Loading
+  if (isModelLoading || !model) return Loading
+  if (isDefaultSchemaLoading || !defaultSchema) return Loading
 
   const onSubmit = async () => {
     setError(undefined)
@@ -66,7 +68,7 @@ export default function Deploy() {
     const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
-    data.highLevelDetails.initialVersionRequested = model!.currentMetadata.highLevelDetails.modelCardVersion
+    data.highLevelDetails.initialVersionRequested = model.currentMetadata.highLevelDetails.modelCardVersion
     data.schemaRef = currentSchema?.reference
 
     const deploy = await postEndpoint(`/api/v1/deployment`, data)
@@ -88,14 +90,14 @@ export default function Deploy() {
   }
 
   return (
-    <Wrapper title={`Deploy: ${model!.currentMetadata.highLevelDetails.name}`} page='model'>
+    <Wrapper title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`} page='model'>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           <Box />
           <SchemaSelector
-            currentSchema={currentSchema ?? defaultSchema!}
+            currentSchema={currentSchema ?? defaultSchema}
             setCurrentSchema={setCurrentSchema}
-            schemas={schemas!}
+            schemas={schemas}
           />
         </Grid>
 

@@ -79,7 +79,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/request/${request!._id}/respond`, { choice }).then((res) => res.json())
+    await postEndpoint(`/api/v1/request/${request?._id}/respond`, { choice }).then((res) => res.json())
 
     mutateRequests()
     mutateNumRequests()
@@ -95,7 +95,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   )
   if (error) return error
 
-  if (isRequestsLoading) {
+  if (isRequestsLoading || !requests) {
     return <Paper sx={{ mt: 2, mb: 2 }} />
   }
 
@@ -112,13 +112,15 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
     }
   }
 
+  const getUploadType = (requestType: string) => (requestType === 'Upload' ? 'models' : 'deployments')
+
   return (
     <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
       <Typography sx={{ p: 3 }} variant='h4'>
         {type === 'Upload' ? 'Models' : 'Deployments'}
       </Typography>
-      {requests!.map((requestObj: any) => (
-        <Box sx={{ px: 3 }} key={`model-${requestObj._id}`}>
+      {requests.map((requestObj: Request) => (
+        <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
             <Grid item xs={12} sm={8}>
               {type === 'Upload' && (
@@ -207,9 +209,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
           </Button>
         </DialogActions>
       </Dialog>
-      {requests!.length === 0 && (
-        <EmptyBlob text={`All done! No ${type === 'Upload' ? 'models' : 'deployments'} are waiting for approvals`} />
-      )}
+      {requests.length === 0 && <EmptyBlob text={`All done! No ${getUploadType(type)} are waiting for approvals`} />}
     </Paper>
   )
 }

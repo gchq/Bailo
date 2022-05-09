@@ -1,5 +1,5 @@
 import Paper from '@mui/material/Paper'
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 import Box from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
@@ -52,7 +52,7 @@ function Deployments() {
     }
   }, [userDeployments, setOrderedDeployments, isCurrentUserError, isUserDeploymentsError, isUserDeploymentsLoading])
 
-  const handleOrderChange = (event: any) => {
+  const handleOrderChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedOrder(event.target.value)
   }
 
@@ -103,51 +103,51 @@ function Deployments() {
             </Accordion>
             <Divider flexItem />
           </Box>
-        </Box>
-        {(selectedOrder === 'date' || selectedOrder === 'name') && (
-          <Box>
-            {orderedDeployments?.map((deployment, index) => (
-              <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
-                <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                    {deployment?.metadata?.highLevelDetails?.name}
-                  </MuiLink>
-                </Link>
-                <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                  {displayDate(deployment?.createdAt)}
-                </Typography>
-                {orderedDeployments !== undefined && index !== orderedDeployments.length - 1 && (
-                  <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                )}
-              </Box>
-            ))}
-          </Box>
-        )}
-        {selectedOrder === 'model' && (
-          <Box>
-            {groupedDeployments !== undefined &&
-              Object.keys(groupedDeployments).map((key) => (
-                <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                  <ModelNameFromKey modelId={key} />
-                  <Divider flexItem />
-                  {groupedDeployments[key].map((deployment) => (
-                    <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
-                      <Box>
-                        <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                          <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                            {deployment?.metadata?.highLevelDetails?.name}
-                          </MuiLink>
-                        </Link>
-                      </Box>
-                      <Box>
-                        <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
-                      </Box>
-                    </Box>
-                  ))}
+          {(selectedOrder === 'date' || selectedOrder === 'name') && (
+            <Box>
+              {orderedDeployments?.map((deployment, index) => (
+                <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
+                  <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                      {deployment?.metadata?.highLevelDetails?.name}
+                    </MuiLink>
+                  </Link>
+                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                    {displayDate(deployment?.createdAt)}
+                  </Typography>
+                  {index !== orderedDeployments.length - 1 && (
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                  )}
                 </Box>
               ))}
-          </Box>
-        )}
+            </Box>
+          )}
+          {selectedOrder === 'model' && (
+            <Box>
+              {groupedDeployments !== undefined &&
+                Object.keys(groupedDeployments).map((key) => (
+                  <Box sx={{ mt: 3, mb: 3 }} key={key}>
+                    <ModelNameFromKey modelId={key} />
+                    <Divider flexItem />
+                    {groupedDeployments[key].map((deployment) => (
+                      <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
+                        <Box>
+                          <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                              {deployment?.metadata?.highLevelDetails?.name}
+                            </MuiLink>
+                          </Link>
+                        </Box>
+                        <Box>
+                          <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
+            </Box>
+          )}
+        </Box>
         <Box>
           {userDeployments !== undefined && !isUserDeploymentsLoading && userDeployments.length === 0 && (
             <EmptyBlob text='No deployments here' />

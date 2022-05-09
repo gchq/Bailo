@@ -28,11 +28,11 @@ function a11yProps(index) {
 }
 
 export default function Settings() {
-  const [tab, setTab] = useState(0)
+  const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
-  const onTabChange = (_event: any, newValue: any) => {
+  const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)
   }
 

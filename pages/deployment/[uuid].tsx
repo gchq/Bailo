@@ -11,8 +11,8 @@ import Tooltip from '@mui/material/Tooltip'
 import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
-import { FlowElement } from 'react-flow-renderer'
+import React, { MouseEvent, useEffect, useState } from 'react'
+import { Elements } from 'react-flow-renderer'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
@@ -22,6 +22,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import MenuItem from '@mui/material/MenuItem'
+import Divider from '@mui/material/Divider'
 
 import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
@@ -35,7 +36,6 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
-import { User } from '@/types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -87,10 +87,10 @@ export default function Deployment() {
   const { uuid }: { uuid?: string } = router.query
 
   const [tab, setTab] = useState<TabOptions>('overview')
-  const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
+  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
-  const [anchorEl, setAnchorEl] = useState<any>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -124,8 +124,8 @@ export default function Deployment() {
     setOpen(false)
   }
 
-  const actionMenuClicked = (event: any) => {
-    setAnchorEl(event.currentTarget)
+  const actionMenuClicked = (event: MouseEvent) => {
+    setAnchorEl(event.currentTarget as HTMLDivElement)
   }
 
   const handleMenuClose = () => {
@@ -139,11 +139,13 @@ export default function Deployment() {
   })
   if (error) return error
 
-  if (isDeploymentLoading || isUiConfigLoading || isCurrentUserLoading) {
-    return <Wrapper title='Loading...' page='deployment' />
-  }
+  const Loading = <Wrapper title='Loading...' page='deployment' />
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser!.id}/${tag}`
+  if (isDeploymentLoading || !deployment) return Loading
+  if (isUiConfigLoading || !uiConfig) return Loading
+  if (isCurrentUserLoading || !currentUser) return Loading
+
+  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -151,7 +153,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment?.metadata.highLevelDetails.name}`} page='deployment'>
+      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -160,6 +162,7 @@ export default function Deployment() {
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip approvals={[deployment?.managerApproved]} />
+            <Divider orientation='vertical' flexItem />
             <Button
               id='model-actions-button'
               aria-controls='model-actions-menu'
@@ -173,7 +176,7 @@ export default function Deployment() {
               Actions
             </Button>
           </Stack>
-          <Menu anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
+          <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
               <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
                 <ListItemIcon>
@@ -197,7 +200,7 @@ export default function Deployment() {
 
           {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-          {tab === 'build' && <TerminalLog logs={deployment?.logs} title='Deployment Build Logs' />}
+          {tab === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
@@ -208,7 +211,7 @@ export default function Deployment() {
               <p>
                 # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
               </p>
-              <CodeLine line={`docker login ${uiConfig?.registry.host} -u ${currentUser?.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />
 
               <p># Pull model</p>

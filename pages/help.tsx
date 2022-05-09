@@ -15,7 +15,7 @@ import { useGetUiConfig } from '../data/uiConfig'
 import { Theme } from '../src/theme'
 
 export default function Help() {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { uiConfig, isUiConfigError } = useGetUiConfig()
 
   const theme = useTheme<Theme>()
 
@@ -26,7 +26,7 @@ export default function Help() {
 
   return (
     <Wrapper title='Help' page='help'>
-      {!isUiConfigLoading && (
+      {uiConfig && (
         <>
           <Box sx={{ p: 5, textAlign: 'center' }}>
             <Typography variant='h2'>Contact us</Typography>
@@ -40,14 +40,14 @@ export default function Help() {
                     Bug reports
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1.5 }} variant='body1' component='p'>
-                    If you have experienced any issues with Bailo, then please report it to the{' '}
-                    {uiConfig!.issues?.label}.
+                    If you have experienced any issues with Bailo, then please report it to the {uiConfig.issues?.label}
+                    .
                   </Typography>
                 </CardContent>
                 <CardActions>
                   <Button
                     variant='contained'
-                    href={uiConfig!.issues?.supportHref}
+                    href={uiConfig.issues?.supportHref}
                     sx={{ margin: 'auto', mb: 1.5, width: 200 }}
                   >
                     Raise ticket
@@ -69,7 +69,7 @@ export default function Help() {
                 <CardActions>
                   <Button
                     variant='contained'
-                    href={uiConfig!.help?.documentationUrl}
+                    href={uiConfig.help?.documentationUrl}
                     sx={{ margin: 'auto', mb: 1.5, width: 200 }}
                   >
                     View documentation
@@ -91,7 +91,7 @@ export default function Help() {
                 <CardActions>
                   <Button
                     variant='contained'
-                    href={uiConfig!.issues?.contactHref}
+                    href={uiConfig.issues?.contactHref}
                     sx={{ margin: 'auto', mb: 1.5, width: 200 }}
                   >
                     Get support

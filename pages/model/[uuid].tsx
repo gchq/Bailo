@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, MouseEvent } from 'react'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -28,7 +28,7 @@ import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import ModelOverview from 'src/ModelOverview'
 import createComplianceFlow from 'utils/complianceFlow'
-import { FlowElement } from 'react-flow-renderer'
+import { Elements } from 'react-flow-renderer'
 import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
@@ -61,12 +61,12 @@ function Model() {
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
-  const [anchorEl, setAnchorEl] = useState<any>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
-  const [complianceFlow, setComplianceFlow] = useState<FlowElement<any>[]>([])
+  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -113,9 +113,12 @@ function Model() {
   })
   if (error) return error
 
-  if (isVersionsLoading || isVersionLoading || isDeploymentsLoading || isCurrentUserLoading) {
-    return <Wrapper title='Loading...' page='model' />
-  }
+  const Loading = <Wrapper title='Loading...' page='model' />
+
+  if (isVersionsLoading || !versions) return Loading
+  if (isVersionLoading || !version) return Loading
+  if (isDeploymentsLoading || !deployments) return Loading
+  if (isCurrentUserLoading || !currentUser) return Loading
 
   const editModel = () => {
     router.push(`/model/${uuid}/edit/${version?.version}`)
@@ -125,8 +128,8 @@ function Model() {
     router.push(`/model/${uuid}/new-version`)
   }
 
-  const actionMenuClicked = (event) => {
-    setAnchorEl(event.currentTarget)
+  const actionMenuClicked = (event: MouseEvent) => {
+    setAnchorEl(event.currentTarget as HTMLDivElement)
   }
 
   const handleClose = () => {
@@ -134,7 +137,7 @@ function Model() {
   }
 
   const setModelFavourite = async (favourite: boolean) => {
-    if (version?.model !== undefined) {
+    if (version.model !== undefined) {
       setFavouriteButtonDisabled(true)
       await postEndpoint(`/api/v1/user/${favourite ? 'favourite' : 'unfavourite'}/${version?.model}`, {})
         .then((res) => res.json())
@@ -150,7 +153,7 @@ function Model() {
   }
 
   return (
-    <Wrapper title={`Model: ${version!.metadata.highLevelDetails.name}`} page='model'>
+    <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -175,9 +178,7 @@ function Model() {
                 <MenuItem
                   onClick={requestDeployment}
                   disabled={
-                    !version!.built ||
-                    version?.managerApproved !== 'Accepted' ||
-                    version?.reviewerApproved !== 'Accepted'
+                    !version.built || version.managerApproved !== 'Accepted' || version.reviewerApproved !== 'Accepted'
                   }
                   data-test='submitDeployment'
                 >
@@ -210,8 +211,8 @@ function Model() {
                 <MenuItem
                   onClick={editModel}
                   disabled={
-                    (version?.managerApproved === 'Accepted' && version?.reviewerApproved === 'Accepted') ||
-                    currentUser?.id !== version?.metadata?.contacts?.uploader
+                    (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                    currentUser.id !== version?.metadata?.contacts?.uploader
                   }
                 >
                   <ListItemIcon>
@@ -219,10 +220,7 @@ function Model() {
                   </ListItemIcon>
                   <ListItemText>Edit</ListItemText>
                 </MenuItem>
-                <MenuItem
-                  onClick={uploadNewVersion}
-                  disabled={currentUser?.id !== version?.metadata?.contacts?.uploader}
-                >
+                <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -230,7 +228,7 @@ function Model() {
                 </MenuItem>
                 <MenuItem
                   onClick={requestApprovalReset}
-                  disabled={version?.managerApproved === 'No Response' && version?.reviewerApproved === 'No Response'}
+                  disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
                 >
                   <ListItemIcon>
                     <RestartAlt fontSize='small' />
@@ -245,11 +243,11 @@ function Model() {
                 <Select
                   labelId='version-label'
                   id='version'
-                  value={version!.version}
+                  value={version.version}
                   label='Version'
                   onChange={onVersionChange}
                 >
-                  {versions!.map((versionObj: Version) => (
+                  {versions.map((versionObj: Version) => (
                     <MenuItem key={`item-${versionObj._id}`} value={versionObj.version}>
                       {versionObj.version}
                     </MenuItem>
@@ -271,12 +269,12 @@ function Model() {
 
         {group === 'overview' && (
           <>
-            {version?.state?.build?.state === 'failed' && (
+            {version.state?.build?.state === 'failed' && (
               <Alert sx={{ mb: 3 }} severity='error'>
                 Build Status: Failed
               </Alert>
             )}
-            {version?.state?.build?.state === 'retrying' && (
+            {version.state?.build?.state === 'retrying' && (
               <Alert sx={{ mb: 3 }} severity='warning'>
                 Build Status: Retrying
               </Alert>
@@ -287,12 +285,12 @@ function Model() {
 
         {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-        {group === 'build' && <TerminalLog logs={version!.logs} title='Model Build Logs' />}
+        {group === 'build' && <TerminalLog logs={version.logs} title='Model Build Logs' />}
 
         {group === 'deployments' && (
           <>
-            {deployments!.length === 0 && <EmptyBlob text='No deployments here' />}
-            {deployments!.map((deployment: Deployment) => (
+            {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
+            {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
                 <Link href={`/deployment/${deployment.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>

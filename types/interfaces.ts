@@ -1,6 +1,7 @@
 import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
 import { UserDoc } from '../server/models/User'
+import { XYPosition } from 'react-flow-renderer'
 
 export type { VersionDoc as Version } from '../server/models/Version'
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'

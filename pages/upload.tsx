@@ -147,6 +147,11 @@ function Upload() {
   if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
     return null
   }
+  const Loading = <Wrapper title='Loading...' page='deployment' />
+
+  if (isDefaultSchemaLoading || !defaultSchema) return Loading
+  if (isSchemasLoading || !schemas) return Loading
+  if (isCurrentUserLoading || !currentUser) return Loading
 
   const onSubmit = async () => {
     setError(undefined)
@@ -194,9 +199,9 @@ function Upload() {
       <Grid container justifyContent='space-between' alignItems='center'>
         <Box />
         <SchemaSelector
-          currentSchema={currentSchema ?? defaultSchema!}
+          currentSchema={currentSchema ?? defaultSchema}
           setCurrentSchema={setCurrentSchema}
-          schemas={schemas!}
+          schemas={schemas}
         />
       </Grid>
 
