@@ -54,5 +54,5 @@ module.exports = {
       typescript: {},
     },
   },
-  ignorePatterns: ['lib/**']
+  ignorePatterns: ['lib/**'],
 }
