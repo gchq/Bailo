@@ -102,18 +102,17 @@ function Upload() {
       url: `/api/v1/model?mode=newVersion&modelUuid=${model.uuid}`,
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
-      onUploadProgress: function (progressEvent) {
+      onUploadProgress: (progressEvent) => {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
       .then((res) => {
         setModelUploading(false)
-        const uuid = res.data.uuid
-        return router.push(`/model/${uuid}`)
+        return router.push(`/model/${res.data.uuid}`)
       })
-      .catch((error) => {
+      .catch((e) => {
         setModelUploading(false)
-        setError(error.response.data.message)
+        setError(e.response.data.message)
       })
   }
 

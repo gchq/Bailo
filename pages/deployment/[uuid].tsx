@@ -98,8 +98,8 @@ export default function Deployment() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   useEffect(() => {
-    if (deployment !== undefined) {
-      const { modelID, initialVersionRequested } = deployment?.metadata?.highLevelDetails
+    if (deployment?.metadata?.highLevelDetails !== undefined) {
+      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
       setTag(`${modelID}:${initialVersionRequested}`)
     }
   }, [deployment])
