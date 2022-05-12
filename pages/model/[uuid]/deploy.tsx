@@ -13,7 +13,7 @@ import Box from '@mui/material/Box'
 import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
-import DeploymentSubmission from '@/src/Form/DeploymentSubmission'
+import DeploymentSubmission from '../../../src/Form/DeploymentSubmission'
 
 const uiSchema = {
   contacts: {
@@ -36,9 +36,7 @@ function renderSubmissionTab(
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
-    </>
+    <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
   )
 }
 

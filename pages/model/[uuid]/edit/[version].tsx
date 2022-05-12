@@ -15,7 +15,7 @@ import Form from '../../../../src/Form/Form'
 import { useGetModelVersion } from 'data/model'
 import { putEndpoint } from 'data/api'
 import useCacheVariable from 'utils/useCacheVariable'
-import ModelEditSubmission from '@/src/Form/ModelEditSubmission'
+import ModelEditSubmission from '../../../../src/Form/ModelEditSubmission'
 
 const uiSchema = {
   highLevelDetails: {

@@ -16,7 +16,7 @@ import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
-import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
+import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 
 const uiSchema = {
   contacts: {
