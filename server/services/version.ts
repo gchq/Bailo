@@ -9,7 +9,7 @@ import { createSerializer, SerializerOptions } from '../utils/logger'
 import { serializedModelFields } from './model'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
-import ModelModel from 'server/models/Model'
+import ModelModel from '../models/Model'
 
 const authorisation = new AuthorisationBase()
 
