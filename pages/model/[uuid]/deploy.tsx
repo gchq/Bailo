@@ -35,9 +35,7 @@ function renderSubmissionTab(
 ) {
   const data = getStepsData(splitSchema)
 
-  return (
-    <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
-  )
+  return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
 }
 
 export default function Deploy() {
