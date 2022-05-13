@@ -40,7 +40,8 @@ export const postUpload = [
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
-      const mode = req.query.mode
+      const mode: string = req.query.mode as string
+      const modelUuid: string = req.query.modelUuid as string
 
       if (!files.binary) {
         throw BadReq({ code: 'binary_file_not_found' }, 'Unable to find binary file')
@@ -102,12 +103,16 @@ export const postUpload = [
 
       let version
       try {
-        version = await createVersion(req.user!, {
-          version: metadata.highLevelDetails.modelCardVersion,
-          metadata: metadata,
-        })
+        version = await createVersion(
+          req.user!,
+          {
+            version: metadata.highLevelDetails.modelCardVersion,
+            metadata: metadata,
+          },
+          modelUuid
+        )
       } catch (err: any) {
-        if (err.toString().includes('Duplicate version name for model')) {
+        if (err.code === 400) {
           return res.status(409).json({
             message: `Duplicate version name found for model '${req.query.modelUuid}'`,
           })

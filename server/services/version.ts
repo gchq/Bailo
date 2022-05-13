@@ -9,6 +9,7 @@ import { createSerializer, SerializerOptions } from '../utils/logger'
 import { serializedModelFields } from './model'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
+import ModelModel from 'server/models/Model'
 
 const authorisation = new AuthorisationBase()
 
@@ -86,18 +87,19 @@ interface CreateVersion {
   metadata: any
 }
 
-export async function createVersion(user: UserDoc, data: CreateVersion) {
+export async function createVersion(user: UserDoc, data: CreateVersion, parentUuid: string) {
   const version = new VersionModel(data)
 
   if (!authorisation.canUserSeeVersion(user, version)) {
     throw Forbidden({ data }, 'Unable to create version, failed permissions check.')
   }
 
-  let allVersionsForModel = VersionModel.find({ model: version.model })
-  if (
-    (await allVersionsForModel).filter((versionDuplicateCheck) => versionDuplicateCheck.version === version.version)
-      .length > 0
-  ) {
+  const parentModel = await ModelModel.findOne({ uuid: parentUuid })
+  const duplicateVersionCheck = await VersionModel.findOne({
+    model: parentModel?._id,
+    version: version.metadata.highLevelDetails.modelCardVersion,
+  })
+  if (duplicateVersionCheck) {
     throw BadReq({ versionModel: version.model }, 'Duplicate version name for model')
   }
 
