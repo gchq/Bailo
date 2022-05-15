@@ -6,7 +6,7 @@ import { NotFound } from '../../utils/result'
 export const getUiConfig = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const uiConfig = await config.get('uiConfig')
+    const uiConfig = config.get('uiConfig')
 
     if (!uiConfig) {
       throw NotFound({ code: 'ui_config_not_found' }, `Unable to find UI Config`)

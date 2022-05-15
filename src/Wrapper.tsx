@@ -233,7 +233,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                     <ViewList />
                   )}
                 </ListItemIcon>
-                <ListItemText primary='Upload' />
+                <ListItemText primary='Deployments' />
               </ListItem>
             </Link>
             <Link href='/upload' passHref>
