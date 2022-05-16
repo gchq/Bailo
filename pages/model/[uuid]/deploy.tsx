@@ -24,7 +24,7 @@ const uiSchema = {
 
 function renderSubmissionTab(
   _currentStep: Step,
-  splitSchema: SplitSchema,
+  _splitSchema: SplitSchema,
   _setSplitSchema: Function,
   activeStep: number,
   setActiveStep: Function,
@@ -33,8 +33,6 @@ function renderSubmissionTab(
   _setOpenValidateError: Function,
   _modelUploading: boolean
 ) {
-  const data = getStepsData(splitSchema)
-
   return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
 }
 
