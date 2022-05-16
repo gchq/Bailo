@@ -3,24 +3,23 @@ import { createSchema, findSchemaByRef, findSchemasByUse, serializedSchemaFields
 import SchemaModel from '../models/Schema'
 
 describe('test schema service', () => {
-
   const uploadSchema: any = {
     name: 'upload-schema',
     reference: 'upload',
     use: 'UPLOAD',
-    schema: {}
+    schema: {},
   }
   const uploadSchema2: any = {
     name: 'upload-schema2',
     reference: 'upload2',
     use: 'UPLOAD',
-    schema: {}
+    schema: {},
   }
   const deploymentSchema: any = {
     name: 'deployment-schema',
     reference: 'deployment',
     use: 'DEPLOYMENT',
-    schema: {}
+    schema: {},
   }
 
   beforeEach(async () => {
@@ -30,7 +29,7 @@ describe('test schema service', () => {
     await uploadDoc2.save()
     const deploymentDoc = new SchemaModel(deploymentSchema)
     await deploymentDoc.save()
-  });
+  })
 
   test('that the serializer returns the correct properties', () => {
     const properties: any = serializedSchemaFields()
@@ -57,7 +56,4 @@ describe('test schema service', () => {
     expect(fetchedSchema).not.toEqual(null)
     expect(fetchedSchema.schema.testProperty).toBe(updatedSchema.schema.testProperty)
   })
-
 })
-
-

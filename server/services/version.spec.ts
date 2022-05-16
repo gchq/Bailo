@@ -2,11 +2,17 @@ import { ObjectId } from 'mongodb'
 import { ApprovalStates } from '../models/Deployment'
 import '../utils/mockMongo'
 import VersionModel from '../models/Version'
-import { createVersion, findModelVersions, findVersionById, findVersionByName, serializedVersionFields } from './version'
+import {
+  createVersion,
+  findModelVersions,
+  findVersionById,
+  findVersionByName,
+  serializedVersionFields,
+} from './version'
 import UserModel from '../models/User'
 
-const modelId = new ObjectId
-const anotherModelId = new ObjectId
+const modelId = new ObjectId()
+const anotherModelId = new ObjectId()
 
 const testVersion: any = {
   model: modelId,
@@ -18,7 +24,7 @@ const testVersion: any = {
   state: {},
   logs: [],
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 const testVersion2: any = {
@@ -31,7 +37,7 @@ const testVersion2: any = {
   state: {},
   logs: [],
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 const testUser = {
@@ -42,7 +48,6 @@ const testUser = {
 const userDoc = new UserModel(testUser)
 
 describe('test version service', () => {
-
   beforeEach(async () => {
     const versionDoc = new VersionModel(testVersion)
     await versionDoc.save()
@@ -75,13 +80,12 @@ describe('test version service', () => {
   })
 
   test('version can be created', async () => {
-    const newVersion: any = { 
+    const newVersion: any = {
       version: '1',
-      metadata: {}
+      metadata: {},
     }
     const version: any = await createVersion(userDoc, newVersion)
     expect(version).not.toBe(null)
     expect(version.version).toBe(newVersion.version)
   })
-
 })

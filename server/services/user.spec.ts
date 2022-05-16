@@ -1,9 +1,15 @@
 import '../utils/mockMongo'
-import { findAndUpdateUser, getUserById, getUserByInternalId, serializedUserFields, findUsers, findUserCached } from './user'
+import {
+  findAndUpdateUser,
+  getUserById,
+  getUserByInternalId,
+  serializedUserFields,
+  findUsers,
+  findUserCached,
+} from './user'
 import UserModel from '../models/User'
 
 describe('test user service', () => {
-
   const testUser1 = {
     userId: 'user1',
     email: 'user1@email.com',
@@ -18,14 +24,14 @@ describe('test user service', () => {
   beforeEach(async () => {
     await findAndUpdateUser(testUser1)
     await findAndUpdateUser(testUser2)
-  });
-  
+  })
+
   test('can create test user', async () => {
     const user = await UserModel.findOne({ id: 'user1' })
     expect(user).toBeTruthy()
   })
-  
-  test('fetch user by ID and internal ID', async () => {    
+
+  test('fetch user by ID and internal ID', async () => {
     const fetchedUser: any = await getUserById('user1')
     expect(fetchedUser).not.toEqual(null)
     const fetchedUser2 = getUserByInternalId(fetchedUser._id)
@@ -48,7 +54,4 @@ describe('test user service', () => {
     expect(user).not.toEqual(null)
     expect(user.id).toBe(testUser1.userId)
   })
-
 })
-
-
