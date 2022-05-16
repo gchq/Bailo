@@ -1,6 +1,6 @@
+import '../utils/mockMongo'
 import { ObjectId } from 'mongodb'
 import { ApprovalStates } from '../models/Deployment'
-import '../utils/mockMongo'
 import VersionModel from '../models/Version'
 import {
   createVersion,
@@ -49,33 +49,32 @@ const userDoc = new UserModel(testUser)
 
 describe('test version service', () => {
   beforeEach(async () => {
-    const versionDoc = new VersionModel(testVersion)
-    await versionDoc.save()
-    const versionDoc2 = new VersionModel(testVersion2)
-    await versionDoc2.save()
+    const versionDoc = await VersionModel.create(testVersion)
+    await VersionModel.create(testVersion2)
     testVersion._id = versionDoc._id
   })
 
   test('that the serializer returns the correct properties', () => {
+    // Need to improve this by testing an actual log entry to see if it has just the properties below
     const properties: any = serializedVersionFields()
     expect(properties.mandatory).toStrictEqual(['_id', 'version', 'metadata.highLevelDetails.name'])
   })
 
   test('find version by name/version', async () => {
     const version: any = await findVersionByName(userDoc, modelId, '1')
-    expect(version).not.toBe(null)
+    expect(version).toBeTruthy()
     expect(version.version).toBe(testVersion.version)
   })
 
   test('find version by ID', async () => {
     const version: any = await findVersionById(userDoc, testVersion._id)
-    expect(version).not.toBe(null)
+    expect(version).toBeTruthy()
     expect(version.version).toBe(testVersion.version)
   })
 
   test('find versions for model ID', async () => {
     const versions: any = await findModelVersions(userDoc, modelId)
-    expect(versions).not.toBe(null)
+    expect(versions).toBeTruthy()
     expect(versions.length).toBe(1)
   })
 
@@ -85,7 +84,7 @@ describe('test version service', () => {
       metadata: {},
     }
     const version: any = await createVersion(userDoc, newVersion)
-    expect(version).not.toBe(null)
+    expect(version).toBeTruthy()
     expect(version.version).toBe(newVersion.version)
   })
 })
