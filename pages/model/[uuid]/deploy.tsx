@@ -8,17 +8,34 @@ import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../../../data/api'
-import { Schema, SplitSchema } from '../../../types/interfaces'
-import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import { Schema, SplitSchema, Step } from '../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
 import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
+import DeploymentSubmission from '../../../src/Form/DeploymentSubmission'
 
 const uiSchema = {
   contacts: {
     requester: { 'ui:widget': 'userSelector' },
     secondPOC: { 'ui:widget': 'userSelector' },
   },
+}
+
+function renderSubmissionTab(
+  _currentStep: Step,
+  _splitSchema: SplitSchema,
+  _setSplitSchema: Function,
+  activeStep: number,
+  setActiveStep: Function,
+  onSubmit: Function,
+  _openValidateError: boolean,
+  _setOpenValidateError: Function,
+  _modelUploading: boolean
+) {
+  return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
 }
 
 export default function Deploy() {
@@ -45,6 +62,24 @@ export default function Deploy() {
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
     ])
+
+    newSteps.push(
+      createStep({
+        schema: {
+          title: 'Submission',
+        },
+        state: {},
+        schemaRef: reference,
+
+        type: 'Message',
+        index: newSteps.length,
+        section: 'submission',
+
+        render: () => <></>,
+        renderButtons: renderSubmissionTab,
+        isComplete: () => true,
+      })
+    )
 
     setSplitSchema({ reference, steps: newSteps })
   }, [currentSchema])

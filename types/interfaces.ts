@@ -105,6 +105,11 @@ export interface UiConfig {
     showWarning: boolean
     checkboxText: string
   }
+
+  deploymentWarning: {
+    showWarning: boolean
+    checkboxText: string
+  }
 }
 
 export type RequestType = 'Upload' | 'Deployment'
