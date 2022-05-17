@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NextRouter, useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import axios from 'axios'
 
 import Paper from '@mui/material/Paper'
@@ -28,7 +28,7 @@ function renderSubmissionTab(
   _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
   setActiveStep: (step: number) => void,
-  onSubmit: () => NextRouter,
+  onSubmit: () => void,
   _openValidateError: boolean,
   _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean

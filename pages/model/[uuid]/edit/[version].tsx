@@ -14,9 +14,6 @@ import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/
 
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
-import { useGetModelVersion } from 'data/model'
-import { putEndpoint } from 'data/api'
-import useCacheVariable from 'utils/useCacheVariable'
 import ModelEditSubmission from '../../../../src/Form/ModelEditSubmission'
 
 const uiSchema = {
@@ -33,23 +30,21 @@ const uiSchema = {
 function renderSubmissionTab(
   _currentStep: Step,
   _splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => void,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean
 ) {
   return (
-    <>
-      <ModelEditSubmission
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-        modelUploading={modelUploading}
-      />
-    </>
+    <ModelEditSubmission
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+      modelUploading={modelUploading}
+    />
   )
 }
 
@@ -84,7 +79,7 @@ function Upload() {
         index: schemaSteps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })

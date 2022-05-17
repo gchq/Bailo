@@ -10,8 +10,6 @@ import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../../../data/api'
 import { Schema, SplitSchema, Step } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
 import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
@@ -27,12 +25,12 @@ const uiSchema = {
 function renderSubmissionTab(
   _currentStep: Step,
   _splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => void,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   _modelUploading: boolean
 ) {
   return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
@@ -75,7 +73,7 @@ export default function Deploy() {
         index: newSteps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })

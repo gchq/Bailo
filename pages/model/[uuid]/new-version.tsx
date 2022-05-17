@@ -8,7 +8,7 @@ import { useGetModel } from '../../../data/model'
 import Wrapper from '../../../src/Wrapper'
 import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { SplitSchema } from '../../../types/interfaces'
+import { SplitSchema, Step } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
@@ -29,28 +29,26 @@ const uiSchema = {
 function renderSubmissionTab(
   _currentStep: Step,
   splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => void,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean
 ) {
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <ModelExportAndSubmission
-        formData={data}
-        splitSchema={splitSchema}
-        schemaRef={splitSchema.reference}
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-        modelUploading={modelUploading}
-      />
-    </>
+    <ModelExportAndSubmission
+      formData={data}
+      splitSchema={splitSchema}
+      schemaRef={splitSchema.reference}
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+      modelUploading={modelUploading}
+    />
   )
 }
 
@@ -105,7 +103,7 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
