@@ -203,7 +203,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
 
   res.error = (code: number, error: any) => {
     req.log.warn(error[0], error[1])
-    return res.status(code).json({
+    return res.status(code || 500).json({
       message: error[1],
     })
   }
@@ -225,6 +225,7 @@ export async function expressErrorHandler(
     throw err
   }
 
+  const code = typeof err.code === 'number' && err.code > 100 && err.code < 600 ? err.code : 500
   const localLogger = err.logger || req.log
 
   localLogger.warn(err.data, err.message)

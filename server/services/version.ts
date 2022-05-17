@@ -94,15 +94,6 @@ export async function createVersion(user: UserDoc, data: CreateVersion, parentUu
     throw Forbidden({ data }, 'Unable to create version, failed permissions check.')
   }
 
-  const parentModel = await ModelModel.findOne({ uuid: parentUuid })
-  const duplicateVersionCheck = await VersionModel.findOne({
-    model: parentModel?._id,
-    version: version.metadata.highLevelDetails.modelCardVersion,
-  })
-  if (duplicateVersionCheck) {
-    throw BadReq({ versionModel: version.model }, 'Duplicate version name for model')
-  }
-
   await version.save()
 
   return version

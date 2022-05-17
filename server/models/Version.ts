@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document } from 'mongoose'
+import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
 import logger from '../utils/logger'
 import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
@@ -43,7 +43,7 @@ const VersionSchema = new Schema<Version>(
   }
 )
 
-VersionSchema.index({ model: 1, version: 1 })
+VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
 VersionSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ versionId: this._id }, msg)
