@@ -8,13 +8,14 @@ import Wrapper from '../../../../src/Wrapper'
 import { useGetSchema } from '../../../../data/schema'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
 import { SplitSchema, Step } from '../../../../types/interfaces'
-import { getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
 
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
 import { useGetModelVersion } from 'data/model'
 import { putEndpoint } from 'data/api'
 import useCacheVariable from 'utils/useCacheVariable'
+import ModelEditSubmission from '../../../../src/Form/ModelEditSubmission'
 
 const uiSchema = {
   highLevelDetails: {
@@ -25,6 +26,29 @@ const uiSchema = {
     reviewer: { 'ui:widget': 'userSelector' },
     manager: { 'ui:widget': 'userSelector' },
   },
+}
+
+function renderSubmissionTab(
+  _currentStep: Step,
+  _splitSchema: SplitSchema,
+  _setSplitSchema: Function,
+  activeStep: number,
+  setActiveStep: Function,
+  onSubmit: Function,
+  _openValidateError: boolean,
+  _setOpenValidateError: Function,
+  modelUploading: boolean
+) {
+  return (
+    <>
+      <ModelEditSubmission
+        onSubmit={onSubmit}
+        setActiveStep={setActiveStep}
+        activeStep={activeStep}
+        modelUploading={modelUploading}
+      />
+    </>
+  )
 }
 
 function Upload() {
@@ -45,6 +69,25 @@ function Upload() {
     if (!cSchema || !cVersion || splitSchema.steps.length) return
 
     const schemaSteps = getStepsFromSchema(cSchema, uiSchema, [], cVersion.metadata)
+
+    schemaSteps.push(
+      createStep({
+        schema: {
+          title: 'Submission',
+        },
+        state: {},
+        schemaRef: cSchema.reference,
+
+        type: 'Message',
+        index: schemaSteps.length,
+        section: 'submission',
+
+        render: () => <></>,
+        renderButtons: renderSubmissionTab,
+        isComplete: () => true,
+      })
+    )
+
     setSplitSchema({ reference: cSchema.reference, steps: schemaSteps })
   }, [cSchema, cVersion, splitSchema.steps.length])
 

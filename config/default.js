@@ -55,6 +55,10 @@ module.exports = {
       showWarning: true,
       checkboxText: 'By checking here you confirm that the information is correct',
     },
+    deploymentWarning: {
+      showWarning: true,
+      checkboxText: 'By checking here you confirm that the information is correct',
+    },
   },
 
   smtp: {
