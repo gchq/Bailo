@@ -8,7 +8,7 @@ export interface User {
   email: string
 
   roles: Types.Array<string>
-  favourites?: Types.Array<ModelDoc | Types.ObjectId>
+  favourites: Types.Array<ModelDoc | Types.ObjectId>
 
   token?: string | undefined
   data?: any

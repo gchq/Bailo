@@ -100,10 +100,9 @@ const Model = () => {
   }, [version, setComplianceFlow])
 
   useEffect(() => {
-    if (!isCurrentUserLoading && currentUser !== undefined && version?.model !== undefined) {
-      setModelFavourited(currentUser.favourites.includes(version?.model as unknown as Types.ObjectId))
-    }
-  }, [currentUser, version, isCurrentUserLoading, setModelFavourited])
+    if (!currentUser || !version?.model) return
+    setModelFavourited(currentUser.favourites?.includes(version?.model as unknown as Types.ObjectId))
+  }, [currentUser, version, setModelFavourited])
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isVersionsError,
