@@ -16,6 +16,7 @@ import Form from '../../../src/Form/Form'
 import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
+import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 
 const uiSchema = {
   contacts: {
@@ -23,6 +24,34 @@ const uiSchema = {
     reviewer: { 'ui:widget': 'userSelector' },
     manager: { 'ui:widget': 'userSelector' },
   },
+}
+
+function renderSubmissionTab(
+  _currentStep: Step,
+  splitSchema: SplitSchema,
+  _setSplitSchema: Function,
+  activeStep: number,
+  setActiveStep: Function,
+  onSubmit: Function,
+  _openValidateError: boolean,
+  _setOpenValidateError: Function,
+  modelUploading: boolean
+) {
+  const data = getStepsData(splitSchema)
+
+  return (
+    <>
+      <ModelExportAndSubmission
+        formData={data}
+        splitSchema={splitSchema}
+        schemaRef={splitSchema.reference}
+        onSubmit={onSubmit}
+        setActiveStep={setActiveStep}
+        activeStep={activeStep}
+        modelUploading={modelUploading}
+      />
+    </>
+  )
 }
 
 function Upload() {
@@ -61,6 +90,24 @@ function Upload() {
 
         render: RenderFileTab,
         isComplete: FileTabComplete,
+      })
+    )
+
+    steps.push(
+      createStep({
+        schema: {
+          title: 'Submission',
+        },
+        state: {},
+        schemaRef: cModel.schemaRef,
+
+        type: 'Message',
+        index: steps.length,
+        section: 'submission',
+
+        render: () => <></>,
+        renderButtons: renderSubmissionTab,
+        isComplete: () => true,
       })
     )
 
