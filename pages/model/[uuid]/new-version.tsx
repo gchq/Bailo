@@ -10,6 +10,7 @@ import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { SplitSchema, Step } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import { useGetModelVersions } from '../../../data/model'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
@@ -60,6 +61,7 @@ function Upload() {
 
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
+  const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(modelUuid)
 
   const cModel = useCacheVariable(model)
   const cSchema = useCacheVariable(schema)
@@ -138,6 +140,11 @@ function Upload() {
     const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
+    // This might need revisiting when models have lots of versions
+    if (versions!.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
+      return setError('This model already has a version with the same name')
+    }
+
     data.schemaRef = model?.schemaRef
 
     form.append('code', data.files.code)
@@ -158,7 +165,6 @@ function Upload() {
       },
     })
       .then((res) => {
-        setModelUploading(false)
         const uuid = res.data.uuid
         return router.push(`/model/${uuid}`)
       })

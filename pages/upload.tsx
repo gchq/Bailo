@@ -180,7 +180,6 @@ function Upload() {
       },
     })
       .then((res) => {
-        setModelUploading(false)
         return router.push(`/model/${res.data.uuid}`)
       })
       .catch((error) => {
