@@ -10,6 +10,7 @@ import { useGetSchema } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import { SplitSchema, Step } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import { useGetModelVersions } from '../../../data/model'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
@@ -58,6 +59,7 @@ function Upload() {
 
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
+  const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(modelUuid)
 
   const cModel = useCacheVariable(model)
   const cSchema = useCacheVariable(schema)
@@ -129,8 +131,21 @@ function Upload() {
   const onSubmit = async () => {
     setError(undefined)
 
+    if (!splitSchema.steps.every((e) => e.isComplete(e))) {
+      return setError('Ensure all steps are complete before submitting')
+    }
+
     const data = getStepsData(splitSchema, true)
     const form = new FormData()
+
+    if (!versions) {
+      return setError('Problem loading versions')
+    }
+
+    // This might need revisiting when models have lots of versions
+    if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
+      return setError('This model already has a version with the same name')
+    }
 
     data.schemaRef = model?.schemaRef
 
@@ -151,14 +166,13 @@ function Upload() {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
-      .then((res) => {
-        setModelUploading(false)
-        return router.push(`/model/${res.data.uuid}`)
-      })
+      .then((res) => router.push(`/model/${res.data.uuid}`))
       .catch((e) => {
         setModelUploading(false)
         setError(e.response.data.message)
+        return null
       })
+    return null
   }
 
   return (

@@ -12,7 +12,7 @@ import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 
 import { createVersionRequests } from '../../services/request'
-import { BadReq } from '../../utils/result'
+import { BadReq, Conflict } from '../../utils/result'
 import { findModelByUuid, createModel } from '../../services/model'
 import { createVersion } from '../../services/version'
 import { findSchemaByRef } from '../../services/schema'
@@ -40,7 +40,8 @@ export const postUpload = [
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
-      const mode = req.query.mode
+      const mode = req.query.mode as string
+      const modelUuid = req.query.modelUuid as string
 
       if (!files.binary) {
         throw BadReq({ code: 'binary_file_not_found' }, 'Unable to find binary file')
@@ -107,12 +108,19 @@ export const postUpload = [
           metadata: metadata,
         })
       } catch (err: any) {
-        if (err.toString().includes('duplicate key error')) {
-          return res.status(409).json({
-            message: `Duplicate version name found for model '${req.query.modelUuid}'`,
-          })
+        if (err.code === 11000) {
+          throw Conflict(
+            {
+              version: metadata.highLevelDetails.modelCardVersion,
+              model: modelUuid,
+            },
+            'This model already has a version with the same name'
+          )
         }
+
+        throw err
       }
+
       req.log.info({ code: 'created_model_version', version }, 'Created model version')
 
       const name = metadata.highLevelDetails.name
