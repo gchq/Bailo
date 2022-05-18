@@ -87,7 +87,7 @@ interface CreateVersion {
   metadata: any
 }
 
-export async function createVersion(user: UserDoc, data: CreateVersion, parentUuid: string) {
+export async function createVersion(user: UserDoc, data: CreateVersion) {
   const version = new VersionModel(data)
 
   if (!authorisation.canUserSeeVersion(user, version)) {
