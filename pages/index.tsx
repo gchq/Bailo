@@ -2,7 +2,6 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Wrapper from '../src/Wrapper'
 import SearchIcon from '@mui/icons-material/Search'
 import InputBase from '@mui/material/InputBase'
 import { useState } from 'react'
@@ -12,6 +11,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
+import Wrapper from '../src/Wrapper'
 import useDebounce from '../utils/useDebounce'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
@@ -23,7 +23,7 @@ export default function ExploreModels() {
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsLoading, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+  const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -44,7 +44,7 @@ export default function ExploreModels() {
   }
 
   return (
-    <Wrapper title={'Explore Models'} page={'marketplace'}>
+    <Wrapper title='Explore Models' page='marketplace'>
       <Paper
         component='form'
         onSubmit={onFilterSubmit}
@@ -75,9 +75,9 @@ export default function ExploreModels() {
           </Box>
           <Box sx={{ marginBottom: 2 }} />
 
-          {!isModelsLoading &&
-            models!.map((model: Model, index: number) => (
-              <Box key={`model-${index}`}>
+          {models &&
+            models.map((model: Model, index: number) => (
+              <Box key={model.uuid}>
                 <Link href={`/model/${model.uuid}`} passHref>
                   <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
                     {model.currentMetadata.highLevelDetails.name}
@@ -89,18 +89,18 @@ export default function ExploreModels() {
                 </Typography>
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                  {model.currentMetadata.highLevelDetails.tags.map((tag: string, tagIndex: number) => (
-                    <Chip color='primary' key={`chip-${tagIndex}`} label={tag} size='small' variant='outlined' />
+                  {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
+                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                   ))}
                 </Stack>
 
-                {index !== models!.length - 1 && (
+                {index !== models.length - 1 && (
                   <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                 )}
               </Box>
             ))}
 
-          {!isModelsLoading && models!.length === 0 && <EmptyBlob text='No models here' />}
+          {models?.length === 0 && <EmptyBlob text='No models here' />}
         </Paper>
       </Box>
     </Wrapper>

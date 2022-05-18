@@ -25,28 +25,26 @@ import LoadingBar from '@/src/common/LoadingBar'
 function renderSubmissionTab(
   _currentStep: Step,
   splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => void,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean
 ) {
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <ModelExportAndSubmission
-        formData={data}
-        splitSchema={splitSchema}
-        schemaRef={splitSchema.reference}
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-        modelUploading={modelUploading}
-      />
-    </>
+    <ModelExportAndSubmission
+      formData={data}
+      splitSchema={splitSchema}
+      schemaRef={splitSchema.reference}
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+      modelUploading={modelUploading}
+    />
   )
 }
 
@@ -86,7 +84,7 @@ function Upload() {
   useEffect(() => {
     if (!currentSchema || !user) return
 
-    const { schema, reference } = currentSchema
+    const { reference } = currentSchema
     const defaultState = {
       contacts: { uploader: user.id },
     }
@@ -126,7 +124,7 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
@@ -147,8 +145,13 @@ function Upload() {
   if (errorWrapper) return errorWrapper
 
   if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
-    return <></>
+    return null
   }
+  const Loading = <Wrapper title='Loading...' page='deployment' />
+
+  if (isDefaultSchemaLoading || !defaultSchema) return Loading
+  if (isSchemasLoading || !schemas) return Loading
+  if (isCurrentUserLoading || !currentUser) return Loading
 
   const onSubmit = async () => {
     setError(undefined)
@@ -175,7 +178,7 @@ function Upload() {
       url: '/api/v1/model',
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
-      onUploadProgress: function (progressEvent) {
+      onUploadProgress: (progressEvent) => {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
@@ -183,10 +186,12 @@ function Upload() {
         setModelUploading(false)
         return router.push(`/model/${res.data.uuid}`)
       })
-      .catch((error) => {
+      .catch((e) => {
         setModelUploading(false)
-        setError(error.response.data.message)
+        setError(e.response.data.message)
+        return null
       })
+    return null
   }
 
   return (
@@ -194,9 +199,9 @@ function Upload() {
       <Grid container justifyContent='space-between' alignItems='center'>
         <Box />
         <SchemaSelector
-          currentSchema={currentSchema ?? defaultSchema!}
+          currentSchema={currentSchema ?? defaultSchema}
           setCurrentSchema={setCurrentSchema}
-          schemas={schemas!}
+          schemas={schemas}
         />
       </Grid>
 
@@ -214,7 +219,7 @@ function Upload() {
 
 export default function Outer() {
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
+    <Wrapper title='Upload Model' page='upload'>
       <Upload />
     </Wrapper>
   )

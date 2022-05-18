@@ -7,6 +7,7 @@ import { Readable } from 'stream'
 type Response = 'Accepted' | 'Declined'
 class Request {
   request: any
+
   api: API
 
   constructor(api: API, request: any) {
@@ -23,6 +24,7 @@ class Request {
 
 class User {
   user: any
+
   api: API
 
   constructor(api: API, user: any) {
@@ -33,6 +35,7 @@ class User {
 
 class Schema {
   schema: any
+
   api: API
 
   constructor(api: API, schema: any) {
@@ -44,6 +47,7 @@ class Schema {
 type VersionName = 'latest' | string
 class Version {
   version: any
+
   api: API
 
   constructor(api: API, version: any) {
@@ -54,6 +58,7 @@ class Version {
 
 class Deployment {
   deployment: any
+
   api: API
 
   constructor(api: API, deployment: any) {
@@ -64,6 +69,7 @@ class Deployment {
 
 class Model {
   model: any
+
   api: API
 
   constructor(api: API, model: any) {

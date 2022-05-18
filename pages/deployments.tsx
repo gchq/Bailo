@@ -1,9 +1,5 @@
 import Paper from '@mui/material/Paper'
-import React from 'react'
-import Wrapper from '../src/Wrapper'
-import { useGetUserDeployments } from '../data/deployment'
-import { useGetModelById } from '../data/model'
-import { useGetCurrentUser } from '../data/user'
+import React, { ChangeEvent } from 'react'
 import Box from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
@@ -16,26 +12,29 @@ import DisplaySettings from '@mui/icons-material/DisplaySettings'
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
-import { Deployment } from '../types/interfaces'
 import _ from 'lodash'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
+import { Deployment } from '../types/interfaces'
+import { useGetCurrentUser } from '../data/user'
+import { useGetModelById } from '../data/model'
+import { useGetUserDeployments } from '../data/deployment'
+import Wrapper from '../src/Wrapper'
 import EmptyBlob from '../src/common/EmptyBlob'
 
-const ModelNameFromKey = ({ modelId }: { modelId: string }) => {
+function ModelNameFromKey({ modelId }: { modelId: string }) {
   const { model, isModelError } = useGetModelById(modelId)
   if (isModelError) {
     return <Typography>Error getting model name</Typography>
-  } else {
-    return <Typography variant='h5'>{model?.currentMetadata?.highLevelDetails?.name ?? 'Loading...'}</Typography>
   }
+  return <Typography variant='h5'>{model?.currentMetadata?.highLevelDetails?.name ?? 'Loading...'}</Typography>
 }
 
 interface GroupedDeployments {
   [key: string]: Deployment[]
 }
 
-const Deployments = () => {
+function Deployments() {
   const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
@@ -48,123 +47,114 @@ const Deployments = () => {
       const groups: GroupedDeployments = _.groupBy(userDeployments, (deployment) => deployment.model)
       setGroupedDeployments(groups)
       // Default the ordered deployment list to date
-      let sortedArray = [...userDeployments]
-      sortedArray.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      const sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
   }, [userDeployments, setOrderedDeployments, isCurrentUserError, isUserDeploymentsError, isUserDeploymentsLoading])
 
-  const handleOrderChange = (event: any) => {
+  const handleOrderChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedOrder(event.target.value)
   }
 
-  const displayDate = (date: any) => {
-    return new Date(date).toLocaleDateString('en-UK')
-  }
+  const displayDate = (date: Date) => new Date(date).toLocaleDateString('en-UK')
 
   React.useEffect(() => {
     if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
-      let sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
+      const sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
         a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1
       )
       setOrderedDeployments(sortedArray)
     } else if (selectedOrder === 'date' && userDeployments !== undefined) {
-      let sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      const sortedArray = [...userDeployments].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
       setOrderedDeployments(sortedArray)
     }
   }, [selectedOrder, setOrderedDeployments, isUserDeploymentsError, userDeployments])
 
   return (
-    <>
-      <Wrapper title='My Deployments' page={'deployments'}>
-        <Paper sx={{ py: 2, px: 4 }}>
+    <Wrapper title='My Deployments' page='deployments'>
+      <Paper sx={{ py: 2, px: 4 }}>
+        <Box>
           <Box>
-            <Box>
-              <Accordion sx={{ boxShadow: 'none' }}>
-                <AccordionSummary
-                  aria-controls='panel1a-content'
-                  expandIcon={<ExpandMoreIcon />}
-                  id='panel1a-header'
-                  sx={{ p: 0 }}
-                >
-                  <DisplaySettings sx={{ color: '#757575', mr: 1 }} />
-                  <Typography>Arrange by</Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ p: 2, backgroundColor: 'whitesmoke' }}>
-                  <FormControl component='fieldset'>
-                    <RadioGroup
-                      defaultValue={'date'}
-                      row
-                      onChange={handleOrderChange}
-                      aria-label='order'
-                      name='row-radio-buttons-group'
-                    >
-                      <FormControlLabel value='date' control={<Radio />} label='Date' />
-                      <FormControlLabel value='name' control={<Radio />} label='Name' />
-                      <FormControlLabel value='model' control={<Radio />} label='Model' />
-                    </RadioGroup>
-                  </FormControl>
-                </AccordionDetails>
-              </Accordion>
-              <Divider flexItem />
-            </Box>
+            <Accordion sx={{ boxShadow: 'none' }}>
+              <AccordionSummary
+                aria-controls='panel1a-content'
+                expandIcon={<ExpandMoreIcon />}
+                id='panel1a-header'
+                sx={{ p: 0 }}
+              >
+                <DisplaySettings sx={{ color: '#757575', mr: 1 }} />
+                <Typography>Arrange by</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 2, backgroundColor: 'whitesmoke' }}>
+                <FormControl component='fieldset'>
+                  <RadioGroup
+                    defaultValue='date'
+                    row
+                    onChange={handleOrderChange}
+                    aria-label='order'
+                    name='row-radio-buttons-group'
+                  >
+                    <FormControlLabel value='date' control={<Radio />} label='Date' />
+                    <FormControlLabel value='name' control={<Radio />} label='Name' />
+                    <FormControlLabel value='model' control={<Radio />} label='Model' />
+                  </RadioGroup>
+                </FormControl>
+              </AccordionDetails>
+            </Accordion>
+            <Divider flexItem />
           </Box>
           {(selectedOrder === 'date' || selectedOrder === 'name') && (
             <Box>
-              {orderedDeployments?.map((deployment, index) => {
-                return (
-                  <Box key={`deployment-${index}`} sx={{ mt: 2 }}>
-                    <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                      <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                        {deployment?.metadata?.highLevelDetails?.name}
-                      </MuiLink>
-                    </Link>
-                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                      {displayDate(deployment?.createdAt)}
-                    </Typography>
-                    {index !== orderedDeployments!.length - 1 && (
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                    )}
-                  </Box>
-                )
-              })}
+              {orderedDeployments?.map((deployment, index) => (
+                <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
+                  <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                      {deployment?.metadata?.highLevelDetails?.name}
+                    </MuiLink>
+                  </Link>
+                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                    {displayDate(deployment?.createdAt)}
+                  </Typography>
+                  {index !== orderedDeployments.length - 1 && (
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                  )}
+                </Box>
+              ))}
             </Box>
           )}
           {selectedOrder === 'model' && (
             <Box>
               {groupedDeployments !== undefined &&
-                Object.keys(groupedDeployments).map((key) => {
-                  return (
-                    <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                      <ModelNameFromKey modelId={key} />
-                      <Divider flexItem />
-                      {groupedDeployments[key].map((deployment, index) => {
-                        return (
-                          <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={index}>
-                            <Box>
-                              <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                                <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                                  {deployment?.metadata?.highLevelDetails?.name}
-                                </MuiLink>
-                              </Link>
-                            </Box>
-                            <Box>
-                              <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
-                            </Box>
-                          </Box>
-                        )
-                      })}
-                    </Box>
-                  )
-                })}
+                Object.keys(groupedDeployments).map((key) => (
+                  <Box sx={{ mt: 3, mb: 3 }} key={key}>
+                    <ModelNameFromKey modelId={key} />
+                    <Divider flexItem />
+                    {groupedDeployments[key].map((deployment) => (
+                      <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
+                        <Box>
+                          <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                              {deployment?.metadata?.highLevelDetails?.name}
+                            </MuiLink>
+                          </Link>
+                        </Box>
+                        <Box>
+                          <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
             </Box>
           )}
-          <Box>
-            {!isUserDeploymentsLoading && userDeployments!.length === 0 && <EmptyBlob text='No deployments here' />}
-          </Box>
-        </Paper>
-      </Wrapper>
-    </>
+        </Box>
+        <Box>
+          {userDeployments !== undefined && !isUserDeploymentsLoading && userDeployments.length === 0 && (
+            <EmptyBlob text='No deployments here' />
+          )}
+        </Box>
+      </Paper>
+    </Wrapper>
   )
 }
 

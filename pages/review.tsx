@@ -34,7 +34,7 @@ export default function Review() {
   }
 
   return (
-    <Wrapper title='Reviews' page={'review'}>
+    <Wrapper title='Reviews' page='review'>
       <>
         {!isCurrentUserLoading && (
           <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
@@ -42,20 +42,22 @@ export default function Review() {
             <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
           </Tabs>
         )}
-        <ApprovalList type={'Upload'} category={value} />
-        <ApprovalList type={'Deployment'} category={value} />
+        <ApprovalList type='Upload' category={value} />
+        <ApprovalList type='Deployment' category={value} />
       </>
     </Wrapper>
   )
 }
 
-const ErrorWrapper = ({ message }: { message: string | undefined }) => (
-  <Paper sx={{ mt: 2, mb: 2 }}>
-    <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
-  </Paper>
-)
+function ErrorWrapper({ message }: { message: string | undefined }) {
+  return (
+    <Paper sx={{ mt: 2, mb: 2 }}>
+      <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
+    </Paper>
+  )
+}
 
-const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewFilterType }) => {
+function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -77,7 +79,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/request/${request!._id}/respond`, { choice }).then((res) => res.json())
+    await postEndpoint(`/api/v1/request/${request?._id}/respond`, { choice }).then((res) => res.json())
 
     mutateRequests()
     mutateNumRequests()
@@ -93,10 +95,6 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
   )
   if (error) return error
 
-  if (isRequestsLoading) {
-    return <Paper sx={{ mt: 2, mb: 2 }} />
-  }
-
   const changeState = (changeStateChoice: string, changeStateRequest: Request) => {
     setOpen(true)
     setRequest(changeStateRequest)
@@ -110,32 +108,38 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
     }
   }
 
+  const getUploadType = (requestType: string) => (requestType === 'Upload' ? 'models' : 'deployments')
+
+  if (isRequestsLoading || !requests) {
+    return <Paper sx={{ mt: 2, mb: 2 }} />
+  }
+
   return (
     <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
       <Typography sx={{ p: 3 }} variant='h4'>
         {type === 'Upload' ? 'Models' : 'Deployments'}
       </Typography>
-      {requests!.map((requestObj: any, index) => (
-        <Box sx={{ px: 3 }} key={`model-${index}`}>
+      {requests.map((requestObj: any) => (
+        <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
             <Grid item xs={12} sm={8}>
               {type === 'Upload' && (
                 <>
-                  <Link href={`/model/${requestObj?.version?.model?.uuid}`} passHref>
+                  <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
                     <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                      {requestObj?.version?.metadata?.highLevelDetails?.name}
+                      {requestObj.version?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Stack direction='row' spacing={2}>
                     <Chip label={requestObj.approvalType} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
-                        {requestObj?.version?.metadata?.highLevelDetails?.modelInASentence}
+                        {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}
                       </Typography>
                     </Box>
                   </Stack>
-                  {requestObj?.version === undefined ||
-                    (requestObj?.version === null && (
+                  {requestObj.version === undefined ||
+                    (requestObj.version === null && (
                       <Alert sx={{ mt: 2 }} severity='warning'>
                         This model appears to have data missing - check with the uploader to make sure it was uploaded
                         correctly
@@ -145,21 +149,21 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
               )}
               {type === 'Deployment' && (
                 <>
-                  <Link href={`/deployment/${requestObj?.deployment?.uuid}`} passHref>
+                  <Link href={`/deployment/${requestObj.deployment?.uuid}`} passHref>
                     <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                      {requestObj?.deployment?.metadata?.highLevelDetails?.name}
+                      {requestObj.deployment?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
-                    <Link href={`/model/${requestObj?.deployment?.model?.uuid}`} passHref>
+                    <Link href={`/model/${requestObj.deployment?.model?.uuid}`} passHref>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none' }}>
-                        {requestObj?.deployment?.model?.currentMetadata?.highLevelDetails?.name}
+                        {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
                   </Typography>
-                  {requestObj?.deployment === undefined ||
-                    (requestObj?.deployment === null && (
+                  {requestObj.deployment === undefined ||
+                    (requestObj.deployment === null && (
                       <Alert sx={{ mt: 2 }} severity='warning'>
                         This deployment appears to have data missing - check with the requester to make sure it was
                         requested correctly
@@ -205,11 +209,7 @@ const ApprovalList = ({ type, category }: { type: RequestType; category: ReviewF
           </Button>
         </DialogActions>
       </Dialog>
-      {requests!.length === 0 && (
-        <EmptyBlob
-          text={'All done! No ' + (type === 'Upload' ? 'models' : 'deployments') + ' are waiting for approvals'}
-        />
-      )}
+      {requests.length === 0 && <EmptyBlob text={`All done! No ${getUploadType(type)} are waiting for approvals`} />}
     </Paper>
   )
 }
