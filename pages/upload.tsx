@@ -182,9 +182,7 @@ function Upload() {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
-      .then((res) => {
-        return router.push(`/model/${res.data.uuid}`)
-      })
+      .then((res) => router.push(`/model/${res.data.uuid}`))
       .catch((e) => {
         setModelUploading(false)
         setError(e.response.data.message)
