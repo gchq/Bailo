@@ -13,6 +13,7 @@
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "test": "jest --bail",
+    "integration": "jest --bail --config jest.config.integration.ts",
     "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts",
     "script": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tsconfig.server.json node --trace-warnings -r ts-node/register -r tsconfig-paths/register server/scripts/runScript.ts"
   },
@@ -56,6 +57,7 @@
     "minio": "^7.0.25",
     "mjml": "^4.11.0",
     "mongodb": "^4.5.0",
+    "mongodb-memory-server": "^8.5.2",
     "mongoose": "^5.13.14",
     "morgan": "^1.10.0",
     "multer": "^1.4.4",

@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
+import '../../utils/mockJsdom'
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
-import Marketplace from '../pages/index'
+import Marketplace from '../../pages/index'
 
 describe('Marketplace', () => {
   it('renders a heading', async () => {

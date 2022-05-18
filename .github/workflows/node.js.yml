@@ -33,6 +33,9 @@ jobs:
       - run: npm run check-style
       - run: npm run lint
 
+      # Run unit tests
+      - run: npm run test
+
       # Setup dependencies
       - name: Build the stack
         run: |
@@ -65,8 +68,8 @@ jobs:
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
-      # Run tests
-      - run: HEADLESS=true npm test
+      # Run integration tests
+      - run: HEADLESS=true npm run integration
 
       - name: Dump docker-compose logs
         if: always()
