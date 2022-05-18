@@ -140,8 +140,12 @@ function Upload() {
     const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
+    if (!versions) {
+      return setError('Problem loading versions')
+    }
+
     // This might need revisiting when models have lots of versions
-    if (versions!.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
+    if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
       return setError('This model already has a version with the same name')
     }
 
