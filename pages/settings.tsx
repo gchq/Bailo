@@ -28,16 +28,16 @@ function a11yProps(index) {
 }
 
 export default function Settings() {
-  const [tab, setTab] = useState(0)
+  const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
 
-  const onTabChange = (_event: any, newValue: any) => {
+  const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)
   }
 
   return (
-    <Wrapper title='Settings' page={'settings'}>
+    <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
         <Tabs value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
           <Tab label='Profile' {...a11yProps(0)} />

@@ -30,28 +30,26 @@ const uiSchema = {
 function renderSubmissionTab(
   _currentStep: Step,
   splitSchema: SplitSchema,
-  _setSplitSchema: Function,
+  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
   activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
+  setActiveStep: (step: number) => void,
+  onSubmit: () => void,
   _openValidateError: boolean,
-  _setOpenValidateError: Function,
+  _setOpenValidateError: (validatorError: boolean) => void,
   modelUploading: boolean
 ) {
   const data = getStepsData(splitSchema)
 
   return (
-    <>
-      <ModelExportAndSubmission
-        formData={data}
-        splitSchema={splitSchema}
-        schemaRef={splitSchema.reference}
-        onSubmit={onSubmit}
-        setActiveStep={setActiveStep}
-        activeStep={activeStep}
-        modelUploading={modelUploading}
-      />
-    </>
+    <ModelExportAndSubmission
+      formData={data}
+      splitSchema={splitSchema}
+      schemaRef={splitSchema.reference}
+      onSubmit={onSubmit}
+      setActiveStep={setActiveStep}
+      activeStep={activeStep}
+      modelUploading={modelUploading}
+    />
   )
 }
 
@@ -107,7 +105,7 @@ function Upload() {
         index: steps.length,
         section: 'submission',
 
-        render: () => <></>,
+        render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
       })
@@ -123,11 +121,11 @@ function Upload() {
   if (errorWrapper) return errorWrapper
 
   if (isModelLoading || isSchemaLoading) {
-    return <></>
+    return null
   }
 
   if (!model || !schema) {
-    return <></>
+    return null
   }
 
   const onSubmit = async () => {
@@ -164,17 +162,16 @@ function Upload() {
       url: `/api/v1/model?mode=newVersion&modelUuid=${model.uuid}`,
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
-      onUploadProgress: function (progressEvent) {
+      onUploadProgress: (progressEvent) => {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
       .then((res) => {
-        const uuid = res.data.uuid
-        return router.push(`/model/${uuid}`)
+        return router.push(`/model/${res.data.uuid}`)
       })
-      .catch((error) => {
+      .catch((e) => {
         setModelUploading(false)
-        setError(error.response.data.message)
+        setError(e.response.data.message)
       })
   }
 
@@ -194,7 +191,7 @@ function Upload() {
 
 export default function Outer() {
   return (
-    <Wrapper title={'Upload Model'} page={'upload'}>
+    <Wrapper title='Upload Model' page='upload'>
       <Upload />
     </Wrapper>
   )

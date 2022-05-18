@@ -25,7 +25,7 @@ export default function FormDesigner({
   const currentStep = splitSchema.steps[activeStep]
 
   if (!currentStep) {
-    return <></>
+    return null
   }
 
   const Render = currentStep.render
