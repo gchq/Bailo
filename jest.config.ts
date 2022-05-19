@@ -14,7 +14,23 @@ const customJestConfig: Config.InitialOptions = {
   },
   testPathIgnorePatterns: ['__tests__/__utils__', 'config'],
   bail: true,
+
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '<rootDir>/.next/',
+    '<rootDir>/__tests__/',
+    '<rootDir>/config/',
+    '<rootDir>/coverage/',
+    '<rootDir>/helm/',
+    '<rootDir>/lib/', // pMongoQueue has its own tests
+    '<rootDir>/server/scripts/',
+    '<rootDir>/src/MuiForms/',
+    '<rootDir>/scripts/',
+  ],
+
+  collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
