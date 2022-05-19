@@ -24,3 +24,5 @@ yarn-error.log*
 public/css/fonts.css
 
 helm/**/*.yaml
+
+coverage
