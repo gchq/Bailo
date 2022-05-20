@@ -4,9 +4,11 @@ import dropRight from 'lodash/dropRight'
 import remove from 'lodash/remove'
 import { Validator } from 'jsonschema'
 
-import { SplitSchema, Step, StepType } from '../types/interfaces'
+import { Schema, SplitSchema, Step, StepType } from '../types/interfaces'
 import RenderForm from '../src/Form/RenderForm'
 import RenderButtons from '../src/Form/RenderButtons'
+import TextareaWidget from '@/src/MuiForms/TextareaWidget'
+import { ammendUiSchema } from './uiSchemaUtils'
 
 export function createStep({
   schema,
@@ -80,9 +82,9 @@ export function setStepValidate(splitSchema: SplitSchema, setSplitSchema: Functi
 
 export function getStepsFromSchema(
   schema: any,
-  uiSchema: any,
   omitFields: Array<string> = [],
-  state: any = {}
+  state: any = {},
+  formType: string
 ): Array<Step> {
   const schemaDupe = omit(schema.schema, omitFields) as any
 
@@ -90,6 +92,8 @@ export function getStepsFromSchema(
     const fields = field.split('.')
     remove(get(schemaDupe, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])
   }
+
+  const ammendedUiSchema = ammendUiSchema(schemaDupe, formType) || {}
 
   const props = Object.keys(schemaDupe.properties).filter((key) =>
     ['object', 'array'].includes(schemaDupe.properties[key].type)
@@ -103,7 +107,7 @@ export function getStepsFromSchema(
         ...schemaDupe.properties[prop],
       },
       uiSchema: {
-        ...uiSchema[prop],
+        ...ammendedUiSchema[prop],
       },
       state: state[prop] || {},
       type: 'Form',
