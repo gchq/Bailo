@@ -6,7 +6,9 @@ import { WidgetProps, utils } from '@rjsf/core'
 
 const { getDisplayLabel } = utils
 
-export type TextWidgetProps = WidgetProps & Pick<TextFieldProps, Exclude<keyof TextFieldProps, 'onBlur' | 'onFocus'>>
+type CustomWidgetProps = WidgetProps & {
+  options: any
+}
 
 const TextareaWidget = ({
   id,
@@ -28,7 +30,7 @@ const TextareaWidget = ({
   formContext,
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
-}: TextWidgetProps) => {
+}: CustomWidgetProps) => {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
     onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
@@ -52,6 +54,7 @@ const TextareaWidget = ({
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
+      rows={4}
       {...(textFieldProps as TextFieldProps)}
     />
   )
