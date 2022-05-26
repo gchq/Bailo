@@ -103,11 +103,7 @@ server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 server.use('/api', expressErrorHandler)
 
 export async function startServer() {
-  await Promise.all([
-    app.prepare(),
-    processUploads(),
-    processDeployments()
-  ])
+  await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
   server.use((req, res) => {
     return handle(req, res)
