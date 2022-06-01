@@ -3,7 +3,15 @@ import UserModel from '../models/User'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import Deployment, { ApprovalStates } from '../models/Deployment'
 import '../utils/mockMongo'
-import { findDeploymentByUuid, serializedDeploymentFields, findDeploymentById, findDeployments, DeploymentFilter, markDeploymentBuilt, createDeployment } from './deployment'
+import {
+  findDeploymentByUuid,
+  serializedDeploymentFields,
+  findDeploymentById,
+  findDeployments,
+  DeploymentFilter,
+  markDeploymentBuilt,
+  createDeployment,
+} from './deployment'
 
 const requesterId = new ObjectId()
 const deploymentUuid = 'test-deployment'
@@ -16,8 +24,8 @@ const deploymentData: any = {
   model: new ObjectId(),
   metadata: {
     contacts: {
-      requester: requesterId
-    }
+      requester: requesterId,
+    },
   },
   owner: new ObjectId(),
   createdAt: new Date(),
@@ -32,8 +40,8 @@ const deploymentData2: any = {
   model: new ObjectId(),
   metadata: {
     contacts: {
-      requester: requesterId
-    }
+      requester: requesterId,
+    },
   },
   owner: new ObjectId(),
   createdAt: new Date(),
@@ -48,7 +56,6 @@ const testUser = {
 const userDoc = new UserModel(testUser)
 
 describe('test deployment service', () => {
-
   beforeEach(async () => {
     const deploymentDoc: any = await DeploymentModel.create(deploymentData)
     deploymentData._id = new ObjectId(deploymentDoc._id)
@@ -61,7 +68,7 @@ describe('test deployment service', () => {
   })
 
   test('that we can find a deployment by its UUID', async () => {
-    const deployment : any = await findDeploymentByUuid(userDoc, deploymentUuid)
+    const deployment: any = await findDeploymentByUuid(userDoc, deploymentUuid)
     expect(deployment).not.toBe(undefined)
     expect(deployment.schemaRef).toBe(deploymentData.schemaRef)
   })
@@ -74,7 +81,7 @@ describe('test deployment service', () => {
 
   test('we can fetch all deployments', async () => {
     const deploymentFilter: any = {}
-    const deployments: any = await findDeployments(userDoc, deploymentFilter as DeploymentFilter) 
+    const deployments: any = await findDeployments(userDoc, deploymentFilter as DeploymentFilter)
     expect(deployments).not.toBe(undefined)
     expect(deployments.length).toBe(1)
   })
@@ -85,5 +92,4 @@ describe('test deployment service', () => {
     expect(deployment._id).not.toBe(undefined)
     expect(deployment.uuid).toBe(deploymentData2.uuid)
   })
-
 })

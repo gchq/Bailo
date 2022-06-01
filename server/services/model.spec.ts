@@ -4,7 +4,16 @@ import { ApprovalStates } from '../models/Deployment'
 import VersionModel from '../models/Version'
 import UserModel from '../models/User'
 import ModelModel from '../models/Model'
-import { findModelById, findModelByUuid, serializedModelFields, isValidType, isValidFilter, findModels, ModelFilter, createModel } from './model'
+import {
+  findModelById,
+  findModelByUuid,
+  serializedModelFields,
+  isValidType,
+  isValidFilter,
+  findModels,
+  ModelFilter,
+  createModel,
+} from './model'
 
 const modelId = new ObjectId()
 
@@ -29,7 +38,7 @@ const testModel: any = {
   currentMetadata: {},
   owner: new ObjectId(),
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 const testModel2: any = {
@@ -39,7 +48,7 @@ const testModel2: any = {
   currentMetadata: {},
   owner: new ObjectId(),
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 const testUser = {
@@ -88,7 +97,7 @@ describe('test version service', () => {
   })
 
   test('find models', async () => {
-    const filter: any = {filter: '', type: 'all'}
+    const filter: any = { filter: '', type: 'all' }
     const models = await findModels(userDoc, filter)
     expect(models).not.toBe(undefined)
     expect(models.length).toBe(1)
@@ -99,5 +108,4 @@ describe('test version service', () => {
     expect(model).not.toBe(undefined)
     expect(model.uuid).toBe(testModel2.uuid)
   })
-
 })

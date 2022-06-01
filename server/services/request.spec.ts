@@ -4,11 +4,10 @@ import RequestModel, { RequestTypes } from '../models/Request'
 import { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
 import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
-import {
-  findAndUpdateUser
-} from './user'
+import { findAndUpdateUser } from './user'
 import * as userService from './user'
 import ModelModel from '../models/Model'
+import * as emailService from '../utils/smtp'
 
 const managerId = new ObjectId()
 const modelId = new ObjectId()
@@ -20,14 +19,14 @@ const testModel: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: { 
+  currentMetadata: {
     highLevelDetails: {
-      name: 'model1'
-    }
+      name: 'model1',
+    },
   },
   owner: userId,
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 const versionData: any = {
@@ -35,12 +34,12 @@ const versionData: any = {
   version: '1',
   metadata: {
     highLevelDetails: {
-      name: 'model1'
+      name: 'model1',
     },
     contacts: {
       uploader: userId,
-      manager: managerId
-    }
+      manager: managerId,
+    },
   },
   built: false,
   managerApproved: ApprovalStates.NoResponse,
@@ -61,11 +60,11 @@ const deploymentData: any = {
   model: testModel,
   metadata: {
     highLevelDetails: {
-      name: 'deployment1'
+      name: 'deployment1',
     },
     contacts: {
-      requester: userId
-    }
+      requester: userId,
+    },
   },
   owner: new ObjectId(),
   createdAt: new Date(),
@@ -90,11 +89,10 @@ const testRequest = {
   version: null,
   __v: 0,
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 }
 
 describe('test request service', () => {
-
   beforeEach(async () => {
     await findAndUpdateUser(testUser)
     await ModelModel.create(testModel)
@@ -102,39 +100,42 @@ describe('test request service', () => {
   })
 
   test('that we can create a deployment request object', async () => {
-    const mock = jest.spyOn(userService, 'getUserById')
-    mock.mockReturnValue(testUser)
-    const request = await createDeploymentRequests({version, deployment})
+    const getUserMock = jest.spyOn(userService, 'getUserById')
+    getUserMock.mockReturnValue(testUser)
+    const emailMock = jest.spyOn(emailService, 'sendEmail')
+    emailMock.mockImplementation()
+    const request = await createDeploymentRequests({ version, deployment })
     expect(request).not.toBe(undefined)
     expect(request.approvalType).toBe('Manager')
     expect(request.request).toBe('Deployment')
   })
 
   test('that we can create a version request object', async () => {
-    const mock = jest.spyOn(userService, 'getUserById')
-    mock.mockReturnValue(testUser)
-    const requests = await createVersionRequests({version})
+    const getUserMock = jest.spyOn(userService, 'getUserById')
+    getUserMock.mockReturnValue(testUser)
+    const emailMock = jest.spyOn(emailService, 'sendEmail')
+    emailMock.mockImplementation()
+    const requests = await createVersionRequests({ version })
     expect(requests).not.toBe(undefined)
     expect(requests.length).toBe(2)
     expect(requests[0].request).toBe('Upload')
   })
 
   test('that we can read the number of requests has', async () => {
-    const requests = await readNumRequests({userId})
+    const requests = await readNumRequests({ userId })
     expect(requests).toBe(1)
   })
 
   test('that we can read the requests', async () => {
-    const requests = await readRequests({type: RequestTypes.Upload, filter: undefined})
+    const requests = await readRequests({ type: RequestTypes.Upload, filter: undefined })
     expect(requests).not.toBe(undefined)
     expect(requests.length).toBe(1)
     expect(requests[0].request).toBe('Upload')
   })
 
   test('we can fetch an individual request by its ID', async () => {
-    const request = await getRequest({requestId})
+    const request = await getRequest({ requestId })
     expect(request).not.toBe(undefined)
     expect(request.request).toBe('Upload')
   })
-
 })

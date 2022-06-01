@@ -41,19 +41,6 @@ const app = next({
 })
 const handle = app.getRequestHandler()
 
-// we don't actually need to wait for mongoose to connect before
-// we start serving connections
-connectToMongoose()
-
-// technically, we do need to wait for this, but it's so quick
-// that nobody should notice unless they want to upload an image
-// within the first few milliseconds of the _first_ time it's run
-ensureBucketExists(config.get('minio.uploadBucket'))
-ensureBucketExists(config.get('minio.registryBucket'))
-
-// lazily create indexes for full text search
-createIndexes()
-
 export const server = express()
 
 // we want to authenticate most requests, so include it here.
@@ -103,6 +90,19 @@ server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 server.use('/api', expressErrorHandler)
 
 export async function startServer() {
+  // technically, we do need to wait for this, but it's so quick
+  // that nobody should notice unless they want to upload an image
+  // within the first few milliseconds of the _first_ time it's run
+  ensureBucketExists(config.get('minio.uploadBucket'))
+  ensureBucketExists(config.get('minio.registryBucket'))
+
+  // we don't actually need to wait for mongoose to connect before
+  // we start serving connections
+  connectToMongoose()
+
+  // lazily create indexes for full text search
+  createIndexes()
+
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
   server.use((req, res) => {
