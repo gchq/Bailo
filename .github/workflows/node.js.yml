@@ -34,13 +34,14 @@ jobs:
       - run: npm run lint
 
       # Run unit tests
+      - run: npm run certs
       - run: npm run test
 
       # Setup dependencies
       - name: Build the stack
         run: |
           sudo chown -R runner:docker certs
-          npm run certs
+          
           cat <<EOT >> config/local.js
           module.exports = {
             minio: {
