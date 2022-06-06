@@ -41,7 +41,7 @@ jobs:
       - name: Build the stack
         run: |
           sudo chown -R runner:docker certs
-          
+
           cat <<EOT >> config/local.js
           module.exports = {
             minio: {
