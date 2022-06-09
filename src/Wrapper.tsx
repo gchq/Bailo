@@ -31,6 +31,7 @@ import Tooltip from '@mui/material/Tooltip'
 import globalTheme from '../src/theme'
 import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
+import { useGetCurrentUser } from '../data/user'
 
 const drawerWidth: number = 240
 
@@ -88,6 +89,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
+  const { currentUser } = useGetCurrentUser()
 
   const [pageTopStyling, setPageTopStyling] = React.useState({})
   const [contentTopStyling, setContentTopStyling] = React.useState({})
@@ -129,7 +131,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <>{title}</>
       )}
       <span>
-        <Typography variant='caption'>Dev</Typography>
+        <Typography variant='caption'>{currentUser !== undefined ? currentUser.id : 'Loading...'}</Typography>
       </span>
     </>
   )
