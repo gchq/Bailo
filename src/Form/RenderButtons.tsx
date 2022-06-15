@@ -5,7 +5,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import LoadingButton from '@mui/lab/LoadingButton'
 
-import { setStepValidate, validateForm } from 'utils/formUtils'
+import { setStepValidate, validateForm } from '../../utils/formUtils'
 import { SplitSchema, Step } from '../../types/interfaces'
 
 export default function RenderButtons(

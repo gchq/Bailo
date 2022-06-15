@@ -7,19 +7,17 @@ import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../data/uiConfig'
 
 describe('Banner', () => {
-
   it('renders a Banner component', async () => {
-
     const mockedConfig: any = {
       uiConfig: {
         banner: {
           enable: true,
           text: 'TEST',
           colour: 'blue',
-        }
+        },
       },
       isUiConfigLoading: false,
-      isUiConfigError: false
+      isUiConfigError: false,
     }
 
     const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
@@ -31,5 +29,4 @@ describe('Banner', () => {
       expect(await screen.findByText('TEST')).not.toBeUndefined()
     })
   })
-
 })

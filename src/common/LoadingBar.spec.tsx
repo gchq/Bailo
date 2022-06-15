@@ -6,7 +6,6 @@ import LoadingBar from './LoadingBar'
 import { render, screen, waitFor } from '@testing-library/react'
 
 describe('LoadingBar', () => {
-
   it('renders an LoadingBar component', async () => {
     render(<LoadingBar showLoadingBar loadingPercentage={50} />)
 
@@ -22,5 +21,4 @@ describe('LoadingBar', () => {
       expect(await screen.queryByText('50%')).toBeNull()
     })
   })
-
 })

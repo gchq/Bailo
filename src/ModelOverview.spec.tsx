@@ -2,36 +2,39 @@
  * @jest-environment jsdom
  */
 
-import DeploymentOverview from './DeploymentOverview'
+import ModelOverview from './ModelOverview'
 import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
 import theme from './theme'
 
-describe('DeploymentOverview', () => {
-  const version = {
+describe('ModelOverview', () => {
+  const version: any = {
     metadata: {
       highLevelDetails: {
-        name: 'test',
+        name: 'test model',
+        modelOverview: 'test',
+        tags: ['tag1'],
       },
       contacts: {
-        requester: 'user1',
-        secondPOC: 'user2',
+        uploader: 'user1',
+        reviewer: 'user2',
+        manager: 'user3',
       },
     },
   }
 
-  it('renders a DeploymentOverview component', async () => {
+  it('renders a ModelOverview component', async () => {
     render(
       <ThemeProvider theme={theme}>
-        <DeploymentOverview version={version} />
+        <ModelOverview version={version} />
       </ThemeProvider>
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('Owner')).not.toBeUndefined()
+      expect(await screen.findByText('test model')).not.toBeUndefined()
       expect(await screen.findByText('user1')).not.toBeUndefined()
-      expect(await screen.findByText('Point of Contact')).not.toBeUndefined()
       expect(await screen.findByText('user2')).not.toBeUndefined()
+      expect(await screen.findByText('user3')).not.toBeUndefined()
     })
   })
 })

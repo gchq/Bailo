@@ -6,14 +6,13 @@ import CommonTabs from './CommonTabs'
 import { render, screen, waitFor } from '@testing-library/react'
 
 describe('CommonTabs', () => {
-
   const tabs = [
     {
-      name: 'tab1'
+      name: 'tab1',
     },
     {
-      name: 'tab2'
-    }
+      name: 'tab2',
+    },
   ]
 
   it('renders an FileInput component', async () => {
@@ -24,5 +23,4 @@ describe('CommonTabs', () => {
       expect(await screen.findByText('test #2')).not.toBeUndefined()
     })
   })
-
 })

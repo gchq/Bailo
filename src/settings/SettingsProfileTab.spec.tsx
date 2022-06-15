@@ -6,10 +6,9 @@ import SettingsProfileTab from './SettingsProfileTab'
 import { render, screen, waitFor } from '@testing-library/react'
 
 describe('SettingsProfileTab', () => {
-
   const user = {
     id: 'test user',
-    roles: ['user']
+    roles: ['user'],
   }
 
   it('renders an SettingsProfileTab component', async () => {
@@ -21,5 +20,4 @@ describe('SettingsProfileTab', () => {
       expect(await screen.findByText('User authentication token')).not.toBeUndefined()
     })
   })
-
 })
