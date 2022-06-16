@@ -35,9 +35,9 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker certs
-
-      # Run unit tests
       - run: npm run certs
+
+      # Run unit tests      
       - run: npm run test
 
       # Setup dependencies
