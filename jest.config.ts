@@ -26,6 +26,7 @@ const customJestConfig: Config.InitialOptions = {
     '<rootDir>/helm/',
     '<rootDir>/lib/', // pMongoQueue has its own tests
     '<rootDir>/server/scripts/',
+    '<rootDir>/server/utils/test/',
     '<rootDir>/src/MuiForms/',
     '<rootDir>/scripts/',
   ],
