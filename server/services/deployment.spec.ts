@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb'
 import UserModel from '../models/User'
-import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
-import Deployment, { ApprovalStates } from '../models/Deployment'
+import DeploymentModel from '../models/Deployment'
 import '../utils/mockMongo'
 import {
   findDeploymentByUuid,
@@ -9,44 +8,9 @@ import {
   findDeploymentById,
   findDeployments,
   DeploymentFilter,
-  markDeploymentBuilt,
   createDeployment,
 } from './deployment'
-
-const requesterId = new ObjectId()
-const deploymentUuid = 'test-deployment'
-
-const deploymentData: any = {
-  managerApproved: ApprovalStates.NoResponse,
-  built: false,
-  schemaRef: 'test-schema',
-  uuid: deploymentUuid,
-  model: new ObjectId(),
-  metadata: {
-    contacts: {
-      requester: requesterId,
-    },
-  },
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const deploymentData2: any = {
-  managerApproved: ApprovalStates.NoResponse,
-  built: false,
-  schemaRef: 'test-schema3',
-  uuid: deploymentUuid,
-  model: new ObjectId(),
-  metadata: {
-    contacts: {
-      requester: requesterId,
-    },
-  },
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
+import { testDeployment2, testDeployment, deploymentUuid } from '../utils/test/testModels'
 
 const testUser = {
   userId: 'user1',
@@ -57,8 +21,8 @@ const userDoc = new UserModel(testUser)
 
 describe('test deployment service', () => {
   beforeEach(async () => {
-    const deploymentDoc: any = await DeploymentModel.create(deploymentData)
-    deploymentData._id = new ObjectId(deploymentDoc._id)
+    const deploymentDoc: any = await DeploymentModel.create(testDeployment)
+    testDeployment._id = new ObjectId(deploymentDoc._id)
   })
 
   test('that the serializer returns the correct properties', () => {
@@ -70,13 +34,13 @@ describe('test deployment service', () => {
   test('that we can find a deployment by its UUID', async () => {
     const deployment: any = await findDeploymentByUuid(userDoc, deploymentUuid)
     expect(deployment).not.toBe(undefined)
-    expect(deployment.schemaRef).toBe(deploymentData.schemaRef)
+    expect(deployment.schemaRef).toBe(testDeployment.schemaRef)
   })
 
   test('that we can find a deployment by its ID', async () => {
-    const deployment: any = await findDeploymentById(userDoc, deploymentData._id)
+    const deployment: any = await findDeploymentById(userDoc, testDeployment._id)
     expect(deployment).not.toBe(undefined)
-    expect(deployment.uuid).toBe(deploymentData.uuid)
+    expect(deployment.uuid).toBe(testDeployment.uuid)
   })
 
   test('we can fetch all deployments', async () => {
@@ -87,9 +51,9 @@ describe('test deployment service', () => {
   })
 
   test('that we can create a new deployment document', async () => {
-    const deployment: any = await createDeployment(userDoc, deploymentData2)
+    const deployment: any = await createDeployment(userDoc, testDeployment2)
     expect(deployment).not.toBe(undefined)
     expect(deployment._id).not.toBe(undefined)
-    expect(deployment.uuid).toBe(deploymentData2.uuid)
+    expect(deployment.uuid).toBe(testDeployment2.uuid)
   })
 })

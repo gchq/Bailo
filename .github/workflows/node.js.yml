@@ -33,8 +33,10 @@ jobs:
       - run: npm run check-style
       - run: npm run lint
 
-      # Run unit tests
+      # Create certs
       - run: sudo chown -R runner:docker certs
+
+      # Run unit tests
       - run: npm run certs
       - run: npm run test
 

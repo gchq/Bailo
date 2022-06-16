@@ -2,27 +2,9 @@ import '../utils/mockMongo'
 import { createSchema, findSchemaByRef, findSchemasByUse, serializedSchemaFields } from './schema'
 import SchemaModel from '../models/Schema'
 import _ from 'lodash'
+import { uploadSchema, uploadSchema2, deploymentSchema } from '../utils/test/testModels'
 
 describe('test schema service', () => {
-  const uploadSchema: any = {
-    name: 'upload-schema',
-    reference: 'upload',
-    use: 'UPLOAD',
-    schema: {},
-  }
-  const uploadSchema2: any = {
-    name: 'upload-schema2',
-    reference: 'upload2',
-    use: 'UPLOAD',
-    schema: {},
-  }
-  const deploymentSchema: any = {
-    name: 'deployment-schema',
-    reference: 'deployment',
-    use: 'DEPLOYMENT',
-    schema: {},
-  }
-
   beforeEach(async () => {
     await SchemaModel.create(uploadSchema)
     await SchemaModel.create(uploadSchema2)
@@ -35,7 +17,7 @@ describe('test schema service', () => {
   })
 
   test('we can fetch schema by reference', async () => {
-    const fetchedSchema: any = await findSchemaByRef('upload')
+    const fetchedSchema: any = await findSchemaByRef('test-schema')
     expect(fetchedSchema).toBeTruthy()
     expect(fetchedSchema.name).toBe(uploadSchema.name)
   })
@@ -50,7 +32,7 @@ describe('test schema service', () => {
     const updatedSchema = _.cloneDeep(uploadSchema)
     updatedSchema.schema.testProperty = 'test field'
     await createSchema(updatedSchema, true)
-    const fetchedSchema: any = await findSchemaByRef('upload')
+    const fetchedSchema: any = await findSchemaByRef('test-schema')
     expect(fetchedSchema).toBeTruthy()
     expect(fetchedSchema.schema.testProperty).toBe(updatedSchema.schema.testProperty)
   })

@@ -7,8 +7,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { ObjectId } from 'mongodb'
 import ModelModel from '../../models/Model'
 import UserModel from '../../models/User'
+import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 const request = supertest(server)
+
 const testUser: any = {
   userId: 'user',
   email: 'user@email.com',
@@ -38,10 +40,9 @@ describe('test user routes', () => {
   })
 
   test('that we can fetch the correct UI config', async () => {
-    const res = await request.get('/api/v1/users').set('x-userid', 'user').set('x-email', 'test')
+    const res = await authenticatedGetRequest('/api/v1/users')
     const data = JSON.parse(res.text)
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    validateTestRequest(res)
     expect(data.users.length).toBe(1)
     expect(data.users[0].id).toBe('user')
   })
@@ -49,16 +50,14 @@ describe('test user routes', () => {
   test('that we can get the logged in user', async () => {
     const mock = jest.spyOn(userService, 'getUserByInternalId')
     mock.mockReturnValue(userDoc)
-    const res = await request.get('/api/v1/user').set('x-userid', 'user').set('x-email', 'test')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedGetRequest('/api/v1/user')
+    validateTestRequest(res)
     expect(res.body.id).toBe(testUser.userId)
   })
 
   test('that we can favourite a model', async () => {
-    const res = await request.post(`/api/v1/user/favourite/${modelId}`).set('x-userid', 'user').set('x-email', 'test')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedPostRequest(`/api/v1/user/favourite/${modelId}`)
+    validateTestRequest(res)
     expect(res.body.favourites.length).toBe(1)
     expect(res.body.favourites[0]).toBe(modelId.toString())
   })
@@ -74,8 +73,7 @@ describe('test user routes', () => {
     testUser2.favourites.push(modelId)
     await UserModel.create(testUser2)
     const res = await request.post(`/api/v1/user/favourite/${modelId}`).set('x-userid', 'user2').set('x-email', 'test')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    validateTestRequest(res)
     expect(res.body.favourites.length).toBe(1)
     expect(res.body.favourites[0]).toBe(modelId.toString())
   })
@@ -94,15 +92,13 @@ describe('test user routes', () => {
       .post(`/api/v1/user/unfavourite/${modelId}`)
       .set('x-userid', 'user2')
       .set('x-email', 'test')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    validateTestRequest(res)
     expect(res.body.favourites.length).toBe(0)
   })
 
   test('that unfavourite a model where the model is not favourited', async () => {
-    const res = await request.post(`/api/v1/user/unfavourite/${modelId}`).set('x-userid', 'user').set('x-email', 'test')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedPostRequest(`/api/v1/user/unfavourite/${modelId}`)
+    validateTestRequest(res)
     expect(res.body.favourites.length).toBe(0)
   })
 

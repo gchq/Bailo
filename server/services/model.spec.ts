@@ -1,8 +1,5 @@
 import '../utils/mockMongo'
-import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../models/Deployment'
 import VersionModel from '../models/Version'
-import UserModel from '../models/User'
 import ModelModel from '../models/Model'
 import {
   findModelById,
@@ -11,58 +8,18 @@ import {
   isValidType,
   isValidFilter,
   findModels,
-  ModelFilter,
   createModel,
 } from './model'
+import { testModel, testVersion, userDoc, testModel2 } from '../utils/test/testModels'
 
-const modelId = new ObjectId()
-
-const testVersion: any = {
-  model: modelId,
-  version: '1',
-  metadata: {},
-  built: false,
-  managerApproved: ApprovalStates.NoResponse,
-  reviewerApproved: ApprovalStates.NoResponse,
-  state: {},
-  logs: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const testModel: any = {
-  _id: modelId,
-  versions: [],
-  schemaRef: 'test-schema',
-  uuid: 'model-test',
-  currentMetadata: {},
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const testModel2: any = {
-  versions: [],
-  schemaRef: 'test-schema',
-  uuid: 'model-test2',
-  currentMetadata: {},
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const testUser = {
-  userId: 'user1',
-  email: 'user1@email.com',
-  data: { some: 'value' },
-}
-const userDoc = new UserModel(testUser)
+let modelId
 
 describe('test version service', () => {
   beforeEach(async () => {
     const versionDoc = await VersionModel.create(testVersion)
     testVersion._id = versionDoc._id
-    await ModelModel.create(testModel)
+    const model = await ModelModel.create(testModel)
+    modelId = model._id
   })
 
   test('that the serializer returns the correct properties', () => {
@@ -72,9 +29,9 @@ describe('test version service', () => {
   })
 
   test('fetch model by uuid', async () => {
-    const model: any = await findModelByUuid(userDoc, 'model-test')
+    const model: any = await findModelByUuid(userDoc, 'test-model')
     expect(model).not.toBe(undefined)
-    expect(model.scheaRef).toBe(testModel.scheaRef)
+    expect(model.schemaRef).toBe(testModel.schemaRef)
   })
 
   test('fetch model by ID', async () => {

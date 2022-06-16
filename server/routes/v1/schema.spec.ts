@@ -1,16 +1,8 @@
-import supertest from 'supertest'
-import { server } from '../../index'
 import mongoose from 'mongoose'
 import '../../utils/mockMongo'
 import SchemaModel from '../../models/Schema'
-
-const request = supertest(server)
-const uploadSchema: any = {
-  name: 'upload-schema',
-  reference: 'upload',
-  use: 'UPLOAD',
-  schema: {},
-}
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { uploadSchema } from '../../utils/test/testModels'
 
 describe('test schema routes', () => {
   beforeEach(async () => {
@@ -18,35 +10,20 @@ describe('test schema routes', () => {
   })
 
   test('that we can fetch schemas', async () => {
-    const res = await request
-      .get('/api/v1/schemas')
-      .set('x-userid', 'user')
-      .set('x-email', 'test')
-      .query({ use: 'UPLOAD' })
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedGetRequest('/api/v1/schemas').query({ use: 'UPLOAD' })
+    validateTestRequest(res)
     expect(res.body.length).toBe(1)
   })
 
   test('that we can fetch default schema', async () => {
-    const res = await request
-      .get('/api/v1/schema/default')
-      .set('x-userid', 'user')
-      .set('x-email', 'test')
-      .query({ use: 'UPLOAD' })
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedGetRequest('/api/v1/schema/default').query({ use: 'UPLOAD' })
+    validateTestRequest(res)
     expect(res.body.name).toBe('upload-schema')
   })
 
   test('that we can fetch a schema by its reference', async () => {
-    const res = await request
-      .get('/api/v1/schema/' + uploadSchema.reference)
-      .set('x-userid', 'user')
-      .set('x-email', 'test')
-      .query({ use: 'UPLOAD' })
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    const res = await authenticatedGetRequest(`/api/v1/schema/${uploadSchema.reference}`).query({ use: 'UPLOAD' })
+    validateTestRequest(res)
     expect(res.body.name).toBe('upload-schema')
   })
 

@@ -51,8 +51,6 @@ server.use(expressLogger)
 
 server.post('/api/v1/model', ...postUpload)
 
-server.use(expressErrorHandler)
-
 server.get('/api/v1/models', ...getModels)
 server.get('/api/v1/model/uuid/:uuid', ...getModelByUuid)
 server.get('/api/v1/model/id/:id', ...getModelById)
