@@ -39,8 +39,7 @@ describe('test model routes', () => {
 
   test('that we can fetch all models', async () => {
     const res = await authenticatedGetRequest('/api/v1/models?type=all&filter=')
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    validateTestRequest(res)
     expect(res.body.models[0].uuid).toBe(testModel.uuid)
   })
 
