@@ -73,6 +73,7 @@ export default function FormUpload({
                   sx={{ p: '0px !important', mr: 1 }}
                   checked={warningCheckboxVal}
                   onChange={handleCheckboxChange}
+                  data-test='warningCheckbox'
                 />
                 {uiConfig.uploadWarning.checkboxText}
               </AlertTitle>
