@@ -41,7 +41,7 @@ describe('test version service', () => {
   test('find versions for model ID', async () => {
     const versions: any = await findModelVersions(userDoc, versionDoc.model)
     expect(versions).toBeTruthy()
-    expect(versions.length).toBe(1)
+    expect(versions.length).toBe(2)
   })
 
   test('version can be created', async () => {

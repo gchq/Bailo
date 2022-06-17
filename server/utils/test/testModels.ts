@@ -5,6 +5,7 @@ import { ApprovalStates } from '../../models/Deployment'
 export const deploymentUuid = 'test-deployment'
 export const requesterId = new ObjectId()
 export const modelId = new ObjectId()
+export const modelUuid = 'test-model'
 
 export const uploadData: any = {
   schemaRef: 'test-schema3',
@@ -66,46 +67,8 @@ export const uploadSchema2: any = {
   schema: {},
 }
 
-export const testDeployment: any = {
-  managerApproved: ApprovalStates.Accepted,
-  built: false,
-  schemaRef: 'test-schema3',
-  uuid: deploymentUuid,
-  model: new ObjectId(),
-  metadata: uploadData,
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-export const testDeployment2: any = {
-  managerApproved: ApprovalStates.NoResponse,
-  built: false,
-  schemaRef: 'test-schema3',
-  uuid: deploymentUuid,
-  model: new ObjectId(),
-  metadata: {
-    contacts: {
-      requester: requesterId,
-    },
-  },
-  owner: new ObjectId(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-export const testModel: any = {
-  versions: [],
-  schemaRef: 'test-schema',
-  uuid: 'test-model',
-  currentMetadata: {},
-  owner: userDoc,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
 export const testVersion: any = {
-  model: new ObjectId(),
+  model: modelId,
   version: '1',
   metadata: {
     highLevelDetails: {
@@ -127,9 +90,18 @@ export const testVersion: any = {
 }
 
 export const testVersion2: any = {
-  model: new ObjectId(),
-  version: '1',
-  metadata: {},
+  model: modelId,
+  version: '2',
+  metadata: {
+    highLevelDetails: {
+      name: 'test',
+    },
+    contacts: {
+      uploader: 'user',
+      reviewer: 'reviewer',
+      manager: 'manager',
+    },
+  },
   built: true,
   managerApproved: ApprovalStates.Accepted,
   reviewerApproved: ApprovalStates.NoResponse,
@@ -139,12 +111,51 @@ export const testVersion2: any = {
   updatedAt: new Date(),
 }
 
+export const testModel: any = {
+  _id: modelId,
+  versions: [],
+  schemaRef: 'test-schema',
+  uuid: modelUuid,
+  currentMetadata: uploadData,
+  owner: userDoc,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
 export const testModel2: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test2',
-  currentMetadata: {},
+  currentMetadata: uploadData,
   owner: userDoc,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const testDeployment: any = {
+  managerApproved: ApprovalStates.Accepted,
+  built: false,
+  schemaRef: 'test-schema3',
+  uuid: deploymentUuid,
+  model: modelId,
+  metadata: uploadData,
+  owner: new ObjectId(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const testDeployment2: any = {
+  managerApproved: ApprovalStates.NoResponse,
+  built: false,
+  schemaRef: 'test-schema3',
+  uuid: deploymentUuid,
+  model: modelId,
+  metadata: {
+    contacts: {
+      requester: requesterId,
+    },
+  },
+  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }

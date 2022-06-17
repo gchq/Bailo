@@ -39,8 +39,7 @@ describe('test deployment routes', () => {
 
   test('find a deployment with a given uuid', async () => {
     const res = await authenticatedGetRequest(`/api/v1/deployment/${deploymentUuid}`)
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8')
-    expect(res.statusCode).toBe(200)
+    validateTestRequest(res)
     expect(res.body).not.toBe(undefined)
     expect(res.body.uuid).toBe(deploymentUuid)
   })

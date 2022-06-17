@@ -10,13 +10,8 @@ import {
   DeploymentFilter,
   createDeployment,
 } from './deployment'
-import { testDeployment2, testDeployment, deploymentUuid } from '../utils/test/testModels'
+import { testDeployment2, testDeployment, deploymentUuid, testUser } from '../utils/test/testModels'
 
-const testUser = {
-  userId: 'user1',
-  email: 'user1@email.com',
-  data: { some: 'value' },
-}
 const userDoc = new UserModel(testUser)
 
 describe('test deployment service', () => {
