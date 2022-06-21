@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose'
-import { Deployment, Request, User, Version } from '../../types/interfaces'
+import { Types } from 'mongoose'
+import { Request } from '../../types/interfaces'
 import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
 import { BadReq } from '../utils/result'
 import { sendEmail } from '../utils/smtp'
