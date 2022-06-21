@@ -2,7 +2,7 @@ import { castArray } from 'lodash'
 
 import { Forbidden } from '../utils/result'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
-import { Deployment, User, ModelId } from '../../types/interfaces'
+import { ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'

@@ -1,5 +1,4 @@
 import dedent from 'dedent-js'
-import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
@@ -7,7 +6,6 @@ import { VersionDoc } from '../models/Version'
 import { DeploymentDoc } from '../models/Deployment'
 import { RequestTypes } from '../models/Request'
 import { ModelDoc } from '../models/Model'
-import logger from '../utils/logger'
 
 export interface ReviewRequestContext {
   document: VersionDoc | DeploymentDoc
