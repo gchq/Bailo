@@ -32,6 +32,7 @@ import globalTheme from '../src/theme'
 import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
 import { useGetCurrentUser } from '../data/user'
+import UserAvatar from './common/UserAvatar'
 
 const drawerWidth: number = 240
 
@@ -131,7 +132,10 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <>{title}</>
       )}
       <span>
-        <Typography variant='caption'>{currentUser !== undefined ? currentUser.id : 'Loading...'}</Typography>
+        {currentUser !== undefined ? 
+          <UserAvatar username={currentUser.id} /> :
+          <Typography variant='caption'>'Loading...'</Typography>
+        }
       </span>
     </>
   )

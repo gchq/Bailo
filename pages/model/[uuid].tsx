@@ -46,6 +46,8 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
+import Chip from '@mui/material/Chip'
+import UserAvatar from 'src/common/UserAvatar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -58,6 +60,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 function Model() {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
+
+  const deploymentVersionsDisplayLimit = 5
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
@@ -297,11 +301,36 @@ function Model() {
                   </MuiLink>
                 </Link>
 
-                <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                  Contacts: {deployment.metadata.contacts.requester}, {deployment.metadata.contacts.secondPOC}
-                </Typography>
+                <Box sx={{ mb: 1}}>
+                  <Stack direction='row'>
+                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
+                      Contacts:
+                    </Typography>
+                    <Chip sx={{mr: 1}} avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />} label={deployment.metadata.contacts.requester} />
+                    <Chip sx={{mr: 1}} avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />} label={deployment.metadata.contacts.secondPOC} />
+                  </Stack>
+                </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                <Box sx={{ mb: 1}}>
+                  <Stack direction='row'>
+                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
+                      Associated versions:
+                    </Typography>       
+                    {deployment.versions.length > 0 && 
+                      versions.filter(version => deployment.versions.includes(version._id))
+                      .slice(0, deploymentVersionsDisplayLimit)
+                      .map(filteredVersion => (
+                        <Chip sx={{mr: 1}} label={filteredVersion.version} />
+                      ))                      
+                    }
+                    {deployment.versions.length > 3 &&
+                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${versions.filter(version => deployment.versions.includes(version._id)).length - deploymentVersionsDisplayLimit} more`}</Typography>
+                    }
+                     
+                  </Stack>
+                </Box>
+
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 1 }} />
               </Box>
             ))}
           </>
