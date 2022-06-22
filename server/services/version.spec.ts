@@ -9,47 +9,13 @@ import {
   findVersionByName,
   serializedVersionFields,
 } from './version'
-import UserModel from '../models/User'
+import { testVersion, testVersion2, userDoc } from '../utils/test/testModels'
 
-const modelId = new ObjectId()
-const anotherModelId = new ObjectId()
-
-const testVersion: any = {
-  model: modelId,
-  version: '1',
-  metadata: {},
-  built: false,
-  managerApproved: ApprovalStates.NoResponse,
-  reviewerApproved: ApprovalStates.NoResponse,
-  state: {},
-  logs: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const testVersion2: any = {
-  model: anotherModelId,
-  version: '1',
-  metadata: {},
-  built: true,
-  managerApproved: ApprovalStates.Accepted,
-  reviewerApproved: ApprovalStates.NoResponse,
-  state: {},
-  logs: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-const testUser = {
-  userId: 'user1',
-  email: 'user1@email.com',
-  data: { some: 'value' },
-}
-const userDoc = new UserModel(testUser)
+let versionDoc
 
 describe('test version service', () => {
   beforeEach(async () => {
-    const versionDoc = await VersionModel.create(testVersion)
+    versionDoc = await VersionModel.create(testVersion)
     await VersionModel.create(testVersion2)
     testVersion._id = versionDoc._id
   })
@@ -61,7 +27,7 @@ describe('test version service', () => {
   })
 
   test('find version by name/version', async () => {
-    const version: any = await findVersionByName(userDoc, modelId, '1')
+    const version: any = await findVersionByName(userDoc, versionDoc.model, '1')
     expect(version).toBeTruthy()
     expect(version.version).toBe(testVersion.version)
   })
@@ -73,9 +39,9 @@ describe('test version service', () => {
   })
 
   test('find versions for model ID', async () => {
-    const versions: any = await findModelVersions(userDoc, modelId)
+    const versions: any = await findModelVersions(userDoc, versionDoc.model)
     expect(versions).toBeTruthy()
-    expect(versions.length).toBe(1)
+    expect(versions.length).toBe(2)
   })
 
   test('version can be created', async () => {

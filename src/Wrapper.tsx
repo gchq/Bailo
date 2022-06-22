@@ -132,10 +132,11 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <>{title}</>
       )}
       <span>
-        {currentUser !== undefined ? 
-          <UserAvatar username={currentUser.id} /> :
+        {currentUser !== undefined ? (
+          <UserAvatar username={currentUser.id} />
+        ) : (
           <Typography variant='caption'>'Loading...'</Typography>
-        }
+        )}
       </span>
     </>
   )

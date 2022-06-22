@@ -83,6 +83,8 @@
     "yargs": "^17.3.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-react": "^7.17.12",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "13.5.0",
@@ -107,7 +109,7 @@
     "@types/yargs": "^17.0.8",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
-    "babel-jest": "^27.4.6",
+    "babel-jest": "^27.5.1",
     "babel-plugin-module-resolver": "^4.1.0",
     "dockerode": "^3.3.1",
     "eslint": "^8.6.0",
@@ -123,10 +125,11 @@
     "eslint-plugin-react-hooks": "^4.5.0",
     "eslint-plugin-testing-library": "5.0.3",
     "geckodriver": "^3.0.1",
-    "jest": "^27.4.7",
+    "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "react-test-renderer": "^17.0.2",
     "selenium-webdriver": "^4.1.1",
+    "supertest": "^6.2.3",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.4"
   },

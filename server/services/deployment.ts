@@ -71,7 +71,7 @@ interface CreateDeployment {
   schemaRef: string
   uuid: string
 
-  versions: Array<VersionDoc>,
+  versions: Array<VersionDoc>
   model: ModelId
   metadata: any
 
@@ -92,8 +92,8 @@ export async function createDeployment(user: UserDoc, data: CreateDeployment) {
 
 export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, version: VersionDoc) {
   const deployments = await findDeployments(user, { model: modelId })
-  if (deployments.length !== 0) {    
-    deployments.forEach((deployment: DeploymentDoc) => {      
+  if (deployments.length !== 0) {
+    deployments.forEach((deployment: DeploymentDoc) => {
       deployment.versions.push(version)
       deployment.save()
     })

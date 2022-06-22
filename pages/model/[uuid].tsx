@@ -301,32 +301,40 @@ function Model() {
                   </MuiLink>
                 </Link>
 
-                <Box sx={{ mb: 1}}>
+                <Box sx={{ mb: 1 }}>
                   <Stack direction='row'>
                     <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
                       Contacts:
                     </Typography>
-                    <Chip sx={{mr: 1}} avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />} label={deployment.metadata.contacts.requester} />
-                    <Chip sx={{mr: 1}} avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />} label={deployment.metadata.contacts.secondPOC} />
+                    <Chip
+                      sx={{ mr: 1 }}
+                      avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
+                      label={deployment.metadata.contacts.requester}
+                    />
+                    <Chip
+                      sx={{ mr: 1 }}
+                      avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
+                      label={deployment.metadata.contacts.secondPOC}
+                    />
                   </Stack>
                 </Box>
 
-                <Box sx={{ mb: 1}}>
+                <Box sx={{ mb: 1 }}>
                   <Stack direction='row'>
                     <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
                       Associated versions:
-                    </Typography>       
-                    {deployment.versions.length > 0 && 
-                      versions.filter(version => deployment.versions.includes(version._id))
-                      .slice(0, deploymentVersionsDisplayLimit)
-                      .map(filteredVersion => (
-                        <Chip sx={{mr: 1}} label={filteredVersion.version} />
-                      ))                      
-                    }
-                    {deployment.versions.length > 3 &&
-                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${versions.filter(version => deployment.versions.includes(version._id)).length - deploymentVersionsDisplayLimit} more`}</Typography>
-                    }
-                     
+                    </Typography>
+                    {deployment.versions.length > 0 &&
+                      versions
+                        .filter((version) => deployment.versions.includes(version._id))
+                        .slice(0, deploymentVersionsDisplayLimit)
+                        .map((filteredVersion) => <Chip sx={{ mr: 1 }} label={filteredVersion.version} />)}
+                    {deployment.versions.length > 3 && (
+                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
+                        versions.filter((version) => deployment.versions.includes(version._id)).length -
+                        deploymentVersionsDisplayLimit
+                      } more`}</Typography>
+                    )}
                   </Stack>
                 </Box>
 

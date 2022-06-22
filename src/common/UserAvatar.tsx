@@ -5,16 +5,15 @@ import { useEffect, useState } from 'react'
 export default function UserAvatar({
   username,
   size,
-  luminosity
+  luminosity,
 }: {
   username: string
   size?: UserAvatarSizes
   luminosity?: Luminosity
 }) {
-
-  const [ avatarSize, setAvatarSize ] = useState<string>()
-  const [ fontSize, setFontSize ] = useState<number>()
-  const [ fontColour, setFontColour ] = useState<string>()
+  const [avatarSize, setAvatarSize] = useState<string>()
+  const [fontSize, setFontSize] = useState<number>()
+  const [fontColour, setFontColour] = useState<string>()
 
   const color = randomColor({
     seed: username,
@@ -23,14 +22,14 @@ export default function UserAvatar({
   })
 
   useEffect(() => {
-    switch(size) {
+    switch (size) {
       case 'chip':
         setAvatarSize('30px')
         setFontSize(13)
         break
     }
-    switch(luminosity) {
-      case undefined: 
+    switch (luminosity) {
+      case undefined:
         setFontColour('black')
         break
       case 'light':
@@ -43,13 +42,15 @@ export default function UserAvatar({
   }, [])
 
   return (
-    <Avatar sx={{ 
-      color: fontColour,
-      backgroundColor: color, 
-      height: avatarSize, 
-      width: avatarSize,
-      fontSize: fontSize
-    }}>
+    <Avatar
+      sx={{
+        color: fontColour,
+        backgroundColor: color,
+        height: avatarSize,
+        width: avatarSize,
+        fontSize: fontSize,
+      }}
+    >
       {username.charAt(0).toUpperCase()}
     </Avatar>
   )
