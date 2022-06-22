@@ -1,6 +1,6 @@
 import { castArray } from 'lodash'
 
-import { Forbidden, NotFound } from '../utils/result'
+import { Forbidden } from '../utils/result'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
