@@ -27,6 +27,7 @@ import RestartAlt from '@mui/icons-material/RestartAlt'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import ModelOverview from 'src/ModelOverview'
+import UserAvatar from 'src/common/UserAvatar'
 import createComplianceFlow from 'utils/complianceFlow'
 import { Elements } from 'react-flow-renderer'
 import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
@@ -34,6 +35,7 @@ import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
+import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
@@ -46,8 +48,6 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
-import Chip from '@mui/material/Chip'
-import UserAvatar from 'src/common/UserAvatar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -326,13 +326,16 @@ function Model() {
                     </Typography>
                     {deployment.versions.length > 0 &&
                       versions
-                        .filter((version) => deployment.versions.includes(version._id))
+                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
-                        .map((filteredVersion) => <Chip sx={{ mr: 1 }} label={filteredVersion.version} />)}
+                        .map((filteredVersion) => (
+                          <Chip key={filteredVersion.version} sx={{ mr: 1 }} label={filteredVersion.version} />
+                        ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
-                        versions.filter((version) => deployment.versions.includes(version._id)).length -
-                        deploymentVersionsDisplayLimit
+                        versions.filter((deploymentVersionForLimit) =>
+                          deployment.versions.includes(deploymentVersionForLimit._id)
+                        ).length - deploymentVersionsDisplayLimit
                       } more`}</Typography>
                     )}
                   </Stack>
