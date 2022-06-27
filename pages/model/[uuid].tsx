@@ -27,6 +27,7 @@ import RestartAlt from '@mui/icons-material/RestartAlt'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import ModelOverview from 'src/ModelOverview'
+import UserAvatar from 'src/common/UserAvatar'
 import createComplianceFlow from 'utils/complianceFlow'
 import { Elements } from 'react-flow-renderer'
 import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
@@ -34,6 +35,7 @@ import { useGetCurrentUser } from 'data/user'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import { setTargetValue } from 'data/utils'
 import Link from 'next/link'
+import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
@@ -58,6 +60,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 function Model() {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
+
+  const deploymentVersionsDisplayLimit = 5
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
@@ -297,11 +301,47 @@ function Model() {
                   </MuiLink>
                 </Link>
 
-                <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                  Contacts: {deployment.metadata.contacts.requester}, {deployment.metadata.contacts.secondPOC}
-                </Typography>
+                <Box sx={{ mb: 1 }}>
+                  <Stack direction='row'>
+                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
+                      Contacts:
+                    </Typography>
+                    <Chip
+                      sx={{ mr: 1 }}
+                      avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
+                      label={deployment.metadata.contacts.requester}
+                    />
+                    <Chip
+                      sx={{ mr: 1 }}
+                      avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
+                      label={deployment.metadata.contacts.secondPOC}
+                    />
+                  </Stack>
+                </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                <Box sx={{ mb: 1 }}>
+                  <Stack direction='row'>
+                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
+                      Associated versions:
+                    </Typography>
+                    {deployment.versions.length > 0 &&
+                      versions
+                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
+                        .slice(0, deploymentVersionsDisplayLimit)
+                        .map((filteredVersion) => (
+                          <Chip key={filteredVersion.version} sx={{ mr: 1 }} label={filteredVersion.version} />
+                        ))}
+                    {deployment.versions.length > 3 && (
+                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
+                        versions.filter((deploymentVersionForLimit) =>
+                          deployment.versions.includes(deploymentVersionForLimit._id)
+                        ).length - deploymentVersionsDisplayLimit
+                      } more`}</Typography>
+                    )}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 1 }} />
               </Box>
             ))}
           </>

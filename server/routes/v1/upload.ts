@@ -17,6 +17,7 @@ import { findModelByUuid, createModel } from '../../services/model'
 import { createVersion } from '../../services/version'
 import { findSchemaByRef } from '../../services/schema'
 import _ from 'lodash'
+import { updateDeploymentVersions } from '../../services/deployment'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -154,6 +155,9 @@ export const postUpload = [
         model = await findModelByUuid(req.user!, modelUuid as string)
         model.versions.push(version._id)
         model.currentMetadata = metadata
+
+        // Find all existing deployments for this model and update their versions array
+        await updateDeploymentVersions(req.user!, model._id, version)
       } else {
         // Save a new model, and add the uploaded version to its array
         model = await createModel(req.user!, {

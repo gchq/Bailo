@@ -83,10 +83,15 @@ export const postDeployment = [
     const uuid = `${name}-${nanoid()}`
     req.log.info({ uuid }, `Named deployment '${uuid}'`)
 
+    const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
+
+    const versionArray: any = [version!._id]
+
     const deployment = await createDeployment(req.user!, {
       schemaRef: body.schemaRef,
       uuid: uuid,
 
+      versions: versionArray,
       model: model._id,
       metadata: body,
 
@@ -100,7 +105,6 @@ export const postDeployment = [
       { code: 'requesting_model_version', model, version: body.highLevelDetails.initialVersionRequested },
       'Requesting model version'
     )
-    const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
     if (!version) {
       throw NotFound(
