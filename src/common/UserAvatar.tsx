@@ -50,7 +50,6 @@ export default function UserAvatar({
         height: avatarSize,
         width: avatarSize,
         fontSize: fontSize,
-        textDecoration: 'none',
       }}
     >
       <Typography>{username.charAt(0).toUpperCase()}</Typography>

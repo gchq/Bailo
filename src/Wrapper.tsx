@@ -133,7 +133,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       )}
       <span>
         {currentUser ? (
-          <Link href='/settings' style={{ textDecoration: 'none' }}>
+          <Link href='/settings'>
             <a>
               <UserAvatar username={currentUser.id} size='chip' />
             </a>
