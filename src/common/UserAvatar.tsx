@@ -1,3 +1,4 @@
+import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
 import { randomColor } from 'randomcolor'
 import { useEffect, useState } from 'react'
@@ -51,7 +52,7 @@ export default function UserAvatar({
         fontSize: fontSize,
       }}
     >
-      {username.charAt(0).toUpperCase()}
+      <Typography>{username.charAt(0).toUpperCase()}</Typography>
     </Avatar>
   )
 }

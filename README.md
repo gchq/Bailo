@@ -129,6 +129,10 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to something more secure.
 
+Always connect to the project via 'Nginx', otherwise you will receive authentication failed errors. We expect the administrator to provide their own forms of authentication.
+
+You can test out your new deployment using the example models which can be found in `__tests__` [`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and [`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder [`minimal_upload_schema_examples.json`](server/scripts/example_schemas/minimal_upload_schema_examples.json) and [`minimal_deployment_schema_examples.json`](server/scripts/example_schemas/minimal_deployment_schema_examples.json).
+
 <br />
 
 ### Logical Project Flow (Overview)
