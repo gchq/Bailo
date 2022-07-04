@@ -32,6 +32,7 @@ import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/re
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { pullBuilderImage } from './utils/build'
 import { createIndexes } from './models/Model'
+import { getSpecification } from './routes/v1/specification'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -84,6 +85,8 @@ server.get('/api/v1/requests/count', ...getNumRequests)
 server.post('/api/v1/request/:id/respond', ...postRequestResponse)
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
+
+server.get('/api/v1/specification', ...getSpecification)
 
 server.use('/api', expressErrorHandler)
 
