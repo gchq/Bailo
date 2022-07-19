@@ -156,7 +156,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 if (config.get('logging.file.enabled')) {
   const logPath = join(appRoot, config.get('logging.file.path'))
-  fs.mkdirSync(dirname(logPath), { recursive: true })
+  const logFolder = dirname(logPath)
+
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder, { recursive: true })
+  }
 
   streams.push({
     level: config.get('logging.file.level'),
