@@ -158,6 +158,10 @@ _Issue: Sometimes SWR fails to install its own binary and the project will refus
 
 Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run: `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
+_Issue: Unable to authenticate to the Docker registry / compile binaries._
+
+Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your application is able to access the Docker registry internally as it will not provide user authentication.
+
 <br />
 
 ### Roadmap
