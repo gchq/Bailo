@@ -79,7 +79,7 @@ module.exports = {
 
   logging: {
     file: {
-      enabled: true,
+      enabled: false,
       level: 'info',
       path: './logs/out.log',
     },
