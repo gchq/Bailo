@@ -5,7 +5,7 @@ import morgan from 'morgan'
 import fs from 'fs'
 import getAppRoot from 'app-root-path'
 import devnull from 'dev-null'
-import { join, sep, dirname } from 'path'
+import { resolve, sep, dirname } from 'path'
 import { inspect } from 'util'
 import omit from 'lodash/omit'
 import chalk from 'chalk'
@@ -155,7 +155,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 if (config.get('logging.file.enabled')) {
-  const logPath = join(appRoot, config.get('logging.file.path'))
+  const logPath = resolve(appRoot, config.get('logging.file.path'))
   const logFolder = dirname(logPath)
 
   if (!fs.existsSync(logFolder)) {
