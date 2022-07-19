@@ -89,7 +89,7 @@ interface CreateVersion {
 export async function createVersion(user: UserDoc, data: CreateVersion) {
   const version = new VersionModel(data)
 
-  if (!authorisation.canUserSeeVersion(user, version)) {
+  if (!await authorisation.canUserSeeVersion(user, version)) {
     throw Forbidden({ data }, 'Unable to create version, failed permissions check.')
   }
 

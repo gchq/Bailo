@@ -66,7 +66,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
 export async function createModel(user: UserDoc, data: Model) {
   const model = new ModelModel(data)
 
-  if (!authorisation.canUserSeeModel(user, model)) {
+  if (!await authorisation.canUserSeeModel(user, model)) {
     throw Forbidden({ data }, 'Unable to create model, failed permissions check.')
   }
 
