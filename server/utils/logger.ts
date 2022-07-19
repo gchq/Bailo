@@ -155,8 +155,6 @@ if (config.get('logging.file.enabled')) {
   const folder = dirname(config.get('logging.file.path'))
   fs.mkdirSync(folder, { recursive: true });
 
-  console.log('making folder', folder)
-
   streams.push({
     level: config.get('logging.file.level'),
     path: config.get('logging.file.path'),
