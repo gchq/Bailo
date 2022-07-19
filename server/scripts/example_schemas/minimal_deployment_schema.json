@@ -108,13 +108,15 @@
           "title": "Who is the owner of the deployment",
           "description": "The person who will be contacted if there is a problem with the model, or if the SRO wants to discuss the model",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "widget": "userSelector"
         },
         "secondPOC": {
           "title": "Secondary Contact",
           "description": "A second person who can be contacted if the deployment owner is unavailable",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "widget": "userSelector"
         }
       },
       "required": ["requester", "secondPOC"],

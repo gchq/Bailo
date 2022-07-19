@@ -19,14 +19,6 @@ import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 
-const uiSchema = {
-  contacts: {
-    uploader: { 'ui:widget': 'userSelector' },
-    reviewer: { 'ui:widget': 'userSelector' },
-    manager: { 'ui:widget': 'userSelector' },
-  },
-}
-
 function renderSubmissionTab(
   _currentStep: Step,
   splitSchema: SplitSchema,
@@ -71,7 +63,7 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema, uiSchema, [], cModel.currentMetadata)
+    const steps = getStepsFromSchema(cSchema, {}, [], cModel.currentMetadata)
 
     steps.push(
       createStep({

@@ -3,6 +3,7 @@ import { withTheme } from '@rjsf/core'
 import { Theme as MaterialUITheme } from '../MuiForms'
 import UserSelector from '../MuiForms/UserSelector'
 import Nothing from '../MuiForms/Nothing'
+import TextareaWidget from '../MuiForms/TextareaWidget'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
@@ -32,6 +33,7 @@ export default function RenderForm({
       onChange={onFormChange}
       widgets={{
         userSelector: UserSelector,
+        textArea: TextareaWidget,
         nothing: Nothing,
       }}
       uiSchema={step.uiSchema}

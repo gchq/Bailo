@@ -16,17 +16,6 @@ import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
 import ModelEditSubmission from '../../../../src/Form/ModelEditSubmission'
 
-const uiSchema = {
-  highLevelDetails: {
-    modelCardVersion: { 'ui:widget': 'nothing' },
-  },
-  contacts: {
-    uploader: { 'ui:widget': 'userSelector' },
-    reviewer: { 'ui:widget': 'userSelector' },
-    manager: { 'ui:widget': 'userSelector' },
-  },
-}
-
 function renderSubmissionTab(
   _currentStep: Step,
   _splitSchema: SplitSchema,
@@ -65,7 +54,16 @@ function Upload() {
   useEffect(() => {
     if (!cSchema || !cVersion || splitSchema.steps.length) return
 
-    const schemaSteps = getStepsFromSchema(cSchema, uiSchema, [], cVersion.metadata)
+    const schemaSteps = getStepsFromSchema(
+      cSchema,
+      {
+        highLevelDetails: {
+          modelCardVersion: { 'ui:widget': 'nothing' },
+        },
+      },
+      [],
+      cVersion.metadata
+    )
 
     schemaSteps.push(
       createStep({

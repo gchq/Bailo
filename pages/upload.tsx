@@ -48,14 +48,6 @@ function renderSubmissionTab(
   )
 }
 
-const uiSchema = {
-  contacts: {
-    uploader: { 'ui:widget': 'userSelector' },
-    reviewer: { 'ui:widget': 'userSelector' },
-    manager: { 'ui:widget': 'userSelector' },
-  },
-}
-
 function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
@@ -89,7 +81,7 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const steps = getStepsFromSchema(currentSchema, uiSchema, undefined, defaultState)
+    const steps = getStepsFromSchema(currentSchema, {}, [], defaultState)
 
     steps.push(
       createStep({

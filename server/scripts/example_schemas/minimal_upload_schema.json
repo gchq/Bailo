@@ -43,11 +43,13 @@
           "title": "What does the model do?",
           "description": "A description of what the model does.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 5000
         },
         "modelCardVersion": {
           "type": "string",
-          "title": "Model version"
+          "title": "Model version",
+          "maxLength": 100
         },
         "tags": {
           "title": "Descriptive tags for the model.",
@@ -73,19 +75,22 @@
           "title": "Model Developer.",
           "description": "The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "widget": "userSelector"
         },
         "reviewer": {
           "title": "Model Technical Reviewer.",
           "description": "An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "widget": "userSelector"
         },
         "manager": {
           "title": "Senior Responsible Officer.",
           "description": "A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "widget": "userSelector"
         }
       },
       "required": ["uploader", "reviewer", "manager"],

@@ -15,13 +15,6 @@ import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
 import DeploymentSubmission from '../../../src/Form/DeploymentSubmission'
 
-const uiSchema = {
-  contacts: {
-    requester: { 'ui:widget': 'userSelector' },
-    secondPOC: { 'ui:widget': 'userSelector' },
-  },
-}
-
 function renderSubmissionTab(
   _currentStep: Step,
   _splitSchema: SplitSchema,
@@ -56,7 +49,7 @@ export default function Deploy() {
     if (!currentSchema) return
 
     const { reference } = currentSchema
-    const newSteps = getStepsFromSchema(currentSchema, uiSchema, [
+    const newSteps = getStepsFromSchema(currentSchema, {}, [
       'properties.highLevelDetails.properties.modelID',
       'properties.highLevelDetails.properties.initialVersionRequested',
     ])
