@@ -81,7 +81,7 @@ module.exports = {
     file: {
       enabled: true,
       level: 'info',
-      path: './logs/out.log'
+      path: './logs/out.log',
     },
   },
 
