@@ -49,14 +49,10 @@ export default function Deploy() {
     if (!currentSchema) return
 
     const { reference } = currentSchema
-    const newSteps = getStepsFromSchema(
-      currentSchema,
-      {},
-      [
-        'properties.highLevelDetails.properties.modelID',
-        'properties.highLevelDetails.properties.initialVersionRequested',
-      ],
-    )
+    const newSteps = getStepsFromSchema(currentSchema, {}, [
+      'properties.highLevelDetails.properties.modelID',
+      'properties.highLevelDetails.properties.initialVersionRequested',
+    ])
 
     newSteps.push(
       createStep({
