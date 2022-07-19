@@ -78,6 +78,9 @@ describe('End to end test', () => {
         const metadata = await fs.readFile(metadataPath, { encoding: 'utf-8' })
         await sendKeys(driver, By.css('div[data-test="metadataTextarea"] div textarea:nth-child(1)'), metadata)
 
+        logger.info('clicking warning checkbox confirming upload is okay')
+        await click(driver, By.css('[data-test="warningCheckbox"]'))
+
         logger.info('submitting upload')
         await click(driver, By.css('[data-test="submitButton"]'))
 
@@ -189,6 +192,9 @@ describe('End to end test', () => {
         By.css('textarea'),
         JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
       )
+
+      logger.info('clicking warning checkbox confirming upload is okay')
+      await click(driver, By.css('[data-test="warningCheckbox"]'))
 
       logger.info(`clicked submit button`)
       await click(driver, By.css('[data-test="submitButton"]'))
