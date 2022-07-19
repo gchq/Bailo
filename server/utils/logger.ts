@@ -155,13 +155,15 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 if (config.get('logging.file.enabled')) {
-  const folder = dirname(config.get('logging.file.path'))
-  fs.mkdirSync(folder, { recursive: true })
+  const logPath = join(appRoot, config.get('logging.file.path'))
+  fs.mkdirSync(dirname(logPath), { recursive: true })
 
   streams.push({
     level: config.get('logging.file.level'),
-    path: join(appRoot, config.get('logging.file.path')),
+    path: logPath,
   })
+
+  console.log(logPath, dirname(logPath))
 }
 
 const log = bunyan.createLogger({
