@@ -38,6 +38,7 @@ const TextareaWidget = ({
 
   const displayLabel = getDisplayLabel(schema, uiSchema)
   const inputType = (type || schema.type) === 'string' ? 'text' : `${type || schema.type}`
+  const height = Math.min(5, Math.max(1, Math.floor((schema.maxLength || 0) / 150)))
 
   return (
     <TextField
@@ -54,7 +55,7 @@ const TextareaWidget = ({
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
-      rows={4}
+      rows={height}
       {...(textFieldProps as TextFieldProps)}
     />
   )

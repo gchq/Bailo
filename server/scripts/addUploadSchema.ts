@@ -10,7 +10,7 @@ import minimal from './example_schemas/minimal_upload_schema.json'
     reference: '/Minimal/General/v10',
     schema: minimal,
     use: 'UPLOAD',
-  })
+  }, true)
 
   setTimeout(disconnectFromMongoose, 50)
 })()

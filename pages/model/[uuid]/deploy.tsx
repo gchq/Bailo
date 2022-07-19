@@ -51,12 +51,11 @@ export default function Deploy() {
     const { reference } = currentSchema
     const newSteps = getStepsFromSchema(
       currentSchema,
+      {},
       [
         'properties.highLevelDetails.properties.modelID',
         'properties.highLevelDetails.properties.initialVersionRequested',
       ],
-      undefined,
-      'deploy'
     )
 
     newSteps.push(

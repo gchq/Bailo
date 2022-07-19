@@ -33,7 +33,7 @@ export default function RenderForm({
       onChange={onFormChange}
       widgets={{
         userSelector: UserSelector,
-        textareaWidget: TextareaWidget,
+        textArea: TextareaWidget,
         nothing: Nothing,
       }}
       uiSchema={step.uiSchema}

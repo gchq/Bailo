@@ -63,7 +63,7 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema, [], cModel.currentMetadata, 'newVersion')
+    const steps = getStepsFromSchema(cSchema, {}, [], cModel.currentMetadata)
 
     steps.push(
       createStep({

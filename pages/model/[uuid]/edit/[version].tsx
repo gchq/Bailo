@@ -54,7 +54,11 @@ function Upload() {
   useEffect(() => {
     if (!cSchema || !cVersion || splitSchema.steps.length) return
 
-    const schemaSteps = getStepsFromSchema(cSchema, [], cVersion.metadata, 'edit')
+    const schemaSteps = getStepsFromSchema(cSchema, {
+      highLevelDetails: {
+        modelCardVersion: { 'ui:widget': 'nothing' },
+      },
+    }, [], cVersion.metadata)
 
     schemaSteps.push(
       createStep({

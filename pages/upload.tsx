@@ -81,7 +81,7 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const steps = getStepsFromSchema(currentSchema, undefined, defaultState, 'upload')
+    const steps = getStepsFromSchema(currentSchema, {}, [], defaultState)
 
     steps.push(
       createStep({
