@@ -60,6 +60,11 @@ jobs:
               },
             },
 
+            logging: {
+              file: {
+                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
+              },
+            },
           }
           EOT
 
