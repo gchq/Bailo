@@ -208,26 +208,26 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
             <Box>
-              <p>
+              <p style={{ margin: 0 }}>
                 # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />
 
-              <p># Pull model</p>
+              <p style={{ margin: 0 }}># Pull model</p>
               <CodeLine line={`docker pull ${deploymentTag}`} />
               <br />
 
-              <p># Run Docker image</p>
+              <p style={{ margin: 0 }}># Run Docker image</p>
               <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p># (the container exposes on port 9000, available on the host as port 9999)</p>
+              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
               <br />
 
-              <p># Check that the Docker container is running</p>
+              <p style={{ margin: 0 }}># Check that the Docker container is running</p>
               <CodeLine line='docker ps' />
               <br />
 
-              <p># The model is accessible at localhost:9999</p>
+              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
             </Box>
           </DialogContentText>
         </DialogContent>

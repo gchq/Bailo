@@ -34,5 +34,9 @@ certs/key.pem
 # User's personal docker-compose-dev file
 docker-compose-dev-personal.yml 
 
+# Helm
 helm/bailo/charts
 helm/bailo/local.yaml
+
+# Jest
+coverage

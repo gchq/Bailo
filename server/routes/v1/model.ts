@@ -9,7 +9,10 @@ import { findSchemaByRef } from '../../services/schema'
 export const getModels = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const { type, filter } = req.query
+    let { type, filter } = req.query
+
+    if (filter === undefined) filter = ''
+    if (type === undefined) type = 'all'
 
     if (!isValidType(type)) {
       throw BadReq({ code: 'model_invalid_type', type }, `Provided invalid type '${type}'`)

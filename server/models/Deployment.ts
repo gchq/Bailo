@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
+import { VersionDoc } from './Version'
 
 export const approvalStates = ['Accepted', 'Declined', 'No Response']
 
@@ -22,6 +23,7 @@ export interface Deployment {
   uuid: string
 
   model: Types.ObjectId | ModelDoc
+  versions: Types.Array<Types.ObjectId | VersionDoc>
   metadata: any
 
   managerApproved: ApprovalStates
@@ -45,6 +47,7 @@ const DeploymentSchema = new Schema<Deployment>(
     uuid: { type: String, required: true, index: true, unique: true },
 
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
+    versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     metadata: { type: Schema.Types.Mixed },
 
     managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },

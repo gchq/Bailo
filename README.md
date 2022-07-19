@@ -129,6 +129,10 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to something more secure.
 
+Always connect to the project via 'Nginx', otherwise you will receive authentication failed errors. We expect the administrator to provide their own forms of authentication.
+
+You can test out your new deployment using the example models which can be found in `__tests__` [`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and [`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder [`minimal_upload_schema_examples.json`](server/scripts/example_schemas/minimal_upload_schema_examples.json) and [`minimal_deployment_schema_examples.json`](server/scripts/example_schemas/minimal_deployment_schema_examples.json).
+
 <br />
 
 ### Logical Project Flow (Overview)
@@ -153,6 +157,10 @@ Fix: Run `docker-compose down --rmi all` followed by `docker-compose up --build`
 _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
 
 Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run: `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
+
+_Issue: Unable to authenticate to the Docker registry / compile binaries._
+
+Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your application is able to access the Docker registry internally as it will not provide user authentication.
 
 <br />
 

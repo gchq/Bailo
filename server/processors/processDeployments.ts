@@ -69,7 +69,7 @@ export default async function processDeployments() {
       await Promise.all(
         manifest.layers.map(async (layer: any) => {
           const res = await fetch(
-            `${registry}/user/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
+            `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
             {
               method: 'POST',
               headers: {
@@ -88,7 +88,7 @@ export default async function processDeployments() {
       )
 
       const mountPostRes = await fetch(
-        `${registry}/user/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
+        `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
         {
           method: 'POST',
           headers: {
@@ -104,7 +104,7 @@ export default async function processDeployments() {
 
       deployment.log('info', `Copied manifest to new repository`)
 
-      const manifestPutRes = await fetch(`${registry}/user/${modelID}/manifests/${initialVersionRequested}`, {
+      const manifestPutRes = await fetch(`${registry}/${user.id}/${modelID}/manifests/${initialVersionRequested}`, {
         method: 'PUT',
         body: JSON.stringify(manifest),
         headers: {
