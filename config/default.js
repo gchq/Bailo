@@ -77,6 +77,14 @@ module.exports = {
     from: '"Bailo 📝" <bailo@example.org>',
   },
 
+  logging: {
+    file: {
+      enabled: true,
+      level: 'info',
+      path: './logs/out.log'
+    },
+  },
+
   app: {
     protocol: 'http',
     host: 'localhost',

@@ -2,11 +2,13 @@ import bunyan from 'bunyan'
 import { v4 as uuidv4 } from 'uuid'
 import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
+import fs from 'fs'
 import devnull from 'dev-null'
-import { join, sep } from 'path'
+import { join, sep, dirname } from 'path'
 import { inspect } from 'util'
 import omit from 'lodash/omit'
 import chalk from 'chalk'
+import config from 'config'
 import { castArray, set, get, pick } from 'lodash'
 import { StatusError } from '../../types/interfaces'
 import { serializedVersionFields } from '../services/version'
@@ -146,6 +148,18 @@ if (process.env.NODE_ENV !== 'production') {
     stream: new Writer({
       basepath: join(__dirname, '..'),
     }),
+  })
+}
+
+if (config.get('logging.file.enabled')) {
+  const folder = dirname(config.get('logging.file.path'))
+  fs.mkdirSync(folder, { recursive: true });
+
+  console.log('making folder', folder)
+
+  streams.push({
+    level: config.get('logging.file.level'),
+    path: config.get('logging.file.path'),
   })
 }
 
