@@ -81,7 +81,7 @@ interface CreateDeployment {
 export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   const deployment = new DeploymentModel(data)
 
-  if (!await authorisation.canUserSeeDeployment(user, deployment)) {
+  if (!(await authorisation.canUserSeeDeployment(user, deployment))) {
     throw Forbidden({ data }, 'Unable to create deployment, failed permissions check.')
   }
 
