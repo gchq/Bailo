@@ -24,7 +24,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - run: pwd
+      - run: ls
       - run: mkdir logs
+      - run: ls
+      - run: pwd
 
       # Install dependencies
       - run: npm ci
