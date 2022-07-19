@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import fs from 'fs'
+import appRoot from 'app-root-path'
 import devnull from 'dev-null'
 import { join, sep, dirname } from 'path'
 import { inspect } from 'util'
@@ -157,7 +158,7 @@ if (config.get('logging.file.enabled')) {
 
   streams.push({
     level: config.get('logging.file.level'),
-    path: config.get('logging.file.path'),
+    path: join(appRoot, config.get('logging.file.path')),
   })
 }
 
