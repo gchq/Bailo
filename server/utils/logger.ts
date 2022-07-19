@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import fs from 'fs'
-import appRoot from 'app-root-path'
+import getAppRoot from 'app-root-path'
 import devnull from 'dev-null'
 import { join, sep, dirname } from 'path'
 import { inspect } from 'util'
@@ -17,6 +17,8 @@ import { serializedModelFields } from '../services/model'
 import { serializedDeploymentFields } from '../services/deployment'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
+
+const appRoot = getAppRoot.toString()
 
 class Writer {
   basepath: string
