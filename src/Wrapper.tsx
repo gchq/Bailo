@@ -207,13 +207,13 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
             </Link>
             {currentUser ? (
               <>
-                <IconButton onClick={userMenuClicked}>
+                <IconButton onClick={userMenuClicked} data-test='showUserMenu'>
                   <UserAvatar username={currentUser.id} size='chip' />
                 </IconButton>
                 <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>
                     <Link href='/settings' passHref>
-                      <MenuItem>
+                      <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
                           <Settings fontSize='small' />
                         </ListItemIcon>
