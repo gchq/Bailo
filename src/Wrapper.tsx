@@ -19,6 +19,8 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuList from '@mui/material/MenuList'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import FileUploadIcon from '@mui/icons-material/FileUpload'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
@@ -33,6 +35,7 @@ import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
 import { useGetCurrentUser } from '../data/user'
 import UserAvatar from './common/UserAvatar'
+import MenuItem from '@mui/material/MenuItem'
 
 const drawerWidth: number = 240
 
@@ -94,6 +97,9 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
 
   const [pageTopStyling, setPageTopStyling] = React.useState({})
   const [contentTopStyling, setContentTopStyling] = React.useState({})
+  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null)
+
+  const actionOpen = anchorEl !== null
 
   React.useEffect(() => {
     if (!isUiConfigLoading) {
@@ -120,6 +126,14 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
   }
 
+  const userMenuClicked = (event: any) => {
+    setAnchorEl(event.currentTarget as HTMLDivElement)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
   const headerTitle = (
     <>
       {typeof title === 'string' ? (
@@ -131,17 +145,6 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       ) : (
         <>{title}</>
       )}
-      <span>
-        {currentUser ? (
-          <Link href='/settings'>
-            <a>
-              <UserAvatar username={currentUser.id} size='chip' />
-            </a>
-          </Link>
-        ) : (
-          <Typography variant='caption'>'Loading...'</Typography>
-        )}
-      </span>
     </>
   )
 
@@ -202,6 +205,27 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                 </Badge>
               </IconButton>
             </Link>
+            {currentUser ? (
+              <>
+                <IconButton onClick={userMenuClicked}>
+                  <UserAvatar username={currentUser.id} size='chip' />
+                </IconButton>
+                <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
+                  <MenuList>
+                    <Link href='/settings' passHref>
+                      <MenuItem>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+              </>
+            ) : (
+              <Typography variant='caption'>'Loading...'</Typography>
+            )}
           </Toolbar>
         </AppBar>
         <Drawer sx={pageTopStyling} variant='permanent' open={open}>
@@ -288,20 +312,6 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                   )}
                 </ListItemIcon>
                 <ListItemText primary='Support' />
-              </ListItem>
-            </Link>
-            <Link href='/settings' passHref>
-              <ListItem button selected={page === 'settings'}>
-                <ListItemIcon data-test='settingLink'>
-                  {!open ? (
-                    <Tooltip title='Settings' arrow placement='right'>
-                      <Settings />
-                    </Tooltip>
-                  ) : (
-                    <Settings />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Settings' />
               </ListItem>
             </Link>
           </StyledList>
