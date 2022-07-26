@@ -20,6 +20,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
+import MuiLink from '@mui/material/Link'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
@@ -36,6 +37,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
+import useTheme from '@mui/styles/useTheme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -43,6 +45,8 @@ type TabOptions = 'overview' | 'compliance' | 'build'
 
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
+
+  const theme: any = useTheme()
 
   const handleButtonClick = () => {
     navigator.clipboard.writeText(line)
@@ -69,9 +73,7 @@ function CodeLine({ line }) {
         ${' '}
         <Tooltip title='Copy to clipboard' arrow>
           <b
-            style={{
-              background: '#e0e0e0',
-            }}
+            
           >
             {line}
           </b>
@@ -96,6 +98,8 @@ export default function Deployment() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  const theme: any = useTheme()
 
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
@@ -204,12 +208,18 @@ export default function Deployment() {
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle>Pull from Docker</DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>Pull from Docker</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
+          <DialogContentText sx={{ p: 2 }}>
             <Box>
               <p style={{ margin: 0 }}>
-                # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
+                # Login to Docker (your token can be found on the 
+                <Link href='/settings'>
+                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>
+                    settings
+                  </MuiLink>                  
+                </Link> 
+                page)
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />

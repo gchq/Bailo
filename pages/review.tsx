@@ -23,6 +23,7 @@ import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } fro
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../data/api'
 import { useGetCurrentUser } from '../data/user'
+import useTheme from '@mui/styles/useTheme'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
@@ -64,11 +65,13 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
+  const theme: any = useTheme()
+
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()
 
-  const managerStyling = { mb: 2, borderLeft: '.3rem solid #283593', p: 2, backgroundColor: 'whitesmoke' }
-  const reviewerStyling = { mb: 2, borderLeft: '.3rem solid #de3c30', p: 2, backgroundColor: 'whitesmoke' }
+  const managerStyling = { mb: 2, borderLeft: '.3rem solid #283593', p: 2, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }
+  const reviewerStyling = { mb: 2, borderLeft: '.3rem solid #de3c30', p: 2, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }
 
   const handleClose = () => {
     setOpen(false)
@@ -126,12 +129,12 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
               {type === 'Upload' && (
                 <>
                   <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
-                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
                       {requestObj.version?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Stack direction='row' spacing={2}>
-                    <Chip label={requestObj.approvalType} size='small' />
+                    <Chip sx={{ backgroundColor: '#f5f5f5', color: '#000000de' }} label={requestObj.approvalType} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
                         {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}
@@ -150,14 +153,14 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
               {type === 'Deployment' && (
                 <>
                   <Link href={`/deployment/${requestObj.deployment?.uuid}`} passHref>
-                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
                       {requestObj.deployment?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
                     <Link href={`/model/${requestObj.deployment?.model?.uuid}`} passHref>
-                      <MuiLink sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                      <MuiLink sx={{ fontWeight: '500', textDecoration: 'none',  color: theme.palette.secondary.main }}>
                         {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>

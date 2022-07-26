@@ -17,6 +17,7 @@ import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Model } from '../types/interfaces'
+import useTheme from '@mui/styles/useTheme'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
@@ -24,6 +25,8 @@ export default function ExploreModels() {
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+
+  const theme: any = useTheme()
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -79,7 +82,7 @@ export default function ExploreModels() {
             models.map((model: Model, index: number) => (
               <Box key={model.uuid}>
                 <Link href={`/model/${model.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
                     {model.currentMetadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -90,7 +93,7 @@ export default function ExploreModels() {
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                    <Chip sx={{ backgroundColor: '#f5f5f5', color: '#000000de' }} key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                   ))}
                 </Stack>
 

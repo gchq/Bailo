@@ -21,6 +21,7 @@ import { useGetModelById } from '../data/model'
 import { useGetUserDeployments } from '../data/deployment'
 import Wrapper from '../src/Wrapper'
 import EmptyBlob from '../src/common/EmptyBlob'
+import useTheme from '@mui/styles/useTheme'
 
 function ModelNameFromKey({ modelId }: { modelId: string }) {
   const { model, isModelError } = useGetModelById(modelId)
@@ -41,6 +42,8 @@ function Deployments() {
   const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
   const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
+
+  const theme: any = useTheme()
 
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
@@ -108,7 +111,7 @@ function Deployments() {
               {orderedDeployments?.map((deployment, index) => (
                 <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                   <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                    <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none',  color: theme.palette.secondary.main }}>
                       {deployment?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
@@ -133,7 +136,7 @@ function Deployments() {
                       <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
                         <Box>
                           <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none',  color: theme.palette.secondary.main }}>
                               {deployment?.metadata?.highLevelDetails?.name}
                             </MuiLink>
                           </Link>

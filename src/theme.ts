@@ -16,8 +16,9 @@ export interface Theme {
 }
 
 // Create a theme instance.
-const theme = createTheme({
+export const lightTheme = createTheme({
   palette: {
+    mode: 'light',
     primary: {
       main: '#27598e',
     },
@@ -30,4 +31,28 @@ const theme = createTheme({
   },
 })
 
-export default theme
+// Create a theme instance.
+export const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#fwwt53',
+      contrastText: "#fff",
+    },
+    secondary: {
+      main: '#f37f58',
+    },
+    error: {
+      main: red.A400,
+    },
+    background: {
+      paper: '#242424',
+    },
+    action: {
+      active: '#fff',
+      hover:'#fff',
+      focus:'#fff',
+      selected:'#fff',
+    }
+  },
+})

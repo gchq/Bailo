@@ -9,15 +9,11 @@ import Button from '@mui/material/Button'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ArticleIcon from '@mui/icons-material/Article'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
-import useTheme from '@mui/styles/useTheme'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { useGetUiConfig } from '../data/uiConfig'
-import { Theme } from '../src/theme'
 
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
-
-  const theme = useTheme<Theme>()
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
@@ -35,7 +31,7 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <BugReportIcon sx={{ pt: 2, color: theme.palette.primary.main, fontSize: 75 }} />
+                  <BugReportIcon sx={{ pt: 2, fontSize: 75 }} />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Bug reports
                   </Typography>
@@ -58,7 +54,7 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ArticleIcon sx={{ pt: 2, color: theme.palette.primary.main, fontSize: 75 }} />
+                  <ArticleIcon sx={{ pt: 2, fontSize: 75 }} />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Documentation
                   </Typography>
@@ -80,7 +76,7 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ContactSupportIcon sx={{ pt: 2, color: theme.palette.primary.main, fontSize: 75 }} />
+                  <ContactSupportIcon sx={{ pt: 2, color: 'primary', fontSize: 75 }} />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Get in touch
                   </Typography>

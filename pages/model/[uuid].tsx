@@ -48,6 +48,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
+import useTheme from '@mui/styles/useTheme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -78,6 +79,7 @@ function Model() {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
+  const theme: any = useTheme()
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
@@ -296,7 +298,7 @@ function Model() {
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
                 <Link href={`/deployment/${deployment.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none',  color: theme.palette.secondary.main }}>
                     {deployment.metadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -307,12 +309,12 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      sx={{ mr: 1 }}
+                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      sx={{ mr: 1 }}
+                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
                     />
@@ -329,7 +331,7 @@ function Model() {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip key={filteredVersion.version} sx={{ mr: 1 }} label={filteredVersion.version} />
+                          <Chip key={filteredVersion.version} sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }} label={filteredVersion.version} />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${

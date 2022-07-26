@@ -32,7 +32,7 @@ const ModelOverview = (props: any) => {
               >
                 {version?.metadata?.highLevelDetails?.tags !== undefined &&
                   version?.metadata?.highLevelDetails?.tags.map((tag: any, index: number) => (
-                    <Chip sx={{ color: 'white', m: 0.25 }} key={`chip-${index}`} label={tag} />
+                    <Chip sx={{ backgroundColor: '#f5f5f5', color: '#000000de', m: 0.25 }} key={`chip-${index}`} label={tag} />
                   ))}
               </Box>
             </Box>

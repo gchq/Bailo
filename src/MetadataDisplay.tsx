@@ -5,6 +5,7 @@ import Box from '@mui/material/Box'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 import { useGetSchemas } from '../data/schema'
+import useTheme from '@mui/styles/useTheme'
 
 const MetadataDisplay = ({
   item,
@@ -20,6 +21,8 @@ const MetadataDisplay = ({
 
   const [schema, setSchema] = useState<any | undefined>(undefined)
   const [sectionKeys, setSectionKeys] = useState<string[]>([])
+
+  const theme: any = useTheme()
 
   useEffect(() => {
     if (!schemas) return
@@ -145,7 +148,7 @@ const MetadataDisplay = ({
       ) : null
     })
   }
-  return <Box sx={{ p: 4, backgroundColor: '#f3f1f1', borderRadius: 2 }}>{printSections()}</Box>
+  return <Box sx={{ p: 4, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }}>{printSections()}</Box>
 }
 
 export default MetadataDisplay

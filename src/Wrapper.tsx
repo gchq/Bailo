@@ -25,17 +25,19 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import FileUploadIcon from '@mui/icons-material/FileUpload'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import ListAltIcon from '@mui/icons-material/ListAlt'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
 import { useGetUiConfig } from '../data/uiConfig'
 import Banner from './Banner'
 import { useGetNumRequests } from '../data/requests'
 import Image from 'next/image'
 import Tooltip from '@mui/material/Tooltip'
-import globalTheme from '../src/theme'
+import { darkTheme, lightTheme } from '../src/theme'
 import Copyright from './Copyright'
 import Settings from '@mui/icons-material/Settings'
 import { useGetCurrentUser } from '../data/user'
 import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
+import Switch from '@mui/material/Switch'
 
 const drawerWidth: number = 240
 
@@ -98,6 +100,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
   const [pageTopStyling, setPageTopStyling] = React.useState({})
   const [contentTopStyling, setContentTopStyling] = React.useState({})
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null)
+  const [darkModeEnabled, setDarkModelEnabled] = React.useState(false)
 
   const actionOpen = anchorEl !== null
 
@@ -113,6 +116,10 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       }
     }
   }, [isUiConfigLoading, uiConfig])
+
+  React.useEffect(() => {
+      setDarkModelEnabled(localStorage.getItem('dark_mode_enabled') === 'true')
+  }, [])
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
@@ -134,6 +141,13 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     setAnchorEl(null)
   }
 
+  const handleDarkModeToggle = (event) => {
+    setDarkModelEnabled(event.target.checked)
+    localStorage.setItem('dark_mode_enabled', 'true')
+  }
+
+  const theme = darkModeEnabled ? darkTheme : lightTheme
+
   const headerTitle = (
     <>
       {typeof title === 'string' ? (
@@ -153,13 +167,13 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     paddingBottom: 0,
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
-        color: globalTheme.palette.secondary.main,
+        color: theme.palette.secondary.main,
       },
     },
   })
 
   return (
-    <ThemeProvider theme={globalTheme}>
+    <ThemeProvider theme={theme}>
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
@@ -212,14 +226,24 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                 </IconButton>
                 <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>
+                    <MenuItem data-test='toggleDarkMode'>
+                      <ListItemIcon>
+                        <DarkModeIcon fontSize='small' />
+                      </ListItemIcon>
+                      <Switch
+                        checked={darkModeEnabled}
+                        onChange={handleDarkModeToggle}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
+                    </MenuItem>
                     <Link href='/settings' passHref>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
                           <Settings fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
-                      </MenuItem>
-                    </Link>
+                      </MenuItem>                      
+                    </Link>                    
                   </MenuList>
                 </Menu>
               </>

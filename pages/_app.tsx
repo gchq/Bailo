@@ -4,7 +4,7 @@ import { AppProps } from 'next/app'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { CacheProvider, EmotionCache } from '@emotion/react'
-import theme from '../src/theme'
+import { darkTheme, lightTheme } from '../src/theme'
 import createEmotionCache from '../src/createEmotionCache'
 
 import '../public/css/terminal.css'
@@ -19,7 +19,16 @@ interface MyAppProps extends AppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
+
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const [darkModeEnabled, setDarkModelEnabled] = React.useState(false)
+
+  React.useEffect(() => {
+    setDarkModelEnabled(localStorage.getItem('dark_mode_enabled') === 'true')
+  }, [])
+
+  const theme = darkModeEnabled ? darkTheme : lightTheme
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
