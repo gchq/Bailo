@@ -19,11 +19,11 @@ interface MyAppProps extends AppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
-
-
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
-  const [ mounted, setMounted ] = React.useState<boolean>(false)
-  const [ theme, setTheme ] = React.useState<any>(typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme)
+  const [mounted, setMounted] = React.useState<boolean>(false)
+  const [theme, setTheme] = React.useState<any>(
+    typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme
+  )
 
   React.useEffect(() => {
     setMounted(true)
@@ -42,12 +42,12 @@ export default function MyApp(props: MyAppProps) {
         <meta name='viewport' content='initial-scale=1, width=device-width' />
         <link rel='shortcut icon' href='/favicon.png' />
       </Head>
-      {mounted && 
+      {mounted && (
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Component {...pageProps } handleDarkModeToggle={_handleDarkModeToggle} />
+          <Component {...pageProps} handleDarkModeToggle={_handleDarkModeToggle} />
         </ThemeProvider>
-      }
+      )}
     </CacheProvider>
   )
 }

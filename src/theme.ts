@@ -37,7 +37,7 @@ export const darkTheme = createTheme({
     mode: 'dark',
     primary: {
       main: '#fwwt53',
-      contrastText: "#fff",
+      contrastText: '#fff',
     },
     secondary: {
       main: '#f37f58',
@@ -50,9 +50,9 @@ export const darkTheme = createTheme({
     },
     action: {
       active: '#fff',
-      hover:'#fff',
-      focus:'#fff',
-      selected:'#fff',
+      hover: '#fff',
+      focus: '#fff',
+      selected: '#fff',
     },
   },
 })

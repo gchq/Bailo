@@ -18,15 +18,16 @@ import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Model } from '../types/interfaces'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../src/theme'
 
-export default function ExploreModels({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
+export default function ExploreModels({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   const [group, setGroup] = useState<ListModelType>('all')
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -82,7 +83,10 @@ export default function ExploreModels({ handleDarkModeToggle } : {handleDarkMode
             models.map((model: Model, index: number) => (
               <Box key={model.uuid}>
                 <Link href={`/model/${model.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
                     {model.currentMetadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -93,7 +97,13 @@ export default function ExploreModels({ handleDarkModeToggle } : {handleDarkMode
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                    <Chip sx={{ backgroundColor: '#f5f5f5', color: '#000000de' }} key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                    <Chip
+                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de' }}
+                      key={`chip-${tag}`}
+                      label={tag}
+                      size='small'
+                      variant='outlined'
+                    />
                   ))}
                 </Stack>
 

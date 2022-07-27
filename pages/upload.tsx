@@ -48,7 +48,7 @@ function renderSubmissionTab(
   )
 }
 
-function Upload({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
+function Upload({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -139,7 +139,7 @@ function Upload({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
     return null
   }
-  const Loading = <Wrapper title='Loading...' page='deployment' handleDarkModeToggle={handleDarkModeToggle}/>
+  const Loading = <Wrapper title='Loading...' page='deployment' handleDarkModeToggle={handleDarkModeToggle} />
 
   if (isDefaultSchemaLoading || !defaultSchema) return Loading
   if (isSchemasLoading || !schemas) return Loading
@@ -206,10 +206,10 @@ function Upload({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   )
 }
 
-export default function Outer({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
+export default function Outer({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   return (
     <Wrapper title='Upload Model' page='upload' handleDarkModeToggle={handleDarkModeToggle}>
-      <Upload handleDarkModeToggle={handleDarkModeToggle}/>
+      <Upload handleDarkModeToggle={handleDarkModeToggle} />
     </Wrapper>
   )
 }

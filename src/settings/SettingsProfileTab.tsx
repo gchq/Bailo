@@ -9,12 +9,13 @@ import IconButton from '@mui/material/IconButton'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import Tooltip from '@mui/material/Tooltip'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../theme'
 
 const SettingsProfileTab = ({ user }: { user: any }) => {
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const regenerateToken = async () => {
     const { token } = await fetch('/api/v1/user/token', {
@@ -46,7 +47,13 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
         <Divider sx={{ pt: 1, mb: 1 }} />
         <Stack direction='row' sx={{ p: 1 }}>
           {user.roles.map((role: any, index: number) => {
-            return <Chip key={'chip-role-' + index} sx={{ mr: 1, backgroundColor: '#f5f5f5', color: '#000000de' }} label={role} />
+            return (
+              <Chip
+                key={'chip-role-' + index}
+                sx={{ mr: 1, backgroundColor: '#f5f5f5', color: '#000000de' }}
+                label={role}
+              />
+            )
           })}
         </Stack>
       </Box>

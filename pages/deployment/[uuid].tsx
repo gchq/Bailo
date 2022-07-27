@@ -38,6 +38,7 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -46,7 +47,7 @@ type TabOptions = 'overview' | 'compliance' | 'build'
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const handleButtonClick = () => {
     navigator.clipboard.writeText(line)
@@ -72,11 +73,7 @@ function CodeLine({ line }) {
       >
         ${' '}
         <Tooltip title='Copy to clipboard' arrow>
-          <b
-            
-          >
-            {line}
-          </b>
+          <b>{line}</b>
         </Tooltip>
       </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
@@ -84,7 +81,7 @@ function CodeLine({ line }) {
   )
 }
 
-export default function Deployment({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
+export default function Deployment({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -99,7 +96,7 @@ export default function Deployment({ handleDarkModeToggle } : {handleDarkModeTog
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
@@ -157,7 +154,11 @@ export default function Deployment({ handleDarkModeToggle } : {handleDarkModeTog
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment' handleDarkModeToggle={handleDarkModeToggle}>
+      <Wrapper
+        title={`Deployment: ${deployment.metadata.highLevelDetails.name}`}
+        page='deployment'
+        handleDarkModeToggle={handleDarkModeToggle}
+      >
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -208,17 +209,17 @@ export default function Deployment({ handleDarkModeToggle } : {handleDarkModeTog
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>Pull from Docker</DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>
+          Pull from Docker
+        </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ p: 2 }}>
             <Box>
               <p style={{ margin: 0 }}>
-                # Login to Docker (your token can be found on the 
+                # Login to Docker (your token can be found on the
                 <Link href='/settings'>
-                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>
-                    settings
-                  </MuiLink>                  
-                </Link> 
+                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
+                </Link>
                 page) {theme.palette.mode}
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />

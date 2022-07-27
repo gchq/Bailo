@@ -49,6 +49,7 @@ import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -58,7 +59,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
-function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
+function Model({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -79,7 +80,7 @@ function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
@@ -118,7 +119,7 @@ function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   })
   if (error) return error
 
-  const Loading = <Wrapper title='Loading...' page='model' handleDarkModeToggle={handleDarkModeToggle} />
+  const Loading = <Wrapper title='Loading...' page='model' />
 
   if (isVersionsLoading || !versions) return Loading
   if (isVersionLoading || !version) return Loading
@@ -158,7 +159,11 @@ function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   }
 
   return (
-    <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model' handleDarkModeToggle={handleDarkModeToggle}>
+    <Wrapper
+      title={`Model: ${version.metadata.highLevelDetails.name}`}
+      page='model'
+      handleDarkModeToggle={handleDarkModeToggle}
+    >
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -298,7 +303,10 @@ function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
                 <Link href={`/deployment/${deployment.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none',  color: theme.palette.secondary.main }}>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
                     {deployment.metadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -331,7 +339,11 @@ function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip key={filteredVersion.version} sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }} label={filteredVersion.version} />
+                          <Chip
+                            key={filteredVersion.version}
+                            sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
+                            label={filteredVersion.version}
+                          />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${

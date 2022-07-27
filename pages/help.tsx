@@ -12,12 +12,12 @@ import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { useGetUiConfig } from '../data/uiConfig'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../src/theme'
 
-export default function Help({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
-
+export default function Help({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,

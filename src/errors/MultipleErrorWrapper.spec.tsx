@@ -4,6 +4,7 @@
 
 import MultipleErrorWrapper from './MultipleErrorWrapper'
 import { render, screen, waitFor } from '@testing-library/react'
+import useTheme from '@mui/styles/useTheme'
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}

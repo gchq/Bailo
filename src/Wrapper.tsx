@@ -38,6 +38,7 @@ import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from './theme'
 
 const drawerWidth: number = 240
 
@@ -87,14 +88,23 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-export default function Wrapper({ title, page, children, handleDarkModeToggle }: { title: any; page: string; children?: any, handleDarkModeToggle: any }) {
-  
+export default function Wrapper({
+  title,
+  page,
+  children,
+  handleDarkModeToggle,
+}: {
+  title: any
+  page: string
+  children?: any
+  handleDarkModeToggle?: any
+}) {
   const [open, setOpen] = React.useState(false)
   const toggleDrawer = () => {
     setOpen(!open)
   }
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
@@ -233,8 +243,8 @@ export default function Wrapper({ title, page, children, handleDarkModeToggle }:
                           <Settings fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
-                      </MenuItem>                      
-                    </Link>                    
+                      </MenuItem>
+                    </Link>
                   </MenuList>
                 </Menu>
               </>
