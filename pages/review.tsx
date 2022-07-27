@@ -25,7 +25,7 @@ import { postEndpoint } from '../data/api'
 import { useGetCurrentUser } from '../data/user'
 import useTheme from '@mui/styles/useTheme'
 
-export default function Review() {
+export default function Review({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
@@ -35,7 +35,7 @@ export default function Review() {
   }
 
   return (
-    <Wrapper title='Reviews' page='review'>
+    <Wrapper title='Reviews' page='review' handleDarkModeToggle={handleDarkModeToggle}>
       <>
         {!isCurrentUserLoading && (
           <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>

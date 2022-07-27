@@ -29,7 +29,7 @@ function renderSubmissionTab(
   return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
 }
 
-export default function Deploy() {
+export default function Deploy({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const router = useRouter()
   const { uuid: modelUuid }: { uuid?: string } = router.query
 
@@ -82,7 +82,7 @@ export default function Deploy() {
   })
   if (errorWrapper) return errorWrapper
 
-  const Loading = <Wrapper title='Loading...' page='model' />
+  const Loading = <Wrapper title='Loading...' page='model' handleDarkModeToggle={handleDarkModeToggle} />
 
   if (isSchemasLoading || !schemas) return Loading
   if (isModelLoading || !model) return Loading
@@ -116,7 +116,7 @@ export default function Deploy() {
   }
 
   return (
-    <Wrapper title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`} page='model'>
+    <Wrapper title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`} page='model' handleDarkModeToggle={handleDarkModeToggle}>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           <Box />

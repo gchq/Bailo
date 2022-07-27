@@ -45,7 +45,7 @@ function renderSubmissionTab(
   )
 }
 
-function Upload() {
+function Upload({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const router = useRouter()
   const { uuid: modelUuid }: { uuid?: string } = router.query
 
@@ -181,10 +181,10 @@ function Upload() {
   )
 }
 
-export default function Outer() {
+export default function Outer({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   return (
-    <Wrapper title='Upload Model' page='upload'>
-      <Upload />
+    <Wrapper title='Upload Model' page='upload' handleDarkModeToggle={handleDarkModeToggle}>
+      <Upload handleDarkModeToggle={handleDarkModeToggle} />
     </Wrapper>
   )
 }

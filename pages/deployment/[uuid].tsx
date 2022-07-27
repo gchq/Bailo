@@ -17,11 +17,11 @@ import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import DownArrow from '@mui/icons-material/KeyboardArrowDown'
-import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import Stack from '@mui/material/Stack'
 import MuiLink from '@mui/material/Link'
-import RestartAlt from '@mui/icons-material/RestartAlt'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 
@@ -84,7 +84,7 @@ function CodeLine({ line }) {
   )
 }
 
-export default function Deployment() {
+export default function Deployment({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -143,7 +143,7 @@ export default function Deployment() {
   })
   if (error) return error
 
-  const Loading = <Wrapper title='Loading...' page='deployment' />
+  const Loading = <Wrapper title='Loading...' page='deployment' handleDarkModeToggle={handleDarkModeToggle} />
 
   if (isDeploymentLoading || !deployment) return Loading
   if (isUiConfigLoading || !uiConfig) return Loading
@@ -157,7 +157,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
+      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment' handleDarkModeToggle={handleDarkModeToggle}>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -219,7 +219,7 @@ export default function Deployment() {
                     settings
                   </MuiLink>                  
                 </Link> 
-                page)
+                page) {theme.palette.mode}
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />

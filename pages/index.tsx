@@ -19,7 +19,7 @@ import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Model } from '../types/interfaces'
 import useTheme from '@mui/styles/useTheme'
 
-export default function ExploreModels() {
+export default function ExploreModels({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const [group, setGroup] = useState<ListModelType>('all')
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
@@ -47,7 +47,7 @@ export default function ExploreModels() {
   }
 
   return (
-    <Wrapper title='Explore Models' page='marketplace'>
+    <Wrapper title='Explore Models' page='marketplace' handleDarkModeToggle={handleDarkModeToggle}>
       <Paper
         component='form'
         onSubmit={onFilterSubmit}

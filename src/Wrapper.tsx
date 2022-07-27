@@ -10,10 +10,10 @@ import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Badge from '@mui/material/Badge'
 import Container from '@mui/material/Container'
-import MenuIcon from '@mui/icons-material/Menu'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import ViewList from '@mui/icons-material/ViewList'
+import MenuIcon from '@mui/icons-material/MenuTwoTone'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
+import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
+import ViewList from '@mui/icons-material/ViewListTwoTone'
 import Link from 'next/link'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -21,23 +21,23 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import FileUploadIcon from '@mui/icons-material/FileUpload'
-import ContactSupportIcon from '@mui/icons-material/ContactSupport'
+import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
+import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
+import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
+import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
 import { useGetUiConfig } from '../data/uiConfig'
 import Banner from './Banner'
 import { useGetNumRequests } from '../data/requests'
 import Image from 'next/image'
 import Tooltip from '@mui/material/Tooltip'
-import { darkTheme, lightTheme } from '../src/theme'
 import Copyright from './Copyright'
-import Settings from '@mui/icons-material/Settings'
+import Settings from '@mui/icons-material/SettingsTwoTone'
 import { useGetCurrentUser } from '../data/user'
 import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
+import useTheme from '@mui/styles/useTheme'
 
 const drawerWidth: number = 240
 
@@ -87,11 +87,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-export default function Wrapper({ title, page, children }: { title: any; page: string; children?: any }) {
+export default function Wrapper({ title, page, children, handleDarkModeToggle }: { title: any; page: string; children?: any, handleDarkModeToggle: any }) {
+  
   const [open, setOpen] = React.useState(false)
   const toggleDrawer = () => {
     setOpen(!open)
   }
+
+  const theme: any = useTheme()
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
@@ -100,7 +103,6 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
   const [pageTopStyling, setPageTopStyling] = React.useState({})
   const [contentTopStyling, setContentTopStyling] = React.useState({})
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null)
-  const [darkModeEnabled, setDarkModelEnabled] = React.useState(false)
 
   const actionOpen = anchorEl !== null
 
@@ -116,10 +118,6 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       }
     }
   }, [isUiConfigLoading, uiConfig])
-
-  React.useEffect(() => {
-      setDarkModelEnabled(localStorage.getItem('dark_mode_enabled') === 'true')
-  }, [])
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
@@ -140,13 +138,6 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
   const handleMenuClose = () => {
     setAnchorEl(null)
   }
-
-  const handleDarkModeToggle = (event) => {
-    setDarkModelEnabled(event.target.checked)
-    localStorage.setItem('dark_mode_enabled', 'true')
-  }
-
-  const theme = darkModeEnabled ? darkTheme : lightTheme
 
   const headerTitle = (
     <>
@@ -231,7 +222,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                         <DarkModeIcon fontSize='small' />
                       </ListItemIcon>
                       <Switch
-                        checked={darkModeEnabled}
+                        checked={localStorage.getItem('dark_mode_enabled') === 'true'}
                         onChange={handleDarkModeToggle}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />

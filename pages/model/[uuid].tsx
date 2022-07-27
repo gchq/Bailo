@@ -16,13 +16,13 @@ import Stack from '@mui/material/Stack'
 import MuiLink from '@mui/material/Link'
 import Snackbar from '@mui/material/Snackbar'
 import copy from 'copy-to-clipboard'
-import UploadIcon from '@mui/icons-material/Upload'
-import EditIcon from '@mui/icons-material/Edit'
-import PostAddIcon from '@mui/icons-material/PostAdd'
-import Favorite from '@mui/icons-material/Favorite'
+import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import EditIcon from '@mui/icons-material/EditTwoTone'
+import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
+import Favorite from '@mui/icons-material/FavoriteTwoTone'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
-import UpArrow from '@mui/icons-material/KeyboardArrowUp'
-import RestartAlt from '@mui/icons-material/RestartAlt'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
@@ -58,7 +58,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
-function Model() {
+function Model({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -118,7 +118,7 @@ function Model() {
   })
   if (error) return error
 
-  const Loading = <Wrapper title='Loading...' page='model' />
+  const Loading = <Wrapper title='Loading...' page='model' handleDarkModeToggle={handleDarkModeToggle} />
 
   if (isVersionsLoading || !versions) return Loading
   if (isVersionLoading || !version) return Loading
@@ -158,7 +158,7 @@ function Model() {
   }
 
   return (
-    <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
+    <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model' handleDarkModeToggle={handleDarkModeToggle}>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>

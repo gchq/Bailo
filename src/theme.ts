@@ -53,6 +53,6 @@ export const darkTheme = createTheme({
       hover:'#fff',
       focus:'#fff',
       selected:'#fff',
-    }
+    },
   },
 })

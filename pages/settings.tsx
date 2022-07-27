@@ -5,6 +5,7 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 import { useGetCurrentUser } from '../data/user'
+import useTheme from '@mui/styles/useTheme'
 
 function TabPanel({ children, value, index, ...rest }) {
   return (
@@ -27,19 +28,20 @@ function a11yProps(index) {
   }
 }
 
-export default function Settings() {
+export default function Settings({ handleDarkModeToggle } : {handleDarkModeToggle: any}) {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
+  const theme: any = useTheme()
 
   const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)
   }
 
   return (
-    <Wrapper title='Settings' page='settings'>
+    <Wrapper title='Settings' page='settings' handleDarkModeToggle={handleDarkModeToggle}>
       <Box sx={{ bgcolor: 'background.paper' }}>
-        <Tabs value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
+        <Tabs TabIndicatorProps={{ style: { background: theme.palette.secondary.main } }} value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
           <Tab label='Profile' {...a11yProps(0)} />
         </Tabs>
         <TabPanel value={tab} index={0}>
