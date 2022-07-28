@@ -4,6 +4,7 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../theme'
 
 function a11yProps(index: any) {
   return {
@@ -23,7 +24,7 @@ const getTitle = (title: any, index: any) => {
 export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any }) {
   const [value, setValue] = React.useState(0)
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   useEffect(() => {
     if (tabs.length === 1) {

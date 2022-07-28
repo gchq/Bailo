@@ -9,6 +9,7 @@ import { SplitSchema, Step } from '../../types/interfaces'
 
 import FormDesigner from './FormDesigner'
 import FormUpload from './FormUpload'
+import { lightTheme } from '../theme'
 
 export default function Form({
   splitSchema,
@@ -26,7 +27,7 @@ export default function Form({
     setTab(newValue)
   }
 
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   return (
     <>
