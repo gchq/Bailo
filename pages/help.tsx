@@ -35,7 +35,10 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <BugReportIcon sx={{ pt: 2, fontSize: 75, color: theme.palette.primary.main }} />
+                  <BugReportIcon
+                    sx={{ pt: 2, fontSize: 75 }}
+                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                  />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Bug reports
                   </Typography>
@@ -58,7 +61,10 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ArticleIcon sx={{ pt: 2, fontSize: 75, color: theme.palette.primary.main }} />
+                  <ArticleIcon
+                    sx={{ pt: 2, fontSize: 75 }}
+                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                  />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Documentation
                   </Typography>
@@ -80,7 +86,10 @@ export default function Help() {
             <Grid item xs={12} md={4} sm={12}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ContactSupportIcon sx={{ pt: 2, fontSize: 75, color: theme.palette.primary.main }} />
+                  <ContactSupportIcon
+                    sx={{ pt: 2, fontSize: 75 }}
+                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                  />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Get in touch
                   </Typography>

@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles'
-import { red } from '@mui/material/colors'
+import { green, red, yellow } from '@mui/material/colors'
 
 export interface Theme {
   palette: {
@@ -36,14 +36,20 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#fwwt53',
+      main: '#6a6a6a',
       contrastText: '#fff',
     },
     secondary: {
       main: '#f37f58',
     },
     error: {
-      main: red.A400,
+      main: red.A200,
+    },
+    warning: {
+      main: yellow.A700,
+    },
+    success: {
+      main: green.A700,
     },
     background: {
       paper: '#242424',
@@ -53,6 +59,18 @@ export const darkTheme = createTheme({
       hover: '#fff',
       focus: '#fff',
       selected: '#fff',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        outlined: {
+          color: '#fff',
+        },
+        contained: {
+          color: '#fff',
+        },
+      },
     },
   },
 })

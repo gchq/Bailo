@@ -43,10 +43,11 @@ export default function Settings() {
     <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
         <Tabs
-          TabIndicatorProps={{ style: { background: theme.palette.secondary.main } }}
           value={tab}
           onChange={onTabChange}
           sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}
+          textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+          indicatorColor='secondary'
         >
           <Tab label='Profile' {...a11yProps(0)} />
         </Tabs>

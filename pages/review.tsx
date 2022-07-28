@@ -30,6 +30,7 @@ export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
+  const theme: any = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -39,7 +40,12 @@ export default function Review() {
     <Wrapper title='Reviews' page='review'>
       <>
         {!isCurrentUserLoading && (
-          <Tabs indicatorColor='secondary' value={value} onChange={handleChange}>
+          <Tabs
+            indicatorColor='secondary'
+            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+            value={value}
+            onChange={handleChange}
+          >
             <Tab value='user' label='My approvals' />
             <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
           </Tabs>

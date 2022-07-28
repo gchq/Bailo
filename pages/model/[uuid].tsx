@@ -263,7 +263,13 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs indicatorColor='secondary' value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
+          <Tabs
+            indicatorColor='secondary'
+            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+            value={group}
+            onChange={handleGroupChange}
+            aria-label='basic tabs example'
+          >
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab label='Build Logs' value='build' />

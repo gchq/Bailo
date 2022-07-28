@@ -227,6 +227,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                         checked={localStorage.getItem('dark_mode_enabled') === 'true'}
                         onChange={toggleDarkMode}
                         inputProps={{ 'aria-label': 'controlled' }}
+                        color='secondary'
                       />
                     </MenuItem>
                     <Link href='/settings' passHref>
