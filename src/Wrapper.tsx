@@ -89,15 +89,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-export default function Wrapper({
-  title,
-  page,
-  children,
-}: {
-  title: any
-  page: string
-  children?: any
-}) {
+export default function Wrapper({ title, page, children }: { title: any; page: string; children?: any }) {
   const [open, setOpen] = React.useState(false)
   const toggleDrawer = () => {
     setOpen(!open)

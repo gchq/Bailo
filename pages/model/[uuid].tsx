@@ -159,10 +159,7 @@ function Model() {
   }
 
   return (
-    <Wrapper
-      title={`Model: ${version.metadata.highLevelDetails.name}`}
-      page='model'
-    >
+    <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>

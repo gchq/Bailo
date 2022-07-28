@@ -154,10 +154,7 @@ export default function Deployment() {
 
   return (
     <>
-      <Wrapper
-        title={`Deployment: ${deployment.metadata.highLevelDetails.name}`}
-        page='deployment'
-      >
+      <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands

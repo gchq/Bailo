@@ -116,10 +116,7 @@ export default function Deploy() {
   }
 
   return (
-    <Wrapper
-      title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`}
-      page='model'
-    >
+    <Wrapper title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`} page='model'>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           <Box />
