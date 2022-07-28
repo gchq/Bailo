@@ -24,6 +24,7 @@ import MuiLink from '@mui/material/Link'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
+import useTheme from '@mui/styles/useTheme'
 
 import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
@@ -37,7 +38,6 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -46,8 +46,6 @@ type TabOptions = 'overview' | 'compliance' | 'build'
 
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
-
-  const theme: any = useTheme() || lightTheme
 
   const handleButtonClick = () => {
     navigator.clipboard.writeText(line)

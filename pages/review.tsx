@@ -14,6 +14,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Stack from '@mui/material/Stack'
+import useTheme from '@mui/styles/useTheme'
 import { useState } from 'react'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
@@ -23,7 +24,6 @@ import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } fro
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { postEndpoint } from '../data/api'
 import { useGetCurrentUser } from '../data/user'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
 
 export default function Review() {

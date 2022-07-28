@@ -9,9 +9,9 @@ import Button from '@mui/material/Button'
 import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import useTheme from '@mui/styles/useTheme'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { useGetUiConfig } from '../data/uiConfig'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
 
 export default function Help() {

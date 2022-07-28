@@ -31,10 +31,10 @@ export default function MyApp(props: MyAppProps) {
     setMounted(true)
   }, [])
 
-  const handleDarkModeToggle = (event: any) => {
+  const handleDarkModeToggle = React.useCallback((event: any) => {
     localStorage.setItem('dark_mode_enabled', event.target.checked)
     setTheme(localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme)
-  }
+  }, [])
 
   return (
     <CacheProvider value={emotionCache}>

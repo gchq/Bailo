@@ -3,9 +3,9 @@ import Wrapper from 'src/Wrapper'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import useTheme from '@mui/styles/useTheme'
 import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 import { useGetCurrentUser } from '../data/user'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
 
 function TabPanel({ children, value, index, ...rest }) {

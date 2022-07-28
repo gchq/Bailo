@@ -23,6 +23,7 @@ import Favorite from '@mui/icons-material/FavoriteTwoTone'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import useTheme from '@mui/styles/useTheme'
 
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
@@ -48,7 +49,6 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
