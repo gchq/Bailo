@@ -81,7 +81,7 @@ function CodeLine({ line }) {
   )
 }
 
-export default function Deployment({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+export default function Deployment() {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -140,7 +140,7 @@ export default function Deployment({ handleDarkModeToggle }: { handleDarkModeTog
   })
   if (error) return error
 
-  const Loading = <Wrapper title='Loading...' page='deployment' handleDarkModeToggle={handleDarkModeToggle} />
+  const Loading = <Wrapper title='Loading...' page='deployment' />
 
   if (isDeploymentLoading || !deployment) return Loading
   if (isUiConfigLoading || !uiConfig) return Loading
@@ -157,7 +157,6 @@ export default function Deployment({ handleDarkModeToggle }: { handleDarkModeTog
       <Wrapper
         title={`Deployment: ${deployment.metadata.highLevelDetails.name}`}
         page='deployment'
-        handleDarkModeToggle={handleDarkModeToggle}
       >
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>

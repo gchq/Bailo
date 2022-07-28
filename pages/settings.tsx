@@ -29,7 +29,7 @@ function a11yProps(index) {
   }
 }
 
-export default function Settings({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+export default function Settings() {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
@@ -40,7 +40,7 @@ export default function Settings({ handleDarkModeToggle }: { handleDarkModeToggl
   }
 
   return (
-    <Wrapper title='Settings' page='settings' handleDarkModeToggle={handleDarkModeToggle}>
+    <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
         <Tabs
           TabIndicatorProps={{ style: { background: theme.palette.secondary.main } }}

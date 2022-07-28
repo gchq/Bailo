@@ -59,7 +59,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
-function Model({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+function Model() {
   const router = useRouter()
   const { uuid }: { uuid?: string } = router.query
 
@@ -162,7 +162,6 @@ function Model({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
     <Wrapper
       title={`Model: ${version.metadata.highLevelDetails.name}`}
       page='model'
-      handleDarkModeToggle={handleDarkModeToggle}
     >
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

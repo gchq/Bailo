@@ -14,6 +14,8 @@ import '../public/css/fonts.css'
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+export const DarkModeContext: any = React.createContext(null)
+
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
@@ -29,7 +31,7 @@ export default function MyApp(props: MyAppProps) {
     setMounted(true)
   }, [])
 
-  const _handleDarkModeToggle = (event: any) => {
+  const handleDarkModeToggle = (event: any) => {
     localStorage.setItem('dark_mode_enabled', event.target.checked)
     setTheme(localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme)
   }
@@ -44,8 +46,10 @@ export default function MyApp(props: MyAppProps) {
       </Head>
       {mounted && (
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Component {...pageProps} handleDarkModeToggle={_handleDarkModeToggle} />
+          <DarkModeContext.Provider value={handleDarkModeToggle}>
+            <CssBaseline />
+            <Component {...pageProps} handleDarkModeToggle={handleDarkModeToggle} />
+          </DarkModeContext.Provider>
         </ThemeProvider>
       )}
     </CacheProvider>

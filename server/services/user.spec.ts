@@ -27,7 +27,6 @@ describe('test user service', () => {
   })
 
   test('can create test user', async () => {
-    console.log(await UserModel.find())
     const user = await UserModel.findOne({ id: 'user' })
     expect(user).toBeTruthy()
   })

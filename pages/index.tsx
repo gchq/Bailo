@@ -20,7 +20,7 @@ import { Model } from '../types/interfaces'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
 
-export default function ExploreModels({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
@@ -48,7 +48,7 @@ export default function ExploreModels({ handleDarkModeToggle }: { handleDarkMode
   }
 
   return (
-    <Wrapper title='Explore Models' page='marketplace' handleDarkModeToggle={handleDarkModeToggle}>
+    <Wrapper title='Explore Models' page='marketplace'>
       <Paper
         component='form'
         onSubmit={onFilterSubmit}

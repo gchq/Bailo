@@ -39,6 +39,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from './theme'
+import { DarkModeContext } from '../pages/_app'
 
 const drawerWidth: number = 240
 
@@ -92,12 +93,10 @@ export default function Wrapper({
   title,
   page,
   children,
-  handleDarkModeToggle,
 }: {
   title: any
   page: string
   children?: any
-  handleDarkModeToggle?: any
 }) {
   const [open, setOpen] = React.useState(false)
   const toggleDrawer = () => {
@@ -105,6 +104,7 @@ export default function Wrapper({
   }
 
   const theme: any = useTheme() || lightTheme
+  const toggleDarkMode: any = React.useContext(DarkModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
@@ -233,7 +233,7 @@ export default function Wrapper({
                       </ListItemIcon>
                       <Switch
                         checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                        onChange={handleDarkModeToggle}
+                        onChange={toggleDarkMode}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </MenuItem>

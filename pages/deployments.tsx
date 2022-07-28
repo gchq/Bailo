@@ -36,7 +36,7 @@ interface GroupedDeployments {
   [key: string]: Deployment[]
 }
 
-function Deployments({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+function Deployments() {
   const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
@@ -75,7 +75,7 @@ function Deployments({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
   }, [selectedOrder, setOrderedDeployments, isUserDeploymentsError, userDeployments])
 
   return (
-    <Wrapper title='My Deployments' page='deployments' handleDarkModeToggle={handleDarkModeToggle}>
+    <Wrapper title='My Deployments' page='deployments'>
       <Paper sx={{ py: 2, px: 4 }}>
         <Box>
           <Box>

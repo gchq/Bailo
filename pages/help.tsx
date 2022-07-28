@@ -14,7 +14,7 @@ import { useGetUiConfig } from '../data/uiConfig'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
 
-export default function Help({ handleDarkModeToggle }: { handleDarkModeToggle: any }) {
+export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
 
   const theme: any = useTheme() || lightTheme
@@ -25,7 +25,7 @@ export default function Help({ handleDarkModeToggle }: { handleDarkModeToggle: a
   if (error) return error
 
   return (
-    <Wrapper title='Help' page='help' handleDarkModeToggle={handleDarkModeToggle}>
+    <Wrapper title='Help' page='help'>
       {uiConfig && (
         <>
           <Box sx={{ p: 5, textAlign: 'center' }}>
