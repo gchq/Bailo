@@ -1,47 +1,44 @@
 # Python client
 
-
 ## Installation
+
 ---
 
 ### Developers
-
 
 ```
 python3 -m pip install -r requirements.txt
 pre-commit install
 ```
 
-
 ### Users
-
 
 ```
 python3 -m pip install -e .
 ```
 
 > #### Note
-> 
+>
 > You may need to install some additional requirements for [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
+>
 > ```
 > sudo yum install gcc gmp python-devel
 > ```
->
-
 
 ## Authentication
+
 ---
 
 There are three different types of authentication:
 
-
 ### Cognito
+
 ---
 
 You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the project as per the [example.env](./examples/resources/example.env). Parameters should be as follows:
 
 **USERPOOL**
- 
+
 > The Cognito userpool ID
 >
 > Cognito -> user pools -> user pool ID
@@ -64,23 +61,22 @@ You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting
 
 > Your Cognito credentials
 
-
 ### PKI
+
 ---
 
 This example assumes the user will enter the certificate password manually so that the password is not stored on disk.
 
-
 ### Null auth
+
 ---
 
 If authentication is not required you can use MockAuthentication()
 
-
 ## Examples
 
-* [bailo-demo.ipynb](./examples/bailo-demo.ipynb) (no authentication)
+- [bailo-demo.ipynb](./examples/bailo-demo.ipynb) (no authentication)
 
-* [cognito_auth](./examples/cognito_client.py)
+- [cognito_auth](./examples/cognito_client.py)
 
-* [pki_auth](./examples/pki_client.py)
+- [pki_auth](./examples/pki_client.py)

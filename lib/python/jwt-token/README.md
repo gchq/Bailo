@@ -1,13 +1,13 @@
-## Generate a JWT for connecting to BAILO ##
+## Generate a JWT for connecting to BAILO
 
-In order to make REST requests to the API programatically, you'll need to supply a JWT in order for your request to be authenticated. 
+In order to make REST requests to the API programatically, you'll need to supply a JWT in order for your request to be authenticated.
 
 This python function will return a token to use as part of your request.
 
 username = the username of the user object in AWS Cognito
 password = the password of the user object
 app_client_id = the App Client Id (can be found on AWS Cognito [select 'App clients' menu on the left of the Cognito page])
-app_client_secret = the app client secret. This can be found on the same page above. 
+app_client_secret = the app client secret. This can be found on the same page above.
 
 How to use:
 
