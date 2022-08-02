@@ -33,9 +33,8 @@ This image can be built with `docker build -t bailo .` in the root directory. Th
 #### Install Bailo
 
 1. `helm dependency update`
-2. `ts-node --project ../../tsconfig.server.json createSecrets.ts`
-3. `helm install --values ./local.yaml bailo .`
-4. `helm list # list current deployments`
+2. `helm install --values ./local.yaml bailo .`
+3. `helm list # list current deployments`
 
 #### Upgrade Bailo
 

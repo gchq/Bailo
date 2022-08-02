@@ -4,9 +4,30 @@
 
 image:
   repository: bailo
-  tag: "0.1.0"
+  tag: "latest"
   pullPolicy: IfNotPresent
 imagePullSecrets: []
+
+# Instance Settings
+config:
+  s2i:
+    image: seldonio/seldon-core-s2i-python37:1.10.0
+  supportEmail: "support@example.com"
+  documentationLink: "https://example.com/support"
+
+  ui:
+    banner:
+      text: "Banner Text Here"
+      colour: '#00CC00'
+
+  smtp:
+    host: 'example.com'
+    from: 'bailo@example.com'
+
+  schema:
+    script: 'schema-setup-script.sh'
+
+podAnnotations: {}
 
 # Instance scaling
 # ReplicateCount ignored if autoscaling is enabled
@@ -16,18 +37,19 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 
 # Pod Security
 podSecurityContext: {}
   # fsGroup: 2000
 securityContext:
-  capabilities:
-    drop:
-      - ALL
-  readOnlyRootFilesystem: true
+  # capabilities:
+  #   drop:
+  #     - ALL
+  readOnlyRootFilesystem: false
   runAsNonRoot: true
-  runAsUser: 1000
+  # runAsUser: 1002380001
 
 # Networking
 service:
@@ -49,14 +71,14 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
+  limits:
+    cpu: 400m
+    memory: 800Mi
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
@@ -82,8 +104,18 @@ mongodb:
       - bailo
   service:
     port: 27017
-  host: ""
+
   collectionName: bailo
+  persistence:
+    size: 10Gi
+  containerSecurityContext:
+    enabled: false
+  podSecurityContext:
+    enabled: false
+
+  username: 'override_in_local'
+  password: 'override_in_local'
+  host: host
     
 minio:
   enabled: true
@@ -99,6 +131,17 @@ minio:
     ports:
       api: 9000
   useSSL: false
+  persistence:
+    size: 10Gi
+  containerSecurityContext:
+    enabled: false
+  podSecurityContext:
+    enabled: false
+
+openshift:
+  namespace: bailo
+  appPublicRoute: 'openshift-route-url'
+  dockerPushSecretName: 'registry-push-secret'
   
 registry:
   enabled: true
