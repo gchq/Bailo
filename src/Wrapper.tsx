@@ -24,6 +24,7 @@ import MenuList from '@mui/material/MenuList'
 import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
 import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
 import { useGetUiConfig } from '../data/uiConfig'
@@ -217,7 +218,12 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                 <IconButton onClick={userMenuClicked} data-test='showUserMenu'>
                   <UserAvatar username={currentUser.id} size='chip' />
                 </IconButton>
-                <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
+                <Menu
+                  sx={{ mt: '10px', right: 0 }}
+                  anchorEl={anchorEl as HTMLDivElement}
+                  open={actionOpen}
+                  onClose={handleMenuClose}
+                >
                   <MenuList>
                     <MenuItem data-test='toggleDarkMode'>
                       <ListItemIcon>
@@ -318,6 +324,20 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               </ListItem>
             </Link>
             <Divider />
+            <Link href='/docs/api' passHref>
+              <ListItem button selected={page === 'api'}>
+                <ListItemIcon>
+                  {!open ? (
+                    <Tooltip title='API' arrow placement='right'>
+                      <LinkIcon />
+                    </Tooltip>
+                  ) : (
+                    <LinkIcon />
+                  )}
+                </ListItemIcon>
+                <ListItemText primary='Support' />
+              </ListItem>
+            </Link>
             <Link href='/help' passHref>
               <ListItem button selected={page === 'help'}>
                 <ListItemIcon>

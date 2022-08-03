@@ -32,7 +32,7 @@ export default function Help() {
             <Typography variant='h2'>Contact us</Typography>
           </Box>
           <Grid container spacing={4} sx={{ maxWidth: 1000, margin: 'auto', pr: 4 }}>
-            <Grid item xs={12} md={4} sm={12}>
+            <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon
@@ -58,7 +58,7 @@ export default function Help() {
                 </CardActions>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4} sm={12}>
+            <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon
@@ -83,7 +83,7 @@ export default function Help() {
                 </CardActions>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4} sm={12}>
+            <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon
