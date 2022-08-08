@@ -2,6 +2,7 @@ import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
 import { UserDoc } from '../server/models/User'
 import { XYPosition } from 'react-flow-renderer'
+import { boolean } from 'yargs'
 
 export type { VersionDoc as Version } from '../server/models/Version'
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
@@ -141,3 +142,8 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
+
+export interface BuildOptions {
+  rawModelExport: boolean
+  allowGuestDeployments: boolean
+}
