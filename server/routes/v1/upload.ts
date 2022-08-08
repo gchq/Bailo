@@ -2,6 +2,7 @@ import multer from 'multer'
 import config from 'config'
 import { v4 as uuidv4 } from 'uuid'
 import { customAlphabet } from 'nanoid'
+import * as Minio from 'minio'
 
 import { validateSchema } from '../../utils/validateSchema'
 import { normalizeMulterFile } from '../../utils/multer'
@@ -12,7 +13,7 @@ import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 
 import { createVersionRequests } from '../../services/request'
-import { BadReq, Conflict } from '../../utils/result'
+import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { findModelByUuid, createModel } from '../../services/model'
 import { createVersion } from '../../services/version'
 import { findSchemaByRef } from '../../services/schema'
@@ -70,11 +71,23 @@ export const postUpload = [
       }
 
       let metadata
+      let buildOptions
 
       try {
         metadata = JSON.parse(req.body.metadata)
       } catch (e) {
         req.log.warn({ code: 'metadata_invalid_json', metadata: req.body.metadata }, 'Metadata is not valid JSON')
+        return res.status(400).json({
+          message: `Unable to parse schema as JSON`,
+        })
+      }
+
+      try {
+        if (req.body.buildOptions !== undefined) {
+          buildOptions = JSON.parse(req.body.buildOptions)
+        }
+      } catch (e) {
+        req.log.warn({ code: 'buildOptions_invalid_json', buildOptions: req.body.buildOptions }, 'Build options is not valid JSON')
         return res.status(400).json({
           message: `Unable to parse schema as JSON`,
         })
@@ -107,6 +120,7 @@ export const postUpload = [
         version = await createVersion(req.user!, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata: metadata,
+          buildOptions: buildOptions
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -201,6 +215,36 @@ export const postUpload = [
       res.json({
         uuid: model.uuid,
       })
+
+      if (buildOptions.rawModelExport) {
+        try {
+          const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${uuidv4()}`
+          const client = new Minio.Client(config.get('minio'))
+          await client.copyObject(
+            files.binary[0].bucket, 
+            binaryLocation, 
+            `${files.binary[0].bucket}/${files.binary[0].path}`, 
+            new Minio.CopyConditions()
+          )
+          const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${uuidv4()}`
+          await client.copyObject(
+            files.code[0].bucket, 
+            codeLocation, 
+            `${files.code[0].bucket}/${files.code[0].path}`, 
+            new Minio.CopyConditions()
+          )
+
+          version.rawBinaryPath = binaryLocation
+          version.rawCodePath = codeLocation
+          version.save()
+        } catch(e: any) {
+          throw GenericError(
+            {},
+            'Error uploading raw code and binary to Minio',
+            500
+          ) 
+        }
+      }
     })
   },
 ]

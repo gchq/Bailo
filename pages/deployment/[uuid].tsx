@@ -196,7 +196,7 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {tab === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
+          {tab === 'overview' && <DeploymentOverview deployent={deployment} use='DEPLOYMENT' />}
 
           {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 

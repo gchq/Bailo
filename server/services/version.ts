@@ -1,7 +1,7 @@
 import { castArray } from 'lodash'
 import VersionModel from '../models/Version'
 
-import { ModelId } from '../../types/interfaces'
+import { BuildOptions, ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { BadReq, Forbidden } from '../utils/result'
@@ -83,7 +83,8 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 
 interface CreateVersion {
   version: string
-  metadata: any
+  metadata: any,
+  buildOptions: BuildOptions
 }
 
 export async function createVersion(user: UserDoc, data: CreateVersion) {

@@ -158,9 +158,9 @@ export async function buildPython(version: VersionDoc, builderFiles: BuilderFile
   rm('-rf', buildDir)
   rm('-rf', s2iDir)
 
-  await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
-  const removeImageCmd = `img rm ${tag}`
-  await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
+  //await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
+  //const removeImageCmd = `img rm ${tag}`
+  //await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
 
   return tag
 }

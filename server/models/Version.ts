@@ -14,7 +14,10 @@ export interface Version {
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
 
-  buildOptions? : BuildOptions
+  buildOptions?: BuildOptions
+
+  rawBinaryPath?: string
+  rawCodePath?: string
 
   state: any
   logs: Types.Array<LogStatement>
@@ -33,6 +36,9 @@ const VersionSchema = new Schema<Version>(
     version: { type: String, required: true },
 
     metadata: { type: Schema.Types.Mixed },
+
+    rawBinaryPath: { type: String },
+    rawCodePath: { type: String },
 
     buildOptions: { type: Schema.Types.Mixed },
 

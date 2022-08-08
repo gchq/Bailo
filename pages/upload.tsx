@@ -179,12 +179,12 @@ function Upload() {
     const form = new FormData()
 
     data.schemaRef = currentSchema?.reference
-    console.log(splitSchema)
-    //dat.buildOptions = {...currentSchema?.}
+
+    form.append('buildOptions', JSON.stringify(data.buildOptions))
+    delete data.buildOptions
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
