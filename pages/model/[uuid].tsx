@@ -20,7 +20,7 @@ import UploadIcon from '@mui/icons-material/UploadTwoTone'
 import EditIcon from '@mui/icons-material/EditTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import Favorite from '@mui/icons-material/FavoriteTwoTone'
-import DownArrow from '@mui/icons-material/KeyboardArrowDown'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import useTheme from '@mui/styles/useTheme'
@@ -319,12 +319,14 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
                     />
@@ -342,8 +344,9 @@ function Model() {
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
                           <Chip
+                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                             key={filteredVersion.version}
-                            sx={{ backgroundColor: '#f5f5f5', color: '#000000de', mr: 1 }}
                             label={filteredVersion.version}
                           />
                         ))}

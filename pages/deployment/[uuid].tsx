@@ -69,9 +69,11 @@ function CodeLine({ line }) {
           }
         }}
       >
-        ${' '}
+        
         <Tooltip title='Copy to clipboard' arrow>
-          <b>{line}</b>
+          <Box sx={{ backgroundColor: 'whitesmoke', color: '#383838', p: 1, borderRadius: 2 }}>
+          ${' '} <b>{line}</b>
+          </Box>
         </Tooltip>
       </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />

@@ -49,8 +49,9 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
           {user.roles.map((role: any, index: number) => {
             return (
               <Chip
+                color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                 key={'chip-role-' + index}
-                sx={{ mr: 1, backgroundColor: '#f5f5f5', color: '#000000de' }}
                 label={role}
               />
             )

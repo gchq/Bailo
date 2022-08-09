@@ -34,9 +34,13 @@ const ModelOverview = (props: any) => {
                 {version?.metadata?.highLevelDetails?.tags !== undefined &&
                   version?.metadata?.highLevelDetails?.tags.map((tag: any, index: number) => (
                     <Chip
-                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de', m: 0.25 }}
+                      sx={{ 
+                        color: theme.palette.mode === 'light' ? 'white' : 'primary',
+                        backgroundColor:  'primary'
+                      }}
                       key={`chip-${index}`}
                       label={tag}
+                      variant='outlined'
                     />
                   ))}
               </Box>

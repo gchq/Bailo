@@ -155,10 +155,12 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                   </Link>
                   <Stack direction='row' spacing={2}>
                     <Chip
-                      sx={{ backgroundColor: '#f5f5f5', color: '#000000de' }}
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       label={requestObj.approvalType}
                       size='small'
                     />
+                    
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
                         {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}
