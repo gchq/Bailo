@@ -64,30 +64,30 @@ export const darkTheme = createTheme({
   components: {
     MuiMenuItem: {
       styleOverrides: {
-        root: { 
-          "&:hover": {
-            backgroundColor: "#5c5c5c"
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
           },
-        }
-      }
+        },
+      },
     },
     MuiListItem: {
       styleOverrides: {
-        button: { 
-          "&:hover": {
-            backgroundColor: "#5c5c5c"
+        button: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
           },
-        }
-      }
+        },
+      },
     },
     MuiIconButton: {
       styleOverrides: {
         root: {
-        "&:hover": {
-            backgroundColor: "#5c5c5c"
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
           },
-        }
-      }
+        },
+      },
     },
     MuiButton: {
       styleOverrides: {
@@ -96,7 +96,7 @@ export const darkTheme = createTheme({
         },
         contained: {
           color: '#fff',
-        }
+        },
       },
     },
   },

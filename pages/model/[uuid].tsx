@@ -319,13 +319,13 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
                       sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
                       sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
@@ -344,7 +344,7 @@ function Model() {
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
                           <Chip
-                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
                             sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                             key={filteredVersion.version}
                             label={filteredVersion.version}

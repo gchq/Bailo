@@ -239,7 +239,10 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
                     <Link href='/settings' passHref>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
-                          <Settings fontSize='small' sx={{ "&:hover": { color: theme.palette.mode === 'dark' ? '#4c4c4c' : '' } }} />
+                          <Settings
+                            fontSize='small'
+                            sx={{ '&:hover': { color: theme.palette.mode === 'dark' ? '#4c4c4c' : '' } }}
+                          />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                       </MenuItem>

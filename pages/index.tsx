@@ -104,7 +104,7 @@ export default function ExploreModels() {
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary' }
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
                       sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       key={`chip-${tag}`}
                       label={tag}
