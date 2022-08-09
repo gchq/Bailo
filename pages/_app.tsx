@@ -4,7 +4,7 @@ import { AppProps } from 'next/app'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { CacheProvider, EmotionCache } from '@emotion/react'
-import theme from '../src/theme'
+import { lightTheme, darkTheme } from '../src/theme'
 import createEmotionCache from '../src/createEmotionCache'
 
 import '../public/css/terminal.css'
@@ -14,12 +14,28 @@ import '../public/css/fonts.css'
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+export const DarkModeContext: any = React.createContext(null)
+
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const [mounted, setMounted] = React.useState<boolean>(false)
+  const [theme, setTheme] = React.useState<any>(
+    typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme
+  )
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleDarkModeToggle = React.useCallback((event: any) => {
+    localStorage.setItem('dark_mode_enabled', event.target.checked)
+    setTheme(localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme)
+  }, [])
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -28,10 +44,14 @@ export default function MyApp(props: MyAppProps) {
         <meta name='viewport' content='initial-scale=1, width=device-width' />
         <link rel='shortcut icon' href='/favicon.png' />
       </Head>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
+      {mounted && (
+        <ThemeProvider theme={theme}>
+          <DarkModeContext.Provider value={handleDarkModeToggle}>
+            <CssBaseline />
+            <Component {...pageProps} handleDarkModeToggle={handleDarkModeToggle} />
+          </DarkModeContext.Provider>
+        </ThemeProvider>
+      )}
     </CacheProvider>
   )
 }
