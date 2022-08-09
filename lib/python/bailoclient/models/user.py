@@ -1,4 +1,7 @@
+"""Bailo user"""
+
 from .base import BailoBase
 
+
 class User(BailoBase):
-    pass
+    """Bailo user class"""

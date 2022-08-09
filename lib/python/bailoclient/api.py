@@ -1,14 +1,20 @@
+"""Interface for the BAILO API"""
+
 import abc
 from typing import Dict, Optional
 
 import requests
 import requests_pkcs12
 
+from bailoclient.utils.exceptions import NoServerResponseMessage
+
 from .auth import AuthenticationInterface, Pkcs12Authenticator, UnauthorizedException
 from .config import BailoConfig
 
 
 class APIInterface(abc.ABC):
+    """API interface"""
+
     @abc.abstractmethod
     def __init__(self, config: BailoConfig, auth: AuthenticationInterface):
         raise NotImplementedError
@@ -20,11 +26,22 @@ class APIInterface(abc.ABC):
         request_params: Optional[Dict[str, str]],
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make a GET request against the API. This will not do any validation of parameters prior to sending.
+        """Make a GET request against the API.
+           This will not do any validation of parameters prior to sending.
 
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_body (Dict): The full request body as a dict
+            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
+                                                                 to the API. Defaults to None.
+            headers (Optional[Dict], optional): request headers. Defaults to None.
+
+        Raises:
+            NotImplementedError: Abstract method must be implemented
+
+        Returns:
+            Dict[str, str]: A JSON object returned by the API.
+                            Returns an empty dictionary if the request fails.
         """
         raise NotImplementedError
 
@@ -36,12 +53,22 @@ class APIInterface(abc.ABC):
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make a POST request against the API. This will not do any validation of parameters prior to sending.
+        """Make a POST request against the API.
+           This will not do any validation of parameters prior to sending.
 
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        request_body: The full request body as a dict
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_body (Dict): The full request body as a dict
+            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
+                                                                 to the API. Defaults to None.
+            headers (Optional[Dict], optional): request headers. Defaults to None.
+
+        Raises:
+            NotImplementedError: Abstract method must be implemented
+
+        Returns:
+            Dict[str, str]: A JSON object returned by the API.
+                            Returns an empty dictionary if the request fails.
         """
         raise NotImplementedError
 
@@ -53,17 +80,29 @@ class APIInterface(abc.ABC):
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make a POST request against the API. This will not do any validation of parameters prior to sending.
+        """Make a PUT request against the API.
+           This will not do any validation of parameters prior to sending.
 
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        request_body: The full request body as a dict
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_body (Dict): The full request body as a dict
+            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
+                                                                 to the API. Defaults to None.
+            headers (Optional[Dict], optional): request headers. Defaults to None.
+
+        Raises:
+            NotImplementedError: Abstract method must be implemented
+
+        Returns:
+            Dict[str, str]: A JSON object returned by the API.
+                            Returns an empty dictionary if the request fails.
         """
         raise NotImplementedError
 
 
 class AuthorisedAPI(APIInterface):
+    """Authorised API interface"""
+
     def __init__(self, config: BailoConfig, auth: AuthenticationInterface):
         self.config = config
         self.auth = auth
@@ -73,14 +112,15 @@ class AuthorisedAPI(APIInterface):
     def _form_url(self, request_path: str) -> str:
         if request_path.startswith("/"):
             return f"{self.config.api.url}{request_path}"
+
         return f"{self.config.api.url}/{request_path}"
 
     def _get_headers(self, input_headers: Optional[Dict] = None) -> Dict[str, str]:
         if input_headers:
             input_headers.update(self.auth.get_authorisation_headers())
             return input_headers
-        else:
-            return {**self.auth.get_authorisation_headers()}
+
+        return {**self.auth.get_authorisation_headers()}
 
     def get(
         self,
@@ -88,18 +128,28 @@ class AuthorisedAPI(APIInterface):
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make an authorised GET request against the Bailo API. This will not do any validation of parameters prior to sending.
+        """Make a GET request against the API.
+           This will not do any validation of parameters prior to sending.
 
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_params (Optional[Dict[str, str]]): Any query parameters to be passed to the API
+            headers (Optional[Dict], optional): A JSON object returned by the API.
+                                                Returns an empty dictionary if the request fails.
+                                                Defaults to None.
+
+        Raises:
+            UnauthorizedException: Unable to access the server
+
+        Returns:
+            Dict[str, str]: Response JSON from the server
         """
 
         url = self._form_url(request_path)
         headers = self._get_headers(headers)
 
         response = None
-        if type(self.auth) == Pkcs12Authenticator:
+        if isinstance(self.auth, Pkcs12Authenticator):
             response = requests_pkcs12.get(
                 url,
                 pkcs12_filename=self.config.pki.pkcs12_filename,
@@ -125,7 +175,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except:
+            except NoServerResponseMessage:
                 response.raise_for_status()
 
         response.raise_for_status()
@@ -139,18 +189,27 @@ class AuthorisedAPI(APIInterface):
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make a POST request against the API. This will not do any validation of parameters prior to sending.
+        """Make a POST request against the API.
+           This will not do any validation of parameters prior to sending.
 
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        request_body: The full request body as a dict
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_params (Optional[Dict[str, str]]): Any query parameters to be passed to the API
+            headers (Optional[Dict], optional): A JSON object returned by the API.
+                                                Returns an empty dictionary if the request fails.
+                                                Defaults to None.
+
+        Raises:
+            UnauthorizedException: Unable to access the server
+
+        Returns:
+            Dict[str, str]: Response JSON from the server
         """
         url = self._form_url(request_path)
         headers = self._get_headers(headers)
 
         response = None
-        if type(self.auth) == Pkcs12Authenticator:
+        if isinstance(self.auth, Pkcs12Authenticator):
             response = requests_pkcs12.get(
                 url,
                 pkcs12_filename=self.config.pki.pkcs12_filename,
@@ -178,7 +237,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except:
+            except NoServerResponseMessage:
                 response.raise_for_status()
 
         response.raise_for_status()
@@ -192,19 +251,28 @@ class AuthorisedAPI(APIInterface):
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
     ) -> Dict[str, str]:
-        """Make a PUT request against the API. This will not do any validation of parameters prior to sending.
-        request_path: The requested path relative to the API (e.g. /model/summary)
-        request_params: Any query parameters to be passed to the API
-        request_body: The full request body as a dict
-        files: List of tuples in request library's format of (form_name_field, file_info)
-        return: A JSON object returned by the API. Returns an empty dictionary if the request fails
+        """Make a PUT request against the API.
+           This will not do any validation of parameters prior to sending.
+
+        Args:
+            request_path (str): The requested path relative to the API (e.g. /model/summary)
+            request_params (Optional[Dict[str, str]]): Any query parameters to be passed to the API
+            headers (Optional[Dict], optional): A JSON object returned by the API.
+                                                Returns an empty dictionary if the request fails.
+                                                Defaults to None.
+
+        Raises:
+            UnauthorizedException: Unable to access the server
+
+        Returns:
+            Dict[str, str]: Response JSON from the server
         """
 
         url = self._form_url(request_path)
         headers = self._get_headers(headers)
 
         response = None
-        if type(self.auth) == Pkcs12Authenticator:
+        if isinstance(self.auth, Pkcs12Authenticator):
             response = requests_pkcs12.get(
                 url,
                 pkcs12_filename=self.config.pki.pkcs12_filename,
@@ -232,7 +300,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except:
+            except NoServerResponseMessage:
                 response.raise_for_status()
 
         response.raise_for_status()

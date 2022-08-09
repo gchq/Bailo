@@ -22,8 +22,18 @@ python3 -m pip install -e .
 > You may need to install some additional requirements for [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
 >
 > ```
-> sudo yum install gcc gmp python-devel
+> sudo yum install gcc gmp python3-devel
 > ```
+
+## Environment
+
+You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the project as per the [example.env](./examples/resources/example.env) with the following parameters:
+
+**AWS_GATEWAY**
+
+> TRUE if you are running on AWS as there is a size limit to the data upload
+
+Add the authentication credentials if you are using Cognito for authentication.
 
 ## Authentication
 
@@ -35,7 +45,7 @@ There are three different types of authentication:
 
 ---
 
-You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the project as per the [example.env](./examples/resources/example.env). Parameters should be as follows:
+You will need to add the additional authentication credentials in your .env file. Parameters should be as follows:
 
 **USERPOOL**
 

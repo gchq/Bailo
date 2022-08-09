@@ -1,8 +1,9 @@
+"""Example Bailo Client usage with PKI authentication"""
+
 import datetime
 import getpass
 import json
 import logging
-import os
 import sys
 
 from bailoclient import create_pki_client
@@ -29,11 +30,11 @@ client.connect()
 
 # Get all models and output their ids
 models = client.get_models()
-model_ids = [m._id for m in models]
+model_uuids = [m.uuid for m in models]
 
 ### Get and print a model card #####
-# Grab a model card by id
-model_card = client.get_model_card(model_id=model_ids[0])
+# Grab a model card by uuid
+model_card = client.get_model_card(model_uuid=model_uuids[0])
 
 users = client.get_users()
 user = client.get_user_by_name("user")
@@ -61,9 +62,9 @@ fields = dir(model_card)
 # Tab auto completion works in iPython/Jupyter for fields (and nested fields)
 """"
 model_card.highLevelDetails.
-                                      internallyCreated      name                  
+                                      internallyCreated      name
                                       modelInASentence       securityClassification
-                                      modelOverview          tags                  
+                                      modelOverview          tags
 """
 ## Update a single field
 now = datetime.datetime.now()
@@ -98,10 +99,6 @@ uploaded_model = client.upload_model(
 )
 
 print(f"Created new model: {uploaded_model}")
-
-# You can also grab and inspect the model schema used for validation:
-schema = client.get_model_schema(model_uuid)
-
 
 # You can also grab and inspect the model schema used for validation:
 schema = client.get_model_schema(model_uuid)

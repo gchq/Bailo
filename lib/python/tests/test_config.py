@@ -9,9 +9,9 @@ def simple_config():
 
     return BailoConfig(
         cognito=CognitoConfig(
-            user_pool_id="example_user_pool",
-            client_id="example_client_id",
-            client_secret="example_client_secret",
+            user_pool_id="a4985vnqw094tn4itbjmpq0e598uytn[qv30957u",
+            client_id="pv95n76q5q3b698qn354096b8uQ£%B^$%^",
+            client_secret="4qb4359068nrjtyvmne5pouybe5YNQ$£uye6bvu 6",
             region="eu-west-2",
         ),
         api=APIConfig(url="https://www.example.com/api", ca_verify=False),

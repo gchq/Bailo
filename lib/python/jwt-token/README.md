@@ -16,3 +16,5 @@ python3 generate_jwt.py <username> <password> <app_client_id> <app_client_secret
 ```
 
 Please note that this functionality is a temporary solution to help provide tokens in order for programatic requests to the BAILO API.
+
+Currently, the Gateway used to connect to BAILO is only directing traffic to the mlops-dev cluster.

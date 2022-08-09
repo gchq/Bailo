@@ -1,2 +1,4 @@
-from .user import User
+"""Models"""
+
 from .model import Model
+from .user import User
