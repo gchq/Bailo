@@ -62,6 +62,33 @@ export const darkTheme = createTheme({
     },
   },
   components: {
+    MuiMenuItem: {
+      styleOverrides: {
+        root: { 
+          "&:hover": {
+            backgroundColor: "#5c5c5c"
+          },
+        }
+      }
+    },
+    MuiListItem: {
+      styleOverrides: {
+        button: { 
+          "&:hover": {
+            backgroundColor: "#5c5c5c"
+          },
+        }
+      }
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+        "&:hover": {
+            backgroundColor: "#5c5c5c"
+          },
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         outlined: {
@@ -69,7 +96,7 @@ export const darkTheme = createTheme({
         },
         contained: {
           color: '#fff',
-        },
+        }
       },
     },
   },
