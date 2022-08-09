@@ -1,0 +1,15 @@
+{
+  "schemaRef": "/Minimal/General/v10",
+  "highLevelDetails": {
+    "tags": ["Test"],
+    "name": "Minimal Model for Testing",
+    "modelInASentence": "This \"model\" reverses its input.",
+    "modelOverview": "This \"model\" reverses its input. It is a tiny model for testing Bailo functionality.",
+    "modelCardVersion": "1"
+  },
+  "contacts": {
+    "uploader": "user",
+    "reviewer": "user",
+    "manager": "user"
+  }
+}
