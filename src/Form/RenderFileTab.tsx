@@ -49,7 +49,7 @@ export default function RenderFileTab({
         <Box sx={{ textAlign: 'center' }}>
           <label htmlFor={codeId}>
             <Typography sx={{ p: 1 }} variant='h5'>
-              Uploade a code file (.zip)
+              Upload a code file (.zip)
             </Typography>
             <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept={'.zip'} />
             <Button variant='outlined' component='span'>
