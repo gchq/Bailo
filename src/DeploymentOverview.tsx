@@ -3,11 +3,11 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import MetadataDisplay from './MetadataDisplay'
 import useTheme from '@mui/styles/useTheme'
-import Divider from '@mui/material/Divider'
+import { lightTheme } from './theme'
 
 const DeploymentOverview = (props: any) => {
-  const { deployent } = props
-  const theme: any = useTheme()
+  const { deployment } = props
+  const theme: any = useTheme() || lightTheme
 
   return (
     <>
@@ -16,30 +16,20 @@ const DeploymentOverview = (props: any) => {
           <Box sx={{ backgroundColor: theme.palette.primary.main, color: 'white', borderRadius: 2 }}>
             <Box sx={{ p: 2 }}>
               <Typography variant='h6'>Deployment name</Typography>
-              <Typography variant='body1'>{deployent.metadata.highLevelDetails.name}</Typography>
+              <Typography variant='body1'>{deployment.metadata.highLevelDetails.name}</Typography>
             </Box>
             <Box sx={{ p: 2 }}>
               <Typography variant='h6'>Owner</Typography>
-              <Typography variant='body1'>{deployent.metadata.contacts.requester}</Typography>
+              <Typography variant='body1'>{deployment.metadata.contacts.requester}</Typography>
             </Box>
             <Box sx={{ p: 2 }}>
               <Typography variant='h6'>Point of Contact</Typography>
-              <Typography variant='body1'>{deployent.metadata.contacts.secondPOC}</Typography>
+              <Typography variant='body1'>{deployment.metadata.contacts.secondPOC}</Typography>
             </Box>
           </Box>
-          {console.log(deployent)}
-          {deployent.buildOptions?.rawModelExport &&
-            <>
-              <Divider />
-              <Box sx={{ p: 2 }}>
-                <Typography variant='h6'>Point of Contact</Typography>
-                <Typography variant='body1'>{deployent.metadata.contacts.secondPOC}</Typography>
-              </Box>
-            </>
-          }
         </Grid>
         <Grid item xs={12} sm={8}>
-          <MetadataDisplay item={deployent.metadata} tabsDisplaySequentially={true} use={'DEPLOYMENT'} />
+          <MetadataDisplay item={deployment.metadata} tabsDisplaySequentially={true} use={'DEPLOYMENT'} />
         </Grid>
       </Grid>
     </>

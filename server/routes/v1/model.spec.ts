@@ -67,7 +67,6 @@ describe('test model routes', () => {
   })
 
   test('that we can fetch a specific version for a model', async () => {
-    console.log(await ModelModel.find())
     const res = await authenticatedGetRequest(`/api/v1/model/${modelUuid}/version/${'1'}`)
     validateTestRequest(res)
     expect(res.body).not.toBe(undefined)

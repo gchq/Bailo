@@ -18,6 +18,8 @@ import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
+import RenderBasicBuildOptionsTab from '@/src/Form/RenderBasicBuildOptionsTab'
+import RenderBuildOptionsTab from '@/src/Form/RenderBuildOptionsTab'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -88,6 +90,27 @@ function Upload() {
     steps.push(
       createStep({
         schema: {
+          title: 'Build Options',
+        },
+        state: {
+          rawModelExport: false,
+          allowGuestDeployments: false
+        },
+        schemaRef: cModel.schemaRef,
+
+        type: 'Data',
+        index: steps.length,
+        section: 'buildOptions',
+
+        render: RenderBuildOptionsTab,
+        renderBasic: RenderBasicBuildOptionsTab,
+        isComplete: () => true,
+      })
+    )
+
+    steps.push(
+      createStep({
+        schema: {
           title: 'Submission',
         },
         state: {},
@@ -140,6 +163,9 @@ function Upload() {
     }
 
     data.schemaRef = model?.schemaRef
+
+    form.append('buildOptions', JSON.stringify(data.buildOptions))
+    delete data.buildOptions
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)

@@ -3,8 +3,10 @@ import Wrapper from 'src/Wrapper'
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import useTheme from '@mui/styles/useTheme'
 import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 import { useGetCurrentUser } from '../data/user'
+import { lightTheme } from '../src/theme'
 
 function TabPanel({ children, value, index, ...rest }) {
   return (
@@ -31,6 +33,7 @@ export default function Settings() {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
+  const theme: any = useTheme() || lightTheme
 
   const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)
@@ -39,7 +42,13 @@ export default function Settings() {
   return (
     <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
-        <Tabs value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={tab}
+          onChange={onTabChange}
+          sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}
+          textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+          indicatorColor='secondary'
+        >
           <Tab label='Profile' {...a11yProps(0)} />
         </Tabs>
         <TabPanel value={tab} index={0}>

@@ -4,10 +4,11 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import MetadataDisplay from './MetadataDisplay'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../src/theme'
 
 const ModelOverview = (props: any) => {
   const { version } = props
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   return (
     <>
@@ -32,7 +33,15 @@ const ModelOverview = (props: any) => {
               >
                 {version?.metadata?.highLevelDetails?.tags !== undefined &&
                   version?.metadata?.highLevelDetails?.tags.map((tag: any, index: number) => (
-                    <Chip sx={{ color: 'white', m: 0.25 }} key={`chip-${index}`} label={tag} />
+                    <Chip
+                      sx={{
+                        color: theme.palette.mode === 'light' ? 'white' : 'primary',
+                        backgroundColor: 'primary',
+                      }}
+                      key={`chip-${index}`}
+                      label={tag}
+                      variant='outlined'
+                    />
                   ))}
               </Box>
             </Box>
