@@ -16,13 +16,14 @@ import Stack from '@mui/material/Stack'
 import MuiLink from '@mui/material/Link'
 import Snackbar from '@mui/material/Snackbar'
 import copy from 'copy-to-clipboard'
-import UploadIcon from '@mui/icons-material/Upload'
-import EditIcon from '@mui/icons-material/Edit'
-import PostAddIcon from '@mui/icons-material/PostAdd'
-import Favorite from '@mui/icons-material/Favorite'
-import DownArrow from '@mui/icons-material/KeyboardArrowDown'
-import UpArrow from '@mui/icons-material/KeyboardArrowUp'
-import RestartAlt from '@mui/icons-material/RestartAlt'
+import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import EditIcon from '@mui/icons-material/EditTwoTone'
+import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
+import Favorite from '@mui/icons-material/FavoriteTwoTone'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import useTheme from '@mui/styles/useTheme'
 
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
@@ -48,6 +49,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
+import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -91,6 +93,7 @@ function Model() {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
+  const theme: any = useTheme() || lightTheme
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
@@ -280,7 +283,13 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs indicatorColor='secondary' value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
+          <Tabs
+            indicatorColor='secondary'
+            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+            value={group}
+            onChange={handleGroupChange}
+            aria-label='basic tabs example'
+          >
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab label='Build Logs' value='build' />
@@ -316,7 +325,10 @@ function Model() {
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
                 <Link href={`/deployment/${deployment.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
                     {deployment.metadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -327,12 +339,14 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      sx={{ mr: 1 }}
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      sx={{ mr: 1 }}
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
                     />
@@ -349,7 +363,12 @@ function Model() {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip key={filteredVersion.version} sx={{ mr: 1 }} label={filteredVersion.version} />
+                          <Chip
+                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                            key={filteredVersion.version}
+                            label={filteredVersion.version}
+                          />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${

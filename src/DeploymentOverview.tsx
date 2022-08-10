@@ -3,10 +3,11 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import MetadataDisplay from './MetadataDisplay'
 import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from './theme'
 
 const DeploymentOverview = (props: any) => {
   const { version } = props
-  const theme: any = useTheme()
+  const theme: any = useTheme() || lightTheme
 
   return (
     <>

@@ -5,7 +5,7 @@
 import DeploymentOverview from './DeploymentOverview'
 import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
-import theme from './theme'
+import { lightTheme } from './theme'
 
 describe('DeploymentOverview', () => {
   const version = {
@@ -22,7 +22,7 @@ describe('DeploymentOverview', () => {
 
   it('renders a DeploymentOverview component', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <DeploymentOverview version={version} />
       </ThemeProvider>
     )
