@@ -1,0 +1,15 @@
+{
+  "schemaRef": "/Minimal/General/v10",
+  "highLevelDetails": {
+    "tags": ["Test"],
+    "name": "Minimal Model for Testing",
+    "modelInASentence": "This is a sentence",
+    "modelOverview": "This is the model overview",
+    "modelCardVersion": "101"
+  },
+  "contacts": {
+    "uploader": "user",
+    "reviewer": "user",
+    "manager": "user"
+  }
+}

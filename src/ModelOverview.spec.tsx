@@ -5,7 +5,7 @@
 import ModelOverview from './ModelOverview'
 import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
-import theme from './theme'
+import { lightTheme } from './theme'
 
 describe('ModelOverview', () => {
   const version: any = {
@@ -25,7 +25,7 @@ describe('ModelOverview', () => {
 
   it('renders a ModelOverview component', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ModelOverview version={version} />
       </ThemeProvider>
     )

@@ -8,10 +8,14 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import Tooltip from '@mui/material/Tooltip'
+import useTheme from '@mui/styles/useTheme'
+import { lightTheme } from '../theme'
 
 const SettingsProfileTab = ({ user }: { user: any }) => {
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
+
+  const theme: any = useTheme() || lightTheme
 
   const regenerateToken = async () => {
     const { token } = await fetch('/api/v1/user/token', {
@@ -43,7 +47,14 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
         <Divider sx={{ pt: 1, mb: 1 }} />
         <Stack direction='row' sx={{ p: 1 }}>
           {user.roles.map((role: any, index: number) => {
-            return <Chip key={'chip-role-' + index} sx={{ mr: 1 }} label={role} />
+            return (
+              <Chip
+                color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                key={'chip-role-' + index}
+                label={role}
+              />
+            )
           })}
         </Stack>
       </Box>
@@ -56,7 +67,7 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
           <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='showTokenButton'>
             Regenerate Token
           </Button>
-          <Box sx={{ backgroundColor: '#f5f5f5', pr: 2, pl: 2, display: 'flex', mr: 1 }}>
+          <Box sx={{ backgroundColor: '#f5f5f5', color: '#000000de', pr: 2, pl: 2, display: 'flex', mr: 1 }}>
             <Box component={Stack} direction='column' justifyContent='center'>
               <Typography variant='body1' data-test='dockerPassword'>
                 {displayToken ? displayedToken : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}

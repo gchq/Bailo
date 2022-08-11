@@ -5,12 +5,12 @@
 import Wrapper from './Wrapper'
 import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
-import theme from './theme'
+import { lightTheme } from './theme'
 
 describe('Wrapper', () => {
   it('renders a Wrapper component', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <Wrapper title='marketplace' page='/' />
       </ThemeProvider>
     )
