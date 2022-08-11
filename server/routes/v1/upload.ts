@@ -87,7 +87,10 @@ export const postUpload = [
           buildOptions = JSON.parse(req.body.buildOptions)
         }
       } catch (e) {
-        req.log.warn({ code: 'buildOptions_invalid_json', buildOptions: req.body.buildOptions }, 'Build options is not valid JSON')
+        req.log.warn(
+          { code: 'buildOptions_invalid_json', buildOptions: req.body.buildOptions },
+          'Build options is not valid JSON'
+        )
         return res.status(400).json({
           message: `Unable to parse schema as JSON`,
         })
@@ -120,7 +123,7 @@ export const postUpload = [
         version = await createVersion(req.user!, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata: metadata,
-          buildOptions: buildOptions
+          buildOptions: buildOptions,
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -221,28 +224,24 @@ export const postUpload = [
           const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${uuidv4()}`
           const client = new Minio.Client(config.get('minio'))
           await client.copyObject(
-            files.binary[0].bucket, 
-            binaryLocation, 
-            `${files.binary[0].bucket}/${files.binary[0].path}`, 
+            files.binary[0].bucket,
+            binaryLocation,
+            `${files.binary[0].bucket}/${files.binary[0].path}`,
             new Minio.CopyConditions()
           )
           const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${uuidv4()}`
           await client.copyObject(
-            files.code[0].bucket, 
-            codeLocation, 
-            `${files.code[0].bucket}/${files.code[0].path}`, 
+            files.code[0].bucket,
+            codeLocation,
+            `${files.code[0].bucket}/${files.code[0].path}`,
             new Minio.CopyConditions()
           )
 
           version.rawBinaryPath = binaryLocation
           version.rawCodePath = codeLocation
           version.save()
-        } catch(e: any) {
-          throw GenericError(
-            {},
-            'Error uploading raw code and binary to Minio',
-            500
-          ) 
+        } catch (e: any) {
+          throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
         }
       }
     })

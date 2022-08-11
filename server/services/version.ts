@@ -83,7 +83,7 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 
 interface CreateVersion {
   version: string
-  metadata: any,
+  metadata: any
   buildOptions: BuildOptions
 }
 

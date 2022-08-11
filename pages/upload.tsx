@@ -113,7 +113,7 @@ function Upload() {
         },
         state: {
           rawModelExport: false,
-          allowGuestDeployments: false
+          allowGuestDeployments: false,
         },
         schemaRef: reference,
 

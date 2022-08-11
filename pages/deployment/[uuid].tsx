@@ -39,7 +39,7 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
 import { lightTheme } from '../../src/theme'
-import RawModelExportList from '@/src/RawModelExportList'
+import RawModelExportList from '../../src/RawModelExportList'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 

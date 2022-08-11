@@ -18,8 +18,8 @@ import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
-import RenderBasicBuildOptionsTab from '@/src/Form/RenderBasicBuildOptionsTab'
-import RenderBuildOptionsTab from '@/src/Form/RenderBuildOptionsTab'
+import RenderBasicBuildOptionsTab from '../../../src/Form/RenderBasicBuildOptionsTab'
+import RenderBuildOptionsTab from '../../../src/Form/RenderBuildOptionsTab'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -94,7 +94,7 @@ function Upload() {
         },
         state: {
           rawModelExport: false,
-          allowGuestDeployments: false
+          allowGuestDeployments: false,
         },
         schemaRef: cModel.schemaRef,
 

@@ -97,6 +97,12 @@ export const darkTheme = createTheme({
         contained: {
           color: '#fff',
         },
+        text: {
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
       },
     },
   },
