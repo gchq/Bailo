@@ -215,21 +215,13 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-<<<<<<< HEAD
-          {tab === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
-=======
-          {group === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
->>>>>>> main
+          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-<<<<<<< HEAD
-          {tab === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
-
-          {tab === 'exports' && <RawModelExportList deployment={deployment} />}
-=======
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
->>>>>>> main
+
+          {group === 'exports' && <RawModelExportList deployment={deployment} />}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
