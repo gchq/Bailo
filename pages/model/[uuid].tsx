@@ -55,13 +55,26 @@ const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
 
+function isTabOption(value: string): value is TabOptions {
+  switch (value) {
+    case 'overview':
+    case 'compliance':
+    case 'build':
+    case 'deployments':
+    case 'settings':
+      return true
+    default:
+      return false
+  }
+}
+
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
 function Model() {
   const router = useRouter()
-  const { uuid }: { uuid?: string } = router.query
+  const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const deploymentVersionsDisplayLimit = 5
 
@@ -85,6 +98,7 @@ function Model() {
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
     mutateVersion()
+    router.push(`/model/${uuid}?tab=${newValue}`)
   }
 
   const requestDeployment = () => {
@@ -99,6 +113,12 @@ function Model() {
   const handleCopyModelCardSnackbarClose = () => {
     setCopyModelCardSnackbarOpen(false)
   }
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (version) {
