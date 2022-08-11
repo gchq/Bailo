@@ -45,6 +45,10 @@ const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'settings' | 'exports'
 
+function isTabOption(value: string): value is TabOptions {
+  return ['overview', 'compliance', 'build', 'exports', 'settings'].includes(value)
+}
+
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
 
@@ -83,9 +87,9 @@ function CodeLine({ line }) {
 
 export default function Deployment() {
   const router = useRouter()
-  const { uuid }: { uuid?: string } = router.query
+  const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
-  const [tab, setTab] = useState<TabOptions>('overview')
+  const [group, setGroup] = useState<TabOptions>('overview')
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
@@ -106,8 +110,15 @@ export default function Deployment() {
   }, [deployment])
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
-    setTab(newValue)
+    setGroup(newValue)
+    router.push(`/deployment/${uuid}?tab=${newValue}`)
   }
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (deployment) {
@@ -191,7 +202,7 @@ export default function Deployment() {
             <Tabs
               textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
               indicatorColor='secondary'
-              value={tab}
+              value={group}
               onChange={handleTabChange}
               aria-label='basic tabs example'
             >
@@ -204,13 +215,21 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
+<<<<<<< HEAD
           {tab === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
+=======
+          {group === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
+>>>>>>> main
 
-          {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+          {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
+<<<<<<< HEAD
           {tab === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
 
           {tab === 'exports' && <RawModelExportList deployment={deployment} />}
+=======
+          {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+>>>>>>> main
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
