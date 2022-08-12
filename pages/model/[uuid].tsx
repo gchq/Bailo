@@ -50,6 +50,7 @@ import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import { lightTheme } from '../../src/theme'
+import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -176,6 +177,10 @@ function Model() {
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
+  }
+
+  const onDelete = () => {
+    //open the confirm dialogue
   }
 
   return (
@@ -412,7 +417,7 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error'>
+            <Button variant='contained' color='error' onClick={onDelete}>
               Delete Model
             </Button>
           </>
