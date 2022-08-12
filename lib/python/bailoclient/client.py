@@ -485,7 +485,9 @@ class Client:
             str: UUID of the updated model
         """
 
-        self._validate_uploads(model_card, binary_file, code_file)
+        self._validate_uploads(
+            card=model_card, binary_file=binary_file, code_file=code_file
+        )
 
         if not model_version:
             model_version = self._increment_version(model_card["uuid"])
