@@ -169,6 +169,17 @@ class Client:
         logger.warning("User with display name %s not found", name)
         return None
 
+    def __model(self, model: dict) -> Model:
+        """Create Model with schema
+
+        Args:
+            model (dict): Model data returned from API
+
+        Returns:
+            Model: Model class object
+        """
+        return Model(model, _schema=self.get_model_schema(model["uuid"]))
+
     @handle_reconnect
     def get_models(
         self,
@@ -184,8 +195,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=all&filter={filter_str}")["models"]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(f"/models?type=all&filter={filter_str}")[
+                "models"
+            ]
         ]
 
     @handle_reconnect
@@ -203,10 +216,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=favourites&filter={filter_str}")[
-                "models"
-            ]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(
+                f"/models?type=favourites&filter={filter_str}"
+            )["models"]
         ]
 
     @handle_reconnect
@@ -224,8 +237,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=user&filter={filter_str}")["models"]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(
+                f"/models?type=user&filter={filter_str}"
+            )["models"]
         ]
 
     @handle_reconnect
@@ -463,5 +478,5 @@ class Client:
         payload = self._generate_payload(metadata, binary_file, code_file)
 
         return self._post_model(
-            data=payload, mode="newVersion", model_uuid=model_card["uuid"]
+            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
         )
