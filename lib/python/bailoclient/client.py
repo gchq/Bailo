@@ -8,7 +8,7 @@ import os
 from functools import wraps
 from typing import Callable, Union
 
-from requests_toolbelt.multipart import encoder
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 from .api import AuthorisedAPI
 from .auth import (
@@ -313,18 +313,14 @@ class Client:
 
     def _post_model(
         self,
-        metadata: dict,
-        binary_file: str,
-        code_file: str,
+        model_data,
         mode: str = "newModel",
         model_uuid: str = None,
     ):
         """Post a new model or an updated model
 
         Args:
-            metadata (dict): Model metadata
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
+            model_data (MultipartEncoder): encoded payload for uploading
             mode (str, optional): newModel or newVersion. Defaults to "newModel".
             model_uuid (str, optional): Model UUID if updating an existing model. Defaults to None.
 
@@ -334,6 +330,42 @@ class Client:
         Returns:
             str: Model UUID
         """
+
+        if mode == "newVersion":
+            return self.api.post(
+                f"/model?mode={mode}&modelUuid={model_uuid}",
+                request_body=model_data,
+                headers={"Content-Type": model_data.content_type},
+            )
+
+        if mode == "newModel":
+            return self.api.post(
+                f"/model?mode={mode}",
+                request_body=model_data,
+                headers={"Content-Type": model_data.content_type},
+            )
+
+        raise ValueError("Invalid mode - must be either newVersion or newModel")
+
+    def _generate_payload(
+        self,
+        metadata: dict,
+        binary_file: str,
+        code_file: str,
+    ) -> MultipartEncoder:
+        """Generate payload for posting a new or updated model
+
+        Args:
+            metadata (dict): Model metadata
+            binary_file (str): Path to model binary file
+            code_file (str): Path to model code file
+
+        Raises:
+            ValueError: Payload is too large for the AWS gateway (if using)
+
+        Returns:
+            MultipartEncoder: Payload of model data
+        """
         payloads = [("metadata", metadata)]
 
         for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
@@ -341,28 +373,26 @@ class Client:
             with open(full_filename, "rb") as file:
                 payloads.append((tag, (fname, file.read(), mtype)))
 
-        data = encoder.MultipartEncoder(payloads)
+        data = MultipartEncoder(payloads)
 
-        if os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000:
+        if self._too_large_for_gateway(data):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
 
-        if mode == "newVersion":
-            return self.api.post(
-                f"/model?mode={mode}&modelUuid={model_uuid}",
-                request_body=data,
-                headers={"Content-Type": data.content_type},
-            )
+        return data
 
-        if mode == "newModel":
-            return self.api.post(
-                f"/model?mode={mode}",
-                request_body=data,
-                headers={"Content-Type": data.content_type},
-            )
+    @staticmethod
+    def _too_large_for_gateway(data) -> bool:
+        """If there is an AWS gateway, check that data is not too large
 
-        raise ValueError("Invalid mode - must be either newVersion or newModel")
+        Args:
+            data (MultipartEncoder): the data to be uploaded
+
+        Returns:
+            bool: True if data is too large to be uploaded
+        """
+        return os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000
 
     @handle_reconnect
     def upload_model(self, metadata: dict, binary_file: str, code_file: str):
@@ -383,9 +413,11 @@ class Client:
             binary_file=binary_file, code_file=code_file, metadata=metadata
         )
 
-        return self._post_model(metadata_json, binary_file, code_file)
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
 
-    def __increment_version(self, model_uuid: str):
+        return self._post_model(payload)
+
+    def _increment_version(self, model_uuid: str):
         """Increment the latest version of a model by 1
 
         Args:
@@ -421,18 +453,15 @@ class Client:
             str: UUID of the updated model
         """
 
-        new_model_version = self.__increment_version(model_card["uuid"])
-
         self._validate_uploads(model_card, binary_file, code_file)
 
+        new_model_version = self._increment_version(model_card["uuid"])
         metadata = model_card["currentMetadata"]
         metadata.highLevelDetails.modelCardVersion = new_model_version
         metadata = metadata.toJSON()
 
+        payload = self._generate_payload(metadata, binary_file, code_file)
+
         return self._post_model(
-            metadata,
-            binary_file,
-            code_file,
-            mode="newVersion",
-            model_uuid=model_card["uuid"],
+            data=payload, mode="newVersion", model_uuid=model_card["uuid"]
         )
