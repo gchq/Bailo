@@ -18,7 +18,12 @@ from .auth import (
 )
 from .config import BailoConfig, load_config
 from .models import Model, User
-from .utils.exceptions import DataInvalid, InvalidMetadata, UnconnectedClient
+from .utils.exceptions import (
+    CannotIncrementVersion,
+    DataInvalid,
+    InvalidMetadata,
+    UnconnectedClient,
+)
 from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
 
 logger = logging.getLogger(__name__)
@@ -443,9 +448,17 @@ class Client:
         """
 
         model_versions = self.api.get(f"model/{model_uuid}/versions")
-        model_versions = [
-            int(model_version["version"]) for model_version in model_versions
-        ]
+        try:
+            model_versions = [
+                int(model_version["version"]) for model_version in model_versions
+            ]
+        except ValueError as exc:
+            raise (
+                CannotIncrementVersion(
+                    "Please manually provide an updated version number"
+                )
+            ) from exc
+
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
@@ -456,6 +469,7 @@ class Client:
         model_card: Model,
         binary_file: str,
         code_file: str,
+        model_version: str = None,
     ):
         """Update an existing model based on its UUID.
 
@@ -463,6 +477,9 @@ class Client:
             model_card (Model): The model card of the existing model
             binary_file (str): Path to the model binary file
             code_file (str): Path to the model code file
+            model_version (str, optional): Incremented mode version number.
+                                           Automatically attempts to increase by 1 if None.
+                                           Defaults to None.
 
         Returns:
             str: UUID of the updated model
@@ -470,9 +487,11 @@ class Client:
 
         self._validate_uploads(model_card, binary_file, code_file)
 
-        new_model_version = self._increment_version(model_card["uuid"])
+        if not model_version:
+            model_version = self._increment_version(model_card["uuid"])
+
         metadata = model_card["currentMetadata"]
-        metadata.highLevelDetails.modelCardVersion = new_model_version
+        metadata.highLevelDetails.modelCardVersion = model_version
         metadata = metadata.toJSON()
 
         payload = self._generate_payload(metadata, binary_file, code_file)

@@ -27,3 +27,7 @@ class DataInvalid(Exception):
 
 class InvalidMetadata(Exception):
     """Metadata does not meet the minimal requirement"""
+
+
+class CannotIncrementVersion(Exception):
+    """Unable to automatically increment a model card version"""
