@@ -8,8 +8,9 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import FileInput from '../common/FileInput'
 
-export default function RenderFileTab({
+export function RenderFileTab({
   currentStep: step,
   splitSchema,
   setSplitSchema,
@@ -75,5 +76,31 @@ export default function RenderFileTab({
 }
 
 export function FileTabComplete(step: Step) {
+  return step.state.binary && step.state.code
+}
+
+export function RenderBasicFileTab(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
+  const { state } = step
+  const { binary, code } = state
+
+  const handleCodeChange = (e: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
+  }
+
+  const handleBinaryChange = (e: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
+  }
+
+  return (
+    <Box sx={{ pb: 4, pt: 4 }}>
+      <Stack direction='row' spacing={2} alignItems='center'>
+        <FileInput label={'Select Code'} file={code} onChange={handleCodeChange} accepts='.zip' />
+        <FileInput label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts='.zip' />
+      </Stack>
+    </Box>
+  )
+}
+
+export function BasicFileTabComplete(step: Step) {
   return step.state.binary && step.state.code
 }

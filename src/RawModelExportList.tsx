@@ -1,30 +1,43 @@
 import React from 'react'
 
-import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
-import VisibilityIcon from '@mui/icons-material/VisibilityTwoTone'
+import TextField from '@mui/material/TextField'
+import IconButton from '@mui/material/IconButton'
+import CopyIcon from '@mui/icons-material/ContentCopyTwoTone'
+import Tooltip from '@mui/material/Tooltip'
 
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
+import CopiedSnackbar from './common/CopiedSnackbar'
 
 const DeploymentVersion = ({ text, type }: { text: string; type: string }) => {
-  const [displayText, setDisplayText] = React.useState<boolean>(false)
+  const [openSnackbar, setOpenSnackbar] = React.useState(false)
 
-  const toggleText = () => {
-    setDisplayText(!displayText)
+  const handleButtonClick = () => {
+    navigator.clipboard.writeText(text)
+    setOpenSnackbar(true)
   }
 
   return (
-    <Stack direction='row'>
-      <Button sx={{ m: 1 }} variant='text' onClick={toggleText} startIcon={<VisibilityIcon />}>
-        {displayText ? 'Hide' : 'Show'} {type} path
-      </Button>
-      <Box component={Stack} direction='column' justifyContent='center'>
-        <Typography variant='body1'>{displayText ? text : 'xxxxxxxx/xxxxxxxx/xxxxxxxx'}</Typography>
-      </Box>
+    <Stack spacing={2} direction='row' sx={{ p: 1 }}>
+      <TextField
+        sx={{ width: 500 }}
+        label={type + ' path'}
+        defaultValue={text}
+        inputProps={{ readOnly: true }}
+        variant='filled'
+      >
+        {text}
+      </TextField>
+      <Tooltip title='Copy' arrow placement='bottom'>
+        <IconButton aria-label='delete' onClick={handleButtonClick}>
+          <CopyIcon />
+        </IconButton>
+      </Tooltip>
+      <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
     </Stack>
   )
 }

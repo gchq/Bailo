@@ -10,8 +10,9 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
+import FileInput from '../common/FileInput'
 
-export default function RenderBuildOptionsTab({
+export function RenderBuildOptionsTab({
   currentStep: step,
   splitSchema,
   setSplitSchema,
@@ -44,7 +45,7 @@ export default function RenderBuildOptionsTab({
             <Divider orientation='vertical' flexItem />
             <Box component={Stack} direction='column' justifyContent='center' sx={{ pl: 2 }}>
               <Typography variant='body1'>
-                Model code and binary files can be store/accessed directly from Minio
+                If enabled, allow raw uploaded model files to be downloaded by deployments.
               </Typography>
             </Box>
           </Stack>
@@ -61,10 +62,46 @@ export default function RenderBuildOptionsTab({
             <Divider orientation='vertical' flexItem />
             <Box component={Stack} direction='column' justifyContent='center' sx={{ pl: 2 }}>
               <Typography variant='body1'>
-                Allow for deployments to be requested without the need of creating metadata
+                Allow for models to be accessible for development purposes without creating a deployment request.
               </Typography>
             </Box>
           </Stack>
+        </FormGroup>
+      </Box>
+    </Stack>
+  )
+}
+
+export function RenderBasicBuildOptionsTab(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
+  const { state } = step
+  const { rawModelExport, allowGuestDeployments } = state
+
+  const handleRawModelExportChange = (event: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, rawModelExport: event.target.checked })
+  }
+
+  const handleGuestDeploymentChange = (event: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, allowGuestDeployments: event.target.checked })
+  }
+
+  return (
+    <Stack direction='column' spacing={2} sx={{ mb: 3 }}>
+      <Box sx={{ textAlign: 'center' }}>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox checked={rawModelExport} />}
+            onChange={handleRawModelExportChange}
+            label='Enable raw model export'
+          />
+        </FormGroup>
+      </Box>
+      <Box sx={{ textAlign: 'center' }}>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox checked={allowGuestDeployments} />}
+            onChange={handleGuestDeploymentChange}
+            label='Allow guest deployment'
+          />
         </FormGroup>
       </Box>
     </Stack>

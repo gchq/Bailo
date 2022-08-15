@@ -14,12 +14,11 @@ import { useGetModelVersions } from '../../../data/model'
 
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Form from '../../../src/Form/Form'
-import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
+import { RenderFileTab, RenderBasicFileTab, FileTabComplete } from '../../../src/Form/RenderFileTab'
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
-import RenderBasicBuildOptionsTab from '../../../src/Form/RenderBasicBuildOptionsTab'
-import RenderBuildOptionsTab from '../../../src/Form/RenderBuildOptionsTab'
+import { RenderBasicBuildOptionsTab, RenderBuildOptionsTab } from '../../../src/Form/RenderBuildOptionsTab'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -83,6 +82,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        renderBasic: RenderBasicFileTab,
         isComplete: FileTabComplete,
       })
     )
