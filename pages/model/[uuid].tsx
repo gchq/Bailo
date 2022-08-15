@@ -183,6 +183,10 @@ function Model() {
     //open the confirm dialogue
   }
 
+  const onDeleteConfirm = () => {
+    //delete the model
+  }
+
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       <Paper sx={{ p: 3 }}>
@@ -413,6 +417,8 @@ function Model() {
             </Box>
 
             <Box sx={{ mb: 4 }} />
+
+            <ConfirmationDialogue showConfirmationDialogue={false} functionOnConfirm={onDeleteConfirm}  dialogueText="Delete the model?" />
 
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
