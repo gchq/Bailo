@@ -91,7 +91,6 @@ If authentication is not required you can use MockAuthentication()
 
 - [pki_auth](./examples/pki_client.py)
 
-
 ## Testing
 
 To run the tests, run the following from the top-level directory of the Bailo Client (Bailo/lib/python):
