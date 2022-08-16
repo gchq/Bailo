@@ -12,6 +12,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import CopiedSnackbar from './common/CopiedSnackbar'
+import EmptyBlob from './common/EmptyBlob'
 
 const DeploymentVersion = ({ text, type }: { text: string; type: string }) => {
   const [openSnackbar, setOpenSnackbar] = React.useState(false)
@@ -45,13 +46,14 @@ const DeploymentVersion = ({ text, type }: { text: string; type: string }) => {
 const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
   const { model } = useGetModelById(deployment.model.toString())
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(model?.uuid)
+  console.log(versions)
 
   return (
     <>
       {!isVersionsLoading &&
         !isVersionsError &&
         versions?.map((version: any) => {
-          if (version?.buildOptions?.rawModelExport) {
+          if (version?.metadata?.buildOptions?.exportRawModel) {
             return (
               <>
                 <Box sx={{ p: 1 }}>
@@ -66,6 +68,9 @@ const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
             )
           }
         })}
+      {versions?.filter((e) => e.metadata?.buildOptions?.exportRawModel).length === 0 && (
+        <EmptyBlob text='No exportable versions' />
+      )}
     </>
   )
 }

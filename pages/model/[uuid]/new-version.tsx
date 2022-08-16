@@ -18,7 +18,6 @@ import { RenderFileTab, RenderBasicFileTab, FileTabComplete } from '../../../src
 import useCacheVariable from '../../../utils/useCacheVariable'
 import LoadingBar from '../../../src/common/LoadingBar'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
-import { RenderBasicBuildOptionsTab, RenderBuildOptionsTab } from '../../../src/Form/RenderBuildOptionsTab'
 
 function renderSubmissionTab(
   _currentStep: Step,
@@ -84,27 +83,6 @@ function Upload() {
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
         isComplete: FileTabComplete,
-      })
-    )
-
-    steps.push(
-      createStep({
-        schema: {
-          title: 'Build Options',
-        },
-        state: {
-          rawModelExport: false,
-          allowGuestDeployments: false,
-        },
-        schemaRef: cModel.schemaRef,
-
-        type: 'Data',
-        index: steps.length,
-        section: 'buildOptions',
-
-        render: RenderBuildOptionsTab,
-        renderBasic: RenderBasicBuildOptionsTab,
-        isComplete: () => true,
       })
     )
 

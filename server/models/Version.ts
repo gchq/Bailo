@@ -2,7 +2,6 @@ import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
 import logger from '../utils/logger'
 import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
-import { BuildOptions } from '../../types/interfaces'
 
 export interface Version {
   model: ModelDoc | Types.ObjectId
@@ -13,8 +12,6 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
-
-  buildOptions?: BuildOptions
 
   rawBinaryPath?: string
   rawCodePath?: string
@@ -39,8 +36,6 @@ const VersionSchema = new Schema<Version>(
 
     rawBinaryPath: { type: String },
     rawCodePath: { type: String },
-
-    buildOptions: { type: Schema.Types.Mixed },
 
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },

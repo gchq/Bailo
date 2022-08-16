@@ -1,7 +1,7 @@
 import { castArray } from 'lodash'
 import VersionModel from '../models/Version'
 
-import { BuildOptions, ModelId } from '../../types/interfaces'
+import { ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
 import { BadReq, Forbidden } from '../utils/result'
@@ -51,7 +51,7 @@ export async function findVersionByName(user: UserDoc, model: ModelId, name: str
 
 export async function findModelVersions(user: UserDoc, model: ModelId, opts?: GetVersionOptions) {
   let versions = VersionModel.find({ model })
-  if (opts?.thin) versions = versions.select({ state: 0, logs: 0, metadata: 0 })
+  if (opts?.thin) versions = versions.select({ state: 0, logs: 0 })
   if (opts?.populate) versions = versions.populate('model')
 
   return filterVersion(user, await versions)
@@ -84,7 +84,6 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 interface CreateVersion {
   version: string
   metadata: any
-  buildOptions: BuildOptions
 }
 
 export async function createVersion(user: UserDoc, data: CreateVersion) {

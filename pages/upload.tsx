@@ -17,7 +17,6 @@ import SubmissionError from '@/src/Form/SubmissionError'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import { RenderFileTab, RenderBasicFileTab, FileTabComplete } from '@/src/Form/RenderFileTab'
-import { RenderBuildOptionsTab, RenderBasicBuildOptionsTab } from '@/src/Form/RenderBuildOptionsTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import LoadingBar from '@/src/common/LoadingBar'
@@ -107,27 +106,6 @@ function Upload() {
     steps.push(
       createStep({
         schema: {
-          title: 'Build Options',
-        },
-        state: {
-          rawModelExport: false,
-          allowGuestDeployments: false,
-        },
-        schemaRef: reference,
-
-        type: 'Data',
-        index: steps.length,
-        section: 'buildOptions',
-
-        render: RenderBuildOptionsTab,
-        renderBasic: RenderBasicBuildOptionsTab,
-        isComplete: () => true,
-      })
-    )
-
-    steps.push(
-      createStep({
-        schema: {
           title: 'Submission',
         },
         state: {},
@@ -177,9 +155,6 @@ function Upload() {
     const form = new FormData()
 
     data.schemaRef = currentSchema?.reference
-
-    form.append('buildOptions', JSON.stringify(data.buildOptions))
-    delete data.buildOptions
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)

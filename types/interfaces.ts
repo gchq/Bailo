@@ -48,6 +48,11 @@ export interface ModelMetadata {
     [x: string]: any
   }
 
+  buildOptions?: {
+    rawModelExport: boolean
+    allowGuestDeployments: boolean
+  }
+
   // allow other properties
   [x: string]: any
 }
@@ -140,8 +145,3 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
-
-export interface BuildOptions {
-  rawModelExport: boolean
-  allowGuestDeployments: boolean
-}
