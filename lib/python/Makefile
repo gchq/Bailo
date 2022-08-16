@@ -4,7 +4,6 @@ PYTHON := /usr/bin/python3
 install: 
 	sudo yum install gcc gmp python3-devel
 	$(PYTHON) -m pip install -r requirements.txt
-	pre-commit install
 
 test:
 	$(PYTHON) -m pytest --log-cli-level=WARNING -vv --ignore=tests/e2e/
