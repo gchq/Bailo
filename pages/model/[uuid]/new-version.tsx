@@ -142,9 +142,6 @@ function Upload() {
 
     data.schemaRef = model?.schemaRef
 
-    form.append('buildOptions', JSON.stringify(data.buildOptions))
-    delete data.buildOptions
-
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
 

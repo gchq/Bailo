@@ -46,14 +46,12 @@ const DeploymentVersion = ({ text, type }: { text: string; type: string }) => {
 const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
   const { model } = useGetModelById(deployment.model.toString())
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(model?.uuid)
-  console.log(versions)
 
   return (
     <>
-      {!isVersionsLoading &&
-        !isVersionsError &&
-        versions?.map((version: any) => {
-          if (version?.metadata?.buildOptions?.exportRawModel) {
+      {versions &&
+        versions.map((version: any) => {
+          if (version.metadata?.buildOptions?.exportRawModel) {
             return (
               <>
                 <Box sx={{ p: 1 }}>
@@ -68,7 +66,7 @@ const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
             )
           }
         })}
-      {versions?.filter((e) => e.metadata?.buildOptions?.exportRawModel).length === 0 && (
+      {versions && versions.filter((e) => e.metadata.buildOptions?.exportRawModel).length === 0 && (
         <EmptyBlob text='No exportable versions' />
       )}
     </>
