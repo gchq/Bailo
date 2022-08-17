@@ -1,14 +1,15 @@
+import { ModelMetadata } from '@/types/interfaces'
 import { merge } from 'lodash'
 
-export function createUiSchema(schema: any, customSchema: any) {
+export function createUiSchema(schema: ModelMetadata, customSchema: any) {
   const baseUiSchema = createBaseSchema(schema)
   const uiSchema = merge(baseUiSchema, customSchema)
 
   return uiSchema
 }
 
-export function createBaseSchema(schema: any) {
-  let uiSchema = {}
+export function createBaseSchema(schema: ModelMetadata) {
+  const uiSchema = {}
 
   if (schema.maxLength) {
     uiSchema['ui:widget'] = 'textArea'
@@ -19,7 +20,7 @@ export function createBaseSchema(schema: any) {
   }
 
   if (schema.type === 'object') {
-    for (let [property, value] of Object.entries(schema.properties)) {
+    for (const [property, value] of Object.entries(schema.properties)) {
       uiSchema[property] = createBaseSchema(value)
     }
   }

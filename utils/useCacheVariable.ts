@@ -4,8 +4,10 @@ export default function useCacheVariable<T>(variable: T): T | undefined {
   const [cache, setCache] = useState<T | undefined>(undefined)
 
   useEffect(() => {
-    if (cache !== undefined) return
-    setCache(variable)
+    setCache((old) => {
+      if (old !== undefined) return old
+      return variable
+    })
   }, [variable])
 
   return cache

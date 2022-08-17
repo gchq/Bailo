@@ -43,9 +43,7 @@ const printProperty = (prop: any, allowArrays: any, allowObjects: any, isOptiona
   return PROP_NOT_HANDLED_TYPE + typeof prop
 }
 
-const printPropertyOptional = (prop: any) => {
-  return printProperty(prop, false, false, true, undefined)
-}
+const printPropertyOptional = (prop: any) => printProperty(prop, false, false, true, undefined)
 
 const printPropertyArray = (prop: any, isOptional: any) => {
   if (!prop) {
@@ -62,9 +60,7 @@ const printPropertyArray = (prop: any, isOptional: any) => {
   return PROP_NOT_ARRAY_TYPE + typeof prop
 }
 
-const printPropertyObject = (prop: any, isOptional: any) => {
-  return printProperty(prop, true, true, isOptional, undefined)
-}
+const printPropertyObject = (prop: any, isOptional: any) => printProperty(prop, true, true, isOptional, undefined)
 
 const printPropertyArrayOfObjects = (prop: any, isOptional: any) => {
   if (!prop) {
