@@ -15,6 +15,15 @@ def test_get_filename_and_mimetype_returns_mimetype_of_none_if_path_is_directory
     assert m_type is None
 
 
+def test_get_filename_and_mimetype_guesses_name_and_type_even_if_the_file_does_not_exist():
+    filename, m_type = utils.get_filename_and_mimetype(
+        "path/does/not/exist/responses.json"
+    )
+
+    assert filename == "responses.json"
+    assert m_type == "application/json"
+
+
 def test_minimal_keys_in_dict_returns_valid_result_if_both_dictionaries_are_empty():
     result = utils.minimal_keys_in_dictionary({}, {})
 
