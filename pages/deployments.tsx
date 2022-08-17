@@ -89,7 +89,7 @@ function Deployments() {
                 <DisplaySettings sx={{ color: '#757575', mr: 1 }} />
                 <Typography>Arrange by</Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ p: 2, backgroundColor: 'whitesmoke' }}>
+              <AccordionDetails sx={{ p: 2 }}>
                 <FormControl component='fieldset'>
                   <RadioGroup
                     defaultValue='date'
@@ -137,7 +137,7 @@ function Deployments() {
                     <ModelNameFromKey modelId={key} />
                     <Divider flexItem />
                     {groupedDeployments[key].map((deployment) => (
-                      <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
+                      <Box sx={{ p: 1, m: 1, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }} key={deployment.uuid}>
                         <Box>
                           <Link href={`/deployment/${deployment?.uuid}`} passHref>
                             <MuiLink

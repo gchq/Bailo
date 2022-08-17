@@ -50,13 +50,14 @@ import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import { lightTheme } from '../../src/theme'
+import PublicDeploymentOverview from '@/src/PublicDeploymentOverview'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'public' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
+  return ['overview', 'compliance', 'build', 'deployments', 'public', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
@@ -203,6 +204,22 @@ function Model() {
                     <UploadIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Request deployment</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={requestDeployment}
+                  disabled={
+                    !version.built || 
+                    version.managerApproved !== 'Accepted' || 
+                    version.reviewerApproved !== 'Accepted' ||
+                    (version.metadata.buildOptions?.allowGuestDeployments === undefined || 
+                      !version.metadata.buildOptions.allowGuestDeployments)
+                  }
+                  data-test='submitDeployment'
+                >
+                  <ListItemIcon>
+                    <UploadIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Request public deployment</ListItemText>
                 </MenuItem>
                 <Divider />
                 {!modelFavourited && (
@@ -377,6 +394,8 @@ function Model() {
           </>
         )}
 
+        {group === 'public' && <PublicDeploymentOverview />}
+
         {group === 'settings' && (
           <>
             <Typography variant='h6' sx={{ mb: 1 }}>
@@ -407,7 +426,8 @@ function Model() {
               Delete Model
             </Button>
           </>
-        )}
+        )}        
+
       </Paper>
     </Wrapper>
   )
