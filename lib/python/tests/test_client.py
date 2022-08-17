@@ -11,6 +11,7 @@ from bailoclient.models.model import ValidationError, ValidationResult
 from bailoclient.utils.exceptions import (
     CannotIncrementVersion,
     DataInvalid,
+    InvalidFilePath,
     InvalidMetadata,
 )
 
@@ -79,11 +80,25 @@ def test_validate_uploads_raises_error_if_filepath_does_not_exist(mock_client):
     model_card = Model(_schema={"key": "value"})
 
     with pytest.raises(
-        DataInvalid, match=re.escape("this/path/does/not/exist does not exist")
+        InvalidFilePath, match=re.escape("this/path/does/not/exist does not exist")
     ):
         mock_client._validate_uploads(
             card=model_card,
             binary_file="this/path/does/not/exist",
+            code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        )
+
+
+def test_validate_uploads_raises_error_if_a_directory_is_uploaded(mock_client):
+    model_card = Model(_schema={"key": "value"})
+
+    with pytest.raises(
+        InvalidFilePath,
+        match=re.escape("../../__tests__/example_models/minimal_model is a directory"),
+    ):
+        mock_client._validate_uploads(
+            card=model_card,
+            binary_file="../../__tests__/example_models/minimal_model",
             code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
         )
 

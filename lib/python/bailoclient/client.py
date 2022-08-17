@@ -21,6 +21,7 @@ from .models import Model, User
 from .utils.exceptions import (
     CannotIncrementVersion,
     DataInvalid,
+    InvalidFilePath,
     InvalidMetadata,
     UnconnectedClient,
 )
@@ -312,7 +313,10 @@ class Client:
             # TODO check that it's some compressed format supported by Patool
             # (used in workflow-extract-files-from-minio)
             if file_path and not os.path.exists(file_path):
-                raise DataInvalid(f"{file_path} does not exist")
+                raise InvalidFilePath(f"{file_path} does not exist")
+
+            if file_path and os.path.isdir(file_path):
+                raise InvalidFilePath(f"{file_path} is a directory")
 
     def __validate_metadata(self, model_metadata: dict):
         """Validate user metadata against the minimal metadata required to
