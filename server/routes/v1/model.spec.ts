@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 import '../../utils/mockMongo'
-import UserModel from '../../models/User'
-import ModelModel from '../../models/Model'
-import DeploymentModel from '../../models/Deployment'
-import SchemaModel from '../../models/Schema'
-import VersionModel from '../../models/Version'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import UserModel from '../../models/User.js'
+import ModelModel from '../../models/Model.js'
+import DeploymentModel from '../../models/Deployment.js'
+import SchemaModel from '../../models/Schema.js'
+import VersionModel from '../../models/Version.js'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 import {
   testUser,
   uploadSchema,
@@ -14,7 +14,7 @@ import {
   testVersion,
   modelUuid,
   testDeployment,
-} from '../../utils/test/testModels'
+} from '../../utils/test/testModels.js'
 import _ from 'lodash'
 
 describe('test model routes', () => {

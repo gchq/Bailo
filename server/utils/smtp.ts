@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import config from 'config'
-import logger from './logger'
-import { GenericError } from './result'
+import logger from './logger.js'
+import { GenericError } from './result.js'
 
 export async function sendEmail({
   to,

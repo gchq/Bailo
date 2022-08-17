@@ -1,5 +1,5 @@
-import Bailo from '../../lib/node'
-import logger from '../utils/logger'
+import Bailo from '../../lib/node.js'
+import logger from '../utils/logger.js'
 
 async function approveAllRequests() {
   const api = new Bailo('http://localhost:8080/api/v1')

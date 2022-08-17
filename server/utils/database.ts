@@ -1,6 +1,6 @@
 import config from 'config'
 import mongoose from 'mongoose'
-import logger from './logger'
+import logger from './logger.js'
 
 export async function connectToMongoose() {
   try {

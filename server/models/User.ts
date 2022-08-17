@@ -1,7 +1,10 @@
-import { Schema, model, Types, Document } from 'mongoose'
+import mongoose, { Types, Document } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcryptjs'
-import { ModelDoc } from './Model'
+import { ModelDoc } from './Model.js'
+
+// mongoose is a CommonJS module that doesn't support the following as named exports
+const { Schema, model } = mongoose
 
 export interface User {
   id: string
@@ -55,7 +58,7 @@ UserSchema.methods.compareToken = function (candidateToken: string) {
   return new Promise((resolve, reject) => {
     if (!this.token) return resolve(false)
 
-    bcrypt.compare(candidateToken, this.token, function (err, isMatch) {
+    bcrypt.compare(candidateToken, this.token, (err, isMatch) => {
       if (err) return reject(err)
       resolve(isMatch)
     })

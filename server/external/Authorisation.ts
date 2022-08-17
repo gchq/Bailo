@@ -4,6 +4,6 @@
 // TypeScript will ensure at build time that any updates made to the
 // Authorisation layout are reflected in your class.
 
-import AuthorisationBase from '../utils/AuthorisationBase'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
 
 export default AuthorisationBase

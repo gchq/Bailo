@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
-import UserModel from '../../models/User'
-import { ApprovalStates } from '../../models/Deployment'
+import UserModel from '../../models/User.js'
+import { ApprovalStates } from '../../models/Deployment.js'
 
 export const deploymentUuid = 'test-deployment'
 export const requesterId = new ObjectId()

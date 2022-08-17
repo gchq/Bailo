@@ -1,14 +1,14 @@
-import { castArray } from 'lodash'
+import _ from 'lodash'
 
-import { Forbidden } from '../utils/result'
-import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
-import { ModelId } from '../../types/interfaces'
-import AuthorisationBase from '../utils/AuthorisationBase'
-import { asyncFilter } from '../utils/general'
-import { createSerializer, SerializerOptions } from '../utils/logger'
-import { serializedModelFields } from './model'
-import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import { Forbidden } from '../utils/result.js'
+import DeploymentModel, { DeploymentDoc } from '../models/Deployment.js'
+import { ModelId } from '../../types/interfaces.js'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
+import { asyncFilter } from '../utils/general.js'
+import { createSerializer, SerializerOptions } from '../utils/logger.js'
+import { serializedModelFields } from './model.js'
+import { UserDoc } from '../models/User.js'
+import { VersionDoc } from '../models/Version.js'
 
 const authorisation = new AuthorisationBase()
 
@@ -25,7 +25,7 @@ export function serializedDeploymentFields(): SerializerOptions {
 }
 
 export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const deployments = castArray(unfiltered)
+  const deployments = _.castArray(unfiltered)
 
   const filtered = await asyncFilter(deployments, (deployment: DeploymentDoc) =>
     authorisation.canUserSeeDeployment(user, deployment)

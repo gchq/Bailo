@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
-import UserModel from '../models/User'
-import DeploymentModel from '../models/Deployment'
+import UserModel from '../models/User.js'
+import DeploymentModel from '../models/Deployment.js'
 import '../utils/mockMongo'
 import {
   findDeploymentByUuid,
@@ -9,8 +9,8 @@ import {
   findDeployments,
   DeploymentFilter,
   createDeployment,
-} from './deployment'
-import { testDeployment2, testDeployment, deploymentUuid, testUser } from '../utils/test/testModels'
+} from './deployment.js'
+import { testDeployment2, testDeployment, deploymentUuid, testUser } from '../utils/test/testModels.js'
 
 const userDoc = new UserModel(testUser)
 

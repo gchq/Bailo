@@ -1,10 +1,10 @@
-import { buildPython } from '../utils/build'
-import { getUploadQueue } from '../utils/queues'
+import { buildPython } from '../utils/build.js'
+import { getUploadQueue } from '../utils/queues.js'
 import prettyMs from 'pretty-ms'
-import { findVersionById, markVersionBuilt } from '../services/version'
-import logger from '../utils/logger'
-import { getUserByInternalId } from '../services/user'
-import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
+import { findVersionById, markVersionBuilt } from '../services/version.js'
+import logger from '../utils/logger.js'
+import { getUserByInternalId } from '../services/user.js'
+import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue.js'
 
 export default async function processUploads() {
   ;(await getUploadQueue()).process(async (msg: QueueMessage) => {

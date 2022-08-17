@@ -6,8 +6,8 @@ import {
   serializedUserFields,
   findUsers,
   findUserCached,
-} from './user'
-import UserModel from '../models/User'
+} from './user.js'
+import UserModel from '../models/User.js'
 
 const testUser = {
   userId: 'user',

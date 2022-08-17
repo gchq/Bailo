@@ -1,5 +1,5 @@
 import { Validator } from 'jsonschema'
-import logger from './logger'
+import logger from './logger.js'
 
 const validator = new Validator()
 

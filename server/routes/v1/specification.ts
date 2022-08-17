@@ -1,4 +1,4 @@
-import { ensureUserRole } from '../../utils/user'
+import { ensureUserRole } from '../../utils/user.js'
 import config from 'config'
 import { Request, Response } from 'express'
 

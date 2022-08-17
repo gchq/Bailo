@@ -1,8 +1,8 @@
 import { join } from 'path'
-import Bailo from '../../lib/node'
+import Bailo from '../../lib/node.js'
 import fs from 'fs'
 import { fileFromPath } from 'formdata-node/file-from-path'
-import logger from '../utils/logger'
+import logger from '../utils/logger.js'
 import open from 'open'
 
 async function uploadExampleModel() {

@@ -1,8 +1,8 @@
 import '../utils/mockMongo'
-import { createSchema, findSchemaByRef, findSchemasByUse, serializedSchemaFields } from './schema'
-import SchemaModel from '../models/Schema'
+import { createSchema, findSchemaByRef, findSchemasByUse, serializedSchemaFields } from './schema.js'
+import SchemaModel from '../models/Schema.js'
 import _ from 'lodash'
-import { uploadSchema, uploadSchema2, deploymentSchema } from '../utils/test/testModels'
+import { uploadSchema, uploadSchema2, deploymentSchema } from '../utils/test/testModels.js'
 
 describe('test schema service', () => {
   beforeEach(async () => {

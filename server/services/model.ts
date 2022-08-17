@@ -1,13 +1,13 @@
 import { Types } from 'mongoose'
-import { castArray } from 'lodash'
+import _ from 'lodash'
 
-import { Forbidden } from '../utils/result'
-import ModelModel from '../models/Model'
-import { Model, User } from '../../types/interfaces'
-import AuthorisationBase from '../utils/AuthorisationBase'
-import { asyncFilter } from '../utils/general'
-import { SerializerOptions } from '../utils/logger'
-import { UserDoc } from '../models/User'
+import { Forbidden } from '../utils/result.js'
+import ModelModel from '../models/Model.js'
+import { Model } from '../../types/interfaces.js'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
+import { asyncFilter } from '../utils/general.js'
+import { SerializerOptions } from '../utils/logger.js'
+import { UserDoc } from '../models/User.js'
 
 const authorisation = new AuthorisationBase()
 
@@ -18,7 +18,7 @@ export function serializedModelFields(): SerializerOptions {
 }
 
 export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const models = castArray(unfiltered)
+  const models = _.castArray(unfiltered)
 
   const filtered = await asyncFilter(models, (model: Model) => authorisation.canUserSeeModel(user, model))
 

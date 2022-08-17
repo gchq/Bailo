@@ -1,14 +1,13 @@
-import { castArray } from 'lodash'
-import VersionModel from '../models/Version'
+import _ from 'lodash'
+import VersionModel, { VersionDoc } from '../models/Version.js'
 
-import { ModelId } from '../../types/interfaces'
-import AuthorisationBase from '../utils/AuthorisationBase'
-import { asyncFilter } from '../utils/general'
-import { BadReq, Forbidden } from '../utils/result'
-import { createSerializer, SerializerOptions } from '../utils/logger'
-import { serializedModelFields } from './model'
-import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import { ModelId } from '../../types/interfaces.js'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
+import { asyncFilter } from '../utils/general.js'
+import { BadReq, Forbidden } from '../utils/result.js'
+import { createSerializer, SerializerOptions } from '../utils/logger.js'
+import { serializedModelFields } from './model.js'
+import { UserDoc } from '../models/User.js'
 
 const authorisation = new AuthorisationBase()
 
@@ -26,7 +25,7 @@ export function serializedVersionFields(): SerializerOptions {
 }
 
 export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const versions = castArray(unfiltered)
+  const versions = _.castArray(unfiltered)
 
   const filtered = await asyncFilter(versions, (version: VersionDoc) => authorisation.canUserSeeVersion(user, version))
 

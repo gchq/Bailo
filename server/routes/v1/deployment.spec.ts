@@ -1,16 +1,16 @@
 import mongoose from 'mongoose'
 import '../../utils/mockMongo'
-import DeploymentModel from '../../models/Deployment'
 import { ObjectId } from 'mongodb'
-import UserModel from '../../models/User'
-import * as deploymentService from '../../services/deployment'
-import * as versionService from '../../services/version'
-import * as requestService from '../../services/request'
-import * as validateSchemaUtil from '../../utils/validateSchema'
-import VersionModel from '../../models/Version'
-import SchemaModel from '../../models/Schema'
-import ModelModel from '../../models/Model'
-import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
+import DeploymentModel from '../../models/Deployment.js'
+import UserModel from '../../models/User.js'
+import * as deploymentService from '../../services/deployment.js'
+import * as versionService from '../../services/version.js'
+import * as requestService from '../../services/request.js'
+import * as validateSchemaUtil from '../../utils/validateSchema.js'
+import VersionModel from '../../models/Version.js'
+import SchemaModel from '../../models/Schema.js'
+import ModelModel from '../../models/Model.js'
+import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 import {
   testDeployment,
   testUser,
@@ -21,7 +21,7 @@ import {
   deploymentUuid,
   managerRequest,
   uploadData,
-} from '../../utils/test/testModels'
+} from '../../utils/test/testModels.js'
 
 let deploymentDoc: any
 let versionDoc: any

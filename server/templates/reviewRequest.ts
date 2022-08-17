@@ -1,11 +1,11 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 import config from 'config'
-import { wrapper } from './partials'
-import { VersionDoc } from '../models/Version'
-import { DeploymentDoc } from '../models/Deployment'
-import { RequestTypes } from '../models/Request'
-import { ModelDoc } from '../models/Model'
+import { wrapper } from './partials.js'
+import { VersionDoc } from '../models/Version.js'
+import { DeploymentDoc } from '../models/Deployment.js'
+import { RequestTypes } from '../models/Request.js'
+import { ModelDoc } from '../models/Model.js'
 
 export interface ReviewRequestContext {
   document: VersionDoc | DeploymentDoc

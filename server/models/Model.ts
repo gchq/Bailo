@@ -1,6 +1,9 @@
-import { Schema, model, Document, Types } from 'mongoose'
-import { UserDoc } from './User'
-import { VersionDoc } from './Version'
+import mongoose, { Document, Types } from 'mongoose'
+import { UserDoc } from './User.js'
+import { VersionDoc } from './Version.js'
+
+// mongoose is a CommonJS module that doesn't support the following as named exports
+const { Schema, model } = mongoose
 
 export interface Model {
   schemaRef: string

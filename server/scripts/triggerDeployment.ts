@@ -1,9 +1,9 @@
-import { closeMongoInstance, getDeploymentQueue } from '../utils/queues'
+import { closeMongoInstance, getDeploymentQueue } from '../utils/queues.js'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import logger from '../utils/logger'
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
-import DeploymentModel from '../models/Deployment'
+import logger from '../utils/logger.js'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import DeploymentModel from '../models/Deployment.js'
 import { getDeployment } from 'server/routes/v1/deployment'
 ;(async () => {
   await connectToMongoose()

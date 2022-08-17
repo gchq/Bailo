@@ -1,9 +1,9 @@
 import { Types } from 'mongoose'
 import memoize from 'memoizee'
 
-import UserModel from '../models/User'
-import { ModelId } from '../../types/interfaces'
-import { SerializerOptions } from '../utils/logger'
+import UserModel from '../models/User.js'
+import { ModelId } from '../../types/interfaces.js'
+import { SerializerOptions } from '../utils/logger.js'
 
 interface GetUserOptions {
   includeToken?: boolean

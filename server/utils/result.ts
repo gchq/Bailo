@@ -1,4 +1,4 @@
-import { StatusError } from '../../types/interfaces'
+import { StatusError } from '../../types/interfaces.js'
 
 export function GenericError(data: any, message: string, code: number, logger?: any) {
   const err = Error(message) as StatusError & { logger: any }

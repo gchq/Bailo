@@ -1,6 +1,6 @@
 import * as Minio from 'minio'
 import { Request } from 'express'
-import logger from './logger'
+import logger from './logger.js'
 
 export default class MinioStore {
   bucket: Function

@@ -1,8 +1,8 @@
-import { User, Model, Deployment, Version } from '../../types/interfaces'
+import { User, Model, Deployment, Version } from '../../types/interfaces.js'
 import { Request } from 'express'
-import { DeploymentDoc } from '../models/Deployment'
-import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import { DeploymentDoc } from '../models/Deployment.js'
+import { UserDoc } from '../models/User.js'
+import { VersionDoc } from '../models/Version.js'
 
 export default class AuthorisationBase {
   constructor() {}

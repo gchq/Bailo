@@ -1,9 +1,9 @@
-import { ensureUserRole } from '../../utils/user'
+import { ensureUserRole } from '../../utils/user.js'
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-import { BadReq, NotFound } from '../../utils/result'
-import { findModelById } from '../../services/model'
-import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
+import { BadReq, NotFound } from '../../utils/result.js'
+import { findModelById } from '../../services/model.js'
+import { findUsers, getUserById, getUserByInternalId } from '../../services/user.js'
 
 export const getUsers = [
   ensureUserRole('user'),

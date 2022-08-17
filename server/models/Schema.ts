@@ -1,4 +1,7 @@
-import { Schema as MongooseSchema, model } from 'mongoose'
+import mongoose from 'mongoose'
+
+// mongoose is a CommonJS module that doesn't support the following as named exports
+const { Schema: MongooseSchema, model } = mongoose
 
 export interface Schema {
   name: string

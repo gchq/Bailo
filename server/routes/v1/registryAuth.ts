@@ -5,12 +5,12 @@ import { readFile } from 'fs/promises'
 import bodyParser from 'body-parser'
 import config from 'config'
 import { v4 as uuidv4, stringify as uuidStringify } from 'uuid'
-import logger from '../../utils/logger'
-import isEqual from 'lodash/isEqual'
-import { getUserFromAuthHeader } from '../../utils/user'
-import { Forbidden } from '../../utils/result'
+import _ from 'lodash'
+import logger from '../../utils/logger.js'
+import { getUserFromAuthHeader } from '../../utils/user.js'
+import { Forbidden } from '../../utils/result.js'
 
-let adminToken: string | undefined = undefined
+let adminToken: string | undefined
 
 export async function getAdminToken() {
   if (!adminToken) {
@@ -39,7 +39,7 @@ function getBit(buffer: Buffer, index: number) {
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  return Number((idByte & Math.pow(2, 7 - bit)) !== 0)
+  return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -143,7 +143,7 @@ function checkAccess(access, user) {
     return false
   }
 
-  if (!isEqual(access.actions, ['pull'])) {
+  if (!_.isEqual(access.actions, ['pull'])) {
     // users should only be able to pull images
     return false
   }
@@ -208,7 +208,7 @@ export const getDockerRegistryAuth = [
 
     const accesses = scopes.map(generateAccess)
 
-    for (let access of accesses) {
+    for (const access of accesses) {
       if (!admin && !checkAccess(access, user)) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }

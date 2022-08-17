@@ -1,5 +1,5 @@
-import { findAndUpdateUser } from '../services/user'
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
+import { findAndUpdateUser } from '../services/user.js'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 ;(async () => {
   await connectToMongoose()
 

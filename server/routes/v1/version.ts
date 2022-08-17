@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import { ensureUserRole } from '../../utils/user'
+import { ensureUserRole } from '../../utils/user.js'
 import bodyParser from 'body-parser'
-import { createVersionRequests } from '../../services/request'
-import { Forbidden, NotFound, BadReq } from '../../utils/result'
-import { findVersionById } from '../../services/version'
-import { ApprovalStates } from '../../models/Deployment'
+import { createVersionRequests } from '../../services/request.js'
+import { Forbidden, NotFound, BadReq } from '../../utils/result.js'
+import { findVersionById } from '../../services/version.js'
+import { ApprovalStates } from '../../models/Deployment.js'
 
 export const getVersion = [
   ensureUserRole('user'),

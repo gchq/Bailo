@@ -1,13 +1,13 @@
-import DeploymentModel from '../models/Deployment'
-import RequestModel from '../models/Request'
-import ModelModel from '../models/Model'
-import UserModel from '../models/User'
-import VersionModel from '../models/Version'
+import DeploymentModel from '../models/Deployment.js'
+import RequestModel from '../models/Request.js'
+import ModelModel from '../models/Model.js'
+import UserModel from '../models/User.js'
+import VersionModel from '../models/Version.js'
 
-import { connectToMongoose, disconnectFromMongoose } from './database'
+import { connectToMongoose, disconnectFromMongoose } from './database.js'
 
 import config from 'config'
-import { emptyBucket } from './minio'
+import { emptyBucket } from './minio.js'
 
 const pause = (time) => new Promise((resolve) => setTimeout(resolve, time))
 

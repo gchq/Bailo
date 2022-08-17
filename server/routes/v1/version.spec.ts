@@ -1,15 +1,15 @@
 import mongoose from 'mongoose'
 import '../../utils/mockMongo'
-import VersionModel from '../../models/Version'
-import UserModel from '../../models/User'
-import * as requestService from '../../services/request'
+import VersionModel from '../../models/Version.js'
+import UserModel from '../../models/User.js'
+import * as requestService from '../../services/request.js'
 import {
   authenticatedGetRequest,
   authenticatedPostRequest,
   authenticatedPutRequest,
   validateTestRequest,
-} from '../../utils/test/testUtils'
-import { testManager, testReviewer, testVersion } from '../../utils/test/testModels'
+} from '../../utils/test/testUtils.js'
+import { testManager, testReviewer, testVersion } from '../../utils/test/testModels.js'
 
 describe('test version routes', () => {
   beforeEach(async () => {

@@ -7,16 +7,20 @@ import getAppRoot from 'app-root-path'
 import devnull from 'dev-null'
 import { join, resolve, sep, dirname } from 'path'
 import { inspect } from 'util'
-import omit from 'lodash/omit'
 import chalk from 'chalk'
 import config from 'config'
-import { castArray, set, get, pick } from 'lodash'
-import { StatusError } from '../../types/interfaces'
-import { serializedVersionFields } from '../services/version'
-import { serializedModelFields } from '../services/model'
-import { serializedDeploymentFields } from '../services/deployment'
-import { serializedSchemaFields } from '../services/schema'
-import { serializedUserFields } from '../services/user'
+import _ from 'lodash'
+import { fileURLToPath } from 'url'
+import { StatusError } from '../../types/interfaces.js'
+import { serializedVersionFields } from '../services/version.js'
+import { serializedModelFields } from '../services/model.js'
+import { serializedDeploymentFields } from '../services/deployment.js'
+import { serializedSchemaFields } from '../services/schema.js'
+import { serializedUserFields } from '../services/user.js'
+
+const __filename = fileURLToPath(import.meta.url)
+
+const __dirname = dirname(__filename)
 
 const appRoot = getAppRoot.toString()
 
@@ -56,7 +60,7 @@ class Writer {
   }
 
   getAttributes(data) {
-    let attributes = omit(data, [
+    let attributes = _.omit(data, [
       'name',
       'hostname',
       'pid',
@@ -73,14 +77,14 @@ class Writer {
 
     if (['id', 'url', 'method', 'response-time', 'status'].every((k) => keys.includes(k))) {
       // this is probably a req object.
-      attributes = omit(attributes, ['id', 'url', 'method', 'response-time', 'status'])
+      attributes = _.omit(attributes, ['id', 'url', 'method', 'response-time', 'status'])
       keys = Object.keys(attributes)
     }
 
     if (keys.includes('id')) {
       // don't show id if it's a uuid
       if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(attributes.id)) {
-        attributes = omit(attributes, ['id'])
+        attributes = _.omit(attributes, ['id'])
         keys = Object.keys(attributes)
       }
     }
@@ -101,7 +105,7 @@ class Writer {
     const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
-    process[pipe].write(message + '\n')
+    process[pipe].write(`${message}\n`)
   }
 }
 
@@ -121,18 +125,18 @@ export function createSerializer(options: SerializerOptions) {
       return unserialized
     }
 
-    const asArray = castArray(unserialized)
+    const asArray = _.castArray(unserialized)
 
-    if (!asArray.every((item) => mandatory.every((value) => get(item, value) !== undefined))) {
+    if (!asArray.every((item) => mandatory.every((value) => _.get(item, value) !== undefined))) {
       return unserialized
     }
 
     const serialized = asArray.map((item) => {
-      const segments = pick(item, mandatory.concat(optional))
+      const segments = _.pick(item, mandatory.concat(optional))
       const remotes = {}
 
       serializable.forEach(({ type, field }) => {
-        set(remotes, field, type(get(item, field)))
+        _.set(remotes, field, type(_.get(item, field)))
       })
 
       return { ...segments, ...remotes }
@@ -204,9 +208,7 @@ const morganLog = morgan<any, any>(
     return ''
   },
   {
-    skip: (req, _res) => {
-      return ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val))
-    },
+    skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
   }

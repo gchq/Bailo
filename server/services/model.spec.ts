@@ -1,6 +1,6 @@
 import '../utils/mockMongo'
-import VersionModel from '../models/Version'
-import ModelModel from '../models/Model'
+import VersionModel from '../models/Version.js'
+import ModelModel from '../models/Model.js'
 import {
   findModelById,
   findModelByUuid,
@@ -9,8 +9,8 @@ import {
   isValidFilter,
   findModels,
   createModel,
-} from './model'
-import { testModel, testVersion, userDoc, testModel2 } from '../utils/test/testModels'
+} from './model.js'
+import { testModel, testVersion, userDoc, testModel2 } from '../utils/test/testModels.js'
 
 let modelId
 

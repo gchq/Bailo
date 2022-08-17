@@ -1,4 +1,4 @@
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 ;(async () => {
   await connectToMongoose()
 

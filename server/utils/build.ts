@@ -1,16 +1,19 @@
-import { mkdir, exec, rm } from 'shelljs'
+import shelljs from 'shelljs'
 import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
 import { join, dirname } from 'path'
 import { writeFile } from 'fs/promises'
-import { getClient } from './minio'
 import unzip from 'unzipper'
 import config from 'config'
 import dedent from 'dedent-js'
-import logger from './logger'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { VersionDoc } from '../models/Version'
-import { ModelDoc } from '../models/Model'
+import { getClient } from './minio.js'
+import logger from './logger.js'
+import { getAdminToken } from '../routes/v1/registryAuth.js'
+import { VersionDoc } from '../models/Version.js'
+import { ModelDoc } from '../models/Model.js'
+
+// shelljs is a CommonJS module that doesn't support the following as named exports
+const { mkdir, exec, rm } = shelljs
 
 interface FileRef {
   path: string

@@ -1,8 +1,11 @@
-import { Schema, model, Document, Types } from 'mongoose'
-import logger from '../utils/logger'
-import { ModelDoc } from './Model'
-import { UserDoc } from './User'
-import { VersionDoc } from './Version'
+import mongoose, { Document, Types } from 'mongoose'
+import logger from '../utils/logger.js'
+import { ModelDoc } from './Model.js'
+import { UserDoc } from './User.js'
+import { VersionDoc } from './Version.js'
+
+// mongoose is a CommonJS module that doesn't support the following as named exports
+const { Schema, model } = mongoose
 
 export const approvalStates = ['Accepted', 'Declined', 'No Response']
 

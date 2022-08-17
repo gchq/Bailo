@@ -1,15 +1,15 @@
 import '../utils/mockMongo'
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../models/Deployment'
-import VersionModel from '../models/Version'
+import { ApprovalStates } from '../models/Deployment.js'
+import VersionModel from '../models/Version.js'
 import {
   createVersion,
   findModelVersions,
   findVersionById,
   findVersionByName,
   serializedVersionFields,
-} from './version'
-import { testVersion, testVersion2, userDoc } from '../utils/test/testModels'
+} from './version.js'
+import { testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
 
 let versionDoc
 

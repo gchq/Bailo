@@ -1,7 +1,9 @@
 import express from 'express'
 import next from 'next'
 import http from 'http'
-import processUploads from './processors/processUploads'
+import config from 'config'
+import { pathToFileURL } from 'url'
+import processUploads from './processors/processUploads.js'
 import {
   getModelByUuid,
   getModelById,
@@ -10,29 +12,27 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
-} from './routes/v1/model'
-import { postUpload } from './routes/v1/upload'
-import { getUiConfig } from './routes/v1/uiConfig'
-import { connectToMongoose } from './utils/database'
-import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import config from 'config'
-import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
+} from './routes/v1/model.js'
+import { postUpload } from './routes/v1/upload.js'
+import { getUiConfig } from './routes/v1/uiConfig.js'
+import { connectToMongoose } from './utils/database.js'
+import { ensureBucketExists } from './utils/minio.js'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema.js'
+import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version.js'
 import {
   getDeployment,
   getCurrentUserDeployments,
   postDeployment,
   resetDeploymentApprovals,
-} from './routes/v1/deployment'
-import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import processDeployments from './processors/processDeployments'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
-import { getUser } from './utils/user'
-import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
-import { createIndexes } from './models/Model'
-import { getSpecification } from './routes/v1/specification'
+} from './routes/v1/deployment.js'
+import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
+import processDeployments from './processors/processDeployments.js'
+import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users.js'
+import { getUser } from './utils/user.js'
+import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests.js'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
+import { createIndexes } from './models/Model.js'
+import { getSpecification } from './routes/v1/specification.js'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -106,14 +106,12 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
-  server.use((req, res) => {
-    return handle(req, res)
-  })
+  server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)
   logger.info({ port }, `Listening on port ${port}`)
 }
 
-if (require.main === module) {
+if (import.meta.url.startsWith('file:') && import.meta.url === pathToFileURL(process.argv[1]).href) {
   startServer()
 }
