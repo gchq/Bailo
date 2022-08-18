@@ -24,7 +24,7 @@ export default function FileInput({
   return (
     <>
       <label htmlFor={id}>
-        <Input id={id} type='file' onChange={onChange} accept={accepts} disabled={disabled} />
+        <Input style={{ margin: '10px' }} id={id} type='file' onInput={onChange} accept={accepts} disabled={disabled} />
         <Button variant='outlined' component='span' disabled={disabled}>
           {label}
         </Button>

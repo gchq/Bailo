@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import FileInput from '../common/FileInput'
 
 export default function RenderFileTab({
   currentStep: step,
@@ -47,27 +48,17 @@ export default function RenderFileTab({
     <Grid container justifyContent='center'>
       <Stack direction='row' spacing={2} sx={{ p: 3 }}>
         <Box sx={{ textAlign: 'center' }}>
-          <label htmlFor={codeId}>
-            <Typography sx={{ p: 1 }} variant='h5'>
-              Uploade a code file (.zip)
-            </Typography>
-            <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept={'.zip'} />
-            <Button variant='outlined' component='span'>
-              {code ? displayFilename(code.name) : 'Upload file'}
-            </Button>
-          </label>
+          <Typography sx={{ p: 1 }} variant='h5'>
+            Upload a code file (.zip)
+          </Typography>
+          <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
         </Box>
         <Divider orientation='vertical' flexItem />
         <Box sx={{ textAlign: 'center' }}>
-          <label htmlFor={binaryId}>
-            <Typography sx={{ p: 1 }} variant='h5'>
-              Upload a binary file (.zip)
-            </Typography>
-            <Input style={{ margin: '10px' }} id={binaryId} type='file' onChange={handleBinaryChange} accept={'.zip'} />
-            <Button variant='outlined' component='span'>
-              {binary ? displayFilename(binary.name) : 'Upload file'}
-            </Button>
-          </label>
+          <Typography sx={{ p: 1 }} variant='h5'>
+            Upload a binary file (.zip)
+          </Typography>
+          <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
         </Box>
       </Stack>
     </Grid>

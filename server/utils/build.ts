@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
 import { join, dirname } from 'path'
 import { writeFile } from 'fs/promises'
+import { createReadStream } from 'fs'
 import { getClient } from './minio'
 import unzip from 'unzipper'
 import config from 'config'
@@ -11,6 +12,8 @@ import logger from './logger'
 import { getAdminToken } from '../routes/v1/registryAuth'
 import { VersionDoc } from '../models/Version'
 import { ModelDoc } from '../models/Model'
+import { OpenshiftClient } from 'openshift-rest-client'
+import AdmZip from 'adm-zip'
 
 interface FileRef {
   path: string
@@ -24,6 +27,11 @@ interface BuilderFiles {
 }
 
 export async function pullBuilderImage() {
+  if (config.get('build.environment') === 'openshift') {
+    logger.info('Running in Openshift, so not pulling base image')
+    return
+  }
+
   await logCommand(`img pull ${config.get('s2i.builderImage')}`, (level: string, message: string) =>
     logger[level](message)
   )
@@ -132,35 +140,159 @@ export async function buildPython(version: VersionDoc, builderFiles: BuilderFile
   await logCommand(command, version.log.bind(version))
 
   // build image
-  const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
-  vlog.info({ buildCommand }, 'Building')
-  await logCommand(buildCommand, version.log.bind(version))
+  if (config.get('build.environment') === 'openshift') {
+    vlog.info('Running in OpenShift. Using OS builder for image building')
+    const client = await OpenshiftClient()
 
-  // push image
-  vlog.info({ tag }, 'Pushing image to docker')
-  version.log('info', 'Logging into docker')
-  // using docker instead of img login because img reads from ~/.docker/config and
-  // does not fully populate authorization headers (clientId and account) in authorization
-  // requests like docker does. docker login doesn't require docker to be running in host
-  await runCommand(
-    `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
-    vlog.info.bind(vlog),
-    vlog.info.bind(vlog),
-    { hide: true }
-  )
-  version.log('info', 'Successfully logged into docker')
+    const { namespace, dockerPushSecretName } = config.get('openshift')
+    const registryUrl = `${config.get('openshift.appPublicRoute')}`
+    try {
+      const existingSecret = await client.api.v1.ns(namespace).secret(dockerPushSecretName).get()
+      vlog.info('Secret already exists')
+    } catch (error) {
+      const token = await getAdminToken()
+      const creds = `admin:${token}`
+      const b64Cred = Buffer.from(creds).toString('base64')
 
-  await logCommand(`img push ${tag}`, version.log.bind(version))
+      const dockerConfig = {
+        auths: {
+          [registryUrl]: {
+            auth: b64Cred,
+          },
+        },
+      }
 
-  // tidy up
-  vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
-  rm('-rf', tmpDir)
-  rm('-rf', buildDir)
-  rm('-rf', s2iDir)
+      const dockerSecret = {
+        kind: 'Secret',
+        apiVersion: 'v1',
+        metadata: {
+          name: dockerPushSecretName,
+        },
+        data: {
+          '.dockerconfigjson': Buffer.from(JSON.stringify(dockerConfig)).toString('base64'),
+        },
+        type: 'kubernetes.io/dockerconfigjson',
+      }
 
-  await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
-  const removeImageCmd = `img rm ${tag}`
-  await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
+      const createSecret = await client.api.v1.ns(namespace).secret.post({ body: dockerSecret })
+      vlog.info({ statusCode: createSecret.statusCode, body: createSecret.body }, 'Created docker secret')
+    }
+
+    const buildConfigName = `${(version.model as ModelDoc).uuid}-${version.version}`
+    let buildConfig = {
+      kind: 'BuildConfig',
+      apiVersion: 'build.openshift.io/v1',
+      metadata: {
+        name: buildConfigName,
+      },
+      spec: {
+        triggers: [
+          {
+            type: 'GitHub',
+            github: {
+              secret: 'notreallyvalid',
+            },
+          },
+        ],
+        runPolicy: 'Serial',
+        source: {
+          type: 'Binary',
+          binary: {},
+        },
+        strategy: {
+          type: 'Docker',
+          dockerStrategy: {},
+        },
+        output: {
+          to: {
+            kind: 'DockerImage',
+            name: `${registryUrl}/internal/${(version.model as ModelDoc).uuid}:${version.version}`,
+          },
+          pushSecret: {
+            name: dockerPushSecretName,
+          },
+        },
+        resources: {},
+        postCommit: {},
+        nodeSelector: null,
+        successfulBuildsHistoryLimit: 5,
+        failedBuildsHistoryLimit: 5,
+      },
+    }
+
+    try {
+      const bc = await client.apis['build.openshift.io'].v1.namespaces(namespace).buildconfigs(buildConfigName).get()
+      logger.info('Build config already exists')
+    } catch (error) {
+      const buildConfigRes = await client.apis['build.openshift.io'].v1
+        .namespaces(namespace)
+        .buildconfigs.post({ body: buildConfig })
+      vlog.info({ statusCode: buildConfigRes.statusCode, body: buildConfigRes.body }, 'Created build config')
+    }
+
+    const zipFile = `${buildDir}.zip`
+    const zip = new AdmZip()
+    zip.addLocalFolder(buildDir)
+    await zip.writeZip(zipFile)
+
+    const binaryResponse = await client.apis.build.v1
+      .ns(namespace)
+      .buildconfigs(buildConfigName)
+      .instantiatebinary.post({ body: createReadStream(zipFile), json: false })
+    vlog.info({ statusCode: binaryResponse.statusCode, body: binaryResponse.body }, 'Created binary')
+
+    const buildName = JSON.parse(binaryResponse.body).metadata.name
+    let curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
+    vlog.info({ statusCode: curBuild.statusCode, body: curBuild.body }, 'Current build status')
+
+    let buildJson = typeof curBuild.body === 'string' ? JSON.parse(curBuild.body) : curBuild.body
+    vlog.info({ buildJson }, 'Starting build JSON')
+
+    while (['Running', 'New'].includes(buildJson.status.phase)) {
+      vlog.info('Waiting for build to finish')
+      await new Promise((resolve) => setTimeout(resolve, 10000))
+      curBuild = await client.apis.build.v1.ns(namespace).builds(buildName).get()
+      vlog.info({ statusCode: curBuild.statusCode, body: curBuild.body }, 'Current build status')
+
+      buildJson = typeof curBuild.body === 'string' ? JSON.parse(curBuild.body) : curBuild.body
+    }
+
+    const buildLog = await client.apis.build.v1.ns(namespace).builds(buildName).log.get()
+    buildLog.body.split(/\r?\n/).forEach((line: string) => version.log('info', line))
+
+    // TODO clean up
+    vlog.info('Not yet complete')
+  } else {
+    const buildCommand = `img build -f ${buildDockerfile} -t ${tag} ${buildDir}`
+    vlog.info({ buildCommand }, 'Building')
+    await logCommand(buildCommand, version.log.bind(version))
+
+    // push image
+    vlog.info({ tag }, 'Pushing image to docker')
+    version.log('info', 'Logging into docker')
+    // using docker instead of img login because img reads from ~/.docker/config and
+    // does not fully populate authorization headers (clientId and account) in authorization
+    // requests like docker does. docker login doesn't require docker to be running in host
+    await runCommand(
+      `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
+      vlog.info.bind(vlog),
+      vlog.info.bind(vlog),
+      { hide: true }
+    )
+    version.log('info', 'Successfully logged into docker')
+
+    await logCommand(`img push ${tag}`, version.log.bind(version))
+
+    // tidy up
+    vlog.info({ tmpDir, builderFiles, s2iDir }, 'Removing temp directories and Minio uploads')
+    rm('-rf', tmpDir)
+    rm('-rf', buildDir)
+    rm('-rf', s2iDir)
+
+    await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
+    const removeImageCmd = `img rm ${tag}`
+    await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
+  }
 
   return tag
 }

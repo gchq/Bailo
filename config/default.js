@@ -1,6 +1,12 @@
 module.exports = {
   mongo: {
     uri: 'mongodb://localhost:27017/bailo',
+    connectionOptions: {
+      useFindAndModify: false,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    },
   },
 
   minio: {
@@ -13,6 +19,7 @@ module.exports = {
 
     uploadBucket: 'uploads',
     registryBucket: 'registry',
+    createBuckets: true,
   },
 
   registry: {
@@ -30,8 +37,14 @@ module.exports = {
     builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
   },
 
-  kaniko: {
-    path: 'kaniko_executor',
+  build: {
+    environment: 'local',
+  },
+
+  openshift: {
+    namespace: '',
+    appPublicRoute: '',
+    dockerPushSecretName: '',
   },
 
   uiConfig: {

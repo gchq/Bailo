@@ -104,6 +104,9 @@ export async function startServer() {
   // lazily create indexes for full text search
   createIndexes()
 
+  // pull builder image
+  pullBuilderImage()
+
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
   server.use((req, res) => {
