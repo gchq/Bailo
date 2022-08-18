@@ -1,7 +1,8 @@
 import { createSchema } from '../services/schema.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
-import minimal from './example_schemas/minimal_upload_schema.json.js'
+import minimal from './example_schemas/minimal_upload_schema.json'
+
 ;(async () => {
   await connectToMongoose()
 
