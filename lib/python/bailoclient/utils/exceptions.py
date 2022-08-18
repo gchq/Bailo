@@ -25,6 +25,10 @@ class DataInvalid(Exception):
     """Model data is invalid"""
 
 
+class InvalidFilePath(Exception):
+    """Filepath does not exist or is otherwise invalid"""
+
+
 class InvalidMetadata(Exception):
     """Metadata does not meet the minimal requirement"""
 
