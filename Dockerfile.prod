@@ -53,4 +53,4 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 EXPOSE 3000
 
-CMD ./scripts/run_app_prod
+CMD ./scripts/run_app_prod.sh
