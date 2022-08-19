@@ -5,8 +5,7 @@ from typing import Dict, Optional
 
 import requests
 import requests_pkcs12
-
-from bailoclient.utils.exceptions import NoServerResponseMessage
+from requests.exceptions import JSONDecodeError
 
 from .auth import AuthenticationInterface, Pkcs12Authenticator, UnauthorizedException
 from .config import BailoConfig
@@ -175,7 +174,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except NoServerResponseMessage:
+            except JSONDecodeError:
                 response.raise_for_status()
 
         response.raise_for_status()
@@ -237,7 +236,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except NoServerResponseMessage:
+            except JSONDecodeError:
                 response.raise_for_status()
 
         response.raise_for_status()
@@ -300,7 +299,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except NoServerResponseMessage:
+            except JSONDecodeError:
                 response.raise_for_status()
 
         response.raise_for_status()
