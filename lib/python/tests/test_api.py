@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import responses
-from bailoclient.config import APIConfig, BailoConfig
+from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
 from requests.exceptions import JSONDecodeError
 
 from ..bailoclient.api import AuthorisedAPI
-from ..bailoclient.auth import NullAuthenticator
+from ..bailoclient.auth import NullAuthenticator, Pkcs12Authenticator
 from ..bailoclient.utils.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
@@ -30,8 +30,22 @@ def authorised_api():
     return api
 
 
-def test_form_url_prepends_slash(authorised_api):
+@pytest.fixture
+def pki_authorised_api():
 
+    api_config = APIConfig(url=os.environ["BAILO_URL"], ca_verify=False)
+
+    pki_config = Pkcs12Config(pkcs12_filename="filename", pkcs12_password="password")
+    config = BailoConfig(api=api_config, pki=pki_config)
+
+    auth = Pkcs12Authenticator(config)
+
+    api = AuthorisedAPI(config, auth)
+
+    return api
+
+
+def test_form_url_prepends_slash(authorised_api):
     url = "this/is/a/url"
     formed_url = authorised_api._form_url(url)
 
@@ -39,7 +53,6 @@ def test_form_url_prepends_slash(authorised_api):
 
 
 def test_form_url_does_not_prepend_slash(authorised_api):
-
     url = "/this/is/a/url"
     formed_url = authorised_api._form_url(url)
 
@@ -47,14 +60,12 @@ def test_form_url_does_not_prepend_slash(authorised_api):
 
 
 def test_get_headers_returns_merged_headers_if_input_headers_provided(authorised_api):
-
     headers = authorised_api._get_headers({"new_header": "value2"})
 
     assert headers == {"header": "value", "new_header": "value2"}
 
 
 def test_get_headers_returns_auth_headers(authorised_api):
-
     assert authorised_api._get_headers() == {"header": "value"}
 
 
@@ -97,7 +108,7 @@ def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
     "bailoclient.api.requests.get",
     return_value=MockResponse({"result": "success"}, 200),
 )
-def test_get_calls_requests_get_if_not_pkcs_auth(mock_get, authorised_api):
+def test_get_calls_requests_get_if_not_pki_auth(mock_get, authorised_api):
 
     authorised_api.get("/test/url")
 
@@ -114,7 +125,7 @@ def test_get_calls_requests_get_if_not_pkcs_auth(mock_get, authorised_api):
     "bailoclient.api.requests.post",
     return_value=MockResponse({"result": "success"}, 200),
 )
-def test_post_calls_requests_get_if_not_pkcs_auth(mock_post, authorised_api):
+def test_post_calls_requests_get_if_not_pki_auth(mock_post, authorised_api):
     request_body = {"data": "value"}
 
     authorised_api.post("/test/url", request_body=request_body)
@@ -133,7 +144,7 @@ def test_post_calls_requests_get_if_not_pkcs_auth(mock_post, authorised_api):
     "bailoclient.api.requests.put",
     return_value=MockResponse({"result": "success"}, 200),
 )
-def test_put_calls_requests_get_if_not_pkcs_auth(mock_put, authorised_api):
+def test_put_calls_requests_get_if_not_pki_auth(mock_put, authorised_api):
     request_body = {"data": "value"}
 
     authorised_api.put("/test/url", request_body=request_body)
@@ -145,4 +156,66 @@ def test_put_calls_requests_get_if_not_pkcs_auth(mock_put, authorised_api):
         params=None,
         timeout=authorised_api.timeout_period,
         verify=authorised_api.verify_certificates,
+    )
+
+
+@patch(
+    "bailoclient.api.requests_pkcs12.get",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_get_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api):
+    request_body = {"data": "value"}
+
+    pki_authorised_api.get("/test/url")
+
+    mock_get.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        pkcs12_filename="filename",
+        pkcs12_password="password",
+        headers=pki_authorised_api._get_headers(),
+        params=None,
+        timeout=pki_authorised_api.timeout_period,
+        verify=pki_authorised_api.verify_certificates,
+    )
+
+
+@patch(
+    "bailoclient.api.requests_pkcs12.get",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_post_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api):
+    request_body = {"data": "value"}
+
+    pki_authorised_api.post("/test/url", request_body=request_body)
+
+    mock_get.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        pkcs12_filename="filename",
+        pkcs12_password="password",
+        data=request_body,
+        headers=pki_authorised_api._get_headers(),
+        params=None,
+        timeout=pki_authorised_api.timeout_period,
+        verify=pki_authorised_api.verify_certificates,
+    )
+
+
+@patch(
+    "bailoclient.api.requests_pkcs12.get",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_put_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api):
+    request_body = {"data": "value"}
+
+    pki_authorised_api.put("/test/url", request_body=request_body)
+
+    mock_get.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        pkcs12_filename="filename",
+        pkcs12_password="password",
+        data=request_body,
+        headers=pki_authorised_api._get_headers(),
+        params=None,
+        timeout=pki_authorised_api.timeout_period,
+        verify=pki_authorised_api.verify_certificates,
     )
