@@ -23,6 +23,7 @@ import {
   getCurrentUserDeployments,
   postDeployment,
   resetDeploymentApprovals,
+  fetchRawModelFiles,
 } from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
@@ -30,7 +31,6 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
 import { createIndexes } from './models/Model'
 import { getSpecification } from './routes/v1/specification'
 
@@ -64,6 +64,7 @@ server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getCurrentUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
+server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)

@@ -1,10 +1,14 @@
+import config from 'config'
+import * as Minio from 'minio'
+import fs from 'fs'
 import { Request, Response } from 'express'
+import contentDisposition from 'content-disposition'
 import bodyParser from 'body-parser'
 import { validateSchema } from '../../utils/validateSchema'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import { createDeploymentRequests } from '../../services/request'
-import { BadReq, NotFound, Forbidden } from '../../utils/result'
+import { BadReq, NotFound, Forbidden, Unauthorised } from '../../utils/result'
 import { findModelByUuid } from '../../services/model'
 import { findVersionByName } from '../../services/version'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
@@ -159,5 +163,61 @@ export const resetDeploymentApprovals = [
     await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
+  },
+]
+
+export const fetchRawModelFiles = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const { uuid, version, fileType } = req.params
+    const deployment: any = await findDeploymentByUuid(req.user!, uuid)
+
+    if (!req.user._id.equals(deployment.owner)) {
+      throw Unauthorised(
+        {},
+        `User is not authorised to download this file. Requester: ${req.user._id}, owner: ${deployment.owner}`
+      )
+    }
+
+    if (fileType !== 'code' && fileType !== 'binary') {
+      throw NotFound({ fileType }, 'Unknown file type specificed')
+    }
+
+    if (deployment === null) {
+      throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
+    }
+
+    const versionDocument: any = await findVersionByName(req.user!, deployment.model, version)
+    const bucketName: string = config.get('minio.uploadBucket')
+    const client = new Minio.Client(config.get('minio'))
+
+    let filePath
+
+    if (fileType === 'code') {
+      filePath = versionDocument.rawCodePath
+    }
+    if (fileType === 'binary') {
+      filePath = versionDocument.rawBinaryPath
+    }
+
+    // Stat object to get size so browser can determine progress
+    const { size } = await client.statObject(bucketName, filePath)
+
+    res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
+    res.set('Content-Type', 'application/zip')
+    res.set('Cache-Control', 'private, max-age=604800, immutable')
+    res.set('Content-Length', size.toString())
+    res.writeHead(200)
+
+    const stream: any = await client.getObject(bucketName, filePath)
+    await stream.on('data', async (_obj, error) => {
+      if (error) {
+        req.log.error('Error fetching model exports from storage')
+      }
+    })
+    stream.pipe(res)
+
+    return res
   },
 ]
