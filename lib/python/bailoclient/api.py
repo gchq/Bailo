@@ -98,6 +98,21 @@ class APIInterface(abc.ABC):
         """
         raise NotImplementedError
 
+    def _handle_response(self, response):
+        if 200 <= response.status_code < 300:
+            return response.json()
+
+        if response.status_code == 401:
+            try:
+                data = response.json()
+                raise UnauthorizedException(data)
+            except JSONDecodeError:
+                response.raise_for_status()
+
+        response.raise_for_status()
+
+        return {}
+
 
 class AuthorisedAPI(APIInterface):
     """Authorised API interface"""
@@ -167,19 +182,7 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        if 200 <= response.status_code < 300:
-            return response.json()
-
-        if response.status_code == 401:
-            try:
-                data = response.json()
-                raise UnauthorizedException(data)
-            except JSONDecodeError:
-                response.raise_for_status()
-
-        response.raise_for_status()
-
-        return {}
+        return self._handle_response(response)
 
     def post(
         self,
@@ -229,19 +232,7 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        if 200 <= response.status_code < 300:
-            return response.json()
-
-        if response.status_code == 401:
-            try:
-                data = response.json()
-                raise UnauthorizedException(data)
-            except JSONDecodeError:
-                response.raise_for_status()
-
-        response.raise_for_status()
-
-        return {}
+        return self._handle_response(response)
 
     def put(
         self,
@@ -292,16 +283,4 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        if 200 <= response.status_code < 300:
-            return response.json()
-
-        if response.status_code == 401:
-            try:
-                data = response.json()
-                raise UnauthorizedException(data)
-            except JSONDecodeError:
-                response.raise_for_status()
-
-        response.raise_for_status()
-
-        return {}
+        return self._handle_response(response)
