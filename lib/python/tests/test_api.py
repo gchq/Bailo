@@ -1,13 +1,18 @@
 import os
-from unittest.mock import MagicMock
+import re
+from unittest.mock import MagicMock, patch
 
 import pytest
 import responses
 from bailoclient.config import APIConfig, BailoConfig
+from requests.exceptions import JSONDecodeError
 
 from ..bailoclient.api import AuthorisedAPI
 from ..bailoclient.auth import NullAuthenticator
-from ..bailoclient.utils.exceptions import UnauthorizedException
+from ..bailoclient.utils.exceptions import (
+    NoServerResponseMessage,
+    UnauthorizedException,
+)
 
 
 @pytest.fixture
@@ -53,33 +58,91 @@ def test_get_headers_returns_auth_headers(authorised_api):
     assert authorised_api._get_headers() == {"header": "value"}
 
 
-@responses.activate
-def test_successful_get_returns_response_json(authorised_api):
+class MockResponse:
+    def __init__(self, response_json, status_code):
+        self.response_json = response_json
+        self.status_code = status_code
 
-    response_json = {"response": "success"}
+    def json(self):
+        if not self.response_json:
+            raise JSONDecodeError("msg", "doc", 1)
 
-    responses.add(
-        responses.GET,
-        f'{os.environ["BAILO_URL"]}/test/get/success',
-        json=response_json,
-        status=200,
+        return self.response_json
+
+    def raise_for_status(self):
+        if not self.response_json:
+            raise NoServerResponseMessage(f"Server returned {self.status_code}")
+
+
+def test_get_returns_response_json_if_successful(authorised_api):
+    response = authorised_api._handle_response(
+        MockResponse({"response": "success"}, 201)
     )
-
-    response = authorised_api.get("/test/get/success")
-
-    assert response == response_json
+    assert response == {"response": "success"}
 
 
-@responses.activate
-def test_unsuccessful_get_raises_exception(authorised_api):
-    response_json = {"response": "failure"}
-
-    responses.add(
-        responses.GET,
-        f'{os.environ["BAILO_URL"]}/test/get/failure',
-        json=response_json,
-        status=401,
-    )
-
+def test_handle_response_raises_unauthorised_exception_if_401_error_and_response_json(
+    authorised_api,
+):
     with pytest.raises(UnauthorizedException):
-        response = authorised_api.get("/test/get/failure")
+        authorised_api._handle_response(MockResponse({"response": "failure"}, 401))
+
+
+def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
+    with pytest.raises(NoServerResponseMessage, match=re.escape("Server returned 401")):
+        authorised_api._handle_response(MockResponse(None, 401))
+
+
+@patch(
+    "bailoclient.api.requests.get",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_get_calls_requests_get_if_not_pkcs_auth(mock_get, authorised_api):
+
+    authorised_api.get("/test/url")
+
+    mock_get.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        headers=authorised_api._get_headers(),
+        params=None,
+        timeout=authorised_api.timeout_period,
+        verify=authorised_api.verify_certificates,
+    )
+
+
+@patch(
+    "bailoclient.api.requests.post",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_post_calls_requests_get_if_not_pkcs_auth(mock_post, authorised_api):
+    request_body = {"data": "value"}
+
+    authorised_api.post("/test/url", request_body=request_body)
+
+    mock_post.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        data=request_body,
+        headers=authorised_api._get_headers(),
+        params=None,
+        timeout=authorised_api.timeout_period,
+        verify=authorised_api.verify_certificates,
+    )
+
+
+@patch(
+    "bailoclient.api.requests.put",
+    return_value=MockResponse({"result": "success"}, 200),
+)
+def test_put_calls_requests_get_if_not_pkcs_auth(mock_put, authorised_api):
+    request_body = {"data": "value"}
+
+    authorised_api.put("/test/url", request_body=request_body)
+
+    mock_put.assert_called_once_with(
+        f"{os.environ['BAILO_URL']}/test/url",
+        data=request_body,
+        headers=authorised_api._get_headers(),
+        params=None,
+        timeout=authorised_api.timeout_period,
+        verify=authorised_api.verify_certificates,
+    )
