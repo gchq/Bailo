@@ -120,7 +120,7 @@ class AuthorisedAPI(APIInterface):
             input_headers.update(self.auth.get_authorisation_headers())
             return input_headers
 
-        return {**self.auth.get_authorisation_headers()}
+        return self.auth.get_authorisation_headers()
 
     def get(
         self,
