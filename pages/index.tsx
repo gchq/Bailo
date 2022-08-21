@@ -11,12 +11,14 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
+import useTheme from '@mui/styles/useTheme'
 import Wrapper from '../src/Wrapper'
 import useDebounce from '../utils/useDebounce'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Model } from '../types/interfaces'
+import { lightTheme } from '../src/theme'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
@@ -24,6 +26,8 @@ export default function ExploreModels() {
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+
+  const theme: any = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -67,7 +71,13 @@ export default function ExploreModels() {
       <Box>
         <Paper sx={{ py: 2, px: 4 }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example' indicatorColor='secondary'>
+            <Tabs
+              value={group}
+              onChange={handleGroupChange}
+              aria-label='basic tabs example'
+              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+              indicatorColor='secondary'
+            >
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='user' />
               <Tab label='Favourites' value='favourites' />
@@ -79,7 +89,10 @@ export default function ExploreModels() {
             models.map((model: Model, index: number) => (
               <Box key={model.uuid}>
                 <Link href={`/model/${model.uuid}`} passHref>
-                  <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none' }}>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
                     {model.currentMetadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
@@ -90,7 +103,14 @@ export default function ExploreModels() {
 
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                    <Chip
+                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                      key={`chip-${tag}`}
+                      label={tag}
+                      size='small'
+                      variant='outlined'
+                    />
                   ))}
                 </Stack>
 

@@ -4,13 +4,13 @@
 
 import ApprovalsChip from './ApprovalsChip'
 import { render, screen, waitFor } from '@testing-library/react'
-import theme from '../theme'
+import { lightTheme } from '../theme'
 import ThemeProvider from '@mui/system/ThemeProvider'
 
 describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/2 approvals', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ApprovalsChip approvals={['No Response', 'No Response']} />
       </ThemeProvider>
     )
@@ -22,7 +22,7 @@ describe('ApprovalsChip', () => {
 
   it('renders an ApprovalsChip component with 1/2 approvals', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ApprovalsChip approvals={['Accepted', 'No Response']} />
       </ThemeProvider>
     )
@@ -34,7 +34,7 @@ describe('ApprovalsChip', () => {
 
   it('renders an ApprovalsChip component with 2/2 approvals', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ApprovalsChip approvals={['Accepted', 'Accepted']} />
       </ThemeProvider>
     )
@@ -46,7 +46,7 @@ describe('ApprovalsChip', () => {
 
   it('renders an ApprovalsChip component with 0/1 approvals', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ApprovalsChip approvals={['No Response']} />
       </ThemeProvider>
     )
@@ -58,7 +58,7 @@ describe('ApprovalsChip', () => {
 
   it('renders an ApprovalsChip component with 1/1 approvals', async () => {
     render(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={lightTheme}>
         <ApprovalsChip approvals={['Accepted']} />
       </ThemeProvider>
     )

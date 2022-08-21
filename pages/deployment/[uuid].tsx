@@ -17,12 +17,14 @@ import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import DownArrow from '@mui/icons-material/KeyboardArrowDown'
-import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import Stack from '@mui/material/Stack'
-import RestartAlt from '@mui/icons-material/RestartAlt'
+import MuiLink from '@mui/material/Link'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
+import useTheme from '@mui/styles/useTheme'
 
 import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
@@ -36,10 +38,23 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
+import { lightTheme } from '../../src/theme'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'settings'
+
+function isTabOption(value: string): value is TabOptions {
+  switch (value) {
+    case 'overview':
+    case 'compliance':
+    case 'build':
+    case 'settings':
+      return true
+    default:
+      return false
+  }
+}
 
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)
@@ -66,15 +81,10 @@ function CodeLine({ line }) {
           }
         }}
       >
-        ${' '}
         <Tooltip title='Copy to clipboard' arrow>
-          <b
-            style={{
-              background: '#e0e0e0',
-            }}
-          >
-            {line}
-          </b>
+          <Box sx={{ backgroundColor: 'whitesmoke', color: '#383838', p: 1, borderRadius: 2 }}>
+            $ <b>{line}</b>
+          </Box>
         </Tooltip>
       </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
@@ -84,9 +94,9 @@ function CodeLine({ line }) {
 
 export default function Deployment() {
   const router = useRouter()
-  const { uuid }: { uuid?: string } = router.query
+  const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
-  const [tab, setTab] = useState<TabOptions>('overview')
+  const [group, setGroup] = useState<TabOptions>('overview')
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
@@ -97,6 +107,8 @@ export default function Deployment() {
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
+  const theme: any = useTheme() || lightTheme
+
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
@@ -105,8 +117,15 @@ export default function Deployment() {
   }, [deployment])
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
-    setTab(newValue)
+    setGroup(newValue)
+    router.push(`/deployment/${uuid}?tab=${newValue}`)
   }
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (deployment) {
@@ -187,7 +206,13 @@ export default function Deployment() {
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
-            <Tabs indicatorColor='secondary' value={tab} onChange={handleTabChange} aria-label='basic tabs example'>
+            <Tabs
+              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+              indicatorColor='secondary'
+              value={group}
+              onChange={handleTabChange}
+              aria-label='basic tabs example'
+            >
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
               <Tab label='Build Logs' value='build' />
@@ -196,20 +221,26 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {tab === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
 
-          {tab === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+          {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
-          {tab === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+          {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle>Pull from Docker</DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>
+          Pull from Docker
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ backgroundColor: 'whitesmoke', p: 2 }}>
+          <DialogContentText sx={{ p: 2 }}>
             <Box>
               <p style={{ margin: 0 }}>
-                # Login to Docker (your token can be found on the <Link href='/settings'>settings</Link> page)
+                # Login to Docker (your token can be found on the
+                <Link href='/settings'>
+                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
+                </Link>
+                page) {theme.palette.mode}
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />

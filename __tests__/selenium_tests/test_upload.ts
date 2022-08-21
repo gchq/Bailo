@@ -239,7 +239,8 @@ describe('End to end test', () => {
         await driver.get(BAILO_APP_URL)
 
         logger.info('changing to settings page')
-        await click(driver, By.css('[data-test="settingLink"]'))
+        await click(driver, By.css('[data-test="showUserMenu"]'))
+        await click(driver, By.css('[data-test="settingsLink"]'))
 
         logger.info('showing docker password')
         await click(driver, By.css('[data-test="showTokenButton"]'))
