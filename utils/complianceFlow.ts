@@ -4,7 +4,7 @@ import { Deployment, Version } from 'types/interfaces'
 
 function approvalColour(state: string) {
   if (state === 'No Response') return yellow['200']
-  if (state === 'Accepted') return green['A200']
+  if (state === 'Accepted') return green.A200
   if (state === 'Declined') return red['200']
 
   return yellow['200']
@@ -13,7 +13,7 @@ function approvalColour(state: string) {
 export default function createComplianceFlow(version: Version) {
   const position: XYPosition = { x: 0, y: 0 }
 
-  const success = green['A200']
+  const success = green.A200
   const inProgress = yellow['200']
 
   let imageBuiltStyle: string = version.built ? success : inProgress
@@ -28,7 +28,7 @@ export default function createComplianceFlow(version: Version) {
     reviewerApprovedStyle = approvalColour(version.reviewerApproved)
   }
 
-  let availableStyle =
+  const availableStyle =
     version.built && version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
       ? success
       : undefined
@@ -84,7 +84,7 @@ export default function createComplianceFlow(version: Version) {
 export function createDeploymentComplianceFlow(deployment: Deployment) {
   const position: XYPosition = { x: 0, y: 0 }
 
-  const success = green['A200']
+  const success = green.A200
   const inProgress = yellow['200']
 
   const imageBuiltStyle = deployment.built ? success : inProgress
@@ -94,7 +94,7 @@ export function createDeploymentComplianceFlow(deployment: Deployment) {
     managerApprovedStyle = approvalColour(deployment.managerApproved)
   }
 
-  let availableStyle = deployment.managerApproved === 'Accepted' ? success : undefined
+  const availableStyle = deployment.managerApproved === 'Accepted' ? success : undefined
 
   return [
     {

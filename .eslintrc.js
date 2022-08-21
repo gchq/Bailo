@@ -25,6 +25,8 @@ module.exports = {
     'prettier',
   ],
   rules: {
+    'import/no-extraneous-dependencies': 'off',
+    'no-restricted-syntax': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     'no-underscore-dangle': 'off',
     'react/jsx-filename-extension': [1, { extensions: ['.ts', '.tsx'] }],

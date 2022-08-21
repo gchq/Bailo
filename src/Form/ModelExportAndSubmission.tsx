@@ -46,7 +46,7 @@ const ModelExportAndSubmission = ({
   onSubmit: any
   activeStep: number
   setActiveStep: Function
-  modelUploading: boolean
+  modelUploading: boolean | undefined
 }) => {
   const [ref] = useState<any>(createRef())
   const [wrappedMetadata, setWrappedMetadata] = useState<any>({ metadata: {} })
