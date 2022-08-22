@@ -22,46 +22,40 @@ export default function ConfirmationDialogue({
   functionOnConfirm: Function
   dialogueText: string
 }) {
-  const [open, setOpen] = useState(false)
   
   const [confirmationModalText, setConfirmationModalText] = useState('')
   const [confirmationModalTitle, setConfirmationModalTitle] = useState('')
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
 
   const handleClose = () => {
-    setOpen(false)
+    showConfirmationDialogue = false
   }
 
   const onCancel = () => {
-    setOpen(false)
+    showConfirmationDialogue = false
   }
 
   const onConfirm = () => {
     functionOnConfirm(); 
-    setOpen(false)
+    showConfirmationDialogue = false
   }
 
   return (
     <>
-      {showConfirmationDialogue && (
-        <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>{confirmationModalText}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button color='secondary' variant='outlined' onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
-                Confirm
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <EmptyBlob text={dialogueText} />
-        </Paper>
-      )}
+      <Dialog open={showConfirmationDialogue} onClose={handleClose}>
+        <EmptyBlob text={dialogueText} />
+        <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>{confirmationModalText}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color='secondary' variant='outlined' onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

@@ -92,6 +92,7 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -180,11 +181,11 @@ function Model() {
   }
 
   const onDelete = () => {
-    //open the confirm dialogue
+    setDeleteConfirmOpen(true)
   }
 
   const onDeleteConfirm = () => {
-    //delete the model
+    console.log("Model would be deleted if this function did anything")
   }
 
   return (
@@ -418,8 +419,8 @@ function Model() {
 
             <Box sx={{ mb: 4 }} />
 
-            <ConfirmationDialogue showConfirmationDialogue={false} functionOnConfirm={onDeleteConfirm}  dialogueText="Delete the model?" />
-
+            <ConfirmationDialogue showConfirmationDialogue={deleteConfirmOpen} functionOnConfirm={onDeleteConfirm}  dialogueText="Delete the model?" />
+            
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
