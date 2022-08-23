@@ -8,7 +8,7 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import Tooltip from '@mui/material/Tooltip'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { lightTheme } from '../theme'
 
 const SettingsProfileTab = ({ user }: { user: any }) => {

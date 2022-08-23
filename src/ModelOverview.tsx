@@ -3,7 +3,7 @@ import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import MetadataDisplay from './MetadataDisplay'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { lightTheme } from '../src/theme'
 
 const ModelOverview = (props: any) => {

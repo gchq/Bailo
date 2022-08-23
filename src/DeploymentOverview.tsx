@@ -2,7 +2,7 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import MetadataDisplay from './MetadataDisplay'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { lightTheme } from './theme'
 
 const DeploymentOverview = (props: any) => {

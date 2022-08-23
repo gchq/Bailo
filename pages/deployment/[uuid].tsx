@@ -24,7 +24,7 @@ import MuiLink from '@mui/material/Link'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 
 import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'

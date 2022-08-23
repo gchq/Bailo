@@ -38,7 +38,7 @@ import { useGetCurrentUser } from '../data/user'
 import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { lightTheme } from './theme'
 import { DarkModeContext } from '../pages/_app'
 

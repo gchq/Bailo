@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 

@@ -23,7 +23,7 @@ import Favorite from '@mui/icons-material/FavoriteTwoTone'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'

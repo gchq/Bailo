@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 import { useGetSchemas } from '../data/schema'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { lightTheme } from '../src/theme'
 
 const MetadataDisplay = ({
