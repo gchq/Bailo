@@ -97,6 +97,20 @@ function Model() {
     router.push(`/model/${uuid}/deploy`)
   }
 
+  const requestPublicDeployment = async() => {
+    const body = {
+      versionId: version?._id,
+      modelId: version?.model,
+      // Change to be a user specified value
+      deploymentName: 'test'
+    }
+    await postEndpoint('/api/v1/deployment/public', {...body})
+      .then((res) => res.json())
+      .then((uuid: string) => {
+        router.push(`/deployment/public/${uuid}`)
+      })
+  }
+
   const copyModelCardToClipboard = () => {
     copy(JSON.stringify(version?.metadata, null, 2))
     setCopyModelCardSnackbarOpen(true)
@@ -206,7 +220,7 @@ function Model() {
                   <ListItemText>Request deployment</ListItemText>
                 </MenuItem>
                 <MenuItem
-                  onClick={requestDeployment}
+                  onClick={requestPublicDeployment}
                   disabled={
                     !version.built || 
                     version.managerApproved !== 'Accepted' || 

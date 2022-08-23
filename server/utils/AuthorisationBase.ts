@@ -1,6 +1,6 @@
 import { User, Model, Deployment, Version } from '../../types/interfaces'
 import { Request } from 'express'
-import { DeploymentDoc } from '../models/Deployment'
+import { DeploymentDoc, PublicDeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
 
@@ -28,6 +28,10 @@ export default class AuthorisationBase {
   }
 
   async canUserSeeDeployment(_user: UserDoc, _deployment: DeploymentDoc) {
+    return true
+  }
+
+  async canUserSeePublicDeployment(_user: UserDoc, _publicDeployment: PublicDeploymentDoc) {
     return true
   }
 }

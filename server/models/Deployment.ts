@@ -41,6 +41,25 @@ export interface Deployment {
 
 export type DeploymentDoc = Deployment & Document<any, any, Deployment>
 
+export interface PublicDeployment {
+  uuid: string
+
+  model: Types.ObjectId | ModelDoc
+  version: Types.ObjectId | VersionDoc
+
+  logs: Types.Array<LogStatement>
+  built: boolean
+
+  owner: Types.ObjectId | UserDoc
+
+  createdAt: Date
+  updatedAt: Date
+
+  log: (level: string, msg: string) => Promise<void>
+}
+
+export type PublicDeploymentDoc = PublicDeployment & Document<any, any, PublicDeployment>
+
 const DeploymentSchema = new Schema<Deployment>(
   {
     schemaRef: { type: String, required: true },

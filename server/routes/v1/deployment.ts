@@ -4,12 +4,13 @@ import { validateSchema } from '../../utils/validateSchema'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import { createDeploymentRequests } from '../../services/request'
-import { BadReq, NotFound, Forbidden } from '../../utils/result'
-import { findModelByUuid } from '../../services/model'
-import { findVersionByName } from '../../services/version'
-import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { BadReq, NotFound, Forbidden, Conflict } from '../../utils/result'
+import { findModelById, findModelByUuid, isValidFilter } from '../../services/model'
+import { findVersionById, findVersionByName } from '../../services/version'
+import { createDeployment, createPublicDeployment, findDeploymentByUuid, findDeployments, findPublicDeploymentByUuid, findPublicDeployments } from '../../services/deployment'
 import { ApprovalStates } from '../../models/Deployment'
 import { findSchemaByRef } from '../../services/schema'
+import { getDeploymentQueue } from '../../utils/queues'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -159,5 +160,113 @@ export const resetDeploymentApprovals = [
     await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
+  },
+]
+
+export const getPublicDeployments = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    console.log('here')
+    let { filter } = req.query
+
+    if (filter === undefined) filter = ''
+
+    if (!isValidFilter(filter)) {
+      throw BadReq({ code: 'invalid_filter', filter }, `Provided invalid filter '${filter}'`)
+    }
+
+    const models = await findPublicDeployments(req.user!, filter as string)
+
+    req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
+
+    return res.json({
+      models,
+    })
+  },
+]
+
+export const getPublicDeployment = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { uuid } = req.params
+
+    const publicDeployment = await findPublicDeploymentByUuid(req.user!, uuid)
+
+    if (!publicDeployment) {
+      throw NotFound({ code: 'deployment_not_found', uuid }, `Unable to find deployment '${uuid}'`)
+    }
+
+    req.log.info({ code: 'get_public_deployment_by_uuid', publicDeployment }, 'Fetching public deployment by a given UUID')
+    return res.json(publicDeployment)
+  },
+]
+
+export const postPublicDeployment = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    req.log.info({ code: 'requesting_public_deployment' }, 'User requesting public deployment')
+
+    const body = req.body as any
+    const { modelId, versionId, deploymentName } = body
+
+    body.user = req.user?.id
+    body.timeStamp = new Date().toISOString()
+
+    const model = await findModelById(req.user!, modelId)
+
+    if (!model) {
+      throw NotFound(
+        { code: 'model_not_found', modelId: modelId },
+        `Unable to find model with name: '${modelId}'`
+      )
+    }
+
+    const version = await findVersionById(req.user!, versionId)
+
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: versionId },
+        `Unable to find version with name: ${versionId} for model: ${modelId}`
+      )
+    }
+
+    const name = deploymentName
+    .toLowerCase()
+    .replace(/[^a-z 0-9]/g, '')
+    .replace(/ /g, '-')
+
+    const uuid = `${name}-${nanoid()}`
+    req.log.info({ uuid }, `Named public deployment '${uuid}'`)
+
+    const publicDeployment = await createPublicDeployment(req.user!, {
+      uuid: uuid,
+
+      version: version._id,
+      model: model._id,
+
+      owner: req.user!._id,
+    })
+
+    req.log.info({ code: 'saving_public_deployment', publicDeployment }, 'Saving public deployment model')
+
+    try {
+      await publicDeployment.save()
+      req.log.info({ code: 'triggered_deployments', publicDeployment }, 'Triggered public deployment')
+        await (
+          await getDeploymentQueue()
+        ).add({
+          deploymentId: publicDeployment._id,
+          userId: req.user!._id,
+          type: 'public'
+        })
+    } catch(e: any) {
+      if (e.contains('E11000')) {
+        throw Conflict({versionId}, 'Duplicate version ID')      
+      }
+    }
+
+    return res.json(uuid)
+
   },
 ]

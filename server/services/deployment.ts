@@ -2,6 +2,7 @@ import { castArray } from 'lodash'
 
 import { Forbidden } from '../utils/result'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
+import PublicDeploymentModel, { PublicDeploymentDoc } from '../models/PublicDeployment'
 import { ModelId } from '../../types/interfaces'
 import AuthorisationBase from '../utils/AuthorisationBase'
 import { asyncFilter } from '../utils/general'
@@ -78,6 +79,15 @@ interface CreateDeployment {
   owner: ModelId
 }
 
+interface CreatePublicDeployment {
+  uuid: string
+
+  version: VersionDoc
+  model: ModelId
+
+  owner: ModelId
+}
+
 export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   const deployment = new DeploymentModel(data)
 
@@ -98,4 +108,43 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
       deployment.save()
     })
   }
+}
+
+export async function findPublicDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
+  let publicDeployment = PublicDeploymentModel.findOne({ uuid })
+  if (opts?.populate) publicDeployment = publicDeployment.populate('model')
+
+  return filterDeployment(user, await publicDeployment)
+}
+
+export async function createPublicDeployment(user: UserDoc, data: CreatePublicDeployment) {
+  const publicDeployment = new PublicDeploymentModel(data)
+
+  if (!(await authorisation.canUserSeePublicDeployment(user, publicDeployment))) {
+    throw Forbidden({ data }, 'Unable to create deployment, failed permissions check.')
+  }
+
+  await publicDeployment.save()
+
+  return publicDeployment
+}
+
+export async function findPublicDeploymentById(user: UserDoc, id: ModelId, opts?: GetDeploymentOptions) {
+  let publicDeployment = PublicDeploymentModel.findById(id)
+  if (opts?.populate) publicDeployment = publicDeployment.populate('model')
+
+  return filterDeployment(user, await publicDeployment)
+}
+
+export async function findPublicDeployments(user: UserDoc, filter: string) {
+  const query: any = {}
+
+  if (filter) query.$text = { $search: filter as string }
+
+  const publicDeployments = await PublicDeploymentModel.find(query).sort({ updatedAt: -1 })
+  return filterDeployment(user, publicDeployments)
+}
+
+export async function markPublicDeploymentBuilt(_id: ModelId) {
+  return PublicDeploymentModel.findByIdAndUpdate(_id, { built: true })
 }

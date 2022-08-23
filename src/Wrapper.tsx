@@ -288,7 +288,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
               <ListItem button selected={page === 'deployments'}>
                 <ListItemIcon>
                   {!open ? (
-                    <Tooltip title='My Deployments' arrow placement='right'>
+                    <Tooltip title='Deployments' arrow placement='right'>
                       <ViewList />
                     </Tooltip>
                   ) : (

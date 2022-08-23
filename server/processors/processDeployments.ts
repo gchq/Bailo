@@ -5,7 +5,7 @@ import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
 import { getUserByInternalId } from '../services/user'
-import { findDeploymentById, markDeploymentBuilt } from '../services/deployment'
+import { findDeploymentById, findPublicDeploymentById, markDeploymentBuilt, markPublicDeploymentBuilt } from '../services/deployment'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
@@ -17,7 +17,7 @@ export default async function processDeployments() {
     try {
       const startTime = new Date()
 
-      const { deploymentId, userId } = msg.payload
+      const { deploymentId, userId, type } = msg.payload
 
       const user = await getUserByInternalId(userId)
 
@@ -26,16 +26,29 @@ export default async function processDeployments() {
         throw new Error('Unable to find deployment owner')
       }
 
-      const deployment = await findDeploymentById(user, deploymentId, { populate: true })
+      let deployment
+      let modelID
+      let initialVersionRequested
 
-      if (!deployment) {
-        logger.error('Unable to find deployment')
-        throw new Error('Unable to find deployment')
+      if (type !== undefined && type === 'public') { 
+        deployment = await findPublicDeploymentById(user, deploymentId, { populate: true })
+        if (!deployment) {
+          logger.error('Unable to find public deployment')
+          throw new Error('Unable to find public deployment')
+        }
+        modelID = deployment.model
+        initialVersionRequested = deployment.version        
+      } else {
+        deployment = await findDeploymentById(user, deploymentId, { populate: true })
+        if (!deployment) {
+          logger.error('Unable to find deployment')
+          throw new Error('Unable to find deployment')
+        }
+        modelID = deployment.metadata.highLevelDetails.modelID
+        initialVersionRequested = deployment.metadata.highLevelDetail.initialVersionRequested
       }
 
       const dlog = logger.child({ deploymentId: deployment._id })
-
-      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
       const registry = `https://${config.get('registry.host')}/v2`
       const tag = `${modelID}:${initialVersionRequested}`
@@ -120,7 +133,12 @@ export default async function processDeployments() {
 
       deployment.log('info', 'Finalised new manifest')
       dlog.info('Marking build as successful')
-      await markDeploymentBuilt(deployment._id)
+
+      if (type !== undefined && type === 'public') { 
+        await markPublicDeploymentBuilt(deployment._id)
+      } else {
+        await markDeploymentBuilt(deployment._id)
+      }
 
       const time = prettyMs(new Date().getTime() - startTime.getTime())
       await deployment.log('info', `Processed deployment with tag '${externalImage}' in ${time}`)
