@@ -41,6 +41,9 @@ module.exports = {
     // needed because of https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md#how-to-use & https://stackoverflow.com/questions/63818415/react-was-used-before-it-was-defined
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error',
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.spec.ts', '**/*.spec.tsx'] }],
   },
   settings: {
     'import/resolver': {
