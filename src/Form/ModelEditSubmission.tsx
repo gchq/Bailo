@@ -20,7 +20,7 @@ const ModelEditSubmission = ({
   onSubmit: any
   activeStep: number
   setActiveStep: Function
-  modelUploading: boolean | undefined
+  modelUploading: boolean
 }) => {
   const [warningCheckboxVal, setWarningCheckboxVal] = useState<boolean>(false)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()

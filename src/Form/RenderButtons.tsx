@@ -22,7 +22,7 @@ export interface RenderButtonsInterface {
   openValidateError: boolean
   setOpenValidateError: Dispatch<SetStateAction<boolean>>
 
-  modelUploading: boolean | undefined
+  modelUploading: boolean
 }
 
 export default function RenderButtons({

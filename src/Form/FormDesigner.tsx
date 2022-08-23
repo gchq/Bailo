@@ -17,7 +17,7 @@ export default function FormDesigner({
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: Function
-  modelUploading?: boolean
+  modelUploading: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [openValidateError, setOpenValidateError] = useState(false)
