@@ -1,9 +1,9 @@
 import { join } from 'path'
-import Bailo from '../../lib/node.js'
 import fs from 'fs'
 import { fileFromPath } from 'formdata-node/file-from-path'
-import logger from '../utils/logger.js'
 import open from 'open'
+import logger from '../utils/logger.js'
+import Bailo from '../../lib/node'
 
 async function uploadExampleModel() {
   const api = new Bailo('http://localhost:8080/api/v1')
