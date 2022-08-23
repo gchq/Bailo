@@ -119,7 +119,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} modelUploading={false} />
     </Paper>
   )
 }
