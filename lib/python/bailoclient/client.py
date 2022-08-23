@@ -8,7 +8,7 @@ import os
 from functools import wraps
 from typing import Callable, Union
 
-from requests_toolbelt.multipart import encoder
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 from .api import AuthorisedAPI
 from .auth import (
@@ -18,7 +18,13 @@ from .auth import (
 )
 from .config import BailoConfig, load_config
 from .models import Model, User
-from .utils.exceptions import DataInvalid, InvalidMetadata, UnconnectedClient
+from .utils.exceptions import (
+    CannotIncrementVersion,
+    DataInvalid,
+    InvalidFilePath,
+    InvalidMetadata,
+    UnconnectedClient,
+)
 from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
 
 logger = logging.getLogger(__name__)
@@ -169,6 +175,17 @@ class Client:
         logger.warning("User with display name %s not found", name)
         return None
 
+    def __model(self, model: dict) -> Model:
+        """Create Model with schema
+
+        Args:
+            model (dict): Model data returned from API
+
+        Returns:
+            Model: Model class object
+        """
+        return Model(model, _schema=self.get_model_schema(model["uuid"]))
+
     @handle_reconnect
     def get_models(
         self,
@@ -184,8 +201,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=all&filter={filter_str}")["models"]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(f"/models?type=all&filter={filter_str}")[
+                "models"
+            ]
         ]
 
     @handle_reconnect
@@ -203,10 +222,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=favourites&filter={filter_str}")[
-                "models"
-            ]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(
+                f"/models?type=favourites&filter={filter_str}"
+            )["models"]
         ]
 
     @handle_reconnect
@@ -224,8 +243,10 @@ class Client:
         """
 
         return [
-            Model(_)
-            for _ in self.api.get(f"/models?type=user&filter={filter_str}")["models"]
+            self.__model(model_metadata)
+            for model_metadata in self.api.get(
+                f"/models?type=user&filter={filter_str}"
+            )["models"]
         ]
 
     @handle_reconnect
@@ -292,7 +313,10 @@ class Client:
             # TODO check that it's some compressed format supported by Patool
             # (used in workflow-extract-files-from-minio)
             if file_path and not os.path.exists(file_path):
-                raise DataInvalid(f"{file_path} does not exist")
+                raise InvalidFilePath(f"{file_path} does not exist")
+
+            if file_path and os.path.isdir(file_path):
+                raise InvalidFilePath(f"{file_path} is a directory")
 
     def __validate_metadata(self, model_metadata: dict):
         """Validate user metadata against the minimal metadata required to
@@ -313,18 +337,14 @@ class Client:
 
     def _post_model(
         self,
-        metadata: dict,
-        binary_file: str,
-        code_file: str,
+        model_data,
         mode: str = "newModel",
         model_uuid: str = None,
     ):
         """Post a new model or an updated model
 
         Args:
-            metadata (dict): Model metadata
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
+            model_data (MultipartEncoder): encoded payload for uploading
             mode (str, optional): newModel or newVersion. Defaults to "newModel".
             model_uuid (str, optional): Model UUID if updating an existing model. Defaults to None.
 
@@ -334,6 +354,42 @@ class Client:
         Returns:
             str: Model UUID
         """
+
+        if mode == "newVersion":
+            return self.api.post(
+                f"/model?mode={mode}&modelUuid={model_uuid}",
+                request_body=model_data,
+                headers={"Content-Type": model_data.content_type},
+            )
+
+        if mode == "newModel":
+            return self.api.post(
+                f"/model?mode={mode}",
+                request_body=model_data,
+                headers={"Content-Type": model_data.content_type},
+            )
+
+        raise ValueError("Invalid mode - must be either newVersion or newModel")
+
+    def _generate_payload(
+        self,
+        metadata: dict,
+        binary_file: str,
+        code_file: str,
+    ) -> MultipartEncoder:
+        """Generate payload for posting a new or updated model
+
+        Args:
+            metadata (dict): Model metadata
+            binary_file (str): Path to model binary file
+            code_file (str): Path to model code file
+
+        Raises:
+            ValueError: Payload is too large for the AWS gateway (if using)
+
+        Returns:
+            MultipartEncoder: Payload of model data
+        """
         payloads = [("metadata", metadata)]
 
         for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
@@ -341,28 +397,26 @@ class Client:
             with open(full_filename, "rb") as file:
                 payloads.append((tag, (fname, file.read(), mtype)))
 
-        data = encoder.MultipartEncoder(payloads)
+        data = MultipartEncoder(payloads)
 
-        if os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000:
+        if self._too_large_for_gateway(data):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
 
-        if mode == "newVersion":
-            return self.api.post(
-                f"/model?mode={mode}&modelUuid={model_uuid}",
-                request_body=data,
-                headers={"Content-Type": data.content_type},
-            )
+        return data
 
-        if mode == "newModel":
-            return self.api.post(
-                f"/model?mode={mode}",
-                request_body=data,
-                headers={"Content-Type": data.content_type},
-            )
+    @staticmethod
+    def _too_large_for_gateway(data) -> bool:
+        """If there is an AWS gateway, check that data is not too large
 
-        raise ValueError("Invalid mode - must be either newVersion or newModel")
+        Args:
+            data (MultipartEncoder): the data to be uploaded
+
+        Returns:
+            bool: True if data is too large to be uploaded
+        """
+        return os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000
 
     @handle_reconnect
     def upload_model(self, metadata: dict, binary_file: str, code_file: str):
@@ -383,9 +437,11 @@ class Client:
             binary_file=binary_file, code_file=code_file, metadata=metadata
         )
 
-        return self._post_model(metadata_json, binary_file, code_file)
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
 
-    def __increment_version(self, model_uuid: str):
+        return self._post_model(payload)
+
+    def _increment_version(self, model_uuid: str):
         """Increment the latest version of a model by 1
 
         Args:
@@ -396,9 +452,17 @@ class Client:
         """
 
         model_versions = self.api.get(f"model/{model_uuid}/versions")
-        model_versions = [
-            int(model_version["version"]) for model_version in model_versions
-        ]
+        try:
+            model_versions = [
+                int(model_version["version"]) for model_version in model_versions
+            ]
+        except ValueError as exc:
+            raise (
+                CannotIncrementVersion(
+                    "Please manually provide an updated version number"
+                )
+            ) from exc
+
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
@@ -409,6 +473,7 @@ class Client:
         model_card: Model,
         binary_file: str,
         code_file: str,
+        model_version: str = None,
     ):
         """Update an existing model based on its UUID.
 
@@ -416,23 +481,27 @@ class Client:
             model_card (Model): The model card of the existing model
             binary_file (str): Path to the model binary file
             code_file (str): Path to the model code file
+            model_version (str, optional): Incremented mode version number.
+                                           Automatically attempts to increase by 1 if None.
+                                           Defaults to None.
 
         Returns:
             str: UUID of the updated model
         """
 
-        new_model_version = self.__increment_version(model_card["uuid"])
+        self._validate_uploads(
+            card=model_card, binary_file=binary_file, code_file=code_file
+        )
 
-        self._validate_uploads(model_card, binary_file, code_file)
+        if not model_version:
+            model_version = self._increment_version(model_card["uuid"])
 
         metadata = model_card["currentMetadata"]
-        metadata.highLevelDetails.modelCardVersion = new_model_version
+        metadata.highLevelDetails.modelCardVersion = model_version
         metadata = metadata.toJSON()
 
+        payload = self._generate_payload(metadata, binary_file, code_file)
+
         return self._post_model(
-            metadata,
-            binary_file,
-            code_file,
-            mode="newVersion",
-            model_uuid=model_card["uuid"],
+            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
         )
