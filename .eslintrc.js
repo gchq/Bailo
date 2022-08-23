@@ -26,7 +26,7 @@ module.exports = {
   ],
   rules: {
     // allow dot notation for styles (e.g. .A200)
-    'dot-notation': ['error', { allowPattern: "^[a-zA-Z][0-9]{3}$" }],
+    'dot-notation': ['error', { allowPattern: '^[a-zA-Z][0-9]{3}$' }],
     'import/no-extraneous-dependencies': 'off',
     'no-restricted-syntax': 'off',
     '@typescript-eslint/no-var-requires': 'off',
