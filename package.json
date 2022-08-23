@@ -26,7 +26,6 @@
     "@mui/icons-material": "^5.2.5",
     "@mui/lab": "^5.0.0-alpha.80",
     "@mui/material": "^5.2.8",
-    "@mui/styles": "^5.2.3",
     "@mui/system": "^5.2.8",
     "@next/bundle-analyzer": "^12.0.8",
     "@rjsf/core": "^4.1.1",
