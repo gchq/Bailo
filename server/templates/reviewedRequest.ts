@@ -24,7 +24,6 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
     ? `${base}/deployment/${document.uuid}`
     : ''
 
-
   return mjml2html(
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
