@@ -180,12 +180,17 @@ function Model() {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
-  const onDelete = () => {
+  const handleDelete = () => {
     setDeleteConfirmOpen(true)
   }
 
-  const onDeleteConfirm = () => {
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false)
+  }
+
+  const handleDeleteConfirm = () => {
     console.log("Model would be deleted if this function did anything")
+    setDeleteConfirmOpen(false)
   }
 
   return (
@@ -419,12 +424,18 @@ function Model() {
 
             <Box sx={{ mb: 4 }} />
 
-            <ConfirmationDialogue showConfirmationDialogue={deleteConfirmOpen} functionOnConfirm={onDeleteConfirm}  dialogueText="Delete the model?" />
+            <ConfirmationDialogue
+              showConfirmationDialogue={deleteConfirmOpen}
+              onCancel={handleDeleteCancel}
+              onConfirm={handleDeleteConfirm}
+              confirmationModalTitle="Delete the model?"
+              confirmationModalText=""
+            />
             
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={onDelete}>
+            <Button variant='contained' color='error' onClick={handleDelete}>
               Delete Model
             </Button>
           </>

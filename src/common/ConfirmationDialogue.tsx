@@ -15,34 +15,21 @@ import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } fro
 
 export default function ConfirmationDialogue({
   showConfirmationDialogue,
-  functionOnConfirm,
-  dialogueText,
+  confirmationModalTitle,
+  confirmationModalText,
+  onCancel,
+  onConfirm,
 }: {
   showConfirmationDialogue: boolean
-  functionOnConfirm: Function
-  dialogueText: string
+  confirmationModalTitle: string
+  confirmationModalText: string
+  onCancel: () => void
+  onConfirm: () => void
 }) {
-  
-  const [confirmationModalText, setConfirmationModalText] = useState('')
-  const [confirmationModalTitle, setConfirmationModalTitle] = useState('')
-
-  const handleClose = () => {
-    showConfirmationDialogue = false
-  }
-
-  const onCancel = () => {
-    showConfirmationDialogue = false
-  }
-
-  const onConfirm = () => {
-    functionOnConfirm(); 
-    showConfirmationDialogue = false
-  }
 
   return (
     <>
-      <Dialog open={showConfirmationDialogue} onClose={handleClose}>
-        <EmptyBlob text={dialogueText} />
+      <Dialog open={showConfirmationDialogue} onClose={onCancel}>
         <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText id='alert-dialog-description'>{confirmationModalText}</DialogContentText>
