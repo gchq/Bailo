@@ -1,17 +1,9 @@
-import Typography from '@mui/material/Typography'
-
-import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
-import { useState } from 'react'
-import { postEndpoint } from '../../data/api'
-import EmptyBlob from './EmptyBlob'
-import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } from '../../data/requests'
-
 
 export default function ConfirmationDialogue({
   showConfirmationDialogue,
@@ -26,7 +18,6 @@ export default function ConfirmationDialogue({
   onCancel: () => void
   onConfirm: () => void
 }) {
-
   return (
     <>
       <Dialog open={showConfirmationDialogue} onClose={onCancel}>
@@ -46,6 +37,3 @@ export default function ConfirmationDialogue({
     </>
   )
 }
-
-
-

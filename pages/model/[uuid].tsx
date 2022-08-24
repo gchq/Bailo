@@ -189,7 +189,7 @@ function Model() {
   }
 
   const handleDeleteConfirm = () => {
-    console.log("Model would be deleted if this function did anything")
+    //Model would be deleted if this function did anything
     setDeleteConfirmOpen(false)
   }
 
@@ -428,10 +428,10 @@ function Model() {
               showConfirmationDialogue={deleteConfirmOpen}
               onCancel={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
-              confirmationModalTitle="Delete the model?"
-              confirmationModalText=""
+              confirmationModalTitle='Delete the model?'
+              confirmationModalText=''
             />
-            
+
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
