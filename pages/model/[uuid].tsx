@@ -54,6 +54,7 @@ import PublicDeploymentOverview from '@/src/PublicDeploymentOverview'
 import Popover from '@mui/material/Popover'
 import TextField from '@mui/material/TextField'
 import axios from 'axios'
+import Modal from '@mui/material/Modal'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -82,6 +83,7 @@ function Model() {
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<HTMLDivElement | null>(null);
   const [publicDeploymentName, setPublicDeploymentName] = React.useState<String>('')
+  const [publicDeploymentErrorMessage, setPublicDeploymentErrorMessage] = React.useState<string>('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -121,8 +123,8 @@ function Model() {
         router.push(`/deployment/public/${res.data}`)
       }
     })
-    .catch((_e) => {        
-      return null
+    .catch((e: any) => {
+      setPublicDeploymentErrorMessage(e.response.data.message)
     })
   }
 
@@ -180,8 +182,9 @@ function Model() {
   }
 
   const handlePopoverClose = () => {
-    setPopoverAnchorEl(null);
-  };
+    setPopoverAnchorEl(null)
+    setPublicDeploymentErrorMessage('')
+  }
 
   const actionMenuClicked = (event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget as HTMLDivElement)
@@ -189,6 +192,7 @@ function Model() {
 
   const handleMenuClose = () => {
     setMenuAnchorEl(null)
+    setPopoverAnchorEl(null)
   }
 
   const handlePublicDeploymentNameChange = (event: any) => {
@@ -210,6 +214,18 @@ function Model() {
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
+
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
@@ -252,8 +268,8 @@ function Model() {
                     !version.built || 
                     version.managerApproved !== 'Accepted' || 
                     version.reviewerApproved !== 'Accepted' ||
-                    (version.metadata.buildOptions?.allowGuestDeployments === undefined ||
-                      !version.metadata.buildOptions?.allowGuestDeployments)
+                    (version.metadata.buildOptions?.allowPublicDeployments === undefined ||
+                      !version.metadata.buildOptions?.allowPublicDeployments)
                   }
                   data-test='submitDeployment'
                 >
@@ -261,31 +277,6 @@ function Model() {
                     <UploadIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Request public deployment</ListItemText>
-                  <Popover 
-                    open={popoverOpen}
-                    anchorEl={popoverAnchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{
-                      vertical: 'center',
-                      horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                      vertical: 'center',
-                      horizontal: 'left',
-                    }}
-                  >
-                    <Box sx={{ p: 2 }}>
-                      <Stack direction='row' spacing={2}>
-                        <TextField 
-                          label="Deployment name" 
-                          variant="standard" 
-                          value={publicDeploymentName} 
-                          onChange={handlePublicDeploymentNameChange}
-                        ></TextField>
-                        <Button variant='contained' onClick={requestPublicDeployment}>Request</Button>
-                      </Stack>
-                    </Box>
-                  </Popover>
                 </MenuItem>
                 <Divider />
                 {!modelFavourited && (
@@ -337,6 +328,23 @@ function Model() {
                 </MenuItem>
               </MenuList>
             </Menu>
+            <Modal
+              open={popoverOpen}
+              onClose={handlePopoverClose}
+            >
+              <Box sx={modalStyle}>
+                <Stack direction='row' spacing={2}>
+                  <TextField 
+                    label="Deployment name" 
+                    variant="standard" 
+                    value={publicDeploymentName} 
+                    onChange={handlePublicDeploymentNameChange}
+                  ></TextField>
+                  <Button variant='contained' onClick={requestPublicDeployment}>Request</Button>
+                </Stack>
+                <Typography sx={{ color: 'red' }}>{publicDeploymentErrorMessage}</Typography>
+              </Box>
+            </Modal>
             <Stack direction='row' spacing={2}>
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel id='version-label'>Version</InputLabel>

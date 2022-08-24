@@ -8,9 +8,11 @@ import { BadReq, NotFound, Forbidden, Conflict } from '../../utils/result'
 import { findModelById, findModelByUuid, isValidFilter } from '../../services/model'
 import { findVersionById, findVersionByName } from '../../services/version'
 import { createDeployment, createPublicDeployment, findDeploymentByUuid, findDeployments, findPublicDeploymentByUuid, findPublicDeployments } from '../../services/deployment'
-import { ApprovalStates } from '../../models/Deployment'
+import { ApprovalStates, PublicDeploymentDoc } from '../../models/Deployment'
 import { findSchemaByRef } from '../../services/schema'
 import { getDeploymentQueue } from '../../utils/queues'
+import { ModelDoc } from '../../models/Model'
+import { VersionDoc } from '../../models/Version'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -88,7 +90,9 @@ export const postDeployment = [
 
     const versionArray: any = [version!._id]
 
-    const deployment = await createDeployment(req.user!, {
+    let deployment
+
+    deployment = await createDeployment(req.user!, {
       schemaRef: body.schemaRef,
       uuid: uuid,
 
@@ -213,7 +217,7 @@ export const postPublicDeployment = [
     body.user = req.user?.id
     body.timeStamp = new Date().toISOString()
 
-    const version = await findVersionById(req.user!, versionId)
+    const version: VersionDoc | null = await findVersionById(req.user!, versionId)
 
     if (!version) {
       throw NotFound(
@@ -222,14 +226,14 @@ export const postPublicDeployment = [
       )
     }
 
-    if (!version.metadata.buildOptions?.allowGuestDeployments) {
+    if (!version.metadata.buildOptions?.allowPublicDeployments) {
       throw BadReq(
         { code: 'public_deployment_not_allowed', versionId: versionId},
         `Public deployment not allowed for version ${versionId}`
       )
     }
 
-    const model = await findModelById(req.user!, modelId)
+    const model: ModelDoc | null = await findModelById(req.user!, modelId)
 
     if (!model) {
       throw NotFound(
@@ -246,18 +250,19 @@ export const postPublicDeployment = [
     const uuid = `${name}-${nanoid()}`
     req.log.info({ uuid }, `Named public deployment '${uuid}'`)
 
-    const publicDeployment = await createPublicDeployment(req.user!, {
-      uuid: uuid,
-
-      version: version._id,
-      model: model._id,
-
-      owner: req.user!._id,
-    })
-
-    req.log.info({ code: 'saving_public_deployment', publicDeployment }, 'Saving public deployment model')
-
     try {
+
+      const publicDeployment: PublicDeploymentDoc = await createPublicDeployment(req.user!, {
+        uuid: uuid,
+
+        version: version._id,
+        model: model._id,
+
+        owner: req.user!._id,
+      })
+
+      req.log.info({ code: 'saving_public_deployment', publicDeployment }, 'Saving public deployment model')
+
       await publicDeployment.save()
       req.log.info({ code: 'triggered_deployments', publicDeployment }, 'Triggered public deployment')
         await (
@@ -269,7 +274,7 @@ export const postPublicDeployment = [
         })
     } catch(e: any) {
       if (e.code === 11000) {
-        throw Conflict({versionId}, 'Duplicate version ID')      
+        throw Conflict({versionId}, 'Public deployment already exists for this version')      
       }
     }
 

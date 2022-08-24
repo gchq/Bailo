@@ -51,7 +51,7 @@ export interface ModelMetadata {
 
   buildOptions?: {
     rawModelExport: boolean
-    allowGuestDeployments: boolean
+    allowPublicDeployments: boolean
   }
 
   // allow other properties
