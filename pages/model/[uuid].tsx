@@ -189,7 +189,7 @@ function Model() {
   }
 
   const handleDeleteConfirm = () => {
-    //Model would be deleted if this function did anything
+    /* Model would be deleted if this function did anything */
     setDeleteConfirmOpen(false)
   }
 

@@ -19,21 +19,19 @@ export default function ConfirmationDialogue({
   onConfirm: () => void
 }) {
   return (
-    <>
-      <Dialog open={showConfirmationDialogue} onClose={onCancel}>
-        <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>{confirmationModalText}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button color='secondary' variant='outlined' onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Dialog open={showConfirmationDialogue} onClose={onCancel}>
+      <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id='alert-dialog-description'>{confirmationModalText}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button color='secondary' variant='outlined' onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }

@@ -2,22 +2,22 @@
  * @jest-environment jsdom
  */
 
-import ConfirmationDialogue from './ConfirmationDialogue'
 import { render, screen, waitFor } from '@testing-library/react'
+import ConfirmationDialogue from './ConfirmationDialogue'
 
 const handleCancel = () => {
-  //dummy function
+  // dummy function
 }
 
 const handleConfirm = () => {
-  //dummy function
+  // dummy function
 }
 
-describe('LoadingBar', () => {
+describe('ConfirmationDialogue', () => {
   it('renders a ConfirmationDialogue component', async () => {
     render(
       <ConfirmationDialogue
-        showConfirmationDialogue={true}
+        showConfirmationDialogue
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         confirmationModalTitle='Test dialogue title'
@@ -26,7 +26,7 @@ describe('LoadingBar', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('50%')).not.toBeUndefined()
+      expect(await screen.findByText('Test dialogue title')).not.toBeUndefined()
     })
   })
 
@@ -42,7 +42,7 @@ describe('LoadingBar', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.queryByText('50%')).toBeNull()
+      expect(await screen.queryByText('Test dialogue title')).toBeNull()
     })
   })
 })
