@@ -52,9 +52,18 @@ export default function FormUpload({
     <>
       {!isUiConfigError && !isUiConfigLoading && (
         <>
-          {dataSteps.map((step, index) => (
-            <Box key={`${index}`}>{step.renderBasic(step, splitSchema, setSplitSchema)}</Box>
-          ))}
+          {dataSteps.map((step, index) => {
+            if (!step.renderBasic) {
+              return <></>
+            }
+
+            const RenderBasic = step.renderBasic
+            return (
+              <Box key={`${index}`}>
+                <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
+              </Box>
+            )
+          })}
           <TextField
             fullWidth
             multiline

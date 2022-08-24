@@ -1,6 +1,8 @@
 import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
 import { UserDoc } from '../server/models/User'
+import { Dispatch, SetStateAction } from 'react'
+import { RenderButtonsInterface } from '../src/Form/RenderButtons'
 
 export type { VersionDoc as Version } from '../server/models/Version'
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
@@ -130,9 +132,9 @@ export interface Step {
   section: string
   schemaRef: string
 
-  render: Function
-  renderBasic: Function
-  renderButtons: Function
+  render: (RenderInterface) => JSX.Element | null
+  renderBasic?: (RenderInterface) => JSX.Element | null
+  renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
   isComplete: Function
@@ -145,3 +147,9 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
+
+export interface RenderInterface {
+  step: Step
+  splitSchema: SplitSchema
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+}

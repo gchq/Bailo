@@ -9,29 +9,26 @@ import Box from '@mui/material/Box'
 import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
 import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
-import { Schema, SplitSchema, Step, User } from '@/types/interfaces'
+import { Schema, SplitSchema, User } from '@/types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
-import { RenderFileTab, RenderBasicFileTab, FileTabComplete } from '@/src/Form/RenderFileTab'
+import RenderFileTab, { RenderBasicFileTab, FileTabComplete } from '@/src/Form/RenderFileTab'
 import { useGetCurrentUser } from '@/data/user'
 import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import LoadingBar from '@/src/common/LoadingBar'
+import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
 
-function renderSubmissionTab(
-  _currentStep: Step,
-  splitSchema: SplitSchema,
-  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
-  activeStep: number,
-  setActiveStep: (step: number) => void,
-  onSubmit: () => void,
-  _openValidateError: boolean,
-  _setOpenValidateError: (validatorError: boolean) => void,
-  modelUploading: boolean
-) {
+function renderSubmissionTab({
+  splitSchema,
+  activeStep,
+  setActiveStep,
+  onSubmit,
+  modelUploading,
+}: RenderButtonsInterface) {
   const data = getStepsData(splitSchema)
 
   return (

@@ -6,7 +6,7 @@ export default function useCacheVariable<T>(variable: T): T | undefined {
   useEffect(() => {
     if (cache !== undefined) return
     setCache(variable)
-  }, [variable])
+  }, [variable, cache])
 
   return cache
 }
