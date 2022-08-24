@@ -14,19 +14,23 @@ const handleConfirm = () => {
 }
 
 describe('ConfirmationDialogue', () => {
+  const testTitle = 'Test dialogue title'
+  const testText = 'Test dialogue text'
+
   it('renders a ConfirmationDialogue component', async () => {
     render(
       <ConfirmationDialogue
         showConfirmationDialogue
         onCancel={handleCancel}
         onConfirm={handleConfirm}
-        confirmationModalTitle='Test dialogue title'
-        confirmationModalText='Test dialogue text'
+        confirmationModalTitle={testTitle}
+        confirmationModalText={testText}
       />
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('Test dialogue title')).not.toBeUndefined()
+      expect(await screen.findByText(testTitle)).not.toBeUndefined()
+      expect(await screen.findByText(testText)).not.toBeUndefined()
     })
   })
 
@@ -36,13 +40,14 @@ describe('ConfirmationDialogue', () => {
         showConfirmationDialogue={false}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
-        confirmationModalTitle='Test dialogue title'
-        confirmationModalText='Test dialogue text'
+        confirmationModalTitle={testTitle}
+        confirmationModalText={testText}
       />
     )
 
     await waitFor(async () => {
-      expect(await screen.queryByText('Test dialogue title')).toBeNull()
+      expect(await screen.queryByText(testTitle)).toBeNull()
+      expect(await screen.queryByText(testText)).toBeNull()
     })
   })
 })
