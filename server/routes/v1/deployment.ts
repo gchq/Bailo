@@ -213,15 +213,6 @@ export const postPublicDeployment = [
     body.user = req.user?.id
     body.timeStamp = new Date().toISOString()
 
-    const model = await findModelById(req.user!, modelId)
-
-    if (!model) {
-      throw NotFound(
-        { code: 'model_not_found', modelId: modelId },
-        `Unable to find model with name: '${modelId}'`
-      )
-    }
-
     const version = await findVersionById(req.user!, versionId)
 
     if (!version) {
@@ -230,6 +221,22 @@ export const postPublicDeployment = [
         `Unable to find version with name: ${versionId} for model: ${modelId}`
       )
     }
+
+    if (!version.metadata.buildOptions?.allowGuestDeployments) {
+      throw BadReq(
+        { code: 'public_deployment_not_allowed', versionId: versionId},
+        `Public deployment not allowed for version ${versionId}`
+      )
+    }
+
+    const model = await findModelById(req.user!, modelId)
+
+    if (!model) {
+      throw NotFound(
+        { code: 'model_not_found', modelId: modelId },
+        `Unable to find model with name: '${modelId}'`
+      )
+    }    
 
     const name = deploymentName
     .toLowerCase()
@@ -261,7 +268,7 @@ export const postPublicDeployment = [
           type: 'public'
         })
     } catch(e: any) {
-      if (e.contains('E11000')) {
+      if (e.code === 11000) {
         throw Conflict({versionId}, 'Duplicate version ID')      
       }
     }

@@ -51,6 +51,9 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import { lightTheme } from '../../src/theme'
 import PublicDeploymentOverview from '@/src/PublicDeploymentOverview'
+import Popover from '@mui/material/Popover'
+import TextField from '@mui/material/TextField'
+import axios from 'axios'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -72,17 +75,21 @@ function Model() {
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLDivElement | null>(null)
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
-  const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<HTMLDivElement | null>(null);
+  const [publicDeploymentName, setPublicDeploymentName] = React.useState<String>('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+
+  const menuOpen = Boolean(menuAnchorEl)
+  const popoverOpen = Boolean(popoverAnchorEl)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -101,14 +108,22 @@ function Model() {
     const body = {
       versionId: version?._id,
       modelId: version?.model,
-      // Change to be a user specified value
-      deploymentName: 'test'
+      deploymentName: publicDeploymentName
     }
-    await postEndpoint('/api/v1/deployment/public', {...body})
-      .then((res) => res.json())
-      .then((uuid: string) => {
-        router.push(`/deployment/public/${uuid}`)
-      })
+    await axios({
+      method: 'post',
+      url: '/api/v1/deployment/public',
+      headers: { 'Content-Type': 'application/json' },
+      data: body
+    })
+    .then((res) => {
+      if (res.status === 200) {
+        router.push(`/deployment/public/${res.data}`)
+      }
+    })
+    .catch((_e) => {        
+      return null
+    })
   }
 
   const copyModelCardToClipboard = () => {
@@ -160,12 +175,24 @@ function Model() {
     router.push(`/model/${uuid}/new-version`)
   }
 
-  const actionMenuClicked = (event: MouseEvent) => {
-    setAnchorEl(event.currentTarget as HTMLDivElement)
+  const handlePublicDeploymentMenuClick = (event: MouseEvent) => {
+    setPopoverAnchorEl(event.currentTarget as HTMLDivElement)
   }
 
-  const handleClose = () => {
-    setAnchorEl(null)
+  const handlePopoverClose = () => {
+    setPopoverAnchorEl(null);
+  };
+
+  const actionMenuClicked = (event: MouseEvent) => {
+    setMenuAnchorEl(event.currentTarget as HTMLDivElement)
+  }
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null)
+  }
+
+  const handlePublicDeploymentNameChange = (event: any) => {
+    setPublicDeploymentName(event.target.value)
   }
 
   const setModelFavourite = async (favourite: boolean) => {
@@ -196,16 +223,16 @@ function Model() {
                 id='model-actions-button'
                 aria-controls='model-actions-menu'
                 aria-haspopup='true'
-                aria-expanded={open ? 'true' : undefined}
+                aria-expanded={menuOpen ? 'true' : undefined}
                 onClick={actionMenuClicked}
                 variant='outlined'
                 data-test='requestDeploymentButton'
-                endIcon={open ? <UpArrow /> : <DownArrow />}
+                endIcon={menuOpen ? <UpArrow /> : <DownArrow />}
               >
                 Actions
               </Button>
             </Stack>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose}>
               <MenuList>
                 <MenuItem
                   onClick={requestDeployment}
@@ -220,13 +247,13 @@ function Model() {
                   <ListItemText>Request deployment</ListItemText>
                 </MenuItem>
                 <MenuItem
-                  onClick={requestPublicDeployment}
+                  onClick={handlePublicDeploymentMenuClick}
                   disabled={
                     !version.built || 
                     version.managerApproved !== 'Accepted' || 
                     version.reviewerApproved !== 'Accepted' ||
-                    (version.metadata.buildOptions?.allowGuestDeployments === undefined || 
-                      !version.metadata.buildOptions.allowGuestDeployments)
+                    (version.metadata.buildOptions?.allowGuestDeployments === undefined ||
+                      !version.metadata.buildOptions?.allowGuestDeployments)
                   }
                   data-test='submitDeployment'
                 >
@@ -234,6 +261,31 @@ function Model() {
                     <UploadIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Request public deployment</ListItemText>
+                  <Popover 
+                    open={popoverOpen}
+                    anchorEl={popoverAnchorEl}
+                    onClose={handlePopoverClose}
+                    anchorOrigin={{
+                      vertical: 'center',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'center',
+                      horizontal: 'left',
+                    }}
+                  >
+                    <Box sx={{ p: 2 }}>
+                      <Stack direction='row' spacing={2}>
+                        <TextField 
+                          label="Deployment name" 
+                          variant="standard" 
+                          value={publicDeploymentName} 
+                          onChange={handlePublicDeploymentNameChange}
+                        ></TextField>
+                        <Button variant='contained' onClick={requestPublicDeployment}>Request</Button>
+                      </Stack>
+                    </Box>
+                  </Popover>
                 </MenuItem>
                 <Divider />
                 {!modelFavourited && (
