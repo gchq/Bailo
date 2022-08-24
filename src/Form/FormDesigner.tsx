@@ -17,7 +17,7 @@ export default function FormDesigner({
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: Function
-  modelUploading?: boolean
+  modelUploading: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [openValidateError, setOpenValidateError] = useState(false)
@@ -29,6 +29,7 @@ export default function FormDesigner({
   }
 
   const Render = currentStep.render
+  const RenderButtons = currentStep.renderButtons
 
   return (
     <>
@@ -53,18 +54,18 @@ export default function FormDesigner({
         ))}
       </Stepper>
 
-      <Render currentStep={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
-      {currentStep.renderButtons(
-        currentStep,
-        splitSchema,
-        setSplitSchema,
-        activeStep,
-        setActiveStep,
-        onSubmit,
-        openValidateError,
-        setOpenValidateError,
-        modelUploading
-      )}
+      <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
+      <RenderButtons
+        step={currentStep}
+        splitSchema={splitSchema}
+        setSplitSchema={setSplitSchema}
+        activeStep={activeStep}
+        setActiveStep={setActiveStep}
+        onSubmit={onSubmit}
+        openValidateError={openValidateError}
+        setOpenValidateError={setOpenValidateError}
+        modelUploading={modelUploading}
+      />
     </>
   )
 }
