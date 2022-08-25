@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById } from '../../services/model'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user'
+import { UserDoc } from '../../models/User'
 
 export const getUsers = [
   ensureUserRole('user'),
@@ -23,6 +24,17 @@ export const getLoggedInUser = [
     const user = await getUserByInternalId(_id)
     req.log.info({ code: 'fetching_user_details' }, 'Getting logged in user details')
     return res.json(user)
+  },
+]
+
+export const getUserNameFromInternalId = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const user: UserDoc | null = await getUserByInternalId(req.params.id)
+    if (user !== null) {
+      req.log.info({ code: 'fetching_user_details' }, 'Fetching user name from internal ID')
+      return res.json(user.id)
+    }
   },
 ]
 

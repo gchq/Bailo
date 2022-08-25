@@ -24,6 +24,7 @@ import TerminalLog from '../../../src/TerminalLog'
 import Wrapper from '../../../src/Wrapper'
 import { lightTheme } from '../../../src/theme'
 import Typography from '@mui/material/Typography'
+import { VersionNameFromKey, ModelNameFromKey, UsernameFromKey } from '../../../src/util/ObjectKeyDisplay'
 
 type TabOptions = 'overview' | 'build'
 
@@ -126,7 +127,7 @@ export default function PublicDeployment() {
 
   return (
     <>
-      <Wrapper title={`Deployment: ${publicDeployment.uuid}`} page='deployment'>
+      <Wrapper title={`Deployment: ${publicDeployment.uuid}`} page='deployments'>
         <Box sx={{ textAlign: 'right', pb: 3 }}>
           <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
             Show download commands
@@ -154,8 +155,16 @@ export default function PublicDeployment() {
                 <Typography variant='body1'>{publicDeployment.uuid}</Typography>
               </Box>
               <Box sx={{ p: 2 }}>
+                <Typography variant='h6'>Model</Typography>
+                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant={'body1'}/>
+              </Box>
+              <Box sx={{ p: 2 }}>
+                <Typography variant='h6'>Version</Typography>
+                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant={'body1'}/>
+              </Box>
+              <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Owner</Typography>
-                <Typography variant='body1'>{publicDeployment.owner}</Typography>
+                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant={'body1'}/>
               </Box>                
             </Box>        
           }

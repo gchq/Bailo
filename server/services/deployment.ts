@@ -136,6 +136,13 @@ export async function findPublicDeploymentById(user: UserDoc, id: ModelId, opts?
   return filterDeployment(user, await publicDeployment)
 }
 
+export async function findPublicDeploymentByVersion(user: UserDoc, version: ModelId, opts?: GetDeploymentOptions) {
+  let publicDeployment = PublicDeploymentModel.findOne({ version })
+  if (opts?.populate) publicDeployment = publicDeployment.populate('model')
+
+  return filterDeployment(user, await publicDeployment)
+}
+
 export async function findPublicDeployments(user: UserDoc, filter: string) {
   const query: any = {}
 

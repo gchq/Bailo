@@ -51,10 +51,10 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import { lightTheme } from '../../src/theme'
 import PublicDeploymentOverview from '@/src/PublicDeploymentOverview'
-import Popover from '@mui/material/Popover'
 import TextField from '@mui/material/TextField'
 import axios from 'axios'
 import Modal from '@mui/material/Modal'
+import { useGetPublicDeploymentByVersion } from 'data/deployment'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -89,6 +89,7 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const { publicDeploymentVersion, isPublicDeploymentVersionLoading, isPublicDeploymentVersionError } = useGetPublicDeploymentByVersion(version?._id)
 
   const menuOpen = Boolean(menuAnchorEl)
   const popoverOpen = Boolean(popoverAnchorEl)
@@ -403,6 +404,20 @@ function Model() {
 
         {group === 'deployments' && (
           <>
+            {!isPublicDeploymentVersionLoading && publicDeploymentVersion !== undefined &&
+              <Box sx={{ pb: 2 }}>
+                <Typography>Public Deployment</Typography>
+                <Link href={`/deployment/public/${publicDeploymentVersion.uuid}`} passHref>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {publicDeploymentVersion.uuid}
+                  </MuiLink>
+                </Link>
+                <Divider sx={{pb: 2 }} orientation='horizontal' flexItem />
+              </Box> 
+            }
             {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>

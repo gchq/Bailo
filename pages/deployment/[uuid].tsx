@@ -151,7 +151,7 @@ export default function Deployment() {
   })
   if (error) return error
 
-  const Loading = <Wrapper title='Loading...' page='deployment' />
+  const Loading = <Wrapper title='Loading...' page='deployments' />
 
   if (isDeploymentLoading || !deployment) return Loading
   if (isUiConfigLoading || !uiConfig) return Loading
@@ -233,7 +233,7 @@ export default function Deployment() {
             <Box>
               <p style={{ margin: 0 }}>
                 # Login to Docker (your token can be found on the
-                <Link href='/settings'>
+                <Link href='/settings' passHref>
                   <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                 </Link>
                 page) {theme.palette.mode}

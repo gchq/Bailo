@@ -26,14 +26,15 @@ import {
   getPublicDeployment,
   postPublicDeployment,
   getPublicDeployments,
+  fetchRawModelFiles,
+  getPublicDeploymentByVersion,
 } from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
+import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel, getUserNameFromInternalId } from './routes/v1/users'
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
 import { createIndexes } from './models/Model'
 import { getSpecification } from './routes/v1/specification'
 
@@ -70,6 +71,8 @@ server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprov
 server.post('/api/v1/deployment/public', ...postPublicDeployment)
 server.get('/api/v1/deployment/public/:uuid', ...getPublicDeployment)
 server.get('/api/v1/deployments/public', ...getPublicDeployments)
+server.get('/api/v1/deployment/public/version/:version', ...getPublicDeploymentByVersion)
+server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
@@ -82,6 +85,7 @@ server.get('/api/v1/schema/:ref', ...getSchema)
 server.get('/api/v1/config', ...getUiConfig)
 server.get('/api/v1/users', ...getUsers)
 server.get('/api/v1/user', ...getLoggedInUser)
+server.get('/api/v1/user/user-id/:id', ...getUserNameFromInternalId)
 server.post('/api/v1/user/token', ...postRegenerateToken)
 server.post('/api/v1/user/favourite/:id', ...favouriteModel)
 server.post('/api/v1/user/unfavourite/:id', ...unfavouriteModel)

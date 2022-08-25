@@ -26,3 +26,16 @@ export function useGetCurrentUser() {
     isCurrentUserError: error,
   }
 }
+
+export function useGetUsernameFromInternalId(id: string) {
+  const { data, error, mutate } = useSWR<User>(`/api/v1/user/user-id/${id}`, fetcher)
+
+  return {
+    mutateUsername: mutate,
+    username: data ? data : undefined,
+    isUsernameLoading: !error && !data,
+    isUsernameError: error,
+  }
+}
+
+

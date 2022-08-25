@@ -20,7 +20,7 @@ export default function Form({
   splitSchema: SplitSchema
   onSubmit: Function
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
-  modelUploading?: boolean
+  modelUploading: boolean
 }) {
   const [tab, setTab] = useState('designer')
   const onTabChange = (_event: any, newValue: any) => {

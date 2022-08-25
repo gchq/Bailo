@@ -1,5 +1,8 @@
-import Paper from '@mui/material/Paper'
 import React, { ChangeEvent } from 'react'
+import _ from 'lodash'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+
 import Box from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
@@ -12,33 +15,27 @@ import DisplaySettings from '@mui/icons-material/DisplaySettings'
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import Stack from '@mui/material/Stack'
 import useTheme from '@mui/styles/useTheme'
-import _ from 'lodash'
-import Link from 'next/link'
 import MuiLink from '@mui/material/Link'
-import { Deployment, PublicDeployment } from '../types/interfaces'
+import Paper from '@mui/material/Paper'
+
+import { Deployment } from '../types/interfaces'
 import { useGetCurrentUser } from '../data/user'
-import { useGetModelById } from '../data/model'
 import { listPublicDeployments, useGetUserDeployments } from '../data/deployment'
 import Wrapper from '../src/Wrapper'
 import EmptyBlob from '../src/common/EmptyBlob'
 import { lightTheme } from '../src/theme'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import { useRouter } from 'next/router'
+
+import { PublicDeploymentDoc } from '../server/models/PublicDeployment'
+import { ModelNameFromKey, VersionNameFromKey } from '../src/util/ObjectKeyDisplay'
 
 type TabOptions = 'my-deployments' | 'public'
 
 function isTabOption(value: string): value is TabOptions {
   return ['my-deployments', 'public'].includes(value)
-}
-
-function ModelNameFromKey({ modelId }: { modelId: string }) {
-  const { model, isModelError } = useGetModelById(modelId)
-  if (isModelError) {
-    return <Typography>Error getting model name</Typography>
-  }
-  return <Typography variant='h5'>{model?.currentMetadata?.highLevelDetails?.name ?? 'Loading...'}</Typography>
 }
 
 interface GroupedDeployments {
@@ -172,7 +169,7 @@ function Deployments() {
                   {groupedDeployments !== undefined &&
                     Object.keys(groupedDeployments).map((key) => (
                       <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                        <ModelNameFromKey modelId={key} />
+                        <ModelNameFromKey modelId={key} fontVariant={'h5'} />
                         <Divider flexItem />
                         {groupedDeployments[key].map((deployment) => (
                           <Box sx={{ p: 1, m: 1, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }} key={deployment.uuid}>
@@ -207,7 +204,7 @@ function Deployments() {
         {group === 'public' && !isPublicDeploymentsLoading && !isPublicDeploymentsError &&        
           <>
             <Box>
-                {publicDeployments && publicDeployments?.map((deployment, index) => (
+                {publicDeployments && publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
                   <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                     <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
                       <MuiLink
@@ -217,6 +214,14 @@ function Deployments() {
                         {deployment?.uuid}
                       </MuiLink>
                     </Link>
+                    <Stack sx={{ pb: 1, pt: 1 }} spacing={1} direction='row'>
+                      <Typography variant='body1'>Model:</Typography>
+                      <ModelNameFromKey modelId={deployment.model.toString()} fontVariant={'body1'}/>
+                    </Stack>
+                    <Stack sx={{ pb: 1 }} spacing={1} direction='row'>
+                      <Typography variant='body1'>Version:</Typography>
+                      <VersionNameFromKey versionId={deployment.version.toString()} fontVariant={'body1'}/>
+                    </Stack>
                     <Typography variant='body1' sx={{ marginBottom: 2 }}>
                       {displayDate(deployment?.createdAt)}
                     </Typography>

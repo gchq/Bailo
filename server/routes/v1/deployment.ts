@@ -1,18 +1,21 @@
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
+import Minio from 'minio'
 import { validateSchema } from '../../utils/validateSchema'
 import { customAlphabet } from 'nanoid'
 import { ensureUserRole } from '../../utils/user'
 import { createDeploymentRequests } from '../../services/request'
-import { BadReq, NotFound, Forbidden, Conflict } from '../../utils/result'
+import { BadReq, NotFound, Forbidden, Conflict, Unauthorised } from '../../utils/result'
 import { findModelById, findModelByUuid, isValidFilter } from '../../services/model'
 import { findVersionById, findVersionByName } from '../../services/version'
-import { createDeployment, createPublicDeployment, findDeploymentByUuid, findDeployments, findPublicDeploymentByUuid, findPublicDeployments } from '../../services/deployment'
-import { ApprovalStates, PublicDeploymentDoc } from '../../models/Deployment'
+import { createDeployment, createPublicDeployment, findDeploymentByUuid, findDeployments, findPublicDeploymentByUuid, findPublicDeploymentByVersion, findPublicDeployments } from '../../services/deployment'
+import { ApprovalStates, DeploymentDoc, PublicDeploymentDoc } from '../../models/Deployment'
 import { findSchemaByRef } from '../../services/schema'
 import { getDeploymentQueue } from '../../utils/queues'
 import { ModelDoc } from '../../models/Model'
 import { VersionDoc } from '../../models/Version'
+import config from 'config'
+import { Readable } from 'stream'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -205,6 +208,22 @@ export const getPublicDeployment = [
   },
 ]
 
+export const getPublicDeploymentByVersion = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { version } = req.params
+
+    const publicDeployment = await findPublicDeploymentByVersion(req.user!, version)
+
+    if (!publicDeployment) {
+      throw NotFound({ code: 'deployment_not_found', version }, `Unable to find deployment for version '${version}'`)
+    }
+
+    req.log.info({ code: 'get_public_deployment_by_version', publicDeployment }, 'Fetching public deployment by a given version ID')
+    return res.json(publicDeployment)
+  },
+]
+
 export const postPublicDeployment = [
   ensureUserRole('user'),
   bodyParser.json(),
@@ -279,6 +298,61 @@ export const postPublicDeployment = [
     }
 
     return res.json(uuid)
+}]
 
+export const fetchRawModelFiles = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const { uuid, version, fileType } = req.params
+    const deployment: DeploymentDoc | null = await findDeploymentByUuid(req.user!, uuid)
+
+    if (deployment === null) {
+      throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
+    }
+
+    if (!req.user._id.equals(deployment.owner)) {
+      throw Unauthorised(
+        { deploymentOwner: deployment.owner },
+        `User is not authorised to download this file. Requester: ${req.user._id}, owner: ${deployment.owner}`
+      )
+    }
+
+    if (fileType !== 'code' && fileType !== 'binary') {
+      throw NotFound({ fileType }, 'Unknown file type specificed')
+    }
+
+    const versionDocument: VersionDoc | null = await findVersionByName(req.user!, deployment.model, version)
+    const bucketName: string = config.get('minio.uploadBucket')
+    const client = new Minio.Client(config.get('minio'))
+
+    if (versionDocument === null) {
+      throw NotFound({ versionId: version }, `Unable to find version for id ${version}`)
+    }
+
+    let filePath
+
+    if (fileType === 'code') {
+      filePath = versionDocument.rawCodePath
+    }
+    if (fileType === 'binary') {
+      filePath = versionDocument.rawBinaryPath
+    }
+
+    // Stat object to get size so browser can determine progress
+    const { size } = await client.statObject(bucketName, filePath)
+
+    //res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
+    res.set('Content-disposition', `attachment; filename=${fileType}.zip`)
+    res.set('Content-Type', 'application/zip')
+    res.set('Cache-Control', 'private, max-age=604800, immutable')
+    res.set('Content-Length', size.toString())
+    res.writeHead(200)
+
+    const stream: Readable = await client.getObject(bucketName, filePath)
+    if (stream !== null) {
+      console.log(filePath)
+      stream.pipe(res)
+    }
   },
 ]

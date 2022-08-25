@@ -37,6 +37,7 @@
     "chalk": "^4.1.2",
     "clsx": "^1.1.1",
     "config": "^3.3.7",
+    "content-disposition": "^0.5.4",
     "copy-to-clipboard": "^3.3.1",
     "cross-env": "^7.0.3",
     "cross-fetch": "^3.1.5",
