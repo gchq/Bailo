@@ -5,8 +5,6 @@ import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
 
 export default class AuthorisationBase {
-  constructor() {}
-
   async getUserFromReq(req: Request) {
     const userId = req.get('x-userid')
     const email = req.get('x-email')

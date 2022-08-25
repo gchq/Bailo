@@ -10,9 +10,9 @@ import { simpleEmail } from '../templates/simpleEmail'
 import { connectToMongoose } from './database'
 import { sendEmail } from './smtp'
 
-let uploadQueue: PMongoQueue | undefined = undefined
-let deploymentQueue: PMongoQueue | undefined = undefined
-let mongoClient: mongoose.Connection | undefined = undefined
+let uploadQueue: PMongoQueue | undefined
+let deploymentQueue: PMongoQueue | undefined
+let mongoClient: mongoose.Connection | undefined
 
 export async function closeMongoInstance() {
   return mongoClient?.close()

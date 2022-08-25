@@ -52,17 +52,22 @@ async function unzipFile(zipPath: string) {
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
 }
 
-export async function logCommand(command: string, log: Function) {
+export async function logCommand(command: string, log: (level: string, msg: string) => void) {
   log('info', `$ ${command}`)
 
-  return await runCommand(
+  return runCommand(
     command,
     (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg)),
     (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg))
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
+export async function runCommand(
+  command: string,
+  onStdout: (msg: string) => void,
+  onStderr: (msg: string) => void,
+  opts: any = {}
+) {
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout!.on('data', (data) => {
     onStdout(data.trim())
@@ -76,11 +81,13 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
     childProcess.on('exit', () => {
       if (childProcess.exitCode !== 0 && !opts.silentErrors) {
         return reject(
-          `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+          new Error(
+            `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+          )
         )
       }
 
-      resolve({})
+      return resolve({})
     })
   })
 }

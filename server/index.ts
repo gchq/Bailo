@@ -105,9 +105,8 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
-  server.use((req, res) => {
-    return handle(req, res)
-  })
+  // handle next requests
+  server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)
   logger.info({ port }, `Listening on port ${port}`)

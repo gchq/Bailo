@@ -3,13 +3,20 @@ import * as Minio from 'minio'
 import logger from './logger'
 
 export default class MinioStore {
-  bucket: Function
-  path: Function
+  bucket: (req: Request, file: any) => string
+  path: (req: Request, file: any) => string
   connection: Minio.ClientOptions
-
   client: Minio.Client
 
-  constructor({ connection, bucket, path }: { connection: Minio.ClientOptions; bucket: Function; path: Function }) {
+  constructor({
+    connection,
+    bucket,
+    path,
+  }: {
+    connection: Minio.ClientOptions
+    bucket: (req: Request, file: any) => string
+    path: (req: Request, file: any) => string
+  }) {
     this.bucket = bucket
     this.path = path
     this.connection = connection
@@ -17,7 +24,7 @@ export default class MinioStore {
     this.client = new Minio.Client(this.connection)
   }
 
-  async _handleFile(req: Request, file: any, cb: Function) {
+  async _handleFile(req: Request, file: any, cb: (err: string | undefined, metadata: any) => void) {
     const bucket = await this.bucket(req, file)
     const path = await this.path(req, file)
 
@@ -31,19 +38,15 @@ export default class MinioStore {
       return cb(e, null)
     }
 
-    cb(
-      undefined,
-      Object.assign(
-        {},
-        {
-          path,
-          bucket,
-        }
-      )
-    )
+    cb(undefined, {
+      ...{
+        path,
+        bucket,
+      },
+    })
   }
 
-  async _removeFile(_req: Request, file: any, cb: Function) {
+  async _removeFile(_req: Request, file: any, cb: (err: string | undefined, data: any) => void) {
     logger.info({ bucket: file.bucket, path: file.path }, 'Removing file from Minio')
     try {
       await this.client.removeObject(file.bucket, file.path)
@@ -53,6 +56,6 @@ export default class MinioStore {
     }
 
     logger.info({ bucket: file.bucket, path: file.path }, 'Successfully removed file from Minio')
-    cb(undefined, null)
+    return cb(undefined, null)
   }
 }

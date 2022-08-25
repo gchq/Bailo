@@ -27,7 +27,7 @@ class Writer {
     this.basepath = basepath + sep
   }
 
-  getLevel(level) {
+  static getLevel(level) {
     switch (level) {
       case 10:
         return chalk.gray('trace')
@@ -51,7 +51,7 @@ class Writer {
     return `${line}:${src.line}`
   }
 
-  representValue(value: any) {
+  static representValue(value: any) {
     return typeof value === 'object' ? inspect(value) : String(value)
   }
 
@@ -89,11 +89,11 @@ class Writer {
       return ''
     }
 
-    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${Writer.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
-    const level = this.getLevel(data.level)
+    const level = Writer.getLevel(data.level)
     const src = this.getSrc(data.src)
     const attributes = this.getAttributes(data)
     const formattedAttributes = attributes.length ? ` (${attributes})` : ''
@@ -101,7 +101,7 @@ class Writer {
     const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
-    process[pipe].write(message + '\n')
+    process[pipe].write(`${message}\n`)
   }
 }
 
@@ -204,9 +204,7 @@ const morganLog = morgan<any, any>(
     return ''
   },
   {
-    skip: (req, _res) => {
-      return ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val))
-    },
+    skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
   }
@@ -231,7 +229,9 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
 
   res.setHeader('x-request-id', req.reqId)
 
-  await new Promise((resolve) => morganLog(req, res, resolve))
+  await new Promise((r) => {
+    morganLog(req, res, r)
+  })
 
   next()
 }

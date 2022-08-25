@@ -69,13 +69,13 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   const user = await findUserCached(userInfo)
   req.user = user
 
-  next()
+  return next()
 }
 
 export function hasRole(roles: Array<string> | string, user: UserDoc) {
   const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-  for (let role of arrayRoles) {
+  for (const role of arrayRoles) {
     if (!user.roles.includes(role)) {
       return false
     }
@@ -92,7 +92,7 @@ export function ensureUserRole(roles: Array<string> | string) {
 
     const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-    for (let role of arrayRoles) {
+    for (const role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
         throw Unauthorised({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
       }

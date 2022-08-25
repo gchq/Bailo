@@ -7,7 +7,10 @@ import VersionModel from '../models/Version'
 import { connectToMongoose, disconnectFromMongoose } from './database'
 import { emptyBucket } from './minio'
 
-const pause = (time) => new Promise((resolve) => setTimeout(resolve, time))
+const pause = (time) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
 
 export async function clearStoredData() {
   await connectToMongoose()
