@@ -18,5 +18,8 @@ export default withBundleAnalyzer(
   withMDX({
     swcMinify: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+    eslint: {
+      dirs: ['pages', 'utils'],
+    },
   })
 )

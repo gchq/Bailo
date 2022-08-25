@@ -78,7 +78,7 @@ class NullAuthenticator(AuthenticationInterface):
         """ "Returns True if the user is authenticated
 
         Returns:
-            bool: True if authenicated
+            bool: True if authenticated
         """
         return True
 
@@ -114,7 +114,7 @@ class Pkcs12Authenticator(AuthenticationInterface):
         """ "Returns True if the user is authenticated
 
         Returns:
-            bool: True if authenicated
+            bool: True if authenticated
         """
         return True
 
@@ -181,7 +181,7 @@ class CognitoSRPAuthenticator(AuthenticationInterface):
         """ "Returns True if the user is authenticated
 
         Returns:
-            bool: True if authenicated
+            bool: True if authenticated
         """
         return self.username is not None and self.password is not None
 

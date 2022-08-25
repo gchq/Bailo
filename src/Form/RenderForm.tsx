@@ -1,4 +1,5 @@
 import { withTheme } from '@rjsf/core'
+import { Dispatch, SetStateAction } from 'react'
 
 import { Theme as MaterialUITheme } from '../MuiForms'
 import UserSelector from '../MuiForms/UserSelector'
@@ -11,13 +12,13 @@ import { setStepState } from '../../utils/formUtils'
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function RenderForm({
-  currentStep: step,
+  step: step,
   splitSchema,
   setSplitSchema,
 }: {
-  currentStep: Step
+  step: Step
   splitSchema: SplitSchema
-  setSplitSchema: Function
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
 }) {
   const onFormChange = (form) => {
     if (form.schema.title !== step.schema.title) {

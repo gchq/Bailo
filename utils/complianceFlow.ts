@@ -28,7 +28,7 @@ export default function createComplianceFlow(version: Version) {
     reviewerApprovedStyle = approvalColour(version.reviewerApproved)
   }
 
-  let availableStyle =
+  const availableStyle =
     version.built && version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
       ? success
       : undefined
@@ -94,7 +94,7 @@ export function createDeploymentComplianceFlow(deployment: Deployment) {
     managerApprovedStyle = approvalColour(deployment.managerApproved)
   }
 
-  let availableStyle = deployment.managerApproved === 'Accepted' ? success : undefined
+  const availableStyle = deployment.managerApproved === 'Accepted' ? success : undefined
 
   return [
     {

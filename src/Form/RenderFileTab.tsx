@@ -1,5 +1,6 @@
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
+import { RenderInterface } from '../../types/interfaces'
 
 import { styled } from '@mui/system'
 import Box from '@mui/material/Box'
@@ -9,15 +10,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
-export default function RenderFileTab({
-  currentStep: step,
-  splitSchema,
-  setSplitSchema,
-}: {
-  currentStep: Step
-  splitSchema: SplitSchema
-  setSplitSchema: Function
-}) {
+export default function RenderFileTab({ step: step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code } = state
 
