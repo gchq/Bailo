@@ -1,6 +1,7 @@
 import express from 'express'
 import next from 'next'
 import http from 'http'
+import config from 'config'
 import processUploads from './processors/processUploads'
 import {
   getModelByUuid,
@@ -16,7 +17,6 @@ import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import {
   getDeployment,
@@ -30,9 +30,9 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
 import { createIndexes } from './models/Model'
 import { getSpecification } from './routes/v1/specification'
+import getDocsMenuContent from './routes/v1/docs'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -88,6 +88,8 @@ server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
 server.get('/api/v1/specification', ...getSpecification)
 
+server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
+
 server.use('/api', expressErrorHandler)
 
 export async function startServer() {
@@ -106,9 +108,7 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
-  server.use((req, res) => {
-    return handle(req, res)
-  })
+  server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)
   logger.info({ port }, `Listening on port ${port}`)

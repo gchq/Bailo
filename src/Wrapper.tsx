@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import { styled, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import MuiDrawer from '@mui/material/Drawer'
@@ -27,22 +27,22 @@ import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
-import { useGetUiConfig } from '../data/uiConfig'
-import Banner from './Banner'
-import { useGetNumRequests } from '../data/requests'
 import Image from 'next/image'
 import Tooltip from '@mui/material/Tooltip'
-import Copyright from './Copyright'
 import Settings from '@mui/icons-material/SettingsTwoTone'
-import { useGetCurrentUser } from '../data/user'
-import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import useTheme from '@mui/styles/useTheme'
+import { useGetUiConfig } from '../data/uiConfig'
+import Banner from './Banner'
+import { useGetNumRequests } from '../data/requests'
 import { lightTheme } from './theme'
+import Copyright from './Copyright'
+import { useGetCurrentUser } from '../data/user'
+import UserAvatar from './common/UserAvatar'
 import { DarkModeContext } from '../pages/_app'
 
-const drawerWidth: number = 240
+const drawerWidth = 240
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean
@@ -90,45 +90,49 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-export default function Wrapper({ title, page, children }: { title: any; page: string; children?: any }) {
-  const [open, setOpen] = React.useState(false)
-  const toggleDrawer = () => {
+type Props = {
+  title: string
+  page: string
+  children?: ReactNode
+}
+
+export default function Wrapper({ title, page, children }: Props): ReactElement {
+  const isDocsPage = useMemo(() => page.slice(0, 4) === 'docs', [page])
+
+  const [open, setOpen] = useState(false)
+  const toggleDrawer = (): void => {
     setOpen(!open)
   }
 
   const theme: any = useTheme() || lightTheme
-  const toggleDarkMode: any = React.useContext(DarkModeContext)
+  const toggleDarkMode: any = useContext(DarkModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
   const { currentUser } = useGetCurrentUser()
 
-  const [pageTopStyling, setPageTopStyling] = React.useState({})
-  const [contentTopStyling, setContentTopStyling] = React.useState({})
-  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null)
+  const [pageTopStyling, setPageTopStyling] = useState({})
+  const [contentTopStyling, setContentTopStyling] = useState({})
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
 
   const actionOpen = anchorEl !== null
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isUiConfigLoading) {
       if (uiConfig?.banner?.enable) {
         setPageTopStyling({
           mt: 4,
         })
         setContentTopStyling({
-          mt: 8,
+          mt: isDocsPage ? 4 : 8,
         })
       }
     }
-  }, [isUiConfigLoading, uiConfig])
+  }, [isUiConfigLoading, uiConfig, isDocsPage])
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
-      return (
-        <>
-          <p>Error authenticating user.</p>
-        </>
-      )
+      return <p>Error authenticating user.</p>
     }
 
     return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
@@ -142,19 +146,14 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     setAnchorEl(null)
   }
 
-  const headerTitle = (
-    <>
-      {typeof title === 'string' ? (
-        <>
-          <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
-            {title}
-          </Typography>
-        </>
-      ) : (
-        <>{title}</>
-      )}
-    </>
-  )
+  const headerTitle =
+    typeof title === 'string' ? (
+      <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
+        {title}
+      </Typography>
+    ) : (
+      title
+    )
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -171,7 +170,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig!.banner.enable && <Box sx={{ mt: 20 }} />}
+        {!isUiConfigLoading && uiConfig?.banner.enable && <Box sx={{ mt: 20 }} />}
         <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
           <Toolbar
             sx={{
@@ -258,17 +257,16 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Drawer sx={pageTopStyling} variant='permanent' open={open}>
           <Toolbar
             sx={{
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
               px: [1],
+              borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
             }}
           >
             <IconButton aria-label='close drawer' onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
-          <Divider />
           <StyledList>
             <Link href='/' passHref>
               <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
@@ -361,8 +359,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Box
           component='main'
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+            backgroundColor: () => (theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900]),
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
@@ -370,10 +367,16 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         >
           <Toolbar />
           <Box sx={contentTopStyling}>
-            <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
-              {children}
-            </Container>
-            <Copyright sx={{ pb: 2 }} />
+            {isDocsPage ? (
+              children
+            ) : (
+              <>
+                <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+                  {children}
+                </Container>
+                <Copyright sx={{ pb: 2 }} />
+              </>
+            )}
           </Box>
         </Box>
       </Box>

@@ -45,9 +45,6 @@ module.exports = {
       supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
       contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
     },
-    help: {
-      documentationUrl: 'https://example.com',
-    },
     registry: {
       host: 'localhost:8080',
     },

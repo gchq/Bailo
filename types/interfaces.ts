@@ -1,7 +1,7 @@
 import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
-import { UserDoc } from '../server/models/User'
 import { XYPosition } from 'react-flow-renderer'
+import { UserDoc } from '../server/models/User'
 
 export type { VersionDoc as Version } from '../server/models/Version'
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
@@ -93,10 +93,6 @@ export interface UiConfig {
     contactHref: string
   }
 
-  help: {
-    documentationUrl: string
-  }
-
   registry: {
     host: string
   }
@@ -141,3 +137,21 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
+
+export type DocHeading = {
+  id: string
+  title: string
+  children: DocFileOrHeading[]
+  priority?: number
+}
+
+export type DocFile = {
+  id: string
+  title: string
+  slug: string
+  priority?: number
+}
+
+export type DocFileOrHeading = DocHeading | DocFile
+
+export type DocsMenuContent = DocFileOrHeading[]

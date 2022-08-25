@@ -10,6 +10,7 @@ import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import useTheme from '@mui/styles/useTheme'
+import Link from 'next/link'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { useGetUiConfig } from '../data/uiConfig'
 import { lightTheme } from '../src/theme'
@@ -73,13 +74,11 @@ export default function Help() {
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button
-                    variant='contained'
-                    href={uiConfig.help?.documentationUrl}
-                    sx={{ margin: 'auto', mb: 1.5, width: 200 }}
-                  >
-                    View documentation
-                  </Button>
+                  <Link href='/docs' passHref>
+                    <Button variant='contained' sx={{ margin: 'auto', mb: 1.5, width: 200 }}>
+                      View documentation
+                    </Button>
+                  </Link>
                 </CardActions>
               </Card>
             </Grid>
