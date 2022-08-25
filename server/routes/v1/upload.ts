@@ -204,8 +204,7 @@ export const postUpload = [
       })
 
       try {
-        const binaryUuid = uuidv4()
-        const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${binaryUuid}`
+        const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${uuidv4()}`
         const client = new Minio.Client(config.get('minio'))
         await client.copyObject(
           files.binary[0].bucket,
@@ -213,17 +212,16 @@ export const postUpload = [
           `${files.binary[0].bucket}/${files.binary[0].path}`,
           new Minio.CopyConditions()
         )
-        await client.removeObject(files.binary[0].bucket, binaryUuid)
+        await client.removeObject(files.binary[0].bucket, files.binary[0].path)
 
-        const codeUuid = uuidv4()
-        const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${codeUuid}`
+        const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${uuidv4()}`
         await client.copyObject(
           files.code[0].bucket,
           codeLocation,
           `${files.code[0].bucket}/${files.code[0].path}`,
           new Minio.CopyConditions()
         )
-        await client.removeObject(files.code[0].bucket, codeUuid)
+        await client.removeObject(files.code[0].bucket, files.code[0].path)
 
         version.rawBinaryPath = binaryLocation
         version.rawCodePath = codeLocation
