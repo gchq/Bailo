@@ -35,7 +35,8 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { createIndexes } from './models/Model'
+import { createIndexes as createModelIndexes } from './models/Model'
+import { createIndexes as createPublicDeploymentIndexes } from './models/PublicDeployment'
 import { getSpecification } from './routes/v1/specification'
 
 const port = config.get('listen')
@@ -112,7 +113,8 @@ export async function startServer() {
   connectToMongoose()
 
   // lazily create indexes for full text search
-  createIndexes()
+  createModelIndexes()
+  createPublicDeploymentIndexes()
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 

@@ -173,7 +173,6 @@ export const resetDeploymentApprovals = [
 export const getPublicDeployments = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    console.log('here')
     let { filter } = req.query
 
     if (filter === undefined) filter = ''

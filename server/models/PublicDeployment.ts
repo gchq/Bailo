@@ -51,5 +51,10 @@ PublicDeploymentSchema.methods.log = async function (level: string, msg: string)
   await PublicDeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
+export async function createIndexes() {
+  PublicDeploymentSchema.index({ '$**': 'text' })
+  await PublicDeploymentModel.createIndexes()
+}
+
 const PublicDeploymentModel = model<PublicDeployment>('PublicDeployment', PublicDeploymentSchema)
 export default PublicDeploymentModel

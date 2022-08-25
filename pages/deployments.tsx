@@ -21,6 +21,9 @@ import Stack from '@mui/material/Stack'
 import useTheme from '@mui/styles/useTheme'
 import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
+import InputBase from '@mui/material/InputBase'
+import IconButton from '@mui/material/IconButton'
+import SearchIcon from '@mui/icons-material/Search'
 
 import { Deployment } from '../types/interfaces'
 import { useGetCurrentUser } from '../data/user'
@@ -28,9 +31,10 @@ import { listPublicDeployments, useGetUserDeployments } from '../data/deployment
 import Wrapper from '../src/Wrapper'
 import EmptyBlob from '../src/common/EmptyBlob'
 import { lightTheme } from '../src/theme'
-
+import useDebounce from '../utils/useDebounce'
 import { PublicDeploymentDoc } from '../server/models/PublicDeployment'
 import { ModelNameFromKey, VersionNameFromKey } from '../src/util/ObjectKeyDisplay'
+
 
 type TabOptions = 'my-deployments' | 'public'
 
@@ -46,14 +50,16 @@ function Deployments() {
   const router = useRouter()
   const { tab }: { tab?: TabOptions } = router.query
 
-  const { currentUser, isCurrentUserError } = useGetCurrentUser()
-  const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
-  const { publicDeployments, isPublicDeploymentsLoading, isPublicDeploymentsError } = listPublicDeployments()
-
   const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
   const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
   const [group, setGroup] = React.useState<TabOptions>('my-deployments')
+  const [filter, setFilter] = React.useState('')
+  const debouncedFilter = useDebounce(filter, 250)
+
+  const { currentUser, isCurrentUserError } = useGetCurrentUser()
+  const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
+  const { publicDeployments, isPublicDeploymentsLoading, isPublicDeploymentsError } = listPublicDeployments(debouncedFilter)
 
   const theme: any = useTheme() || lightTheme
 
@@ -80,6 +86,14 @@ function Deployments() {
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
     router.push(`/deployments?tab=${newValue}`)
+  }
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value)
+  }
+
+  const onFilterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
   }
 
   const displayDate = (date: Date) => new Date(date).toLocaleDateString('en-UK')
@@ -203,7 +217,26 @@ function Deployments() {
 
         {group === 'public' && !isPublicDeploymentsLoading && !isPublicDeploymentsError &&        
           <>
-            <Box>
+            <Box sx={{ p: 2 }}>
+                <Paper
+                  component='form'
+                  onSubmit={onFilterSubmit}
+                  sx={{
+                    p: '2px 4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '70%',
+                    maxWidth: '400px',
+                    margin: 'auto',
+                    marginRight: 0,
+                    marginBottom: 3,
+                  }}
+                >
+                  <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Public Deployments' value={filter} onChange={handleFilterChange} />
+                  <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                    <SearchIcon />
+                  </IconButton>
+                </Paper>
                 {publicDeployments && publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
                   <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                     <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
