@@ -1,11 +1,11 @@
-import { getDeploymentQueue } from '../utils/queues'
 import config from 'config'
-import prettyMs from 'pretty-ms'
 import https from 'https'
-import logger from '../utils/logger'
+import prettyMs from 'pretty-ms'
 import { getAccessToken } from '../routes/v1/registryAuth'
-import { getUserByInternalId } from '../services/user'
 import { findDeploymentById, markDeploymentBuilt } from '../services/deployment'
+import { getUserByInternalId } from '../services/user'
+import logger from '../utils/logger'
+import { getDeploymentQueue } from '../utils/queues'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),

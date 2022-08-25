@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import DeploymentSubmission from './DeploymentSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import DeploymentSubmission from './DeploymentSubmission'
 
 describe('DeploymentSubmission', () => {
   it('renders an DeploymentSubmission component', async () => {

@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import Banner from './Banner'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../data/uiConfig'
+import Banner from './Banner'
 
 describe('Banner', () => {
   it('renders a Banner component', async () => {

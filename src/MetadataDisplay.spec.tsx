@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import MetadataDisplay from './MetadataDisplay'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as schemaService from '../data/schema'
+import MetadataDisplay from './MetadataDisplay'
 
 describe('MetadataDisplay', () => {
   it('renders a MetadataDisplay component', async () => {

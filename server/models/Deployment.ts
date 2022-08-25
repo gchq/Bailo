@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose'
+import { Document, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'

@@ -1,4 +1,4 @@
-import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
+import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'

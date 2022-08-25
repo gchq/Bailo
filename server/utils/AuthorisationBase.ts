@@ -1,5 +1,5 @@
-import { User, Model, Deployment, Version } from '../../types/interfaces'
 import { Request } from 'express'
+import { Model } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'

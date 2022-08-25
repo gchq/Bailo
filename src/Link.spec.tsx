@@ -2,8 +2,7 @@
  * @jest-environment jsdom
  */
 
-import Link from './Link'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import * as router from 'next/router'
 
 describe('Link', () => {

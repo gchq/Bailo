@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { TextWidgetProps } from '../TextWidget'
 
 const PasswordWidget = (props: TextWidgetProps) => {

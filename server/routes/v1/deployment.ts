@@ -1,15 +1,15 @@
-import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
-import { validateSchema } from '../../utils/validateSchema'
+import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
-import { ensureUserRole } from '../../utils/user'
-import { createDeploymentRequests } from '../../services/request'
-import { BadReq, NotFound, Forbidden } from '../../utils/result'
-import { findModelByUuid } from '../../services/model'
-import { findVersionByName } from '../../services/version'
-import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { ApprovalStates } from '../../models/Deployment'
+import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { findModelByUuid } from '../../services/model'
+import { createDeploymentRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
+import { findVersionByName } from '../../services/version'
+import { BadReq, Forbidden, NotFound } from '../../utils/result'
+import { ensureUserRole } from '../../utils/user'
+import { validateSchema } from '../../utils/validateSchema'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 

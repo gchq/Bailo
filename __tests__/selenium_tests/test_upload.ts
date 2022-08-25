@@ -1,24 +1,22 @@
-import { By, until, WebDriver } from 'selenium-webdriver'
-import { runCommand } from '../../server/utils/build'
-import fs from 'fs/promises'
-import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
+import Docker from 'dockerode'
+import fs from 'fs/promises'
+import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-
+import { runCommand } from '../../server/utils/build'
+import logger from '../../server/utils/logger'
 import {
   clearData,
+  click,
+  fromRelative,
+  getDriver,
+  pause,
+  selectOption,
+  sendKeys,
   waitForElement,
   waitForElements,
-  selectOption,
-  getDriver,
-  click,
-  sendKeys,
-  pause,
-  fromRelative,
-  screenshot,
 } from '../__utils__/helpers'
-import logger from '../../server/utils/logger'
 
 const binaryPath = fromRelative(config.get('samples.binary'))
 const codePath = fromRelative(config.get('samples.code'))

@@ -1,11 +1,10 @@
-import { Request, Response, NextFunction } from 'express'
-import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { Forbidden, Unauthorised } from './result'
+import { NextFunction, Request, Response } from 'express'
 import Authorisation from '../external/Authorisation'
-import { findAndUpdateUser, findUserCached, getUserById } from '../services/user'
 import { UserDoc } from '../models/User'
+import { getAdminToken } from '../routes/v1/registryAuth'
+import { findUserCached, getUserById } from '../services/user'
+import { Forbidden, Unauthorised } from './result'
 
 const authorisation = new Authorisation()
 

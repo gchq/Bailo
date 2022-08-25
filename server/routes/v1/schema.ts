@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { ensureUserRole } from '../../utils/user'
+import { findSchemaByRef, findSchemasByUse } from '../../services/schema'
 import { NotFound } from '../../utils/result'
-import { findSchemasByUse, findSchemaByRef } from '../../services/schema'
+import { ensureUserRole } from '../../utils/user'
 
 export const getSchemas = [
   ensureUserRole('user'),

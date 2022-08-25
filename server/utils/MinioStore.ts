@@ -1,5 +1,5 @@
-import * as Minio from 'minio'
 import { Request } from 'express'
+import * as Minio from 'minio'
 import logger from './logger'
 
 export default class MinioStore {

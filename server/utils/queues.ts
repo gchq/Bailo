@@ -1,15 +1,14 @@
-import { MongoClient } from 'mongodb'
 import config from 'config'
 import mongoose from 'mongoose'
-import { simpleEmail } from '../templates/simpleEmail'
-import { sendEmail } from './smtp'
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { findVersionById, markVersionState } from '../services/version'
-import { getUserByInternalId } from '../services/user'
-import { findDeploymentById } from '../services/deployment'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
+import { findDeploymentById } from '../services/deployment'
+import { getUserByInternalId } from '../services/user'
+import { findVersionById, markVersionState } from '../services/version'
+import { simpleEmail } from '../templates/simpleEmail'
 import { connectToMongoose } from './database'
+import { sendEmail } from './smtp'
 
 let uploadQueue: PMongoQueue | undefined = undefined
 let deploymentQueue: PMongoQueue | undefined = undefined

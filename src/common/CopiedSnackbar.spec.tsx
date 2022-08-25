@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import CopiedSnackbar from './CopiedSnackbar'
 import { render, screen, waitFor } from '@testing-library/react'
+import CopiedSnackbar from './CopiedSnackbar'
 
 describe('CopiedSnackbar', () => {
   it('renders an CopiedSnackbar component', async () => {

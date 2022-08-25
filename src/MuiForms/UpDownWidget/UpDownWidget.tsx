@@ -1,10 +1,8 @@
-import React from 'react'
-
 import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
-
 import { WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const UpDownWidget = ({
   id,

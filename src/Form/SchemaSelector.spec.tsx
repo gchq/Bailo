@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import SchemaSelector from './SchemaSelector'
 import { render, screen, waitFor } from '@testing-library/react'
+import SchemaSelector from './SchemaSelector'
 
 describe('SchemaSelector', () => {
   const schema: any = {

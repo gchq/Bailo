@@ -1,5 +1,5 @@
-import * as Minio from 'minio'
 import config from 'config'
+import * as Minio from 'minio'
 import logger from './logger'
 
 export function getClient(): Minio.Client {

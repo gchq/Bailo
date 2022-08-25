@@ -1,13 +1,10 @@
-import React from 'react'
-
-import { FieldTemplateProps } from '@rjsf/core'
-
 import FormControl from '@mui/material/FormControl'
 import FormHelperText from '@mui/material/FormHelperText'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
-
+import { FieldTemplateProps } from '@rjsf/core'
+import React from 'react'
 import WrapIfAdditional from './WrapIfAdditional'
 
 const FieldTemplate = ({

@@ -1,7 +1,7 @@
-import { Schema, model, Types, Document } from 'mongoose'
+import { Document, model, Schema, Types } from 'mongoose'
 import { approvalStates, ApprovalStates, DeploymentDoc } from './Deployment'
-import { VersionDoc } from './Version'
 import { UserDoc } from './User'
+import { VersionDoc } from './Version'
 
 export const approvalTypes = ['Manager', 'Reviewer']
 

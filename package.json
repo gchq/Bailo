@@ -125,6 +125,7 @@
     "geckodriver": "^3.0.1",
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
+    "prettier-plugin-organize-imports": "^3.1.0",
     "react-test-renderer": "^17.0.2",
     "selenium-webdriver": "^4.1.1",
     "supertest": "^6.2.3",
