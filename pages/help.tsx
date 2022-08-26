@@ -74,7 +74,7 @@ export default function Help() {
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Link href='/docs' passHref>
+                  <Link passHref href='/docs'>
                     <Button variant='contained' sx={{ margin: 'auto', mb: 1.5, width: 200 }}>
                       View documentation
                     </Button>

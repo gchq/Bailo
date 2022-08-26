@@ -26,7 +26,7 @@ const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenu
   let headingPriority: number | undefined
   const docsDirectoryContents = readdirSync(dirPath)
 
-  const updatedDocsMenuContent: DocsMenuContent = docsDirectoryContents
+  const docsMenuContent: DocsMenuContent = docsDirectoryContents
     .reduce<DocsMenuContent>((docsMetadata, fileOrDirName) => {
       const nameWithoutExtension = removeFileExtension(fileOrDirName)
       const title = convertFileOrDirNameToTitle(nameWithoutExtension)
@@ -42,7 +42,7 @@ const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenu
           id: nanoid(),
           title,
           slug: currentSlug,
-          ...(frontMatter.priority && { priority: frontMatter.priority }), // As the highest priority is 1, we don't care about 0
+          ...(frontMatter.priority && frontMatter.priority > 0 && { priority: frontMatter.priority }),
         })
         if (
           frontMatter.priority &&
@@ -65,7 +65,7 @@ const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenu
     }, [])
     .sort(sortByPriority)
 
-  return [updatedDocsMenuContent, headingPriority]
+  return [docsMenuContent, headingPriority]
 }
 
 const generateDocsMenuContent = (): DocsMenuContent => {
