@@ -45,7 +45,7 @@ export default async function processDeployments() {
           throw new Error('Unable to find deployment')
         }
         modelID = deployment.metadata.highLevelDetails.modelID
-        initialVersionRequested = deployment.metadata.highLevelDetail.initialVersionRequested
+        initialVersionRequested = deployment.metadata.highLevelDetails.initialVersionRequested
       }
 
       const dlog = logger.child({ deploymentId: deployment._id })
