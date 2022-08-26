@@ -3,6 +3,10 @@ import matter from 'gray-matter'
 import { nanoid } from 'nanoid'
 import { DocFileOrHeading, DocsMenuContent } from '../../types/interfaces'
 
+type DocsFrontMatter = {
+  priority?: number
+}
+
 const sortByPriority = (a: DocFileOrHeading, b: DocFileOrHeading): number => {
   // As the highest priority is 1, we don't care about 0
   if (a.priority && b.priority) return a.priority - b.priority
@@ -22,7 +26,26 @@ const removeFileExtension = (fileOrDirName: string): string => {
   return extensionIndex === -1 ? fileOrDirName : fileOrDirName.slice(0, extensionIndex)
 }
 
-const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenuContent, number | undefined] => {
+const updateHeadingPriority = (
+  headingPriority: number | undefined,
+  childPriority: number | undefined
+): number | undefined => {
+  if (childPriority && childPriority > 0 && (!headingPriority || childPriority < headingPriority)) {
+    return childPriority
+  }
+  return headingPriority
+}
+
+const extractFrontMatterFromFile = (fileOrDirPath: string): DocsFrontMatter => {
+  const fileContents = readFileSync(fileOrDirPath).toString()
+  return matter(fileContents).data
+}
+
+const extractFrontMatterFromDir = (
+  dirPath: string,
+  partialSlug = ''
+): [DocsMenuContent, boolean, number | undefined] => {
+  let headingHasIndex = false
   let headingPriority: number | undefined
   const docsDirectoryContents = readdirSync(dirPath)
 
@@ -35,27 +58,26 @@ const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenu
       const stats = statSync(fileOrDirPath)
 
       if (stats.isFile() && fileOrDirName.slice(-4) === '.mdx') {
-        const fileContents = readFileSync(fileOrDirPath).toString()
-        const frontMatter = matter(fileContents).data
-
+        const frontMatter = extractFrontMatterFromFile(fileOrDirPath)
+        headingPriority = updateHeadingPriority(headingPriority, frontMatter.priority)
+        if (fileOrDirName === 'index.mdx') {
+          headingHasIndex = true
+        } else {
+          docsMetadata.push({
+            id: nanoid(),
+            title,
+            slug: currentSlug,
+            ...(frontMatter.priority && frontMatter.priority > 0 && { priority: frontMatter.priority }),
+          })
+        }
+      } else if (stats.isDirectory()) {
+        const [headingChildren, hasIndex, highestChildPriority] = extractFrontMatterFromDir(fileOrDirPath, currentSlug)
+        headingPriority = updateHeadingPriority(headingPriority, highestChildPriority)
         docsMetadata.push({
           id: nanoid(),
           title,
           slug: currentSlug,
-          ...(frontMatter.priority && frontMatter.priority > 0 && { priority: frontMatter.priority }),
-        })
-        if (
-          frontMatter.priority &&
-          frontMatter.priority > 0 &&
-          (!headingPriority || frontMatter.priority < headingPriority)
-        ) {
-          headingPriority = frontMatter.priority
-        }
-      } else if (stats.isDirectory()) {
-        const [headingChildren, highestChildPriority] = extractFrontMatterFromDir(fileOrDirPath, currentSlug)
-        docsMetadata.push({
-          id: nanoid(),
-          title,
+          hasIndex,
           children: headingChildren,
           ...(highestChildPriority && { priority: highestChildPriority }),
         })
@@ -65,7 +87,7 @@ const extractFrontMatterFromDir = (dirPath: string, partialSlug = ''): [DocsMenu
     }, [])
     .sort(sortByPriority)
 
-  return [docsMenuContent, headingPriority]
+  return [docsMenuContent, headingHasIndex, headingPriority]
 }
 
 const generateDocsMenuContent = (): DocsMenuContent => {

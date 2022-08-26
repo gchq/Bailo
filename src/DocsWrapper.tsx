@@ -1,5 +1,5 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
-import { Box, Container, List, ListItem, ListItemText, styled, Theme } from '@mui/material'
+import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, Theme } from '@mui/material'
 import Link from 'next/link'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
@@ -37,20 +37,30 @@ export default function DocsWrapper({ children }: Props): ReactElement {
         const childDocElements = doc.children.map((childDoc) =>
           createDocElement(childDoc, paddingLeft + paddingIncrement)
         )
+        const headingText = <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
+
         return (
           <Fragment key={doc.id}>
-            <ListItem dense sx={{ pl: paddingLeft }}>
-              <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
-            </ListItem>
+            {doc.hasIndex ? (
+              <Link passHref href={`/docs/${doc.slug}`}>
+                <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+                  {headingText}
+                </ListItemButton>
+              </Link>
+            ) : (
+              <ListItem dense sx={{ pl: paddingLeft }}>
+                {headingText}
+              </ListItem>
+            )}
             {childDocElements}
           </Fragment>
         )
       }
       return (
         <Link passHref href={`/docs/${doc.slug}`} key={doc.id}>
-          <ListItem dense button selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+          <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
             <ListItemText primary={doc.title} />
-          </ListItem>
+          </ListItemButton>
         </Link>
       )
     },

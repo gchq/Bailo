@@ -147,6 +147,8 @@ export interface RenderInterface {
 export type DocHeading = {
   id: string
   title: string
+  slug: string
+  hasIndex: boolean
   children: DocFileOrHeading[]
   priority?: number
 }
