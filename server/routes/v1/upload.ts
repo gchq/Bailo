@@ -193,9 +193,10 @@ export const postUpload = [
       ).add({
         versionId: version._id,
         userId: req.user?._id,
-        binary: normalizeMulterFile(files.binary[0]),
-        code: normalizeMulterFile(files.code[0]),
+        binary: normalizeMulterFile(files.binary[0], 'binary', version),
+        code: normalizeMulterFile(files.code[0], 'code', version),
       })
+
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
 
       // then return reference to user
@@ -204,7 +205,7 @@ export const postUpload = [
       })
 
       try {
-        const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${uuidv4()}`
+        const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
         const client = new Minio.Client(config.get('minio'))
         await client.copyObject(
           files.binary[0].bucket,
@@ -214,7 +215,7 @@ export const postUpload = [
         )
         await client.removeObject(files.binary[0].bucket, files.binary[0].path)
 
-        const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${uuidv4()}`
+        const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
         await client.copyObject(
           files.code[0].bucket,
           codeLocation,
