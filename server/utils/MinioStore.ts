@@ -24,7 +24,7 @@ export default class MinioStore {
     this.client = new Minio.Client(this.connection)
   }
 
-  async _handleFile(req: Request, file: any, cb: (err: string | undefined, metadata: any) => void) {
+  async _handleFile(req: Request, file: Express.Multer.File, cb: (error: Error | null, data: any) => void) {
     const bucket = await this.bucket(req, file)
     const path = await this.path(req, file)
 
@@ -35,10 +35,10 @@ export default class MinioStore {
       logger.info({ bucket, path }, 'Finished uploading file to Minio')
     } catch (e) {
       logger.error({ error: e }, 'Unable to add file to Minio')
-      return cb(e, null)
+      return cb(e as Error, null)
     }
 
-    cb(undefined, {
+    cb(null, {
       ...{
         path,
         bucket,
@@ -46,16 +46,16 @@ export default class MinioStore {
     })
   }
 
-  async _removeFile(_req: Request, file: any, cb: (err: string | undefined, data: any) => void) {
+  async _removeFile(req: Request, file: Express.Multer.File & { bucket: string }, cb: (error: Error | null, data: any) => void) {
     logger.info({ bucket: file.bucket, path: file.path }, 'Removing file from Minio')
     try {
       await this.client.removeObject(file.bucket, file.path)
     } catch (e) {
       logger.error({ error: e }, 'Unable to remove file from Minio')
-      return cb(e, null)
+      return cb(e as Error, null)
     }
 
     logger.info({ bucket: file.bucket, path: file.path }, 'Successfully removed file from Minio')
-    return cb(undefined, null)
+    return cb(null, null)
   }
 }
