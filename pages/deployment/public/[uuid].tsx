@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import Info from '@mui/icons-material/Info'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -13,8 +15,8 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import MuiLink from '@mui/material/Link'
 import useTheme from '@mui/styles/useTheme'
+import Typography from '@mui/material/Typography'
 
-import Link from 'next/link'
 import { useGetPublicDeployment } from '../../../data/deployment'
 import { useGetUiConfig } from '../../../data/uiConfig'
 import { useGetCurrentUser } from '../../../data/user'
@@ -23,7 +25,6 @@ import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../../src/TerminalLog'
 import Wrapper from '../../../src/Wrapper'
 import { lightTheme } from '../../../src/theme'
-import Typography from '@mui/material/Typography'
 import { VersionNameFromKey, ModelNameFromKey, UsernameFromKey } from '../../../src/util/ObjectKeyDisplay'
 
 type TabOptions = 'overview' | 'build'
@@ -156,15 +157,15 @@ export default function PublicDeployment() {
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Model</Typography>
-                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant={'body1'} />
+                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant='body1' />
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Version</Typography>
-                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant={'body1'} />
+                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant='body1' />
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Owner</Typography>
-                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant={'body1'} />
+                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant='body1' />
               </Box>
             </Box>
           )}

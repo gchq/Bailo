@@ -183,7 +183,7 @@ function Deployments() {
                   {groupedDeployments !== undefined &&
                     Object.keys(groupedDeployments).map((key) => (
                       <Box sx={{ mt: 3, mb: 3 }} key={key}>
-                        <ModelNameFromKey modelId={key} fontVariant={'h5'} />
+                        <ModelNameFromKey modelId={key} fontVariant='h5' />
                         <Divider flexItem />
                         {groupedDeployments[key].map((deployment) => (
                           <Box
@@ -228,62 +228,60 @@ function Deployments() {
         )}
 
         {group === 'public' && !isPublicDeploymentsLoading && !isPublicDeploymentsError && (
-          <>
-            <Box sx={{ p: 2 }}>
-              <Paper
-                component='form'
-                onSubmit={onFilterSubmit}
-                sx={{
-                  p: '2px 4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '70%',
-                  maxWidth: '400px',
-                  margin: 'auto',
-                  marginRight: 0,
-                  marginBottom: 3,
-                }}
-              >
-                <InputBase
-                  sx={{ ml: 1, flex: 1 }}
-                  placeholder='Filter Public Deployments'
-                  value={filter}
-                  onChange={handleFilterChange}
-                />
-                <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-                  <SearchIcon />
-                </IconButton>
-              </Paper>
-              {publicDeployments &&
-                publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
-                  <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
-                    <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                      >
-                        {deployment?.uuid}
-                      </MuiLink>
-                    </Link>
-                    <Stack sx={{ pb: 1, pt: 1 }} spacing={1} direction='row'>
-                      <Typography variant='body1'>Model:</Typography>
-                      <ModelNameFromKey modelId={deployment.model.toString()} fontVariant={'body1'} />
-                    </Stack>
-                    <Stack sx={{ pb: 1 }} spacing={1} direction='row'>
-                      <Typography variant='body1'>Version:</Typography>
-                      <VersionNameFromKey versionId={deployment.version.toString()} fontVariant={'body1'} />
-                    </Stack>
-                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                      {displayDate(deployment?.createdAt)}
-                    </Typography>
-                    {index !== publicDeployments.length - 1 && (
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                    )}
-                  </Box>
-                ))}
-              {publicDeployments?.length === 0 && <EmptyBlob text='No public deployments here' />}
-            </Box>
-          </>
+          <Box sx={{ p: 2 }}>
+            <Paper
+              component='form'
+              onSubmit={onFilterSubmit}
+              sx={{
+                p: '2px 4px',
+                display: 'flex',
+                alignItems: 'center',
+                width: '70%',
+                maxWidth: '400px',
+                margin: 'auto',
+                marginRight: 0,
+                marginBottom: 3,
+              }}
+            >
+              <InputBase
+                sx={{ ml: 1, flex: 1 }}
+                placeholder='Filter Public Deployments'
+                value={filter}
+                onChange={handleFilterChange}
+              />
+              <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                <SearchIcon />
+              </IconButton>
+            </Paper>
+            {publicDeployments &&
+              publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
+                <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
+                  <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
+                    <MuiLink
+                      variant='h5'
+                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                    >
+                      {deployment?.uuid}
+                    </MuiLink>
+                  </Link>
+                  <Stack sx={{ pb: 1, pt: 1 }} spacing={1} direction='row'>
+                    <Typography variant='body1'>Model:</Typography>
+                    <ModelNameFromKey modelId={deployment.model.toString()} fontVariant='body1' />
+                  </Stack>
+                  <Stack sx={{ pb: 1 }} spacing={1} direction='row'>
+                    <Typography variant='body1'>Version:</Typography>
+                    <VersionNameFromKey versionId={deployment.version.toString()} fontVariant='body1' />
+                  </Stack>
+                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                    {displayDate(deployment?.createdAt)}
+                  </Typography>
+                  {index !== publicDeployments.length - 1 && (
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                  )}
+                </Box>
+              ))}
+            {publicDeployments?.length === 0 && <EmptyBlob text='No public deployments here' />}
+          </Box>
         )}
       </Paper>
     </Wrapper>

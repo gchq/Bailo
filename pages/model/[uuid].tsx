@@ -1,5 +1,11 @@
 import { useRouter } from 'next/router'
 import React, { useEffect, useState, MouseEvent } from 'react'
+import axios from 'axios'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import { Types } from 'mongoose'
+import { Elements } from 'react-flow-renderer'
+
 import Box from '@mui/material/Box'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -24,44 +30,38 @@ import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import useTheme from '@mui/styles/useTheme'
-
-import TerminalLog from 'src/TerminalLog'
-import Wrapper from 'src/Wrapper'
-import ModelOverview from 'src/ModelOverview'
-import UserAvatar from 'src/common/UserAvatar'
-import createComplianceFlow from 'utils/complianceFlow'
-import { Elements } from 'react-flow-renderer'
-import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
-import { useGetCurrentUser } from 'data/user'
-import MuiAlert, { AlertProps } from '@mui/material/Alert'
-import { setTargetValue } from 'data/utils'
-import Link from 'next/link'
 import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
+import TextField from '@mui/material/TextField'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
+import Modal from '@mui/material/Modal'
+
+import TerminalLog from 'src/TerminalLog'
+import Wrapper from 'src/Wrapper'
+import ModelOverview from 'src/ModelOverview'
+import UserAvatar from 'src/common/UserAvatar'
+import createComplianceFlow from 'utils/complianceFlow'
+import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
+import { useGetCurrentUser } from 'data/user'
+import { setTargetValue } from 'data/utils'
+import { useGetPublicDeploymentByVersion } from 'data/deployment'
 import { postEndpoint } from 'data/api'
-import dynamic from 'next/dynamic'
-import { Types } from 'mongoose'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { Deployment, User, Version } from '../../types/interfaces'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import { lightTheme } from '../../src/theme'
-import PublicDeploymentOverview from '@/src/PublicDeploymentOverview'
-import TextField from '@mui/material/TextField'
-import axios from 'axios'
-import Modal from '@mui/material/Modal'
-import { useGetPublicDeploymentByVersion } from 'data/deployment'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'public' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  return ['overview', 'compliance', 'build', 'deployments', 'public', 'settings'].includes(value)
+  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
@@ -82,7 +82,7 @@ function Model() {
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<HTMLDivElement | null>(null)
-  const [publicDeploymentName, setPublicDeploymentName] = React.useState<String>('')
+  const [publicDeploymentName, setPublicDeploymentName] = React.useState<string>('')
   const [publicDeploymentErrorMessage, setPublicDeploymentErrorMessage] = React.useState<string>('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
@@ -338,7 +338,7 @@ function Model() {
                     variant='standard'
                     value={publicDeploymentName}
                     onChange={handlePublicDeploymentNameChange}
-                  ></TextField>
+                  />
                   <Button variant='contained' onClick={requestPublicDeployment}>
                     Request
                   </Button>
@@ -482,8 +482,6 @@ function Model() {
             ))}
           </>
         )}
-
-        {group === 'public' && <PublicDeploymentOverview />}
 
         {group === 'settings' && (
           <>
