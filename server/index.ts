@@ -31,7 +31,14 @@ import {
 } from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel, getUserNameFromInternalId } from './routes/v1/users'
+import {
+  getUsers,
+  getLoggedInUser,
+  postRegenerateToken,
+  favouriteModel,
+  unfavouriteModel,
+  getUserNameFromInternalId,
+} from './routes/v1/users'
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'

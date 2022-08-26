@@ -37,5 +37,3 @@ export function useGetUsernameFromInternalId(id: string) {
     isUsernameError: error,
   }
 }
-
-

@@ -35,7 +35,6 @@ import useDebounce from '../utils/useDebounce'
 import { PublicDeploymentDoc } from '../server/models/PublicDeployment'
 import { ModelNameFromKey, VersionNameFromKey } from '../src/util/ObjectKeyDisplay'
 
-
 type TabOptions = 'my-deployments' | 'public'
 
 function isTabOption(value: string): value is TabOptions {
@@ -59,7 +58,8 @@ function Deployments() {
 
   const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
-  const { publicDeployments, isPublicDeploymentsLoading, isPublicDeploymentsError } = listPublicDeployments(debouncedFilter)
+  const { publicDeployments, isPublicDeploymentsLoading, isPublicDeploymentsError } =
+    listPublicDeployments(debouncedFilter)
 
   const theme: any = useTheme() || lightTheme
 
@@ -68,7 +68,7 @@ function Deployments() {
       setGroup(tab)
     }
   }, [tab])
-  
+
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
       const groups: GroupedDeployments = _.groupBy(userDeployments, (deployment) => deployment.model)
@@ -124,7 +124,7 @@ function Deployments() {
           <Tab label='Public Deployments' value='public' />
         </Tabs>
 
-        {group === 'my-deployments' &&
+        {group === 'my-deployments' && (
           <>
             <Box sx={{ pt: 2 }}>
               <Box>
@@ -186,12 +186,24 @@ function Deployments() {
                         <ModelNameFromKey modelId={key} fontVariant={'h5'} />
                         <Divider flexItem />
                         {groupedDeployments[key].map((deployment) => (
-                          <Box sx={{ p: 1, m: 1, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }} key={deployment.uuid}>
+                          <Box
+                            sx={{
+                              p: 1,
+                              m: 1,
+                              backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a',
+                              borderRadius: 2,
+                            }}
+                            key={deployment.uuid}
+                          >
                             <Box>
                               <Link href={`/deployment/${deployment?.uuid}`} passHref>
                                 <MuiLink
                                   variant='h5'
-                                  sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                                  sx={{
+                                    fontWeight: '500',
+                                    textDecoration: 'none',
+                                    color: theme.palette.secondary.main,
+                                  }}
                                 >
                                   {deployment?.metadata?.highLevelDetails?.name}
                                 </MuiLink>
@@ -213,31 +225,37 @@ function Deployments() {
               )}
             </Box>
           </>
-        }
+        )}
 
-        {group === 'public' && !isPublicDeploymentsLoading && !isPublicDeploymentsError &&        
+        {group === 'public' && !isPublicDeploymentsLoading && !isPublicDeploymentsError && (
           <>
             <Box sx={{ p: 2 }}>
-                <Paper
-                  component='form'
-                  onSubmit={onFilterSubmit}
-                  sx={{
-                    p: '2px 4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '70%',
-                    maxWidth: '400px',
-                    margin: 'auto',
-                    marginRight: 0,
-                    marginBottom: 3,
-                  }}
-                >
-                  <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Public Deployments' value={filter} onChange={handleFilterChange} />
-                  <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-                    <SearchIcon />
-                  </IconButton>
-                </Paper>
-                {publicDeployments && publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
+              <Paper
+                component='form'
+                onSubmit={onFilterSubmit}
+                sx={{
+                  p: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '70%',
+                  maxWidth: '400px',
+                  margin: 'auto',
+                  marginRight: 0,
+                  marginBottom: 3,
+                }}
+              >
+                <InputBase
+                  sx={{ ml: 1, flex: 1 }}
+                  placeholder='Filter Public Deployments'
+                  value={filter}
+                  onChange={handleFilterChange}
+                />
+                <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                  <SearchIcon />
+                </IconButton>
+              </Paper>
+              {publicDeployments &&
+                publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
                   <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                     <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
                       <MuiLink
@@ -249,11 +267,11 @@ function Deployments() {
                     </Link>
                     <Stack sx={{ pb: 1, pt: 1 }} spacing={1} direction='row'>
                       <Typography variant='body1'>Model:</Typography>
-                      <ModelNameFromKey modelId={deployment.model.toString()} fontVariant={'body1'}/>
+                      <ModelNameFromKey modelId={deployment.model.toString()} fontVariant={'body1'} />
                     </Stack>
                     <Stack sx={{ pb: 1 }} spacing={1} direction='row'>
                       <Typography variant='body1'>Version:</Typography>
-                      <VersionNameFromKey versionId={deployment.version.toString()} fontVariant={'body1'}/>
+                      <VersionNameFromKey versionId={deployment.version.toString()} fontVariant={'body1'} />
                     </Stack>
                     <Typography variant='body1' sx={{ marginBottom: 2 }}>
                       {displayDate(deployment?.createdAt)}
@@ -263,11 +281,10 @@ function Deployments() {
                     )}
                   </Box>
                 ))}
-                {publicDeployments?.length === 0 && <EmptyBlob text='No public deployments here' />}
-              </Box>
+              {publicDeployments?.length === 0 && <EmptyBlob text='No public deployments here' />}
+            </Box>
           </>
-        }
-
+        )}
       </Paper>
     </Wrapper>
   )

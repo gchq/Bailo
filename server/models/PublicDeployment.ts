@@ -48,7 +48,10 @@ const PublicDeploymentSchema = new Schema<PublicDeployment>(
 
 PublicDeploymentSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)
-  await PublicDeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
+  await PublicDeploymentModel.findOneAndUpdate(
+    { _id: this._id },
+    { $push: { logs: { timestamp: new Date(), level, msg } } }
+  )
 }
 
 export async function createIndexes() {

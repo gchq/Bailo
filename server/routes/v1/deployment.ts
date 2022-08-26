@@ -8,7 +8,15 @@ import { createDeploymentRequests } from '../../services/request'
 import { BadReq, NotFound, Forbidden, Conflict, Unauthorised } from '../../utils/result'
 import { findModelById, findModelByUuid, isValidFilter } from '../../services/model'
 import { findVersionById, findVersionByName } from '../../services/version'
-import { createDeployment, createPublicDeployment, findDeploymentByUuid, findDeployments, findPublicDeploymentByUuid, findPublicDeploymentByVersion, findPublicDeployments } from '../../services/deployment'
+import {
+  createDeployment,
+  createPublicDeployment,
+  findDeploymentByUuid,
+  findDeployments,
+  findPublicDeploymentByUuid,
+  findPublicDeploymentByVersion,
+  findPublicDeployments,
+} from '../../services/deployment'
 import { ApprovalStates, DeploymentDoc, PublicDeploymentDoc } from '../../models/Deployment'
 import { findSchemaByRef } from '../../services/schema'
 import { getDeploymentQueue } from '../../utils/queues'
@@ -202,7 +210,10 @@ export const getPublicDeployment = [
       throw NotFound({ code: 'deployment_not_found', uuid }, `Unable to find deployment '${uuid}'`)
     }
 
-    req.log.info({ code: 'get_public_deployment_by_uuid', publicDeployment }, 'Fetching public deployment by a given UUID')
+    req.log.info(
+      { code: 'get_public_deployment_by_uuid', publicDeployment },
+      'Fetching public deployment by a given UUID'
+    )
     return res.json(publicDeployment)
   },
 ]
@@ -218,7 +229,10 @@ export const getPublicDeploymentByVersion = [
       throw NotFound({ code: 'deployment_not_found', version }, `Unable to find deployment for version '${version}'`)
     }
 
-    req.log.info({ code: 'get_public_deployment_by_version', publicDeployment }, 'Fetching public deployment by a given version ID')
+    req.log.info(
+      { code: 'get_public_deployment_by_version', publicDeployment },
+      'Fetching public deployment by a given version ID'
+    )
     return res.json(publicDeployment)
   },
 ]
@@ -246,7 +260,7 @@ export const postPublicDeployment = [
 
     if (!version.metadata.buildOptions?.allowPublicDeployments) {
       throw BadReq(
-        { code: 'public_deployment_not_allowed', versionId: versionId},
+        { code: 'public_deployment_not_allowed', versionId: versionId },
         `Public deployment not allowed for version ${versionId}`
       )
     }
@@ -254,22 +268,18 @@ export const postPublicDeployment = [
     const model: ModelDoc | null = await findModelById(req.user!, modelId)
 
     if (!model) {
-      throw NotFound(
-        { code: 'model_not_found', modelId: modelId },
-        `Unable to find model with name: '${modelId}'`
-      )
-    }    
+      throw NotFound({ code: 'model_not_found', modelId: modelId }, `Unable to find model with name: '${modelId}'`)
+    }
 
     const name = deploymentName
-    .toLowerCase()
-    .replace(/[^a-z 0-9]/g, '')
-    .replace(/ /g, '-')
+      .toLowerCase()
+      .replace(/[^a-z 0-9]/g, '')
+      .replace(/ /g, '-')
 
     const uuid = `${name}-${nanoid()}`
     req.log.info({ uuid }, `Named public deployment '${uuid}'`)
 
     try {
-
       const publicDeployment: PublicDeploymentDoc = await createPublicDeployment(req.user!, {
         uuid: uuid,
 
@@ -283,21 +293,22 @@ export const postPublicDeployment = [
 
       await publicDeployment.save()
       req.log.info({ code: 'triggered_deployments', publicDeployment }, 'Triggered public deployment')
-        await (
-          await getDeploymentQueue()
-        ).add({
-          deploymentId: publicDeployment._id,
-          userId: req.user!._id,
-          type: 'public'
-        })
-    } catch(e: any) {
+      await (
+        await getDeploymentQueue()
+      ).add({
+        deploymentId: publicDeployment._id,
+        userId: req.user!._id,
+        type: 'public',
+      })
+    } catch (e: any) {
       if (e.code === 11000) {
-        throw Conflict({versionId}, 'Public deployment already exists for this version')      
+        throw Conflict({ versionId }, 'Public deployment already exists for this version')
       }
     }
 
     return res.json(uuid)
-}]
+  },
+]
 
 export const fetchRawModelFiles = [
   ensureUserRole('user'),

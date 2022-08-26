@@ -5,7 +5,12 @@ import https from 'https'
 import logger from '../utils/logger'
 import { getAccessToken } from '../routes/v1/registryAuth'
 import { getUserByInternalId } from '../services/user'
-import { findDeploymentById, findPublicDeploymentById, markDeploymentBuilt, markPublicDeploymentBuilt } from '../services/deployment'
+import {
+  findDeploymentById,
+  findPublicDeploymentById,
+  markDeploymentBuilt,
+  markPublicDeploymentBuilt,
+} from '../services/deployment'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.get('registry.insecure'),
@@ -30,14 +35,14 @@ export default async function processDeployments() {
       let modelID
       let initialVersionRequested
 
-      if (type !== undefined && type === 'public') { 
+      if (type !== undefined && type === 'public') {
         deployment = await findPublicDeploymentById(user, deploymentId, { populate: true })
         if (!deployment) {
           logger.error('Unable to find public deployment')
           throw new Error('Unable to find public deployment')
         }
         modelID = deployment.model
-        initialVersionRequested = deployment.version        
+        initialVersionRequested = deployment.version
       } else {
         deployment = await findDeploymentById(user, deploymentId, { populate: true })
         if (!deployment) {
@@ -134,7 +139,7 @@ export default async function processDeployments() {
       deployment.log('info', 'Finalised new manifest')
       dlog.info('Marking build as successful')
 
-      if (type !== undefined && type === 'public') { 
+      if (type !== undefined && type === 'public') {
         await markPublicDeploymentBuilt(deployment._id)
       } else {
         await markDeploymentBuilt(deployment._id)

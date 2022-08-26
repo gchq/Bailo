@@ -39,7 +39,10 @@ export function useGetPublicDeployment(uuid?: string) {
 }
 
 export function useGetPublicDeploymentByVersion(versionId?: string) {
-  const { data, error, mutate } = useSWR<PublicDeployment>(versionId ? `/api/v1/deployment/public/version/${versionId}` : null, fetcher)
+  const { data, error, mutate } = useSWR<PublicDeployment>(
+    versionId ? `/api/v1/deployment/public/version/${versionId}` : null,
+    fetcher
+  )
 
   return {
     mutatePublicDeploymentVersion: mutate,

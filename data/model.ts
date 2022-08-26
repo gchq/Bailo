@@ -89,13 +89,9 @@ export function useGetModelVersion(uuid?: string, selectedVersion?: string) {
 }
 
 export function useGetVersionById(id?: string) {
-  const { data, error, mutate } = useSWR<Version>(
-    id ? `/api/v1/version/${id}` : null,
-    fetcher,
-    {
-      refreshInterval: 1000,
-    }
-  )
+  const { data, error, mutate } = useSWR<Version>(id ? `/api/v1/version/${id}` : null, fetcher, {
+    refreshInterval: 1000,
+  })
 
   return {
     mutateVersion: mutate,

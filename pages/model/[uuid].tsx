@@ -81,7 +81,7 @@ function Model() {
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
-  const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<HTMLDivElement | null>(null);
+  const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<HTMLDivElement | null>(null)
   const [publicDeploymentName, setPublicDeploymentName] = React.useState<String>('')
   const [publicDeploymentErrorMessage, setPublicDeploymentErrorMessage] = React.useState<string>('')
 
@@ -89,7 +89,8 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
-  const { publicDeploymentVersion, isPublicDeploymentVersionLoading, isPublicDeploymentVersionError } = useGetPublicDeploymentByVersion(version?._id)
+  const { publicDeploymentVersion, isPublicDeploymentVersionLoading, isPublicDeploymentVersionError } =
+    useGetPublicDeploymentByVersion(version?._id)
 
   const menuOpen = Boolean(menuAnchorEl)
   const popoverOpen = Boolean(popoverAnchorEl)
@@ -107,26 +108,26 @@ function Model() {
     router.push(`/model/${uuid}/deploy`)
   }
 
-  const requestPublicDeployment = async() => {
+  const requestPublicDeployment = async () => {
     const body = {
       versionId: version?._id,
       modelId: version?.model,
-      deploymentName: publicDeploymentName
+      deploymentName: publicDeploymentName,
     }
     await axios({
       method: 'post',
       url: '/api/v1/deployment/public',
       headers: { 'Content-Type': 'application/json' },
-      data: body
+      data: body,
     })
-    .then((res) => {
-      if (res.status === 200) {
-        router.push(`/deployment/public/${res.data}`)
-      }
-    })
-    .catch((e: any) => {
-      setPublicDeploymentErrorMessage(e.response.data.message)
-    })
+      .then((res) => {
+        if (res.status === 200) {
+          router.push(`/deployment/public/${res.data}`)
+        }
+      })
+      .catch((e: any) => {
+        setPublicDeploymentErrorMessage(e.response.data.message)
+      })
   }
 
   const copyModelCardToClipboard = () => {
@@ -226,7 +227,7 @@ function Model() {
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
-  };
+  }
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
@@ -266,11 +267,11 @@ function Model() {
                 <MenuItem
                   onClick={handlePublicDeploymentMenuClick}
                   disabled={
-                    !version.built || 
-                    version.managerApproved !== 'Accepted' || 
+                    !version.built ||
+                    version.managerApproved !== 'Accepted' ||
                     version.reviewerApproved !== 'Accepted' ||
-                    (version.metadata.buildOptions?.allowPublicDeployments === undefined ||
-                      !version.metadata.buildOptions?.allowPublicDeployments)
+                    version.metadata.buildOptions?.allowPublicDeployments === undefined ||
+                    !version.metadata.buildOptions?.allowPublicDeployments
                   }
                   data-test='submitDeployment'
                 >
@@ -329,19 +330,18 @@ function Model() {
                 </MenuItem>
               </MenuList>
             </Menu>
-            <Modal
-              open={popoverOpen}
-              onClose={handlePopoverClose}
-            >
+            <Modal open={popoverOpen} onClose={handlePopoverClose}>
               <Box sx={modalStyle}>
                 <Stack direction='row' spacing={2}>
-                  <TextField 
-                    label="Deployment name" 
-                    variant="standard" 
-                    value={publicDeploymentName} 
+                  <TextField
+                    label='Deployment name'
+                    variant='standard'
+                    value={publicDeploymentName}
                     onChange={handlePublicDeploymentNameChange}
                   ></TextField>
-                  <Button variant='contained' onClick={requestPublicDeployment}>Request</Button>
+                  <Button variant='contained' onClick={requestPublicDeployment}>
+                    Request
+                  </Button>
                 </Stack>
                 <Typography sx={{ color: 'red' }}>{publicDeploymentErrorMessage}</Typography>
               </Box>
@@ -404,7 +404,7 @@ function Model() {
 
         {group === 'deployments' && (
           <>
-            {!isPublicDeploymentVersionLoading && publicDeploymentVersion !== undefined &&
+            {!isPublicDeploymentVersionLoading && publicDeploymentVersion !== undefined && (
               <Box sx={{ pb: 2 }}>
                 <Typography>Public Deployment</Typography>
                 <Link href={`/deployment/public/${publicDeploymentVersion.uuid}`} passHref>
@@ -415,9 +415,9 @@ function Model() {
                     {publicDeploymentVersion.uuid}
                   </MuiLink>
                 </Link>
-                <Divider sx={{pb: 2 }} orientation='horizontal' flexItem />
-              </Box> 
-            }
+                <Divider sx={{ pb: 2 }} orientation='horizontal' flexItem />
+              </Box>
+            )}
             {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
@@ -515,8 +515,7 @@ function Model() {
               Delete Model
             </Button>
           </>
-        )}        
-
+        )}
       </Paper>
     </Wrapper>
   )

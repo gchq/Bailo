@@ -133,7 +133,7 @@ export default function PublicDeployment() {
             Show download commands
           </Button>
         </Box>
-        <Paper sx={{ p: 3 }}>                  
+        <Paper sx={{ p: 3 }}>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
             <Tabs
               textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
@@ -148,7 +148,7 @@ export default function PublicDeployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' &&
+          {group === 'overview' && (
             <Box sx={{ backgroundColor: theme.palette.primary.main, color: 'white', borderRadius: 2 }}>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Deployment name</Typography>
@@ -156,21 +156,20 @@ export default function PublicDeployment() {
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Model</Typography>
-                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant={'body1'}/>
+                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant={'body1'} />
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Version</Typography>
-                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant={'body1'}/>
+                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant={'body1'} />
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Owner</Typography>
-                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant={'body1'}/>
-              </Box>                
-            </Box>        
-          }
+                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant={'body1'} />
+              </Box>
+            </Box>
+          )}
 
           {group === 'build' && <TerminalLog logs={publicDeployment.logs} title='Deployment Build Logs' />}
-
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
