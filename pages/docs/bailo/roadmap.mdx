@@ -1,0 +1,22 @@
+---
+priority: 10000000
+---
+
+import DocsWrapper from '@/src/DocsWrapper'
+import Image from 'next/image'
+
+import roadmap from './../../../public/docs/diagrams/roadmap.svg'
+
+## Roadmap
+
+A rough guide of what we're aiming for in the future:
+
+<Image src={roadmap} />
+
+> We're interested in changing the roadmap to suit shifting product requirements.
+>
+> Have a feature you want added? Contact us via our issue tracker [here](https://github.com/gchq/bailo/issues).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper
+
+>
