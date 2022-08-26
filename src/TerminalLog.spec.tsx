@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
+import { render, waitFor } from '@testing-library/react'
 import TerminalLog from './TerminalLog'
-import { render, screen, waitFor } from '@testing-library/react'
 
 describe('TerminalLog', () => {
   const logs = ['test line 1', 'test line 2', 'test line 3']

@@ -1,11 +1,11 @@
+import Box from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import useTheme from '@mui/styles/useTheme'
 import React, { useState } from 'react'
 import Wrapper from 'src/Wrapper'
-import Box from '@mui/material/Box'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import useTheme from '@mui/styles/useTheme'
-import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 import { useGetCurrentUser } from '../data/user'
+import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 import { lightTheme } from '../src/theme'
 
 function TabPanel({ children, value, index, ...rest }) {

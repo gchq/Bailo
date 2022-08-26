@@ -1,9 +1,7 @@
-import React from 'react'
-
-import { FieldProps } from '@rjsf/core'
-
-import makeStyles from '@mui/styles/makeStyles'
 import Typography from '@mui/material/Typography'
+import makeStyles from '@mui/styles/makeStyles'
+import { FieldProps } from '@rjsf/core'
+import React from 'react'
 
 const useStyles = makeStyles({
   root: {

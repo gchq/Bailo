@@ -1,17 +1,17 @@
+import dagre from 'dagre'
 import React, { useState } from 'react'
 import ReactFlow, {
-  ReactFlowProvider,
   addEdge,
-  removeElements,
-  Controls,
-  isNode,
-  Elements,
   Connection,
+  Controls,
   Edge,
+  Elements,
+  isNode,
   NodeExtent,
   Position,
+  ReactFlowProvider,
+  removeElements,
 } from 'react-flow-renderer'
-import dagre from 'dagre'
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))

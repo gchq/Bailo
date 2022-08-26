@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
 import AppBar from '@mui/material/AppBar'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
 import useTheme from '@mui/styles/useTheme'
+import React, { useEffect } from 'react'
 import { lightTheme } from '../theme'
 
 function a11yProps(index: any) {

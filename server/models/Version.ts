@@ -1,6 +1,6 @@
-import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
+import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
-import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
+import { approvalStateOptions, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
 
 export interface Version {
@@ -32,8 +32,8 @@ const VersionSchema = new Schema<Version>(
     metadata: { type: Schema.Types.Mixed },
 
     built: { type: Boolean, default: false },
-    managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
-    reviewerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],

@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import ModelExportAndSubmission from './ModelExportAndSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import ModelExportAndSubmission from './ModelExportAndSubmission'
 
 describe('ModelExportAndSubmission', () => {
   it('renders a ModelExportAndSubmission component', async () => {

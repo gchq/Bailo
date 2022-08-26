@@ -1,13 +1,10 @@
-import React from 'react'
-
-import { utils } from '@rjsf/core'
-import { JSONSchema7 } from 'json-schema'
-
-import Grid from '@mui/material/Grid'
 import FormControl from '@mui/material/FormControl'
+import Grid from '@mui/material/Grid'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
-
+import { utils } from '@rjsf/core'
+import { JSONSchema7 } from 'json-schema'
+import React from 'react'
 import IconButton from '../IconButton/IconButton'
 
 const { ADDITIONAL_PROPERTY_FLAG } = utils

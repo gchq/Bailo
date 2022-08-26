@@ -1,9 +1,7 @@
-import React from 'react'
-
-import Slider from '@mui/material/Slider'
 import FormLabel from '@mui/material/FormLabel'
-
+import Slider from '@mui/material/Slider'
 import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const { rangeSpec } = utils
 

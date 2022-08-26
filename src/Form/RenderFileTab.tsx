@@ -1,14 +1,12 @@
-import { SplitSchema, Step } from '../../types/interfaces'
-import { setStepState } from '../../utils/formUtils'
-import { RenderInterface } from '../../types/interfaces'
-
-import { styled } from '@mui/system'
 import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import { styled } from '@mui/system'
+import { RenderInterface, Step } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
 
 export default function RenderFileTab({ step: step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step

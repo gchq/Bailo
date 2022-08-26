@@ -2,10 +2,10 @@
  * @jest-environment jsdom
  */
 
-import Wrapper from './Wrapper'
-import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
+import { render, screen, waitFor } from '@testing-library/react'
 import { lightTheme } from './theme'
+import Wrapper from './Wrapper'
 
 describe('Wrapper', () => {
   it('renders a Wrapper component', async () => {

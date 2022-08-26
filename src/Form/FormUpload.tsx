@@ -1,15 +1,13 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-
-import TextField from '@mui/material/TextField'
+import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-
+import Checkbox from '@mui/material/Checkbox'
+import TextField from '@mui/material/TextField'
+import { Dispatch, SetStateAction, useState } from 'react'
+import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
 import { getStepsData, setStepsData } from '../../utils/formUtils'
-import Alert from '@mui/material/Alert'
-import Checkbox from '@mui/material/Checkbox'
-import AlertTitle from '@mui/material/AlertTitle'
-import { useGetUiConfig } from '../../data/uiConfig'
 
 export default function FormUpload({
   splitSchema,

@@ -1,8 +1,6 @@
-import React from 'react'
-
 import TextField, { StandardTextFieldProps as TextFieldProps } from '@mui/material/TextField'
-
-import { WidgetProps, utils } from '@rjsf/core'
+import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const { getDisplayLabel } = utils
 

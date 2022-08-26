@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import ModelEditSubmission from './ModelEditSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import ModelEditSubmission from './ModelEditSubmission'
 
 describe('ModelEditSubmission', () => {
   it('renders an ModelEditSubmission component', async () => {

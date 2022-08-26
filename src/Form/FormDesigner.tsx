@@ -1,11 +1,9 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-
-import Stepper from '@mui/material/Stepper'
+import Box from '@mui/material/Box'
 import MaterialStep from '@mui/material/Step'
 import StepButton from '@mui/material/StepButton'
-import Box from '@mui/material/Box'
+import Stepper from '@mui/material/Stepper'
 import Typography from '@mui/material/Typography'
-
+import { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
 
 export default function FormDesigner({
