@@ -148,6 +148,7 @@ export const postRequestResponse = [
       throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')
     }
 
+    const reviewingUser = req.user.id
     const user = await getUserByInternalId(userId)
     if (user?.email) {
       await sendEmail({
@@ -156,6 +157,7 @@ export const postRequestResponse = [
           document,
           choice,
           requestType,
+          reviewingUser,
         }),
       })
     }

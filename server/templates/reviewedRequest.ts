@@ -1,5 +1,4 @@
 import dedent from 'dedent-js'
-import { Document } from 'mongoose'
 import mjml2html from 'mjml'
 import config from 'config'
 import { wrapper } from './partials'
@@ -12,9 +11,10 @@ export interface ReviewedRequestContext {
   document: VersionDoc | DeploymentDoc
   choice: string
   requestType: RequestTypes
+  reviewingUser: string
 }
 
-export function html({ document, requestType, choice }: ReviewedRequestContext) {
+export function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
@@ -28,7 +28,7 @@ export function html({ document, requestType, choice }: ReviewedRequestContext) 
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
