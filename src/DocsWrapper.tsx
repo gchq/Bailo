@@ -65,7 +65,7 @@ export default function DocsWrapper({ children }: Props): ReactElement {
   return (
     <Wrapper title='Documentation' page='docs'>
       {/* Banner height + Toolbar height == 96px */}
-      <Box display='flex' width='100%' minHeight='calc(100vh - 96px)'>
+      <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         {errorMessage ? (
           <Box mx='auto' mt={4}>
             {errorMessage}
@@ -77,11 +77,12 @@ export default function DocsWrapper({ children }: Props): ReactElement {
                 minWidth: 200,
                 backgroundColor: '#fff',
                 borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                overflow: 'scroll',
               }}
             >
               <StyledList>{docsMenu}</StyledList>
             </Box>
-            <Box flex={1}>
+            <Box flex={1} overflow='scroll'>
               <Box display='flex' flexDirection='column' height='100%'>
                 <Container maxWidth='lg'>{children}</Container>
                 <Copyright sx={{ pb: 2, mt: 'auto' }} />
