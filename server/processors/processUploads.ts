@@ -5,12 +5,12 @@ import { buildPython } from '../utils/build'
 import logger from '../utils/logger'
 import { getUserByInternalId } from '../services/user'
 
-import { BuildHandler } from 'server/utils/build/BuildHandler'
-import createWorkingDirectory from 'server/utils/build/CreateWorkingDirectory'
-import getRawFiles from 'server/utils/build/GetRawFiles'
-import extractFiles from 'server/utils/build/ExtractFiles'
-import getSeldonDockerfile from 'server/utils/build/GetSeldonDockerfile'
-import imgBuildDockerfile from 'server/utils/build/ImgBuildDockerfile'
+import { BuildHandler } from '../utils/build/BuildHandler'
+import createWorkingDirectory from '../utils/build/CreateWorkingDirectory'
+import getRawFiles from '../utils/build/GetRawFiles'
+import extractFiles from '../utils/build/ExtractFiles'
+import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile'
+import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile'
 import { getUploadQueue } from '../utils/queues'
 
 export default async function processUploads() {

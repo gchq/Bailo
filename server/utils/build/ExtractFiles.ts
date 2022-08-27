@@ -3,7 +3,7 @@ import { rm } from 'shelljs'
 import unzip from 'unzipper'
 import { dirname } from 'path'
 
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { getClient } from '../minio'

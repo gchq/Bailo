@@ -1,4 +1,4 @@
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../models/Version'
 import { FileRef } from './build'
 import { BuildLogger } from './BuildLogger'
 

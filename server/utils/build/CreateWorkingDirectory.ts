@@ -3,7 +3,7 @@ import { tmpdir } from 'os'
 import { v4 as uuidv4 } from 'uuid'
 import { mkdir, rm } from 'shelljs'
 
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 

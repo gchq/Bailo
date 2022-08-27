@@ -2,7 +2,7 @@ import indentString from 'indent-string'
 import prettyMs from 'pretty-ms'
 import { v4 as uuidv4 } from 'uuid'
 
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../models/Version'
 import logger from '../logger'
 import { BuildLogger } from './BuildLogger'
 import { BuildStep, Files } from './BuildStep'

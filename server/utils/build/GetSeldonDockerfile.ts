@@ -6,10 +6,10 @@ import { writeFile } from 'fs/promises'
 import dedent from 'dedent-js'
 import config from 'config'
 
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
-import { ModelDoc } from 'server/models/Model'
+import { ModelDoc } from '../../models/Model'
 import { logCommand } from './build'
 
 interface GetSeldonDockerfileProps {}
