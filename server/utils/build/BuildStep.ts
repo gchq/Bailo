@@ -26,5 +26,5 @@ export abstract class BuildStep {
   abstract rollback(version: VersionDoc, files: Files, state: any): Promise<void>
 
   // optional tidyup
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {}
+  async tidyup(_version: VersionDoc, _files: Files, _state: any): Promise<void> {}
 }
