@@ -1,17 +1,18 @@
-import { buildPython } from '../utils/build'
-import { getUploadQueue } from '../utils/queues'
 import prettyMs from 'pretty-ms'
+import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
+import { getUserByInternalId } from '../services/user'
 import { findVersionById, markVersionBuilt } from '../services/version'
+import { buildPython } from '../utils/build'
 import logger from '../utils/logger'
 import { getUserByInternalId } from '../services/user'
-import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { BuildHandler } from 'server/utils/build/BuildHandler'
 
+import { BuildHandler } from 'server/utils/build/BuildHandler'
 import createWorkingDirectory from 'server/utils/build/CreateWorkingDirectory'
 import getRawFiles from 'server/utils/build/GetRawFiles'
 import extractFiles from 'server/utils/build/ExtractFiles'
 import getSeldonDockerfile from 'server/utils/build/GetSeldonDockerfile'
 import imgBuildDockerfile from 'server/utils/build/ImgBuildDockerfile'
+import { getUploadQueue } from '../utils/queues'
 
 export default async function processUploads() {
   ;(await getUploadQueue()).process(async (msg: QueueMessage) => {

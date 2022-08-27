@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import SettingsProfileTab from './SettingsProfileTab'
 import { render, screen, waitFor } from '@testing-library/react'
+import SettingsProfileTab from './SettingsProfileTab'
 
 describe('SettingsProfileTab', () => {
   const user = {

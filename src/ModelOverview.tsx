@@ -1,10 +1,10 @@
-import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import MetadataDisplay from './MetadataDisplay'
+import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '../src/theme'
+import MetadataDisplay from './MetadataDisplay'
 
 const ModelOverview = (props: any) => {
   const { version } = props

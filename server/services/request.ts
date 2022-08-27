@@ -1,14 +1,13 @@
 import { Types } from 'mongoose'
 import { Request } from '../../types/interfaces'
+import { ApprovalStates, DeploymentDoc } from '../models/Deployment'
 import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
-import { BadReq } from '../utils/result'
-import { sendEmail } from '../utils/smtp'
-import { reviewRequest } from '../templates/reviewRequest'
-import { getUserById } from './user'
-import { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
-import { ApprovalStates } from '../models/Deployment'
+import { reviewRequest } from '../templates/reviewRequest'
+import { BadReq } from '../utils/result'
+import { sendEmail } from '../utils/smtp'
+import { getUserById } from './user'
 
 export async function createDeploymentRequests({
   version,

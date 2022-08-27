@@ -1,9 +1,9 @@
 import Close from '@mui/icons-material/CloseTwoTone'
-import Done from '@mui/icons-material/DoneTwoTone'
 import DoneAll from '@mui/icons-material/DoneAllTwoTone'
+import Done from '@mui/icons-material/DoneTwoTone'
 import Chip from '@mui/material/Chip'
-import React from 'react'
 import useTheme from '@mui/styles/useTheme'
+import React from 'react'
 import { Theme } from '../../src/theme'
 
 export default function ApprovalsChip({ approvals }: { approvals: any }) {

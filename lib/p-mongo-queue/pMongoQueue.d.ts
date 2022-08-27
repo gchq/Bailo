@@ -1,5 +1,5 @@
-import { Db, MongoError } from 'mongodb'
 import { EventEmitter } from 'events'
+import { Db } from 'mongodb'
 
 export default class Queue extends EventEmitter {
   constructor(db: Db, name: string, opts?: QueueOptions)

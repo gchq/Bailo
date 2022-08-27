@@ -1,15 +1,15 @@
+import Edit from '@mui/icons-material/Edit'
+import LoadingButton from '@mui/lab/LoadingButton'
+import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import Edit from '@mui/icons-material/Edit'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import { useGetUiConfig } from '../../data/uiConfig'
-import Checkbox from '@mui/material/Checkbox'
 
 const ModelEditSubmission = ({
   onSubmit,

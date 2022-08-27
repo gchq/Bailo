@@ -1,20 +1,19 @@
-import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
+import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import { ensureUserRole, hasRole } from '../../utils/user'
-
-import { getDeploymentQueue } from '../../utils/queues'
+import { ApprovalStates, DeploymentDoc } from '../../models/Deployment'
+import { ModelDoc } from '../../models/Model'
+import { RequestTypes } from '../../models/Request'
+import { VersionDoc } from '../../models/Version'
+import { findDeploymentById } from '../../services/deployment'
 import { getRequest, readNumRequests, readRequests } from '../../services/request'
 import { getUserByInternalId } from '../../services/user'
-import { BadReq, Unauthorised } from '../../utils/result'
-import { reviewedRequest } from '../../templates/reviewedRequest'
-import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
-import { findDeploymentById } from '../../services/deployment'
-import { DeploymentDoc, ApprovalStates } from '../../models/Deployment'
-import { VersionDoc } from '../../models/Version'
-import { RequestTypes } from '../../models/Request'
-import { ModelDoc } from '../../models/Model'
+import { reviewedRequest } from '../../templates/reviewedRequest'
+import { getDeploymentQueue } from '../../utils/queues'
+import { BadReq, Unauthorised } from '../../utils/result'
+import { sendEmail } from '../../utils/smtp'
+import { ensureUserRole, hasRole } from '../../utils/user'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -148,6 +147,7 @@ export const postRequestResponse = [
       throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')
     }
 
+    const reviewingUser = req.user.id
     const user = await getUserByInternalId(userId)
     if (user?.email) {
       await sendEmail({
@@ -156,6 +156,7 @@ export const postRequestResponse = [
           document,
           choice,
           requestType,
+          reviewingUser,
         }),
       })
     }
