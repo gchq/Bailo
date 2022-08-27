@@ -24,7 +24,7 @@ class GetSeldonDockerfile extends BuildStep {
     return 'Get Seldon Dockerfile'
   }
 
-  async build(version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(_version: VersionDoc, _files: Files, state: any): Promise<void> {
     if (!state.workingDirectory) {
       throw new Error('Get dockerfile requires a working directory')
     }
