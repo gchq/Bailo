@@ -1,5 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import fs from 'fs/promises'
 import Docker from 'dockerode'
 import axios from 'axios'
