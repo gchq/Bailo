@@ -4,7 +4,7 @@ import config from 'config'
 import fs from 'fs/promises'
 import path from 'path'
 import { clearStoredData } from '../../server/utils/clear'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import log from '../../server/utils/logger'
 
 export async function clearData() {
