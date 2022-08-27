@@ -1,6 +1,5 @@
 import prettyMs from 'pretty-ms'
 import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { getUserByInternalId } from '../services/user'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import { buildPython } from '../utils/build'
 import logger from '../utils/logger'
