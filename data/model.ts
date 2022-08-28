@@ -68,7 +68,7 @@ export function useGetModelVersions(uuid?: string) {
 }
 
 export function useGetModelVersion(uuid?: string, selectedVersion?: string) {
-  const getVersion = selectedVersion ? selectedVersion : 'latest'
+  const getVersion = selectedVersion || 'latest'
 
   const { data, error, mutate } = useSWR<Version>(
     uuid ? `/api/v1/model/${uuid}/version/${getVersion}` : null,

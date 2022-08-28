@@ -18,7 +18,7 @@ declare global {
     }
 
     interface Response {
-      error: Function
+      error: (code: number, error: any) => void
     }
   }
 }
@@ -129,7 +129,7 @@ export interface Step {
   renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
-  isComplete: Function
+  isComplete: (step: Step) => boolean
 }
 
 export interface SplitSchema {
