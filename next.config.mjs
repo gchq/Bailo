@@ -2,6 +2,7 @@ import nextBundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
+import remarkMermaid from 'mdx-mermaid'
 import rehypeHighlight from 'rehype-highlight'
 
 const withBundleAnalyzer = nextBundleAnalyzer({
@@ -11,7 +12,7 @@ const withBundleAnalyzer = nextBundleAnalyzer({
 const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkFrontmatter, remarkGfm],
+    remarkPlugins: [remarkFrontmatter, remarkGfm, remarkMermaid],
     rehypePlugins: [rehypeHighlight],
   },
 })
