@@ -31,7 +31,7 @@ function ModelOverview(props: any) {
               }}
             >
               {version?.metadata?.highLevelDetails?.tags !== undefined &&
-                version?.metadata?.highLevelDetails?.tags.map((tag: any, index: number) => (
+                version?.metadata?.highLevelDetails?.tags.map((tag: any) => (
                   <Chip
                     sx={{
                       color: theme.palette.mode === 'light' ? 'white' : 'primary',

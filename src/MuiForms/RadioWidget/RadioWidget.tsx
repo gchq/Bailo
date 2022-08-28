@@ -32,7 +32,7 @@ function RadioWidget({
         {label || schema.title}
       </FormLabel>
       <RadioGroup value={`${value}`} row={row as boolean} onChange={_onChange} onBlur={_onBlur} onFocus={_onFocus}>
-        {(enumOptions as any).map((option: any, i: number) => {
+        {(enumOptions as any).map((option: any) => {
           const itemDisabled = enumDisabled && (enumDisabled as any).indexOf(option.value) !== -1
 
           return (

@@ -88,7 +88,7 @@ function SelectWidget({
         multiple: typeof multiple === 'undefined' ? false : multiple,
       }}
     >
-      {(enumOptions as any).map(({ value: optionValue, label: optionLabel }: any, i: number) => {
+      {(enumOptions as any).map(({ value: optionValue, label: optionLabel }: any) => {
         const optionDisabled: any = enumDisabled && (enumDisabled as any).indexOf(optionValue) !== -1
         return (
           <MenuItem key={optionValue} value={optionValue} disabled={optionDisabled}>

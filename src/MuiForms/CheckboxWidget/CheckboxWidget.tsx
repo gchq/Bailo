@@ -37,7 +37,7 @@ function CheckboxWidget(props: WidgetProps) {
         {label || schema.title}
       </FormLabel>
       <RadioGroup value={`${value}`} row={false} onChange={_onChange} onBlur={_onBlur} onFocus={_onFocus}>
-        {(enumOptions as any).map((option: any, i: number) => (
+        {(enumOptions as any).map((option: any) => (
           <FormControlLabel
             control={<Radio color='primary' key={option.value} />}
             label={`${option.label}`}
