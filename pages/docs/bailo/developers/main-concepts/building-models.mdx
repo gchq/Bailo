@@ -36,7 +36,11 @@ retry limit is reached, where it will fail.
 The `BuildHandler` is constructed with a static series of steps to carry out:
 
 ```javascript
-const buildHandler = new BuildHandler([{ construct: exampleTaskA() }, { construct: exampleTaskB() }])
+const buildHandler = new BuildHandler([
+  { construct: exampleTaskA() },
+  { construct: exampleTaskB() },
+  { construct: exampleTaskC() },
+])
 ```
 
 Each `construct` is a function that takes in some options and returns a factory for an instantiated class extending
@@ -70,7 +74,10 @@ export abstract class BuildStep {
 A `BuildStep` also takes in props which can be provided when creating the `BuildHandler`:
 
 ```javascript
-const buildHandler = new BuildHandler([{ construct: createFolder(), props: { folderPath: '/tmp/a' } }])
+const buildHandler = new BuildHandler([
+  { construct: createFolder(), props: { folderPath: '/tmp/a' } },
+  { construct: buildModel(), props: { image: 'seldon3.6' } },
+])
 ```
 
 This can be used for configuring existing constructs. One a `BuildHandler` is configured, it can be run by calling
