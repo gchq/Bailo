@@ -5,6 +5,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer({
   swcMinify: true,
   eslint: {
-    dirs: ['pages', 'utils'],
+    dirs: ['pages', 'utils', 'src'],
   },
 })

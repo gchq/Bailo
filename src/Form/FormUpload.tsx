@@ -46,59 +46,59 @@ export default function FormUpload({
     }
   }
 
+  if (isUiConfigError || isUiConfigLoading) {
+    return null
+  }
+
   return (
     <>
-      {!isUiConfigError && !isUiConfigLoading && (
-        <>
-          {dataSteps.map((step, index) => {
-            if (!step.renderBasic) {
-              return <></>
-            }
+      {dataSteps.map((step) => {
+        if (!step.renderBasic) {
+          return null
+        }
 
-            const RenderBasic = step.renderBasic
-            return (
-              <Box key={`${index}`}>
-                <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
-              </Box>
-            )
-          })}
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label='Metadata'
-            value={metadata}
-            onChange={handleMetadataChange}
-            error={validationErrorText !== ''}
-            helperText={validationErrorText}
-            data-test='metadataTextarea'
-          />
-          {uiConfig?.uploadWarning?.showWarning && (
-            <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-              <AlertTitle sx={{ m: 0 }}>
-                <Checkbox
-                  sx={{ p: '0px !important', mr: 1 }}
-                  checked={warningCheckboxVal}
-                  onChange={handleCheckboxChange}
-                  data-test='warningCheckbox'
-                />
-                {uiConfig.uploadWarning.checkboxText}
-              </AlertTitle>
-            </Alert>
-          )}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <Button
-              variant='contained'
-              onClick={onSubmit}
-              sx={{ mt: 3 }}
-              data-test='submitButton'
-              disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
-            >
-              Submit
-            </Button>
+        const RenderBasic = step.renderBasic
+        return (
+          <Box key={step.section}>
+            <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
           </Box>
-        </>
+        )
+      })}
+      <TextField
+        fullWidth
+        multiline
+        rows={4}
+        label='Metadata'
+        value={metadata}
+        onChange={handleMetadataChange}
+        error={validationErrorText !== ''}
+        helperText={validationErrorText}
+        data-test='metadataTextarea'
+      />
+      {uiConfig?.uploadWarning?.showWarning && (
+        <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
+          <AlertTitle sx={{ m: 0 }}>
+            <Checkbox
+              sx={{ p: '0px !important', mr: 1 }}
+              checked={warningCheckboxVal}
+              onChange={handleCheckboxChange}
+              data-test='warningCheckbox'
+            />
+            {uiConfig.uploadWarning.checkboxText}
+          </AlertTitle>
+        </Alert>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <Button
+          variant='contained'
+          onClick={onSubmit}
+          sx={{ mt: 3 }}
+          data-test='submitButton'
+          disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
+        >
+          Submit
+        </Button>
+      </Box>
     </>
   )
 }

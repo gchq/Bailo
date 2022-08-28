@@ -4,12 +4,12 @@ import { TextWidgetProps } from '../TextWidget'
 
 const { localToUTC, utcToLocal } = utils
 
-const DateTimeWidget = (props: TextWidgetProps) => {
-  const { registry } = props
+function DateTimeWidget(props: TextWidgetProps) {
+  const { registry, value: propsValue, onChange: propsOnChange } = props
   const { TextWidget } = registry.widgets
-  const value = utcToLocal(props.value)
+  const value = utcToLocal(propsValue)
   const onChange = (newValue: any) => {
-    props.onChange(localToUTC(newValue))
+    propsOnChange(localToUTC(newValue))
   }
 
   return (

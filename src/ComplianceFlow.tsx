@@ -21,7 +21,7 @@ const nodeExtent: NodeExtent = [
   [1000, 1000],
 ]
 
-const ComplianceFlow = ({ initialElements }: { initialElements: Elements }) => {
+function ComplianceFlow({ initialElements }: { initialElements: Elements }) {
   const [elements, setElements] = useState<Elements>(initialElements)
   const onConnect = (params: Connection | Edge) => setElements((els) => addEdge(params, els))
   const onElementsRemove = (elementsToRemove: Elements) => setElements((els) => removeElements(elementsToRemove, els))
@@ -43,9 +43,13 @@ const ComplianceFlow = ({ initialElements }: { initialElements: Elements }) => {
     const layoutedElements = elements.map((el) => {
       if (isNode(el)) {
         const nodeWithPosition = dagreGraph.node(el.id)
+
+        // ESLint confuses `el` for a function.
+        /* eslint-disable no-param-reassign */
         el.targetPosition = isHorizontal ? Position.Left : Position.Top
         el.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
         el.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
+        /* eslint-enable no-param-reassign */
       }
 
       return el

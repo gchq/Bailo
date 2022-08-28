@@ -19,8 +19,8 @@ export default function RenderBasicFileTab({ step, splitSchema, setSplitSchema }
   return (
     <Box sx={{ pb: 4, pt: 4 }}>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <FileInput label={'Select Code'} file={code} onChange={handleCodeChange} accepts='.zip' />
-        <FileInput label={'Select Binary'} file={binary} onChange={handleBinaryChange} accepts='.zip' />
+        <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
+        <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
       </Stack>
     </Box>
   )

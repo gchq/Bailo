@@ -13,13 +13,15 @@ const { getDefaultRegistry } = utils
 
 const { fields, widgets } = getDefaultRegistry()
 
-const DefaultChildren = () => (
-  <Box marginTop={3}>
-    <Button type='submit' variant='contained' color='primary'>
-      Submit
-    </Button>
-  </Box>
-)
+function DefaultChildren() {
+  return (
+    <Box marginTop={3}>
+      <Button type='submit' variant='contained' color='primary'>
+        Submit
+      </Button>
+    </Box>
+  )
+}
 
 const Theme: any = {
   children: <DefaultChildren />,

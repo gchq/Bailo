@@ -4,7 +4,7 @@ import Done from '@mui/icons-material/DoneTwoTone'
 import Chip from '@mui/material/Chip'
 import useTheme from '@mui/styles/useTheme'
 import React from 'react'
-import { Theme } from '../../src/theme'
+import { Theme } from '../theme'
 
 export default function ApprovalsChip({ approvals }: { approvals: any }) {
   const numApprovals = approvals.filter((e: string) => e === 'Accepted').length

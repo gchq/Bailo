@@ -8,8 +8,7 @@ export default function Copyright(props: any) {
       <Link color='inherit' href='https://www.gchq.gov.uk/'>
         Crown Copyright
       </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
+      {new Date().getFullYear()}.
     </Typography>
   )
 }

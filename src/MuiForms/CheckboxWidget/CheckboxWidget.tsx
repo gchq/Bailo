@@ -11,7 +11,7 @@ import React from 'react'
 
 const { schemaRequiresTrueValue } = utils
 
-const CheckboxWidget = (props: WidgetProps) => {
+function CheckboxWidget(props: WidgetProps) {
   const { schema, id, value, disabled, readonly, label, onChange, onBlur, onFocus } = props
 
   const required = schemaRequiresTrueValue(schema)
@@ -27,7 +27,7 @@ const CheckboxWidget = (props: WidgetProps) => {
     },
   ]
 
-  const _onChange = (_: any, newValue: any) => onChange(schema.type == 'boolean' ? newValue !== 'false' : newValue)
+  const _onChange = (_: any, newValue: any) => onChange(schema.type === 'boolean' ? newValue !== 'false' : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
   const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, newValue)
 
@@ -37,17 +37,15 @@ const CheckboxWidget = (props: WidgetProps) => {
         {label || schema.title}
       </FormLabel>
       <RadioGroup value={`${value}`} row={false} onChange={_onChange} onBlur={_onBlur} onFocus={_onFocus}>
-        {(enumOptions as any).map((option: any, i: number) => {
-          return (
-            <FormControlLabel
-              control={<Radio color='primary' key={i} />}
-              label={`${option.label}`}
-              value={`${option.value}`}
-              key={i}
-              disabled={disabled || readonly}
-            />
-          )
-        })}
+        {(enumOptions as any).map((option: any, i: number) => (
+          <FormControlLabel
+            control={<Radio color='primary' key={option.value} />}
+            label={`${option.label}`}
+            value={`${option.value}`}
+            key={option.value}
+            disabled={disabled || readonly}
+          />
+        ))}
       </RadioGroup>
     </>
   )
