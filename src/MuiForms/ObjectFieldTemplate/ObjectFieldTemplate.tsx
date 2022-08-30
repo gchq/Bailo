@@ -1,10 +1,7 @@
-import React from 'react'
-
 import Grid from '@mui/material/Grid'
 import makeStyles from '@mui/styles/makeStyles'
-
 import { ObjectFieldTemplateProps, utils } from '@rjsf/core'
-
+import React from 'react'
 import AddButton from '../AddButton/AddButton'
 
 const { canExpand } = utils

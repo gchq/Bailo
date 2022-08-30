@@ -2,10 +2,10 @@
  * @jest-environment jsdom
  */
 
-import ApprovalsChip from './ApprovalsChip'
+import ThemeProvider from '@mui/system/ThemeProvider'
 import { render, screen, waitFor } from '@testing-library/react'
 import { lightTheme } from '../theme'
-import ThemeProvider from '@mui/system/ThemeProvider'
+import ApprovalsChip from './ApprovalsChip'
 
 describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/2 approvals', async () => {

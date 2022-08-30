@@ -1,6 +1,6 @@
 import { exec } from 'shelljs'
-import packageInfo from '../../package.json'
 import packageLock from '../../package-lock.json'
+import packageInfo from '../../package.json'
 
 // This script requires 'license-checker'
 //   npm i -g license-checker

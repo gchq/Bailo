@@ -1,16 +1,16 @@
 import { ObjectId } from 'mongodb'
-import UserModel from '../models/User'
 import DeploymentModel from '../models/Deployment'
+import UserModel from '../models/User'
 import '../utils/mockMongo'
+import { deploymentUuid, testDeployment, testDeployment2, testUser } from '../utils/test/testModels'
 import {
-  findDeploymentByUuid,
-  serializedDeploymentFields,
-  findDeploymentById,
-  findDeployments,
-  DeploymentFilter,
   createDeployment,
+  DeploymentFilter,
+  findDeploymentById,
+  findDeploymentByUuid,
+  findDeployments,
+  serializedDeploymentFields,
 } from './deployment'
-import { testDeployment2, testDeployment, deploymentUuid, testUser } from '../utils/test/testModels'
 
 const userDoc = new UserModel(testUser)
 

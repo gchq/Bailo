@@ -20,7 +20,9 @@ export const getErrorMessage = async (res: Response) => {
   let messageError = res.statusText
   try {
     messageError = `${res.statusText}: ${(await res.json()).message}`
-  } catch (e) {}
+  } catch (e) {
+    // unable to identify error message, possibly a network failure
+  }
 
   return messageError
 }

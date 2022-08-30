@@ -1,10 +1,10 @@
-import { Schema, model, Document, Types } from 'mongoose'
+import { Document, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
-export const approvalStates = ['Accepted', 'Declined', 'No Response']
+export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
 
 export enum ApprovalStates {
   Accepted = 'Accepted',
@@ -50,7 +50,7 @@ const DeploymentSchema = new Schema<Deployment>(
     versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     metadata: { type: Schema.Types.Mixed },
 
-    managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },

@@ -1,11 +1,9 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-
-import Stepper from '@mui/material/Stepper'
+import Box from '@mui/material/Box'
 import MaterialStep from '@mui/material/Step'
 import StepButton from '@mui/material/StepButton'
-import Box from '@mui/material/Box'
+import Stepper from '@mui/material/Stepper'
 import Typography from '@mui/material/Typography'
-
+import { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
 
 export default function FormDesigner({
@@ -17,7 +15,7 @@ export default function FormDesigner({
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: Function
-  modelUploading?: boolean
+  modelUploading: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [openValidateError, setOpenValidateError] = useState(false)
@@ -29,6 +27,7 @@ export default function FormDesigner({
   }
 
   const Render = currentStep.render
+  const RenderButtons = currentStep.renderButtons
 
   return (
     <>
@@ -53,18 +52,18 @@ export default function FormDesigner({
         ))}
       </Stepper>
 
-      <Render currentStep={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
-      {currentStep.renderButtons(
-        currentStep,
-        splitSchema,
-        setSplitSchema,
-        activeStep,
-        setActiveStep,
-        onSubmit,
-        openValidateError,
-        setOpenValidateError,
-        modelUploading
-      )}
+      <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
+      <RenderButtons
+        step={currentStep}
+        splitSchema={splitSchema}
+        setSplitSchema={setSplitSchema}
+        activeStep={activeStep}
+        setActiveStep={setActiveStep}
+        onSubmit={onSubmit}
+        openValidateError={openValidateError}
+        setOpenValidateError={setOpenValidateError}
+        modelUploading={modelUploading}
+      />
     </>
   )
 }

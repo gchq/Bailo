@@ -1,32 +1,48 @@
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
 import LoadingButton from '@mui/lab/LoadingButton'
-
-import { setStepValidate, validateForm } from '../../utils/formUtils'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Snackbar from '@mui/material/Snackbar'
+import { Dispatch, SetStateAction } from 'react'
 import { SplitSchema, Step } from '../../types/interfaces'
+import { setStepValidate, validateForm } from '../../utils/formUtils'
 
-export default function RenderButtons(
-  currentStep: Step,
-  splitSchema: SplitSchema,
-  setSplitSchema: Function,
-  activeStep: number,
-  setActiveStep: Function,
-  onSubmit: Function,
-  openValidateError: boolean,
-  setOpenValidateError: Function,
-  modelUploading?: boolean
-) {
+export interface RenderButtonsInterface {
+  step: Step
+  splitSchema: SplitSchema
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+
+  activeStep: number
+  setActiveStep: Dispatch<SetStateAction<number>>
+
+  onSubmit: () => {}
+
+  openValidateError: boolean
+  setOpenValidateError: Dispatch<SetStateAction<boolean>>
+
+  modelUploading: boolean
+}
+
+export default function RenderButtons({
+  step,
+  splitSchema,
+  setSplitSchema,
+  activeStep,
+  setActiveStep,
+  onSubmit,
+  openValidateError,
+  setOpenValidateError,
+  modelUploading,
+}: RenderButtonsInterface) {
   const isFirstStep = activeStep === 0
   const isLastStep = activeStep === splitSchema.steps.length - 1
 
   const onClickNextSection = () => {
-    const isValid = validateForm(currentStep)
+    const isValid = validateForm(step)
 
     if (!isValid) {
-      setStepValidate(splitSchema, setSplitSchema, currentStep, true)
+      setStepValidate(splitSchema, setSplitSchema, step, true)
       setOpenValidateError(true)
       return
     }
@@ -35,10 +51,10 @@ export default function RenderButtons(
   }
 
   const onClickSubmit = () => {
-    const isValid = validateForm(currentStep)
+    const isValid = validateForm(step)
 
     if (!isValid) {
-      setStepValidate(splitSchema, setSplitSchema, currentStep, true)
+      setStepValidate(splitSchema, setSplitSchema, step, true)
       setOpenValidateError(true)
       return
     }

@@ -1,11 +1,10 @@
-import { SplitSchema, Step } from '../../types/interfaces'
-import { setStepState } from '../../utils/formUtils'
-
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
+import { RenderInterface, Step } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
 
-export default function RenderBasicFileTab(step: Step, splitSchema: SplitSchema, setSplitSchema: Function) {
+export default function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code } = state
 

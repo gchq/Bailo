@@ -1,14 +1,12 @@
-import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
+import { Date, Types } from 'mongoose'
+import { Dispatch, SetStateAction } from 'react'
 import { UserDoc } from '../server/models/User'
-import { XYPosition } from 'react-flow-renderer'
 
-export type { VersionDoc as Version } from '../server/models/Version'
-export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
+export type { ApprovalStates, DeploymentDoc as Deployment } from '../server/models/Deployment'
 export type { RequestDoc as Request } from '../server/models/Request'
 export type { UserDoc as User } from '../server/models/User'
-
-export type { ApprovalStates } from '../server/models/Deployment'
+export type { VersionDoc as Version } from '../server/models/Version'
 
 declare global {
   namespace Express {
@@ -126,9 +124,9 @@ export interface Step {
   section: string
   schemaRef: string
 
-  render: Function
-  renderBasic: Function
-  renderButtons: Function
+  render: (RenderInterface) => JSX.Element | null
+  renderBasic?: (RenderInterface) => JSX.Element | null
+  renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
   isComplete: Function
@@ -141,3 +139,9 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
+
+export interface RenderInterface {
+  step: Step
+  splitSchema: SplitSchema
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+}

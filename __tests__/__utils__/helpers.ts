@@ -1,10 +1,10 @@
-import { until, By, WebDriver, Builder } from 'selenium-webdriver'
-import firefox from 'selenium-webdriver/firefox'
 import config from 'config'
 import fs from 'fs/promises'
 import path from 'path'
-import { clearStoredData } from '../../server/utils/clear'
+import { Builder, By, until, WebDriver } from 'selenium-webdriver'
+import firefox from 'selenium-webdriver/firefox'
 import { runCommand } from '../../server/utils/build'
+import { clearStoredData } from '../../server/utils/clear'
 import log from '../../server/utils/logger'
 
 export async function clearData() {
