@@ -54,6 +54,7 @@
     "jsonschema": "^1.4.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
+    "mdx-mermaid": "1.2.3",
     "memoizee": "^0.4.15",
     "minio": "^7.0.25",
     "mjml": "^4.11.0",

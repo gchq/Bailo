@@ -4,7 +4,7 @@ priority: 0
 
 import DocsWrapper from '@/src/DocsWrapper'
 
-# h1 Heading hello
+# h1 Heading
 
 ## h2 Heading
 
@@ -90,6 +90,22 @@ var foo = function (bar) {
 console.log(foo(5))
 ```
 
+### [Footnotes](https://github.com/markdown-it/markdown-it-footnote)
+
+Footnote 1 link[^first].
+
+Footnote 2 link[^second].
+
+Inline footnote^[Text of inline footnote] definition.
+
+Duplicated footnote reference[^second].
+
+[^first]: Footnote **can have markup**
+
+    and multiple paragraphs.
+
+[^second]: Footnote text.
+
 ## Tables
 
 | Option | Description                                                               |
@@ -112,19 +128,6 @@ Right aligned columns
 
 [link with title](http://nodeca.github.io/pica/demo/ 'title text!')
 
-{/\* ## Images
-
-![Minion](https://octodex.github.com/images/minion.png)
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg 'The Stormtroopocat')
-
-Like links, Images also have a footnote style syntax
-
-![Alt text][id]
-
-With a reference later in the document defining the URL location:
-
-[id]: https://octodex.github.com/images/dojocat.jpg 'The Dojocat' \*/}
-
 ### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
 
 - 19^th^
@@ -138,22 +141,4 @@ With a reference later in the document defining the URL location:
 
 ==Marked text==
 
-### [Footnotes](https://github.com/markdown-it/markdown-it-footnote)
-
-Footnote 1 link[^first].
-
-Footnote 2 link[^second].
-
-Inline footnote^[Text of inline footnote] definition.
-
-Duplicated footnote reference[^second].
-
-[^first]: Footnote **can have markup**
-
-    and multiple paragraphs.
-
-[^second]: Footnote text.
-
-export default ({ children }) => <DocsWrapper>{children}</DocsWrapper
-
->
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
