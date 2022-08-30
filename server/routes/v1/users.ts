@@ -27,17 +27,6 @@ export const getLoggedInUser = [
   },
 ]
 
-export const getUserNameFromInternalId = [
-  ensureUserRole('user'),
-  async (req: Request, res: Response) => {
-    const user: UserDoc | null = await getUserByInternalId(req.params.id)
-    if (user !== null) {
-      req.log.info({ code: 'fetching_user_details' }, 'Fetching user name from internal ID')
-      return res.json(user.id)
-    }
-  },
-]
-
 export const postRegenerateToken = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {

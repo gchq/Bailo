@@ -41,8 +41,8 @@ export default async function processDeployments() {
           logger.error('Unable to find public deployment')
           throw new Error('Unable to find public deployment')
         }
-        modelID = deployment.model
-        initialVersionRequested = deployment.version
+        modelID = deployment.model.uuid
+        initialVersionRequested = deployment.version.version
       } else {
         deployment = await findDeploymentById(user, deploymentId, { populate: true })
         if (!deployment) {

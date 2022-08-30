@@ -23,22 +23,35 @@ import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import InputBase from '@mui/material/InputBase'
 import IconButton from '@mui/material/IconButton'
+import { Variant } from '@mui/material/styles/createTypography'
 import SearchIcon from '@mui/icons-material/Search'
 
-import { Deployment } from '../types/interfaces'
+import { Deployment, PublicDeployment } from '../types/interfaces'
+import { VersionDoc } from '../server/models/Version'
 import { useGetCurrentUser } from '../data/user'
 import { listPublicDeployments, useGetUserDeployments } from '../data/deployment'
 import Wrapper from '../src/Wrapper'
 import EmptyBlob from '../src/common/EmptyBlob'
 import { lightTheme } from '../src/theme'
 import useDebounce from '../utils/useDebounce'
-import { PublicDeploymentDoc } from '../server/models/PublicDeployment'
-import { ModelNameFromKey, VersionNameFromKey } from '../src/util/ObjectKeyDisplay'
+import { useGetModelById } from '../data/model'
 
 type TabOptions = 'my-deployments' | 'public'
 
 function isTabOption(value: string): value is TabOptions {
   return ['my-deployments', 'public'].includes(value)
+}
+
+function isVersion(version: any): version is VersionDoc {
+  return (version as VersionDoc).version !== undefined
+}
+
+function ModelNameFromKey({ modelId, fontVariant }: { modelId: string; fontVariant: Variant }) {
+  const { model, isModelError } = useGetModelById(modelId)
+  if (isModelError) {
+    return <Typography>Error getting model name</Typography>
+  }
+  return <Typography variant={fontVariant}>{model?.currentMetadata?.highLevelDetails?.name ?? 'Loading...'}</Typography>
 }
 
 interface GroupedDeployments {
@@ -254,7 +267,7 @@ function Deployments() {
               </IconButton>
             </Paper>
             {publicDeployments &&
-              publicDeployments?.map((deployment: PublicDeploymentDoc, index) => (
+              publicDeployments?.map((deployment: PublicDeployment, index) => (
                 <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
                   <Link href={`/deployment/public/${deployment?.uuid}`} passHref>
                     <MuiLink
@@ -265,14 +278,20 @@ function Deployments() {
                     </MuiLink>
                   </Link>
                   <Stack sx={{ pb: 1, pt: 1 }} spacing={1} direction='row'>
-                    <Typography variant='body1'>Model:</Typography>
+                    <Typography sx={{ fontWeight: 'bold' }} variant='body1'>
+                      Model:
+                    </Typography>
                     <ModelNameFromKey modelId={deployment.model.toString()} fontVariant='body1' />
                   </Stack>
                   <Stack sx={{ pb: 1 }} spacing={1} direction='row'>
-                    <Typography variant='body1'>Version:</Typography>
-                    <VersionNameFromKey versionId={deployment.version.toString()} fontVariant='body1' />
+                    <Typography sx={{ fontWeight: 'bold' }} variant='body1'>
+                      Version:
+                    </Typography>
+                    <Typography variant='body1'>
+                      {isVersion(deployment.version) && deployment.version.version}
+                    </Typography>
                   </Stack>
-                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                  <Typography variant='subtitle2' sx={{ marginBottom: 2 }}>
                     {displayDate(deployment?.createdAt)}
                   </Typography>
                   {index !== publicDeployments.length - 1 && (

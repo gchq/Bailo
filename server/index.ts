@@ -31,14 +31,7 @@ import {
 } from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import processDeployments from './processors/processDeployments'
-import {
-  getUsers,
-  getLoggedInUser,
-  postRegenerateToken,
-  favouriteModel,
-  unfavouriteModel,
-  getUserNameFromInternalId,
-} from './routes/v1/users'
+import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
@@ -93,7 +86,6 @@ server.get('/api/v1/schema/:ref', ...getSchema)
 server.get('/api/v1/config', ...getUiConfig)
 server.get('/api/v1/users', ...getUsers)
 server.get('/api/v1/user', ...getLoggedInUser)
-server.get('/api/v1/user/user-id/:id', ...getUserNameFromInternalId)
 server.post('/api/v1/user/token', ...postRegenerateToken)
 server.post('/api/v1/user/favourite/:id', ...favouriteModel)
 server.post('/api/v1/user/unfavourite/:id', ...unfavouriteModel)

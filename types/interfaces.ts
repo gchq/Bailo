@@ -52,7 +52,7 @@ export interface ModelMetadata {
   }
 
   buildOptions?: {
-    rawModelExport: boolean
+    exportRawModel: boolean
     allowPublicDeployments: boolean
   }
 

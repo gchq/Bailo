@@ -25,12 +25,26 @@ import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../../src/TerminalLog'
 import Wrapper from '../../../src/Wrapper'
 import { lightTheme } from '../../../src/theme'
-import { VersionNameFromKey, ModelNameFromKey, UsernameFromKey } from '../../../src/util/ObjectKeyDisplay'
+import { VersionDoc } from '../../../server/models/Version'
+import { UserDoc } from '../../../server/models/User'
+import { ModelDoc } from '../../../server/models/Model'
 
 type TabOptions = 'overview' | 'build'
 
 function isTabOption(value: string): value is TabOptions {
   return ['overview', 'build'].includes(value)
+}
+
+function isVersion(version: any): version is VersionDoc {
+  return (version as VersionDoc).version !== undefined
+}
+
+function isModel(model: any): model is ModelDoc {
+  return (model as ModelDoc).uuid !== undefined
+}
+
+function isUser(user: any): user is UserDoc {
+  return (user as UserDoc).id !== undefined
 }
 
 function CodeLine({ line }) {
@@ -42,7 +56,7 @@ function CodeLine({ line }) {
   }
 
   return (
-    <>
+    <Box sx={{ mb: 2 }}>
       <div
         style={{
           cursor: 'pointer',
@@ -65,7 +79,7 @@ function CodeLine({ line }) {
         </Tooltip>
       </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
-    </>
+    </Box>
   )
 }
 
@@ -86,7 +100,9 @@ export default function PublicDeployment() {
   useEffect(() => {
     if (publicDeployment !== undefined) {
       const { model, version } = publicDeployment
-      setTag(`${model}:${version}`)
+      if (isModel(model) && isVersion(version)) {
+        setTag(`${model.uuid}:${version.version}`)
+      }
     }
   }, [publicDeployment])
 
@@ -126,6 +142,8 @@ export default function PublicDeployment() {
 
   const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
 
+  console.log(tag)
+
   return (
     <>
       <Wrapper title={`Deployment: ${publicDeployment.uuid}`} page='deployments'>
@@ -157,15 +175,19 @@ export default function PublicDeployment() {
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Model</Typography>
-                <ModelNameFromKey modelId={publicDeployment.model.toString()} fontVariant='body1' />
+                <Typography variant='body1'>
+                  {isModel(publicDeployment.model) && publicDeployment.model.uuid}
+                </Typography>
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Version</Typography>
-                <VersionNameFromKey versionId={publicDeployment.version.toString()} fontVariant='body1' />
+                <Typography variant='body1'>
+                  {isVersion(publicDeployment.version) && publicDeployment.version.version}
+                </Typography>
               </Box>
               <Box sx={{ p: 2 }}>
                 <Typography variant='h6'>Owner</Typography>
-                <UsernameFromKey userId={publicDeployment.owner.toString()} fontVariant='body1' />
+                <Typography variant='body1'>{isUser(publicDeployment.owner) && publicDeployment.owner.id}</Typography>
               </Box>
             </Box>
           )}
@@ -180,30 +202,28 @@ export default function PublicDeployment() {
         <DialogContent>
           <DialogContentText sx={{ p: 2 }}>
             <Box>
-              <p style={{ margin: 0 }}>
+              <Typography sx={{ m: 0 }}>
                 # Login to Docker (your token can be found on the
                 <Link href='/settings'>
                   <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                 </Link>
                 page) {theme.palette.mode}
-              </p>
+              </Typography>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
-              <br />
 
-              <p style={{ margin: 0 }}># Pull model</p>
+              <Typography sx={{ m: 0 }}># Pull model</Typography>
               <CodeLine line={`docker pull ${deploymentTag}`} />
-              <br />
 
-              <p style={{ margin: 0 }}># Run Docker image</p>
+              <Typography sx={{ m: 0 }}># Run Docker image</Typography>
               <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
-              <br />
+              <Typography sx={{ m: 0 }}>
+                # (the container exposes on port 9000, available on the host as port 9999)
+              </Typography>
 
-              <p style={{ margin: 0 }}># Check that the Docker container is running</p>
+              <Typography sx={{ m: 0 }}># Check that the Docker container is running</Typography>
               <CodeLine line='docker ps' />
-              <br />
 
-              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
+              <Typography sx={{ m: 0 }}># The model is accessible at localhost:9999</Typography>
             </Box>
           </DialogContentText>
         </DialogContent>

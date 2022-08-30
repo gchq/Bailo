@@ -361,7 +361,6 @@ export const fetchRawModelFiles = [
 
     const stream: Readable = await client.getObject(bucketName, filePath)
     if (stream !== null) {
-      console.log(filePath)
       stream.pipe(res)
     }
   },

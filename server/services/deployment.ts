@@ -110,9 +110,9 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
   }
 }
 
-export async function findPublicDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
+export async function findPublicDeploymentByUuid(user: UserDoc, uuid: string, _opts?: GetDeploymentOptions) {
   let publicDeployment = PublicDeploymentModel.findOne({ uuid })
-  if (opts?.populate) publicDeployment = publicDeployment.populate('model')
+  publicDeployment = publicDeployment.populate('model').populate('version').populate('owner')
 
   return filterDeployment(user, await publicDeployment)
 }
@@ -130,7 +130,7 @@ export async function createPublicDeployment(user: UserDoc, data: CreatePublicDe
 }
 
 export async function findPublicDeploymentById(user: UserDoc, id: ModelId, opts?: GetDeploymentOptions) {
-  let publicDeployment = PublicDeploymentModel.findById(id)
+  let publicDeployment = PublicDeploymentModel.findById(id).populate('version', 'version')
   if (opts?.populate) publicDeployment = publicDeployment.populate('model')
 
   return filterDeployment(user, await publicDeployment)
@@ -148,7 +148,10 @@ export async function findPublicDeployments(user: UserDoc, filter: string) {
 
   if (filter) query.$text = { $search: filter as string }
 
-  const publicDeployments = await PublicDeploymentModel.find(query).sort({ updatedAt: -1 })
+  const publicDeployments = await PublicDeploymentModel.find(query)
+    .sort({ updatedAt: -1 })
+    .populate('version', 'version')
+
   return filterDeployment(user, publicDeployments)
 }
 

@@ -25,6 +25,7 @@ import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import useTheme from '@mui/styles/useTheme'
+import Typography from '@mui/material/Typography'
 
 import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
@@ -58,7 +59,7 @@ function CodeLine({ line }) {
   }
 
   return (
-    <>
+    <Box sx={{ mb: 2 }}>
       <div
         style={{
           cursor: 'pointer',
@@ -81,7 +82,7 @@ function CodeLine({ line }) {
         </Tooltip>
       </div>
       <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
-    </>
+    </Box>
   )
 }
 
@@ -231,30 +232,28 @@ export default function Deployment() {
         <DialogContent>
           <DialogContentText sx={{ p: 2 }}>
             <Box>
-              <p style={{ margin: 0 }}>
+              <Typography sx={{ m: 0 }}>
                 # Login to Docker (your token can be found on the
                 <Link href='/settings' passHref>
                   <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                 </Link>
                 page) {theme.palette.mode}
-              </p>
+              </Typography>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
-              <br />
 
-              <p style={{ margin: 0 }}># Pull model</p>
+              <Typography sx={{ m: 0 }}># Pull model</Typography>
               <CodeLine line={`docker pull ${deploymentTag}`} />
-              <br />
 
-              <p style={{ margin: 0 }}># Run Docker image</p>
+              <Typography sx={{ m: 0 }}># Run Docker image</Typography>
               <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
-              <br />
+              <Typography sx={{ m: 0 }}>
+                # (the container exposes on port 9000, available on the host as port 9999)
+              </Typography>
 
-              <p style={{ margin: 0 }}># Check that the Docker container is running</p>
+              <Typography sx={{ m: 0 }}># Check that the Docker container is running</Typography>
               <CodeLine line='docker ps' />
-              <br />
 
-              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
+              <Typography sx={{ m: 0 }}># The model is accessible at localhost:9999</Typography>
             </Box>
           </DialogContentText>
         </DialogContent>
