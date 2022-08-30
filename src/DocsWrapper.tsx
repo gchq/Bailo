@@ -10,13 +10,13 @@ import DocsMenuContext from '../utils/contexts/docsMenuContext'
 import { DocFileOrHeading } from '../types/interfaces'
 import isDocHeading from '../utils/isDocHeading'
 
-type Props = {
+type DocsWrapperProps = {
   children?: ReactNode
 }
 
 const paddingIncrement = 2
 
-export default function DocsWrapper({ children }: Props): ReactElement {
+export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme: Theme = useTheme() || lightTheme
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)

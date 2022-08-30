@@ -90,13 +90,13 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-type Props = {
+type WrapperProps = {
   title: string
   page: string
   children?: ReactNode
 }
 
-export default function Wrapper({ title, page, children }: Props): ReactElement {
+export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
   const isDocsPage = useMemo(() => page.slice(0, 4) === 'docs', [page])
 
   const [open, setOpen] = useState(false)
