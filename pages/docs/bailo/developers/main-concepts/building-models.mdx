@@ -35,7 +35,7 @@ retry limit is reached, where it will fail.
 
 The `BuildHandler` is constructed with a static series of steps to carry out:
 
-```javascript
+```typescript
 const buildHandler = new BuildHandler([
   { construct: exampleTaskA() },
   { construct: exampleTaskB() },
@@ -46,7 +46,7 @@ const buildHandler = new BuildHandler([
 Each `construct` is a function that takes in some options and returns a factory for an instantiated class extending
 `BuildStep`. An example `construct` is:
 
-```javascript
+```typescript
 function exampleTaskA(opts: Partial<BuildOpts> = {}) {
   return (logger: BuildLogger, props: ExtractFilesProps) => {
     return new ExampleTaskA(logger, opts, props)
@@ -58,7 +58,7 @@ A `BuildStep` represents a single unit of work. It needs a string `name`, used i
 function to run the work and a `rollback` function in case of failure. An optional `tidyup` function can be provided to
 clean up after your operations.
 
-```javascript
+```typescript
 export abstract class BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: any) => BuildStep
 
@@ -73,7 +73,7 @@ export abstract class BuildStep {
 
 A `BuildStep` also takes in props which can be provided when creating the `BuildHandler`:
 
-```javascript
+```typescript
 const buildHandler = new BuildHandler([
   { construct: createFolder(), props: { folderPath: '/tmp/a' } },
   { construct: buildModel(), props: { image: 'seldon3.6' } },
@@ -83,13 +83,13 @@ const buildHandler = new BuildHandler([
 This can be used for configuring existing constructs. One a `BuildHandler` is configured, it can be run by calling
 `.process()`:
 
-```javascript
+```typescript
 await buildHandler.process(version, files)
 ```
 
 `files` is used to reference to any build artefacts required by the build process. It is an object of named files, e.g:
 
-```javascript
+```typescript
 {
     binary: {
         path: "/binary.zip",
