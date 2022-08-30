@@ -5,7 +5,7 @@ priority: 1
 import DocsWrapper from '@/src/DocsWrapper'
 import IntroCard from '@/src/docs/IntroCard'
 import Box from '@mui/material/Box'
-import Grid from '@mui/material/Unstable_Grid2'
+import Grid from '@mui/material/Grid'
 
 ## What is Bailo?
 
@@ -27,33 +27,33 @@ Want to find out more, pick one of the following paths:
 
 <Box sx={{ flexGrow: 1 }}>
   <Grid container spacing={2}>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Make a Model' user='for data scientists' url='./bailo/users/upload-a-model/why-upload-a-model'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Make a Model' user='for data scientists' url='./docs/users/upload-a-model/why-upload-a-model'>
         Want to upload a machine learning model to Bailo? Start here.
       </IntroCard>
     </Grid>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Model Deployments' user='for model consumers' url='./bailo/users/upload-a-model'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Model Deployments' user='for model consumers' url='./docs/users/upload-a-model'>
         Use Bailo's registry, or code stores to deploy your models to other systems.
       </IntroCard>
     </Grid>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Approvals' user='for accreditors' url='./bailo/users/approvals/model-approvals'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Approvals' user='for accreditors' url='./docs/users/approvals/model-approvals'>
         A guide on how to review models on Bailo for ethical and technical assurance.
       </IntroCard>
     </Grid>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Automation' user='for developers' url='./bailo/users/upload-a-model'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Automation' user='for developers' url='./docs/users/upload-a-model'>
         Bored of doing repetitive actions, use our API or libraries.
       </IntroCard>
     </Grid>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Manage Bailo' user='for administrators' url='./bailo/users/upload-a-model'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Manage Bailo' user='for administrators' url='./docs/users/upload-a-model'>
         We've tried to make hosting Bailo easy, but documentation is always required.
       </IntroCard>
     </Grid>
-    <Grid sm={12} md={12} lg={4}>
-      <IntroCard title='Bailo Development' user='for engineers' url='./bailo/developers'>
+    <Grid item xs={12} lg={4}>
+      <IntroCard title='Bailo Development' user='for engineers' url='./docs/developers'>
         Understand the internals of Bailo and how to contribute new features.
       </IntroCard>
     </Grid>
