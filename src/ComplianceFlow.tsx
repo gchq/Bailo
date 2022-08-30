@@ -41,18 +41,17 @@ function ComplianceFlow({ initialElements }: { initialElements: Elements }) {
     dagre.layout(dagreGraph)
 
     const layoutedElements = elements.map((el) => {
+      const updatedEl: any = { ...el }
+
       if (isNode(el)) {
         const nodeWithPosition = dagreGraph.node(el.id)
 
-        // ESLint confuses `el` for a function.
-        /* eslint-disable no-param-reassign */
-        el.targetPosition = isHorizontal ? Position.Left : Position.Top
-        el.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
-        el.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
-        /* eslint-enable no-param-reassign */
+        updatedEl.targetPosition = isHorizontal ? Position.Left : Position.Top
+        updatedEl.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
+        updatedEl.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
       }
 
-      return el
+      return updatedEl
     })
 
     setElements(layoutedElements)

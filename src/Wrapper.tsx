@@ -352,8 +352,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Box
           component='main'
           sx={{
-            backgroundColor: (curTheme) =>
-              curTheme.palette.mode === 'light' ? curTheme.palette.grey[100] : curTheme.palette.grey[900],
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
