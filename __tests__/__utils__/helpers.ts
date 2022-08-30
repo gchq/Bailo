@@ -3,7 +3,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { Builder, By, until, WebDriver } from 'selenium-webdriver'
 import firefox from 'selenium-webdriver/firefox'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import { clearStoredData } from '../../server/utils/clear'
 import log from '../../server/utils/logger'
 
