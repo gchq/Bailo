@@ -95,7 +95,7 @@ export default function DocsWrapper({ children }: Props): ReactElement {
             <Box flex={1} overflow='scroll'>
               <Box display='flex' flexDirection='column' height='100%'>
                 <Container maxWidth='lg'>{children}</Container>
-                <Copyright sx={{ pb: 2, mt: 'auto' }} />
+                <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
               </Box>
             </Box>
           </>
