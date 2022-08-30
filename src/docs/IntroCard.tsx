@@ -12,6 +12,7 @@ interface IntroCardProps {
   url: string
   children: ReactNode
 }
+
 export default function IntroCard({ title, user, url, children }: IntroCardProps) {
   return (
     <Card sx={{ minWidth: 275 }}>
