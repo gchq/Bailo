@@ -185,11 +185,7 @@ describe('End to end test', () => {
       logger.info('sending deployment information')
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
-      await sendKeys(
-        driver,
-        By.css('textarea'),
-        JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
-      )
+      await sendKeys(driver, By.css('textarea'), JSON.stringify({ ...deploymentInfo, modelID: modelInfo.name }))
 
       logger.info('clicking warning checkbox confirming upload is okay')
       await click(driver, By.css('[data-test="warningCheckbox"]'))

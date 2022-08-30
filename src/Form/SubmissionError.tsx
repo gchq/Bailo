@@ -1,13 +1,11 @@
 import Alert from '@mui/material/Alert'
 
 export default function SubmissionError({ error }: { error?: string }) {
+  if (!error) return null
+
   return (
-    <>
-      {error && (
-        <Alert severity='error' sx={{ mb: 2, mt: 2 }}>
-          {error}
-        </Alert>
-      )}
-    </>
+    <Alert severity='error' sx={{ mb: 2, mt: 2 }}>
+      {error}
+    </Alert>
   )
 }

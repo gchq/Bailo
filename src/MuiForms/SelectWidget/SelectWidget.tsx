@@ -16,11 +16,14 @@ const processValue = (schema: any, value: any) => {
   const { type, items } = schema
   if (value === '') {
     return undefined
-  } else if (type === 'array' && items && nums.has(items.type)) {
+  }
+  if (type === 'array' && items && nums.has(items.type)) {
     return value.map(asNumber)
-  } else if (type === 'boolean') {
+  }
+  if (type === 'boolean') {
     return value === 'true'
-  } else if (type === 'number') {
+  }
+  if (type === 'number') {
     return asNumber(value)
   }
 
@@ -29,7 +32,8 @@ const processValue = (schema: any, value: any) => {
   if (schema.enum) {
     if (schema.enum.every((x: any) => guessType(x) === 'number')) {
       return asNumber(value)
-    } else if (schema.enum.every((x: any) => guessType(x) === 'boolean')) {
+    }
+    if (schema.enum.every((x: any) => guessType(x) === 'boolean')) {
       return value === 'true'
     }
   }
@@ -37,7 +41,7 @@ const processValue = (schema: any, value: any) => {
   return value
 }
 
-const SelectWidget = ({
+function SelectWidget({
   schema,
   id,
   options,
@@ -52,7 +56,7 @@ const SelectWidget = ({
   onBlur,
   onFocus,
   rawErrors = [],
-}: WidgetProps) => {
+}: WidgetProps) {
   const { enumOptions, enumDisabled } = options
 
   const emptyValue = multiple ? [] : ''
@@ -84,10 +88,10 @@ const SelectWidget = ({
         multiple: typeof multiple === 'undefined' ? false : multiple,
       }}
     >
-      {(enumOptions as any).map(({ value: optionValue, label: optionLabel }: any, i: number) => {
-        const optionDisabled: any = enumDisabled && (enumDisabled as any).indexOf(optionValue) != -1
+      {(enumOptions as any).map(({ value: optionValue, label: optionLabel }: any) => {
+        const optionDisabled: any = enumDisabled && (enumDisabled as any).indexOf(optionValue) !== -1
         return (
-          <MenuItem key={i} value={optionValue} disabled={optionDisabled}>
+          <MenuItem key={optionValue} value={optionValue} disabled={optionDisabled}>
             {optionLabel}
           </MenuItem>
         )

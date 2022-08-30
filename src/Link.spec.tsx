@@ -10,7 +10,9 @@ describe('Link', () => {
     const url = 'example_url'
     const mockedRouter: any = {
       pathName: 'test-path',
-      prefetch: () => {},
+      prefetch: () => {
+        /* do nothing */
+      },
     }
 
     const mockRouter = jest.spyOn(router, 'useRouter')
@@ -24,7 +26,7 @@ describe('Link', () => {
 
     await waitFor(async () => {
       // Need to expand on this and find way to test getting href attribute of the anchor element rendered
-      //expect(await screen.findByText('Click here')).not.toBeUndefined()
+      // expect(await screen.findByText('Click here')).not.toBeUndefined()
     })
   })
 })

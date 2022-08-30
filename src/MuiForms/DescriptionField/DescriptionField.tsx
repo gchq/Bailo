@@ -9,10 +9,10 @@ const useStyles = makeStyles({
   },
 })
 
-const DescriptionField = ({ description }: FieldProps) => {
-  if (description) {
-    const classes = useStyles()
+function DescriptionField({ description }: FieldProps) {
+  const classes = useStyles()
 
+  if (description) {
     return (
       <Typography variant='subtitle2' className={classes.root}>
         {description}

@@ -11,7 +11,6 @@ const { ADDITIONAL_PROPERTY_FLAG } = utils
 
 type WrapIfAdditionalProps = {
   children: React.ReactElement
-  classNames: string
   disabled: boolean
   id: string
   label: string
@@ -22,7 +21,7 @@ type WrapIfAdditionalProps = {
   schema: JSONSchema7
 }
 
-const WrapIfAdditional = ({
+function WrapIfAdditional({
   children,
   disabled,
   id,
@@ -32,9 +31,9 @@ const WrapIfAdditional = ({
   readonly,
   required,
   schema,
-}: WrapIfAdditionalProps) => {
+}: WrapIfAdditionalProps) {
   const keyLabel = `${label} Key` // i18n ?
-  const additional = schema.hasOwnProperty(ADDITIONAL_PROPERTY_FLAG)
+  const additional = Object.prototype.hasOwnProperty.call(schema, ADDITIONAL_PROPERTY_FLAG)
   const btnStyle = {
     flex: 1,
     paddingLeft: 6,
@@ -43,15 +42,15 @@ const WrapIfAdditional = ({
   }
 
   if (!additional) {
-    return <>{children}</>
+    return children
   }
 
   const handleBlur = ({ target }: React.FocusEvent<HTMLInputElement>) => onKeyChange(target.value)
 
   return (
-    <Grid container={true} key={`${id}-key`} alignItems='center' spacing={2}>
-      <Grid item={true} xs>
-        <FormControl fullWidth={true} required={required}>
+    <Grid container key={`${id}-key`} alignItems='center' spacing={2}>
+      <Grid item xs>
+        <FormControl fullWidth required={required}>
           <InputLabel>{keyLabel}</InputLabel>
           <Input
             defaultValue={label}
@@ -63,10 +62,10 @@ const WrapIfAdditional = ({
           />
         </FormControl>
       </Grid>
-      <Grid item={true} xs>
+      <Grid item xs>
         {children}
       </Grid>
-      <Grid item={true}>
+      <Grid item>
         <IconButton
           icon='remove'
           tabIndex={-1}

@@ -5,7 +5,7 @@ import React from 'react'
 
 const { rangeSpec } = utils
 
-const RangeWidget = ({
+function RangeWidget({
   value,
   readonly,
   disabled,
@@ -17,8 +17,8 @@ const RangeWidget = ({
   required,
   label,
   id,
-}: WidgetProps) => {
-  let sliderProps = { value, label, id, ...rangeSpec(schema) }
+}: WidgetProps) {
+  const sliderProps = { value, label, id, ...rangeSpec(schema) }
 
   const _onChange = (_: any, newValue: any) => onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)

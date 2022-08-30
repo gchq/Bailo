@@ -3,7 +3,7 @@ import Button from '@mui/material/Button'
 import { AddButtonProps } from '@rjsf/core'
 import React from 'react'
 
-const AddButton: React.FC<AddButtonProps> = (props) => {
+function AddButton(props: AddButtonProps) {
   const { ...props2 } = props
 
   return (
