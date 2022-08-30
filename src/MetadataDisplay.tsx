@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
+import Divider from '@mui/material/Divider'
+import Typography from '@mui/material/Typography'
+import useTheme from '@mui/styles/useTheme'
+import React, { useEffect, useState } from 'react'
+import { useGetSchemas } from '../data/schema'
+import { lightTheme } from '../src/theme'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
-import { useGetSchemas } from '../data/schema'
-import useTheme from '@mui/styles/useTheme'
-import { lightTheme } from '../src/theme'
 
 const MetadataDisplay = ({
   item,

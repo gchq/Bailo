@@ -1,13 +1,13 @@
 import { ObjectId } from 'mongodb'
 import { ApprovalStates, DeploymentDoc } from '../models/Deployment'
+import ModelModel from '../models/Model'
 import RequestModel, { RequestTypes } from '../models/Request'
 import { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
-import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
-import { findAndUpdateUser } from './user'
-import * as userService from './user'
-import ModelModel from '../models/Model'
 import * as emailService from '../utils/smtp'
+import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
+import * as userService from './user'
+import { findAndUpdateUser } from './user'
 
 const managerId = new ObjectId()
 const modelId = new ObjectId()

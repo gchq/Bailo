@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import FileInput from './FileInput'
 import { render, screen, waitFor } from '@testing-library/react'
+import FileInput from './FileInput'
 
 describe('FileInput', () => {
   const onChange = (_newVal: any) => {}

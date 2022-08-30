@@ -1,38 +1,38 @@
-import express from 'express'
-import next from 'next'
-import http from 'http'
 import config from 'config'
+import express from 'express'
+import http from 'http'
+import next from 'next'
+import { createIndexes } from './models/Model'
+import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
-  getModelByUuid,
+  getCurrentUserDeployments,
+  getDeployment,
+  postDeployment,
+  resetDeploymentApprovals,
+} from './routes/v1/deployment'
+import getDocsMenuContent from './routes/v1/docs'
+import {
   getModelById,
+  getModelByUuid,
   getModelDeployments,
   getModels,
   getModelSchema,
   getModelVersion,
   getModelVersions,
 } from './routes/v1/model'
-import { postUpload } from './routes/v1/upload'
-import { getUiConfig } from './routes/v1/uiConfig'
-import { connectToMongoose } from './utils/database'
-import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
-import {
-  getDeployment,
-  getCurrentUserDeployments,
-  postDeployment,
-  resetDeploymentApprovals,
-} from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import processDeployments from './processors/processDeployments'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
-import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { createIndexes } from './models/Model'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
-import getDocsMenuContent from './routes/v1/docs'
+import { getUiConfig } from './routes/v1/uiConfig'
+import { postUpload } from './routes/v1/upload'
+import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
+import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
+import { connectToMongoose } from './utils/database'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { ensureBucketExists } from './utils/minio'
+import { getUser } from './utils/user'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -108,6 +108,7 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
+  // handle next requests
   server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)

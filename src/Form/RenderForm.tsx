@@ -1,13 +1,11 @@
 import { withTheme } from '@rjsf/core'
 import { Dispatch, SetStateAction } from 'react'
-
-import { Theme as MaterialUITheme } from '../MuiForms'
-import UserSelector from '../MuiForms/UserSelector'
-import Nothing from '../MuiForms/Nothing'
-import TextareaWidget from '../MuiForms/TextareaWidget'
-
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
+import { Theme as MaterialUITheme } from '../MuiForms'
+import Nothing from '../MuiForms/Nothing'
+import TextareaWidget from '../MuiForms/TextareaWidget'
+import UserSelector from '../MuiForms/UserSelector'
 
 const SchemaForm = withTheme(MaterialUITheme)
 

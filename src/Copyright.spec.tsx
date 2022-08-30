@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import Copyright from './Copyright'
 import { render, screen, waitFor } from '@testing-library/react'
+import Copyright from './Copyright'
 
 describe('Copyright', () => {
   it('renders a Copyright component', async () => {

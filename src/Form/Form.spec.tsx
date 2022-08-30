@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import Form from './Form'
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
+import Form from './Form'
 
 describe('Form', () => {
   const splitSchema: any = {

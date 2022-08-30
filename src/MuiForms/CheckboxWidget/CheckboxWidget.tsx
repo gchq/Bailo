@@ -1,11 +1,9 @@
-import React from 'react'
-
-import FormLabel from '@mui/material/FormLabel'
-import RadioGroup from '@mui/material/RadioGroup'
-import Radio from '@mui/material/Radio'
 import FormControlLabel from '@mui/material/FormControlLabel'
-
-import { WidgetProps, utils } from '@rjsf/core'
+import FormLabel from '@mui/material/FormLabel'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 // Due to not being able to change the default behaviour of "booleans" in the schema
 // to use radio components, we have edited this custom CheckboxWidget component

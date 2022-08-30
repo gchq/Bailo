@@ -1,13 +1,13 @@
+import UserModel from '../models/User'
 import '../utils/mockMongo'
 import {
   findAndUpdateUser,
+  findUserCached,
+  findUsers,
   getUserById,
   getUserByInternalId,
   serializedUserFields,
-  findUsers,
-  findUserCached,
 } from './user'
-import UserModel from '../models/User'
 
 const testUser = {
   userId: 'user',

@@ -1,9 +1,7 @@
-import React from 'react'
-
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-
-import { WidgetProps, utils } from '@rjsf/core'
+import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const { asNumber, guessType } = utils
 

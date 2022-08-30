@@ -1,16 +1,16 @@
-import { Schema, model, Types, Document } from 'mongoose'
-import { approvalStates, ApprovalStates, DeploymentDoc } from './Deployment'
-import { VersionDoc } from './Version'
+import { Document, model, Schema, Types } from 'mongoose'
+import { approvalStateOptions, ApprovalStates, DeploymentDoc } from './Deployment'
 import { UserDoc } from './User'
+import { VersionDoc } from './Version'
 
-export const approvalTypes = ['Manager', 'Reviewer']
+export const approvalTypeOptions = ['Manager', 'Reviewer']
 
 export enum ApprovalTypes {
   Manager = 'Manager',
   Reviewer = 'Reviewer',
 }
 
-export const requestTypes = ['Upload', 'Deployment']
+export const requestTypeOptions = ['Upload', 'Deployment']
 
 export enum RequestTypes {
   Upload = 'Upload',
@@ -40,10 +40,10 @@ const RequestSchema = new Schema<Request>(
     deployment: { type: Schema.Types.ObjectId, ref: 'Deployment' },
 
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    status: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
-    approvalType: { type: String, enum: approvalTypes },
-    request: { type: String, enum: requestTypes },
+    approvalType: { type: String, enum: approvalTypeOptions },
+    request: { type: String, enum: requestTypeOptions },
   },
   {
     timestamps: true,
