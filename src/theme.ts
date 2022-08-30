@@ -80,6 +80,15 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {

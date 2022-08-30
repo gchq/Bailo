@@ -260,7 +260,7 @@ export default function Wrapper({ title, page, children }: Props): ReactElement 
               alignItems: 'center',
               justifyContent: 'flex-end',
               px: [1],
-              borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+              borderBottom: `1px solid ${theme.palette.divider}`,
             }}
           >
             <IconButton aria-label='close drawer' onClick={toggleDrawer}>

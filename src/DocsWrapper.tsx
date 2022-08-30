@@ -85,8 +85,8 @@ export default function DocsWrapper({ children }: Props): ReactElement {
             <Box
               sx={{
                 minWidth: 200,
-                backgroundColor: '#fff',
-                borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                backgroundColor: theme.palette.background.paper,
+                borderRight: `1px solid ${theme.palette.divider}`,
                 overflow: 'scroll',
               }}
             >
