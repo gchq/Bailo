@@ -181,11 +181,11 @@ function Deployments() {
                           {deployment?.metadata?.highLevelDetails?.name}
                         </MuiLink>
                       </Link>
-                      <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                      <Typography variant='body1' sx={{ mb: 2 }}>
                         {displayDate(deployment?.createdAt)}
                       </Typography>
                       {index !== orderedDeployments.length - 1 && (
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }} />
                       )}
                     </Box>
                   ))}
@@ -251,9 +251,9 @@ function Deployments() {
                 alignItems: 'center',
                 width: '70%',
                 maxWidth: '400px',
-                margin: 'auto',
-                marginRight: 0,
-                marginBottom: 3,
+                m: 'auto',
+                mr: 0,
+                mb: 3,
               }}
             >
               <InputBase
@@ -291,11 +291,11 @@ function Deployments() {
                       {isVersion(deployment.version) && deployment.version.version}
                     </Typography>
                   </Stack>
-                  <Typography variant='subtitle2' sx={{ marginBottom: 2 }}>
+                  <Typography variant='subtitle2' sx={{ mb: 2 }}>
                     {displayDate(deployment?.createdAt)}
                   </Typography>
                   {index !== publicDeployments.length - 1 && (
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }} />
                   )}
                 </Box>
               ))}

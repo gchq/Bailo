@@ -58,9 +58,9 @@ export default function ExploreModels() {
           alignItems: 'center',
           width: '70%',
           maxWidth: '400px',
-          margin: 'auto',
-          marginRight: 0,
-          marginBottom: 3,
+          m: 'auto',
+          mr: 0,
+          mb: 3,
         }}
       >
         <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
@@ -83,7 +83,7 @@ export default function ExploreModels() {
               <Tab label='Favourites' value='favourites' />
             </Tabs>
           </Box>
-          <Box sx={{ marginBottom: 2 }} />
+          <Box sx={{ mb: 2 }} />
 
           {models &&
             models.map((model: Model, index: number) => (
@@ -97,11 +97,11 @@ export default function ExploreModels() {
                   </MuiLink>
                 </Link>
 
-                <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                <Typography variant='body1' sx={{ mb: 2 }}>
                   {model.currentMetadata.highLevelDetails.modelInASentence}
                 </Typography>
 
-                <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                <Stack direction='row' spacing={1} sx={{ mb: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
                     <Chip
                       color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
@@ -114,9 +114,7 @@ export default function ExploreModels() {
                   ))}
                 </Stack>
 
-                {index !== models.length - 1 && (
-                  <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                )}
+                {index !== models.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }} />}
               </Box>
             ))}
 

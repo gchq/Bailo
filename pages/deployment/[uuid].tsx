@@ -214,7 +214,7 @@ export default function Deployment() {
               <Tab label='Model Exports' value='exports' />
             </Tabs>
           </Box>
-          <Box sx={{ marginBottom: 3 }} />
+          <Box sx={{ mb: 3 }} />
 
           {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
 

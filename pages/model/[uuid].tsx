@@ -380,7 +380,7 @@ function Model() {
             <Tab label='Settings' value='settings' />
           </Tabs>
         </Box>
-        <Box sx={{ marginBottom: 3 }} />
+        <Box sx={{ mb: 3 }} />
 
         {group === 'overview' && (
           <>
@@ -477,7 +477,7 @@ function Model() {
                   </Stack>
                 </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 1 }} />
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} />
               </Box>
             ))}
           </>

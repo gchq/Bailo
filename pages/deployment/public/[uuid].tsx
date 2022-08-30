@@ -142,8 +142,6 @@ export default function PublicDeployment() {
 
   const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
 
-  console.log(tag)
-
   return (
     <>
       <Wrapper title={`Deployment: ${publicDeployment.uuid}`} page='deployments'>
@@ -165,7 +163,7 @@ export default function PublicDeployment() {
               <Tab label='Build Logs' value='build' />
             </Tabs>
           </Box>
-          <Box sx={{ marginBottom: 3 }} />
+          <Box sx={{ mb: 3 }} />
 
           {group === 'overview' && (
             <Box sx={{ backgroundColor: theme.palette.primary.main, color: 'white', borderRadius: 2 }}>
