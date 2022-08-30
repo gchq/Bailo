@@ -6,9 +6,9 @@ import Copyright from '@/src/Copyright'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '@/src/theme'
 import { useRouter } from 'next/router'
-import DocsMenuContext from '../utils/contexts/docsMenuContext'
-import { DocFileOrHeading } from '../types/interfaces'
-import isDocHeading from '../utils/isDocHeading'
+import DocsMenuContext from '../../utils/contexts/docsMenuContext'
+import { DocFileOrHeading } from '../../types/interfaces'
+import isDocHeading from '../../utils/isDocHeading'
 
 type DocsWrapperProps = {
   children?: ReactNode
