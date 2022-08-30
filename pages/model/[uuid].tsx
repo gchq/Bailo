@@ -184,7 +184,14 @@ function Model() {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
-              <ApprovalsChip approvals={[version?.managerApproved, version?.reviewerApproved]} />
+              <ApprovalsChip
+                approvals={{
+                  manager: version?.metadata?.contacts?.manager,
+                  managerResponse: version?.managerApproved,
+                  reviewer: version?.metadata?.contacts?.reviewer,
+                  reviewerResponse: version?.reviewerApproved,
+                }}
+              />
               <Divider orientation='vertical' flexItem />
               <Button
                 id='model-actions-button'
