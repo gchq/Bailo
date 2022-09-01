@@ -1,14 +1,14 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
 import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, Theme } from '@mui/material'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '@/src/theme'
-import { useRouter } from 'next/router'
-import DocsMenuContext from '../../utils/contexts/docsMenuContext'
-import { DocFileOrHeading } from '../../types/interfaces'
-import isDocHeading from '../../utils/isDocHeading'
+import DocsMenuContext from '@/utils/contexts/docsMenuContext'
+import isDocHeading from '@/utils/isDocHeading'
+import { DocFileOrHeading } from '@/types/interfaces'
 
 type DocsWrapperProps = {
   children?: ReactNode
