@@ -40,7 +40,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         const headingText = <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
 
         return (
-          <Fragment key={doc.id}>
+          <Fragment key={doc.slug}>
             {doc.hasIndex ? (
               <Link passHref href={`/docs/${doc.slug}`}>
                 <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
@@ -57,7 +57,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         )
       }
       return (
-        <Link passHref href={`/docs/${doc.slug}`} key={doc.id}>
+        <Link passHref href={`/docs/${doc.slug}`} key={doc.slug}>
           <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
             <ListItemText primary={doc.title} />
           </ListItemButton>

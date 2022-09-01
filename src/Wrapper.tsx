@@ -97,7 +97,7 @@ type WrapperProps = {
 }
 
 export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
-  const isDocsPage = useMemo(() => page.slice(0, 4) === 'docs', [page])
+  const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
 
   const [open, setOpen] = useState(false)
   const toggleDrawer = (): void => {
@@ -119,7 +119,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   useEffect(() => {
     if (!isUiConfigLoading) {
-      if (uiConfig?.banner?.enable) {
+      if (uiConfig && uiConfig.banner.enable) {
         setPageTopStyling({
           mt: 4,
         })
@@ -170,7 +170,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig?.banner.enable && <Box sx={{ mt: 20 }} />}
+        {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
         <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
           <Toolbar
             sx={{
@@ -359,7 +359,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
         <Box
           component='main'
           sx={{
-            backgroundColor: () => (theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900]),
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',

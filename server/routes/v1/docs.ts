@@ -4,8 +4,8 @@ import generateDocsMenuContent from '../../services/docs'
 
 const getDocsMenuContent = [
   ensureUserRole('user'),
-  (_: Request, res: Response) => {
-    const docsMenuContent = generateDocsMenuContent()
+  async (_: Request, res: Response) => {
+    const docsMenuContent = await generateDocsMenuContent()
     return res.json(docsMenuContent)
   },
 ]

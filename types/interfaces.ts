@@ -143,19 +143,17 @@ export interface RenderInterface {
 }
 
 export type DocHeading = {
-  id: string
   title: string
   slug: string
   hasIndex: boolean
   children: DocFileOrHeading[]
-  priority?: number
+  priority: number
 }
 
 export type DocFile = {
-  id: string
   title: string
   slug: string
-  priority?: number
+  priority: number
 }
 
 export type DocFileOrHeading = DocHeading | DocFile

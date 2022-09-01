@@ -1,19 +1,15 @@
-import { readdirSync, readFileSync, statSync } from 'fs'
+import { readdir, readFile, stat } from 'fs/promises'
 import matter from 'gray-matter'
-import { nanoid } from 'nanoid'
+import { parse } from 'path'
 import { DocFileOrHeading, DocsMenuContent } from '../../types/interfaces'
 
 type DocsFrontMatter = {
   priority?: number
 }
 
-const sortByPriority = (a: DocFileOrHeading, b: DocFileOrHeading): number => {
-  // As the highest priority is 1, we don't care about 0
-  if (a.priority && b.priority) return a.priority - b.priority
-  if (!a.priority && b.priority) return 1
-  if (a.priority && !b.priority) return -1
-  return 0
-}
+const LOWEST_PRIORITY = Number.MAX_SAFE_INTEGER
+
+const sortByPriority = (a: DocFileOrHeading, b: DocFileOrHeading): number => a.priority - b.priority
 
 const convertFileOrDirNameToTitle = (str: string): string =>
   str
@@ -21,78 +17,83 @@ const convertFileOrDirNameToTitle = (str: string): string =>
     .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
     .join(' ')
 
-const removeFileExtension = (fileOrDirName: string): string => {
-  const extensionIndex = fileOrDirName.indexOf('.')
-  return extensionIndex === -1 ? fileOrDirName : fileOrDirName.slice(0, extensionIndex)
-}
-
-const updateHeadingPriority = (
-  headingPriority: number | undefined,
-  childPriority: number | undefined
-): number | undefined => {
+const updateHeadingPriority = (headingPriority: number, childPriority: number): number => {
   if (childPriority && childPriority > 0 && (!headingPriority || childPriority < headingPriority)) {
     return childPriority
   }
   return headingPriority
 }
 
-const extractFrontMatterFromFile = (fileOrDirPath: string): DocsFrontMatter => {
-  const fileContents = readFileSync(fileOrDirPath).toString()
+const extractFrontMatterFromFile = async (fileOrDirPath: string): Promise<DocsFrontMatter> => {
+  const fileContents = await readFile(fileOrDirPath, { encoding: 'utf8' })
   return matter(fileContents).data
 }
 
-const extractFrontMatterFromDir = (
+const extractFrontMatterFromDir = async (
   dirPath: string,
   partialSlug = ''
-): [DocsMenuContent, boolean, number | undefined] => {
+): Promise<{
+  docsMenuContent: DocsMenuContent
+  headingHasIndex: boolean
+  highestChildPriority: number
+}> => {
   let headingHasIndex = false
-  let headingPriority: number | undefined
-  const docsDirectoryContents = readdirSync(dirPath)
+  let headingPriority = LOWEST_PRIORITY
+  const docsDirectoryContents = await readdir(dirPath)
 
-  const docsMenuContent: DocsMenuContent = docsDirectoryContents
-    .reduce<DocsMenuContent>((docsMetadata, fileOrDirName) => {
-      const nameWithoutExtension = removeFileExtension(fileOrDirName)
-      const title = convertFileOrDirNameToTitle(nameWithoutExtension)
-      const currentSlug = partialSlug ? `${partialSlug}/${nameWithoutExtension}` : nameWithoutExtension
+  const docsMenuContent: DocsMenuContent = await docsDirectoryContents.reduce<Promise<DocsMenuContent>>(
+    async (docsMetadata, fileOrDirName) => {
+      const metadata = await docsMetadata
+      const { name } = parse(fileOrDirName)
+      const title = convertFileOrDirNameToTitle(name)
+      const currentSlug = partialSlug ? `${partialSlug}/${name}` : name
       const fileOrDirPath = `${dirPath}/${fileOrDirName}`
-      const stats = statSync(fileOrDirPath)
+      const stats = await stat(fileOrDirPath)
 
-      if (stats.isFile() && fileOrDirName.slice(-4) === '.mdx') {
-        const frontMatter = extractFrontMatterFromFile(fileOrDirPath)
-        headingPriority = updateHeadingPriority(headingPriority, frontMatter.priority)
+      if (stats.isFile() && fileOrDirName.endsWith('.mdx')) {
+        const frontMatter = await extractFrontMatterFromFile(fileOrDirPath)
+        const filePriority = frontMatter.priority && frontMatter.priority > 0 ? frontMatter.priority : LOWEST_PRIORITY
+        headingPriority = updateHeadingPriority(headingPriority, filePriority)
         if (fileOrDirName === 'index.mdx') {
           headingHasIndex = true
         } else {
-          docsMetadata.push({
-            id: nanoid(),
+          metadata.push({
             title,
             slug: currentSlug,
-            ...(frontMatter.priority && frontMatter.priority > 0 && { priority: frontMatter.priority }),
+            priority: filePriority,
           })
         }
       } else if (stats.isDirectory()) {
-        const [headingChildren, hasIndex, highestChildPriority] = extractFrontMatterFromDir(fileOrDirPath, currentSlug)
+        const {
+          docsMenuContent: headingChildren,
+          headingHasIndex: hasIndex,
+          highestChildPriority,
+        } = await extractFrontMatterFromDir(fileOrDirPath, currentSlug)
         headingPriority = updateHeadingPriority(headingPriority, highestChildPriority)
-        docsMetadata.push({
-          id: nanoid(),
+        metadata.push({
           title,
           slug: currentSlug,
           hasIndex,
           children: headingChildren,
-          ...(highestChildPriority && { priority: highestChildPriority }),
+          priority: highestChildPriority,
         })
       }
 
-      return docsMetadata
-    }, [])
-    .sort(sortByPriority)
+      return metadata
+    },
+    Promise.resolve([])
+  )
 
-  return [docsMenuContent, headingHasIndex, headingPriority]
+  return {
+    docsMenuContent: docsMenuContent.sort(sortByPriority),
+    headingHasIndex,
+    highestChildPriority: headingPriority,
+  }
 }
 
-const generateDocsMenuContent = (): DocsMenuContent => {
+const generateDocsMenuContent = async (): Promise<DocsMenuContent> => {
   const basePath = 'pages/docs'
-  const [docsMenuContent] = extractFrontMatterFromDir(basePath)
+  const { docsMenuContent } = await extractFrontMatterFromDir(basePath)
   return docsMenuContent
 }
 
