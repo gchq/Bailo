@@ -2,13 +2,13 @@ import multer from 'multer'
 import config from 'config'
 import { v4 as uuidv4 } from 'uuid'
 import { customAlphabet } from 'nanoid'
-import * as Minio from 'minio'
 
 import { validateSchema } from '../../utils/validateSchema'
-import { normalizeMulterFile } from '../../utils/multer'
+import { createFilePath } from '../../utils/multer'
 import MinioStore from '../../utils/MinioStore'
 import { getUploadQueue } from '../../utils/queues'
 import { ensureUserRole } from '../../utils/user'
+import { copyFile, getClient } from '../../utils/minio'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 
@@ -19,6 +19,8 @@ import { createVersion } from '../../services/version'
 import { findSchemaByRef } from '../../services/schema'
 import _ from 'lodash'
 import { updateDeploymentVersions } from '../../services/deployment'
+import { Version } from '@/types/interfaces'
+import VersionModel from '../../models/Version'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -103,11 +105,15 @@ export const postUpload = [
         })
       }
 
-      let version
+      let version: Version
       try {
         version = await createVersion(req.user!, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata: metadata,
+          files: {
+            rawBinaryPath: '',
+            rawCodePath: ''
+          }
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -193,8 +199,8 @@ export const postUpload = [
       ).add({
         versionId: version._id,
         userId: req.user?._id,
-        binary: normalizeMulterFile(files.binary[0], 'binary', version),
-        code: normalizeMulterFile(files.code[0], 'code', version),
+        binary: createFilePath(files.binary[0], 'binary', version),
+        code: createFilePath(files.code[0], 'code', version),
       })
 
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
@@ -205,28 +211,21 @@ export const postUpload = [
       })
 
       try {
-        const binaryLocation = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
-        const client = new Minio.Client(config.get('minio'))
-        await client.copyObject(
-          files.binary[0].bucket,
-          binaryLocation,
+        const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
+        const client = getClient()
+        await copyFile(
           `${files.binary[0].bucket}/${files.binary[0].path}`,
-          new Minio.CopyConditions()
+          rawBinaryPath          
         )
         await client.removeObject(files.binary[0].bucket, files.binary[0].path)
-
-        const codeLocation = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
-        await client.copyObject(
-          files.code[0].bucket,
-          codeLocation,
+        const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
+        await copyFile(          
           `${files.code[0].bucket}/${files.code[0].path}`,
-          new Minio.CopyConditions()
+          rawCodePath
         )
         await client.removeObject(files.code[0].bucket, files.code[0].path)
-
-        version.rawBinaryPath = binaryLocation
-        version.rawCodePath = codeLocation
-        version.save()
+        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath }})
+        req.log.info({ code: 'adding_file_paths', rawCodePath, rawBinaryPath }, `Adding paths for raw model exports of files to version.`)
       } catch (e: any) {
         throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
       }

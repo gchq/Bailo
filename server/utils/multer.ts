@@ -1,6 +1,4 @@
-import { VersionDoc } from '../models/Version'
-
-export function normalizeMulterFile(file: any, type: string, version: any) {
+export function createFilePath(file: any, type: string, version: any) {
   return {
     name: file.originalname,
     bucket: file.bucket,

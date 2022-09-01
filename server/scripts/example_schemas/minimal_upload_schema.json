@@ -105,11 +105,6 @@
           "title": "Export raw models",
           "description": "If enabled, allow raw uploaded model files to be downloaded by deployments.",
           "type": "boolean"
-        },
-        "allowGuestDeployments": {
-          "title": "Allow guest deployments",
-          "description": "Allow for models to be accessible for development purposes without creating a deployment request.",
-          "type": "boolean"
         }
       }
     }

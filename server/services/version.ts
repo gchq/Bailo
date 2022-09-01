@@ -84,6 +84,7 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 interface CreateVersion {
   version: string
   metadata: any
+  files: any
 }
 
 export async function createVersion(user: UserDoc, data: CreateVersion) {

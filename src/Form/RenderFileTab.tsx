@@ -72,7 +72,7 @@ export function FileTabComplete(step: Step) {
   return step.state.binary && step.state.code
 }
 
-export function RenderBasicFileTab({ step: step, splitSchema, setSplitSchema }: RenderInterface) {
+export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code } = state
 

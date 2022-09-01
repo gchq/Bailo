@@ -172,7 +172,7 @@ export const fetchRawModelFiles = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const { uuid, version, fileType } = req.params
-    const deployment: DeploymentDoc | null = await findDeploymentByUuid(req.user!, uuid)
+    const deployment = await findDeploymentByUuid(req.user!, uuid)
 
     if (deployment === null) {
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
@@ -200,10 +200,10 @@ export const fetchRawModelFiles = [
     let filePath
 
     if (fileType === 'code') {
-      filePath = versionDocument.rawCodePath
+      filePath = versionDocument.files.rawCodePath
     }
     if (fileType === 'binary') {
-      filePath = versionDocument.rawBinaryPath
+      filePath = versionDocument.files.rawBinaryPath
     }
 
     // Stat object to get size so browser can determine progress
@@ -217,8 +217,9 @@ export const fetchRawModelFiles = [
     res.writeHead(200)
 
     const stream: Readable = await client.getObject(bucketName, filePath)
-    if (stream !== null) {
-      stream.pipe(res)
+    if (!stream) {
+      throw NotFound({code: 'object_fetch_failed', bucketName, filePath}, 'Failed to fetch object from storage')
     }
+    stream.pipe(res)
   },
 ]
