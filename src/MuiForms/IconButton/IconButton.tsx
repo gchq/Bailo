@@ -18,7 +18,7 @@ type IconButtonProps = MuiIconButtonProps & {
   iconProps?: object
 }
 
-const IconButton = (props: IconButtonProps) => {
+function IconButton(props: IconButtonProps) {
   const { icon, className, iconProps, ...otherProps } = props
   const IconComp = mappings[icon]
   return <Button startIcon={<IconComp />} {...otherProps} variant='text' color='secondary' size='small' />

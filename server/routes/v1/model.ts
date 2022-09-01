@@ -24,7 +24,7 @@ export const getModels = [
 
     const models = await findModels(req.user!, { filter: filter as string, type })
 
-    req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
+    req.log.trace({ code: 'fetching_models', models }, 'User fetching all models')
 
     return res.json({
       models,
@@ -43,7 +43,7 @@ export const getModelByUuid = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
-    req.log.info({ code: 'fetch_model_by_uuid', model }, 'User fetching model by given UUID')
+    req.log.trace({ code: 'fetch_model_by_uuid', model }, 'User fetching model by given UUID')
     return res.json(model)
   },
 ]
@@ -59,7 +59,7 @@ export const getModelById = [
       throw NotFound({ code: 'model_not_found', id }, `Unable to find model '${id}'`)
     }
 
-    req.log.info({ code: 'fetch_model_by_id', model }, 'User fetching model by given ID')
+    req.log.trace({ code: 'fetch_model_by_id', model }, 'User fetching model by given ID')
     return res.json(model)
   },
 ]
@@ -77,7 +77,7 @@ export const getModelDeployments = [
 
     const deployments = await findDeployments(req.user!, { model: model._id })
 
-    req.log.info({ code: 'fetch_deployments_by_model', model }, 'User fetching all deployments for model')
+    req.log.trace({ code: 'fetch_deployments_by_model', model }, 'User fetching all deployments for model')
     return res.json(deployments)
   },
 ]
@@ -101,7 +101,7 @@ export const getModelSchema = [
       )
     }
 
-    req.log.info({ code: 'fetch_model_schema', model }, 'User fetching model schema')
+    req.log.trace({ code: 'fetch_model_schema', model }, 'User fetching model schema')
     return res.json(schema)
   },
 ]
@@ -119,7 +119,7 @@ export const getModelVersions = [
 
     const versions = await findModelVersions(req.user!, model._id, { thin: true })
 
-    req.log.info({ code: 'fetch_versions_for_model', model }, 'User fetching versions for specified model')
+    req.log.trace({ code: 'fetch_versions_for_model', model }, 'User fetching versions for specified model')
     return res.json(versions)
   },
 ]
@@ -146,7 +146,7 @@ export const getModelVersion = [
       throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
     }
 
-    req.log.info({ code: 'fetch_version_for_model', model, version }, 'User finding specific version for model')
+    req.log.trace({ code: 'fetch_version_for_model', model, version }, 'User finding specific version for model')
     return res.json(version)
   },
 ]

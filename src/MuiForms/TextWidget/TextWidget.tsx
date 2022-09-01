@@ -6,7 +6,7 @@ const { getDisplayLabel } = utils
 
 export type TextWidgetProps = WidgetProps & Pick<TextFieldProps, Exclude<keyof TextFieldProps, 'onBlur' | 'onFocus'>>
 
-const TextWidget = ({
+function TextWidget({
   id,
   placeholder,
   required,
@@ -26,7 +26,7 @@ const TextWidget = ({
   formContext,
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
-}: TextWidgetProps) => {
+}: TextWidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
     onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)

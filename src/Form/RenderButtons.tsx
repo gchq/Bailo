@@ -16,7 +16,7 @@ export interface RenderButtonsInterface {
   activeStep: number
   setActiveStep: Dispatch<SetStateAction<number>>
 
-  onSubmit: () => {}
+  onSubmit: () => void
 
   openValidateError: boolean
   setOpenValidateError: Dispatch<SetStateAction<boolean>>

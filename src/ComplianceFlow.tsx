@@ -21,7 +21,7 @@ const nodeExtent: NodeExtent = [
   [1000, 1000],
 ]
 
-const ComplianceFlow = ({ initialElements }: { initialElements: Elements }) => {
+function ComplianceFlow({ initialElements }: { initialElements: Elements }) {
   const [elements, setElements] = useState<Elements>(initialElements)
   const onConnect = (params: Connection | Edge) => setElements((els) => addEdge(params, els))
   const onElementsRemove = (elementsToRemove: Elements) => setElements((els) => removeElements(elementsToRemove, els))
@@ -41,14 +41,17 @@ const ComplianceFlow = ({ initialElements }: { initialElements: Elements }) => {
     dagre.layout(dagreGraph)
 
     const layoutedElements = elements.map((el) => {
+      const updatedEl: any = { ...el }
+
       if (isNode(el)) {
         const nodeWithPosition = dagreGraph.node(el.id)
-        el.targetPosition = isHorizontal ? Position.Left : Position.Top
-        el.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
-        el.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
+
+        updatedEl.targetPosition = isHorizontal ? Position.Left : Position.Top
+        updatedEl.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
+        updatedEl.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
       }
 
-      return el
+      return updatedEl
     })
 
     setElements(layoutedElements)

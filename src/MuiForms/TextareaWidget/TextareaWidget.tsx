@@ -8,7 +8,7 @@ type CustomWidgetProps = WidgetProps & {
   options: any
 }
 
-const TextareaWidget = ({
+function TextareaWidget({
   id,
   placeholder,
   required,
@@ -28,7 +28,7 @@ const TextareaWidget = ({
   formContext,
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
-}: CustomWidgetProps) => {
+}: CustomWidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
     onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
