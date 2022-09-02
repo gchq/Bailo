@@ -20,6 +20,7 @@ import { serializedModelFields } from '../services/model'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
+import { ensurePathExists, getFilesInDir } from './filesystemHelpers'
 
 const appRoot = getAppRoot.toString()
 
@@ -159,11 +160,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 if (config.get('logging.file.enabled')) {
   const logPath = resolve(appRoot, config.get('logging.file.path'))
-  const logFolder = dirname(logPath)
 
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder, { recursive: true })
-  }
+  ensurePathExists(logPath, true)
 
   streams.push({
     level: config.get('logging.file.level'),
@@ -175,12 +173,7 @@ async function processStroomFiles() {
   const stroomFolder = resolve(appRoot, config.get('logging.stroom.folder'))
   const processingFolder = resolve(stroomFolder, 'processing')
 
-  const files = (
-    await fsPromise.readdir(stroomFolder, {
-      withFileTypes: true,
-    })
-  ).filter((item) => item.isFile())
-
+  const files = await getFilesInDir(stroomFolder)
   for (const file of files) {
     const from = resolve(stroomFolder, file.name)
     const to = resolve(processingFolder, file.name)
@@ -194,12 +187,7 @@ async function processStroomFiles() {
     await fsPromise.rename(from, to)
   }
 
-  const processing = (
-    await fsPromise.readdir(processingFolder, {
-      withFileTypes: true,
-    })
-  ).filter((item) => item.isFile())
-
+  const processing = await getFilesInDir(processingFolder)
   for (const file of processing) {
     const name = resolve(processingFolder, file.name)
     try {
@@ -237,25 +225,17 @@ if (config.get('logging.stroom.enabled')) {
   const processingFolder = resolve(stroomFolder, 'processing')
   const processedFolder = resolve(stroomFolder, 'processed')
 
+  ensurePathExists(stroomFolder, true)
+  ensurePathExists(processingFolder, true)
+  ensurePathExists(processedFolder, true)
+
   let date = new Date()
-
-  if (!fs.existsSync(stroomFolder)) {
-    fs.mkdirSync(stroomFolder, { recursive: true })
-  }
-
-  if (!fs.existsSync(processingFolder)) {
-    fs.mkdirSync(processingFolder, { recursive: true })
-  }
-
-  if (!fs.existsSync(processedFolder)) {
-    fs.mkdirSync(processedFolder, { recursive: true })
-  }
 
   const stroomStream = new WritableStream({
     async write(message) {
       if (message.code) {
         const path = resolve(stroomFolder, `logs.${+date}.txt`)
-        await fsPromise.appendFile(path, JSON.stringify(message) + '\n')
+        await fsPromise.appendFile(path, `${JSON.stringify(message)}\n`)
       }
     },
   })
