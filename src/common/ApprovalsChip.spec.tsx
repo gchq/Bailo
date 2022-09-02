@@ -11,7 +11,7 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/2 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={['No Response', 'No Response']} />
+        <ApprovalsChip approvals={{ managerResponse: 'No Response', reviewerResponse: 'No Response' }} />
       </ThemeProvider>
     )
 
@@ -23,7 +23,7 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 1/2 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={['Accepted', 'No Response']} />
+        <ApprovalsChip approvals={{ managerResponse: 'Accepted', reviewerResponse: 'No Response' }} />
       </ThemeProvider>
     )
 
@@ -35,7 +35,7 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 2/2 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={['Accepted', 'Accepted']} />
+        <ApprovalsChip approvals={{ managerResponse: 'Accepted', reviewerResponse: 'Accepted' }} />
       </ThemeProvider>
     )
 
@@ -47,7 +47,7 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/1 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={['No Response']} />
+        <ApprovalsChip approvals={{ managerResponse: 'No Response' }} />
       </ThemeProvider>
     )
 
@@ -59,7 +59,7 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 1/1 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={['Accepted']} />
+        <ApprovalsChip approvals={{ reviewerResponse: 'Accepted' }} />
       </ThemeProvider>
     )
 
