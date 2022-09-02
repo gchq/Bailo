@@ -185,8 +185,6 @@ export const fetchRawModelFiles = [
       )
     }
 
-    req.log.info({}, 'test')
-
     if (deployment.managerApproved !== 'Accepted') {
       throw Unauthorised(
         { approvalStatus: deployment.managerApproved },
