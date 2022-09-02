@@ -1,13 +1,12 @@
-import { Dispatch, SetStateAction } from 'react'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
 import LoadingButton from '@mui/lab/LoadingButton'
-
-import { setStepValidate, validateForm } from '../../utils/formUtils'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Snackbar from '@mui/material/Snackbar'
+import { Dispatch, SetStateAction } from 'react'
 import { SplitSchema, Step } from '../../types/interfaces'
+import { setStepValidate, validateForm } from '../../utils/formUtils'
 
 export interface RenderButtonsInterface {
   step: Step
@@ -17,7 +16,7 @@ export interface RenderButtonsInterface {
   activeStep: number
   setActiveStep: Dispatch<SetStateAction<number>>
 
-  onSubmit: () => {}
+  onSubmit: () => void
 
   openValidateError: boolean
   setOpenValidateError: Dispatch<SetStateAction<boolean>>

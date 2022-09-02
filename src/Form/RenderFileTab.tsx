@@ -1,17 +1,15 @@
-import { SplitSchema, Step } from '../../types/interfaces'
-import { setStepState } from '../../utils/formUtils'
-import { RenderInterface } from '../../types/interfaces'
-
-import { styled } from '@mui/system'
 import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import { styled } from '@mui/system'
+import { RenderInterface, Step } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
 
-export default function RenderFileTab({ step: step, splitSchema, setSplitSchema }: RenderInterface) {
+export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code } = state
 
@@ -45,7 +43,7 @@ export default function RenderFileTab({ step: step, splitSchema, setSplitSchema 
             <Typography sx={{ p: 1 }} variant='h5'>
               Uploade a code file (.zip)
             </Typography>
-            <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept={'.zip'} />
+            <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept='.zip' />
             <Button variant='outlined' component='span'>
               {code ? displayFilename(code.name) : 'Upload file'}
             </Button>
@@ -57,7 +55,7 @@ export default function RenderFileTab({ step: step, splitSchema, setSplitSchema 
             <Typography sx={{ p: 1 }} variant='h5'>
               Upload a binary file (.zip)
             </Typography>
-            <Input style={{ margin: '10px' }} id={binaryId} type='file' onChange={handleBinaryChange} accept={'.zip'} />
+            <Input style={{ margin: '10px' }} id={binaryId} type='file' onChange={handleBinaryChange} accept='.zip' />
             <Button variant='outlined' component='span'>
               {binary ? displayFilename(binary.name) : 'Upload file'}
             </Button>

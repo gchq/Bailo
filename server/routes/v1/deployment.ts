@@ -3,18 +3,18 @@ import * as Minio from 'minio'
 import { Request, Response } from 'express'
 import contentDisposition from 'content-disposition'
 import bodyParser from 'body-parser'
-import { validateSchema } from '../../utils/validateSchema'
 import { customAlphabet } from 'nanoid'
-import { ensureUserRole } from '../../utils/user'
-import { createDeploymentRequests } from '../../services/request'
-import { BadReq, NotFound, Forbidden, Unauthorised } from '../../utils/result'
-import { findModelByUuid } from '../../services/model'
-import { findVersionByName } from '../../services/version'
-import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
-import { ApprovalStates, DeploymentDoc } from '../../models/Deployment'
-import { findSchemaByRef } from '../../services/schema'
 import { VersionDoc } from '../../models/Version'
 import { Readable } from 'stream'
+import { ApprovalStates } from '../../models/Deployment'
+import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { findModelByUuid } from '../../services/model'
+import { createDeploymentRequests } from '../../services/request'
+import { findSchemaByRef } from '../../services/schema'
+import { findVersionByName } from '../../services/version'
+import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
+import { ensureUserRole } from '../../utils/user'
+import { validateSchema } from '../../utils/validateSchema'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -218,7 +218,7 @@ export const fetchRawModelFiles = [
 
     const stream: Readable = await client.getObject(bucketName, filePath)
     if (!stream) {
-      throw NotFound({code: 'object_fetch_failed', bucketName, filePath}, 'Failed to fetch object from storage')
+      throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
     }
     stream.pipe(res)
   },

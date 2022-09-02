@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
 import AppBar from '@mui/material/AppBar'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
 import useTheme from '@mui/styles/useTheme'
+import React, { useEffect } from 'react'
 import { lightTheme } from '../theme'
 
 function a11yProps(index: any) {
@@ -46,17 +46,15 @@ export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any 
           onChange={handleChange}
           aria-label={`${tabName} tab bar`}
         >
-          {tabs.map((tab: any, index: any) => {
-            return (
-              <Tab
-                label={tabName !== undefined ? getTitle(tabName, index) : tab.name}
-                key={`${tabName} ${index + 1}`}
-                sx={{ flexGrow: 1, backgroundColor: 'white', maxWidth: 275 }}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...a11yProps(index)}
-              />
-            )
-          })}
+          {tabs.map((tab: any, index: any) => (
+            <Tab
+              label={tabName !== undefined ? getTitle(tabName, index) : tab.name}
+              key={`${tabName} ${index + 1}`}
+              sx={{ flexGrow: 1, backgroundColor: 'white', maxWidth: 275 }}
+              // eslint-disable-next-line react/jsx-props-no-spreading
+              {...a11yProps(index)}
+            />
+          ))}
         </Tabs>
       </AppBar>
     </Box>

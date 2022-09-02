@@ -1,8 +1,6 @@
-import React from 'react'
-
 import TextField, { StandardTextFieldProps as TextFieldProps } from '@mui/material/TextField'
-
-import { WidgetProps, utils } from '@rjsf/core'
+import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const { getDisplayLabel } = utils
 
@@ -10,7 +8,7 @@ type CustomWidgetProps = WidgetProps & {
   options: any
 }
 
-const TextareaWidget = ({
+function TextareaWidget({
   id,
   placeholder,
   required,
@@ -30,7 +28,7 @@ const TextareaWidget = ({
   formContext,
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
-}: CustomWidgetProps) => {
+}: CustomWidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
     onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)

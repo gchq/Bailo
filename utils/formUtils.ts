@@ -1,13 +1,12 @@
-import { Dispatch, SetStateAction } from 'react'
-import omit from 'lodash/omit'
-import get from 'lodash/get'
-import dropRight from 'lodash/dropRight'
-import remove from 'lodash/remove'
 import { Validator } from 'jsonschema'
-
-import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
-import RenderForm from '../src/Form/RenderForm'
+import dropRight from 'lodash/dropRight'
+import get from 'lodash/get'
+import omit from 'lodash/omit'
+import remove from 'lodash/remove'
+import { Dispatch, SetStateAction } from 'react'
 import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
+import RenderForm from '../src/Form/RenderForm'
+import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
 
 export function createStep({

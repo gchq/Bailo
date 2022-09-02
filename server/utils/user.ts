@@ -1,11 +1,10 @@
-import { Request, Response, NextFunction } from 'express'
-import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { Forbidden, Unauthorised } from './result'
+import { NextFunction, Request, Response } from 'express'
 import Authorisation from '../external/Authorisation'
-import { findAndUpdateUser, findUserCached, getUserById } from '../services/user'
 import { UserDoc } from '../models/User'
+import { getAdminToken } from '../routes/v1/registryAuth'
+import { findUserCached, getUserById } from '../services/user'
+import { Forbidden, Unauthorised } from './result'
 
 const authorisation = new Authorisation()
 
@@ -70,13 +69,13 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   const user = await findUserCached(userInfo)
   req.user = user
 
-  next()
+  return next()
 }
 
 export function hasRole(roles: Array<string> | string, user: UserDoc) {
   const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-  for (let role of arrayRoles) {
+  for (const role of arrayRoles) {
     if (!user.roles.includes(role)) {
       return false
     }
@@ -93,7 +92,7 @@ export function ensureUserRole(roles: Array<string> | string) {
 
     const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-    for (let role of arrayRoles) {
+    for (const role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
         throw Unauthorised({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
       }

@@ -1,48 +1,48 @@
-import * as React from 'react'
-import { styled, ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import MuiDrawer from '@mui/material/Drawer'
-import Box from '@mui/material/Box'
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
-import Badge from '@mui/material/Badge'
-import Container from '@mui/material/Container'
-import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
+import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
+import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
+import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
+import LinkIcon from '@mui/icons-material/LinkTwoTone'
+import ListAltIcon from '@mui/icons-material/ListAlt'
+import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
+import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
-import Link from 'next/link'
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
+import Badge from '@mui/material/Badge'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import CssBaseline from '@mui/material/CssBaseline'
+import Divider from '@mui/material/Divider'
+import MuiDrawer from '@mui/material/Drawer'
+import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
-import MenuList from '@mui/material/MenuList'
-import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
-import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
-import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
-import LinkIcon from '@mui/icons-material/LinkTwoTone'
-import ListAltIcon from '@mui/icons-material/ListAlt'
-import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
-import { useGetUiConfig } from '../data/uiConfig'
-import Banner from './Banner'
-import { useGetNumRequests } from '../data/requests'
-import Image from 'next/image'
-import Tooltip from '@mui/material/Tooltip'
-import Copyright from './Copyright'
-import Settings from '@mui/icons-material/SettingsTwoTone'
-import { useGetCurrentUser } from '../data/user'
-import UserAvatar from './common/UserAvatar'
 import MenuItem from '@mui/material/MenuItem'
+import MenuList from '@mui/material/MenuList'
+import { styled, ThemeProvider } from '@mui/material/styles'
 import Switch from '@mui/material/Switch'
+import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
-import { lightTheme } from './theme'
+import Image from 'next/image'
+import Link from 'next/link'
+import * as React from 'react'
+import { useGetNumRequests } from '../data/requests'
+import { useGetUiConfig } from '../data/uiConfig'
+import { useGetCurrentUser } from '../data/user'
 import { DarkModeContext } from '../pages/_app'
+import Banner from './Banner'
+import UserAvatar from './common/UserAvatar'
+import Copyright from './Copyright'
+import { lightTheme } from './theme'
 
-const drawerWidth: number = 240
+const drawerWidth = 240
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean
@@ -124,11 +124,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
-      return (
-        <>
-          <p>Error authenticating user.</p>
-        </>
-      )
+      return <p>Error authenticating user.</p>
     }
 
     return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
@@ -142,19 +138,14 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     setAnchorEl(null)
   }
 
-  const headerTitle = (
-    <>
-      {typeof title === 'string' ? (
-        <>
-          <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
-            {title}
-          </Typography>
-        </>
-      ) : (
-        <>{title}</>
-      )}
-    </>
-  )
+  const headerTitle =
+    typeof title === 'string' ? (
+      <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
+        {title}
+      </Typography>
+    ) : (
+      title
+    )
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -171,7 +162,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig!.banner.enable && <Box sx={{ mt: 20 }} />}
+        {uiConfig?.banner?.enable && <Box sx={{ mt: 20 }} />}
         <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
           <Toolbar
             sx={{
@@ -361,8 +352,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Box
           component='main'
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',

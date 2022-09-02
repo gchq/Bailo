@@ -1,18 +1,16 @@
 import { withTheme } from '@rjsf/core'
 import { Dispatch, SetStateAction } from 'react'
-
-import { Theme as MaterialUITheme } from '../MuiForms'
-import UserSelector from '../MuiForms/UserSelector'
-import Nothing from '../MuiForms/Nothing'
-import TextareaWidget from '../MuiForms/TextareaWidget'
-
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
+import { Theme as MaterialUITheme } from '../MuiForms'
+import Nothing from '../MuiForms/Nothing'
+import TextareaWidget from '../MuiForms/TextareaWidget'
+import UserSelector from '../MuiForms/UserSelector'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function RenderForm({
-  step: step,
+  step,
   splitSchema,
   setSplitSchema,
 }: {
@@ -42,6 +40,7 @@ export default function RenderForm({
       omitExtraData
       liveOmit
     >
+      {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
       <></>
     </SchemaForm>
   )

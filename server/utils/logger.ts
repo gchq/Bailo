@@ -1,22 +1,22 @@
-import bunyan from 'bunyan'
-import { v4 as uuidv4 } from 'uuid'
-import { NextFunction, Request, Response } from 'express'
-import morgan from 'morgan'
-import fs from 'fs'
 import getAppRoot from 'app-root-path'
-import devnull from 'dev-null'
-import { join, resolve, sep, dirname } from 'path'
-import { inspect } from 'util'
-import omit from 'lodash/omit'
+import bunyan from 'bunyan'
 import chalk from 'chalk'
 import config from 'config'
-import { castArray, set, get, pick } from 'lodash'
+import devnull from 'dev-null'
+import { NextFunction, Request, Response } from 'express'
+import fs from 'fs'
+import { castArray, get, pick, set } from 'lodash'
+import omit from 'lodash/omit'
+import morgan from 'morgan'
+import { dirname, join, resolve, sep } from 'path'
+import { inspect } from 'util'
+import { v4 as uuidv4 } from 'uuid'
 import { StatusError } from '../../types/interfaces'
-import { serializedVersionFields } from '../services/version'
-import { serializedModelFields } from '../services/model'
 import { serializedDeploymentFields } from '../services/deployment'
+import { serializedModelFields } from '../services/model'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
+import { serializedVersionFields } from '../services/version'
 
 const appRoot = getAppRoot.toString()
 
@@ -27,7 +27,7 @@ class Writer {
     this.basepath = basepath + sep
   }
 
-  getLevel(level) {
+  static getLevel(level) {
     switch (level) {
       case 10:
         return chalk.gray('trace')
@@ -51,7 +51,7 @@ class Writer {
     return `${line}:${src.line}`
   }
 
-  representValue(value: any) {
+  static representValue(value: any) {
     return typeof value === 'object' ? inspect(value) : String(value)
   }
 
@@ -89,11 +89,11 @@ class Writer {
       return ''
     }
 
-    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${Writer.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
-    const level = this.getLevel(data.level)
+    const level = Writer.getLevel(data.level)
     const src = this.getSrc(data.src)
     const attributes = this.getAttributes(data)
     const formattedAttributes = attributes.length ? ` (${attributes})` : ''
@@ -101,7 +101,7 @@ class Writer {
     const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
-    process[pipe].write(message + '\n')
+    process[pipe].write(`${message}\n`)
   }
 }
 
@@ -146,7 +146,7 @@ const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'trace',
+    level: 'info',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
@@ -204,9 +204,7 @@ const morganLog = morgan<any, any>(
     return ''
   },
   {
-    skip: (req, _res) => {
-      return ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val))
-    },
+    skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
   }
@@ -231,7 +229,9 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
 
   res.setHeader('x-request-id', req.reqId)
 
-  await new Promise((resolve) => morganLog(req, res, resolve))
+  await new Promise((r) => {
+    morganLog(req, res, r)
+  })
 
   next()
 }

@@ -1,16 +1,16 @@
-import '../utils/mockMongo'
-import VersionModel from '../models/Version'
 import ModelModel from '../models/Model'
+import VersionModel from '../models/Version'
+import '../utils/mockMongo'
+import { testModel, testModel2, testVersion, userDoc } from '../utils/test/testModels'
 import {
+  createModel,
   findModelById,
   findModelByUuid,
-  serializedModelFields,
-  isValidType,
-  isValidFilter,
   findModels,
-  createModel,
+  isValidFilter,
+  isValidType,
+  serializedModelFields,
 } from './model'
-import { testModel, testVersion, userDoc, testModel2 } from '../utils/test/testModels'
 
 let modelId
 

@@ -1,70 +1,45 @@
-import { buildPython } from '../utils/build'
-import { getUploadQueue } from '../utils/queues'
 import prettyMs from 'pretty-ms'
+import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionBuilt } from '../services/version'
+import { buildPython } from '../utils/build'
 import logger from '../utils/logger'
 import { getUserByInternalId } from '../services/user'
-import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
+
+import { BuildHandler } from '../utils/build/BuildHandler'
+import createWorkingDirectory from '../utils/build/CreateWorkingDirectory'
+import getRawFiles from '../utils/build/GetRawFiles'
+import extractFiles from '../utils/build/ExtractFiles'
+import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile'
+import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile'
+import { getUploadQueue } from '../utils/queues'
 
 export default async function processUploads() {
   ;(await getUploadQueue()).process(async (msg: QueueMessage) => {
     logger.info({ job: msg.payload }, 'Started processing upload')
-    try {
-      const startTime = new Date()
 
-      const user = await getUserByInternalId(msg.payload.userId)
-
-      if (!user) {
-        throw new Error(`Unable to find upload user '${msg.payload.userId}'`)
-      }
-
-      const version = await findVersionById(user, msg.payload.versionId, { populate: true })
-      if (!version) {
-        throw new Error(`Unable to find version '${msg.payload.versionId}'`)
-      }
-
-      const vlog = logger.child({ versionId: version._id })
-
-      const { binary, code } = msg.payload
-      vlog.info({ binary, code }, 'Starting image build')
-      const tag = await buildPython(version, { binary, code })
-
-      vlog.info('Marking build as successful')
-      await markVersionBuilt(version._id)
-
-      const time = prettyMs(new Date().getTime() - startTime.getTime())
-      await version.log('info', `Processed job with tag ${tag} in ${time}`)
-    } catch (e) {
-      logger.error({ error: e, versionId: msg.payload.versionId }, 'Error occurred whilst processing upload')
-
-      try {
-        const user = await getUserByInternalId(msg.payload.userId)
-
-        if (!user) {
-          throw new Error('Unable to find upload user')
-        }
-
-        const version = await findVersionById(user, msg.payload.versionId, { populate: true })
-        if (!version) {
-          throw new Error(`Unable to find version '${msg.payload.versionId}'`)
-        }
-
-        await version.log('error', `Failed to process job due to error: '${e}'`)
-        version.state.build = {
-          state: 'failed',
-          reason: e,
-        }
-
-        version.markModified('state')
-        await version.save()
-      } catch (e2) {
-        logger.error(
-          { error: e2, versionId: msg.payload.versionId },
-          'Error occurred whilst logging processing error occurred'
-        )
-      }
-
-      throw e
+    const user = await getUserByInternalId(msg.payload.userId)
+    if (!user) {
+      throw new Error(`Unable to find upload user '${msg.payload.userId}'`)
     }
+
+    const version = await findVersionById(user, msg.payload.versionId, { populate: true })
+    if (!version) {
+      throw new Error(`Unable to find version '${msg.payload.versionId}'`)
+    }
+
+    const buildHandler = new BuildHandler([
+      { construct: createWorkingDirectory() },
+      { construct: getRawFiles() },
+      { construct: extractFiles() },
+      { construct: getSeldonDockerfile() },
+      { construct: imgBuildDockerfile() },
+    ])
+
+    await buildHandler.process(version, {
+      binary: msg.payload.binary,
+      code: msg.payload.code,
+    })
+
+    await markVersionBuilt(version._id)
   })
 }

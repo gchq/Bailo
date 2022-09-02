@@ -2,9 +2,8 @@
  * @jest-environment jsdom
  */
 
-import MultipleErrorWrapper from './MultipleErrorWrapper'
 import { render, screen, waitFor } from '@testing-library/react'
-import useTheme from '@mui/styles/useTheme'
+import MultipleErrorWrapper from './MultipleErrorWrapper'
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}

@@ -1,15 +1,13 @@
-import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
-import { UserDoc } from '../server/models/User'
+import { Date, Types } from 'mongoose'
 import { Dispatch, SetStateAction } from 'react'
+import { UserDoc } from '../server/models/User'
 import { RenderButtonsInterface } from '../src/Form/RenderButtons'
 
-export type { VersionDoc as Version } from '../server/models/Version'
-export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
+export type { ApprovalStates, DeploymentDoc as Deployment } from '../server/models/Deployment'
 export type { RequestDoc as Request } from '../server/models/Request'
 export type { UserDoc as User } from '../server/models/User'
-
-export type { ApprovalStates } from '../server/models/Deployment'
+export type { VersionDoc as Version } from '../server/models/Version'
 
 declare global {
   namespace Express {
@@ -21,7 +19,7 @@ declare global {
     }
 
     interface Response {
-      error: Function
+      error: (code: number, error: any) => void
     }
   }
 }
@@ -137,7 +135,7 @@ export interface Step {
   renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
-  isComplete: Function
+  isComplete: (step: Step) => boolean
 }
 
 export interface SplitSchema {

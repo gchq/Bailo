@@ -1,25 +1,21 @@
-import multer from 'multer'
 import config from 'config'
-import { v4 as uuidv4 } from 'uuid'
-import { customAlphabet } from 'nanoid'
-
-import { validateSchema } from '../../utils/validateSchema'
-import { createFilePath } from '../../utils/multer'
-import MinioStore from '../../utils/MinioStore'
-import { getUploadQueue } from '../../utils/queues'
-import { ensureUserRole } from '../../utils/user'
-import { copyFile, getClient } from '../../utils/minio'
 import { Request, Response } from 'express'
 import mongoose from 'mongoose'
-
-import { createVersionRequests } from '../../services/request'
-import { BadReq, Conflict, GenericError } from '../../utils/result'
-import { findModelByUuid, createModel } from '../../services/model'
-import { createVersion } from '../../services/version'
-import { findSchemaByRef } from '../../services/schema'
-import _ from 'lodash'
+import multer from 'multer'
+import { customAlphabet } from 'nanoid'
+import { copyFile, getClient } from '../../utils/minio'
+import { createFilePath } from '../../utils/multer'
+import { v4 as uuidv4 } from 'uuid'
 import { updateDeploymentVersions } from '../../services/deployment'
-import { Version } from '@/types/interfaces'
+import { createModel, findModelByUuid } from '../../services/model'
+import { createVersionRequests } from '../../services/request'
+import { findSchemaByRef } from '../../services/schema'
+import { createVersion } from '../../services/version'
+import MinioStore from '../../utils/MinioStore'
+import { getUploadQueue } from '../../utils/queues'
+import { BadReq, Conflict, GenericError } from '../../utils/result'
+import { ensureUserRole } from '../../utils/user'
+import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
 
 export interface MinioFile {
@@ -105,15 +101,15 @@ export const postUpload = [
         })
       }
 
-      let version: Version
+      let version
       try {
         version = await createVersion(req.user!, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata: metadata,
           files: {
             rawBinaryPath: '',
-            rawCodePath: ''
-          }
+            rawCodePath: '',
+          },
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -213,19 +209,16 @@ export const postUpload = [
       try {
         const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
         const client = getClient()
-        await copyFile(
-          `${files.binary[0].bucket}/${files.binary[0].path}`,
-          rawBinaryPath          
-        )
+        await copyFile(`${files.binary[0].bucket}/${files.binary[0].path}`, rawBinaryPath)
         await client.removeObject(files.binary[0].bucket, files.binary[0].path)
         const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
-        await copyFile(          
-          `${files.code[0].bucket}/${files.code[0].path}`,
-          rawCodePath
-        )
+        await copyFile(`${files.code[0].bucket}/${files.code[0].path}`, rawCodePath)
         await client.removeObject(files.code[0].bucket, files.code[0].path)
-        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath }})
-        req.log.info({ code: 'adding_file_paths', rawCodePath, rawBinaryPath }, `Adding paths for raw model exports of files to version.`)
+        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
+        req.log.info(
+          { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
+          `Adding paths for raw model exports of files to version.`
+        )
       } catch (e: any) {
         throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
       }
