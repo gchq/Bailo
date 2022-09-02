@@ -209,7 +209,7 @@ export default function Deployment() {
               <Tab label='Compliance' value='compliance' />
               <Tab label='Build Logs' value='build' />
               <Tab label='Settings' value='settings' />
-              <Tab label='Model Exports' value='exports' />
+              <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
@@ -220,7 +220,9 @@ export default function Deployment() {
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
 
-          {group === 'exports' && <RawModelExportList deployment={deployment} />}
+          {group === 'exports' && deployment.managerApproved === 'Accepted' && (
+            <RawModelExportList deployment={deployment} />
+          )}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>

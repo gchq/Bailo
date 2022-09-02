@@ -185,6 +185,15 @@ export const fetchRawModelFiles = [
       )
     }
 
+    req.log.info({}, 'test')
+
+    if (deployment.managerApproved !== 'Accepted') {
+      throw Unauthorised(
+        { approvalStatus: deployment.managerApproved },
+        'User is not authorised to download this file as it has not been approved.'
+      )
+    }
+
     if (fileType !== 'code' && fileType !== 'binary') {
       throw NotFound({ fileType }, 'Unknown file type specificed')
     }
