@@ -1,4 +1,4 @@
-export function createFilePath(file: any, type: string, version: any) {
+export function createFileRef(file: any, type: string, version: any) {
   return {
     name: file.originalname,
     bucket: file.bucket,

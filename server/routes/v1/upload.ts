@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { copyFile, getClient } from '../../utils/minio'
-import { createFilePath } from '../../utils/multer'
+import { createFileRef } from '../../utils/multer'
 import { v4 as uuidv4 } from 'uuid'
 import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
@@ -195,8 +195,8 @@ export const postUpload = [
       ).add({
         versionId: version._id,
         userId: req.user?._id,
-        binary: createFilePath(files.binary[0], 'binary', version),
-        code: createFilePath(files.code[0], 'code', version),
+        binary: createFileRef(files.binary[0], 'binary', version),
+        code: createFileRef(files.code[0], 'code', version),
       })
 
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
