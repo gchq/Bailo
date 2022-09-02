@@ -4,22 +4,22 @@ import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
+import Button from '@mui/material/Button'
 
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import EmptyBlob from './common/EmptyBlob'
-import Button from '@mui/material/Button'
 
-const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
+function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const { model } = useGetModelById(deployment.model.toString())
   const { versions } = useGetModelVersions(model?.uuid)
 
   return (
     <>
       {versions &&
-        versions.map((version: any) => {
-          if (version.metadata?.buildOptions?.exportRawModel) {
-            return (
+        versions.map(
+          (version: any) =>
+            version.metadata?.buildOptions?.exportRawModel && (
               <Box key={version.version}>
                 <Box sx={{ p: 1 }}>
                   <Box sx={{ p: 2 }}>
@@ -45,8 +45,7 @@ const RawModelExportList = ({ deployment }: { deployment: Deployment }) => {
                 <Divider orientation='horizontal' />
               </Box>
             )
-          }
-        })}
+        )}
       {versions && versions.filter((e) => e.metadata.buildOptions?.exportRawModel).length === 0 && (
         <EmptyBlob text='No exportable versions' />
       )}

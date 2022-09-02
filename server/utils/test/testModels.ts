@@ -1,3 +1,6 @@
+import { TextEncoder } from 'util'
+
+global.TextEncoder = TextEncoder
 import { ObjectId } from 'mongodb'
 import { ApprovalStates } from '../../models/Deployment'
 import UserModel from '../../models/User'
