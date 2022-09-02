@@ -18,10 +18,12 @@ import useTheme from '@mui/styles/useTheme'
 import { Theme } from '../../src/theme'
 
 export default function ApprovalsChip({ approvals }: { approvals: any }) {
-  const approvalOutcomes = [approvals.managerResponse, approvals.reviewerResponse]
+  Object.keys(approvals).forEach((key) => (approvals[key] === undefined ? delete approvals[key] : {}))
 
+  const approvalOutcomes = [approvals?.managerResponse, approvals?.reviewerResponse].filter(Boolean)
   const numApprovals = approvalOutcomes.filter((e: string) => e === 'Accepted').length
   const totalApprovals = approvalOutcomes.length
+
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const open = Boolean(anchorEl)
 
@@ -58,11 +60,11 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
     return [Icon, secondaryText]
   }
 
-  const [ReviewerIcon, reviewerSecondaryText] = getRequestResponses(approvals.reviewerResponse)
-  const reviewerPrimaryText = `Technical reviewer (${approvals.reviewer})`
+  const [ReviewerIcon, reviewerSecondaryText] = getRequestResponses(approvals?.reviewerResponse)
+  const reviewerPrimaryText = `Technical reviewer (${approvals?.reviewer})`
 
-  const [ManagerIcon, managerSecondaryText] = getRequestResponses(approvals.managerResponse)
-  const managerPrimaryText = `Model manager (${approvals.manager})`
+  const [ManagerIcon, managerSecondaryText] = getRequestResponses(approvals?.managerResponse)
+  const managerPrimaryText = `Model manager (${approvals?.manager})`
 
   const approvalsClicked = (event: MouseEvent) => {
     setAnchorEl(event.currentTarget as HTMLDivElement)
@@ -91,18 +93,22 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
       />
       <Menu id='model-approvals-menu' anchorEl={anchorEl} open={open} onClose={handleClose}>
         <List dense={true}>
-          <ListItem>
-            <ListItemIcon>
-              <ReviewerIcon aria-hidden={true} />
-            </ListItemIcon>
-            <ListItemText primary={reviewerPrimaryText} secondary={reviewerSecondaryText} />
-          </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <ManagerIcon aria-hidden={true} />
-            </ListItemIcon>
-            <ListItemText primary={managerPrimaryText} secondary={managerSecondaryText} />
-          </ListItem>
+          {approvals?.reviewerResponse !== undefined && (
+            <ListItem>
+              <ListItemIcon>
+                <ReviewerIcon aria-hidden={true} />
+              </ListItemIcon>
+              <ListItemText primary={reviewerPrimaryText} secondary={reviewerSecondaryText} />
+            </ListItem>
+          )}
+          {approvals?.managerResponse !== undefined && (
+            <ListItem>
+              <ListItemIcon>
+                <ManagerIcon aria-hidden={true} />
+              </ListItemIcon>
+              <ListItemText primary={managerPrimaryText} secondary={managerSecondaryText} />
+            </ListItem>
+          )}
         </List>
       </Menu>
     </Stack>
