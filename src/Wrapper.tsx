@@ -42,7 +42,7 @@ import UserAvatar from './common/UserAvatar'
 import Copyright from './Copyright'
 import { lightTheme } from './theme'
 
-const drawerWidth: number = 240
+const drawerWidth = 240
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean
@@ -124,11 +124,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
-      return (
-        <>
-          <p>Error authenticating user.</p>
-        </>
-      )
+      return <p>Error authenticating user.</p>
     }
 
     return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
@@ -142,19 +138,14 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
     setAnchorEl(null)
   }
 
-  const headerTitle = (
-    <>
-      {typeof title === 'string' ? (
-        <>
-          <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
-            {title}
-          </Typography>
-        </>
-      ) : (
-        <>{title}</>
-      )}
-    </>
-  )
+  const headerTitle =
+    typeof title === 'string' ? (
+      <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
+        {title}
+      </Typography>
+    ) : (
+      title
+    )
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -171,7 +162,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig!.banner.enable && <Box sx={{ mt: 20 }} />}
+        {uiConfig?.banner?.enable && <Box sx={{ mt: 20 }} />}
         <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
           <Toolbar
             sx={{
@@ -361,8 +352,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Box
           component='main'
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',

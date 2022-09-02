@@ -28,19 +28,22 @@ export default function UserAvatar({
         setAvatarSize('30px')
         setFontSize(13)
         break
-    }
-    switch (luminosity) {
-      case undefined:
-        setFontColour('black')
+      default:
         break
+    }
+
+    switch (luminosity) {
       case 'light':
         setFontColour('black')
         break
       case 'dark':
         setFontColour('white')
         break
+      default:
+        setFontColour('black')
+        break
     }
-  }, [])
+  }, [size, luminosity])
 
   return (
     <Avatar
@@ -49,7 +52,7 @@ export default function UserAvatar({
         backgroundColor: color,
         height: avatarSize,
         width: avatarSize,
-        fontSize: fontSize,
+        fontSize,
       }}
     >
       <Typography>{username.charAt(0).toUpperCase()}</Typography>

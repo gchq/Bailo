@@ -20,7 +20,10 @@ describe('SchemaSelector', () => {
   schemas.push(schema)
 
   it('renders a SchemaSelector component', async () => {
-    render(<SchemaSelector currentSchema={schema} schemas={schemas} setCurrentSchema={() => {}} />)
+    const doNothing = () => {
+      /* do nothing */
+    }
+    render(<SchemaSelector currentSchema={schema} schemas={schemas} setCurrentSchema={doNothing} />)
 
     await waitFor(async () => {
       expect(await screen.findByLabelText('Test Schema')).not.toBeUndefined()

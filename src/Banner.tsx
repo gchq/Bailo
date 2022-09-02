@@ -1,7 +1,7 @@
 import Card from '@mui/material/Card'
 import { useGetUiConfig } from '../data/uiConfig'
 
-const Banner = () => {
+function Banner() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const style = {
@@ -17,20 +17,14 @@ const Banner = () => {
   }
 
   if (isUiConfigError) {
-    // @ts-ignore
     return <Card sx={style}>Unable to load uiConfig</Card>
   }
 
-  return (
-    <>
-      {!isUiConfigLoading && uiConfig?.banner?.enable ? (
-        // @ts-ignore
-        <Card sx={style}>{uiConfig?.banner?.text}</Card>
-      ) : (
-        <> </>
-      )}
-    </>
-  )
+  if (isUiConfigLoading || !uiConfig?.banner?.enable) {
+    return null
+  }
+
+  return <Card sx={style}>{uiConfig.banner.text}</Card>
 }
 
 export default Banner

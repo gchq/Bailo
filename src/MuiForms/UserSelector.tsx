@@ -8,7 +8,7 @@ export default function UserSelector(props: any) {
   const { users, isUsersLoading } = useListUsers()
   const [open, setOpen] = React.useState(false)
 
-  const { onChange, value: currentValue, required } = props
+  const { onChange, value: currentValue, required, label } = props
 
   const _onChange = (_event: any, newValue: any) => {
     onChange(newValue?.id)
@@ -33,14 +33,14 @@ export default function UserSelector(props: any) {
       renderInput={(params) => (
         <TextField
           {...params}
-          label={props.label + (required ? ' *' : '')}
+          label={label + (required ? ' *' : '')}
           InputProps={{
             ...params.InputProps,
             endAdornment: (
-              <React.Fragment>
+              <>
                 {isUsersLoading ? <CircularProgress color='inherit' size={20} /> : null}
                 {params.InputProps.endAdornment}
-              </React.Fragment>
+              </>
             ),
           }}
         />

@@ -20,7 +20,7 @@ export function useGetCurrentUser() {
 
   return {
     mutateCurrentUser: mutate,
-    currentUser: data ? data : undefined,
+    currentUser: data || undefined,
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
   }

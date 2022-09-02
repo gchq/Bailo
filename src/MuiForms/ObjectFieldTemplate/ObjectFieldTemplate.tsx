@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   },
 })
 
-const ObjectFieldTemplate = ({
+function ObjectFieldTemplate({
   DescriptionField,
   description,
   TitleField,
@@ -26,21 +26,21 @@ const ObjectFieldTemplate = ({
   schema,
   formData,
   onAddClick,
-}: ObjectFieldTemplateProps) => {
+}: ObjectFieldTemplateProps) {
   const classes = useStyles()
 
   return (
     <>
       {(uiSchema['ui:title'] || title) && <TitleField id={`${idSchema.$id}-title`} title={title} required={required} />}
       {description && <DescriptionField id={`${idSchema.$id}-description`} description={description} />}
-      <Grid container={true} spacing={2} className={classes.root}>
-        {properties.map((element, index) =>
+      <Grid container spacing={2} className={classes.root}>
+        {properties.map((element) =>
           // Remove the <Grid> if the inner element is hidden as the <Grid>
           // itself would otherwise still take up space.
           element.hidden ? (
             element.content
           ) : (
-            <Grid item={true} xs={12} key={index} style={{ marginBottom: '10px' }}>
+            <Grid item xs={12} key={element.content.key} style={{ marginBottom: '10px' }}>
               {element.content}
             </Grid>
           )

@@ -10,7 +10,7 @@ import UserSelector from '../MuiForms/UserSelector'
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function RenderForm({
-  step: step,
+  step,
   splitSchema,
   setSplitSchema,
 }: {
@@ -40,6 +40,7 @@ export default function RenderForm({
       omitExtraData
       liveOmit
     >
+      {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
       <></>
     </SchemaForm>
   )

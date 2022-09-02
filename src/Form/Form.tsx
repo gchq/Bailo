@@ -15,7 +15,7 @@ export default function Form({
   modelUploading,
 }: {
   splitSchema: SplitSchema
-  onSubmit: Function
+  onSubmit: () => void
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   modelUploading: boolean
 }) {
