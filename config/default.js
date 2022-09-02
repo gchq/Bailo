@@ -85,7 +85,7 @@ module.exports = {
     },
 
     stroom: {
-      enabled: true,
+      enabled: false,
       folder: './logs/stroom',
       url: 'http://localhost:8090/stroom/datafeed',
       environment: 'insecure',
