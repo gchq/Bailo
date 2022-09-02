@@ -91,10 +91,6 @@ export interface UiConfig {
     contactHref: string
   }
 
-  help: {
-    documentationUrl: string
-  }
-
   registry: {
     host: string
   }
@@ -145,3 +141,21 @@ export interface RenderInterface {
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
 }
+
+export type DocHeading = {
+  title: string
+  slug: string
+  hasIndex: boolean
+  children: DocFileOrHeading[]
+  priority: number
+}
+
+export type DocFile = {
+  title: string
+  slug: string
+  priority: number
+}
+
+export type DocFileOrHeading = DocHeading | DocFile
+
+export type DocsMenuContent = DocFileOrHeading[]

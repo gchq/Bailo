@@ -1,0 +1,26 @@
+---
+priority: 10020
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Requirements
+
+You should consider uploading a model once you have trained and tested it in your own environment and you feel that it
+is **production ready**. Bailo is not intended to hold models until they have reached this point and so any development
+must be carried out in an external environment. As a model developer you must make yourself aware of and meet the
+requirements that are placed on you under the AI Policy and ensure that you have appropriate data owner approval to use
+the training data that you have identified.
+
+To submit a model you will need to provide the following three artifacts:
+
+- A model card containing details of the provenance, training, limitations and bias, along with any lifecycle deadlines
+- The trained model binary, representing the trained model itself
+- Supporting code that exposes defined endpoints on the model (notably a `predict` or `predict_raw` endpoint)
+
+The model card can either be designed using the [upload form](/upload) or as a JSON blob that follows the
+[upload schema](/api/v1/schema/default?use=UPLOAD).
+
+More information on the supporting code and binary formats are provided later in this documentation.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

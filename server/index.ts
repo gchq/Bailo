@@ -11,6 +11,7 @@ import {
   postDeployment,
   resetDeploymentApprovals,
 } from './routes/v1/deployment'
+import getDocsMenuContent from './routes/v1/docs'
 import {
   getModelById,
   getModelByUuid,
@@ -86,6 +87,8 @@ server.post('/api/v1/request/:id/respond', ...postRequestResponse)
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
 server.get('/api/v1/specification', ...getSpecification)
+
+server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.use('/api', expressErrorHandler)
 
