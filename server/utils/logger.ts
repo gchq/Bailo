@@ -20,7 +20,7 @@ import { serializedModelFields } from '../services/model'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
-import { ensurePathExists, getFilesInDir } from './filesystemHelpers'
+import { ensurePathExists, getFilesInDir } from './filesystem'
 
 const appRoot = getAppRoot.toString()
 
