@@ -13,19 +13,24 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
+import { ApprovalStates } from '../../types/interfaces'
 
 import useTheme from '@mui/styles/useTheme'
 import { Theme } from '../../src/theme'
 
-export default function ApprovalsChip({ approvals }: { approvals: any }) {
-  Object.keys(approvals).forEach((key) => (approvals[key] === undefined ? delete approvals[key] : {}))
-
-  const approvalOutcomes = [approvals?.managerResponse, approvals?.reviewerResponse].filter(Boolean)
-  const numApprovals = approvalOutcomes.filter((e: string) => e === 'Accepted').length
-  const totalApprovals = approvalOutcomes.length
+export default function ApprovalsChip({
+  approvals,
+}: {
+  approvals: [{ ['reviewer']: any; ['status']: ApprovalStates }, { ['reviewer']: any; ['status']: ApprovalStates }]
+}) {
+  const numApprovals = approvals.filter(
+    (e: { ['reviewer']: any; ['status']: ApprovalStates } | { ['manager']: any; ['status']: ApprovalStates }) =>
+      e.status === 'Accepted'
+  ).length
+  const totalApprovals = approvals.length
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const open = Boolean(anchorEl)
+  const open = !!anchorEl
 
   const theme = useTheme<Theme>()
 
@@ -42,31 +47,35 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
     backgroundColor = '#4c8a4c'
   }
 
-  const getRequestResponses = (response) => {
+  const getRequestResponses = (response, index) => {
     let Icon
     let secondaryText
+    let primaryText = `${response.reviewer}`
 
-    if (response === 'Accepted') {
+    if (response.status === ApprovalStates.Accepted) {
       Icon = Done
       secondaryText = 'Approved'
-    } else if (response === 'Declined') {
+    } else if (response.status === ApprovalStates.Declined) {
       Icon = Close
       secondaryText = 'Declined'
-    } else if (response === 'No Response') {
+    } else if (response.status === ApprovalStates.NoResponse) {
       Icon = AccessTime
       secondaryText = 'Awaiting response'
     }
 
-    return [Icon, secondaryText]
+    return (
+      <ListItem key={index}>
+        <ListItemIcon>
+          <Icon aria-hidden={true} />
+        </ListItemIcon>
+        <ListItemText primary={primaryText} secondary={secondaryText} />
+      </ListItem>
+    )
   }
 
-  const [ReviewerIcon, reviewerSecondaryText] = getRequestResponses(approvals?.reviewerResponse)
-  const reviewerPrimaryText = `Technical reviewer (${approvals?.reviewer})`
+  const requestResponseListItems = approvals.map((reviewer, index) => getRequestResponses(reviewer, index))
 
-  const [ManagerIcon, managerSecondaryText] = getRequestResponses(approvals?.managerResponse)
-  const managerPrimaryText = `Model manager (${approvals?.manager})`
-
-  const approvalsClicked = (event: MouseEvent) => {
+  const handleApprovalsClicked = (event: MouseEvent) => {
     setAnchorEl(event.currentTarget as HTMLDivElement)
   }
 
@@ -75,11 +84,11 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
   }
 
   return (
-    <Stack direction='row' spacing={0}>
+    <Stack direction='row'>
       <Chip
         sx={{ borderRadius: 1, color: 'white', height: 'auto', backgroundColor }}
         label={`Approvals ${numApprovals}/${totalApprovals}`}
-        onClick={approvalsClicked}
+        onClick={handleApprovalsClicked}
         icon={
           open ? (
             <UpArrow sx={{ color: 'white !important', pl: 1 }} />
@@ -92,24 +101,7 @@ export default function ApprovalsChip({ approvals }: { approvals: any }) {
         aria-expanded={open ? 'true' : undefined}
       />
       <Menu id='model-approvals-menu' anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <List dense={true}>
-          {approvals?.reviewerResponse !== undefined && (
-            <ListItem>
-              <ListItemIcon>
-                <ReviewerIcon aria-hidden={true} />
-              </ListItemIcon>
-              <ListItemText primary={reviewerPrimaryText} secondary={reviewerSecondaryText} />
-            </ListItem>
-          )}
-          {approvals?.managerResponse !== undefined && (
-            <ListItem>
-              <ListItemIcon>
-                <ManagerIcon aria-hidden={true} />
-              </ListItemIcon>
-              <ListItemText primary={managerPrimaryText} secondary={managerSecondaryText} />
-            </ListItem>
-          )}
-        </List>
+        <List dense>{requestResponseListItems}</List>
       </Menu>
     </Stack>
   )

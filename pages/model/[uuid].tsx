@@ -184,12 +184,9 @@ function Model() {
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
               <ApprovalsChip
-                approvals={{
-                  manager: version?.metadata?.contacts?.manager,
-                  managerResponse: version?.managerApproved,
-                  reviewer: version?.metadata?.contacts?.reviewer,
-                  reviewerResponse: version?.reviewerApproved,
-                }}
+                approvals={[{reviewer: version.metadata.contacts.manager, status: version.managerApproved}, {reviewer: version.metadata.contacts.reviewer, status: version.reviewerApproved}]
+
+                }
               />
               <Divider orientation='vertical' flexItem />
               <Button
