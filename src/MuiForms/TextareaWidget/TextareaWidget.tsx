@@ -47,13 +47,14 @@ function TextareaWidget({
       required={required}
       disabled={disabled || readonly}
       type={inputType as string}
-      multiline
+      multiline={height > 2}
       value={value || value === 0 ? value : ''}
       error={rawErrors.length > 0}
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
-      rows={height}
+      maxRows={height > 2 ? 15 : 1}
+      minRows={height > 2 ? 4 : 1}
       {...(textFieldProps as TextFieldProps)}
     />
   )
