@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import RequestModel, { RequestDoc } from '../../models/Request'
 import { ApprovalStates } from '../../models/Deployment'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
@@ -39,6 +40,11 @@ export const putVersion = [
     if (req.user?.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
+
+    const existingRequests = await RequestModel.find({ version: version._id })
+    existingRequests.forEach((request: RequestDoc) => {
+      request.delete()
+    })
 
     version.metadata = metadata
     version.managerApproved = ApprovalStates.NoResponse
