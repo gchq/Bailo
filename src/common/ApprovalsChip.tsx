@@ -1,8 +1,7 @@
-import React, { useState, MouseEvent } from 'react'
+import React, { useState, useMemo, useCallback, MouseEvent } from 'react'
 
 import Close from '@mui/icons-material/CloseTwoTone'
 import Done from '@mui/icons-material/DoneTwoTone'
-import DoneAll from '@mui/icons-material/DoneAllTwoTone'
 import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import List from '@mui/material/List'
@@ -13,20 +12,24 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
-import { ApprovalStates } from '../../types/interfaces'
-
 import useTheme from '@mui/styles/useTheme'
-import { Theme } from '../../src/theme'
+
+import { ApprovalStates } from '../../types/interfaces'
+import { Theme } from '../theme'
 
 export default function ApprovalsChip({
   approvals,
 }: {
   approvals: [{ ['reviewer']: any; ['status']: ApprovalStates }, { ['reviewer']: any; ['status']: ApprovalStates }]
 }) {
-  const numApprovals = approvals.filter(
-    (e: { ['reviewer']: any; ['status']: ApprovalStates } | { ['manager']: any; ['status']: ApprovalStates }) =>
-      e.status === 'Accepted'
-  ).length
+  const numApprovals = useMemo(
+    () =>
+      approvals.filter(
+        (e: { ['reviewer']: any; ['status']: ApprovalStates } | { ['manager']: any; ['status']: ApprovalStates }) =>
+          e.status === 'Accepted'
+      ).length,
+    [approvals]
+  )
   const totalApprovals = approvals.length
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -34,23 +37,19 @@ export default function ApprovalsChip({
 
   const theme = useTheme<Theme>()
 
-  let Icon
   let backgroundColor
   if (numApprovals === 0) {
-    Icon = Close
     backgroundColor = theme.palette.error.main
   } else if (numApprovals < totalApprovals) {
-    Icon = Done
     backgroundColor = '#dc851b'
   } else {
-    Icon = DoneAll
     backgroundColor = '#4c8a4c'
   }
 
   const getRequestResponses = (response, index) => {
     let Icon
     let secondaryText
-    let primaryText = `${response.reviewer}`
+    const primaryText = `${response.reviewer}`
 
     if (response.status === ApprovalStates.Accepted) {
       Icon = Done
@@ -66,7 +65,7 @@ export default function ApprovalsChip({
     return (
       <ListItem key={index}>
         <ListItemIcon>
-          <Icon aria-hidden={true} />
+          <Icon aria-hidden />
         </ListItemIcon>
         <ListItemText primary={primaryText} secondary={secondaryText} />
       </ListItem>
