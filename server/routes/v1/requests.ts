@@ -69,7 +69,7 @@ export const postRequestResponse = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    const id = req.params.id
+    const { id } = req.params
     const choice = req.body.choice as string
 
     const request = await getRequest({ requestId: id })

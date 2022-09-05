@@ -60,8 +60,6 @@ class GetRawFiles extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: GetRawFilesProps) => {
-    return new GetRawFiles(logger, opts, props)
-  }
+export default function getRawFiles(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: GetRawFilesProps) => new GetRawFiles(logger, opts, props)
 }

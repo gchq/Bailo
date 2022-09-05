@@ -81,8 +81,6 @@ class GetSeldonDockerfile extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: GetSeldonDockerfileProps) => {
-    return new GetSeldonDockerfile(logger, opts, props)
-  }
+export default function getSeldonDockerfile(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: GetSeldonDockerfileProps) => new GetSeldonDockerfile(logger, opts, props)
 }

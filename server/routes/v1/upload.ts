@@ -103,7 +103,7 @@ export const postUpload = [
       try {
         version = await createVersion(req.user!, {
           version: metadata.highLevelDetails.modelCardVersion,
-          metadata: metadata,
+          metadata,
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -141,13 +141,13 @@ export const postUpload = [
         parentId = parentModel._id
       }
 
-      /** Saving the model **/
+      /** Saving the model */
 
-      let model: any = undefined
+      let model: any
 
       if (mode === 'newVersion') {
         // Update an existing model's version array
-        const modelUuid = req.query.modelUuid
+        const { modelUuid } = req.query
 
         model = await findModelByUuid(req.user!, modelUuid as string)
         model.versions.push(version._id)

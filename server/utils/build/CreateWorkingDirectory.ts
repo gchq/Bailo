@@ -39,8 +39,6 @@ class CreateWorkingDirectory extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: CreateWorkingDirectoryProps) => {
-    return new CreateWorkingDirectory(logger, opts, props)
-  }
+export default function createWorkingDirectory(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: CreateWorkingDirectoryProps) => new CreateWorkingDirectory(logger, opts, props)
 }

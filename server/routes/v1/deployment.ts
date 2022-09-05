@@ -89,7 +89,7 @@ export const postDeployment = [
 
     const deployment = await createDeployment(req.user!, {
       schemaRef: body.schemaRef,
-      uuid: uuid,
+      uuid,
 
       versions: versionArray,
       model: model._id,
@@ -129,7 +129,7 @@ export const resetDeploymentApprovals = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    const user = req.user
+    const { user } = req
     const { uuid } = req.params
     const deployment = await findDeploymentByUuid(req.user!, uuid)
     if (!deployment) {

@@ -1,7 +1,6 @@
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { rm } from 'shelljs'
 import unzip from 'unzipper'
-import { dirname } from 'path'
 
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
@@ -46,8 +45,6 @@ class ExtractFiles extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: ExtractFilesProps) => {
-    return new ExtractFiles(logger, opts, props)
-  }
+export default function extractFiles(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: ExtractFilesProps) => new ExtractFiles(logger, opts, props)
 }

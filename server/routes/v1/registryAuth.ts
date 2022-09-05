@@ -10,7 +10,7 @@ import logger from '../../utils/logger'
 import { Forbidden } from '../../utils/result'
 import { getUserFromAuthHeader } from '../../utils/user'
 
-let adminToken: string | undefined = undefined
+let adminToken: string | undefined
 
 export async function getAdminToken() {
   if (!adminToken) {
@@ -39,7 +39,7 @@ function getBit(buffer: Buffer, index: number) {
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  return Number((idByte & Math.pow(2, 7 - bit)) !== 0)
+  return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -208,7 +208,7 @@ export const getDockerRegistryAuth = [
 
     const accesses = scopes.map(generateAccess)
 
-    for (let access of accesses) {
+    for (const access of accesses) {
       if (!admin && !checkAccess(access, user)) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }

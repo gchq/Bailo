@@ -33,7 +33,7 @@ export const putVersion = [
     const version = await findVersionById(req.user!, id, { populate: true })
 
     if (!version) {
-      throw NotFound({ code: 'version_not_found', id: id }, 'Unable to find version')
+      throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
     }
 
     if (req.user?.id !== version.metadata.contacts.uploader) {
@@ -56,7 +56,7 @@ export const resetVersionApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
-    const user = req.user
+    const { user } = req
     const version = await findVersionById(req.user!, id, { populate: true })
     if (!version) {
       throw BadReq({ code: 'version_not_found' }, 'Unabled to find version for requested deployment')

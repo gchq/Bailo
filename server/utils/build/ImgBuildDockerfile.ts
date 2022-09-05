@@ -69,8 +69,6 @@ class ImgBuildDockerfile extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: ImgBuildDockerfileProps) => {
-    return new ImgBuildDockerfile(logger, opts, props)
-  }
+export default function imgBuildDockerfile(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: ImgBuildDockerfileProps) => new ImgBuildDockerfile(logger, opts, props)
 }
