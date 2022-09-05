@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, MouseEvent } from 'react'
+import React, { useState, useMemo, useCallback, MouseEvent, ReactElement } from 'react'
 
 import Close from '@mui/icons-material/CloseTwoTone'
 import Done from '@mui/icons-material/DoneTwoTone'
@@ -17,47 +17,45 @@ import useTheme from '@mui/styles/useTheme'
 import { ApprovalStates } from '../../types/interfaces'
 import { Theme } from '../theme'
 
-export default function ApprovalsChip({
-  approvals,
-}: {
-  approvals: [{ ['reviewer']: any; ['status']: ApprovalStates }, { ['reviewer']: any; ['status']: ApprovalStates }]
-}) {
-  const numApprovals = useMemo(
-    () =>
-      approvals.filter(
-        (e: { ['reviewer']: any; ['status']: ApprovalStates } | { ['manager']: any; ['status']: ApprovalStates }) =>
-          e.status === 'Accepted'
-      ).length,
-    [approvals]
-  )
-  const totalApprovals = approvals.length
+type Approval = {
+  reviewer: string
+  status: ApprovalStates
+}
 
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const open = !!anchorEl
+type ApprovalsChipProps = {
+  approvals: Approval[]
+}
 
+export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactElement {
   const theme = useTheme<Theme>()
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
 
-  let backgroundColor
-  if (numApprovals === 0) {
-    backgroundColor = theme.palette.error.main
-  } else if (numApprovals < totalApprovals) {
-    backgroundColor = '#dc851b'
-  } else {
-    backgroundColor = '#4c8a4c'
-  }
+  const open = useMemo(() => !!anchorEl, [anchorEl])
+  const numApprovals = useMemo(() => approvals.filter((approval) => approval.status === 'Accepted').length, [approvals])
+  const totalApprovals = useMemo(() => approvals.length, [approvals])
 
-  const getRequestResponses = (response, index) => {
+  const backgroundColor = useMemo(() => {
+    if (numApprovals === 0) {
+      return theme.palette.error.main
+    }
+    if (numApprovals < totalApprovals) {
+      return '#dc851b'
+    }
+    return '#4c8a4c'
+  }, [numApprovals, totalApprovals, theme])
+
+  const getRequestResponses = useCallback((approval: Approval, index: number) => {
     let Icon
-    let secondaryText
-    const primaryText = `${response.reviewer}`
+    let secondaryText = ''
+    const primaryText = approval.reviewer
 
-    if (response.status === ApprovalStates.Accepted) {
+    if (approval.status === ApprovalStates.Accepted) {
       Icon = Done
       secondaryText = 'Approved'
-    } else if (response.status === ApprovalStates.Declined) {
+    } else if (approval.status === ApprovalStates.Declined) {
       Icon = Close
       secondaryText = 'Declined'
-    } else if (response.status === ApprovalStates.NoResponse) {
+    } else if (approval.status === ApprovalStates.NoResponse) {
       Icon = AccessTime
       secondaryText = 'Awaiting response'
     }
@@ -70,12 +68,15 @@ export default function ApprovalsChip({
         <ListItemText primary={primaryText} secondary={secondaryText} />
       </ListItem>
     )
-  }
+  }, [])
 
-  const requestResponseListItems = approvals.map((reviewer, index) => getRequestResponses(reviewer, index))
+  const requestResponseListItems = useMemo(
+    () => approvals.map((approval, index) => getRequestResponses(approval, index)),
+    [approvals, getRequestResponses]
+  )
 
-  const handleApprovalsClicked = (event: MouseEvent) => {
-    setAnchorEl(event.currentTarget as HTMLDivElement)
+  const handleApprovalsClicked = (event: MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
