@@ -67,7 +67,7 @@ export default function FormUpload({
       <TextField
         fullWidth
         multiline
-        rows={4}
+        maxRows={20}
         label='Metadata'
         value={metadata}
         onChange={handleMetadataChange}
