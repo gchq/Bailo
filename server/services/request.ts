@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
-import { Request } from '../../types/interfaces'
-import { ApprovalStates, DeploymentDoc } from '../models/Deployment'
+import { ApprovalStates, Request } from '../../types/interfaces'
+import { DeploymentDoc } from '../../models/Deployment'
 import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'

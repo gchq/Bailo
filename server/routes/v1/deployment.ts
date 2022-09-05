@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
-import { ApprovalStates } from '../../models/Deployment'
+import { ApprovalStates } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
 import { createDeploymentRequests } from '../../services/request'

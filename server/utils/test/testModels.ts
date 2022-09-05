@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../models/Deployment'
+import { ApprovalStates } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
 export const deploymentUuid = 'test-deployment'
