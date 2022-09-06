@@ -41,7 +41,7 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const existingRequests = await RequestModel.find({ version: version._id })
+    const existingRequests = await RequestModel.find({ version: version._id, request: 'Upload' })
     existingRequests.forEach((request: RequestDoc) => {
       request.delete()
     })
