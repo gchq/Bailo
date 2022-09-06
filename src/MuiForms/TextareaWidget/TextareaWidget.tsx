@@ -38,7 +38,7 @@ function TextareaWidget({
   const inputType = (type || schema.type) === 'string' ? 'text' : `${type || schema.type}`
   const height = Math.min(5, Math.max(1, Math.floor((schema.maxLength || 0) / 150)))
   const isMultiline = height > 1
-  
+
   return (
     <TextField
       id={id}
