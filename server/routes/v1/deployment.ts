@@ -196,7 +196,7 @@ export const fetchRawModelFiles = [
       throw NotFound({ fileType }, 'Unknown file type specificed')
     }
 
-    const versionDocument: VersionDoc | null = await findVersionByName(req.user!, deployment.model, version)
+    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 
@@ -223,7 +223,7 @@ export const fetchRawModelFiles = [
     res.set('Content-Length', size.toString())
     res.writeHead(200)
 
-    const stream: Readable = await client.getObject(bucketName, filePath)
+    const stream = await client.getObject(bucketName, filePath)
     if (!stream) {
       throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
     }
