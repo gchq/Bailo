@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { ApprovalStates } from '@/types/interfaces'
+import { ApprovalStates } from '../../types/interfaces'
 import ThemeProvider from '@mui/system/ThemeProvider'
 import { render, screen, waitFor } from '@testing-library/react'
 import { lightTheme } from '../theme'
