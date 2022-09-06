@@ -68,6 +68,7 @@ export default function FormUpload({
         fullWidth
         multiline
         maxRows={20}
+        minRows={4}
         label='Metadata'
         value={metadata}
         onChange={handleMetadataChange}
