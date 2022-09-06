@@ -962,8 +962,9 @@ function generateSpecification() {
             {
               name: 'fileType',
               in: 'path',
-              description: 'specify either code or binary.',
+              description: 'Raw file to export',
               type: 'string',
+              enum: ['code', 'binary'],
             },
           ],
           responses: {
