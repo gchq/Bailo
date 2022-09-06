@@ -9,6 +9,7 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
+import Link from 'next/link'
 import Wrapper from 'src/Wrapper'
 import { useGetUiConfig } from '../data/uiConfig'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
@@ -42,7 +43,7 @@ export default function Help() {
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Bug reports
                   </Typography>
-                  <Typography sx={{ p: 2, mb: 1.5 }} variant='body1' component='p'>
+                  <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
                     If you have experienced any issues with Bailo, then please report it to the {uiConfig.issues?.label}
                     .
                   </Typography>
@@ -51,7 +52,7 @@ export default function Help() {
                   <Button
                     variant='contained'
                     href={uiConfig.issues?.supportHref}
-                    sx={{ margin: 'auto', mb: 1.5, width: 200 }}
+                    sx={{ mx: 'auto', mb: 2, width: 200 }}
                   >
                     Raise ticket
                   </Button>
@@ -68,18 +69,16 @@ export default function Help() {
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Documentation
                   </Typography>
-                  <Typography sx={{ p: 2, mb: 1.5 }} variant='body1' component='p'>
+                  <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
                     To find out more about Bailo please see our documentation pages.
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button
-                    variant='contained'
-                    href={uiConfig.help?.documentationUrl}
-                    sx={{ margin: 'auto', mb: 1.5, width: 200 }}
-                  >
-                    View documentation
-                  </Button>
+                  <Link passHref href='/docs'>
+                    <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }}>
+                      View documentation
+                    </Button>
+                  </Link>
                 </CardActions>
               </Card>
             </Grid>
@@ -93,7 +92,7 @@ export default function Help() {
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Get in touch
                   </Typography>
-                  <Typography sx={{ p: 2, mb: 1.5 }} variant='body1' component='p'>
+                  <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
                     If you have a general query and need to get in touch, please do so below.
                   </Typography>
                 </CardContent>
@@ -101,7 +100,7 @@ export default function Help() {
                   <Button
                     variant='contained'
                     href={uiConfig.issues?.contactHref}
-                    sx={{ margin: 'auto', mb: 1.5, width: 200 }}
+                    sx={{ mx: 'auto', mb: 2, width: 200 }}
                   >
                     Get support
                   </Button>

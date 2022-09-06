@@ -1,0 +1,151 @@
+---
+priority: 1100010
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+import { Mermaid } from 'mdx-mermaid/Mermaid'
+
+# Building Models
+
+<Mermaid chart={`
+graph LR;
+    post_upload[POST /api/v1/upload]
+    upload_queue>Upload Queue]
+    mongo[(MongoDB)]
+    upload_process[Upload Processor]
+    registry[(Registry)]
+
+    post_upload-->upload_queue;
+    upload_queue-->mongo;
+    mongo-->upload_process;
+    upload_process-->registry;
+
+`} />
+
+One of Bailo's responsibilities is turning a raw model into a packaged and productionised image for deployments. This
+process differs based on packaging method and build environment, but is always controlled by the `BuildHandler`.
+
+The `BuildHandler` takes a series of steps and handles running them, tidying up after or rolling back in the case of
+failure. The `BuildHandler` is not responsible for retrying failed steps, which is handled by the underlying `Queue`.
+
+Upon completion, the build is marked as complete and returned. In the case of a failure, the model will retry until the
+retry limit is reached, where it will fail.
+
+## Build Handler
+
+The `BuildHandler` is constructed with a static series of steps to carry out:
+
+```typescript
+const buildHandler = new BuildHandler([
+  { construct: exampleTaskA() },
+  { construct: exampleTaskB() },
+  { construct: exampleTaskC() },
+])
+```
+
+Each `construct` is a function that takes in some options and returns a factory for an instantiated class extending
+`BuildStep`. An example `construct` is:
+
+```typescript
+function exampleTaskA(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger, props: ExtractFilesProps) => {
+    return new ExampleTaskA(logger, opts, props)
+  }
+}
+```
+
+A `BuildStep` represents a single unit of work. It needs a string `name`, used in the logs. It also needs a `build`
+function to run the work and a `rollback` function in case of failure. An optional `tidyup` function can be provided to
+clean up after your operations.
+
+```typescript
+export abstract class BuildStep {
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: any) => BuildStep
+
+  abstract name(version: VersionDoc, files: Files, state: any): Promise<string>
+  abstract build(version: VersionDoc, files: Files, state: any): Promise<void>
+  abstract rollback(version: VersionDoc, files: Files, state: any): Promise<void>
+
+  // optional tidyup
+  async tidyup(_version: VersionDoc, _files: Files, _state: any): Promise<void> {}
+}
+```
+
+A `BuildStep` also takes in props which can be provided when creating the `BuildHandler`:
+
+```typescript
+const buildHandler = new BuildHandler([
+  { construct: createFolder(), props: { folderPath: '/tmp/a' } },
+  { construct: buildModel(), props: { image: 'seldon3.6' } },
+])
+```
+
+This can be used for configuring existing constructs. Once a `BuildHandler` is configured, it can be run by calling
+`.process()`:
+
+```typescript
+await buildHandler.process(version, files)
+```
+
+`files` is used to reference to any build artefacts required by the build process. It is an object of named files, e.g:
+
+```typescript
+{
+    binary: {
+        path: "/binary.zip",
+        bucket: "uploads",
+        name: "binary.zip"
+    },
+    code: {
+        path: "/code.zip",
+        bucket: "uploads",
+        name: "code.zip"
+    }
+}
+```
+
+## Seldon Core
+
+Seldon Core is a framework that allows machine learning models to be run on orchestration platforms like Kubernetes and
+OpenShift. It takes a model, a requirements files and an interface and returns a fully productionised Docker Image.
+
+This Docker Image runs multiple model instances in parallel behind a load balancer to enable both fault tolerance as
+well as performance improvements. It also provides both HTTP and GRPC interfaces as well as an OpenAPI specification to
+document them.
+
+We do not build images with SeldonCore on any platform. The default Seldon builder requires access to a Docker daemon
+which either does not exist or we have disabled for security reasons on every production deployment we support.
+
+Instead, when building an image we:
+
+1. Configure `s2i` by creating a `.s2i/environment` file containing:
+
+```
+MODEL_NAME=Model
+API_TYPE=REST
+SERVICE_TYPE=MODEL
+PERSISTENCE=0
+PIP_NO_CACHE_DIR=off
+INCLUDE_METRICS_IN_CLIENT_RESPONSE=false
+```
+
+2. Run `s2i` with the `--as-dockerfile` tag, which forces it to only generate a `Dockerfile` and not attempt to build an
+   image.
+
+3. Build and push the generated `Dockerfile` using another tool. Currently supported include:
+   - OpenShift Builder
+   - img
+
+## img
+
+The default build tool for Bailo is [img](https://github.com/genuinetools/img). It mirrors the CLI syntax of `docker`
+but runs as a standalone, daemonless and unprivileged executable.
+
+## OpenShift Builder
+
+We use OpenShift Builder when running within OpenShift, which by default disables certain system calls required by
+`img`. This process currently comes with drawbacks, specifically:
+
+- Unable to see live logs of models being built.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
