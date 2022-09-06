@@ -55,7 +55,7 @@ class Writer {
     return typeof value === 'object' ? inspect(value) : String(value)
   }
 
-  getAttributes(data) {
+  static getAttributes(data) {
     let attributes = omit(data, [
       'name',
       'hostname',
@@ -95,7 +95,7 @@ class Writer {
   write(data) {
     const level = Writer.getLevel(data.level)
     const src = this.getSrc(data.src)
-    const attributes = this.getAttributes(data)
+    const attributes = Writer.getAttributes(data)
     const formattedAttributes = attributes.length ? ` (${attributes})` : ''
 
     const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`

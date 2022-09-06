@@ -12,11 +12,11 @@ type BuildConstructor = (logger: BuildLogger, props?: any) => BuildStep
 function formatError(e: unknown): string {
   if (e instanceof Error) {
     return e.message
-  } else if (typeof e === 'string') {
-    return e
-  } else {
-    return JSON.stringify(e)
   }
+  if (typeof e === 'string') {
+    return e
+  }
+  return JSON.stringify(e)
 }
 
 export class BuildHandler {
@@ -35,10 +35,10 @@ export class BuildHandler {
 
     buildLogger.info({ buildId }, `=== Building ${buildId}\n`)
 
-    steps: for (const [i, { construct, props }] of Object.entries(this.steps)) {
+    for (const [i, { construct, props }] of Object.entries(this.steps)) {
       const step: BuildStep = construct(buildLogger, props)
       const name = await step.name(version, files, state)
-      const stepPrefix = `Step ${parseInt(i) + 1}/${this.steps.length}`
+      const stepPrefix = `Step ${parseInt(i, 10) + 1}/${this.steps.length}`
       const stepStartTime = new Date()
 
       // Starting build step
@@ -48,7 +48,7 @@ export class BuildHandler {
         await step.build(version, files, state)
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
-        buildLogger.info({ time }, `${stepPrefix} : Succesfully completed in ${time}\n`)
+        buildLogger.info({ time }, `${stepPrefix} : Successfully completed in ${time}\n`)
       } catch (e) {
         // Handling error
         buildLogger.error({}, `${stepPrefix} : Failed due to error:`)
@@ -68,20 +68,20 @@ export class BuildHandler {
       }
     }
 
-    steps: for (const [i, { construct, props }] of Object.entries(this.steps.reverse())) {
+    for (const [i, { construct, props }] of Object.entries(this.steps.reverse())) {
       const step: BuildStep = construct(buildLogger, props)
       const name = await step.name(version, files, state)
-      const stepPrefix = `Tidyup Step ${parseInt(i) + 1}/${this.steps.length}`
+      const stepPrefix = `Tidy up Step ${parseInt(i, 10) + 1}/${this.steps.length}`
       const stepStartTime = new Date()
 
       // Starting build step
       buildLogger.info({ step: i, name }, `${stepPrefix} : ${name}`)
 
       try {
-        await step.tidyup(version, files, state)
+        await step.tidyUp(version, files, state)
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
-        buildLogger.info({ time }, `${stepPrefix} : Succesfully tidied up in ${time}\n`)
+        buildLogger.info({ time }, `${stepPrefix} : Successfully tidied up in ${time}\n`)
       } catch (e) {
         // Handling error
         buildLogger.error({}, `${stepPrefix} : Failed due to error:`)
@@ -93,6 +93,6 @@ export class BuildHandler {
     }
 
     const time = prettyMs(new Date().getTime() - startTime.getTime())
-    buildLogger.info({}, `Succesfully completed build in ${time}`)
+    buildLogger.info({}, `Successfully completed build in ${time}`)
   }
 }

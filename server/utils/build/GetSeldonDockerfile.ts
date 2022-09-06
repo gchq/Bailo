@@ -9,7 +9,6 @@ import config from 'config'
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
-import { ModelDoc } from '../../models/Model'
 import { logCommand } from './build'
 
 interface GetSeldonDockerfileProps {}
@@ -76,7 +75,7 @@ class GetSeldonDockerfile extends BuildStep {
     }
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

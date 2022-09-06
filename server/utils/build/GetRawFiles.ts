@@ -1,7 +1,5 @@
 import { join } from 'path'
-import { tmpdir } from 'os'
-import { v4 as uuidv4 } from 'uuid'
-import { mkdir, rm } from 'shelljs'
+import { rm } from 'shelljs'
 
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
@@ -55,7 +53,7 @@ class GetRawFiles extends BuildStep {
     }
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

@@ -1,9 +1,3 @@
-import { rm, mkdir } from 'shelljs'
-import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { tmpdir } from 'os'
-import { writeFile } from 'fs/promises'
-import dedent from 'dedent-js'
 import config from 'config'
 
 import { VersionDoc } from '../../models/Version'
@@ -14,6 +8,7 @@ import { logCommand, runCommand } from './build'
 import { getAdminToken } from '../../routes/v1/registryAuth'
 
 interface ImgBuildDockerfileProps {}
+
 class ImgBuildDockerfile extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: ImgBuildDockerfileProps) {
     super(logger, opts, props)
@@ -64,7 +59,7 @@ class ImgBuildDockerfile extends BuildStep {
     }
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

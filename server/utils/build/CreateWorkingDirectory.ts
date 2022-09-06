@@ -34,7 +34,7 @@ class CreateWorkingDirectory extends BuildStep {
     state.workingDirectory = undefined
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }
