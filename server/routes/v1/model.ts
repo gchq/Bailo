@@ -77,7 +77,10 @@ export const getModelDeployments = [
 
     const deployments = await findDeployments(req.user!, { model: model._id })
 
-    req.log.info({ code: 'fetch_deployments_by_model', modelId: model._id, deployments }, 'User fetching all deployments for model')
+    req.log.info(
+      { code: 'fetch_deployments_by_model', modelId: model._id, deployments },
+      'User fetching all deployments for model'
+    )
     return res.json(deployments)
   },
 ]
@@ -119,7 +122,10 @@ export const getModelVersions = [
 
     const versions = await findModelVersions(req.user!, model._id, { thin: true })
 
-    req.log.info({ code: 'fetch_versions_for_model', modelId: model._id, versions }, 'User fetching versions for specified model')
+    req.log.info(
+      { code: 'fetch_versions_for_model', modelId: model._id, versions },
+      'User fetching versions for specified model'
+    )
     return res.json(versions)
   },
 ]
