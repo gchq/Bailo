@@ -33,6 +33,7 @@ module.exports = {
     'import/no-cycle': [0, { ignoreExternal: true }],
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
     '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
+    "@typescript-eslint/no-shadow": ["error"],
     // IGNORED RULES
     '@typescript-eslint/no-var-requires': 'off',
     'import/extensions': 'off',
@@ -51,6 +52,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
     'react/react-in-jsx-scope': 'off',
+    'no-shadow': 'off',
   },
   settings: {
     'import/resolver': {

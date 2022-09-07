@@ -3,7 +3,7 @@ import { Date, Types } from 'mongoose'
 import { Dispatch, SetStateAction } from 'react'
 import { UserDoc } from '../server/models/User'
 
-export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
+// export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
 export type { RequestDoc as Request } from '../server/models/Request'
 export type { UserDoc as User } from '../server/models/User'
 export type { VersionDoc as Version } from '../server/models/Version'
@@ -145,7 +145,6 @@ export interface RenderInterface {
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
 }
-
 export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
 
 export enum ApprovalStates {
