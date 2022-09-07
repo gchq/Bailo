@@ -19,7 +19,7 @@ export const getModels = [
     }
 
     if (!isValidFilter(filter)) {
-      throw BadReq({ code: 'invalid_filter', filter }, `Provided invalid filter '${filter}'`)
+      throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
     const models = await findModels(req.user!, { filter: filter as string, type })
