@@ -152,7 +152,10 @@ export const getModelVersion = [
       throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
     }
 
-    req.log.info({ code: 'fetch_version_for_model', model, version }, 'User finding specific version for model')
+    req.log.info(
+      { code: 'fetch_version_for_model', modelId: model._id, version },
+      'User finding specific version for model'
+    )
     return res.json(version)
   },
 ]

@@ -86,7 +86,6 @@ export const postDeployment = [
       .replace(/ /g, '-')
 
     const uuid = `${name}-${nanoid()}`
-    req.log.info({ uuid }, `Named deployment '${uuid}'`)
 
     const version = await findVersionByName(req.user!, model._id, body.highLevelDetails.initialVersionRequested)
 
@@ -106,10 +105,7 @@ export const postDeployment = [
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
     await deployment.save()
 
-    req.log.info(
-      { code: 'requesting_model_version', model, version: body.highLevelDetails.initialVersionRequested },
-      'Requesting model version'
-    )
+    req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
     if (!version) {
       throw NotFound(
@@ -118,11 +114,16 @@ export const postDeployment = [
       )
     }
 
+    req.log.info({ code: 'requesting_model_version', modelId: model._id, version }, 'Requesting model version')
+
     const managerRequest = await createDeploymentRequests({
       version,
       deployment: await deployment.populate('model').execPopulate(),
     })
-    req.log.info({ code: 'created_deployment', request: managerRequest._id, uuid }, 'Successfully created deployment')
+    req.log.info(
+      { code: 'created_deployment', deploymentId: deployment._id, request: managerRequest._id, uuid },
+      'Successfully created deployment'
+    )
 
     res.json({
       uuid,
@@ -154,8 +155,12 @@ export const resetDeploymentApprovals = [
     )
     if (!version) {
       throw BadReq(
-        { code: 'deployment_version_not_found', uuid },
-        `Unabled to find version for requested deployment: '${uuid}'`
+        {
+          code: 'deployment_version_not_found',
+          deploymentId: deployment._id,
+          version: deployment.metadata.highLevelDetails.initialVersionRequested,
+        },
+        `Unable to find version for requested deployment: '${uuid}'`
       )
     }
     deployment.managerApproved = ApprovalStates.NoResponse
