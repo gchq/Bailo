@@ -1,12 +1,15 @@
 import getAppRoot from 'app-root-path'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
+import { gzip } from 'pako'
 import config from 'config'
 import devnull from 'dev-null'
 import { NextFunction, Request, Response } from 'express'
 import fs from 'fs'
+import fsPromise from 'fs/promises'
 import { castArray, get, pick, set } from 'lodash'
 import omit from 'lodash/omit'
+import { WritableStream } from 'node:stream/web'
 import morgan from 'morgan'
 import { dirname, join, resolve, sep } from 'path'
 import { inspect } from 'util'
@@ -17,6 +20,7 @@ import { serializedModelFields } from '../services/model'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
+import { ensurePathExists, getFilesInDir } from './filesystem'
 
 const appRoot = getAppRoot.toString()
 
@@ -156,18 +160,98 @@ if (process.env.NODE_ENV !== 'production') {
 
 if (config.get('logging.file.enabled')) {
   const logPath = resolve(appRoot, config.get('logging.file.path'))
-  const logFolder = dirname(logPath)
 
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder, { recursive: true })
-  }
+  ensurePathExists(logPath, true)
 
   streams.push({
     level: config.get('logging.file.level'),
     path: logPath,
   })
+}
 
-  console.log(logPath, dirname(logPath))
+async function processStroomFiles() {
+  const stroomFolder = resolve(appRoot, config.get('logging.stroom.folder'))
+  const processingFolder = resolve(stroomFolder, 'processing')
+
+  const files = await getFilesInDir(stroomFolder)
+  for (const file of files) {
+    const from = resolve(stroomFolder, file.name)
+    const to = resolve(processingFolder, file.name)
+
+    const { size } = await fsPromise.stat(from)
+
+    if (size < 0) {
+      continue
+    }
+
+    await fsPromise.rename(from, to)
+  }
+
+  const processing = await getFilesInDir(processingFolder)
+  for (const file of processing) {
+    const name = resolve(processingFolder, file.name)
+    try {
+      await sendLogsToStroom(name)
+    } catch (e) {
+      // ironically we cannot use our logger here.
+      console.error(e, 'Unable to send logs to ACE')
+    }
+  }
+}
+
+async function sendLogsToStroom(file: string) {
+  const logBuffer = await fsPromise.readFile(file)
+
+  const res = await fetch(config.get('logging.stroom.url'), {
+    method: 'POST',
+    body: await gzip(logBuffer),
+    headers: {
+      Compression: 'gzip',
+      Feed: config.get('logging.stroom.feed'),
+      Environment: config.get('logging.stroom.environment'),
+      System: config.get('logging.stroom.system'),
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to send logs to stroom')
+  }
+
+  await fsPromise.unlink(file)
+}
+
+if (config.get('logging.stroom.enabled')) {
+  const stroomFolder = resolve(appRoot, config.get('logging.stroom.folder'))
+  const processingFolder = resolve(stroomFolder, 'processing')
+  const processedFolder = resolve(stroomFolder, 'processed')
+
+  ensurePathExists(stroomFolder, true)
+  ensurePathExists(processingFolder, true)
+  ensurePathExists(processedFolder, true)
+
+  let date = new Date()
+
+  const stroomStream = new WritableStream({
+    async write(message) {
+      if (message.code) {
+        const path = resolve(stroomFolder, `logs.${+date}.txt`)
+        await fsPromise.appendFile(path, `${JSON.stringify(message)}\n`)
+      }
+    },
+  })
+
+  // send logs to ACE every hour
+  processStroomFiles()
+  setInterval(() => {
+    date = new Date()
+    processStroomFiles()
+  }, 1000 * 60 * 60)
+
+  streams.push({
+    level: 'trace',
+    type: 'raw',
+    stream: stroomStream.getWriter(),
+  })
 }
 
 const log = bunyan.createLogger({

@@ -80,6 +80,15 @@ module.exports = {
       level: 'info',
       path: './logs/out.log',
     },
+
+    stroom: {
+      enabled: false,
+      folder: './logs/stroom',
+      url: 'http://localhost:8090/stroom/datafeed',
+      environment: 'insecure',
+      feed: 'bailo',
+      system: 'bailo',
+    },
   },
 
   app: {

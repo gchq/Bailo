@@ -49,7 +49,7 @@ export async function findVersionByName(user: UserDoc, model: ModelId, name: str
 
 export async function findModelVersions(user: UserDoc, model: ModelId, opts?: GetVersionOptions) {
   let versions = VersionModel.find({ model })
-  if (opts?.thin) versions = versions.select({ state: 0, logs: 0, metadata: 0 })
+  if (opts?.thin) versions = versions.select({ state: 0, logs: 0 })
   if (opts?.populate) versions = versions.populate('model')
 
   return filterVersion(user, await versions)
@@ -63,7 +63,7 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
   const version = await findVersionById(user, _id)
 
   if (!version) {
-    throw BadReq({ code: 'model_invalid_type', _id }, `Provided invalid version '${_id}'`)
+    throw BadReq({ code: 'model_version_invalid', versionId: _id }, `Provided invalid version '${_id}'`)
   }
 
   version.state.build = {
@@ -82,6 +82,7 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 interface CreateVersion {
   version: string
   metadata: any
+  files: any
 }
 
 export async function createVersion(user: UserDoc, data: CreateVersion) {

@@ -3,6 +3,11 @@ import logger from '../utils/logger'
 import { approvalStateOptions, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
 
+interface FilePaths {
+  rawBinaryPath: string
+  rawCodePath: string
+}
+
 export interface Version {
   model: ModelDoc | Types.ObjectId
   version: string
@@ -12,6 +17,11 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
+
+  files: {
+    rawBinaryPath: string
+    rawCodePath: string
+  }
 
   state: any
   logs: Types.Array<LogStatement>
@@ -30,6 +40,8 @@ const VersionSchema = new Schema<Version>(
     version: { type: String, required: true },
 
     metadata: { type: Schema.Types.Mixed },
+
+    files: { type: Schema.Types.Mixed, required: true },
 
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },

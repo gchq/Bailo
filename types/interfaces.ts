@@ -47,6 +47,11 @@ export interface ModelMetadata {
     [x: string]: any
   }
 
+  buildOptions?: {
+    exportRawModel: boolean
+    allowGuestDeployments: boolean
+  }
+
   // allow other properties
   [x: string]: any
 }

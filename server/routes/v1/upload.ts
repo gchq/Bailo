@@ -4,17 +4,19 @@ import mongoose from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
+import { copyFile, getClient } from '../../utils/minio'
+import { createFileRef } from '../../utils/multer'
 import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
 import { createVersionRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
 import { createVersion } from '../../services/version'
 import MinioStore from '../../utils/MinioStore'
-import { normalizeMulterFile } from '../../utils/multer'
 import { getUploadQueue } from '../../utils/queues'
-import { BadReq, Conflict } from '../../utils/result'
+import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
+import VersionModel from '../../models/Version'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -104,6 +106,10 @@ export const postUpload = [
         version = await createVersion(req.user, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata,
+          files: {
+            rawBinaryPath: '',
+            rawCodePath: '',
+          },
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -187,15 +193,33 @@ export const postUpload = [
       ).add({
         versionId: version._id,
         userId: req.user?._id,
-        binary: normalizeMulterFile(files.binary[0]),
-        code: normalizeMulterFile(files.code[0]),
+        binary: createFileRef(files.binary[0], 'binary', version),
+        code: createFileRef(files.code[0], 'code', version),
       })
+
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
 
       // then return reference to user
       res.json({
         uuid: model.uuid,
       })
+
+      try {
+        const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
+        const client = getClient()
+        await copyFile(`${files.binary[0].bucket}/${files.binary[0].path}`, rawBinaryPath)
+        await client.removeObject(files.binary[0].bucket, files.binary[0].path)
+        const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
+        await copyFile(`${files.code[0].bucket}/${files.code[0].path}`, rawCodePath)
+        await client.removeObject(files.code[0].bucket, files.code[0].path)
+        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
+        req.log.info(
+          { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
+          `Adding paths for raw model exports of files to version.`
+        )
+      } catch (e: any) {
+        throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
+      }
     })
   },
 ]
