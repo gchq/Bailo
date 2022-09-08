@@ -150,3 +150,13 @@ export const getModelVersion = [
     return res.json(version)
   },
 ]
+
+export const deleteModel = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { uuid } = req.params
+
+    const model = await findModelByUuid(req.user, uuid)
+    return res.json(model)
+  },
+]
