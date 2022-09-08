@@ -46,8 +46,13 @@ export default function RenderButtons({
       setOpenValidateError(true)
       return
     }
-
+    document.getElementById('form-page-stepper')?.scrollIntoView({ behavior: 'smooth' })
     setActiveStep(activeStep + 1)
+  }
+
+  const onClickPreviousSection = () => {
+    setActiveStep(activeStep - 1)
+    document.getElementById('form-page-stepper')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const onClickSubmit = () => {
@@ -68,7 +73,7 @@ export default function RenderButtons({
       <Grid container justifyContent='space-between'>
         <Grid item>
           {!isFirstStep && (
-            <Button variant='outlined' onClick={() => setActiveStep(activeStep - 1)}>
+            <Button variant='outlined' onClick={onClickPreviousSection}>
               Previous Section
             </Button>
           )}
