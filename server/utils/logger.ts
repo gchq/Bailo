@@ -180,11 +180,9 @@ async function processStroomFiles() {
 
     const { size } = await fsPromise.stat(from)
 
-    if (size < 0) {
-      continue
+    if (size >= 0) {
+      await fsPromise.rename(from, to)
     }
-
-    await fsPromise.rename(from, to)
   }
 
   const processing = await getFilesInDir(processingFolder)

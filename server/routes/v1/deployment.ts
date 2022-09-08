@@ -1,11 +1,8 @@
 import config from 'config'
 import * as Minio from 'minio'
 import { Request, Response } from 'express'
-import contentDisposition from 'content-disposition'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
-import { VersionDoc } from '../../models/Version'
-import { Readable } from 'stream'
 import { ApprovalStates } from '../../models/Deployment'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
@@ -221,7 +218,7 @@ export const fetchRawModelFiles = [
     // Stat object to get size so browser can determine progress
     const { size } = await client.statObject(bucketName, filePath)
 
-    //res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
+    // res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
     res.set('Content-disposition', `attachment; filename=${fileType}.zip`)
     res.set('Content-Type', 'application/zip')
     res.set('Cache-Control', 'private, max-age=604800, immutable')

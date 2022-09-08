@@ -47,13 +47,13 @@ function formatKid(keyBuffer: Buffer) {
   const bitLength = keyBuffer.length * 8
 
   if (bitLength % 40 !== 0) {
-    throw new Error('Invalid bitlength provided, expected multiple of 40')
+    throw new Error('Invalid bitLength provided, expected multiple of 40')
   }
 
   let output = ''
   for (let i = 0; i < bitLength; i += 5) {
     let idx = 0
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < 5; j += 1) {
       idx <<= 1
       idx += getBit(keyBuffer, i + j)
     }
