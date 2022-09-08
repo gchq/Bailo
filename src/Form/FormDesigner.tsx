@@ -31,7 +31,7 @@ export default function FormDesigner({
 
   return (
     <>
-      <Stepper sx={{ mt: 4, mb: 4 }} activeStep={activeStep} nonLinear alternativeLabel>
+      <Stepper id='form-page-stepper' sx={{ mt: 4, mb: 4 }} activeStep={activeStep} nonLinear alternativeLabel>
         {splitSchema.steps.map((step, index) => (
           <MaterialStep key={step.schema.title}>
             <StepButton onClick={() => setActiveStep(index)}>{step.schema.title}</StepButton>
