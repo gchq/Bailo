@@ -1,6 +1,7 @@
 import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
-import { approvalStateOptions, ApprovalStates, LogStatement } from './Deployment'
+import LogStatement from './Deployment'
+import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
 import { ModelDoc } from './Model'
 
 interface FilePaths {
