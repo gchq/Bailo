@@ -1,4 +1,6 @@
 import { CacheProvider, EmotionCache } from '@emotion/react'
+import DocsMenuContext from '@/utils/contexts/docsMenuContext'
+import useDocsMenu from '@/utils/useDocsMenu'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppProps } from 'next/app'
@@ -7,6 +9,7 @@ import * as React from 'react'
 import '../public/css/fonts.css'
 import '../public/css/layouting.css'
 import '../public/css/terminal.css'
+import '../public/css/highlight.css'
 import createEmotionCache from '../src/createEmotionCache'
 import { darkTheme, lightTheme } from '../src/theme'
 
@@ -25,6 +28,7 @@ export default function MyApp(props: MyAppProps) {
   const [theme, setTheme] = React.useState<any>(
     typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme
   )
+  const docsMenuValue = useDocsMenu()
 
   React.useEffect(() => {
     setMounted(true)
@@ -46,8 +50,10 @@ export default function MyApp(props: MyAppProps) {
       {mounted && (
         <ThemeProvider theme={theme}>
           <DarkModeContext.Provider value={handleDarkModeToggle}>
-            <CssBaseline />
-            <Component {...pageProps} handleDarkModeToggle={handleDarkModeToggle} />
+            <DocsMenuContext.Provider value={docsMenuValue}>
+              <CssBaseline />
+              <Component {...pageProps} handleDarkModeToggle={handleDarkModeToggle} />
+            </DocsMenuContext.Provider>
           </DarkModeContext.Provider>
         </ThemeProvider>
       )}

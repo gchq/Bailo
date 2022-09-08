@@ -1,3 +1,6 @@
+import { TextEncoder } from 'util'
+
+global.TextEncoder = TextEncoder
 import { ObjectId } from 'mongodb'
 import { ApprovalStates } from '../../../types/interfaces'
 import UserModel from '../../models/User'
@@ -80,6 +83,10 @@ export const testVersion: any = {
       manager: 'manager',
     },
   },
+  files: {
+    rawCodePath: '',
+    rawBinaryPath: '',
+  },
   built: false,
   managerApproved: ApprovalStates.Accepted,
   reviewerApproved: ApprovalStates.NoResponse,
@@ -101,6 +108,10 @@ export const testVersion2: any = {
       reviewer: 'reviewer',
       manager: 'manager',
     },
+  },
+  files: {
+    rawCodePath: '',
+    rawBinaryPath: '',
   },
   built: true,
   managerApproved: ApprovalStates.Accepted,

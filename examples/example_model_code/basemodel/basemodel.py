@@ -17,7 +17,6 @@ class BaseModel(ABC):
         """
         super().__init__()
    
-    @abstractmethod
     def predict(self, input, features_names):
         """
         Provides a model prediction for a given input and set of feature names

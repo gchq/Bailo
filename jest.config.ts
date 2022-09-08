@@ -9,8 +9,10 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig: Config.InitialOptions = {
   moduleNameMapper: {
-    // Handle module aliases (this will be automatically configured for you soon)
-    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/data/(.*)$': '<rootDir>/data/$1',
+    '^@/src/(.*)$': '<rootDir>/src/$1',
+    '^@/types/(.*)$': '<rootDir>/types/$1',
+    '^@/utils/(.*)$': '<rootDir>/utils/$1',
   },
   testPathIgnorePatterns: ['__tests__/__utils__', 'config'],
   bail: true,

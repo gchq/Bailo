@@ -46,6 +46,7 @@ describe('test version service', () => {
     const newVersion: any = {
       version: '1',
       metadata: {},
+      files: {},
     }
     const version: any = await createVersion(userDoc, newVersion)
     expect(version).toBeTruthy()

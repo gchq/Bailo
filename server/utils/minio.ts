@@ -49,3 +49,9 @@ export async function emptyBucket(bucket: string) {
   )
   logger.info({ bucket }, 'Removed all files from bucket')
 }
+
+export async function copyFile(from: string, to: string) {
+  const client = getClient()
+
+  await client.copyObject(config.get('minio.uploadBucket'), to, from, new Minio.CopyConditions())
+}

@@ -1,11 +1,12 @@
+import { ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
 import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
 import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
-import ListAltIcon from '@mui/icons-material/ListAlt'
 import MenuIcon from '@mui/icons-material/MenuTwoTone'
+import ListAltIcon from '@mui/icons-material/ListAlt'
 import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
@@ -32,7 +33,6 @@ import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
 import Image from 'next/image'
 import Link from 'next/link'
-import * as React from 'react'
 import { useGetNumRequests } from '../data/requests'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
@@ -90,37 +90,45 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-export default function Wrapper({ title, page, children }: { title: any; page: string; children?: any }) {
-  const [open, setOpen] = React.useState(false)
-  const toggleDrawer = () => {
+type WrapperProps = {
+  title: string
+  page: string
+  children?: ReactNode
+}
+
+export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
+  const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
+
+  const [open, setOpen] = useState(false)
+  const toggleDrawer = (): void => {
     setOpen(!open)
   }
 
   const theme: any = useTheme() || lightTheme
-  const toggleDarkMode: any = React.useContext(DarkModeContext)
+  const toggleDarkMode: any = useContext(DarkModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
   const { currentUser } = useGetCurrentUser()
 
-  const [pageTopStyling, setPageTopStyling] = React.useState({})
-  const [contentTopStyling, setContentTopStyling] = React.useState({})
-  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null)
+  const [pageTopStyling, setPageTopStyling] = useState({})
+  const [contentTopStyling, setContentTopStyling] = useState({})
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
 
   const actionOpen = anchorEl !== null
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isUiConfigLoading) {
-      if (uiConfig?.banner?.enable) {
+      if (uiConfig && uiConfig.banner.enable) {
         setPageTopStyling({
           mt: 4,
         })
         setContentTopStyling({
-          mt: 8,
+          mt: isDocsPage ? 4 : 8,
         })
       }
     }
-  }, [isUiConfigLoading, uiConfig])
+  }, [isUiConfigLoading, uiConfig, isDocsPage])
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
@@ -162,7 +170,7 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {uiConfig?.banner?.enable && <Box sx={{ mt: 20 }} />}
+        {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
         <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
           <Toolbar
             sx={{
@@ -249,17 +257,16 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         <Drawer sx={pageTopStyling} variant='permanent' open={open}>
           <Toolbar
             sx={{
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
               px: [1],
+              borderBottom: `1px solid ${theme.palette.divider}`,
             }}
           >
             <IconButton aria-label='close drawer' onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
-          <Divider />
           <StyledList>
             <Link href='/' passHref>
               <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
@@ -360,10 +367,16 @@ export default function Wrapper({ title, page, children }: { title: any; page: s
         >
           <Toolbar />
           <Box sx={contentTopStyling}>
-            <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
-              {children}
-            </Container>
-            <Copyright sx={{ pb: 2 }} />
+            {isDocsPage ? (
+              children
+            ) : (
+              <>
+                <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+                  {children}
+                </Container>
+                <Copyright sx={{ pb: 2 }} />
+              </>
+            )}
           </Box>
         </Box>
       </Box>

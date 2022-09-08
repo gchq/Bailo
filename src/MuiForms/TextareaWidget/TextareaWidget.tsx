@@ -37,6 +37,7 @@ function TextareaWidget({
   const displayLabel = getDisplayLabel(schema, uiSchema)
   const inputType = (type || schema.type) === 'string' ? 'text' : `${type || schema.type}`
   const height = Math.min(5, Math.max(1, Math.floor((schema.maxLength || 0) / 150)))
+  const isMultiline = height > 1
 
   return (
     <TextField
@@ -47,13 +48,14 @@ function TextareaWidget({
       required={required}
       disabled={disabled || readonly}
       type={inputType as string}
-      multiline
+      multiline={isMultiline}
       value={value || value === 0 ? value : ''}
       error={rawErrors.length > 0}
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
-      rows={height}
+      maxRows={isMultiline ? height * 3 : 1}
+      minRows={height}
       {...(textFieldProps as TextFieldProps)}
     />
   )

@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import { styled } from '@mui/system'
 import { RenderInterface, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
+import FileInput from '../common/FileInput'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
@@ -40,7 +41,7 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
         <Box sx={{ textAlign: 'center' }}>
           <label htmlFor={codeId}>
             <Typography sx={{ p: 1 }} variant='h5'>
-              Uploade a code file (.zip)
+              Upload a code file (.zip)
             </Typography>
             <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept='.zip' />
             <Button variant='outlined' component='span'>
@@ -66,5 +67,31 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 }
 
 export function FileTabComplete(step: Step) {
+  return step.state.binary && step.state.code
+}
+
+export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
+  const { state } = step
+  const { binary, code } = state
+
+  const handleCodeChange = (e: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
+  }
+
+  const handleBinaryChange = (e: any) => {
+    setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
+  }
+
+  return (
+    <Box sx={{ pb: 4, pt: 4 }}>
+      <Stack direction='row' spacing={2} alignItems='center'>
+        <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
+        <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
+      </Stack>
+    </Box>
+  )
+}
+
+export function BasicFileTabComplete(step: Step) {
   return step.state.binary && step.state.code
 }
