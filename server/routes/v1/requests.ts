@@ -76,13 +76,16 @@ export const postRequestResponse = [
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
       throw Unauthorised(
-        { code: 'unauthorised_to_approve', id, userId: req.user?._id, requestUser: request.user },
+        { code: 'unauthorised_to_approve', requestId: id, userId: req.user?._id, requestUser: request.user },
         'You do not have permissions to approve this'
       )
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
-      throw BadReq({ code: 'invalid_request_choice', choice }, `Received invalid request choice, received '${choice}'`)
+      throw BadReq(
+        { code: 'invalid_request_choice', choice, requestId: id },
+        `Received invalid request choice, received '${choice}'`
+      )
     }
 
     request.status = choice as ApprovalStates
@@ -161,7 +164,7 @@ export const postRequestResponse = [
       })
     }
 
-    req.log.info({ code: 'approval_response_set', id, choice }, 'Successfully set approval response')
+    req.log.info({ code: 'approval_response_set', requestId: id, choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',

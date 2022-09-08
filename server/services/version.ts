@@ -63,7 +63,7 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
   const version = await findVersionById(user, _id)
 
   if (!version) {
-    throw BadReq({ code: 'model_invalid_type', _id }, `Provided invalid version '${_id}'`)
+    throw BadReq({ code: 'model_version_invalid', versionId: _id }, `Provided invalid version '${_id}'`)
   }
 
   version.state.build = {
