@@ -6,7 +6,7 @@ import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '@/src/theme'
-import DocsMenuContext from '@/utils/contexts/docsMenuContext'
+import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
 

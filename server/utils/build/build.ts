@@ -16,7 +16,17 @@ export function logCommand(command: string, logger: BuildLogger) {
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
+type RunCommandOptions = {
+  silentErrors?: boolean
+  hide?: boolean
+}
+
+export async function runCommand(
+  command: string,
+  onStdout: (data: string) => void,
+  onStderr: (data: string) => void,
+  opts: RunCommandOptions = {}
+) {
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout?.on('data', (data) => {
     onStdout(data.trim())

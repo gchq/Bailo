@@ -101,7 +101,7 @@ export const postUpload = [
 
       let version
       try {
-        version = await createVersion(req.user!, {
+        version = await createVersion(req.user, {
           version: metadata.highLevelDetails.modelCardVersion,
           metadata,
         })
@@ -129,7 +129,7 @@ export const postUpload = [
       let parentId
       if (req.body.parent) {
         req.log.info({ code: 'model_parent_already_exists', parent: req.body.parent }, 'Uploaded model has parent')
-        const parentModel = await findModelByUuid(req.user!, req.body.parent)
+        const parentModel = await findModelByUuid(req.user, req.body.parent)
 
         if (!parentModel) {
           req.log.warn({ code: 'model_parent_not_found', parent: req.body.parent }, 'Could not find parent')
@@ -147,17 +147,15 @@ export const postUpload = [
 
       if (mode === 'newVersion') {
         // Update an existing model's version array
-        const { modelUuid } = req.query
-
-        model = await findModelByUuid(req.user!, modelUuid as string)
+        model = await findModelByUuid(req.user, modelUuid)
         model.versions.push(version._id)
         model.currentMetadata = metadata
 
         // Find all existing deployments for this model and update their versions array
-        await updateDeploymentVersions(req.user!, model._id, version)
+        await updateDeploymentVersions(req.user, model._id, version)
       } else {
         // Save a new model, and add the uploaded version to its array
-        model = await createModel(req.user!, {
+        model = await createModel(req.user, {
           schemaRef: metadata.schemaRef,
           uuid: `${name}-${nanoid()}`,
 
@@ -165,7 +163,7 @@ export const postUpload = [
           versions: [version._id],
           currentMetadata: metadata,
 
-          owner: req.user!._id,
+          owner: req.user._id,
         })
       }
 

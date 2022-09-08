@@ -49,22 +49,22 @@ export class BuildHandler {
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
         buildLogger.info({ time }, `${stepPrefix} : Successfully completed in ${time}\n`)
-      } catch (e) {
+      } catch (buildError) {
         // Handling error
         buildLogger.error({}, `${stepPrefix} : Failed due to error:`)
-        buildLogger.error({}, indentString(formatError(e), 2))
+        buildLogger.error({}, indentString(formatError(buildError), 2))
 
         try {
           buildLogger.error({}, `${stepPrefix} : Rolling back`)
           await step.rollback(version, files, state)
-        } catch (e) {
+        } catch (rollbackError) {
           // Handling error during rollback
           buildLogger.error({}, `${stepPrefix} : Failed during rollback:`)
-          buildLogger.error({}, indentString(formatError(e), 2))
+          buildLogger.error({}, indentString(formatError(rollbackError), 2))
         }
 
         buildLogger.error({}, `\nFailed to build model.\n\n`)
-        throw e
+        throw buildError
       }
     }
 

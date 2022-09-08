@@ -551,7 +551,7 @@ function generateSpecification() {
       },
       {
         name: 'deployment',
-        description: 'A deployent allows users to access one or more versions of a model',
+        description: 'A deployment allows users to access one or more versions of a model',
       },
       {
         name: 'version',

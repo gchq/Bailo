@@ -51,7 +51,7 @@ class Writer {
     return `${line}:${src.line}`
   }
 
-  static representValue(value: any) {
+  static representValue(value: unknown) {
     return typeof value === 'object' ? inspect(value) : String(value)
   }
 

@@ -28,11 +28,11 @@ export async function getAdminToken() {
 getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
 async function getPrivateKey() {
-  return await readFile('./certs/key.pem', { encoding: 'utf-8' })
+  return readFile('./certs/key.pem', { encoding: 'utf-8' })
 }
 
 async function getPublicKey() {
-  return await readFile('./certs/cert.pem', { encoding: 'utf-8' })
+  return readFile('./certs/cert.pem', { encoding: 'utf-8' })
 }
 
 function getBit(buffer: Buffer, index: number) {

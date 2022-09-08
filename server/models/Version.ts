@@ -45,10 +45,11 @@ const VersionSchema = new Schema<Version>(
 
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
+const VersionModel = model<Version>('Version', VersionSchema)
+
 VersionSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ versionId: this._id }, msg)
   await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
-const VersionModel = model<Version>('Version', VersionSchema)
 export default VersionModel
