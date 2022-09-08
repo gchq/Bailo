@@ -1,6 +1,7 @@
 import { exec } from 'shelljs'
 import packageLock from '../../package-lock.json'
 import packageInfo from '../../package.json'
+import { consoleLog } from '../../utils/logging'
 
 // This script requires 'license-checker'
 //   npm i -g license-checker
@@ -23,8 +24,7 @@ export default async function runScript() {
     const license = unknownLicense as any
     const { version } = packageLock.packages[`node_modules/${name}`]
 
-    // eslint-disable-next-line no-console
-    console.log(`${name} v${version} <${license.licenses}>: ${license.repository}`)
+    consoleLog(`${name} v${version} <${license.licenses}>: ${license.repository}`)
   }
 }
 
