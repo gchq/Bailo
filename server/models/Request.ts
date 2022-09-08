@@ -1,4 +1,5 @@
 import { Schema, model, Types, Document } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import { approvalStates, ApprovalStates, DeploymentDoc } from './Deployment'
 import { VersionDoc } from './Version'
 import { UserDoc } from './User'
@@ -33,7 +34,7 @@ export interface Request {
 
 export type RequestDoc = Request & Document<any, any, Request>
 
-const RequestSchema = new Schema<Request>(
+const RequestSchema: any = new Schema<Request>(
   {
     // ONE OF THESE TWO
     version: { type: Schema.Types.ObjectId, ref: 'Version' },
@@ -49,6 +50,8 @@ const RequestSchema = new Schema<Request>(
     timestamps: true,
   }
 )
+
+RequestSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
 
 const RequestModel = model<Request>('Request', RequestSchema)
 export default RequestModel

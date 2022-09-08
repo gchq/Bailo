@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import RequestModel from 'server/models/Request'
 import { ensureUserRole } from '../../utils/user'
 import { BadReq, NotFound } from '../../utils/result'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
@@ -157,6 +158,39 @@ export const deleteModel = [
     const { uuid } = req.params
 
     const model = await findModelByUuid(req.user, uuid)
-    return res.json(model)
+
+    if (!model) {
+      throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
+    }
+
+    const versions = await findModelVersions(req.user!, model._id, { thin: true })
+    if (versions.length > 0) {
+      versions.forEach(async (version) => {
+        const versionRequests = await RequestModel.find({ version: version._id })
+        if (versionRequests.length > 0) {
+          versionRequests.forEach((versionRequest) => {
+            versionRequest.delete()
+          })
+        }
+        version.delete()
+      })
+    }
+
+    const deployments = await findDeployments(req.user!, { model: model._id })
+    if (deployments.length > 0) {
+      deployments.forEach(async (deployment) => {
+        const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
+        if (deploymentRequests.length > 0) {
+          deploymentRequests.forEach((deploymentRequest) => {
+            deploymentRequest.delete()
+          })
+        }
+        deployment.delete()
+      })
+    }
+
+    model.delete()
+
+    return res.json(uuid)
   },
 ]

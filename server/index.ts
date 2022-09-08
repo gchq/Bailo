@@ -1,6 +1,7 @@
 import express from 'express'
 import next from 'next'
 import http from 'http'
+import config from 'config'
 import processUploads from './processors/processUploads'
 import {
   getModelByUuid,
@@ -10,13 +11,13 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
+  deleteModel,
 } from './routes/v1/model'
 import { postUpload } from './routes/v1/upload'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import config from 'config'
 import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import {
   getDeployment,
@@ -59,6 +60,7 @@ server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
 server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
 server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
 server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
+server.delete('/api/v1/model/:uuid', ...deleteModel)
 
 server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
@@ -106,9 +108,7 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
-  server.use((req, res) => {
-    return handle(req, res)
-  })
+  server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)
   logger.info({ port }, `Listening on port ${port}`)

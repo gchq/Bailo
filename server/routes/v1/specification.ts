@@ -645,13 +645,15 @@ function generateSpecification() {
             },
           },
         },
+      },
+      '/model/{uuid}': {
         delete: {
           tags: ['model'],
           description: 'Delete model and all versions',
           parameters: [
             {
               name: 'uuid',
-              in: 'query',
+              in: 'path',
               description: 'uuid of the model to be deleted',
               type: 'string',
             },

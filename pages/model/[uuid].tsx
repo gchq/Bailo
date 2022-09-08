@@ -42,7 +42,7 @@ import MenuList from '@mui/material/MenuList'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
-import { postEndpoint } from 'data/api'
+import { deleteEndpoint, postEndpoint } from 'data/api'
 import dynamic from 'next/dynamic'
 import { Types } from 'mongoose'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
@@ -188,9 +188,12 @@ function Model() {
     setDeleteConfirmOpen(false)
   }
 
-  const handleDeleteConfirm = () => {
-    /* Model would be deleted if this function did anything */
-    setDeleteConfirmOpen(false)
+  const handleDeleteConfirm = async () => {
+    await deleteEndpoint(`/api/v1/model/${uuid}`, {}).then((res) => {
+      if (res.status === 200) {
+        router.push('/')
+      }
+    })
   }
 
   return (

@@ -1,4 +1,5 @@
 import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
@@ -24,7 +25,7 @@ export interface Version {
 
 export type VersionDoc = Version & Document<any, any, Version>
 
-const VersionSchema = new Schema<Version>(
+const VersionSchema: any = new Schema<Version>(
   {
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
     version: { type: String, required: true },
@@ -42,6 +43,8 @@ const VersionSchema = new Schema<Version>(
     timestamps: true,
   }
 )
+
+VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
 
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
