@@ -8,8 +8,6 @@ import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 
-const authorisation = new AuthorisationBase()
-
 export function serializedModelFields(): SerializerOptions {
   return {
     mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'],
@@ -19,7 +17,7 @@ export function serializedModelFields(): SerializerOptions {
 export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const models = castArray(unfiltered)
 
-  const filtered = await asyncFilter(models, (model: Model) => authorisation.canUserSeeModel(user, model))
+  const filtered = await asyncFilter(models, (model: Model) => AuthorisationBase.canUserSeeModel(user, model))
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -39,11 +37,11 @@ export interface ModelFilter {
   type: 'favourites' | 'user' | 'all'
 }
 
-export function isValidType(type: any): type is 'favourites' | 'user' | 'all' {
+export function isValidType(type: unknown): type is 'favourites' | 'user' | 'all' {
   return typeof type === 'string' && ['favourites', 'user', 'all'].includes(type)
 }
 
-export function isValidFilter(filter: any): filter is string {
+export function isValidFilter(filter: unknown): filter is string {
   return typeof filter === 'string'
 }
 
@@ -65,7 +63,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
 export async function createModel(user: UserDoc, data: Model) {
   const model = new ModelModel(data)
 
-  if (!(await authorisation.canUserSeeModel(user, model))) {
+  if (!(await AuthorisationBase.canUserSeeModel(user, model))) {
     throw Forbidden({ data }, 'Unable to create model, failed permissions check.')
   }
 

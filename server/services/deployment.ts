@@ -9,8 +9,6 @@ import { createSerializer, SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 
-const authorisation = new AuthorisationBase()
-
 interface GetDeploymentOptions {
   populate?: boolean
 }
@@ -27,7 +25,7 @@ export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise
   const deployments = castArray(unfiltered)
 
   const filtered = await asyncFilter(deployments, (deployment: DeploymentDoc) =>
-    authorisation.canUserSeeDeployment(user, deployment)
+    AuthorisationBase.canUserSeeDeployment(user, deployment)
   )
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
@@ -80,7 +78,7 @@ interface CreateDeployment {
 export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   const deployment = new DeploymentModel(data)
 
-  if (!(await authorisation.canUserSeeDeployment(user, deployment))) {
+  if (!(await AuthorisationBase.canUserSeeDeployment(user, deployment))) {
     throw Forbidden({ data }, 'Unable to create deployment, failed permissions check.')
   }
 

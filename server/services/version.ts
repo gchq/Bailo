@@ -8,8 +8,6 @@ import { createSerializer, SerializerOptions } from '../utils/logger'
 import { BadReq, Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 
-const authorisation = new AuthorisationBase()
-
 interface GetVersionOptions {
   thin?: boolean
   populate?: boolean
@@ -26,7 +24,9 @@ export function serializedVersionFields(): SerializerOptions {
 export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const versions = castArray(unfiltered)
 
-  const filtered = await asyncFilter(versions, (version: VersionDoc) => authorisation.canUserSeeVersion(user, version))
+  const filtered = await asyncFilter(versions, (version: VersionDoc) =>
+    AuthorisationBase.canUserSeeVersion(user, version)
+  )
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -88,7 +88,7 @@ interface CreateVersion {
 export async function createVersion(user: UserDoc, data: CreateVersion) {
   const version = new VersionModel(data)
 
-  if (!(await authorisation.canUserSeeVersion(user, version))) {
+  if (!(await AuthorisationBase.canUserSeeVersion(user, version))) {
     throw Forbidden({ data }, 'Unable to create version, failed permissions check.')
   }
 
