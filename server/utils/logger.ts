@@ -5,13 +5,12 @@ import { gzip } from 'pako'
 import config from 'config'
 import devnull from 'dev-null'
 import { NextFunction, Request, Response } from 'express'
-import fs from 'fs'
 import fsPromise from 'fs/promises'
 import { castArray, get, pick, set } from 'lodash'
 import omit from 'lodash/omit'
 import { WritableStream } from 'node:stream/web'
 import morgan from 'morgan'
-import { dirname, join, resolve, sep } from 'path'
+import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
 import { StatusError } from '../../types/interfaces'
@@ -21,6 +20,7 @@ import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
 import { ensurePathExists, getFilesInDir } from './filesystem'
+import { consoleError } from '../../utils/logging'
 
 const appRoot = getAppRoot.toString()
 
@@ -192,7 +192,7 @@ async function processStroomFiles() {
       await sendLogsToStroom(name)
     } catch (e) {
       // ironically we cannot use our logger here.
-      console.error(e, 'Unable to send logs to ACE')
+      consoleError('Unable to send logs to ACE', e)
     }
   }
 }
@@ -328,7 +328,6 @@ export async function expressErrorHandler(
     throw err
   }
 
-  const code = typeof err.code === 'number' && err.code > 100 && err.code < 600 ? err.code : 500
   const localLogger = err.logger || req.log
 
   localLogger.warn(err.data, err.message)
