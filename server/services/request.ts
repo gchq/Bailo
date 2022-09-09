@@ -32,7 +32,7 @@ export async function createDeploymentRequests({
   })
 }
 
-export async function createVersionRequests({ version }: { version: VersionDoc }) {
+export async function createVersionRequests({ version, oldContacts }: { version: VersionDoc; oldContacts?: any }) {
   const [manager, reviewer] = await Promise.all([
     getUserById(version.metadata.contacts.manager),
     getUserById(version.metadata.contacts.reviewer),
@@ -44,7 +44,6 @@ export async function createVersionRequests({ version }: { version: VersionDoc }
       `Unable to find manager with id: '${version.metadata.contacts.manager}'`
     )
   }
-
   if (!reviewer) {
     throw BadReq(
       { reviewerId: version.metadata.contacts.reviewer },
@@ -52,17 +51,49 @@ export async function createVersionRequests({ version }: { version: VersionDoc }
     )
   }
 
-  const managerRequest = createVersionRequest({
-    user: manager,
-    version,
-    approvalType: ApprovalTypes.Manager,
-  })
+  let managerRequest
+  let reviewerRequest
 
-  const reviewerRequest = createVersionRequest({
-    user: reviewer,
-    version,
-    approvalType: ApprovalTypes.Reviewer,
-  })
+  if (oldContacts !== undefined) {
+    const [oldManager, oldReviewer] = await Promise.all([
+      getUserById(oldContacts.manager),
+      getUserById(oldContacts.reviewer),
+    ])
+
+    if (!oldManager) {
+      throw BadReq({ managerId: oldContacts.manager }, `Unable to find manager with id: '${oldContacts.manager}'`)
+    }
+    if (!oldReviewer) {
+      throw BadReq({ reviewerId: oldContacts.reviewer }, `Unable to find reviewer with id: '${oldContacts.reviewer}'`)
+    }
+
+    if (manager.id !== oldManager.id || version.managerApproved !== ApprovalStates.NoResponse) {
+      managerRequest = createVersionRequest({
+        user: manager,
+        version,
+        approvalType: ApprovalTypes.Manager,
+      })
+    }
+
+    if (reviewer.id !== oldReviewer.id || version.reviewerApproved !== ApprovalStates.NoResponse) {
+      reviewerRequest = createVersionRequest({
+        user: reviewer,
+        version,
+        approvalType: ApprovalTypes.Reviewer,
+      })
+    }
+  } else {
+    managerRequest = createVersionRequest({
+      user: manager,
+      version,
+      approvalType: ApprovalTypes.Manager,
+    })
+    reviewerRequest = createVersionRequest({
+      user: reviewer,
+      version,
+      approvalType: ApprovalTypes.Reviewer,
+    })
+  }
 
   return await Promise.all([managerRequest, reviewerRequest])
 }

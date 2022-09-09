@@ -1,11 +1,12 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import RequestModel, { RequestDoc } from '../../models/Request'
+import RequestModel, { ApprovalTypes, RequestDoc } from '../../models/Request'
 import { ApprovalStates } from '../../models/Deployment'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
+import { VersionDoc } from 'server/models/Version'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -41,17 +42,37 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const existingRequests = await RequestModel.find({ version: version._id, request: 'Upload' })
-    existingRequests.forEach((request: RequestDoc) => {
-      request.delete()
-    })
-
+    const oldContacts: any = version.metadata.contacts
     version.metadata = metadata
+
+    if (
+      version.metadata.contacts.manager !== oldContacts.manager ||
+      version.managerApproved !== ApprovalStates.NoResponse
+    ) {
+      const existingManagerRequest = await RequestModel.findOne({
+        version: version._id,
+        request: 'Upload',
+        approvalType: ApprovalTypes.Manager,
+      })
+      existingManagerRequest !== null && existingManagerRequest.delete()
+    }
+    if (
+      version.metadata.contacts.reviewer !== oldContacts.reviewer ||
+      version.reviewerApproved !== ApprovalStates.NoResponse
+    ) {
+      const existingMReviewerRequest = await RequestModel.findOne({
+        version: version._id,
+        request: 'Upload',
+        approvalType: ApprovalTypes.Reviewer,
+      })
+      existingMReviewerRequest !== null && existingMReviewerRequest.delete()
+    }
+
+    await createVersionRequests({ version, oldContacts })
+
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
-
     await version.save()
-    await createVersionRequests({ version })
 
     req.log.info({ code: 'updating_version', version }, 'User updating version')
     return res.json(version)
