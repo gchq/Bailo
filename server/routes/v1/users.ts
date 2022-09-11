@@ -19,7 +19,7 @@ export const getUsers = [
 export const getLoggedInUser = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const _id = req.user._id
+    const { _id } = req.user
     const user = await getUserByInternalId(_id)
     req.log.info({ code: 'fetching_user_details' }, 'Getting logged in user details')
     return res.json(user)
