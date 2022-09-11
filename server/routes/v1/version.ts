@@ -36,7 +36,7 @@ export const putVersion = [
       throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
     }
 
-    if (req.user?.id !== version.metadata.contacts.uploader) {
+    if (req.user.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 

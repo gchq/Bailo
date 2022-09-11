@@ -19,7 +19,7 @@ export const getUsers = [
 export const getLoggedInUser = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const _id = req.user?._id
+    const _id = req.user._id
     const user = await getUserByInternalId(_id)
     req.log.info({ code: 'fetching_user_details' }, 'Getting logged in user details')
     return res.json(user)
@@ -51,11 +51,11 @@ export const favouriteModel = [
       throw BadReq({ code: 'model_id_incorrect_type' }, `Model ID must be a string`)
     }
 
-    const user = await getUserById(req.user?.id)
+    const user = await getUserById(req.user.id)
     const model = await findModelById(req.user, modelId)
 
     if (!user) {
-      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user?.id}'`)
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
     if (user.favourites.includes(modelId)) {
@@ -83,9 +83,9 @@ export const unfavouriteModel = [
       throw BadReq({ code: 'model_id_incorrect_type' }, `Model ID must be a string`)
     }
 
-    const user = await getUserById(req.user?.id)
+    const user = await getUserById(req.user.id)
     if (!user) {
-      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user?.id}'`)
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
     const model = await findModelById(req.user, modelId)

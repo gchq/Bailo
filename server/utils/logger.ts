@@ -298,7 +298,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   req.reqId = (req.headers['x-request-id'] as string) || uuidv4()
   req.log = log.child({
     id: req.reqId,
-    user: req.user?.id,
+    user: req.user.id,
     clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 

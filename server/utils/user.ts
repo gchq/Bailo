@@ -64,7 +64,8 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
 
   const userInfo = await auth.getUserFromReq(req)
 
-  if (!userInfo.userId || !userInfo.email) return next()
+  // no user found
+  if (!userInfo.userId) return next()
 
   const user = await findUserCached(userInfo)
   req.user = user

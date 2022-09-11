@@ -59,7 +59,7 @@ export const postDeployment = [
       )
     }
 
-    body.user = req.user?.id
+    body.user = req.user.id
     body.timeStamp = new Date().toISOString()
 
     // first, we verify the schema
@@ -85,8 +85,18 @@ export const postDeployment = [
     const uuid = `${name}-${nanoid()}`
 
     const version = await findVersionByName(req.user, model._id, body.highLevelDetails.initialVersionRequested)
+    if (!version) {
+      throw NotFound(
+        {
+          code: 'version_not_found',
+          modelId: body.highLevelDetails.modelID,
+          version: body.highLevelDetails.initialVersionRequested,
+        },
+        `Unable to find verison with name: '${body.highLevelDetails.initialVersionRequested}'`
+      )
+    }
 
-    const versionArray: any = version ? [version._id] : []
+    const versionArray = [version._id]
 
     const deployment = await createDeployment(req.user, {
       schemaRef: body.schemaRef,
@@ -96,7 +106,7 @@ export const postDeployment = [
       model: model._id,
       metadata: body,
 
-      owner: req.user?._id,
+      owner: req.user._id,
     })
 
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')

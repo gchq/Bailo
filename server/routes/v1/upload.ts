@@ -192,7 +192,7 @@ export const postUpload = [
         await getUploadQueue()
       ).add({
         versionId: version._id,
-        userId: req.user?._id,
+        userId: req.user._id,
         binary: createFileRef(files.binary[0], 'binary', version),
         code: createFileRef(files.code[0], 'code', version),
       })
