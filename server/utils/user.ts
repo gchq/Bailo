@@ -6,6 +6,8 @@ import { getAdminToken } from '../routes/v1/registryAuth'
 import { findUserCached, getUserById } from '../services/user'
 import { Forbidden, Unauthorised } from './result'
 
+const auth = new Authorisation()
+
 function safelyCompareTokens(expected, actual) {
   // This is not constant time, which will allow a user to calculate the length
   // of the token.  However, the token is a uuidv4() of constant length, so this
@@ -60,7 +62,7 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   // this function must never fail to call next, even when
   // no user is found.
 
-  const userInfo = await Authorisation.getUserFromReq(req)
+  const userInfo = await auth.getUserFromReq(req)
 
   if (!userInfo.userId || !userInfo.email) return next()
 

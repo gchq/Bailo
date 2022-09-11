@@ -3,11 +3,13 @@ import { ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
-import AuthorisationBase from '../utils/AuthorisationBase'
+import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
+
+const auth = new Authorisation()
 
 interface GetDeploymentOptions {
   populate?: boolean
@@ -25,7 +27,7 @@ export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise
   const deployments = castArray(unfiltered)
 
   const filtered = await asyncFilter(deployments, (deployment: DeploymentDoc) =>
-    AuthorisationBase.canUserSeeDeployment(user, deployment)
+    auth.canUserSeeDeployment(user, deployment)
   )
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
@@ -78,7 +80,7 @@ interface CreateDeployment {
 export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   const deployment = new DeploymentModel(data)
 
-  if (!(await AuthorisationBase.canUserSeeDeployment(user, deployment))) {
+  if (!(await auth.canUserSeeDeployment(user, deployment))) {
     throw Forbidden({ data }, 'Unable to create deployment, failed permissions check.')
   }
 

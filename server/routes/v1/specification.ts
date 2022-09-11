@@ -532,6 +532,8 @@ function parseValue(value) {
 
     return parent
   }
+
+  throw new Error(`Unexpected value ${value}`)
 }
 
 function generateSpecification() {

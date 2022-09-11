@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { rm, mkdir } from 'shelljs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,10 +12,9 @@ import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { logCommand } from './build'
 
-interface GetSeldonDockerfileProps {}
 class GetSeldonDockerfile extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: GetSeldonDockerfileProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = true
   }
@@ -81,5 +81,5 @@ class GetSeldonDockerfile extends BuildStep {
 }
 
 export default function getSeldonDockerfile(opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: GetSeldonDockerfileProps) => new GetSeldonDockerfile(logger, opts, props)
+  return (logger: BuildLogger) => new GetSeldonDockerfile(logger, opts)
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import config from 'config'
 
 import { VersionDoc } from '../../models/Version'
@@ -7,11 +8,9 @@ import { ModelDoc } from '../../models/Model'
 import { logCommand, runCommand } from './build'
 import { getAdminToken } from '../../routes/v1/registryAuth'
 
-interface ImgBuildDockerfileProps {}
-
 class ImgBuildDockerfile extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: ImgBuildDockerfileProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = true
   }
@@ -65,5 +64,5 @@ class ImgBuildDockerfile extends BuildStep {
 }
 
 export default function imgBuildDockerfile(opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: ImgBuildDockerfileProps) => new ImgBuildDockerfile(logger, opts, props)
+  return (logger: BuildLogger) => new ImgBuildDockerfile(logger, opts)
 }

@@ -31,7 +31,7 @@ export class BuildHandler {
     const buildId = uuidv4()
     const vlog = logger.child({ versionId: version._id, buildId })
     const buildLogger = new BuildLogger(version, vlog)
-    const state = {}
+    let state = {}
 
     buildLogger.info({ buildId }, `=== Building ${buildId}\n`)
 
@@ -45,7 +45,8 @@ export class BuildHandler {
       buildLogger.info({ step: i, name }, `${stepPrefix} : ${name}`)
 
       try {
-        await step.build(version, files, state)
+        const newState = await step.build(version, files, state)
+        if (newState) state = newState
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
         buildLogger.info({ time }, `${stepPrefix} : Successfully completed in ${time}\n`)
@@ -56,7 +57,8 @@ export class BuildHandler {
 
         try {
           buildLogger.error({}, `${stepPrefix} : Rolling back`)
-          await step.rollback(version, files, state)
+          const newState = await step.rollback(version, files, state)
+          if (newState) state = newState
         } catch (rollbackError) {
           // Handling error during rollback
           buildLogger.error({}, `${stepPrefix} : Failed during rollback:`)
@@ -78,7 +80,8 @@ export class BuildHandler {
       buildLogger.info({ step: i, name }, `${stepPrefix} : ${name}`)
 
       try {
-        await step.tidyUp(version, files, state)
+        const newState = await step.tidyUp(version, files, state)
+        if (newState) state = newState
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
         buildLogger.info({ time }, `${stepPrefix} : Successfully tidied up in ${time}\n`)

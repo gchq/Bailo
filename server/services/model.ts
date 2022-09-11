@@ -3,10 +3,12 @@ import { Types } from 'mongoose'
 import { Model } from '../../types/interfaces'
 import ModelModel from '../models/Model'
 import { UserDoc } from '../models/User'
-import AuthorisationBase from '../utils/AuthorisationBase'
+import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
+
+const auth = new Authorisation()
 
 export function serializedModelFields(): SerializerOptions {
   return {
@@ -17,7 +19,7 @@ export function serializedModelFields(): SerializerOptions {
 export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const models = castArray(unfiltered)
 
-  const filtered = await asyncFilter(models, (model: Model) => AuthorisationBase.canUserSeeModel(user, model))
+  const filtered = await asyncFilter(models, (model: Model) => auth.canUserSeeModel(user, model))
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -63,7 +65,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
 export async function createModel(user: UserDoc, data: Model) {
   const model = new ModelModel(data)
 
-  if (!(await AuthorisationBase.canUserSeeModel(user, model))) {
+  if (!(await auth.canUserSeeModel(user, model))) {
     throw Forbidden({ data }, 'Unable to create model, failed permissions check.')
   }
 

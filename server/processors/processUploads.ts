@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-relative-packages
 import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'

@@ -5,7 +5,7 @@ import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
 
 export default class AuthorisationBase {
-  static async getUserFromReq(req: Request) {
+  async getUserFromReq(req: Request) {
     const userId = req.get('x-userid')
     const email = req.get('x-email')
     const data = JSON.parse(req.get('x-user') ?? '{}')
@@ -17,15 +17,15 @@ export default class AuthorisationBase {
     }
   }
 
-  static async canUserSeeModel(_user: UserDoc, _model: Model) {
+  async canUserSeeModel(_user: UserDoc, _model: Model) {
     return true
   }
 
-  static async canUserSeeVersion(_user: UserDoc, _model: VersionDoc) {
+  async canUserSeeVersion(_user: UserDoc, _model: VersionDoc) {
     return true
   }
 
-  static async canUserSeeDeployment(_user: UserDoc, _deployment: DeploymentDoc) {
+  async canUserSeeDeployment(_user: UserDoc, _deployment: DeploymentDoc) {
     return true
   }
 }

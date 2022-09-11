@@ -2,11 +2,13 @@ import { castArray } from 'lodash'
 import { ModelId } from '../../types/interfaces'
 import { UserDoc } from '../models/User'
 import VersionModel, { VersionDoc } from '../models/Version'
-import AuthorisationBase from '../utils/AuthorisationBase'
+import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
 import { BadReq, Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
+
+const auth = new Authorisation()
 
 interface GetVersionOptions {
   thin?: boolean
@@ -24,9 +26,7 @@ export function serializedVersionFields(): SerializerOptions {
 export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const versions = castArray(unfiltered)
 
-  const filtered = await asyncFilter(versions, (version: VersionDoc) =>
-    AuthorisationBase.canUserSeeVersion(user, version)
-  )
+  const filtered = await asyncFilter(versions, (version: VersionDoc) => auth.canUserSeeVersion(user, version))
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -88,7 +88,7 @@ interface CreateVersion {
 export async function createVersion(user: UserDoc, data: CreateVersion) {
   const version = new VersionModel(data)
 
-  if (!(await AuthorisationBase.canUserSeeVersion(user, version))) {
+  if (!(await auth.canUserSeeVersion(user, version))) {
     throw Forbidden({ data }, 'Unable to create version, failed permissions check.')
   }
 

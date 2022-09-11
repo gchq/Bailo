@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { join } from 'path'
 import { rm } from 'shelljs'
 
@@ -6,10 +7,9 @@ import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { getClient } from '../minio'
 
-interface GetRawFilesProps {}
 class GetRawFiles extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: GetRawFilesProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = true
   }
@@ -59,5 +59,5 @@ class GetRawFiles extends BuildStep {
 }
 
 export default function getRawFiles(opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: GetRawFilesProps) => new GetRawFiles(logger, opts, props)
+  return (logger: BuildLogger) => new GetRawFiles(logger, opts)
 }

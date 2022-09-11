@@ -199,11 +199,6 @@ export const postUpload = [
 
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
 
-      // then return reference to user
-      res.json({
-        uuid: model.uuid,
-      })
-
       try {
         const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
         const client = getClient()
@@ -220,6 +215,11 @@ export const postUpload = [
       } catch (e: any) {
         throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
       }
+
+      // then return reference to user
+      return res.json({
+        uuid: model.uuid,
+      })
     })
   },
 ]

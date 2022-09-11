@@ -36,6 +36,7 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'error',
     // IGNORED RULES
     '@typescript-eslint/no-var-requires': 'off',
+    'class-methods-use-this': 'off',
     'import/extensions': 'off',
     'import/export': 'off',
     'import/no-extraneous-dependencies': 'off',

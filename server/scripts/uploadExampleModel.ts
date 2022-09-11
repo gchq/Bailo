@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'
