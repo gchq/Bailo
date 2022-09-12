@@ -1,24 +1,20 @@
-import React from 'react'
-
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
-
 import { ArrayFieldTemplateProps, IdSchema, utils } from '@rjsf/core'
-
+import React from 'react'
 import AddButton from '../AddButton/AddButton'
 import IconButton from '../IconButton/IconButton'
 
 const { isMultiSelect, getDefaultRegistry } = utils
 
-const ArrayFieldTemplate = (props: ArrayFieldTemplateProps) => {
+function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   const { schema, registry = getDefaultRegistry() } = props
 
-  if (isMultiSelect(schema, registry['rootSchema'])) {
+  if (isMultiSelect(schema, registry.rootSchema)) {
     return <DefaultFixedArrayFieldTemplate {...props} />
-  } else {
-    return <DefaultNormalArrayFieldTemplate {...props} />
   }
+  return <DefaultNormalArrayFieldTemplate {...props} />
 }
 
 type ArrayFieldTitleProps = {
@@ -28,7 +24,7 @@ type ArrayFieldTitleProps = {
   required: boolean
 }
 
-const ArrayFieldTitle = ({ TitleField, idSchema, title, required }: ArrayFieldTitleProps) => {
+function ArrayFieldTitle({ TitleField, idSchema, title, required }: ArrayFieldTitleProps) {
   if (!title) {
     return null
   }
@@ -43,7 +39,7 @@ type ArrayFieldDescriptionProps = {
   description: string
 }
 
-const ArrayFieldDescription = ({ DescriptionField, idSchema, description }: ArrayFieldDescriptionProps) => {
+function ArrayFieldDescription({ DescriptionField, idSchema, description }: ArrayFieldDescriptionProps) {
   if (!description) {
     return null
   }
@@ -53,7 +49,21 @@ const ArrayFieldDescription = ({ DescriptionField, idSchema, description }: Arra
 }
 
 // Used in the two templates
-const DefaultArrayItem = (props: any) => {
+function DefaultArrayItem(props: any) {
+  const {
+    key,
+    children,
+    hasToolbar,
+    hasMoveUp,
+    hasMoveDown,
+    disabled,
+    readonly,
+    onReorderClick,
+    index,
+    hasRemove,
+    onDropIndexClick,
+  } = props
+
   const btnStyle = {
     flex: 1,
     paddingLeft: 6,
@@ -62,48 +72,48 @@ const DefaultArrayItem = (props: any) => {
     minWidth: 0,
   }
   return (
-    <Grid container={true} key={props.key} alignItems='center'>
-      <Grid item={true} xs style={{ overflow: 'auto' }}>
+    <Grid container key={key} alignItems='center'>
+      <Grid item xs style={{ overflow: 'auto' }}>
         <Box mb={2}>
           <Paper elevation={2}>
-            <Box p={2}>{props.children}</Box>
+            <Box p={2}>{children}</Box>
           </Paper>
         </Box>
       </Grid>
 
-      {props.hasToolbar && (
-        <Grid item={true}>
-          {(props.hasMoveUp || props.hasMoveDown) && (
+      {hasToolbar && (
+        <Grid item>
+          {(hasMoveUp || hasMoveDown) && (
             <IconButton
               icon='arrow-up'
               className='array-item-move-up'
               tabIndex={-1}
               style={btnStyle as any}
               iconProps={{ fontSize: 'small' }}
-              disabled={props.disabled || props.readonly || !props.hasMoveUp}
-              onClick={props.onReorderClick(props.index, props.index - 1)}
+              disabled={disabled || readonly || !hasMoveUp}
+              onClick={onReorderClick(index, index - 1)}
             />
           )}
 
-          {(props.hasMoveUp || props.hasMoveDown) && (
+          {(hasMoveUp || hasMoveDown) && (
             <IconButton
               icon='arrow-down'
               tabIndex={-1}
               style={btnStyle as any}
               iconProps={{ fontSize: 'small' }}
-              disabled={props.disabled || props.readonly || !props.hasMoveDown}
-              onClick={props.onReorderClick(props.index, props.index + 1)}
+              disabled={disabled || readonly || !hasMoveDown}
+              onClick={onReorderClick(index, index + 1)}
             />
           )}
 
-          {props.hasRemove && (
+          {hasRemove && (
             <IconButton
               icon='remove'
               tabIndex={-1}
               style={btnStyle as any}
               iconProps={{ fontSize: 'small' }}
-              disabled={props.disabled || props.readonly}
-              onClick={props.onDropIndexClick(props.index)}
+              disabled={disabled || readonly}
+              onClick={onDropIndexClick(index)}
             />
           )}
         </Grid>
@@ -112,63 +122,87 @@ const DefaultArrayItem = (props: any) => {
   )
 }
 
-const DefaultFixedArrayFieldTemplate = (props: ArrayFieldTemplateProps) => {
+function DefaultFixedArrayFieldTemplate(props: ArrayFieldTemplateProps) {
+  const {
+    className,
+    idSchema,
+    TitleField,
+    uiSchema,
+    title,
+    required,
+    schema,
+    items,
+    canAdd,
+    onAddClick,
+    readonly,
+    disabled,
+  } = props
+
   return (
-    <fieldset className={props.className}>
+    <fieldset className={className}>
       <ArrayFieldTitle
-        key={`array-field-title-${props.idSchema.$id}`}
-        TitleField={props.TitleField}
-        idSchema={props.idSchema}
-        title={props.uiSchema['ui:title'] || props.title}
-        required={props.required}
+        key={`array-field-title-${idSchema.$id}`}
+        TitleField={TitleField}
+        idSchema={idSchema}
+        title={uiSchema['ui:title'] || title}
+        required={required}
       />
 
-      {(props.uiSchema['ui:description'] || props.schema.description) && (
-        <div className='field-description' key={`field-description-${props.idSchema.$id}`}>
-          {props.uiSchema['ui:description'] || props.schema.description}
+      {(uiSchema['ui:description'] || schema.description) && (
+        <div className='field-description' key={`field-description-${idSchema.$id}`}>
+          {uiSchema['ui:description'] || schema.description}
         </div>
       )}
-      <div className='row array-item-list' key={`array-item-list-${props.idSchema.$id}`}>
-        {props.items && props.items.map(DefaultArrayItem)}
+      <div className='row array-item-list' key={`array-item-list-${idSchema.$id}`}>
+        {items && items.map(DefaultArrayItem)}
       </div>
-      {props.canAdd && (
-        <AddButton className='array-item-add' onClick={props.onAddClick} disabled={props.disabled || props.readonly} />
-      )}
+      {canAdd && <AddButton className='array-item-add' onClick={onAddClick} disabled={disabled || readonly} />}
     </fieldset>
   )
 }
 
-const DefaultNormalArrayFieldTemplate = (props: ArrayFieldTemplateProps) => {
+function DefaultNormalArrayFieldTemplate(props: ArrayFieldTemplateProps) {
+  const {
+    idSchema,
+    TitleField,
+    uiSchema,
+    title,
+    required,
+    schema,
+    items,
+    canAdd,
+    onAddClick,
+    readonly,
+    disabled,
+    DescriptionField,
+  } = props
+
   return (
     <Paper elevation={2}>
       <Box p={2}>
         <ArrayFieldTitle
-          key={`array-field-title-${props.idSchema.$id}`}
-          TitleField={props.TitleField}
-          idSchema={props.idSchema}
-          title={props.uiSchema['ui:title'] || props.title}
-          required={props.required}
+          key={`array-field-title-${idSchema.$id}`}
+          TitleField={TitleField}
+          idSchema={idSchema}
+          title={uiSchema['ui:title'] || title}
+          required={required}
         />
-        {(props.uiSchema['ui:description'] || props.schema.description) && (
+        {(uiSchema['ui:description'] || schema.description) && (
           <ArrayFieldDescription
-            key={`array-field-description-${props.idSchema.$id}`}
-            DescriptionField={props.DescriptionField}
-            idSchema={props.idSchema}
-            description={props.uiSchema['ui:description'] || props.schema.description}
+            key={`array-field-description-${idSchema.$id}`}
+            DescriptionField={DescriptionField}
+            idSchema={idSchema}
+            description={uiSchema['ui:description'] || schema.description}
           />
         )}
-        <Grid container={true} key={`array-item-list-${props.idSchema.$id}`}>
-          {props.items && props.items.map((p) => DefaultArrayItem(p))}
+        <Grid container key={`array-item-list-${idSchema.$id}`}>
+          {items && items.map((p) => DefaultArrayItem(p))}
 
-          {props.canAdd && (
+          {canAdd && (
             <Grid container justifyItems='flex-end'>
-              <Grid item={true}>
+              <Grid item>
                 <Box mt={2}>
-                  <AddButton
-                    className='array-item-add'
-                    onClick={props.onAddClick}
-                    disabled={props.disabled || props.readonly}
-                  />
+                  <AddButton className='array-item-add' onClick={onAddClick} disabled={disabled || readonly} />
                 </Box>
               </Grid>
             </Grid>

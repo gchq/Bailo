@@ -1,10 +1,10 @@
-import { until, By, WebDriver, Builder } from 'selenium-webdriver'
-import firefox from 'selenium-webdriver/firefox'
 import config from 'config'
 import fs from 'fs/promises'
 import path from 'path'
+import { Builder, By, until, WebDriver } from 'selenium-webdriver'
+import firefox from 'selenium-webdriver/firefox'
+import { runCommand } from '../../server/utils/build/build'
 import { clearStoredData } from '../../server/utils/clear'
-import { runCommand } from '../../server/utils/build'
 import log from '../../server/utils/logger'
 
 export async function clearData() {
@@ -14,21 +14,15 @@ export async function clearData() {
   log.debug('removing local registry docker images')
   const imageIdentifier = `${config.get('registry.host')}/`
 
-  const stopCmd =
-    "docker stop $(docker ps --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
-    imageIdentifier +
-    "'))"
+  const stopCmd = `docker stop $(docker ps --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '${imageIdentifier}'))`
   log.debug(stopCmd)
   await runCommand(stopCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
-  const rmCmd =
-    "docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" +
-    imageIdentifier +
-    "'))"
+  const rmCmd = `docker rm $(docker ps -a --format '{{.ID}}' --filter ancestor=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '${imageIdentifier}'))`
   log.debug(rmCmd)
   await runCommand(rmCmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
 
-  const cmd = "docker rmi $(docker images --format '{{.Repository}}:{{.Tag}}' | grep '" + imageIdentifier + "')"
+  const cmd = `docker rmi $(docker images --format '{{.Repository}}:{{.Tag}}' | grep '${imageIdentifier}')`
   log.debug(cmd)
   await runCommand(cmd, log.debug.bind(log), log.error.bind(log), { silentErrors: true })
   log.debug('clearData complete')
@@ -50,18 +44,16 @@ export async function waitForElement(driver: WebDriver, selector: By) {
       await element.getText()
       return element
     } catch (e: any) {
-      if (e.name === 'StaleElementReferenceError') {
-        continue
+      if (e.name !== 'StaleElementReferenceError') {
+        throw e
       }
-
-      throw e
     }
   }
 }
 
 export async function waitForElements(driver: WebDriver, selector: By) {
   await waitForElement(driver, selector)
-  return await driver.findElements(selector)
+  return driver.findElements(selector)
 }
 
 export async function getDriver() {
@@ -99,7 +91,9 @@ export async function sendKeys(driver: WebDriver, selector: By, keys: string) {
 }
 
 export function pause(time) {
-  return new Promise((resolve) => setTimeout(resolve, time))
+  return new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
 }
 
 export function fromRelative(relative: string) {
@@ -113,7 +107,7 @@ export async function selectOption(driver, parentSelector, childSelector, displa
   await selectList.click()
 
   const options = await driver.findElements(childSelector)
-  for (let option of options) {
+  for (const option of options) {
     const display = await option.getText()
 
     if (display.toUpperCase().includes(displayUpper)) {

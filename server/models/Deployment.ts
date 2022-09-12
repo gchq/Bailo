@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Schema, model, Document, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
@@ -5,8 +6,9 @@ import { ModelDoc } from './Model'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
-export const approvalStates = ['Accepted', 'Declined', 'No Response']
+export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
 
+// eslint-disable-next-line no-shadow
 export enum ApprovalStates {
   Accepted = 'Accepted',
   Declined = 'Declined',
@@ -51,7 +53,7 @@ const DeploymentSchema: any = new Schema<Deployment>(
     versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     metadata: { type: Schema.Types.Mixed },
 
-    managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },
@@ -65,10 +67,10 @@ const DeploymentSchema: any = new Schema<Deployment>(
 
 DeploymentSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
 
+const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
+export default DeploymentModel
+
 DeploymentSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)
   await DeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
-
-const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
-export default DeploymentModel

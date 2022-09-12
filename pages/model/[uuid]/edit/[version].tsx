@@ -1,32 +1,20 @@
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-
 import Paper from '@mui/material/Paper'
-import { useGetModelVersion, useGetModel } from '../../../../data/model'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { putEndpoint } from '../../../../data/api'
-import useCacheVariable from '../../../../utils/useCacheVariable'
-
-import Wrapper from '../../../../src/Wrapper'
+import { useGetModel, useGetModelVersion } from '../../../../data/model'
 import { useGetSchema } from '../../../../data/schema'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
-import { SplitSchema, Step } from '../../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
-
-import SubmissionError from '../../../../src/Form/SubmissionError'
 import Form from '../../../../src/Form/Form'
 import ModelEditSubmission from '../../../../src/Form/ModelEditSubmission'
+import { RenderButtonsInterface } from '../../../../src/Form/RenderButtons'
+import SubmissionError from '../../../../src/Form/SubmissionError'
+import Wrapper from '../../../../src/Wrapper'
+import { SplitSchema } from '../../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
+import useCacheVariable from '../../../../utils/useCacheVariable'
 
-function renderSubmissionTab(
-  _currentStep: Step,
-  _splitSchema: SplitSchema,
-  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
-  activeStep: number,
-  setActiveStep: (step: number) => void,
-  onSubmit: () => void,
-  _openValidateError: boolean,
-  _setOpenValidateError: (validatorError: boolean) => void,
-  modelUploading: boolean
-) {
+function renderSubmissionTab({ activeStep, setActiveStep, onSubmit, modelUploading }: RenderButtonsInterface) {
   return (
     <ModelEditSubmission
       onSubmit={onSubmit}
@@ -128,7 +116,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} modelUploading={false} />
     </Paper>
   )
 }

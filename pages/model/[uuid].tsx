@@ -1,72 +1,62 @@
-import { useRouter } from 'next/router'
-import React, { useEffect, useState, MouseEvent } from 'react'
+import EditIcon from '@mui/icons-material/EditTwoTone'
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
+import Favorite from '@mui/icons-material/FavoriteTwoTone'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
+import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
 import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
-import Typography from '@mui/material/Typography'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
 import MuiLink from '@mui/material/Link'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import MenuList from '@mui/material/MenuList'
+import Paper from '@mui/material/Paper'
+import Select from '@mui/material/Select'
 import Snackbar from '@mui/material/Snackbar'
-import copy from 'copy-to-clipboard'
-import UploadIcon from '@mui/icons-material/UploadTwoTone'
-import EditIcon from '@mui/icons-material/EditTwoTone'
-import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
-import Favorite from '@mui/icons-material/FavoriteTwoTone'
-import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
-import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
-import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import Stack from '@mui/material/Stack'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
-
+import copy from 'copy-to-clipboard'
+import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
+import { useGetCurrentUser } from 'data/user'
+import { setTargetValue } from 'data/utils'
+import { Types } from 'mongoose'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import React, { MouseEvent, useEffect, useState } from 'react'
+import { Elements } from 'react-flow-renderer'
+import UserAvatar from 'src/common/UserAvatar'
+import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
-import ModelOverview from 'src/ModelOverview'
-import UserAvatar from 'src/common/UserAvatar'
 import createComplianceFlow from 'utils/complianceFlow'
-import { Elements } from 'react-flow-renderer'
-import { useGetModelVersions, useGetModelVersion, useGetModelDeployments } from 'data/model'
-import { useGetCurrentUser } from 'data/user'
-import MuiAlert, { AlertProps } from '@mui/material/Alert'
-import { setTargetValue } from 'data/utils'
-import Link from 'next/link'
-import Chip from '@mui/material/Chip'
-import Menu from '@mui/material/Menu'
-import MenuList from '@mui/material/MenuList'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import { deleteEndpoint, postEndpoint } from 'data/api'
-import dynamic from 'next/dynamic'
-import { Types } from 'mongoose'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
-import { Deployment, User, Version } from '../../types/interfaces'
-import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import EmptyBlob from '../../src/common/EmptyBlob'
+import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
+import { Deployment, User, Version } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  switch (value) {
-    case 'overview':
-    case 'compliance':
-    case 'build':
-    case 'deployments':
-    case 'settings':
-      return true
-    default:
-      return false
-  }
+  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (

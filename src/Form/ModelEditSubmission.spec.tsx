@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
-import ModelEditSubmission from './ModelEditSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import ModelEditSubmission from './ModelEditSubmission'
+import { doNothing } from '../../utils/tests'
 
 describe('ModelEditSubmission', () => {
   it('renders an ModelEditSubmission component', async () => {
@@ -22,7 +23,7 @@ describe('ModelEditSubmission', () => {
     const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
     uiConfigMock.mockReturnValue(mockedConfig)
 
-    render(<ModelEditSubmission onSubmit={() => {}} activeStep={1} setActiveStep={() => {}} modelUploading={false} />)
+    render(<ModelEditSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} modelUploading={false} />)
 
     await waitFor(async () => {
       expect(await screen.findByText('please check before submitting')).not.toBeUndefined()

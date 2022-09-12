@@ -1,8 +1,7 @@
-import { Types } from 'mongoose'
 import memoize from 'memoizee'
-
-import UserModel from '../models/User'
+import { Types } from 'mongoose'
 import { ModelId } from '../../types/interfaces'
+import UserModel from '../models/User'
 import { SerializerOptions } from '../utils/logger'
 
 interface GetUserOptions {

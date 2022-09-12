@@ -1,38 +1,32 @@
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import axios from 'axios'
-
-import Paper from '@mui/material/Paper'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-
-import Wrapper from '@/src/Wrapper'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
+import { useGetCurrentUser } from '@/data/user'
+import LoadingBar from '@/src/common/LoadingBar'
+import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
-import { Schema, SplitSchema, Step, User } from '@/types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
-
-import SchemaSelector from '@/src/Form/SchemaSelector'
-import SubmissionError from '@/src/Form/SubmissionError'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
-import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
-import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
-import { useGetCurrentUser } from '@/data/user'
-import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
-import LoadingBar from '@/src/common/LoadingBar'
+import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
+import RenderFileTab from '@/src/Form/RenderFileTab'
+import SchemaSelector from '@/src/Form/SchemaSelector'
+import SubmissionError from '@/src/Form/SubmissionError'
+import Wrapper from '@/src/Wrapper'
+import { Schema, SplitSchema, User } from '@/types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
+import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid'
+import Paper from '@mui/material/Paper'
+import axios from 'axios'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 
-function renderSubmissionTab(
-  _currentStep: Step,
-  splitSchema: SplitSchema,
-  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
-  activeStep: number,
-  setActiveStep: (step: number) => void,
-  onSubmit: () => void,
-  _openValidateError: boolean,
-  _setOpenValidateError: (validatorError: boolean) => void,
-  modelUploading: boolean
-) {
+function renderSubmissionTab({
+  splitSchema,
+  activeStep,
+  setActiveStep,
+  onSubmit,
+  modelUploading,
+}: RenderButtonsInterface) {
   const data = getStepsData(splitSchema)
 
   return (
@@ -159,7 +153,6 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
     delete data.files
 
     form.append('metadata', JSON.stringify(data))

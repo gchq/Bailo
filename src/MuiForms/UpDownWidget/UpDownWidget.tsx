@@ -1,12 +1,10 @@
-import React from 'react'
-
 import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
-
 import { WidgetProps } from '@rjsf/core'
+import React from 'react'
 
-const UpDownWidget = ({
+function UpDownWidget({
   id,
   required,
   readonly,
@@ -17,13 +15,13 @@ const UpDownWidget = ({
   onBlur,
   onFocus,
   autofocus,
-}: WidgetProps) => {
+}: WidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) => onChange(newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)
   const _onFocus = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onFocus(id, newValue)
 
   return (
-    <FormControl fullWidth={true} required={required}>
+    <FormControl fullWidth required={required}>
       <InputLabel>{label}</InputLabel>
       <Input
         id={id}

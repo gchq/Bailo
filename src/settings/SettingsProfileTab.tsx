@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
+import ContentCopy from '@mui/icons-material/ContentCopy'
 import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
-import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import ContentCopy from '@mui/icons-material/ContentCopy'
+import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
+import React, { useState } from 'react'
 import { lightTheme } from '../theme'
 
-const SettingsProfileTab = ({ user }: { user: any }) => {
+function SettingsProfileTab({ user }: { user: any }) {
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
 
@@ -46,16 +46,14 @@ const SettingsProfileTab = ({ user }: { user: any }) => {
         </Typography>
         <Divider sx={{ pt: 1, mb: 1 }} />
         <Stack direction='row' sx={{ p: 1 }}>
-          {user.roles.map((role: any, index: number) => {
-            return (
-              <Chip
-                color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                key={'chip-role-' + index}
-                label={role}
-              />
-            )
-          })}
+          {user.roles.map((role: any) => (
+            <Chip
+              color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+              sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+              key={`chip-role-${role}`}
+              label={role}
+            />
+          ))}
         </Stack>
       </Box>
       <Box sx={{ p: 2 }}>

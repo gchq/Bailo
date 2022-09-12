@@ -1,8 +1,13 @@
 import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
-import { approvalStates, ApprovalStates, LogStatement } from './Deployment'
+import { approvalStateOptions, ApprovalStates, LogStatement } from './Deployment'
 import { ModelDoc } from './Model'
+
+interface FilePaths {
+  rawBinaryPath: string
+  rawCodePath: string
+}
 
 export interface Version {
   model: ModelDoc | Types.ObjectId
@@ -13,6 +18,11 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
+
+  files: {
+    rawBinaryPath: string
+    rawCodePath: string
+  }
 
   state: any
   logs: Types.Array<LogStatement>
@@ -32,9 +42,11 @@ const VersionSchema: any = new Schema<Version>(
 
     metadata: { type: Schema.Types.Mixed },
 
+    files: { type: Schema.Types.Mixed, required: true },
+
     built: { type: Boolean, default: false },
-    managerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
-    reviewerApproved: { type: String, required: true, enum: approvalStates, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],
@@ -48,10 +60,10 @@ VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, 
 
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
+const VersionModel = model<Version>('Version', VersionSchema)
+export default VersionModel
+
 VersionSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ versionId: this._id }, msg)
   await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
-
-const VersionModel = model<Version>('Version', VersionSchema)
-export default VersionModel

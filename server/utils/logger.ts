@@ -1,22 +1,26 @@
-import bunyan from 'bunyan'
-import { v4 as uuidv4 } from 'uuid'
-import { NextFunction, Request, Response } from 'express'
-import morgan from 'morgan'
-import fs from 'fs'
 import getAppRoot from 'app-root-path'
-import devnull from 'dev-null'
-import { join, resolve, sep, dirname } from 'path'
-import { inspect } from 'util'
-import omit from 'lodash/omit'
+import bunyan from 'bunyan'
 import chalk from 'chalk'
+import { gzip } from 'pako'
 import config from 'config'
-import { castArray, set, get, pick } from 'lodash'
+import devnull from 'dev-null'
+import { NextFunction, Request, Response } from 'express'
+import fs from 'fs'
+import fsPromise from 'fs/promises'
+import { castArray, get, pick, set } from 'lodash'
+import omit from 'lodash/omit'
+import { WritableStream } from 'node:stream/web'
+import morgan from 'morgan'
+import { dirname, join, resolve, sep } from 'path'
+import { inspect } from 'util'
+import { v4 as uuidv4 } from 'uuid'
 import { StatusError } from '../../types/interfaces'
-import { serializedVersionFields } from '../services/version'
-import { serializedModelFields } from '../services/model'
 import { serializedDeploymentFields } from '../services/deployment'
+import { serializedModelFields } from '../services/model'
 import { serializedSchemaFields } from '../services/schema'
 import { serializedUserFields } from '../services/user'
+import { serializedVersionFields } from '../services/version'
+import { ensurePathExists, getFilesInDir } from './filesystem'
 
 const appRoot = getAppRoot.toString()
 
@@ -27,7 +31,7 @@ class Writer {
     this.basepath = basepath + sep
   }
 
-  getLevel(level) {
+  static getLevel(level) {
     switch (level) {
       case 10:
         return chalk.gray('trace')
@@ -51,7 +55,7 @@ class Writer {
     return `${line}:${src.line}`
   }
 
-  representValue(value: any) {
+  static representValue(value: any) {
     return typeof value === 'object' ? inspect(value) : String(value)
   }
 
@@ -89,11 +93,11 @@ class Writer {
       return ''
     }
 
-    return keys.map((key) => `${key}=${this.representValue(attributes[key])}`).join(' ')
+    return keys.map((key) => `${key}=${Writer.representValue(attributes[key])}`).join(' ')
   }
 
   write(data) {
-    const level = this.getLevel(data.level)
+    const level = Writer.getLevel(data.level)
     const src = this.getSrc(data.src)
     const attributes = this.getAttributes(data)
     const formattedAttributes = attributes.length ? ` (${attributes})` : ''
@@ -101,7 +105,7 @@ class Writer {
     const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
-    process[pipe].write(message + '\n')
+    process[pipe].write(`${message}\n`)
   }
 }
 
@@ -146,7 +150,7 @@ const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'trace',
+    level: 'info',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
@@ -156,18 +160,98 @@ if (process.env.NODE_ENV !== 'production') {
 
 if (config.get('logging.file.enabled')) {
   const logPath = resolve(appRoot, config.get('logging.file.path'))
-  const logFolder = dirname(logPath)
 
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder, { recursive: true })
-  }
+  ensurePathExists(logPath, true)
 
   streams.push({
     level: config.get('logging.file.level'),
     path: logPath,
   })
+}
 
-  console.log(logPath, dirname(logPath))
+async function processStroomFiles() {
+  const stroomFolder = resolve(appRoot, config.get('logging.stroom.folder'))
+  const processingFolder = resolve(stroomFolder, 'processing')
+
+  const files = await getFilesInDir(stroomFolder)
+  for (const file of files) {
+    const from = resolve(stroomFolder, file.name)
+    const to = resolve(processingFolder, file.name)
+
+    const { size } = await fsPromise.stat(from)
+
+    if (size < 0) {
+      continue
+    }
+
+    await fsPromise.rename(from, to)
+  }
+
+  const processing = await getFilesInDir(processingFolder)
+  for (const file of processing) {
+    const name = resolve(processingFolder, file.name)
+    try {
+      await sendLogsToStroom(name)
+    } catch (e) {
+      // ironically we cannot use our logger here.
+      console.error(e, 'Unable to send logs to ACE')
+    }
+  }
+}
+
+async function sendLogsToStroom(file: string) {
+  const logBuffer = await fsPromise.readFile(file)
+
+  const res = await fetch(config.get('logging.stroom.url'), {
+    method: 'POST',
+    body: await gzip(logBuffer),
+    headers: {
+      Compression: 'gzip',
+      Feed: config.get('logging.stroom.feed'),
+      Environment: config.get('logging.stroom.environment'),
+      System: config.get('logging.stroom.system'),
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to send logs to stroom')
+  }
+
+  await fsPromise.unlink(file)
+}
+
+if (config.get('logging.stroom.enabled')) {
+  const stroomFolder = resolve(appRoot, config.get('logging.stroom.folder'))
+  const processingFolder = resolve(stroomFolder, 'processing')
+  const processedFolder = resolve(stroomFolder, 'processed')
+
+  ensurePathExists(stroomFolder, true)
+  ensurePathExists(processingFolder, true)
+  ensurePathExists(processedFolder, true)
+
+  let date = new Date()
+
+  const stroomStream = new WritableStream({
+    async write(message) {
+      if (message.code) {
+        const path = resolve(stroomFolder, `logs.${+date}.txt`)
+        await fsPromise.appendFile(path, `${JSON.stringify(message)}\n`)
+      }
+    },
+  })
+
+  // send logs to ACE every hour
+  processStroomFiles()
+  setInterval(() => {
+    date = new Date()
+    processStroomFiles()
+  }, 1000 * 60 * 60)
+
+  streams.push({
+    level: 'trace',
+    type: 'raw',
+    stream: stroomStream.getWriter(),
+  })
 }
 
 const log = bunyan.createLogger({
@@ -204,9 +288,7 @@ const morganLog = morgan<any, any>(
     return ''
   },
   {
-    skip: (req, _res) => {
-      return ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val))
-    },
+    skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
   }
@@ -231,7 +313,9 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
 
   res.setHeader('x-request-id', req.reqId)
 
-  await new Promise((resolve) => morganLog(req, res, resolve))
+  await new Promise((r) => {
+    morganLog(req, res, r)
+  })
 
   next()
 }

@@ -1,5 +1,5 @@
-import { createTheme } from '@mui/material/styles'
 import { green, red, yellow } from '@mui/material/colors'
+import { createTheme } from '@mui/material/styles'
 
 export interface Theme {
   palette: {
@@ -80,6 +80,15 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
@@ -96,6 +105,12 @@ export const darkTheme = createTheme({
         },
         contained: {
           color: '#fff',
+        },
+        text: {
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
         },
       },
     },

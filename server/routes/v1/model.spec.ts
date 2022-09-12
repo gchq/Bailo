@@ -1,21 +1,21 @@
+import _ from 'lodash'
 import mongoose from 'mongoose'
-import '../../utils/mockMongo'
-import UserModel from '../../models/User'
-import ModelModel from '../../models/Model'
 import DeploymentModel from '../../models/Deployment'
+import ModelModel from '../../models/Model'
 import SchemaModel from '../../models/Schema'
+import UserModel from '../../models/User'
 import VersionModel from '../../models/Version'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import '../../utils/mockMongo'
 import {
-  testUser,
-  uploadSchema,
-  testModel,
   modelId,
-  testVersion,
   modelUuid,
   testDeployment,
+  testModel,
+  testUser,
+  testVersion,
+  uploadSchema,
 } from '../../utils/test/testModels'
-import _ from 'lodash'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 describe('test model routes', () => {
   beforeEach(async () => {

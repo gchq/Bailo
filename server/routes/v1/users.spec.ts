@@ -1,12 +1,12 @@
-import supertest from 'supertest'
-import { server } from '../../index'
-import mongoose from 'mongoose'
-import '../../utils/mockMongo'
-import * as userService from '../../services/user'
-import { v4 as uuidv4 } from 'uuid'
 import { ObjectId } from 'mongodb'
+import mongoose from 'mongoose'
+import supertest from 'supertest'
+import { v4 as uuidv4 } from 'uuid'
+import { server } from '../../index'
 import ModelModel from '../../models/Model'
 import UserModel from '../../models/User'
+import * as userService from '../../services/user'
+import '../../utils/mockMongo'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 const request = supertest(server)

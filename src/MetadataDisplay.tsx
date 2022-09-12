@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
+import Divider from '@mui/material/Divider'
+import Typography from '@mui/material/Typography'
+import useTheme from '@mui/styles/useTheme'
+import React, { useEffect, useState } from 'react'
+import { useGetSchemas } from '../data/schema'
+import { lightTheme } from './theme'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
-import { useGetSchemas } from '../data/schema'
-import useTheme from '@mui/styles/useTheme'
-import { lightTheme } from '../src/theme'
 
-const MetadataDisplay = ({
+function MetadataDisplay({
   item,
   tabsDisplaySequentially,
   use,
@@ -16,9 +16,8 @@ const MetadataDisplay = ({
   item: any
   tabsDisplaySequentially: boolean
   use: any
-}) => {
+}) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(use)
-  const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
 
   const [schema, setSchema] = useState<any | undefined>(undefined)
   const [sectionKeys, setSectionKeys] = useState<string[]>([])
@@ -28,14 +27,16 @@ const MetadataDisplay = ({
   useEffect(() => {
     if (!schemas) return
 
-    const currentSchema = schemas.filter(({ reference }) => reference == item.schemaRef)[0].schema
+    const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
+
+    const currentSchema = schemas.filter(({ reference }) => reference === item.schemaRef)[0].schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) => !propertiesToIgnore.includes(sectionName)
     )
 
     setSchema(currentSchema)
     setSectionKeys(keys)
-  }, [schemas, setSchema, setSectionKeys])
+  }, [schemas, setSchema, setSectionKeys, item])
 
   if (isSchemasLoading) {
     return (
@@ -114,7 +115,7 @@ const MetadataDisplay = ({
         <Box sx={{ mt: 4 }}>
           {tabsDisplaySequentially &&
             tabs.map((tab: any, i: any) => (
-              <div key={'dataset ' + (i + 1)}>
+              <div key={`dataset ${i + 1}`}>
                 <Typography sx={{ p: 2 }} variant='h5'>
                   Dataset #{i + 1}
                 </Typography>

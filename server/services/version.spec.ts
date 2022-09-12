@@ -1,7 +1,6 @@
-import '../utils/mockMongo'
-import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../models/Deployment'
 import VersionModel from '../models/Version'
+import '../utils/mockMongo'
+import { testVersion, testVersion2, userDoc } from '../utils/test/testModels'
 import {
   createVersion,
   findModelVersions,
@@ -9,7 +8,6 @@ import {
   findVersionByName,
   serializedVersionFields,
 } from './version'
-import { testVersion, testVersion2, userDoc } from '../utils/test/testModels'
 
 let versionDoc
 
@@ -48,6 +46,7 @@ describe('test version service', () => {
     const newVersion: any = {
       version: '1',
       metadata: {},
+      files: {},
     }
     const version: any = await createVersion(userDoc, newVersion)
     expect(version).toBeTruthy()

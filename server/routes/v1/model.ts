@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Request, Response } from 'express'
 import RequestModel from 'server/models/Request'
-import { ensureUserRole } from '../../utils/user'
-import { BadReq, NotFound } from '../../utils/result'
-import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
-import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
 import { findDeployments } from '../../services/deployment'
+import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
+import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
+import { BadReq, NotFound } from '../../utils/result'
+import { ensureUserRole } from '../../utils/user'
 
 export const getModels = [
   ensureUserRole('user'),
@@ -20,7 +21,7 @@ export const getModels = [
     }
 
     if (!isValidFilter(filter)) {
-      throw BadReq({ code: 'invalid_filter', filter }, `Provided invalid filter '${filter}'`)
+      throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
     const models = await findModels(req.user!, { filter: filter as string, type })
@@ -78,7 +79,10 @@ export const getModelDeployments = [
 
     const deployments = await findDeployments(req.user!, { model: model._id })
 
-    req.log.info({ code: 'fetch_deployments_by_model', model }, 'User fetching all deployments for model')
+    req.log.info(
+      { code: 'fetch_deployments_by_model', modelId: model._id, deployments },
+      'User fetching all deployments for model'
+    )
     return res.json(deployments)
   },
 ]
@@ -120,7 +124,10 @@ export const getModelVersions = [
 
     const versions = await findModelVersions(req.user!, model._id, { thin: true })
 
-    req.log.info({ code: 'fetch_versions_for_model', model }, 'User fetching versions for specified model')
+    req.log.info(
+      { code: 'fetch_versions_for_model', modelId: model._id, versions },
+      'User fetching versions for specified model'
+    )
     return res.json(versions)
   },
 ]
@@ -147,7 +154,10 @@ export const getModelVersion = [
       throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
     }
 
-    req.log.info({ code: 'fetch_version_for_model', model, version }, 'User finding specific version for model')
+    req.log.info(
+      { code: 'fetch_version_for_model', modelId: model._id, version },
+      'User finding specific version for model'
+    )
     return res.json(version)
   },
 ]

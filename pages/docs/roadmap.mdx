@@ -1,0 +1,45 @@
+---
+priority: 10000000
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+import Image from 'next/image'
+import { Mermaid } from 'mdx-mermaid/Mermaid'
+
+## Roadmap
+
+A rough guide of what we're aiming for in the future:
+
+<Mermaid chart={`gantt
+    dateFormat  YYYY-MM-DD
+    title       Bailo Roadmap
+    excludes    weekends
+
+    section Core
+    Group permissions             :        core1, 2022-08-01, 2022-09-01
+    API Documentation             :done,   core2, 2022-07-01, 2022-08-01
+    Automated Smoke Tests         :        core3, 2022-08-15, 2022-08-30
+    Python Client                 :done,   core4, 2022-06-01, 2022-08-30
+    Model Deletion and Retirement :        core5, 2022-08-01, 2022-10-01
+
+    section Use Cases
+    Raw Model Export              :        case1, 2022-08-01, 2022-09-01
+    Ungoverned Deployments        :        case2, 2022-08-15, 2022-09-15
+    Custom Containers             :        case3, 2022-09-01, 2022-09-30
+    Model Relationships           :        case4, 2022-11-01, 2022-12-30
+    Model Branching               :        case5, 2022-10-01, 2022-12-30
+
+    section Federation
+    Bidirectional Sync            :        fede1, 2022-11-01, 2023-05-30
+    One directional Sync          :        fede2, 2022-12-01, 2023-06-30
+
+    section Syncing
+    Model Syncing                 :        sync1, 2022-10-01, 2023-03-30
+
+`} con />
+
+> We're interested in changing the roadmap to suit shifting product requirements.
+>
+> Have a feature you want added? Contact us via our issue tracker [here](https://github.com/gchq/bailo/issues).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

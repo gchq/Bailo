@@ -1,59 +1,51 @@
 import Info from '@mui/icons-material/Info'
+import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
+import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
+import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
+import MuiLink from '@mui/material/Link'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
+import useTheme from '@mui/styles/useTheme'
 import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
-import Menu from '@mui/material/Menu'
-import MenuList from '@mui/material/MenuList'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
-import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
-import Stack from '@mui/material/Stack'
-import MuiLink from '@mui/material/Link'
-import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
-import MenuItem from '@mui/material/MenuItem'
-import Divider from '@mui/material/Divider'
-import useTheme from '@mui/styles/useTheme'
-
-import Link from 'next/link'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
+import ApprovalsChip from '../../src/common/ApprovalsChip'
 import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
+import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
-import ApprovalsChip from '../../src/common/ApprovalsChip'
 import { postEndpoint } from '../../data/api'
-import { lightTheme } from '../../src/theme'
+import RawModelExportList from '../../src/RawModelExportList'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'settings' | 'exports'
 
 function isTabOption(value: string): value is TabOptions {
-  switch (value) {
-    case 'overview':
-    case 'compliance':
-    case 'build':
-    case 'settings':
-      return true
-    default:
-      return false
-  }
+  return ['overview', 'compliance', 'build', 'exports', 'settings'].includes(value)
 }
 
 function CodeLine({ line }) {
@@ -217,15 +209,20 @@ export default function Deployment() {
               <Tab label='Compliance' value='compliance' />
               <Tab label='Build Logs' value='build' />
               <Tab label='Settings' value='settings' />
+              <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+
+          {group === 'exports' && deployment.managerApproved === 'Accepted' && (
+            <RawModelExportList deployment={deployment} />
+          )}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
@@ -237,7 +234,7 @@ export default function Deployment() {
             <Box>
               <p style={{ margin: 0 }}>
                 # Login to Docker (your token can be found on the
-                <Link href='/settings'>
+                <Link href='/settings' passHref>
                   <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                 </Link>
                 page) {theme.palette.mode}

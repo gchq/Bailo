@@ -1,5 +1,5 @@
 export async function fetchEndpoint(url: string, method: string, data: any) {
-  return await fetch(url, {
+  return fetch(url, {
     method,
     body: JSON.stringify(data),
     headers: {

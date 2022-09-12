@@ -1,20 +1,19 @@
-import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
+import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import { ensureUserRole, hasRole } from '../../utils/user'
-
-import { getDeploymentQueue } from '../../utils/queues'
+import { ApprovalStates, DeploymentDoc } from '../../models/Deployment'
+import { ModelDoc } from '../../models/Model'
+import { RequestTypes } from '../../models/Request'
+import { VersionDoc } from '../../models/Version'
+import { findDeploymentById } from '../../services/deployment'
 import { getRequest, readNumRequests, readRequests } from '../../services/request'
 import { getUserByInternalId } from '../../services/user'
-import { BadReq, Unauthorised } from '../../utils/result'
-import { reviewedRequest } from '../../templates/reviewedRequest'
-import { sendEmail } from '../../utils/smtp'
 import { findVersionById } from '../../services/version'
-import { findDeploymentById } from '../../services/deployment'
-import { DeploymentDoc, ApprovalStates } from '../../models/Deployment'
-import { VersionDoc } from '../../models/Version'
-import { RequestTypes } from '../../models/Request'
-import { ModelDoc } from '../../models/Model'
+import { reviewedRequest } from '../../templates/reviewedRequest'
+import { getDeploymentQueue } from '../../utils/queues'
+import { BadReq, Unauthorised } from '../../utils/result'
+import { sendEmail } from '../../utils/smtp'
+import { ensureUserRole, hasRole } from '../../utils/user'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -77,13 +76,16 @@ export const postRequestResponse = [
 
     if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
       throw Unauthorised(
-        { code: 'unauthorised_to_approve', id, userId: req.user?._id, requestUser: request.user },
+        { code: 'unauthorised_to_approve', requestId: id, userId: req.user?._id, requestUser: request.user },
         'You do not have permissions to approve this'
       )
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
-      throw BadReq({ code: 'invalid_request_choice', choice }, `Received invalid request choice, received '${choice}'`)
+      throw BadReq(
+        { code: 'invalid_request_choice', choice, requestId: id },
+        `Received invalid request choice, received '${choice}'`
+      )
     }
 
     request.status = choice as ApprovalStates
@@ -148,6 +150,7 @@ export const postRequestResponse = [
       throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')
     }
 
+    const reviewingUser = req.user.id
     const user = await getUserByInternalId(userId)
     if (user?.email) {
       await sendEmail({
@@ -156,11 +159,12 @@ export const postRequestResponse = [
           document,
           choice,
           requestType,
+          reviewingUser,
         }),
       })
     }
 
-    req.log.info({ code: 'approval_response_set', id, choice }, 'Successfully set approval response')
+    req.log.info({ code: 'approval_response_set', requestId: id, choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',

@@ -1,7 +1,6 @@
-import { Request } from '../types/interfaces'
-import useSWR from 'swr'
 import qs from 'qs'
-
+import useSWR from 'swr'
+import { Request } from '../types/interfaces'
 import { fetcher } from '../utils/fetcher'
 
 export type RequestType = 'Upload' | 'Deployment'

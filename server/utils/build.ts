@@ -1,16 +1,16 @@
-import { mkdir, exec, rm } from 'shelljs'
-import { v4 as uuidv4 } from 'uuid'
-import { tmpdir } from 'os'
-import { join, dirname } from 'path'
-import { writeFile } from 'fs/promises'
-import { getClient } from './minio'
-import unzip from 'unzipper'
 import config from 'config'
 import dedent from 'dedent-js'
-import logger from './logger'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { VersionDoc } from '../models/Version'
+import { writeFile } from 'fs/promises'
+import { tmpdir } from 'os'
+import { dirname, join } from 'path'
+import { exec, mkdir, rm } from 'shelljs'
+import unzip from 'unzipper'
+import { v4 as uuidv4 } from 'uuid'
 import { ModelDoc } from '../models/Model'
+import { VersionDoc } from '../models/Version'
+import { getAdminToken } from '../routes/v1/registryAuth'
+import logger from './logger'
+import { getClient } from './minio'
 
 interface FileRef {
   path: string
@@ -52,17 +52,22 @@ async function unzipFile(zipPath: string) {
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
 }
 
-export async function logCommand(command: string, log: Function) {
+export async function logCommand(command: string, log: (level: string, msg: string) => void) {
   log('info', `$ ${command}`)
 
-  return await runCommand(
+  return runCommand(
     command,
     (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg)),
     (data: string) => data.split(/\r?\n/).map((msg: string) => log('info', msg))
   )
 }
 
-export async function runCommand(command: string, onStdout: Function, onStderr: Function, opts: any = {}) {
+export async function runCommand(
+  command: string,
+  onStdout: (msg: string) => void,
+  onStderr: (msg: string) => void,
+  opts: any = {}
+) {
   const childProcess = exec(command, { async: true, silent: true })
   childProcess.stdout!.on('data', (data) => {
     onStdout(data.trim())
@@ -76,11 +81,13 @@ export async function runCommand(command: string, onStdout: Function, onStderr: 
     childProcess.on('exit', () => {
       if (childProcess.exitCode !== 0 && !opts.silentErrors) {
         return reject(
-          `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+          new Error(
+            `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
+          )
         )
       }
 
-      resolve({})
+      return resolve({})
     })
   })
 }
@@ -158,7 +165,6 @@ export async function buildPython(version: VersionDoc, builderFiles: BuilderFile
   rm('-rf', buildDir)
   rm('-rf', s2iDir)
 
-  await Promise.all([deleteMinioFile(builderFiles.binary), deleteMinioFile(builderFiles.code)])
   const removeImageCmd = `img rm ${tag}`
   await logCommand(removeImageCmd, (level: string, message: string) => logger[level](message))
 

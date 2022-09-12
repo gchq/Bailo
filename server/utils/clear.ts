@@ -1,15 +1,16 @@
+import config from 'config'
 import DeploymentModel from '../models/Deployment'
-import RequestModel from '../models/Request'
 import ModelModel from '../models/Model'
+import RequestModel from '../models/Request'
 import UserModel from '../models/User'
 import VersionModel from '../models/Version'
-
 import { connectToMongoose, disconnectFromMongoose } from './database'
-
-import config from 'config'
 import { emptyBucket } from './minio'
 
-const pause = (time) => new Promise((resolve) => setTimeout(resolve, time))
+const pause = (time) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
 
 export async function clearStoredData() {
   await connectToMongoose()
