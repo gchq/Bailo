@@ -2,17 +2,13 @@ import config from 'config'
 import express from 'express'
 import http from 'http'
 import next from 'next'
-import { createIndexes, createIndexes } from './models/Model'
+import { createIndexes } from './models/Model'
 import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
   fetchRawModelFiles,
   getCurrentUserDeployments,
   getDeployment,
-  postDeployment,
-  resetDeploymentApprovals,
-  getDeployment,
-  getCurrentUserDeployments,
   postDeployment,
   resetDeploymentApprovals,
 } from './routes/v1/deployment'
@@ -38,7 +34,6 @@ import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavou
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
 import { getSpecification } from './routes/v1/specification'
 
 const port = config.get('listen')
