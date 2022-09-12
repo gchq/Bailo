@@ -4,7 +4,7 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import Link from 'next/link'
+import Link from '../Link'
 
 interface IntroCardProps {
   title: string
@@ -28,7 +28,7 @@ export default function IntroCard({ title, user, url, children }: IntroCardProps
         </Typography>
       </CardContent>
       <CardActions>
-        <Link passHref href={url}>
+        <Link passHref sx={{ textDecoration: 'none' }} href={url}>
           <Button size='small'>Learn More</Button>
         </Link>
       </CardActions>
