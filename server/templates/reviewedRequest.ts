@@ -5,6 +5,7 @@ import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { RequestTypes } from '../models/Request'
 import { VersionDoc } from '../models/Version'
+import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
 export interface ReviewedRequestContext {
@@ -18,11 +19,7 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return mjml2html(
     wrapper(`
@@ -61,11 +58,7 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
     '${model.currentMetadata.highLevelDetails.name}' has been reviewed

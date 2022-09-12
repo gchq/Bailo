@@ -22,7 +22,7 @@ export const getModels = [
       throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await findModels(req.user!, { filter: filter as string, type })
+    const models = await findModels(req.user, { filter: filter as string, type })
 
     req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
 
@@ -37,7 +37,7 @@ export const getModelByUuid = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user!, uuid)
+    const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -53,7 +53,7 @@ export const getModelById = [
   async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const model = await findModelById(req.user!, id)
+    const model = await findModelById(req.user, id)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', id }, `Unable to find model '${id}'`)
@@ -69,13 +69,13 @@ export const getModelDeployments = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user!, uuid)
+    const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const deployments = await findDeployments(req.user!, { model: model._id })
+    const deployments = await findDeployments(req.user, { model: model._id })
 
     req.log.info(
       { code: 'fetch_deployments_by_model', modelId: model._id, deployments },
@@ -90,7 +90,7 @@ export const getModelSchema = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user!, uuid)
+    const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -114,13 +114,13 @@ export const getModelVersions = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user!, uuid)
+    const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const versions = await findModelVersions(req.user!, model._id, { thin: true })
+    const versions = await findModelVersions(req.user, model._id, { thin: true })
 
     req.log.info(
       { code: 'fetch_versions_for_model', modelId: model._id, versions },
@@ -135,7 +135,7 @@ export const getModelVersion = [
   async (req: Request, res: Response) => {
     const { uuid, version: versionName } = req.params
 
-    const model = await findModelByUuid(req.user!, uuid)
+    const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -143,9 +143,9 @@ export const getModelVersion = [
 
     let version
     if (versionName === 'latest') {
-      version = await findVersionById(req.user!, model.versions[model.versions.length - 1])
+      version = await findVersionById(req.user, model.versions[model.versions.length - 1])
     } else {
-      version = await findVersionByName(req.user!, model._id, versionName)
+      version = await findVersionByName(req.user, model._id, versionName)
     }
 
     if (!version) {

@@ -1,12 +1,11 @@
-import { join } from 'path'
+/* eslint-disable no-param-reassign */
+import { dirname } from 'path'
 import { rm } from 'shelljs'
 import unzip from 'unzipper'
-import { dirname } from 'path'
 
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
-import { getClient } from '../minio'
 
 async function unzipFile(zipPath: string) {
   const outputDir = dirname(zipPath)
@@ -14,10 +13,9 @@ async function unzipFile(zipPath: string) {
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
 }
 
-interface ExtractFilesProps {}
 class ExtractFiles extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: ExtractFilesProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = false
   }
@@ -46,8 +44,6 @@ class ExtractFiles extends BuildStep {
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: ExtractFilesProps) => {
-    return new ExtractFiles(logger, opts, props)
-  }
+export default function extractFiles(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger) => new ExtractFiles(logger, opts)
 }

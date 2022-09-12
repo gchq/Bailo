@@ -64,8 +64,10 @@ const DeploymentSchema = new Schema<Deployment>(
 
 DeploymentSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await DeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
 const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
+
 export default DeploymentModel

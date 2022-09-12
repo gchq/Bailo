@@ -3,15 +3,8 @@ import { Request, Response } from 'express'
 import { ensureUserRole } from '../../utils/user'
 
 function getMongoID() {
-  const timestamp = ((new Date().getTime() / 1000) | 0).toString(16)
-  return (
-    timestamp +
-    'xxxxxxxxxxxxxxxx'
-      .replace(/[x]/g, function () {
-        return ((Math.random() * 16) | 0).toString(16)
-      })
-      .toLowerCase()
-  )
+  const timestamp = Math.floor(new Date().getTime() / 1000).toString(16)
+  return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => Math.floor(Math.random() * 16).toString(16)).toLowerCase()
 }
 
 function getVersionDefinition(populated: boolean) {
@@ -520,23 +513,27 @@ function parseValue(value) {
       type: 'string',
       example: value,
     }
-  } else if (typeof value === 'boolean') {
+  }
+  if (typeof value === 'boolean') {
     return {
       type: 'boolean',
       example: value,
     }
-  } else if (typeof value === 'object') {
+  }
+  if (typeof value === 'object') {
     const parent = {
       type: 'object',
       properties: {},
     }
 
-    for (let [key, child] of Object.entries(value)) {
+    for (const [key, child] of Object.entries(value)) {
       parent.properties[key] = parseValue(child)
     }
 
     return parent
   }
+
+  throw new Error(`Unexpected value ${value}`)
 }
 
 function generateSpecification() {
@@ -556,7 +553,7 @@ function generateSpecification() {
       },
       {
         name: 'deployment',
-        description: 'A deployent allows users to access one or more versions of a model',
+        description: 'A deployment allows users to access one or more versions of a model',
       },
       {
         name: 'version',
@@ -1340,7 +1337,5 @@ function generateSpecification() {
 
 export const getSpecification = [
   ensureUserRole('user'),
-  async (_req: Request, res: Response) => {
-    return res.json(generateSpecification())
-  },
+  async (_req: Request, res: Response) => res.json(generateSpecification()),
 ]

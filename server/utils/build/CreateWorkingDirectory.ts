@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { v4 as uuidv4 } from 'uuid'
@@ -7,10 +8,9 @@ import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 
-interface CreateWorkingDirectoryProps {}
 class CreateWorkingDirectory extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: CreateWorkingDirectoryProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = true
   }
@@ -19,14 +19,14 @@ class CreateWorkingDirectory extends BuildStep {
     return 'Create Temporary Working Directory'
   }
 
-  async build(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(_version: VersionDoc, _files: Files, state: any) {
     const directory = join(tmpdir(), uuidv4())
     await mkdir(directory)
 
     state.workingDirectory = directory
   }
 
-  async rollback(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async rollback(_version: VersionDoc, _files: Files, state: any) {
     if (state.workingDirectory) {
       rm('-rf', state.workingDirectory)
     }
@@ -34,13 +34,11 @@ class CreateWorkingDirectory extends BuildStep {
     state.workingDirectory = undefined
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any) {
     return this.rollback(version, files, state)
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: CreateWorkingDirectoryProps) => {
-    return new CreateWorkingDirectory(logger, opts, props)
-  }
+export default function createWorkingDirectory(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger) => new CreateWorkingDirectory(logger, opts)
 }

@@ -1,7 +1,6 @@
-import prettyMs from 'pretty-ms'
+// eslint-disable-next-line import/no-relative-packages
 import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { findVersionById, markVersionBuilt } from '../services/version'
-import { buildPython } from '../utils/build'
 import logger from '../utils/logger'
 import { getUserByInternalId } from '../services/user'
 
