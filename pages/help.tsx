@@ -9,8 +9,8 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
-import Link from 'next/link'
 import Wrapper from 'src/Wrapper'
+import Link from '../src/Link'
 import { useGetUiConfig } from '../data/uiConfig'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../src/theme'
@@ -74,8 +74,8 @@ export default function Help() {
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Link passHref href='/docs'>
-                    <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }}>
+                  <Link passHref href='/docs' sx={{ mx: 'auto' }}>
+                    <Button variant='contained' sx={{ mb: 2, width: 200 }}>
                       View documentation
                     </Button>
                   </Link>
