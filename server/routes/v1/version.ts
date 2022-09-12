@@ -7,6 +7,7 @@ import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { VersionDoc } from 'server/models/Version'
+import { getUserById } from 'server/services/user'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -42,10 +43,27 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const oldContacts: any = version.metadata.contacts
+    const oldContacts = version.metadata.contacts
     version.metadata = metadata
 
-    if (
+    const [manager, reviewer] = await Promise.all([
+      getUserById(version.metadata.contacts.manager),
+      getUserById(version.metadata.contacts.reviewer),
+    ])
+
+    await RequestModel.remove({
+      version: version._id,
+      request: 'Upload',
+      $or: [
+        { $or: [
+          { approvalType: ApprovalTypes.Manager, user: { $ne: manager } },
+          { approvalType: ApprovalTypes.Reviewer, user: { $ne: reviewer } }
+        ]},
+        { approvalType: { $ne: ApprovalStates.NoResponse }}
+      ]
+    })
+
+    /*if (
       version.metadata.contacts.manager !== oldContacts.manager ||
       version.managerApproved !== ApprovalStates.NoResponse
     ) {
@@ -66,9 +84,9 @@ export const putVersion = [
         approvalType: ApprovalTypes.Reviewer,
       })
       existingMReviewerRequest !== null && existingMReviewerRequest.delete()
-    }
+    }*/
 
-    await createVersionRequests({ version, oldContacts })
+    await createVersionRequests({ version })
 
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
