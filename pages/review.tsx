@@ -8,16 +8,15 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
-import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
-import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
+import Link from '../src/Link'
 import { postEndpoint } from '../data/api'
 import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
 import { useGetCurrentUser } from '../data/user'
@@ -145,13 +144,12 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
             <Grid item xs={12} sm={8}>
               {type === 'Upload' && (
                 <>
-                  <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                    >
-                      {requestObj.version?.metadata?.highLevelDetails?.name}
-                    </MuiLink>
+                  <Link
+                    href={`/model/${requestObj.version?.model?.uuid}`}
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {requestObj.version?.metadata?.highLevelDetails?.name}
                   </Link>
                   <Stack direction='row' spacing={2}>
                     <Chip
@@ -178,20 +176,20 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
               )}
               {type === 'Deployment' && (
                 <>
-                  <Link href={`/deployment/${requestObj.deployment?.uuid}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                    >
-                      {requestObj.deployment?.metadata?.highLevelDetails?.name}
-                    </MuiLink>
+                  <Link
+                    href={`/deployment/${requestObj.deployment?.uuid}`}
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {requestObj.deployment?.metadata?.highLevelDetails?.name}
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
-                    <Link href={`/model/${requestObj.deployment?.model?.uuid}`} passHref>
-                      <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
-                        {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
-                      </MuiLink>
+                    <Link
+                      href={`/model/${requestObj.deployment?.model?.uuid}`}
+                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                    >
+                      {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
                     </Link>
                   </Typography>
                   {requestObj.deployment === undefined ||
