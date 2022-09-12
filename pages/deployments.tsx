@@ -7,15 +7,14 @@ import Box from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
 import _ from 'lodash'
-import Link from 'next/link'
 import React, { ChangeEvent } from 'react'
+import Link from '../src/Link'
 import { useGetUserDeployments } from '../data/deployment'
 import { useGetModelById } from '../data/model'
 import { useGetCurrentUser } from '../data/user'
@@ -111,13 +110,12 @@ function Deployments() {
             <Box>
               {orderedDeployments?.map((deployment, index) => (
                 <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
-                  <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                    >
-                      {deployment?.metadata?.highLevelDetails?.name}
-                    </MuiLink>
+                  <Link
+                    href={`/deployment/${deployment?.uuid}`}
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {deployment?.metadata?.highLevelDetails?.name}
                   </Link>
                   <Typography variant='body1' sx={{ marginBottom: 2 }}>
                     {displayDate(deployment?.createdAt)}
@@ -139,13 +137,12 @@ function Deployments() {
                     {groupedDeployments[key].map((deployment) => (
                       <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
                         <Box>
-                          <Link href={`/deployment/${deployment?.uuid}`} passHref>
-                            <MuiLink
-                              variant='h5'
-                              sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                            >
-                              {deployment?.metadata?.highLevelDetails?.name}
-                            </MuiLink>
+                          <Link
+                            href={`/deployment/${deployment?.uuid}`}
+                            variant='h5'
+                            sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                          >
+                            {deployment?.metadata?.highLevelDetails?.name}
                           </Link>
                         </Box>
                         <Box>
