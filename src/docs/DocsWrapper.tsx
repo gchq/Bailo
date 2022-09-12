@@ -1,6 +1,5 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
 import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, Theme } from '@mui/material'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
@@ -9,6 +8,8 @@ import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/utils/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
+import { ThemeProvider } from '@mui/material/styles'
+import Link from '../Link'
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -42,7 +43,14 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         return (
           <Fragment key={doc.slug}>
             {doc.hasIndex ? (
-              <Link passHref href={`/docs/${doc.slug}`}>
+              <Link
+                passHref
+                sx={{
+                  textDecoration: 'none',
+                  color: theme.palette.mode === 'light' ? '#414141' : 'primary.contrastText',
+                }}
+                href={`/docs/${doc.slug}`}
+              >
                 <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
                   {headingText}
                 </ListItemButton>
@@ -57,14 +65,21 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         )
       }
       return (
-        <Link passHref href={`/docs/${doc.slug}`} key={doc.slug}>
-          <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
-            <ListItemText primary={doc.title} />
-          </ListItemButton>
-        </Link>
+        <ThemeProvider theme={theme}>
+          <Link
+            passHref
+            sx={{ textDecoration: 'none', color: theme.palette.mode === 'light' ? '#414141' : 'primary.contrastText' }}
+            href={`/docs/${doc.slug}`}
+            key={doc.slug}
+          >
+            <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+              <ListItemText primary={doc.title} />
+            </ListItemButton>
+          </Link>
+        </ThemeProvider>
       )
     },
-    [pathname]
+    [pathname, theme]
   )
 
   const docsMenu = useMemo(
