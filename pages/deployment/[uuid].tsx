@@ -5,10 +5,8 @@ import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
-import MuiLink from '@mui/material/Link'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
@@ -22,10 +20,10 @@ import Tooltip from '@mui/material/Tooltip'
 import useTheme from '@mui/styles/useTheme'
 import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
+import Link from '../../src/Link'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -230,34 +228,32 @@ export default function Deployment() {
           Pull from Docker
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ p: 2 }}>
-            <Box>
-              <p style={{ margin: 0 }}>
-                # Login to Docker (your token can be found on the
-                <Link href='/settings' passHref>
-                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
-                </Link>
-                page) {theme.palette.mode}
-              </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
-              <br />
+          <Box sx={{ p: 2 }}>
+            <p style={{ margin: 0 }}>
+              # Login to Docker (your token can be found on the
+              <Link href='/settings' sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>
+                settings
+              </Link>
+              page) {theme.palette.mode}
+            </p>
+            <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+            <br />
 
-              <p style={{ margin: 0 }}># Pull model</p>
-              <CodeLine line={`docker pull ${deploymentTag}`} />
-              <br />
+            <p style={{ margin: 0 }}># Pull model</p>
+            <CodeLine line={`docker pull ${deploymentTag}`} />
+            <br />
 
-              <p style={{ margin: 0 }}># Run Docker image</p>
-              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
-              <br />
+            <p style={{ margin: 0 }}># Run Docker image</p>
+            <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
+            <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
+            <br />
 
-              <p style={{ margin: 0 }}># Check that the Docker container is running</p>
-              <CodeLine line='docker ps' />
-              <br />
+            <p style={{ margin: 0 }}># Check that the Docker container is running</p>
+            <CodeLine line='docker ps' />
+            <br />
 
-              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
-            </Box>
-          </DialogContentText>
+            <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
+          </Box>
         </DialogContent>
       </Dialog>
     </>
