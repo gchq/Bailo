@@ -3,15 +3,14 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import InputBase from '@mui/material/InputBase'
-import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import useTheme from '@mui/styles/useTheme'
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from '../src/Link'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
@@ -88,13 +87,12 @@ export default function ExploreModels() {
           {models &&
             models.map((model: Model, index: number) => (
               <Box key={model.uuid}>
-                <Link href={`/model/${model.uuid}`} passHref>
-                  <MuiLink
-                    variant='h5'
-                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                  >
-                    {model.currentMetadata.highLevelDetails.name}
-                  </MuiLink>
+                <Link
+                  href={`/model/${model.uuid}`}
+                  variant='h5'
+                  sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                >
+                  {model.currentMetadata.highLevelDetails.name}
                 </Link>
 
                 <Typography variant='body1' sx={{ marginBottom: 2 }}>
