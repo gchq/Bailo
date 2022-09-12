@@ -8,7 +8,6 @@ import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/utils/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
-import { ThemeProvider } from '@mui/material/styles'
 import Link from '../Link'
 
 type DocsWrapperProps = {
@@ -49,6 +48,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   textDecoration: 'none',
                   color: theme.palette.mode === 'light' ? '#414141' : 'primary.contrastText',
                 }}
+                key={doc.slug}
                 href={`/docs/${doc.slug}`}
               >
                 <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
@@ -65,18 +65,16 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         )
       }
       return (
-        <ThemeProvider theme={theme}>
-          <Link
-            passHref
-            sx={{ textDecoration: 'none', color: theme.palette.mode === 'light' ? '#414141' : 'primary.contrastText' }}
-            href={`/docs/${doc.slug}`}
-            key={doc.slug}
-          >
-            <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
-              <ListItemText primary={doc.title} />
-            </ListItemButton>
-          </Link>
-        </ThemeProvider>
+        <Link
+          passHref
+          sx={{ textDecoration: 'none', color: theme.palette.mode === 'light' ? '#414141' : 'primary.contrastText' }}
+          href={`/docs/${doc.slug}`}
+          key={doc.slug}
+        >
+          <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+            <ListItemText primary={doc.title} />
+          </ListItemButton>
+        </Link>
       )
     },
     [pathname, theme]
