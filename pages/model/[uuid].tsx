@@ -14,7 +14,6 @@ import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
 import InputLabel from '@mui/material/InputLabel'
-import MuiLink from '@mui/material/Link'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
@@ -35,7 +34,6 @@ import { useGetCurrentUser } from 'data/user'
 import { setTargetValue } from 'data/utils'
 import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
@@ -44,6 +42,7 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import Link from '../../src/Link'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
@@ -314,13 +313,12 @@ function Model() {
             {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
-                <Link href={`/deployment/${deployment.uuid}`} passHref>
-                  <MuiLink
-                    variant='h5'
-                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                  >
-                    {deployment.metadata.highLevelDetails.name}
-                  </MuiLink>
+                <Link
+                  href={`/deployment/${deployment.uuid}`}
+                  variant='h5'
+                  sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                >
+                  {deployment.metadata.highLevelDetails.name}
                 </Link>
 
                 <Box sx={{ mb: 1 }}>
