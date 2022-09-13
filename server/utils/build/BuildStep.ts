@@ -12,19 +12,23 @@ export interface BuildOpts {
 
 export abstract class BuildStep {
   logger: BuildLogger
+
   opts: BuildOpts = {
     retryable: false,
   }
 
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, _props: any) {
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, _props?: any) {
     this.opts = { ...this.opts, ...opts }
     this.logger = logger
   }
 
   abstract name(version: VersionDoc, files: Files, state: any): Promise<string>
-  abstract build(version: VersionDoc, files: Files, state: any): Promise<void>
-  abstract rollback(version: VersionDoc, files: Files, state: any): Promise<void>
 
-  // optional tidyup
-  async tidyup(_version: VersionDoc, _files: Files, _state: any): Promise<void> {}
+  abstract build(version: VersionDoc, files: Files, state: any): Promise<any>
+
+  abstract rollback(version: VersionDoc, files: Files, state: any): Promise<any>
+
+  async tidyUp(_version: VersionDoc, _files: Files, _state: any): Promise<any> {
+    // tidying up is optional
+  }
 }

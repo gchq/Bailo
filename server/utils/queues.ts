@@ -1,5 +1,6 @@
 import config from 'config'
 import mongoose from 'mongoose'
+// eslint-disable-next-line import/no-relative-packages
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'

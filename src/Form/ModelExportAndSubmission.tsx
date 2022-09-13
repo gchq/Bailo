@@ -20,6 +20,7 @@ import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from '../../data/uiConfig'
 import ModelOverview from '../ModelOverview'
 import { SplitSchema } from '../../types/interfaces'
+import { consoleWarn } from '../../utils/logging'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')
@@ -71,8 +72,8 @@ function ModelExportAndSubmission({
             }
           }
         }
-      } catch (e: any) {
-        console.warn('CSS rules could not be loaded.')
+      } catch (e) {
+        consoleWarn('CSS rules could not be loaded.')
       }
     }
     return `${css.join('\n')}\n`

@@ -22,7 +22,7 @@ export async function findSchemasByUse(use: string, limit?: number) {
   return baseSchemas
 }
 
-export async function createSchema(schema: Schema, overwrite: boolean = false) {
+export async function createSchema(schema: Schema, overwrite = false) {
   if (overwrite) {
     await SchemaModel.deleteOne({ reference: schema.reference })
   }
