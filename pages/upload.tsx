@@ -6,7 +6,7 @@ import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
-import RenderFileTab from '@/src/Form/RenderFileTab'
+import RenderFileTab, { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
@@ -18,7 +18,6 @@ import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 
 function renderSubmissionTab({
   splitSchema,

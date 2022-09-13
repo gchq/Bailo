@@ -29,9 +29,9 @@ export const getRequests = [
     }
 
     if (filter === 'all') {
-      if (!hasRole(['admin'], req.user!)) {
+      if (!hasRole(['admin'], req.user)) {
         return res.error(401, [
-          { code: 'unauthorised_admin_role_missing', roles: req.user?.roles },
+          { code: 'unauthorised_admin_role_missing', roles: req.user.roles },
           'Forbidden.  Your user does not have the "admin" role',
         ])
       }
@@ -41,7 +41,7 @@ export const getRequests = [
 
     const requests = await readRequests({
       type: type as RequestTypes,
-      filter: filter === 'all' ? undefined : req.user!._id,
+      filter: filter === 'all' ? undefined : req.user._id,
     })
 
     req.log.info({ code: 'fetching_requests', requests }, 'User fetching requests')
@@ -55,7 +55,7 @@ export const getNumRequests = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const requests = await readNumRequests({
-      userId: req.user!._id,
+      userId: req.user._id,
     })
 
     req.log.info({ code: 'fetching_request_count', requestCount: requests }, 'Fetching the number of requests')
@@ -69,14 +69,14 @@ export const postRequestResponse = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    const id = req.params.id
+    const { id } = req.params
     const choice = req.body.choice as string
 
     const request = await getRequest({ requestId: id })
 
-    if (!req.user!._id.equals(request.user) && !hasRole(['admin'], req.user!)) {
+    if (!req.user._id.equals(request.user) && !hasRole(['admin'], req.user)) {
       throw Unauthorised(
-        { code: 'unauthorised_to_approve', requestId: id, userId: req.user?._id, requestUser: request.user },
+        { code: 'unauthorised_to_approve', requestId: id, userId: req.user._id, requestUser: request.user },
         'You do not have permissions to approve this'
       )
     }
@@ -104,7 +104,7 @@ export const postRequestResponse = [
 
     if (request.version) {
       const versionDoc = request.version as VersionDoc
-      const version = await findVersionById(req.user!, versionDoc._id, { populate: true })
+      const version = await findVersionById(req.user, versionDoc._id, { populate: true })
       if (!version) {
         throw BadReq(
           { code: 'version_not_found', version: versionDoc._id },
@@ -120,7 +120,7 @@ export const postRequestResponse = [
       await version.save()
     } else if (request.deployment) {
       const deploymentDoc = request.deployment as DeploymentDoc
-      const deployment = await findDeploymentById(req.user!, deploymentDoc._id, { populate: true })
+      const deployment = await findDeploymentById(req.user, deploymentDoc._id, { populate: true })
       if (!deployment) {
         throw BadReq(
           { code: 'deployment_not_found', deployment: deploymentDoc },

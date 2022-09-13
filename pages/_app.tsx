@@ -1,5 +1,5 @@
 import { CacheProvider, EmotionCache } from '@emotion/react'
-import DocsMenuContext from '@/utils/contexts/docsMenuContext'
+import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import useDocsMenu from '@/utils/useDocsMenu'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'

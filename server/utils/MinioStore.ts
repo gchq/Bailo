@@ -4,8 +4,11 @@ import logger from './logger'
 
 export default class MinioStore {
   bucket: (req: Request, file: any) => string
+
   path: (req: Request, file: any) => string
+
   connection: Minio.ClientOptions
+
   client: Minio.Client
 
   constructor({
@@ -35,7 +38,8 @@ export default class MinioStore {
       logger.info({ bucket, path }, 'Finished uploading file to Minio')
     } catch (e) {
       logger.error({ error: e }, 'Unable to add file to Minio')
-      return cb(e as Error, null)
+      cb(e as Error, null)
+      return
     }
 
     cb(null, {
@@ -56,10 +60,11 @@ export default class MinioStore {
       await this.client.removeObject(file.bucket, file.path)
     } catch (e) {
       logger.error({ error: e }, 'Unable to remove file from Minio')
-      return cb(e as Error, null)
+      cb(e as Error, null)
+      return
     }
 
     logger.info({ bucket: file.bucket, path: file.path }, 'Successfully removed file from Minio')
-    return cb(null, null)
+    cb(null, null)
   }
 }

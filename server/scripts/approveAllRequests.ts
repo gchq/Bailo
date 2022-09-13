@@ -7,12 +7,12 @@ async function approveAllRequests() {
   const deployments = await api.getRequests('Deployment')
   const uploads = await api.getRequests('Upload')
 
-  for (let deployment of deployments) {
+  for (const deployment of deployments) {
     const response = await deployment.respond('Accepted')
     logger.info(response, 'Responded to deployment')
   }
 
-  for (let upload of uploads) {
+  for (const upload of uploads) {
     const response = await upload.respond('Accepted')
     logger.info(response, 'Responded to upload')
   }

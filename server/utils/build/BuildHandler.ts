@@ -12,11 +12,11 @@ type BuildConstructor = (logger: BuildLogger, props?: any) => BuildStep
 function formatError(e: unknown): string {
   if (e instanceof Error) {
     return e.message
-  } else if (typeof e === 'string') {
-    return e
-  } else {
-    return JSON.stringify(e)
   }
+  if (typeof e === 'string') {
+    return e
+  }
+  return JSON.stringify(e)
 }
 
 export class BuildHandler {
@@ -31,57 +31,60 @@ export class BuildHandler {
     const buildId = uuidv4()
     const vlog = logger.child({ versionId: version._id, buildId })
     const buildLogger = new BuildLogger(version, vlog)
-    const state = {}
+    let state = {}
 
     buildLogger.info({ buildId }, `=== Building ${buildId}\n`)
 
-    steps: for (const [i, { construct, props }] of Object.entries(this.steps)) {
+    for (const [i, { construct, props }] of Object.entries(this.steps)) {
       const step: BuildStep = construct(buildLogger, props)
       const name = await step.name(version, files, state)
-      const stepPrefix = `Step ${parseInt(i) + 1}/${this.steps.length}`
+      const stepPrefix = `Step ${parseInt(i, 10) + 1}/${this.steps.length}`
       const stepStartTime = new Date()
 
       // Starting build step
       buildLogger.info({ step: i, name }, `${stepPrefix} : ${name}`)
 
       try {
-        await step.build(version, files, state)
+        const newState = await step.build(version, files, state)
+        if (newState) state = newState
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
-        buildLogger.info({ time }, `${stepPrefix} : Succesfully completed in ${time}\n`)
-      } catch (e) {
+        buildLogger.info({ time }, `${stepPrefix} : Successfully completed in ${time}\n`)
+      } catch (buildError) {
         // Handling error
         buildLogger.error({}, `${stepPrefix} : Failed due to error:`)
-        buildLogger.error({}, indentString(formatError(e), 2))
+        buildLogger.error({}, indentString(formatError(buildError), 2))
 
         try {
           buildLogger.error({}, `${stepPrefix} : Rolling back`)
-          await step.rollback(version, files, state)
-        } catch (e) {
+          const newState = await step.rollback(version, files, state)
+          if (newState) state = newState
+        } catch (rollbackError) {
           // Handling error during rollback
           buildLogger.error({}, `${stepPrefix} : Failed during rollback:`)
-          buildLogger.error({}, indentString(formatError(e), 2))
+          buildLogger.error({}, indentString(formatError(rollbackError), 2))
         }
 
         buildLogger.error({}, `\nFailed to build model.\n\n`)
-        throw e
+        throw buildError
       }
     }
 
-    steps: for (const [i, { construct, props }] of Object.entries(this.steps.reverse())) {
+    for (const [i, { construct, props }] of Object.entries(this.steps.reverse())) {
       const step: BuildStep = construct(buildLogger, props)
       const name = await step.name(version, files, state)
-      const stepPrefix = `Tidyup Step ${parseInt(i) + 1}/${this.steps.length}`
+      const stepPrefix = `Tidy up Step ${parseInt(i, 10) + 1}/${this.steps.length}`
       const stepStartTime = new Date()
 
       // Starting build step
       buildLogger.info({ step: i, name }, `${stepPrefix} : ${name}`)
 
       try {
-        await step.tidyup(version, files, state)
+        const newState = await step.tidyUp(version, files, state)
+        if (newState) state = newState
 
         const time = prettyMs(new Date().getTime() - stepStartTime.getTime())
-        buildLogger.info({ time }, `${stepPrefix} : Succesfully tidied up in ${time}\n`)
+        buildLogger.info({ time }, `${stepPrefix} : Successfully tidied up in ${time}\n`)
       } catch (e) {
         // Handling error
         buildLogger.error({}, `${stepPrefix} : Failed due to error:`)
@@ -93,6 +96,6 @@ export class BuildHandler {
     }
 
     const time = prettyMs(new Date().getTime() - startTime.getTime())
-    buildLogger.info({}, `Succesfully completed build in ${time}`)
+    buildLogger.info({}, `Successfully completed build in ${time}`)
   }
 }
