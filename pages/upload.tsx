@@ -10,7 +10,7 @@ import RenderFileTab from '@/src/Form/RenderFileTab'
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
-import { Schema, SplitSchema, User } from '@/types/interfaces'
+import { Schema, SplitSchema, ModelUploadType, User } from '@/types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -85,6 +85,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          uploadType: ModelUploadType.Zip,
         },
         schemaRef: reference,
 
@@ -153,6 +154,7 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
+    form.append('uploadType', data.files.uploadType)
     delete data.files
 
     form.append('metadata', JSON.stringify(data))

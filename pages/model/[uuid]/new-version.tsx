@@ -12,7 +12,7 @@ import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission
 import { RenderButtonsInterface } from '../../../src/Form/RenderButtons'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
-import { SplitSchema } from '../../../types/interfaces'
+import { SplitSchema, ModelUploadType } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import useCacheVariable from '../../../utils/useCacheVariable'
 
@@ -66,6 +66,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          uploadType: ModelUploadType.Zip,
         },
         schemaRef: cModel.schemaRef,
 
@@ -137,6 +138,7 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
+    form.append('uploadType', data.files.uploadType)
 
     delete data.files
 

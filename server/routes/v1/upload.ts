@@ -10,13 +10,14 @@ import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
 import { createVersionRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
-import { createVersion } from '../../services/version'
+import { createVersion, markVersionBuilt } from '../../services/version'
 import MinioStore from '../../utils/MinioStore'
 import { getUploadQueue } from '../../utils/queues'
 import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
+import { ModelUploadType } from '@/types/interfaces'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -42,16 +43,17 @@ export const postUpload = [
       const files = req.files as unknown as MinioFile
       const mode = req.query.mode as string
       const modelUuid = req.query.modelUuid as string
+      const uploadType = req.body.uploadType as ModelUploadType
 
-      if (!files.binary) {
+      if (uploadType === ModelUploadType.Zip && !files.binary) {
         throw BadReq({ code: 'binary_file_not_found' }, 'Unable to find binary file')
       }
 
-      if (!files.code) {
+      if (uploadType === ModelUploadType.Zip && !files.code) {
         throw BadReq({ code: 'code_file_not_found' }, 'Unable to find code file')
       }
 
-      if (!files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
+      if (uploadType === ModelUploadType.Zip && !files.binary[0].originalname.toLowerCase().endsWith('.zip')) {
         req.log.warn(
           { code: 'binary_wrong_file_type', filename: files.binary[0].originalname },
           'Binary is not a zip file'
@@ -61,7 +63,7 @@ export const postUpload = [
         })
       }
 
-      if (!files.code[0].originalname.toLowerCase().endsWith('.zip')) {
+      if (uploadType === ModelUploadType.Zip && !files.code[0].originalname.toLowerCase().endsWith('.zip')) {
         req.log.warn({ code: 'code_wrong_file_type', filename: files.code[0].originalname }, 'Code is not a zip file')
         return res.status(400).json({
           message: `Unable to process code, file not a zip.`,
@@ -178,7 +180,6 @@ export const postUpload = [
       await model.save()
 
       version.model = model._id
-      await version.save()
 
       req.log.info({ code: 'created_model', model }, 'Created model document')
 
@@ -190,38 +191,47 @@ export const postUpload = [
         'Successfully created requests for reviews'
       )
 
-      const jobId = await (
-        await getUploadQueue()
-      ).add({
-        versionId: version._id,
-        userId: req.user?._id,
-        binary: createFileRef(files.binary[0], 'binary', version),
-        code: createFileRef(files.code[0], 'code', version),
-      })
+      if (uploadType === ModelUploadType.ModelCard) {
+        version.modelCardOnly = true
+        await version.save()
+        await markVersionBuilt(version._id)
+      } else {
+        await version.save()
+      }
 
-      req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
+      if (uploadType === ModelUploadType.Zip) {
+        const jobId = await (
+          await getUploadQueue()
+        ).add({
+          versionId: version._id,
+          userId: req.user?._id,
+          binary: createFileRef(files.binary[0], 'binary', version),
+          code: createFileRef(files.code[0], 'code', version),
+        })
 
-      // then return reference to user
+        req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
+
+        try {
+          const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
+          const client = getClient()
+          await copyFile(`${files.binary[0].bucket}/${files.binary[0].path}`, rawBinaryPath)
+          await client.removeObject(files.binary[0].bucket, files.binary[0].path)
+          const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
+          await copyFile(`${files.code[0].bucket}/${files.code[0].path}`, rawCodePath)
+          await client.removeObject(files.code[0].bucket, files.code[0].path)
+          await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
+          req.log.info(
+            { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
+            `Adding paths for raw model exports of files to version.`
+          )
+        } catch (e: any) {
+          throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
+        }
+      }
+
       res.json({
         uuid: model.uuid,
       })
-
-      try {
-        const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
-        const client = getClient()
-        await copyFile(`${files.binary[0].bucket}/${files.binary[0].path}`, rawBinaryPath)
-        await client.removeObject(files.binary[0].bucket, files.binary[0].path)
-        const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
-        await copyFile(`${files.code[0].bucket}/${files.code[0].path}`, rawCodePath)
-        await client.removeObject(files.code[0].bucket, files.code[0].path)
-        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
-        req.log.info(
-          { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
-          `Adding paths for raw model exports of files to version.`
-        )
-      } catch (e: any) {
-        throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
-      }
     })
   },
 ]

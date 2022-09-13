@@ -1,7 +1,9 @@
+import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -39,6 +41,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
+import { VersionDoc } from '../../server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -162,6 +165,10 @@ export default function Deployment() {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
   }
 
+  const initialVersionRequested: ObjectId | VersionDoc = deployment.versions.filter(
+    (version: any) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+  )[0] as VersionDoc
+
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
@@ -186,6 +193,9 @@ export default function Deployment() {
             >
               Actions
             </Button>
+            {initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly && (
+              <Alert severity='info'>This model version was uploaded as just a model card</Alert>
+            )}
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
@@ -207,7 +217,11 @@ export default function Deployment() {
             >
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
-              <Tab label='Build Logs' value='build' />
+              <Tab
+                label='Build Logs'
+                value='build'
+                disabled={initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly}
+              />
               <Tab label='Settings' value='settings' />
               <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
             </Tabs>

@@ -164,3 +164,9 @@ export type DocFile = {
 export type DocFileOrHeading = DocHeading | DocFile
 
 export type DocsMenuContent = DocFileOrHeading[]
+
+export enum ModelUploadType {
+  Zip = 'Upload code & binary',
+  ModelCard = 'Upload a model card',
+  Docker = 'Upload an exported Docker container',
+}

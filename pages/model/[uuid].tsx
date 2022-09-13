@@ -188,6 +188,9 @@ function Model() {
               >
                 Actions
               </Button>
+              {version.modelCardOnly !== undefined && version.modelCardOnly && (
+                <Alert severity='info'>This model version was uploaded as just a model card</Alert>
+              )}
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
@@ -282,7 +285,11 @@ function Model() {
           >
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
-            <Tab label='Build Logs' value='build' />
+            <Tab
+              label='Build Logs'
+              value='build'
+              disabled={version.modelCardOnly !== undefined && version.modelCardOnly}
+            />
             <Tab label='Deployments' value='deployments' />
             <Tab label='Settings' value='settings' />
           </Tabs>
