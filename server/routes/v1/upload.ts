@@ -17,7 +17,7 @@ import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
-import { ModelUploadType } from '@/types/interfaces'
+import { ModelUploadType } from '../../../types/interfaces'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -227,7 +227,7 @@ export const postUpload = [
         }
       }
 
-      res.json({
+      return res.json({
         uuid: model.uuid,
       })
     })
