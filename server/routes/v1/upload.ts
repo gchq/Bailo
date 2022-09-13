@@ -68,6 +68,13 @@ export const postUpload = [
         })
       }
 
+      if (mode !== 'newVersion' && mode !== 'newModel') {
+        req.log.warn({ code: 'upload_mode_invalid', mode: { mode } }, `'${mode}' is not a valid upload mode.`)
+        return res.status(400).json({
+          message: `Upload mode '${mode}' is not valid. Must be either 'newModel' or 'newVersion'`,
+        })
+      }
+
       let metadata
 
       try {
@@ -173,6 +180,7 @@ export const postUpload = [
         })
       }
 
+      console.log('should not be here')
       await model.save()
 
       version.model = model._id
