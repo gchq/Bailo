@@ -6,8 +6,7 @@ import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
-import { VersionDoc } from 'server/models/Version'
-import { getUserById } from 'server/services/user'
+import { getUserById } from '../../services/user'
 
 export const getVersion = [
   ensureUserRole('user'),
