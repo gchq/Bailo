@@ -63,7 +63,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
-function ModalText({ status, statusText }: { status: number; statusText: string }) {
+function ConfirmationFeedbackText({ status, statusText }: { status: number; statusText: string }) {
   return (
     <Alert severity='error'>
       Error {status}: {statusText}
@@ -91,7 +91,7 @@ function Model() {
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false)
-  const [deleteConfirmText, setDeleteConfirmText] = useState<JSX.Element>(<Box />)
+  const [deleteConfirmContent, setDeleteConfirmContent] = useState<JSX.Element>(<Box />)
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -180,7 +180,7 @@ function Model() {
   }
 
   const handleDelete = () => {
-    setDeleteConfirmText(<Box />)
+    setDeleteConfirmContent(<Box />)
     setDeleteConfirmOpen(true)
   }
 
@@ -193,7 +193,7 @@ function Model() {
       if (res.status < 400) {
         router.push('/')
       } else {
-        setDeleteConfirmText(<ModalText status={res.status} statusText={res.statusText} />)
+        setDeleteConfirmContent(<ConfirmationFeedbackText status={res.status} statusText={res.statusText} />)
       }
     })
   }
@@ -434,8 +434,7 @@ function Model() {
               onCancel={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
               confirmationModalTitle='Delete the model?'
-              // eslint-disable-next-line react/jsx-curly-brace-presence
-              confirmationTextContent={deleteConfirmText}
+              confirmationContent={deleteConfirmContent}
             />
 
             <Typography variant='h6' sx={{ mb: 1 }}>
