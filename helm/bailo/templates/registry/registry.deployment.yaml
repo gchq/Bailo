@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -41,11 +42,11 @@ spec:
         - name: REGISTRY_AUTH
           value: "token"
         - name: REGISTRY_AUTH_TOKEN_REALM
-          value: "https://{{ .Values.openshift.appPublicRoute"/api/v1/registry_auth"
+          value: "https://{{ .Values.openshift.appPublicRoute }}/api/v1/registry_auth"
         - name: REGISTRY_AUTH_TOKEN_SERVICE
-          value: "RegistryAuth"
+          value: "RegistryAith"
         - name: REGISTRY_AUTH_TOKEN_ISSUER
-          value: "RegistryIssuer"
+          value: "ReigistryIssuer"
         - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
           value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
         - name: REGISTRY_HTTP_SECRET
@@ -74,4 +75,3 @@ spec:
               path: {{ .Values.registry.certFile }}
             - key: {{ .Values.nginxcert.key }}
               path: {{ .Values.registry.keyFile }}
-      

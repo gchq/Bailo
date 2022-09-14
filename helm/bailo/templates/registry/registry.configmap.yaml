@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,7 +19,7 @@ data:
         regionendpoint: http://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
         bucket: {{ .Values.minio.registryBucket }}
         secure: false
-        region: ignored
+        region: ignored-for-minio
       redirect:
         disable: true
       delete:
@@ -41,4 +42,3 @@ data:
         enabled: true
         interval: 10s
         threshold: 3
-        

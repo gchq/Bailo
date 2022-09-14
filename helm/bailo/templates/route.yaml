@@ -9,11 +9,11 @@ spec:
   host: {{ .Values.openshift.appPublicRoute }}
   to:
     kind: Service
-    name: nginx
+    name: nginxauth
     weight: 100
   port:
     targetPort: http
   tls:
-    termination: passthrough
+    termination: edge
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None

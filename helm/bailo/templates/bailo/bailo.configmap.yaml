@@ -9,7 +9,7 @@ data:
   production.js: |
     module.exports = {
       minio: {
-        endpoint: '{{ include "bailo.minio.host" .}}',
+        endPoint: '{{ include "bailo.minio.host" .}}',
         port: {{ .Values.minio.service.ports.api }},
         useSSL: {{ .Values.minio.useSSL }},
         region: '',
@@ -21,7 +21,7 @@ data:
         host: '{{ .Values.config.smtp.host }}',
         port: 25,
         secure: false,
-        auth: { use: '', pass: '' },
+        auth: { user: '', pass: '' },
         tls: { rejectUnauthorized: false },
         from: '{{ .Values.config.smtp.from }}',
       },
@@ -58,8 +58,8 @@ data:
           useNewUrlParser: true,
           useUnifiedTopology: true,
           useCreateIndex: true,
-          ssl: true,
-          sslValidate: false,
+          //ssl: false,
+          //sslValidate: false,
         },
       }
     }

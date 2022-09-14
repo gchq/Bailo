@@ -30,73 +30,74 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-        securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        env:
-          - name: MINIO_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "bailo.fullname" . }}-minio
-                key: root-user
-          - name: MINIO_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "bailo.fullname" . }}-minio
-                key: root-password
-          - name: MONGO_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "bailo.fullname" . }}-mongodb
-                key: mongodb-passwords
-          - name: MONGO_CONNECTION_URI
-            value: {{ include "bailo.mongoConnectionURI" . | quote }}
-          - name: SCHEMA_SETUP_SCRIPT
-            value: {{ .Values.schema.script }}
-          - name: OPENSHIFT
-            value: "True"
-        ports:
-          - name: http
-            containerPort: {{ .Values.service.port }}
-            protocol: TCP
-        livenessProbe:
-          httpGet:
-            path: /
-            port: http
-        readinessProbe:
-          httpGet:
-            path: /
-            port: http
-        resources:
-          {{ - toYaml .Values.resource | nindent 12 }}
-        volumeMounts:
-          - name: config
-            mountPath: /app/config/production.js
-            subPath: production.js
-          - name: config
-            mountPath: /app/config/custom-environment-variables.js
-            subPath: cert.pem
-          - name: certs
-            mountPath: /app/certs
-          - name: temp
-            mountPath: /tmp
-          - name: cache
-            mountPath: /app/.next/cache
-          - name: certs
-            mountPath: /usr/local/share/ca-certificates/bailo.pem
-            subPath: cert.pem
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          #image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-minio
+                  key: root-user
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-minio
+                  key: root-password
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-mongodb
+                  key: mongodb-passwords
+            - name: MONGO_CONNECTION_URI
+              value: {{ include "bailo.mongoConnectionURI" . | quote }}
+            - name: SCHEMA_SETUP_SCRIPT
+              value: {{ .Values.config.schema.script }}
+            - name: OPENSHIFT
+              value: "True"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resource | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config/production.js
+              subPath: production.js
+            - name: config
+              mountPath: /app/config/custom-environment-variables.js
+              subPath: custom-environment-variables.js
+            - name: certs
+              mountPath: /app/certs
+            - name: temp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.next/cache
+            - name: certs
+              mountPath: /usr/local/share/ca-certificates/bailo.pem
+              subPath: cert.pem
       {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{ -toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
-        {{ -toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{ -toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
         - name: config
