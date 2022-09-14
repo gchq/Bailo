@@ -55,36 +55,19 @@ export const putVersion = [
       version: version._id,
       request: 'Upload',
       $or: [
-        { $or: [
-          { approvalType: ApprovalTypes.Manager, user: { $ne: manager } },
-          { approvalType: ApprovalTypes.Reviewer, user: { $ne: reviewer } }
-        ]},
-        { approvalType: { $ne: ApprovalStates.NoResponse }}
-      ]
+        {
+          approvalType: ApprovalTypes.Manager,
+          user: { $ne: manager },
+        },
+        {
+          approvalType: ApprovalTypes.Reviewer,
+          user: { $ne: reviewer },
+        },
+        {
+          status: { $in: [ApprovalStates.Accepted, ApprovalStates.Declined] },
+        },
+      ],
     })
-
-    /*if (
-      version.metadata.contacts.manager !== oldContacts.manager ||
-      version.managerApproved !== ApprovalStates.NoResponse
-    ) {
-      const existingManagerRequest = await RequestModel.findOne({
-        version: version._id,
-        request: 'Upload',
-        approvalType: ApprovalTypes.Manager,
-      })
-      existingManagerRequest !== null && existingManagerRequest.delete()
-    }
-    if (
-      version.metadata.contacts.reviewer !== oldContacts.reviewer ||
-      version.reviewerApproved !== ApprovalStates.NoResponse
-    ) {
-      const existingMReviewerRequest = await RequestModel.findOne({
-        version: version._id,
-        request: 'Upload',
-        approvalType: ApprovalTypes.Reviewer,
-      })
-      existingMReviewerRequest !== null && existingMReviewerRequest.delete()
-    }*/
 
     await createVersionRequests({ version })
 
