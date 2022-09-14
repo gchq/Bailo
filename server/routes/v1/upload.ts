@@ -41,7 +41,7 @@ export const postUpload = [
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
-      const mode = req.query.mode as string
+      const mode = (req.query.mode as string) || 'newModel'
       const modelUuid = req.query.modelUuid as string
 
       if (!files.binary) {
