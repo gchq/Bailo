@@ -172,11 +172,32 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        <Box sx={{ textAlign: 'right', pb: 3 }}>
-          <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-            Show download commands
-          </Button>
-        </Box>
+        {initialVersionRequested.modelCardOnly === undefined ||
+          (!initialVersionRequested.modelCardOnly && (
+            <Box sx={{ textAlign: 'right', pb: 3 }}>
+              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+                Show download commands
+              </Button>
+            </Box>
+          ))}
+        {initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly && (
+          <Box sx={{ pb: 2 }}>
+            <Alert
+              severity='info'
+              sx={{
+                width: 'fit-content',
+                m: 'auto',
+                backgroundColor: '#0288d1',
+                color: '#fff',
+                '& .MuiAlert-icon': {
+                  color: '#fff',
+                },
+              }}
+            >
+              This model version was uploaded as just a model card
+            </Alert>
+          </Box>
+        )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip approvals={[deployment?.managerApproved]} />
@@ -193,9 +214,6 @@ export default function Deployment() {
             >
               Actions
             </Button>
-            {initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly && (
-              <Alert severity='info'>This model version was uploaded as just a model card</Alert>
-            )}
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>

@@ -170,6 +170,13 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
+      {version.modelCardOnly !== undefined && version.modelCardOnly && (
+        <Box sx={{ pb: 2 }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+            This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -188,9 +195,6 @@ function Model() {
               >
                 Actions
               </Button>
-              {version.modelCardOnly !== undefined && version.modelCardOnly && (
-                <Alert severity='info'>This model version was uploaded as just a model card</Alert>
-              )}
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
