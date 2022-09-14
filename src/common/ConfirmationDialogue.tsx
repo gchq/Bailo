@@ -8,13 +8,13 @@ import DialogActions from '@mui/material/DialogActions'
 export default function ConfirmationDialogue({
   showConfirmationDialogue,
   confirmationModalTitle,
-  confirmationTextContent,
+  confirmationContent,
   onCancel,
   onConfirm,
 }: {
   showConfirmationDialogue: boolean
   confirmationModalTitle: string
-  confirmationTextContent: JSX.Element
+  confirmationContent: JSX.Element
 
   onCancel: () => void
   onConfirm: () => void
@@ -23,7 +23,7 @@ export default function ConfirmationDialogue({
     <Dialog open={showConfirmationDialogue} onClose={onCancel}>
       <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
       <DialogContent>
-        <Box id='alert-dialog-description'>{confirmationTextContent}</Box>
+        <Box id='alert-dialog-description'>{confirmationContent}</Box>
       </DialogContent>
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={onCancel}>
