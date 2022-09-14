@@ -164,3 +164,8 @@ export type DocFile = {
 export type DocFileOrHeading = DocHeading | DocFile
 
 export type DocsMenuContent = DocFileOrHeading[]
+
+export enum UploadModes {
+  NewModel = 'newModel',
+  NewVersion = 'newVersion',
+}
