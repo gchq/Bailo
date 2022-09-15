@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Schema, model, Document, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
@@ -8,7 +7,6 @@ import { VersionDoc } from './Version'
 
 export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
 
-// eslint-disable-next-line no-shadow
 export enum ApprovalStates {
   Accepted = 'Accepted',
   Declined = 'Declined',

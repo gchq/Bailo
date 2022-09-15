@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import Box from '@mui/material/DialogContentText'
 import { render, screen, waitFor } from '@testing-library/react'
 import ConfirmationDialogue from './ConfirmationDialogue'
 
@@ -16,6 +17,7 @@ const handleConfirm = () => {
 describe('ConfirmationDialogue', () => {
   const testTitle = 'Test dialogue title'
   const testText = 'Test dialogue text'
+  const testContent = <Box>{testText}</Box>
 
   it('renders a ConfirmationDialogue component', async () => {
     render(
@@ -24,7 +26,7 @@ describe('ConfirmationDialogue', () => {
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         confirmationModalTitle={testTitle}
-        confirmationModalText={testText}
+        confirmationContent={testContent}
       />
     )
 
@@ -41,7 +43,7 @@ describe('ConfirmationDialogue', () => {
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         confirmationModalTitle={testTitle}
-        confirmationModalText={testText}
+        confirmationContent={testContent}
       />
     )
 

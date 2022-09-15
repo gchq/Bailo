@@ -76,6 +76,7 @@ describe('test model routes', () => {
   test('that we can delete a specific version for a model', async () => {
     const resDelete = await authenticatedDeleteRequest(`/api/v1/model/${modelUuid}`)
     validateTestRequest(resDelete)
+    expect(resDelete.body).toBe(`${modelUuid}`)
     const resGet = await authenticatedGetRequest(`/api/v1/model/uuid/${modelUuid}`)
     expect(resGet.statusCode).toBe(404)
     expect(resGet.body.message).toBe(`Unable to find model '${modelUuid}'`)

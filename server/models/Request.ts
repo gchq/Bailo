@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import { approvalStateOptions, ApprovalStates, DeploymentDoc } from './Deployment'
@@ -7,7 +6,6 @@ import { VersionDoc } from './Version'
 
 export const approvalTypeOptions = ['Manager', 'Reviewer']
 
-// eslint-disable-next-line no-shadow
 export enum ApprovalTypes {
   Manager = 'Manager',
   Reviewer = 'Reviewer',
@@ -15,7 +13,6 @@ export enum ApprovalTypes {
 
 export const requestTypeOptions = ['Upload', 'Deployment']
 
-// eslint-disable-next-line no-shadow
 export enum RequestTypes {
   Upload = 'Upload',
   Deployment = 'Deployment',

@@ -1,7 +1,6 @@
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
 import Box from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 
@@ -22,9 +21,7 @@ export default function ConfirmationDialogue({
   return (
     <Dialog open={showConfirmationDialogue} onClose={onCancel}>
       <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
-      <DialogContent>
-        <Box id='alert-dialog-description'>{confirmationContent}</Box>
-      </DialogContent>
+      <Box id='alert-dialog-description'>{confirmationContent}</Box>
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={onCancel}>
           Cancel
