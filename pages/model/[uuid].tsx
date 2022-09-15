@@ -65,7 +65,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 
 function ConfirmationFeedbackText({ status, statusText }: { status: number; statusText: string }) {
   return (
-    <Alert severity='error'>
+    <Alert severity='error' sx={{ m: 2, width: 400 }}>
       Error {status}: {statusText}
     </Alert>
   )
