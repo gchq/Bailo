@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { ApprovalStates } from '../../models/Deployment'
+import { ApprovalStates } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
