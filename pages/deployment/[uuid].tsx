@@ -39,6 +39,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
+import DisabledButtonInfo, { DisabledButtonConditions } from '../../src/common/DisabledButtonInfo'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -162,6 +163,20 @@ export default function Deployment() {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
   }
 
+  const resetApprovalDisabledConditions: DisabledButtonConditions[] = [
+    {
+      condition: deployment.managerApproved === 'No Response',
+      message: 'Deployment needs to be approved before it can have its approvals reset,',
+    },
+  ]
+
+  const modelExportDisabledConditions: DisabledButtonConditions[] = [
+    {
+      condition: deployment.managerApproved !== 'Accepted',
+      message: 'Deployment needs to be approved before you can view the exported model list.',
+    },
+  ]
+
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
@@ -189,12 +204,14 @@ export default function Deployment() {
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
-              <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
-                <ListItemIcon>
-                  <RestartAlt fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Reset approvals</ListItemText>
-              </MenuItem>
+              <DisabledButtonInfo conditions={resetApprovalDisabledConditions}>
+                <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
+                  <ListItemIcon>
+                    <RestartAlt fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Reset approvals</ListItemText>
+                </MenuItem>
+              </DisabledButtonInfo>
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
@@ -209,7 +226,16 @@ export default function Deployment() {
               <Tab label='Compliance' value='compliance' />
               <Tab label='Build Logs' value='build' />
               <Tab label='Settings' value='settings' />
-              <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
+              <Tab
+                style={{ pointerEvents: 'auto' }}
+                disabled={deployment.managerApproved !== 'Accepted'}
+                value='exports'
+                label={
+                  <DisabledButtonInfo conditions={modelExportDisabledConditions} placement='top'>
+                    Model Exports
+                  </DisabledButtonInfo>
+                }
+              />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />

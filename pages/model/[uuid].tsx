@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -49,6 +50,7 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
 import { Deployment, User, Version } from '../../types/interfaces'
+import DisabledButtonInfo, { DisabledButtonConditions } from '../../src/common/DisabledButtonInfo'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -168,6 +170,39 @@ function Model() {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
+  const requestDeploymentDisabledConditions: DisabledButtonConditions[] = [
+    {
+      condition: !version.built,
+      message: 'Version not built.',
+    },
+    {
+      condition: version.managerApproved !== 'Accepted',
+      message: 'Version has not been approved by a manager.',
+    },
+    {
+      condition: version.reviewerApproved !== 'Accepted',
+      message: 'Version has not been approved by a technical reviewer.',
+    },
+  ]
+
+  const editDisabledConditions: DisabledButtonConditions[] = [
+    {
+      condition: version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted',
+      message: 'Version has already been approved by both a manager and a technical reviewer.',
+    },
+    {
+      condition: currentUser.id !== version?.metadata?.contacts?.uploader,
+      message: 'You do not have permission to edit this version.',
+    },
+  ]
+
+  const resetApprovalDisabledConditions: DisabledButtonConditions[] = [
+    {
+      condition: version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response',
+      message: 'Version needs to have at least one approval before it can have its approvals reset,',
+    },
+  ]
+
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       <Paper sx={{ p: 3 }}>
@@ -191,18 +226,22 @@ function Model() {
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
-                <MenuItem
-                  onClick={requestDeployment}
-                  disabled={
-                    !version.built || version.managerApproved !== 'Accepted' || version.reviewerApproved !== 'Accepted'
-                  }
-                  data-test='submitDeployment'
-                >
-                  <ListItemIcon>
-                    <UploadIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Request deployment</ListItemText>
-                </MenuItem>
+                <DisabledButtonInfo conditions={requestDeploymentDisabledConditions}>
+                  <MenuItem
+                    onClick={requestDeployment}
+                    disabled={
+                      !version.built ||
+                      version.managerApproved !== 'Accepted' ||
+                      version.reviewerApproved !== 'Accepted'
+                    }
+                    data-test='submitDeployment'
+                  >
+                    <ListItemIcon>
+                      <UploadIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Request deployment</ListItemText>
+                  </MenuItem>
+                </DisabledButtonInfo>
                 <Divider />
                 {!modelFavourited && (
                   <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
@@ -224,33 +263,37 @@ function Model() {
                     </>
                   </MenuItem>
                 )}
-                <MenuItem
-                  onClick={editModel}
-                  disabled={
-                    (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
-                    currentUser.id !== version?.metadata?.contacts?.uploader
-                  }
-                >
-                  <ListItemIcon>
-                    <EditIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
-                </MenuItem>
+                <DisabledButtonInfo conditions={editDisabledConditions}>
+                  <MenuItem
+                    onClick={editModel}
+                    disabled={
+                      (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                      currentUser.id !== version?.metadata?.contacts?.uploader
+                    }
+                  >
+                    <ListItemIcon>
+                      <EditIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+                </DisabledButtonInfo>
                 <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <MenuItem
-                  onClick={requestApprovalReset}
-                  disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
-                >
-                  <ListItemIcon>
-                    <RestartAlt fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Reset approvals</ListItemText>
-                </MenuItem>
+                <DisabledButtonInfo conditions={resetApprovalDisabledConditions}>
+                  <MenuItem
+                    onClick={requestApprovalReset}
+                    disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
+                  >
+                    <ListItemIcon>
+                      <RestartAlt fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Reset approvals</ListItemText>
+                  </MenuItem>
+                </DisabledButtonInfo>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>
