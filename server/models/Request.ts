@@ -1,5 +1,6 @@
 import { Document, model, Schema, Types } from 'mongoose'
-import { approvalStateOptions, ApprovalStates, DeploymentDoc } from './Deployment'
+import { DeploymentDoc } from './Deployment'
+import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
