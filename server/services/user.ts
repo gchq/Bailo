@@ -41,7 +41,7 @@ interface FindAndUpdateUserArgs {
 export async function findAndUpdateUser({ userId, email, data }: FindAndUpdateUserArgs) {
   // findOneAndUpdate is atomic, so we don't need to worry about
   // multiple threads calling this simultaneously.
-  return await UserModel.findOneAndUpdate(
+  return UserModel.findOneAndUpdate(
     { $or: [{ id: userId }, { email }] },
     { id: userId, email, data }, // upsert docs
     { new: true, upsert: true }

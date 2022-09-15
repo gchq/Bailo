@@ -10,13 +10,15 @@ import logger from '../../utils/logger'
 import { Forbidden } from '../../utils/result'
 import { getUserFromAuthHeader } from '../../utils/user'
 
-let adminToken: string | undefined = undefined
+let adminToken: string | undefined
 
 export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
     const hash = createHash('sha256').update(key).digest().slice(0, 16)
+    // eslint-disable-next-line no-bitwise
     hash[6] = (hash[6] & 0x0f) | 0x40
+    // eslint-disable-next-line no-bitwise
     hash[8] = (hash[8] & 0x3f) | 0x80
 
     adminToken = uuidStringify(hash)
@@ -28,18 +30,20 @@ export async function getAdminToken() {
 getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
 async function getPrivateKey() {
-  return await readFile('./certs/key.pem', { encoding: 'utf-8' })
+  return readFile('./certs/key.pem', { encoding: 'utf-8' })
 }
 
 async function getPublicKey() {
-  return await readFile('./certs/cert.pem', { encoding: 'utf-8' })
+  return readFile('./certs/cert.pem', { encoding: 'utf-8' })
 }
 
 function getBit(buffer: Buffer, index: number) {
+  // eslint-disable-next-line no-bitwise
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  return Number((idByte & Math.pow(2, 7 - bit)) !== 0)
+  // eslint-disable-next-line no-bitwise
+  return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -47,13 +51,14 @@ function formatKid(keyBuffer: Buffer) {
   const bitLength = keyBuffer.length * 8
 
   if (bitLength % 40 !== 0) {
-    throw new Error('Invalid bitlength provided, expected multiple of 40')
+    throw new Error('Invalid bitLength provided, expected multiple of 40')
   }
 
   let output = ''
   for (let i = 0; i < bitLength; i += 5) {
     let idx = 0
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < 5; j += 1) {
+      // eslint-disable-next-line no-bitwise
       idx <<= 1
       idx += getBit(keyBuffer, i + j)
     }
@@ -208,7 +213,7 @@ export const getDockerRegistryAuth = [
 
     const accesses = scopes.map(generateAccess)
 
-    for (let access of accesses) {
+    for (const access of accesses) {
       if (!admin && !checkAccess(access, user)) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }

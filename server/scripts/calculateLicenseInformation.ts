@@ -1,6 +1,7 @@
 import { exec } from 'shelljs'
 import packageLock from '../../package-lock.json'
 import packageInfo from '../../package.json'
+import { consoleLog } from '../../utils/logging'
 
 // This script requires 'license-checker'
 //   npm i -g license-checker
@@ -11,7 +12,7 @@ export default async function runScript() {
   const packages = Object.keys(packageInfo.dependencies).concat(Object.keys(packageInfo.devDependencies))
   const dependencies: any = {}
 
-  for (let license of Object.keys(licenses)) {
+  for (const license of Object.keys(licenses)) {
     const name = license.split('@')[0]
 
     if (packages.includes(name)) {
@@ -19,12 +20,11 @@ export default async function runScript() {
     }
   }
 
-  for (let [name, unknownLicense] of Object.entries(dependencies)) {
-    let license = unknownLicense as any
-    const version = packageLock.packages[`node_modules/${name}`].version
+  for (const [name, unknownLicense] of Object.entries(dependencies)) {
+    const license = unknownLicense as any
+    const { version } = packageLock.packages[`node_modules/${name}`]
 
-    // console.log([name, version, license.licenses, license.repository].join(','))
-    console.log(`${name} v${version} <${license.licenses}>: ${license.repository}`)
+    consoleLog(`${name} v${version} <${license.licenses}>: ${license.repository}`)
   }
 }
 

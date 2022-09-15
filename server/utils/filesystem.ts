@@ -9,11 +9,10 @@ export function ensurePathExists(path: string, sync = false) {
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, { recursive: true })
     }
-
     return
   }
 
-  return access(path, constants.F_OK).catch(() => mkdir(path))
+  access(path, constants.F_OK).catch(() => mkdir(path))
 }
 
 export async function getFilesInDir(path: string) {

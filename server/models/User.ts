@@ -41,10 +41,16 @@ const UserSchema = new Schema<User>(
 )
 
 UserSchema.pre('save', function (next) {
-  if (!this.isModified('token') || !this.token) return next()
+  if (!this.isModified('token') || !this.token) {
+    next()
+    return
+  }
 
   bcrypt.hash(this.token, 10, (err, hash) => {
-    if (err) return next(err)
+    if (err) {
+      next(err)
+      return
+    }
 
     this.token = hash
     next()
@@ -53,10 +59,16 @@ UserSchema.pre('save', function (next) {
 
 UserSchema.methods.compareToken = function (candidateToken: string) {
   return new Promise((resolve, reject) => {
-    if (!this.token) return resolve(false)
+    if (!this.token) {
+      resolve(false)
+      return
+    }
 
-    bcrypt.compare(candidateToken, this.token, function (err, isMatch) {
-      if (err) return reject(err)
+    bcrypt.compare(candidateToken, this.token, (err, isMatch) => {
+      if (err) {
+        reject(err)
+        return
+      }
       resolve(isMatch)
     })
   })

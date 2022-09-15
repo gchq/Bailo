@@ -19,7 +19,7 @@ export const getUsers = [
 export const getLoggedInUser = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const _id = req.user!._id
+    const { _id } = req.user
     const user = await getUserByInternalId(_id)
     req.log.info({ code: 'fetching_user_details' }, 'Getting logged in user details')
     return res.json(user)
@@ -33,8 +33,10 @@ export const postRegenerateToken = [
 
     req.log.info({ code: 'user_requested_token' }, 'User requested token')
 
-    req.user!.token = token
-    await req.user!.save()
+    if (req.user) {
+      req.user.token = token
+      await req.user.save()
+    }
 
     return res.json({ token })
   },
@@ -49,11 +51,11 @@ export const favouriteModel = [
       throw BadReq({ code: 'model_id_incorrect_type' }, `Model ID must be a string`)
     }
 
-    const user = await getUserById(req.user!.id)
-    const model = await findModelById(req.user!, modelId)
+    const user = await getUserById(req.user.id)
+    const model = await findModelById(req.user, modelId)
 
     if (!user) {
-      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user!.id}'`)
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
     if (user.favourites.includes(modelId)) {
@@ -81,12 +83,12 @@ export const unfavouriteModel = [
       throw BadReq({ code: 'model_id_incorrect_type' }, `Model ID must be a string`)
     }
 
-    const user = await getUserById(req.user!.id)
+    const user = await getUserById(req.user.id)
     if (!user) {
-      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user!.id}'`)
+      throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
-    const model = await findModelById(req.user!, modelId)
+    const model = await findModelById(req.user, modelId)
 
     if (!user.favourites.includes(modelId)) {
       // model not favourited

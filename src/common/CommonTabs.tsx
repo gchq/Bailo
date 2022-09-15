@@ -51,7 +51,6 @@ export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any 
               label={tabName !== undefined ? getTitle(tabName, index) : tab.name}
               key={`${tabName} ${index + 1}`}
               sx={{ flexGrow: 1, backgroundColor: 'white', maxWidth: 275 }}
-              // eslint-disable-next-line react/jsx-props-no-spreading
               {...a11yProps(index)}
             />
           ))}

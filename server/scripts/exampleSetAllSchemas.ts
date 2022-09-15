@@ -1,7 +1,8 @@
+/* eslint-disable import/newline-after-import */
 import { createSchema } from '../services/schema'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
-import deploy_schema from './example_schemas/minimal_deployment_schema.json'
-import model_schema from './example_schemas/minimal_upload_schema.json'
+import deploySchema from './example_schemas/minimal_deployment_schema.json'
+import modelSchema from './example_schemas/minimal_upload_schema.json'
 ;(async () => {
   await connectToMongoose()
 
@@ -9,7 +10,7 @@ import model_schema from './example_schemas/minimal_upload_schema.json'
     {
       name: 'Minimal Schema v10',
       reference: '/Minimal/General/v10',
-      schema: model_schema,
+      schema: modelSchema,
       use: 'UPLOAD',
     },
     true
@@ -18,7 +19,7 @@ import model_schema from './example_schemas/minimal_upload_schema.json'
   await createSchema({
     name: 'Minimal Deployment Schema v6',
     reference: '/Minimal/Deployment/v6',
-    schema: deploy_schema,
+    schema: deploySchema,
     use: 'DEPLOYMENT',
   })
 

@@ -1,3 +1,3 @@
-export default function Nothing(_props: any) {
+export default function Nothing(_props: unknown) {
   return null
 }

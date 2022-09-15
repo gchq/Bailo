@@ -1,17 +1,15 @@
+/* eslint-disable no-param-reassign */
 import { join } from 'path'
-import { tmpdir } from 'os'
-import { v4 as uuidv4 } from 'uuid'
-import { mkdir, rm } from 'shelljs'
+import { rm } from 'shelljs'
 
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { getClient } from '../minio'
 
-interface GetRawFilesProps {}
 class GetRawFiles extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: GetRawFilesProps) {
-    super(logger, opts, props)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
+    super(logger, opts)
 
     this.opts.retryable = true
   }
@@ -55,13 +53,11 @@ class GetRawFiles extends BuildStep {
     }
   }
 
-  async tidyup(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }
 
-export default function (opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger, props: GetRawFilesProps) => {
-    return new GetRawFiles(logger, opts, props)
-  }
+export default function getRawFiles(opts: Partial<BuildOpts> = {}) {
+  return (logger: BuildLogger) => new GetRawFiles(logger, opts)
 }

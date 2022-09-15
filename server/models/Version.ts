@@ -65,5 +65,6 @@ export default VersionModel
 
 VersionSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ versionId: this._id }, msg)
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }

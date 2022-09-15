@@ -6,7 +6,7 @@ import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '@/src/theme'
-import DocsMenuContext from '@/utils/contexts/docsMenuContext'
+import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
 
@@ -87,12 +87,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 minWidth: 200,
                 backgroundColor: theme.palette.background.paper,
                 borderRight: `1px solid ${theme.palette.divider}`,
-                overflow: 'scroll',
+                overflow: 'auto',
               }}
             >
               <StyledList>{docsMenu}</StyledList>
             </Box>
-            <Box flex={1} overflow='scroll'>
+            <Box flex={1} overflow='auto'>
               <Box display='flex' flexDirection='column' height='100%'>
                 <Container maxWidth='lg'>{children}</Container>
                 <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
