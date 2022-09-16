@@ -48,7 +48,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
-import { Deployment, User, Version } from '../../types/interfaces'
+import { Deployment, ModelUploadType, User, Version } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -170,13 +170,14 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
-      {version.modelCardOnly !== undefined && version.modelCardOnly && (
-        <Box sx={{ pb: 2 }}>
-          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
-            This model version was uploaded as just a model card
-          </Alert>
-        </Box>
-      )}
+      {version.metadata.buildOptions.uploadType !== undefined &&
+        version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+          <Box sx={{ pb: 2 }}>
+            <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+              This model version was uploaded as just a model card
+            </Alert>
+          </Box>
+        )}
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -297,7 +298,10 @@ function Model() {
             <Tab
               label='Build Logs'
               value='build'
-              disabled={version.modelCardOnly !== undefined && version.modelCardOnly}
+              disabled={
+                version.metadata.buildOptions.uploadType !== undefined &&
+                version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+              }
             />
             <Tab label='Deployments' value='deployments' />
             <Tab label='Settings' value='settings' />

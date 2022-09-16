@@ -43,9 +43,21 @@ export const postUpload = [
       const files = req.files as unknown as MinioFile
       const mode = (req.query.mode as string) || UploadModes.NewModel
       const modelUuid = req.query.modelUuid as string
-      const uploadType = req.body.uploadType as ModelUploadType
 
-      if (uploadType === ModelUploadType.Zip && !files.binary) {
+      let metadata
+
+      try {
+        metadata = JSON.parse(req.body.metadata)
+      } catch (e) {
+        req.log.warn({ code: 'metadata_invalid_json', metadata: req.body.metadata }, 'Metadata is not valid JSON')
+        return res.status(400).json({
+          message: `Unable to parse schema as JSON`,
+        })
+      }
+
+      const uploadType = metadata.buildOptions.uploadType as ModelUploadType
+
+      if (metadata.uploadType === ModelUploadType.Zip && !files.binary) {
         throw BadReq({ code: 'binary_file_not_found' }, 'Unable to find binary file')
       }
 
@@ -75,17 +87,6 @@ export const postUpload = [
           { code: 'upload_mode_invalid' },
           `Upload mode '${mode}' is not valid. Must be either 'newModel' or 'newVersion'`
         )
-      }
-
-      let metadata
-
-      try {
-        metadata = JSON.parse(req.body.metadata)
-      } catch (e) {
-        req.log.warn({ code: 'metadata_invalid_json', metadata: req.body.metadata }, 'Metadata is not valid JSON')
-        return res.status(400).json({
-          message: `Unable to parse schema as JSON`,
-        })
       }
 
       const schema = await findSchemaByRef(metadata.schemaRef)
@@ -197,8 +198,6 @@ export const postUpload = [
       )
 
       if (uploadType === ModelUploadType.ModelCard) {
-        version.modelCardOnly = true
-        await version.save()
         await markVersionBuilt(version._id)
       } else {
         await version.save()

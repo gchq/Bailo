@@ -1,3 +1,6 @@
+import axios from 'axios'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
 import { useGetCurrentUser } from '@/data/user'
 import LoadingBar from '@/src/common/LoadingBar'
@@ -10,14 +13,11 @@ import RenderFileTab, { FileTabComplete, RenderBasicFileTab } from '@/src/Form/R
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
-import { Schema, SplitSchema, ModelUploadType, User } from '@/types/interfaces'
+import { Schema, SplitSchema, User } from '@/types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
-import axios from 'axios'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 
 function renderSubmissionTab({
   splitSchema,
@@ -84,7 +84,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
-          uploadType: ModelUploadType.Zip,
+          steps,
         },
         schemaRef: reference,
 
@@ -153,7 +153,6 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-    form.append('uploadType', data.files.uploadType)
     delete data.files
 
     form.append('metadata', JSON.stringify(data))

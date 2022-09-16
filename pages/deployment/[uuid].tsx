@@ -42,6 +42,7 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import { VersionDoc } from '../../server/models/Version'
+import { ModelUploadType } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -172,32 +173,33 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {initialVersionRequested.modelCardOnly === undefined ||
-          (!initialVersionRequested.modelCardOnly && (
+        {initialVersionRequested.metadata.buildOptions.uploadType === undefined ||
+          (initialVersionRequested.metadata.buildOptions.uploadType !== ModelUploadType.ModelCard && (
             <Box sx={{ textAlign: 'right', pb: 3 }}>
               <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
                 Show download commands
               </Button>
             </Box>
           ))}
-        {initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly && (
-          <Box sx={{ pb: 2 }}>
-            <Alert
-              severity='info'
-              sx={{
-                width: 'fit-content',
-                m: 'auto',
-                backgroundColor: '#0288d1',
-                color: '#fff',
-                '& .MuiAlert-icon': {
+        {initialVersionRequested.metadata.buildOptions.uploadType !== undefined &&
+          initialVersionRequested.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+            <Box sx={{ pb: 2 }}>
+              <Alert
+                severity='info'
+                sx={{
+                  width: 'fit-content',
+                  m: 'auto',
+                  backgroundColor: '#0288d1',
                   color: '#fff',
-                },
-              }}
-            >
-              This model version was uploaded as just a model card
-            </Alert>
-          </Box>
-        )}
+                  '& .MuiAlert-icon': {
+                    color: '#fff',
+                  },
+                }}
+              >
+                This model version was uploaded as just a model card
+              </Alert>
+            </Box>
+          )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
@@ -240,7 +242,10 @@ export default function Deployment() {
               <Tab
                 label='Build Logs'
                 value='build'
-                disabled={initialVersionRequested.modelCardOnly !== undefined && initialVersionRequested.modelCardOnly}
+                disabled={
+                  initialVersionRequested.metadata.buildOptions.uploadType !== undefined &&
+                  initialVersionRequested.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                }
               />
               <Tab label='Settings' value='settings' />
               <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />

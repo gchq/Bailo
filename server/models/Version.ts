@@ -19,8 +19,6 @@ export interface Version {
     rawCodePath: string
   }
 
-  modelCardOnly?: boolean
-
   state: any
   logs: Types.Array<LogStatement>
 
@@ -40,8 +38,6 @@ const VersionSchema = new Schema<Version>(
     metadata: { type: Schema.Types.Mixed },
 
     files: { type: Schema.Types.Mixed, required: true },
-
-    modelCardOnly: { type: Boolean },
 
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
