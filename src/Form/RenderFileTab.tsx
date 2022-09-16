@@ -45,46 +45,38 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   }
 
   return (
-    <>
-      <Grid container justifyContent='center'>
-        {buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
-          <Stack direction='row' spacing={2} sx={{ p: 3 }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <label htmlFor={codeId}>
-                <Typography sx={{ p: 1 }} variant='h5'>
-                  Upload a code file (.zip)
-                </Typography>
-                <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept='.zip' />
-                <Button variant='outlined' component='span'>
-                  {code ? displayFilename(code.name) : 'Upload file'}
-                </Button>
-              </label>
-            </Box>
-            <Divider orientation='vertical' flexItem />
-            <Box sx={{ textAlign: 'center' }}>
-              <label htmlFor={binaryId}>
-                <Typography sx={{ p: 1 }} variant='h5'>
-                  Upload a binary file (.zip)
-                </Typography>
-                <Input
-                  style={{ margin: '10px' }}
-                  id={binaryId}
-                  type='file'
-                  onChange={handleBinaryChange}
-                  accept='.zip'
-                />
-                <Button variant='outlined' component='span'>
-                  {binary ? displayFilename(binary.name) : 'Upload file'}
-                </Button>
-              </label>
-            </Box>
-          </Stack>
-        )}
-        {buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
-          <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
-        )}
-      </Grid>
-    </>
+    <Grid container justifyContent='center'>
+      {buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
+        <Stack direction='row' spacing={2} sx={{ p: 3 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <label htmlFor={codeId}>
+              <Typography sx={{ p: 1 }} variant='h5'>
+                Upload a code file (.zip)
+              </Typography>
+              <Input style={{ margin: '10px' }} id={codeId} type='file' onChange={handleCodeChange} accept='.zip' />
+              <Button variant='outlined' component='span'>
+                {code ? displayFilename(code.name) : 'Upload file'}
+              </Button>
+            </label>
+          </Box>
+          <Divider orientation='vertical' flexItem />
+          <Box sx={{ textAlign: 'center' }}>
+            <label htmlFor={binaryId}>
+              <Typography sx={{ p: 1 }} variant='h5'>
+                Upload a binary file (.zip)
+              </Typography>
+              <Input style={{ margin: '10px' }} id={binaryId} type='file' onChange={handleBinaryChange} accept='.zip' />
+              <Button variant='outlined' component='span'>
+                {binary ? displayFilename(binary.name) : 'Upload file'}
+              </Button>
+            </label>
+          </Box>
+        </Stack>
+      )}
+      {buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
+        <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
+      )}
+    </Grid>
   )
 }
 
@@ -93,7 +85,7 @@ export function FileTabComplete(step: Step) {
     (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
   )[0]
   return (
-    (buildOptionsStep.state.uploadType === ModelUploadType.Zip && buildOptionsStep.state.binary && step.state.code) ||
+    (buildOptionsStep.state.uploadType === ModelUploadType.Zip && step.state.binary && step.state.code) ||
     buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
   )
 }

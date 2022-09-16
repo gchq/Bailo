@@ -199,6 +199,7 @@ export const postUpload = [
 
       if (uploadType === ModelUploadType.ModelCard) {
         await markVersionBuilt(version._id)
+        await version.save()
       } else {
         await version.save()
       }

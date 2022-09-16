@@ -66,6 +66,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          steps,
         },
         schemaRef: cModel.schemaRef,
 
