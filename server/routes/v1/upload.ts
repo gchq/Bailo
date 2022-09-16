@@ -17,7 +17,7 @@ import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
-import { ModelUploadType } from '../../../types/interfaces'
+import { ModelUploadType, UploadModes } from '../../../types/interfaces'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -41,7 +41,7 @@ export const postUpload = [
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
-      const mode = req.query.mode as string
+      const mode = (req.query.mode as string) || UploadModes.NewModel
       const modelUuid = req.query.modelUuid as string
       const uploadType = req.body.uploadType as ModelUploadType
 
@@ -68,6 +68,13 @@ export const postUpload = [
         return res.status(400).json({
           message: `Unable to process code, file not a zip.`,
         })
+      }
+
+      if (!Object.values(UploadModes).includes(mode as UploadModes)) {
+        throw BadReq(
+          { code: 'upload_mode_invalid' },
+          `Upload mode '${mode}' is not valid. Must be either 'newModel' or 'newVersion'`
+        )
       }
 
       let metadata
@@ -153,7 +160,7 @@ export const postUpload = [
 
       let model: any
 
-      if (mode === 'newVersion') {
+      if (mode === UploadModes.NewVersion) {
         // Update an existing model's version array
         model = await findModelByUuid(req.user, modelUuid)
         model.versions.push(version._id)

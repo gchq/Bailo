@@ -200,7 +200,9 @@ export default function Deployment() {
         )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
-            <ApprovalsChip approvals={[deployment?.managerApproved]} />
+            <ApprovalsChip
+              approvals={[{ reviewer: deployment.metadata.contacts.manager, status: deployment.managerApproved }]}
+            />
             <Divider orientation='vertical' flexItem />
             <Button
               id='model-actions-button'
