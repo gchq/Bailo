@@ -1,17 +1,12 @@
 import React, { ReactNode, useEffect } from 'react'
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip'
 
-export type DisabledButtonConditions = {
-  condition: boolean
-  message: string
-}
-
 function DisabledButtonInfo({
   conditions,
   placement,
   children,
 }: {
-  conditions: DisabledButtonConditions[]
+  conditions: string[]
   placement?: TooltipProps['placement']
   children: ReactNode
 }) {
@@ -20,9 +15,9 @@ function DisabledButtonInfo({
   useEffect(() => {
     if (conditions !== undefined) {
       let updatedTitleText = ''
-      conditions.forEach(({ condition, message }) => {
-        if (condition) {
-          updatedTitleText = `${updatedTitleText} ${message}`
+      conditions.forEach((condition) => {
+        if (condition !== '') {
+          updatedTitleText = `${updatedTitleText} ${condition}`
         }
       })
       setTitleText(updatedTitleText)

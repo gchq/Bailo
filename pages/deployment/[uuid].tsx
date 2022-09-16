@@ -39,7 +39,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
-import DisabledButtonInfo, { DisabledButtonConditions } from '../../src/common/DisabledButtonInfo'
+import DisabledButtonInfo from '../../src/common/DisabledButtonInfo'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -163,20 +163,6 @@ export default function Deployment() {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
   }
 
-  const resetApprovalDisabledConditions: DisabledButtonConditions[] = [
-    {
-      condition: deployment.managerApproved === 'No Response',
-      message: 'Deployment needs to be approved before it can have its approvals reset,',
-    },
-  ]
-
-  const modelExportDisabledConditions: DisabledButtonConditions[] = [
-    {
-      condition: deployment.managerApproved !== 'Accepted',
-      message: 'Deployment needs to be approved before you can view the exported model list.',
-    },
-  ]
-
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
@@ -204,7 +190,13 @@ export default function Deployment() {
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
-              <DisabledButtonInfo conditions={resetApprovalDisabledConditions}>
+              <DisabledButtonInfo
+                conditions={[
+                  deployment?.managerApproved === 'No Response'
+                    ? 'Deployment needs to be approved before it can have its approvals reset.'
+                    : '',
+                ]}
+              >
                 <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
                   <ListItemIcon>
                     <RestartAlt fontSize='small' />
@@ -231,7 +223,14 @@ export default function Deployment() {
                 disabled={deployment.managerApproved !== 'Accepted'}
                 value='exports'
                 label={
-                  <DisabledButtonInfo conditions={modelExportDisabledConditions} placement='top'>
+                  <DisabledButtonInfo
+                    conditions={[
+                      deployment.managerApproved !== 'Accepted'
+                        ? 'Deployment needs to be approved before you can view the exported model list.'
+                        : '',
+                    ]}
+                    placement='top'
+                  >
                     Model Exports
                   </DisabledButtonInfo>
                 }
