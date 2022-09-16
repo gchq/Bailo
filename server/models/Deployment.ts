@@ -4,14 +4,7 @@ import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
-
-export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
-
-export enum ApprovalStates {
-  Accepted = 'Accepted',
-  Declined = 'Declined',
-  NoResponse = 'No Response',
-}
+import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
 
 export interface LogStatement {
   timestamp: Date

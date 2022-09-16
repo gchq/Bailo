@@ -54,6 +54,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
     'react/react-in-jsx-scope': 'off',
+    'no-shadow': 'off',
   },
   settings: {
     'import/resolver': {
