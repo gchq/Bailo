@@ -24,8 +24,8 @@ export default function ConfirmationDialogue({
     <Dialog open={showConfirmationDialogue} onClose={onCancel}>
       <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
       <DialogContent>
-        <Typography>Are you want to perform this action?</Typography>
-      </DialogContent>      
+        <Typography>Are you sure you want to perform this action?</Typography>
+      </DialogContent>
       {confirmationContent}
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={onCancel}>

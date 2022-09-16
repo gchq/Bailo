@@ -167,8 +167,6 @@ export const deleteModel = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`) 
-
     const model = await findModelByUuid(req.user, uuid)
 
     if (!model) {
