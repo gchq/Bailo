@@ -33,8 +33,10 @@ module.exports = {
     'import/no-cycle': [0, { ignoreExternal: true }],
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
     '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
+    '@typescript-eslint/no-shadow': 'error',
     // IGNORED RULES
     '@typescript-eslint/no-var-requires': 'off',
+    'class-methods-use-this': 'off',
     'import/extensions': 'off',
     'import/export': 'off',
     'import/no-extraneous-dependencies': 'off',
@@ -46,11 +48,13 @@ module.exports = {
     'no-underscore-dangle': 'off',
     // needed because of https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md#how-to-use & https://stackoverflow.com/questions/63818415/react-was-used-before-it-was-defined
     'no-use-before-define': 'off',
+    'no-shadow': 'off',
     'react/display-name': 'off',
     'react/no-unescaped-entities': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
     'react/react-in-jsx-scope': 'off',
+    'no-shadow': 'off',
   },
   settings: {
     'import/resolver': {

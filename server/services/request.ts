@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
-import { Request } from '../../types/interfaces'
-import { ApprovalStates, DeploymentDoc } from '../models/Deployment'
+import { ApprovalStates, Request } from '../../types/interfaces'
+import { DeploymentDoc } from '../models/Deployment'
 import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
@@ -25,9 +25,9 @@ export async function createDeploymentRequests({
     )
   }
 
-  return await createDeploymentRequest({
+  return createDeploymentRequest({
     user: manager,
-    deployment: deployment,
+    deployment,
     approvalType: ApprovalTypes.Manager,
   })
 }
@@ -64,7 +64,7 @@ export async function createVersionRequests({ version }: { version: VersionDoc }
     approvalType: ApprovalTypes.Reviewer,
   })
 
-  return await Promise.all([managerRequest, reviewerRequest])
+  return Promise.all([managerRequest, reviewerRequest])
 }
 
 async function createDeploymentRequest({
@@ -154,11 +154,11 @@ async function createRequest({
     })
   }
 
-  return await request
+  return request
 }
 
 export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
-  return await RequestModel.countDocuments({
+  return RequestModel.countDocuments({
     status: 'No Response',
     user: userId,
   })
@@ -175,7 +175,7 @@ export async function readRequests({ type, filter }: { type: RequestTypes; filte
     query.user = filter
   }
 
-  return await RequestModel.find(query)
+  return RequestModel.find(query)
     .populate({
       path: 'version',
       populate: { path: 'model' },

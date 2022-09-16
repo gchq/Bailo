@@ -26,7 +26,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
-import { postEndpoint } from '../../data/api'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -38,21 +37,15 @@ import TerminalLog from '../../src/TerminalLog'
 import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
+import { postEndpoint } from '../../data/api'
+import RawModelExportList from '../../src/RawModelExportList'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'settings' | 'exports'
 
 function isTabOption(value: string): value is TabOptions {
-  switch (value) {
-    case 'overview':
-    case 'compliance':
-    case 'build':
-    case 'settings':
-      return true
-    default:
-      return false
-  }
+  return ['overview', 'compliance', 'build', 'exports', 'settings'].includes(value)
 }
 
 function CodeLine({ line }) {
@@ -179,7 +172,9 @@ export default function Deployment() {
         </Box>
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
-            <ApprovalsChip approvals={[deployment?.managerApproved]} />
+            <ApprovalsChip
+              approvals={[{ reviewer: deployment.metadata.contacts.manager, status: deployment.managerApproved }]}
+            />
             <Divider orientation='vertical' flexItem />
             <Button
               id='model-actions-button'
@@ -216,15 +211,20 @@ export default function Deployment() {
               <Tab label='Compliance' value='compliance' />
               <Tab label='Build Logs' value='build' />
               <Tab label='Settings' value='settings' />
+              <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview version={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+
+          {group === 'exports' && deployment.managerApproved === 'Accepted' && (
+            <RawModelExportList deployment={deployment} />
+          )}
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>

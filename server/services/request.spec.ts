@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
-import { ApprovalStates, DeploymentDoc } from '../models/Deployment'
+import { ApprovalStates } from '../../types/interfaces'
+import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
 import RequestModel, { RequestTypes } from '../models/Request'
 import { VersionDoc } from '../models/Version'

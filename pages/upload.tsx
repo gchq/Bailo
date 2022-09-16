@@ -5,9 +5,8 @@ import { MinimalErrorWrapper } from '@/src/errors/ErrorWrapper'
 import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
-import RenderBasicFileTab from '@/src/Form/RenderBasicFileTab'
 import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
-import RenderFileTab, { FileTabComplete } from '@/src/Form/RenderFileTab'
+import RenderFileTab, { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
@@ -153,7 +152,6 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
     delete data.files
 
     form.append('metadata', JSON.stringify(data))

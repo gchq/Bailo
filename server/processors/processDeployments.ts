@@ -80,7 +80,7 @@ export default async function processDeployments() {
           )
 
           if (res.status >= 400) {
-            throw new Error('Invalid status response: ' + res.status)
+            throw new Error(`Invalid status response: ${res.status}`)
           }
 
           deployment.log('info', `Copied layer ${layer.digest}`)
@@ -99,7 +99,7 @@ export default async function processDeployments() {
       )
 
       if (mountPostRes.status >= 400) {
-        throw new Error('Invalid status response in mount post: ' + mountPostRes.status)
+        throw new Error(`Invalid status response in mount post: ${mountPostRes.status}`)
       }
 
       deployment.log('info', `Copied manifest to new repository`)
@@ -115,7 +115,7 @@ export default async function processDeployments() {
       } as RequestInit)
 
       if (manifestPutRes.status >= 400) {
-        throw new Error('Invalid status response in manifest put: ' + manifestPutRes.status)
+        throw new Error(`Invalid status response in manifest put: ${manifestPutRes.status}`)
       }
 
       deployment.log('info', 'Finalised new manifest')

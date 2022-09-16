@@ -4,17 +4,20 @@ import mongoose from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
+import { copyFile, getClient } from '../../utils/minio'
+import { createFileRef } from '../../utils/multer'
 import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
 import { createVersionRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
 import { createVersion } from '../../services/version'
 import MinioStore from '../../utils/MinioStore'
-import { normalizeMulterFile } from '../../utils/multer'
 import { getUploadQueue } from '../../utils/queues'
-import { BadReq, Conflict } from '../../utils/result'
+import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
+import VersionModel from '../../models/Version'
+import { UploadModes } from '../../../types/interfaces'
 
 export interface MinioFile {
   [fieldname: string]: Array<Express.Multer.File & { bucket: string }>
@@ -38,7 +41,7 @@ export const postUpload = [
     const session = await mongoose.startSession()
     return session.withTransaction(async () => {
       const files = req.files as unknown as MinioFile
-      const mode = req.query.mode as string
+      const mode = (req.query.mode as string) || UploadModes.NewModel
       const modelUuid = req.query.modelUuid as string
 
       if (!files.binary) {
@@ -64,6 +67,13 @@ export const postUpload = [
         return res.status(400).json({
           message: `Unable to process code, file not a zip.`,
         })
+      }
+
+      if (!Object.values(UploadModes).includes(mode as UploadModes)) {
+        throw BadReq(
+          { code: 'upload_mode_invalid' },
+          `Upload mode '${mode}' is not valid. Must be either 'newModel' or 'newVersion'`
+        )
       }
 
       let metadata
@@ -101,9 +111,13 @@ export const postUpload = [
 
       let version
       try {
-        version = await createVersion(req.user!, {
+        version = await createVersion(req.user, {
           version: metadata.highLevelDetails.modelCardVersion,
-          metadata: metadata,
+          metadata,
+          files: {
+            rawBinaryPath: '',
+            rawCodePath: '',
+          },
         })
       } catch (err: any) {
         if (err.code === 11000) {
@@ -129,7 +143,7 @@ export const postUpload = [
       let parentId
       if (req.body.parent) {
         req.log.info({ code: 'model_parent_already_exists', parent: req.body.parent }, 'Uploaded model has parent')
-        const parentModel = await findModelByUuid(req.user!, req.body.parent)
+        const parentModel = await findModelByUuid(req.user, req.body.parent)
 
         if (!parentModel) {
           req.log.warn({ code: 'model_parent_not_found', parent: req.body.parent }, 'Could not find parent')
@@ -141,23 +155,21 @@ export const postUpload = [
         parentId = parentModel._id
       }
 
-      /** Saving the model **/
+      /** Saving the model */
 
-      let model: any = undefined
+      let model: any
 
-      if (mode === 'newVersion') {
+      if (mode === UploadModes.NewVersion) {
         // Update an existing model's version array
-        const modelUuid = req.query.modelUuid
-
-        model = await findModelByUuid(req.user!, modelUuid as string)
+        model = await findModelByUuid(req.user, modelUuid)
         model.versions.push(version._id)
         model.currentMetadata = metadata
 
         // Find all existing deployments for this model and update their versions array
-        await updateDeploymentVersions(req.user!, model._id, version)
+        await updateDeploymentVersions(req.user, model._id, version)
       } else {
         // Save a new model, and add the uploaded version to its array
-        model = await createModel(req.user!, {
+        model = await createModel(req.user, {
           schemaRef: metadata.schemaRef,
           uuid: `${name}-${nanoid()}`,
 
@@ -165,7 +177,7 @@ export const postUpload = [
           versions: [version._id],
           currentMetadata: metadata,
 
-          owner: req.user!._id,
+          owner: req.user._id,
         })
       }
 
@@ -188,14 +200,32 @@ export const postUpload = [
         await getUploadQueue()
       ).add({
         versionId: version._id,
-        userId: req.user?._id,
-        binary: normalizeMulterFile(files.binary[0]),
-        code: normalizeMulterFile(files.code[0]),
+        userId: req.user._id,
+        binary: createFileRef(files.binary[0], 'binary', version),
+        code: createFileRef(files.code[0], 'code', version),
       })
+
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created job in upload queue')
 
+      try {
+        const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
+        const client = getClient()
+        await copyFile(`${files.binary[0].bucket}/${files.binary[0].path}`, rawBinaryPath)
+        await client.removeObject(files.binary[0].bucket, files.binary[0].path)
+        const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
+        await copyFile(`${files.code[0].bucket}/${files.code[0].path}`, rawCodePath)
+        await client.removeObject(files.code[0].bucket, files.code[0].path)
+        await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
+        req.log.info(
+          { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
+          `Adding paths for raw model exports of files to version.`
+        )
+      } catch (e: any) {
+        throw GenericError({}, 'Error uploading raw code and binary to Minio', 500)
+      }
+
       // then return reference to user
-      res.json({
+      return res.json({
         uuid: model.uuid,
       })
     })

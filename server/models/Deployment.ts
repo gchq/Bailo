@@ -3,14 +3,7 @@ import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
-
-export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
-
-export enum ApprovalStates {
-  Accepted = 'Accepted',
-  Declined = 'Declined',
-  NoResponse = 'No Response',
-}
+import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
 
 export interface LogStatement {
   timestamp: Date
@@ -64,8 +57,10 @@ const DeploymentSchema = new Schema<Deployment>(
 
 DeploymentSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await DeploymentModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
 const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
+
 export default DeploymentModel

@@ -55,7 +55,7 @@ function exampleTaskA(opts: Partial<BuildOpts> = {}) {
 ```
 
 A `BuildStep` represents a single unit of work. It needs a string `name`, used in the logs. It also needs a `build`
-function to run the work and a `rollback` function in case of failure. An optional `tidyup` function can be provided to
+function to run the work and a `rollback` function in case of failure. An optional `tidyUp` function can be provided to
 clean up after your operations.
 
 ```typescript
@@ -66,8 +66,8 @@ export abstract class BuildStep {
   abstract build(version: VersionDoc, files: Files, state: any): Promise<void>
   abstract rollback(version: VersionDoc, files: Files, state: any): Promise<void>
 
-  // optional tidyup
-  async tidyup(_version: VersionDoc, _files: Files, _state: any): Promise<void> {}
+  // optional tidy up
+  async tidyUp(_version: VersionDoc, _files: Files, _state: any): Promise<void> {}
 }
 ```
 

@@ -7,9 +7,9 @@ import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import Form from '../../../src/Form/Form'
+import RenderFileTab, { RenderBasicFileTab, FileTabComplete } from '../../../src/Form/RenderFileTab'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '../../../src/Form/RenderButtons'
-import RenderFileTab, { FileTabComplete } from '../../../src/Form/RenderFileTab'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
@@ -74,6 +74,7 @@ function Upload() {
         section: 'files',
 
         render: RenderFileTab,
+        renderBasic: RenderBasicFileTab,
         isComplete: FileTabComplete,
       })
     )

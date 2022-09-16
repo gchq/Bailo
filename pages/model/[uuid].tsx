@@ -55,16 +55,7 @@ const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  switch (value) {
-    case 'overview':
-    case 'compliance':
-    case 'build':
-    case 'deployments':
-    case 'settings':
-      return true
-    default:
-      return false
-  }
+  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
@@ -183,7 +174,12 @@ function Model() {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
-              <ApprovalsChip approvals={[version?.managerApproved, version?.reviewerApproved]} />
+              <ApprovalsChip
+                approvals={[
+                  { reviewer: version.metadata.contacts.manager, status: version.managerApproved },
+                  { reviewer: version.metadata.contacts.reviewer, status: version.reviewerApproved },
+                ]}
+              />
               <Divider orientation='vertical' flexItem />
               <Button
                 id='model-actions-button'

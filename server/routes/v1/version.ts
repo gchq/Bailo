@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes, RequestDoc } from '../../models/Request'
-import { ApprovalStates } from '../../models/Deployment'
+import { ApprovalStates } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
@@ -35,10 +35,10 @@ export const putVersion = [
     const version = await findVersionById(req.user!, id, { populate: true })
 
     if (!version) {
-      throw NotFound({ code: 'version_not_found', id: id }, 'Unable to find version')
+      throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
     }
 
-    if (req.user?.id !== version.metadata.contacts.uploader) {
+    if (req.user.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
@@ -83,7 +83,7 @@ export const resetVersionApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
-    const user = req.user
+    const { user } = req
     const version = await findVersionById(req.user!, id, { populate: true })
     if (!version) {
       throw BadReq({ code: 'version_not_found' }, 'Unabled to find version for requested deployment')
