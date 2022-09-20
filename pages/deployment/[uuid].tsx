@@ -39,7 +39,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
-import DisabledButtonInfo from '../../src/common/DisabledButtonInfo'
+import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -192,7 +192,7 @@ export default function Deployment() {
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
-              <DisabledButtonInfo
+              <DisabledElementTooltip
                 conditions={[
                   deployment?.managerApproved === 'No Response'
                     ? 'Deployment needs to be approved before it can have its approvals reset.'
@@ -205,7 +205,7 @@ export default function Deployment() {
                   </ListItemIcon>
                   <ListItemText>Reset approvals</ListItemText>
                 </MenuItem>
-              </DisabledButtonInfo>
+              </DisabledElementTooltip>
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
@@ -225,7 +225,7 @@ export default function Deployment() {
                 disabled={deployment.managerApproved !== 'Accepted'}
                 value='exports'
                 label={
-                  <DisabledButtonInfo
+                  <DisabledElementTooltip
                     conditions={[
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
@@ -234,7 +234,7 @@ export default function Deployment() {
                     placement='top'
                   >
                     Model Exports
-                  </DisabledButtonInfo>
+                  </DisabledElementTooltip>
                 }
               />
             </Tabs>

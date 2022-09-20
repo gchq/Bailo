@@ -5,16 +5,16 @@
 import Button from '@mui/material/Button'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import DisabledButtonInfo from './DisabledButtonInfo'
+import DisabledElementTooltip from './DisabledElementTooltip'
 
-describe('DisabledButtonInfo', () => {
+describe('DisabledElementTooltip', () => {
   const testMessage = 'This ia test message'
 
-  it('renders an DisabledButtonInfo component when a button is hovered over', async () => {
+  it('renders an DisabledElementTooltip component when a button is hovered over', async () => {
     render(
-      <DisabledButtonInfo conditions={[testMessage]}>
+      <DisabledElementTooltip conditions={[testMessage]}>
         <Button data-testid='trigger'>Button</Button>
-      </DisabledButtonInfo>
+      </DisabledElementTooltip>
     )
 
     await waitFor(async () => {

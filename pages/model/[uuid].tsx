@@ -50,7 +50,7 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
 import { Deployment, User, Version } from '../../types/interfaces'
-import DisabledButtonInfo from '../../src/common/DisabledButtonInfo'
+import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -198,7 +198,7 @@ function Model() {
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
-                <DisabledButtonInfo
+                <DisabledElementTooltip
                   conditions={[
                     !version.built ? 'Version needs to build.' : '',
                     version.managerApproved !== 'Accepted' ? 'Waiting on manager approval.' : '',
@@ -219,7 +219,7 @@ function Model() {
                     </ListItemIcon>
                     <ListItemText>Request deployment</ListItemText>
                   </MenuItem>
-                </DisabledButtonInfo>
+                </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
                   <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
@@ -241,7 +241,7 @@ function Model() {
                     </>
                   </MenuItem>
                 )}
-                <DisabledButtonInfo
+                <DisabledElementTooltip
                   conditions={[
                     version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
                       ? 'Version has already been approved by both a manager and a technical reviewer.'
@@ -263,14 +263,14 @@ function Model() {
                     </ListItemIcon>
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
-                </DisabledButtonInfo>
+                </DisabledElementTooltip>
                 <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <DisabledButtonInfo
+                <DisabledElementTooltip
                   conditions={[
                     version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'
                       ? 'Version needs to have at least one approval before it can have its approvals reset,'
@@ -286,7 +286,7 @@ function Model() {
                     </ListItemIcon>
                     <ListItemText>Reset approvals</ListItemText>
                   </MenuItem>
-                </DisabledButtonInfo>
+                </DisabledElementTooltip>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>
