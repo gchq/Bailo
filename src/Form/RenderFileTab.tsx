@@ -81,9 +81,13 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 }
 
 export function FileTabComplete(step: Step) {
+  
   const buildOptionsStep: Step = step.state.steps.filter(
     (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
   )[0]
+  if (buildOptionsStep.state.uploadType === undefined) {
+    return true
+  }
   return (
     (buildOptionsStep.state.uploadType === ModelUploadType.Zip && step.state.binary && step.state.code) ||
     buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
@@ -124,5 +128,11 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
 }
 
 export function BasicFileTabComplete(step: Step) {
-  return step.state.binary && step.state.code
+  const buildOptionsStep: Step = step.state.steps.filter(
+    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
+  )[0]
+  return (
+    (buildOptionsStep.state.uploadType === ModelUploadType.Zip && step.state.binary && step.state.code) ||
+    buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
+  )
 }
