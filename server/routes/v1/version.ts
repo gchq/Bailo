@@ -42,7 +42,6 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const oldContacts = version.metadata.contacts
     version.metadata = metadata
 
     const [manager, reviewer] = await Promise.all([
