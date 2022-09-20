@@ -266,7 +266,7 @@ describe('End to end test', () => {
         { silentErrors: true }
       )
 
-      logger.info({modelInfo}, 'the model info')
+      logger.info({ modelInfo }, 'the model info')
 
       logger.info('pulling container')
       await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {

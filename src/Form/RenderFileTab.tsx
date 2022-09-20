@@ -81,7 +81,6 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 }
 
 export function FileTabComplete(step: Step) {
-  
   const buildOptionsStep: Step = step.state.steps.filter(
     (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
   )[0]
