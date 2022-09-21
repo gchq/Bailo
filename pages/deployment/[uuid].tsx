@@ -1,7 +1,9 @@
+import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
+import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -24,7 +26,7 @@ import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -40,6 +42,8 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import { VersionDoc } from '../../server/models/Version'
+import { ModelUploadType } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -85,6 +89,9 @@ function CodeLine({ line }) {
   )
 }
 
+const isVersionDoc = (value: unknown): value is VersionDoc =>
+  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
+
 export default function Deployment() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -102,10 +109,24 @@ export default function Deployment() {
 
   const theme: any = useTheme() || lightTheme
 
+  const initialVersionRequested = useMemo(() => {
+    if (!deployment) return undefined
+    const initialVersion = deployment.versions.find(
+      (version) =>
+        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+    )
+    return isVersionDoc(initialVersion) ? initialVersion : undefined
+  }, [deployment])
+
+  const hasUploadType = useMemo(
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    [initialVersionRequested]
+  )
+
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
-      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
-      setTag(`${modelID}:${initialVersionRequested}`)
+      const { modelID, versionRequested } = deployment.metadata.highLevelDetails
+      setTag(`${modelID}:${versionRequested}`)
     }
   }, [deployment])
 
@@ -166,11 +187,32 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        <Box sx={{ textAlign: 'right', pb: 3 }}>
-          <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-            Show download commands
-          </Button>
-        </Box>
+        {hasUploadType ||
+          (initialVersionRequested?.metadata.buildOptions.uploadType !== ModelUploadType.ModelCard && (
+            <Box sx={{ textAlign: 'right', pb: 3 }}>
+              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+                Show download commands
+              </Button>
+            </Box>
+          ))}
+        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+          <Box sx={{ pb: 2 }}>
+            <Alert
+              severity='info'
+              sx={{
+                width: 'fit-content',
+                m: 'auto',
+                backgroundColor: '#0288d1',
+                color: '#fff',
+                '& .MuiAlert-icon': {
+                  color: '#fff',
+                },
+              }}
+            >
+              This model version was uploaded as just a model card
+            </Alert>
+          </Box>
+        )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
@@ -218,7 +260,14 @@ export default function Deployment() {
             >
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
-              <Tab label='Build Logs' value='build' />
+              <Tab
+                label='Build Logs'
+                value='build'
+                disabled={
+                  hasUploadType &&
+                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                }
+              />
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}

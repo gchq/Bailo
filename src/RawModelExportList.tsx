@@ -9,9 +9,11 @@ import Button from '@mui/material/Button'
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import EmptyBlob from './common/EmptyBlob'
+import { ModelDoc } from '../server/models/Model'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {
-  const { model } = useGetModelById(deployment.model.toString())
+  const modelFromDeployment: ModelDoc = deployment.model as ModelDoc
+  const { model } = useGetModelById(modelFromDeployment._id.toString())
   const { versions } = useGetModelVersions(model?.uuid)
 
   return (

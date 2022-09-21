@@ -38,7 +38,7 @@ import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
@@ -49,7 +49,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
-import { Deployment, User, Version } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -83,6 +83,8 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -172,6 +174,13 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
+      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+        <Box sx={{ pb: 2 }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+            This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -318,7 +327,11 @@ function Model() {
           >
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
-            <Tab label='Build Logs' value='build' />
+            <Tab
+              label='Build Logs'
+              value='build'
+              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+            />
             <Tab label='Deployments' value='deployments' />
             <Tab label='Settings' value='settings' />
           </Tabs>
