@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -48,7 +49,8 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
-import { Deployment, ModelUploadType, User, Version } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
+import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -205,18 +207,28 @@ function Model() {
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
-                <MenuItem
-                  onClick={requestDeployment}
-                  disabled={
-                    !version.built || version.managerApproved !== 'Accepted' || version.reviewerApproved !== 'Accepted'
-                  }
-                  data-test='submitDeployment'
+                <DisabledElementTooltip
+                  conditions={[
+                    !version.built ? 'Version needs to build.' : '',
+                    version.managerApproved !== 'Accepted' ? 'Waiting on manager approval.' : '',
+                    version.reviewerApproved !== 'Accepted' ? 'Waiting on technical reviewer approval.' : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <UploadIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Request deployment</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={requestDeployment}
+                    disabled={
+                      !version.built ||
+                      version.managerApproved !== 'Accepted' ||
+                      version.reviewerApproved !== 'Accepted'
+                    }
+                    data-test='submitDeployment'
+                  >
+                    <ListItemIcon>
+                      <UploadIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Request deployment</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
                   <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
@@ -238,33 +250,52 @@ function Model() {
                     </>
                   </MenuItem>
                 )}
-                <MenuItem
-                  onClick={editModel}
-                  disabled={
-                    (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                <DisabledElementTooltip
+                  conditions={[
+                    version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
+                      ? 'Version has already been approved by both a manager and a technical reviewer.'
+                      : '',
                     currentUser.id !== version?.metadata?.contacts?.uploader
-                  }
+                      ? 'You do not have permission to edit this model.'
+                      : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <EditIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={editModel}
+                    disabled={
+                      (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                      currentUser.id !== version?.metadata?.contacts?.uploader
+                    }
+                  >
+                    <ListItemIcon>
+                      <EditIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
                 <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <MenuItem
-                  onClick={requestApprovalReset}
-                  disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
+                <DisabledElementTooltip
+                  conditions={[
+                    version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'
+                      ? 'Version needs to have at least one approval before it can have its approvals reset,'
+                      : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <RestartAlt fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Reset approvals</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={requestApprovalReset}
+                    disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
+                  >
+                    <ListItemIcon>
+                      <RestartAlt fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Reset approvals</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>

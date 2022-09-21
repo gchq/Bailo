@@ -41,6 +41,7 @@ import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
+import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { VersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
 
@@ -233,12 +234,20 @@ export default function Deployment() {
           </Stack>
           <Menu anchorEl={anchorEl as HTMLDivElement} open={actionOpen} onClose={handleMenuClose}>
             <MenuList>
-              <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
-                <ListItemIcon>
-                  <RestartAlt fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Reset approvals</ListItemText>
-              </MenuItem>
+              <DisabledElementTooltip
+                conditions={[
+                  deployment?.managerApproved === 'No Response'
+                    ? 'Deployment needs to be approved before it can have its approvals reset.'
+                    : '',
+                ]}
+              >
+                <MenuItem onClick={requestApprovalReset} disabled={deployment?.managerApproved === 'No Response'}>
+                  <ListItemIcon>
+                    <RestartAlt fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Reset approvals</ListItemText>
+                </MenuItem>
+              </DisabledElementTooltip>
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
@@ -260,7 +269,23 @@ export default function Deployment() {
                 }
               />
               <Tab label='Settings' value='settings' />
-              <Tab label='Model Exports' disabled={deployment.managerApproved !== 'Accepted'} value='exports' />
+              <Tab
+                style={{ pointerEvents: 'auto' }}
+                disabled={deployment.managerApproved !== 'Accepted'}
+                value='exports'
+                label={
+                  <DisabledElementTooltip
+                    conditions={[
+                      deployment.managerApproved !== 'Accepted'
+                        ? 'Deployment needs to be approved before you can view the exported model list.'
+                        : '',
+                    ]}
+                    placement='top'
+                  >
+                    Model Exports
+                  </DisabledElementTooltip>
+                }
+              />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
