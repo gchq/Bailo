@@ -37,7 +37,7 @@ import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
@@ -81,6 +81,8 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -170,14 +172,13 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
-      {version.metadata.buildOptions.uploadType !== undefined &&
-        version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-          <Box sx={{ pb: 2 }}>
-            <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
-              This model version was uploaded as just a model card
-            </Alert>
-          </Box>
-        )}
+      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+        <Box sx={{ pb: 2 }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+            This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -298,10 +299,7 @@ function Model() {
             <Tab
               label='Build Logs'
               value='build'
-              disabled={
-                version.metadata.buildOptions.uploadType !== undefined &&
-                version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
-              }
+              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
             />
             <Tab label='Deployments' value='deployments' />
             <Tab label='Settings' value='settings' />

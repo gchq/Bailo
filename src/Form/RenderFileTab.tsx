@@ -1,15 +1,11 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { styled } from '@mui/system'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
@@ -25,9 +21,10 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
     display: 'none',
   })
 
-  const buildOptionsStep: Step = splitSchema.steps.filter(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )[0]
+  const buildOptionsStep = useMemo(
+    () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
+    [splitSchema.steps]
+  )
 
   const handleCodeChange = (e: any) => {
     setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
@@ -46,7 +43,7 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 
   return (
     <Grid container justifyContent='center'>
-      {buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
+      {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
         <Stack direction='row' spacing={2} sx={{ p: 3 }}>
           <Box sx={{ textAlign: 'center' }}>
             <label htmlFor={codeId}>
@@ -73,7 +70,7 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
           </Box>
         </Stack>
       )}
-      {buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
+      {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
         <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
       )}
     </Grid>
@@ -81,14 +78,18 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 }
 
 export function FileTabComplete(step: Step) {
-  const buildOptionsStep: Step = step.state.steps.filter(
+  const buildOptionsStep = step.state.steps.find(
     (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )[0]
-  if (buildOptionsStep.state.uploadType === undefined) {
+  )
+  const hasUploadType = useMemo(() => !!buildOptionsStep.state.uploadType, [buildOptionsStep])
+  if (!hasUploadType) {
     return true
   }
   return (
-    (buildOptionsStep.state.uploadType === ModelUploadType.Zip && step.state.binary && step.state.code) ||
+    (buildOptionsStep !== undefined &&
+      buildOptionsStep.state.uploadType === ModelUploadType.Zip &&
+      step.state.binary &&
+      step.state.code) ||
     buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
   )
 }
@@ -97,9 +98,10 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
   const { state } = step
   const { binary, code } = state
 
-  const buildOptionsStep: Step = splitSchema.steps.filter(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )[0]
+  const buildOptionsStep = useMemo(
+    () => step.state.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
+    [step]
+  )
 
   const handleCodeChange = (e: any) => {
     setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
@@ -109,29 +111,34 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
   }
 
+  const hasUploadType = useMemo(() => !!buildOptionsStep.state.uploadType, [buildOptionsStep])
+
   return (
     <Box sx={{ pb: 4, pt: 4 }}>
-      {(buildOptionsStep.state.uploadType === undefined ||
-        buildOptionsStep.state.uploadType === ModelUploadType.Zip) && (
+      {(!hasUploadType ||
+        (buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip)) && (
         <Stack direction='row' spacing={2} alignItems='center'>
           <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
           <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
         </Stack>
       )}
-      {buildOptionsStep.state.uploadType !== undefined &&
-        buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
-          <Typography sx={{ pt: 2, pb: 2 }}>Uploading a model card without any code or binary files</Typography>
-        )}
+      {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
+        <Typography sx={{ pt: 2, pb: 2 }}>Uploading a model card without any code or binary files</Typography>
+      )}
     </Box>
   )
 }
 
 export function BasicFileTabComplete(step: Step) {
-  const buildOptionsStep: Step = step.state.steps.filter(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )[0]
+  const buildOptionsStep = useMemo(
+    () => step.state.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
+    [step]
+  )
   return (
-    (buildOptionsStep.state.uploadType === ModelUploadType.Zip && step.state.binary && step.state.code) ||
+    (buildOptionsStep !== undefined &&
+      buildOptionsStep.state.uploadType === ModelUploadType.Zip &&
+      step.state.binary &&
+      step.state.code) ||
     buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
   )
 }

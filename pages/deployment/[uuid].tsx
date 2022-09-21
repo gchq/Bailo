@@ -26,7 +26,7 @@ import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -88,6 +88,9 @@ function CodeLine({ line }) {
   )
 }
 
+const isVersionDoc = (value: unknown): value is VersionDoc =>
+  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
+
 export default function Deployment() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -105,10 +108,24 @@ export default function Deployment() {
 
   const theme: any = useTheme() || lightTheme
 
+  const initialVersionRequested = useMemo(() => {
+    if (!deployment) return undefined
+    const initialVersion = deployment.versions.find(
+      (version) =>
+        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+    )
+    return isVersionDoc(initialVersion) ? initialVersion : undefined
+  }, [deployment])
+
+  const hasUploadType = useMemo(
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    [initialVersionRequested]
+  )
+
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
-      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
-      setTag(`${modelID}:${initialVersionRequested}`)
+      const { modelID, versionRequested } = deployment.metadata.highLevelDetails
+      setTag(`${modelID}:${versionRequested}`)
     }
   }, [deployment])
 
@@ -166,40 +183,35 @@ export default function Deployment() {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
   }
 
-  const initialVersionRequested: ObjectId | VersionDoc = deployment.versions.filter(
-    (version: any) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
-  )[0] as VersionDoc
-
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {initialVersionRequested.metadata.buildOptions.uploadType === undefined ||
-          (initialVersionRequested.metadata.buildOptions.uploadType !== ModelUploadType.ModelCard && (
+        {hasUploadType ||
+          (initialVersionRequested?.metadata.buildOptions.uploadType !== ModelUploadType.ModelCard && (
             <Box sx={{ textAlign: 'right', pb: 3 }}>
               <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
                 Show download commands
               </Button>
             </Box>
           ))}
-        {initialVersionRequested.metadata.buildOptions.uploadType !== undefined &&
-          initialVersionRequested.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-            <Box sx={{ pb: 2 }}>
-              <Alert
-                severity='info'
-                sx={{
-                  width: 'fit-content',
-                  m: 'auto',
-                  backgroundColor: '#0288d1',
+        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+          <Box sx={{ pb: 2 }}>
+            <Alert
+              severity='info'
+              sx={{
+                width: 'fit-content',
+                m: 'auto',
+                backgroundColor: '#0288d1',
+                color: '#fff',
+                '& .MuiAlert-icon': {
                   color: '#fff',
-                  '& .MuiAlert-icon': {
-                    color: '#fff',
-                  },
-                }}
-              >
-                This model version was uploaded as just a model card
-              </Alert>
-            </Box>
-          )}
+                },
+              }}
+            >
+              This model version was uploaded as just a model card
+            </Alert>
+          </Box>
+        )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
@@ -243,8 +255,8 @@ export default function Deployment() {
                 label='Build Logs'
                 value='build'
                 disabled={
-                  initialVersionRequested.metadata.buildOptions.uploadType !== undefined &&
-                  initialVersionRequested.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                  hasUploadType &&
+                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
                 }
               />
               <Tab label='Settings' value='settings' />
