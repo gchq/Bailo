@@ -38,13 +38,13 @@ module.exports = {
   },
 
   build: {
-    environment: 'local',
+    environment: 'openshift',
   },
 
   openshift: {
-    namespace: '',
-    appPublicRoute: '',
-    dockerPushSecretName: '',
+    namespace: 'bailo',
+    appPublicRoute: 'https://bailo.apps.os1.uksouth.gss.gov.uk',
+    dockerPushSecretName: 'registry-push-secret',
   },
 
   uiConfig: {
@@ -76,7 +76,7 @@ module.exports = {
 
   smtp: {
     enabled: true,
-    host: 'localhost',
+    host: 'mail',
     port: 1025,
     secure: false,
     auth: {
@@ -86,7 +86,6 @@ module.exports = {
     tls: {
       rejectUnauthorized: false,
     },
-
     from: '"Bailo 📝" <bailo@example.org>',
   },
 

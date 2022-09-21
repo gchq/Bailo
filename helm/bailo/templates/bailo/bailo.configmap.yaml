@@ -19,9 +19,9 @@ data:
       },
       smtp: {
         host: '{{ .Values.config.smtp.host }}',
-        port: 25,
+        port: 1025,
         secure: false,
-        auth: { user: '', pass: '' },
+        auth: { user: 'mailuser', pass: 'mailpass' },
         tls: { rejectUnauthorized: false },
         from: '{{ .Values.config.smtp.from }}',
       },

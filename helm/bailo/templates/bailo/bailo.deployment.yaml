@@ -70,7 +70,7 @@ spec:
               path: /
               port: http
           resources:
-            {{- toYaml .Values.resource | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /app/config/production.js
