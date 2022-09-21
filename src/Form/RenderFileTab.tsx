@@ -77,11 +77,11 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   )
 }
 
-export function FileTabComplete(step: Step) {
+export function fileTabComplete(step: Step) {
   const buildOptionsStep = step.state.steps.find(
     (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
   )
-  const hasUploadType = useMemo(() => !!buildOptionsStep.state.uploadType, [buildOptionsStep])
+  const hasUploadType = !!buildOptionsStep.state.uploadType
   if (!hasUploadType) {
     return true
   }
@@ -126,19 +126,5 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
         <Typography sx={{ pt: 2, pb: 2 }}>Uploading a model card without any code or binary files</Typography>
       )}
     </Box>
-  )
-}
-
-export function BasicFileTabComplete(step: Step) {
-  const buildOptionsStep = useMemo(
-    () => step.state.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
-    [step]
-  )
-  return (
-    (buildOptionsStep !== undefined &&
-      buildOptionsStep.state.uploadType === ModelUploadType.Zip &&
-      step.state.binary &&
-      step.state.code) ||
-    buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
   )
 }

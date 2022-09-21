@@ -9,7 +9,7 @@ import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
-import RenderFileTab, { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
+import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
@@ -94,7 +94,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: FileTabComplete,
+        isComplete: fileTabComplete,
       })
     )
 
