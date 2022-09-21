@@ -1,3 +1,6 @@
+import axios from 'axios'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { useGetDefaultSchema, useGetSchemas } from '@/data/schema'
 import { useGetCurrentUser } from '@/data/user'
 import LoadingBar from '@/src/common/LoadingBar'
@@ -6,7 +9,7 @@ import MultipleErrorWrapper from '@/src/errors/MultipleErrorWrapper'
 import Form from '@/src/Form/Form'
 import ModelExportAndSubmission from '@/src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '@/src/Form/RenderButtons'
-import RenderFileTab, { FileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
+import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '@/src/Form/RenderFileTab'
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
@@ -15,9 +18,6 @@ import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
-import axios from 'axios'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 
 function renderSubmissionTab({
   splitSchema,
@@ -84,6 +84,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          steps,
         },
         schemaRef: reference,
 
@@ -93,7 +94,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: FileTabComplete,
+        isComplete: fileTabComplete,
       })
     )
 

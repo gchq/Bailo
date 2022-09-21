@@ -4,11 +4,6 @@ import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
 import { ModelDoc } from './Model'
 
-interface FilePaths {
-  rawBinaryPath: string
-  rawCodePath: string
-}
-
 export interface Version {
   model: ModelDoc | Types.ObjectId
   version: string
