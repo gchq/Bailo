@@ -125,7 +125,7 @@ export default function Deployment() {
 
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
-      const { modelID, versionRequested } = deployment.metadata.highLevelDetails
+      const { modelID, initialVersionRequested: versionRequested } = deployment.metadata.highLevelDetails
       setTag(`${modelID}:${versionRequested}`)
     }
   }, [deployment])
