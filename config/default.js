@@ -43,7 +43,7 @@ module.exports = {
 
   openshift: {
     namespace: 'bailo',
-    appPublicRoute: 'https://bailo.apps.os1.uksouth.gss.gov.uk',
+    appPublicRoute: 'https://appPublicRoute',
     dockerPushSecretName: 'registry-push-secret',
   },
 

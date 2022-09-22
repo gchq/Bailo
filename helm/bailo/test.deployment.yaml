@@ -1,0 +1,20 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      name: test-deployment
+  template:
+    metadata:
+      labels:
+        name: test-deployment
+    spec:
+      containers:
+      - name: test-deployment
+        #image: image-registry.openshift-image-registry.svc:5000/bailo/bailo-20220922"
+        #image: bailo.apps.os1.uksouth.gss.gov.uk/internal/minimal-model-for-testing-wo5k9q
+        image: image-registry.openshift-image-registry.svc:5000/bailo/minimal-model-for-testing-wo5k9q"
