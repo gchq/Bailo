@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -36,7 +37,7 @@ import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
@@ -49,7 +50,8 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
-import { Deployment, User, Version } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
+import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -92,6 +94,8 @@ function Model() {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false)
   const [deleteConfirmContent, setDeleteConfirmContent] = useState<JSX.Element>(<Box />)
+
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
   const onVersionChange = setTargetValue(setSelectedVersion)
   const theme: any = useTheme() || lightTheme
@@ -200,6 +204,13 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
+      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+        <Box sx={{ pb: 2 }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+            This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
       <Paper sx={{ p: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Grid container justifyContent='space-between' alignItems='center'>
@@ -226,18 +237,28 @@ function Model() {
             </Stack>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuList>
-                <MenuItem
-                  onClick={requestDeployment}
-                  disabled={
-                    !version.built || version.managerApproved !== 'Accepted' || version.reviewerApproved !== 'Accepted'
-                  }
-                  data-test='submitDeployment'
+                <DisabledElementTooltip
+                  conditions={[
+                    !version.built ? 'Version needs to build.' : '',
+                    version.managerApproved !== 'Accepted' ? 'Waiting on manager approval.' : '',
+                    version.reviewerApproved !== 'Accepted' ? 'Waiting on technical reviewer approval.' : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <UploadIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Request deployment</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={requestDeployment}
+                    disabled={
+                      !version.built ||
+                      version.managerApproved !== 'Accepted' ||
+                      version.reviewerApproved !== 'Accepted'
+                    }
+                    data-test='submitDeployment'
+                  >
+                    <ListItemIcon>
+                      <UploadIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Request deployment</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
                   <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
@@ -259,33 +280,52 @@ function Model() {
                     </>
                   </MenuItem>
                 )}
-                <MenuItem
-                  onClick={editModel}
-                  disabled={
-                    (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                <DisabledElementTooltip
+                  conditions={[
+                    version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
+                      ? 'Version has already been approved by both a manager and a technical reviewer.'
+                      : '',
                     currentUser.id !== version?.metadata?.contacts?.uploader
-                  }
+                      ? 'You do not have permission to edit this model.'
+                      : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <EditIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={editModel}
+                    disabled={
+                      (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
+                      currentUser.id !== version?.metadata?.contacts?.uploader
+                    }
+                  >
+                    <ListItemIcon>
+                      <EditIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
                 <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <MenuItem
-                  onClick={requestApprovalReset}
-                  disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
+                <DisabledElementTooltip
+                  conditions={[
+                    version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'
+                      ? 'Version needs to have at least one approval before it can have its approvals reset,'
+                      : '',
+                  ]}
                 >
-                  <ListItemIcon>
-                    <RestartAlt fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Reset approvals</ListItemText>
-                </MenuItem>
+                  <MenuItem
+                    onClick={requestApprovalReset}
+                    disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
+                  >
+                    <ListItemIcon>
+                      <RestartAlt fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Reset approvals</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>
@@ -317,7 +357,11 @@ function Model() {
           >
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
-            <Tab label='Build Logs' value='build' />
+            <Tab
+              label='Build Logs'
+              value='build'
+              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+            />
             <Tab label='Deployments' value='deployments' />
             <Tab label='Settings' value='settings' />
           </Tabs>

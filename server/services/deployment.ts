@@ -33,9 +33,9 @@ export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
+export async function findDeploymentByUuid(user: UserDoc, uuid: string, _opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findOne({ uuid })
-  if (opts?.populate) deployment = deployment.populate('model')
+  deployment = deployment.populate('model', ['_id', 'uuid']).populate('versions', ['version', 'metadata'])
 
   return filterDeployment(user, await deployment)
 }

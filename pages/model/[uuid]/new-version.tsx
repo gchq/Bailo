@@ -7,7 +7,7 @@ import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
 import Form from '../../../src/Form/Form'
-import RenderFileTab, { RenderBasicFileTab, FileTabComplete } from '../../../src/Form/RenderFileTab'
+import RenderFileTab, { RenderBasicFileTab, fileTabComplete } from '../../../src/Form/RenderFileTab'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '../../../src/Form/RenderButtons'
 import SubmissionError from '../../../src/Form/SubmissionError'
@@ -66,6 +66,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          steps,
         },
         schemaRef: cModel.schemaRef,
 
@@ -75,7 +76,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: FileTabComplete,
+        isComplete: fileTabComplete,
       })
     )
 

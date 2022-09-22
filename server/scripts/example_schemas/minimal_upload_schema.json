@@ -105,8 +105,15 @@
           "title": "Export raw models",
           "description": "If enabled, allow raw uploaded model files to be downloaded by deployments.",
           "type": "boolean"
+        },
+        "uploadType": {
+          "type": "string",
+          "title": "Upload type",
+          "description": "Select the type of model upload that you want",
+          "enum": ["Code and binaries", "Model card only"]
         }
-      }
+      },
+      "required": ["uploadType"]
     }
   },
   "required": ["timeStamp", "highLevelDetails"]
