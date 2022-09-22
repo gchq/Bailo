@@ -125,7 +125,7 @@ export default function Deployment() {
 
   useEffect(() => {
     if (deployment?.metadata?.highLevelDetails !== undefined) {
-      const { modelID, versionRequested } = deployment.metadata.highLevelDetails
+      const { modelID, initialVersionRequested: versionRequested } = deployment.metadata.highLevelDetails
       setTag(`${modelID}:${versionRequested}`)
     }
   }, [deployment])
@@ -187,14 +187,13 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {hasUploadType ||
-          (initialVersionRequested?.metadata.buildOptions.uploadType !== ModelUploadType.ModelCard && (
-            <Box sx={{ textAlign: 'right', pb: 3 }}>
-              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-                Show download commands
-              </Button>
-            </Box>
-          ))}
+        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
+          <Box sx={{ textAlign: 'right', pb: 3 }}>
+            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+              Show download commands
+            </Button>
+          </Box>
+        )}
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
           <Box sx={{ pb: 2 }}>
             <Alert
