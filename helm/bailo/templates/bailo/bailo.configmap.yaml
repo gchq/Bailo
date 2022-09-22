@@ -1,4 +1,11 @@
 ---
+{{- define "mongoSecret" }}
+{{- $obj := (lookup "v1" "Secret" .Namespace .Name).data -}}
+{{- if $obj }}
+{{- index $obj .Key | b64dec -}}
+{{- end -}}
+{{- end }}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -52,7 +59,7 @@ data:
         },
       },
       mongo: {
-        uri: 'mongodb://{{ .Values.mongodb.username }}:{{ .Values.mongodb.password }}@{{ .Values.mongodb.host }}',
+        uri: 'mongodb://{{ .Values.mongodb.username }}:{{- include "mongoSecret" (dict "Namespace" .Release.Namespace "Name" "bailo-mongodb" "Key" "mongodb-passwords") -}}@{{ .Values.mongodb.host }}',
         connectionOptions: {
           useFindAndModify: false,
           useNewUrlParser: true,
