@@ -187,14 +187,13 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {hasUploadType &&
-          (initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
-            <Box sx={{ textAlign: 'right', pb: 3 }}>
-              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-                Show download commands
-              </Button>
-            </Box>
-          ))}
+        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
+          <Box sx={{ textAlign: 'right', pb: 3 }}>
+            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+              Show download commands
+            </Button>
+          </Box>
+        )}
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
           <Box sx={{ pb: 2 }}>
             <Alert
