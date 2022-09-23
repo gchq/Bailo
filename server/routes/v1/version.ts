@@ -1,10 +1,12 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import RequestModel, { ApprovalTypes, RequestDoc } from '../../models/Request'
 import { ApprovalStates } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
+import { getUserById } from '../../services/user'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -41,11 +43,35 @@ export const putVersion = [
     }
 
     version.metadata = metadata
+
+    const [manager, reviewer] = await Promise.all([
+      getUserById(version.metadata.contacts.manager),
+      getUserById(version.metadata.contacts.reviewer),
+    ])
+
+    await RequestModel.remove({
+      version: version._id,
+      request: 'Upload',
+      $or: [
+        {
+          approvalType: ApprovalTypes.Manager,
+          user: { $ne: manager },
+        },
+        {
+          approvalType: ApprovalTypes.Reviewer,
+          user: { $ne: reviewer },
+        },
+        {
+          status: { $in: [ApprovalStates.Accepted, ApprovalStates.Declined] },
+        },
+      ],
+    })
+
+    await createVersionRequests({ version })
+
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
-
     await version.save()
-    await createVersionRequests({ version })
 
     req.log.info({ code: 'updating_version', version }, 'User updating version')
     return res.json(version)

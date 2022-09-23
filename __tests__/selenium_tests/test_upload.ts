@@ -86,6 +86,9 @@ describe('End to end test', () => {
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
         const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+
+        logger.info(`model name is ${mName}`)
+
         modelInfo.url = modelUrl
         modelInfo.name = mName
 
@@ -262,6 +265,8 @@ describe('End to end test', () => {
         logger.error.bind(logger),
         { silentErrors: true }
       )
+
+      logger.info({ modelInfo }, 'the model info')
 
       logger.info('pulling container')
       await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {
