@@ -49,9 +49,9 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
+import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
