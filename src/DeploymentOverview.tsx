@@ -1,13 +1,13 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'
 
 function DeploymentOverview(props: any) {
   const { deployment } = props
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   return (
     <Grid container spacing={2}>

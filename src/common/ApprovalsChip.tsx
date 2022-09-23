@@ -12,10 +12,9 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 
 import { ApprovalStates } from '../../types/interfaces'
-import { Theme } from '../theme'
 
 type Approval = {
   reviewer: string
@@ -27,7 +26,7 @@ type ApprovalsChipProps = {
 }
 
 export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactElement {
-  const theme = useTheme<Theme>()
+  const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
 
   const open = useMemo(() => !!anchorEl, [anchorEl])

@@ -30,7 +30,7 @@ import Switch from '@mui/material/Switch'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useGetNumRequests } from '../data/requests'
@@ -104,7 +104,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     setOpen(!open)
   }
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
   const toggleDarkMode: any = useContext(DarkModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
