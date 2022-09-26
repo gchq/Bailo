@@ -2,7 +2,7 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import React, { useEffect } from 'react'
 import { lightTheme } from '../theme'
 
@@ -24,7 +24,7 @@ const getTitle = (title: any, index: any) => {
 export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any }) {
   const [value, setValue] = React.useState(0)
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   useEffect(() => {
     if (tabs.length === 1) {

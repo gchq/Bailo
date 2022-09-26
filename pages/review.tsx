@@ -14,7 +14,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
@@ -30,7 +30,7 @@ export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-  const theme: any = useTheme()
+  const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -72,7 +72,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()

@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import Link from 'next/link'
 import { useState } from 'react'
 import { ListModelType, useListModels } from '../data/model'
@@ -27,7 +27,7 @@ export default function ExploreModels() {
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
