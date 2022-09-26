@@ -32,9 +32,9 @@ export default function Help() {
           <Box sx={{ p: 5, textAlign: 'center' }}>
             <Typography variant='h2'>Contact us</Typography>
           </Box>
-          <Grid container spacing={4} sx={{ maxWidth: 1000, margin: 'auto', pr: 4 }}>
+          <Grid container spacing={4}>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon
                     sx={{ pt: 2, fontSize: 75 }}
@@ -60,7 +60,7 @@ export default function Help() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon
                     sx={{ pt: 2, fontSize: 75 }}
@@ -83,7 +83,7 @@ export default function Help() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon
                     sx={{ pt: 2, fontSize: 75 }}
