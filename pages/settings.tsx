@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import React, { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { useGetCurrentUser } from '../data/user'
@@ -33,7 +33,7 @@ export default function Settings() {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)

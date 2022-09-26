@@ -1,6 +1,7 @@
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -8,7 +9,6 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
 import Link from 'next/link'
 import Wrapper from 'src/Wrapper'
 import { useGetUiConfig } from '../data/uiConfig'
@@ -18,7 +18,7 @@ import { lightTheme } from '../src/theme'
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,

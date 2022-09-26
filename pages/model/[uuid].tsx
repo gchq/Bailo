@@ -28,7 +28,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import copy from 'copy-to-clipboard'
 import { postEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
@@ -87,7 +87,7 @@ function Model() {
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
   const onVersionChange = setTargetValue(setSelectedVersion)
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
