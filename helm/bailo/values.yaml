@@ -127,7 +127,7 @@ registry:
   repository: registry
   tag: 2
   enabled: true
-  host: "registy"
+  host: "registry"
   port: 31113 #5000
   insecure: true
   certDir: "/certs"
