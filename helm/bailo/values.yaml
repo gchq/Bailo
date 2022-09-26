@@ -94,8 +94,6 @@ mongodb:
     registry: docker.io
     repository: bitnami/mongodb
     tag: 4.4.13-debian-10-r0
-  #password: 'SetYouPasswordInLocal.yaml'
-  #host: 'SetYouPasswordInLocal.yaml'
 
 minio:
   enabled: true
