@@ -21,7 +21,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -107,7 +107,7 @@ export default function Deployment() {
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const initialVersionRequested = useMemo(() => {
     if (!deployment) return undefined

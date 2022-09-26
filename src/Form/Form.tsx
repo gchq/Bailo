@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
 import { lightTheme } from '../theme'
@@ -24,7 +24,7 @@ export default function Form({
     setTab(newValue)
   }
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   return (
     <>
