@@ -1,10 +1,9 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
-import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, Theme } from '@mui/material'
+import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, useTheme } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
-import useTheme from '@mui/styles/useTheme'
 import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
@@ -17,7 +16,7 @@ type DocsWrapperProps = {
 const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
-  const theme: Theme = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 
