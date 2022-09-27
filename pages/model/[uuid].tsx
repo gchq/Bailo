@@ -6,7 +6,6 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
-import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -65,14 +64,6 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
   <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
 ))
 
-function ConfirmationFeedbackText({ status, statusText }: { status: number; statusText: string }) {
-  return (
-    <Alert severity='error' sx={{ m: 2, width: 400 }}>
-      Error {status}: {statusText}
-    </Alert>
-  )
-}
-
 function Model() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -82,8 +73,8 @@ function Model() {
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [modelFavourited, setModelFavourited] = useState<boolean>(false)
-  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
+  const [modelFavourited, setModelFavourited] = useState(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
@@ -92,8 +83,8 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false)
-  const [deleteConfirmContent, setDeleteConfirmContent] = useState<JSX.Element>(<Box />)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
@@ -184,7 +175,7 @@ function Model() {
   }
 
   const handleDelete = () => {
-    setDeleteConfirmContent(<Box />)
+    setDeleteModelErrorMessage('')
     setDeleteConfirmOpen(true)
   }
 
@@ -193,13 +184,13 @@ function Model() {
   }
 
   const handleDeleteConfirm = async () => {
-    await deleteEndpoint(`/api/v1/model/${uuid}`, {}).then((res) => {
-      if (res.status < 400) {
-        router.push('/')
-      } else {
-        setDeleteConfirmContent(<ConfirmationFeedbackText status={res.status} statusText={res.statusText} />)
-      }
-    })
+    const response = await deleteEndpoint(`/api/v1/model/${uuid}`)
+
+    if (response.ok) {
+      router.push('/')
+    } else {
+      setDeleteModelErrorMessage(`Error ${response.status}: ${response.statusText}`)
+    }
   }
 
   return (
@@ -460,7 +451,6 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
-
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy Model Card to Clipboard
@@ -475,17 +465,14 @@ function Model() {
                 </Alert>
               </Snackbar>
             </Box>
-
             <Box sx={{ mb: 4 }} />
-
             <ConfirmationDialogue
-              showConfirmationDialogue={deleteConfirmOpen}
+              open={deleteConfirmOpen}
               onCancel={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
-              confirmationModalTitle='Delete the model?'
-              confirmationContent={deleteConfirmContent}
+              title='Delete model'
+              errorMessage={deleteModelErrorMessage}
             />
-
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>

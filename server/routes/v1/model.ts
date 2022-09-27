@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Request, Response } from 'express'
 import RequestModel from '../../models/Request'
 import { findDeployments } from '../../services/deployment'

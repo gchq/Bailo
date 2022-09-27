@@ -1,32 +1,37 @@
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
-import Box from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Typography from '@mui/material/Typography'
 import DialogContent from '@mui/material/DialogContent'
+import Alert from '@mui/material/Alert'
 
-export default function ConfirmationDialogue({
-  showConfirmationDialogue,
-  confirmationModalTitle,
-  confirmationContent,
-  onCancel,
-  onConfirm,
-}: {
-  showConfirmationDialogue: boolean
-  confirmationModalTitle: string
-  confirmationContent: JSX.Element
-
+type ConfirmationDialogProps = {
+  open: boolean
+  title: string
   onCancel: () => void
   onConfirm: () => void
-}) {
+  errorMessage?: string
+}
+
+export default function ConfirmationDialogue({
+  open,
+  title,
+  onCancel,
+  onConfirm,
+  errorMessage,
+}: ConfirmationDialogProps) {
   return (
-    <Dialog open={showConfirmationDialogue} onClose={onCancel}>
-      <DialogTitle id='alert-dialog-title'>{confirmationModalTitle}</DialogTitle>
+    <Dialog open={open} onClose={onCancel}>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>Are you sure you want to perform this action?</Typography>
+        {errorMessage && (
+          <Alert severity='error' sx={{ m: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
       </DialogContent>
-      {confirmationContent}
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={onCancel}>
           Cancel
