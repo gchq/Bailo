@@ -1,6 +1,7 @@
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -8,7 +9,6 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
 import Link from 'next/link'
 import Wrapper from 'src/Wrapper'
 import { useGetUiConfig } from '../data/uiConfig'
@@ -18,7 +18,7 @@ import { lightTheme } from '../src/theme'
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
@@ -32,9 +32,9 @@ export default function Help() {
           <Box sx={{ p: 5, textAlign: 'center' }}>
             <Typography variant='h2'>Contact us</Typography>
           </Box>
-          <Grid container spacing={4} sx={{ maxWidth: 1000, margin: 'auto', pr: 4 }}>
+          <Grid container spacing={4}>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon
                     sx={{ pt: 2, fontSize: 75 }}
@@ -60,7 +60,7 @@ export default function Help() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon
                     sx={{ pt: 2, fontSize: 75 }}
@@ -83,7 +83,7 @@ export default function Help() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={4}>
-              <Card sx={{ textAlign: 'center', margin: 'auto', width: 300 }}>
+              <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon
                     sx={{ pt: 2, fontSize: 75 }}

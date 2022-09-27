@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/styles/useTheme'
+import { useTheme } from '@mui/material'
 import _ from 'lodash'
 import Link from 'next/link'
 import React, { ChangeEvent } from 'react'
@@ -44,7 +44,7 @@ function Deployments() {
   const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {

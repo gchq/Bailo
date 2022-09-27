@@ -30,7 +30,7 @@ function Upload() {
   const { uuid: modelUuid, version: versionString }: { uuid?: string; version?: string } = router.query
 
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
-  const { version, isVersionLoading, isVersionError } = useGetModelVersion(modelUuid, versionString)
+  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(modelUuid, versionString)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
 
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
@@ -109,6 +109,7 @@ function Upload() {
       return
     }
 
+    mutateVersion()
     const response = await edit.json()
     router.push(`/model/${response.model.uuid}`)
   }
