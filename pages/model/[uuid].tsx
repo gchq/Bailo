@@ -468,9 +468,9 @@ function Model() {
             <Box sx={{ mb: 4 }} />
             <ConfirmationDialogue
               open={deleteConfirmOpen}
-              onCancel={handleDeleteCancel}
-              onConfirm={handleDeleteConfirm}
               title='Delete model'
+              onConfirm={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
               errorMessage={deleteModelErrorMessage}
             />
             <Typography variant='h6' sx={{ mb: 1 }}>

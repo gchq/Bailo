@@ -22,12 +22,12 @@ export default function ConfirmationDialogue({
   errorMessage,
 }: ConfirmationDialogProps) {
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>Are you sure you want to perform this action?</Typography>
         {errorMessage && (
-          <Alert severity='error' sx={{ m: 2 }}>
+          <Alert severity='error' sx={{ mt: 2 }}>
             {errorMessage}
           </Alert>
         )}
