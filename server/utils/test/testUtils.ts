@@ -31,6 +31,16 @@ export function authenticatedPutRequest(path: string) {
     .set('Accept', 'application/json')
 }
 
+export function authenticatedDeleteRequest(path: string) {
+  const request = supertest(server)
+  return request
+    .delete(path)
+    .set('x-userid', 'user')
+    .set('x-email', 'test@example.com')
+    .set('Content-Type', 'application/json')
+    .set('Accept', 'application/json')
+}
+
 export function validateTestRequest(res: any) {
   expect(res.header['content-type']).toBe('application/json; charset=utf-8')
   expect(res.statusCode).toBe(200)

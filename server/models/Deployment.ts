@@ -1,4 +1,5 @@
-import { Document, model, Schema, Types } from 'mongoose'
+import { Schema, model, Document, Types } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
@@ -34,7 +35,7 @@ export interface Deployment {
 
 export type DeploymentDoc = Deployment & Document<any, any, Deployment>
 
-const DeploymentSchema = new Schema<Deployment>(
+const DeploymentSchema: any = new Schema<Deployment>(
   {
     schemaRef: { type: String, required: true },
     uuid: { type: String, required: true, index: true, unique: true },
@@ -55,6 +56,8 @@ const DeploymentSchema = new Schema<Deployment>(
   }
 )
 
+DeploymentSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
+
 DeploymentSchema.methods.log = async function (level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -62,5 +65,4 @@ DeploymentSchema.methods.log = async function (level: string, msg: string) {
 }
 
 const DeploymentModel = model<Deployment>('Deployment', DeploymentSchema)
-
 export default DeploymentModel
