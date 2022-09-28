@@ -12,6 +12,6 @@ export async function postEndpoint(url: string, data: any) {
   return fetchEndpoint(url, 'POST', data)
 }
 
-export async function putEndpoint(url: string, data: any) {
+export async function putEndpoint(url: string, data?: any) {
   return fetchEndpoint(url, 'PUT', data)
 }

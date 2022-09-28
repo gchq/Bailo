@@ -30,7 +30,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import copy from 'copy-to-clipboard'
-import { postEndpoint } from 'data/api'
+import { postEndpoint, putEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { setTargetValue } from 'data/utils'
@@ -78,6 +78,9 @@ function Model() {
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [showLastViewedWarning, setShowLastViewedWarning] = useState<boolean>(false)
+  const [managerLastViewed, setManagerLastViewed] = useState<Date | undefined>(undefined)
+  const [reviewerLastViewed, setReviewerLastViewed] = useState<Date | undefined>(undefined)
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -109,10 +112,45 @@ function Model() {
   }
 
   useEffect(() => {
+    if (currentUser) {
+      if (currentUser !== undefined && currentUser.id === version?.metadata.contacts.manager) {
+        updateLastViewed('manager')
+      }
+      if (currentUser !== undefined && currentUser.id === version?.metadata.contacts.reviewer) {
+        updateLastViewed('reviewer')
+      }
+    }
+  }, [managerLastViewed, reviewerLastViewed, currentUser])
+
+  const updateLastViewed = (role: string) => {
+    if (currentUser?.id === version?.metadata.contacts.manager) {
+      const managerLastViewedDate = new Date(managerLastViewed as Date)
+      const reviewerLastViewedDate = new Date(reviewerLastViewed as Date)
+      const updatedAtDate = new Date(version!.updatedAt)
+      if (
+        managerLastViewedDate.getTime() < updatedAtDate.getTime() ||
+        reviewerLastViewedDate.getTime() < updatedAtDate.getTime()
+      ) {
+        setShowLastViewedWarning(true)
+      }
+      putEndpoint(`/api/v1/version/${version!._id}/lastViewed/${role}`)
+    }
+  }
+
+  useEffect(() => {
     if (tab !== undefined && isTabOption(tab)) {
       setGroup(tab)
     }
   }, [tab])
+
+  useEffect(() => {
+    if (version && managerLastViewed === undefined) {
+      setManagerLastViewed(version!.managerLastViewed)
+    }
+    if (version && reviewerLastViewed === undefined) {
+      setReviewerLastViewed(version.reviewerLastViewed)
+    }
+  }, [version])
 
   useEffect(() => {
     if (version) {
@@ -178,6 +216,17 @@ function Model() {
         <Box sx={{ pb: 2 }}>
           <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
             This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
+      {showLastViewedWarning && (
+        <Box sx={{ pb: 2 }}>
+          <Alert
+            onClose={() => setShowLastViewedWarning(false)}
+            severity='warning'
+            sx={{ width: 'fit-content', m: 'auto' }}
+          >
+            This model version has been updated since you last viewed it
           </Alert>
         </Box>
       )}

@@ -13,6 +13,8 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
+  managerLastViewed: Date
+  reviewerLastViewed: Date
 
   files: {
     rawBinaryPath: string
@@ -42,6 +44,8 @@ const VersionSchema = new Schema<Version>(
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
     reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    managerLastViewed: { type: Date },
+    reviewerLastViewed: { type: Date },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],
