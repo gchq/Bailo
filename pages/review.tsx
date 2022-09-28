@@ -23,7 +23,6 @@ import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } fro
 import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../src/theme'
 import { Request } from '../types/interfaces'
 
 export default function Review() {
@@ -72,7 +71,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()

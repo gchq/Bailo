@@ -15,7 +15,6 @@ import { useState } from 'react'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../src/theme'
 import Wrapper from '../src/Wrapper'
 import { Model } from '../types/interfaces'
 import useDebounce from '../utils/useDebounce'
@@ -27,7 +26,7 @@ export default function ExploreModels() {
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,

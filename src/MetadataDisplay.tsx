@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useGetSchemas } from '../data/schema'
-import { lightTheme } from './theme'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 
@@ -22,7 +21,7 @@ function MetadataDisplay({
   const [schema, setSchema] = useState<any | undefined>(undefined)
   const [sectionKeys, setSectionKeys] = useState<string[]>([])
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   useEffect(() => {
     if (!schemas) return

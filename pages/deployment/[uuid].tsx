@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
@@ -36,7 +35,6 @@ import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
-import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
@@ -107,7 +105,7 @@ export default function Deployment() {
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const initialVersionRequested = useMemo(() => {
     if (!deployment) return undefined

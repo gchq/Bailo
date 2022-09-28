@@ -6,7 +6,6 @@ import React, { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { useGetCurrentUser } from '../data/user'
 import SettingsProfileTab from '../src/settings/SettingsProfileTab'
-import { lightTheme } from '../src/theme'
 
 function TabPanel({ children, value, index, ...rest }) {
   return (
@@ -33,7 +32,7 @@ export default function Settings() {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)

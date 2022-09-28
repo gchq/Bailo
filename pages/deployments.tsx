@@ -20,7 +20,6 @@ import { useGetUserDeployments } from '../data/deployment'
 import { useGetModelById } from '../data/model'
 import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
-import { lightTheme } from '../src/theme'
 import Wrapper from '../src/Wrapper'
 import { Deployment } from '../types/interfaces'
 
@@ -44,7 +43,7 @@ function Deployments() {
   const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
   const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   React.useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {

@@ -40,7 +40,6 @@ import { DarkModeContext } from '../pages/_app'
 import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
 import Copyright from './Copyright'
-import { lightTheme } from './theme'
 
 const drawerWidth = 240
 
@@ -104,7 +103,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     setOpen(!open)
   }
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
   const toggleDarkMode: any = useContext(DarkModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()

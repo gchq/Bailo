@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
-import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
@@ -16,7 +15,7 @@ type DocsWrapperProps = {
 const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 

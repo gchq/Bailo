@@ -13,12 +13,11 @@ import Link from 'next/link'
 import Wrapper from 'src/Wrapper'
 import { useGetUiConfig } from '../data/uiConfig'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../src/theme'
 
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,

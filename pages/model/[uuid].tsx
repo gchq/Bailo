@@ -6,7 +6,6 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
-import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -28,12 +27,11 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import { SelectChangeEvent, useTheme } from '@mui/material'
 import copy from 'copy-to-clipboard'
 import { postEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
-import { setTargetValue } from 'data/utils'
 import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -48,7 +46,6 @@ import createComplianceFlow from 'utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../../src/theme'
 import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
@@ -83,11 +80,13 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const theme = useTheme()
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
-  const onVersionChange = setTargetValue(setSelectedVersion)
-  const theme = useTheme() || lightTheme
+  const onVersionChange = (event: SelectChangeEvent<string>) => {
+    setSelectedVersion(event.target.value)
+  }
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
