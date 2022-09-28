@@ -1,6 +1,6 @@
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
-import useDocsMenu from '@/utils/useDocsMenu'
+import useDocsMenu from '@/utils/hooks/useDocsMenu'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppProps } from 'next/app'

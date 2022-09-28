@@ -17,7 +17,7 @@ import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
 import { Model } from '../types/interfaces'
-import useDebounce from '../utils/useDebounce'
+import useDebounce from '../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
