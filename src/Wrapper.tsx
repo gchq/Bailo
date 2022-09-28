@@ -36,10 +36,10 @@ import Link from 'next/link'
 import { useGetNumRequests } from '../data/requests'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
-import { DarkModeContext } from '../pages/_app'
 import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
 import Copyright from './Copyright'
+import ThemeModeContext from './contexts/themeModeContext'
 
 const drawerWidth = 240
 
@@ -104,7 +104,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
   }
 
   const theme = useTheme()
-  const toggleDarkMode: any = useContext(DarkModeContext)
+  const { toggleDarkMode } = useContext(ThemeModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numRequests, isNumRequestsLoading } = useGetNumRequests()
