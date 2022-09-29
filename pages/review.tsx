@@ -46,12 +46,22 @@ export default function Review() {
             value={value}
             onChange={handleChange}
           >
-            <Tab value='user' label='My approvals' />
-            <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
+            <Tab value='user' label='Approvals' />
+            <Tab value='archived' label='Archived' />
           </Tabs>
         )}
-        <ApprovalList type='Upload' category={value} />
-        <ApprovalList type='Deployment' category={value} />
+        {value === 'user' && (
+          <>
+            <ApprovalList type='Upload' category={value} archived={false} />
+            <ApprovalList type='Deployment' category={value} archived={false} />
+          </>
+        )}
+        {value === 'archived' && (
+          <>
+            <ApprovalList type='Upload' category={value} archived />
+            <ApprovalList type='Deployment' category={value} archived />
+          </>
+        )}
       </>
     </Wrapper>
   )
@@ -65,7 +75,15 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
+function ApprovalList({
+  type,
+  category,
+  archived,
+}: {
+  type: RequestType
+  category: ReviewFilterType
+  archived: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -74,7 +92,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
 
   const theme = useTheme() || lightTheme
 
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
+  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category, archived)
   const { mutateNumRequests } = useGetNumRequests()
 
   const managerStyling = {
@@ -206,6 +224,17 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
             </Grid>
             <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
               <Box>
+                {requestObj.approvalType === 'Manager' && requestObj.version.managerApproved !== 'No Response' && (
+                  <Alert severity='info' sx={{ mt: 2 }}>
+                    {requestObj.version.managerApproved}
+                  </Alert>
+                )}
+                {requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved !== 'No Response' && (
+                  <Alert severity='info' sx={{ mt: 2 }}>
+                    {requestObj.version.reviewerApproved}
+                  </Alert>
+                )}
+
                 <Button
                   color='secondary'
                   sx={{ m: 1 }}
