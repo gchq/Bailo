@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
 import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
@@ -112,7 +112,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
   const actionOpen = anchorEl !== null
 
@@ -137,8 +137,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
   }
 
-  const userMenuClicked = (event: any) => {
-    setAnchorEl(event.currentTarget as HTMLDivElement)
+  const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
   }
 
   const handleMenuClose = () => {
@@ -213,15 +213,10 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </Link>
             {currentUser ? (
               <>
-                <IconButton onClick={userMenuClicked} data-test='showUserMenu'>
+                <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
                   <UserAvatar username={currentUser.id} size='chip' />
                 </IconButton>
-                <Menu
-                  sx={{ mt: '10px', right: 0 }}
-                  anchorEl={anchorEl as HTMLDivElement}
-                  open={actionOpen}
-                  onClose={handleMenuClose}
-                >
+                <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>
                     <MenuItem data-test='toggleDarkMode'>
                       <ListItemIcon>

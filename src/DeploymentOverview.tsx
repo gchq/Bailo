@@ -3,9 +3,13 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import MetadataDisplay from './MetadataDisplay'
+import { DeploymentDoc } from '../server/models/Deployment'
 
-function DeploymentOverview(props: any) {
-  const { deployment } = props
+type DeploymentOverviewProps = {
+  deployment: DeploymentDoc
+}
+
+function DeploymentOverview({ deployment }: DeploymentOverviewProps) {
   const theme = useTheme()
 
   return (

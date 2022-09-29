@@ -40,7 +40,7 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { VersionDoc } from '../../server/models/Version'
+import { isVersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -86,9 +86,6 @@ function CodeLine({ line }) {
     </>
   )
 }
-
-const isVersionDoc = (value: unknown): value is VersionDoc =>
-  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
 
 export default function Deployment() {
   const router = useRouter()
@@ -287,7 +284,7 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 

@@ -19,7 +19,7 @@ export default function ConfirmationDialogue({
   title,
   onCancel,
   onConfirm,
-  errorMessage,
+  errorMessage = '',
 }: ConfirmationDialogProps) {
   return (
     <Dialog fullWidth open={open} onClose={onCancel}>

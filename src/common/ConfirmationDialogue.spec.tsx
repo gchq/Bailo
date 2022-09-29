@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { doNothing } from '@/utils/tests'
+import { doNothing } from '@/utils/testUtils'
 import { render, screen, waitFor } from '@testing-library/react'
 import ConfirmationDialogue from './ConfirmationDialogue'
 
