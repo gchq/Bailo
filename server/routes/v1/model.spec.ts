@@ -15,7 +15,7 @@ import {
   testVersion,
   uploadSchema,
 } from '../../utils/test/testModels'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { authenticatedGetRequest, authenticatedDeleteRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 describe('test model routes', () => {
   beforeEach(async () => {
@@ -71,6 +71,15 @@ describe('test model routes', () => {
     validateTestRequest(res)
     expect(res.body).not.toBe(undefined)
     expect(res.body.version).toBe('1')
+  })
+
+  test('that we can delete a specific version for a model', async () => {
+    const resDelete = await authenticatedDeleteRequest(`/api/v1/model/${modelUuid}`)
+    validateTestRequest(resDelete)
+    expect(resDelete.body).toBe(`${modelUuid}`)
+    const resGet = await authenticatedGetRequest(`/api/v1/model/uuid/${modelUuid}`)
+    expect(resGet.statusCode).toBe(404)
+    expect(resGet.body.message).toBe(`Unable to find model '${modelUuid}'`)
   })
 
   afterAll((done) => {
