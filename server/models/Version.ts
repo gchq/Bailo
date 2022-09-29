@@ -1,7 +1,7 @@
 import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
-import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
+import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
 
 export interface Version {
@@ -13,8 +13,8 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
-  managerLastViewed: Date
-  reviewerLastViewed: Date
+  managerLastViewed: DateString
+  reviewerLastViewed: DateString
 
   files: {
     rawBinaryPath: string

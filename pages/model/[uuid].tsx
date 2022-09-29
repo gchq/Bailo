@@ -38,7 +38,7 @@ import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
@@ -73,14 +73,16 @@ function Model() {
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [modelFavourited, setModelFavourited] = useState<boolean>(false)
-  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
+  const [modelFavourited, setModelFavourited] = useState(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
-  const [showLastViewedWarning, setShowLastViewedWarning] = useState<boolean>(false)
-  const [managerLastViewed, setManagerLastViewed] = useState<Date | undefined>(undefined)
-  const [reviewerLastViewed, setReviewerLastViewed] = useState<Date | undefined>(undefined)
+  const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
+  const [managerLastViewed, setManagerLastViewed] = useState<Date | undefined>()
+  const [reviewerLastViewed, setReviewerLastViewed] = useState<Date | undefined>()
+  const [isManager, setIsManager] = useState(false)
+  const [isReviewer, setIsReviewer] = useState(false)
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -112,36 +114,38 @@ function Model() {
   }
 
   useEffect(() => {
+    if (currentUser && version) {
+      setIsManager(currentUser.id === version.metadata.contacts.manager)
+      setIsReviewer(currentUser.id === version.metadata.contacts.reviewer)
+    }
+  }, [currentUser, version])
+
+  const updateLastViewed = useCallback(
+    (role: string) => {
+      if (isManager && version?.updatedAt) {
+        const versionLastUpdatedAt = new Date(version?.updatedAt)
+        if (
+          (managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt!.getTime()) ||
+          (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt!.getTime())
+        ) {
+          setShowLastViewedWarning(true)
+        }
+        putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`, {})
+      }
+    },
+    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager]
+  )
+
+  useEffect(() => {
     if (currentUser) {
-      if (currentUser !== undefined && currentUser.id === version?.metadata.contacts.manager) {
+      if (isManager) {
         updateLastViewed('manager')
       }
-      if (currentUser !== undefined && currentUser.id === version?.metadata.contacts.reviewer) {
+      if (isReviewer) {
         updateLastViewed('reviewer')
       }
     }
-  }, [managerLastViewed, reviewerLastViewed, currentUser])
-
-  const updateLastViewed = (role: string) => {
-    if (currentUser?.id === version?.metadata.contacts.manager) {
-      const managerLastViewedDate = new Date(managerLastViewed as Date)
-      const reviewerLastViewedDate = new Date(reviewerLastViewed as Date)
-      const updatedAtDate = new Date(version!.updatedAt)
-      if (
-        managerLastViewedDate.getTime() < updatedAtDate.getTime() ||
-        reviewerLastViewedDate.getTime() < updatedAtDate.getTime()
-      ) {
-        setShowLastViewedWarning(true)
-      }
-      putEndpoint(`/api/v1/version/${version!._id}/lastViewed/${role}`)
-    }
-  }
-
-  useEffect(() => {
-    if (tab !== undefined && isTabOption(tab)) {
-      setGroup(tab)
-    }
-  }, [tab])
+  }, [currentUser, updateLastViewed, isManager, isReviewer])
 
   useEffect(() => {
     if (version && managerLastViewed === undefined) {
@@ -150,13 +154,19 @@ function Model() {
     if (version && reviewerLastViewed === undefined) {
       setReviewerLastViewed(version.reviewerLastViewed)
     }
-  }, [version])
+  }, [version, reviewerLastViewed, managerLastViewed])
 
   useEffect(() => {
     if (version) {
       setComplianceFlow(createComplianceFlow(version))
     }
   }, [version, setComplianceFlow])
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (!currentUser || !version?.model) return

@@ -105,6 +105,9 @@ export const updateLastViewed = [
   async (req: Request, res: Response) => {
     const { id, role } = req.params
     const { user } = req
+    if (!user) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'Not user details found in request.')
+    }
     const version = await findVersionById(req.user!, id, { populate: true })
     if (!version) {
       throw BadReq({ code: 'version_not_found' }, 'Unabled to find requested version')

@@ -182,3 +182,6 @@ export enum UploadModes {
   NewModel = 'newModel',
   NewVersion = 'newVersion',
 }
+
+export enum DateStringBrand {}
+export type DateString = string & DateStringBrand
