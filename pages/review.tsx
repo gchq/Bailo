@@ -247,6 +247,10 @@ function ApprovalList({
                   variant='outlined'
                   onClick={() => changeState('Declined', requestObj)}
                   sx={{ mr: 1 }}
+                  disabled={
+                    (requestObj.approvalType === 'Manager' && requestObj.version.managerApproved === 'Declined') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved === 'Declined')
+                  }
                 >
                   Reject
                 </Button>
@@ -254,6 +258,10 @@ function ApprovalList({
                   variant='contained'
                   onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
+                  disabled={
+                    (requestObj.approvalType === 'Manager' && requestObj.version.managerApproved === 'Accepted') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved === 'Accepted')
+                  }
                 >
                   Approve
                 </Button>
