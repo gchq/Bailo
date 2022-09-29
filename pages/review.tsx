@@ -29,7 +29,7 @@ import { Request } from '../types/interfaces'
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
-  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
+  const { isCurrentUserLoading } = useGetCurrentUser()
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
@@ -52,14 +52,14 @@ export default function Review() {
         )}
         {value === 'user' && (
           <>
-            <ApprovalList type='Upload' category={value} archived={false} />
-            <ApprovalList type='Deployment' category={value} archived={false} />
+            <ApprovalList type='Upload' category={value} />
+            <ApprovalList type='Deployment' category={value} />
           </>
         )}
         {value === 'archived' && (
           <>
-            <ApprovalList type='Upload' category={value} archived />
-            <ApprovalList type='Deployment' category={value} archived />
+            <ApprovalList archived type='Upload' category={value} />
+            <ApprovalList archived type='Deployment' category={value} />
           </>
         )}
       </>
@@ -78,11 +78,11 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
 function ApprovalList({
   type,
   category,
-  archived,
+  archived = false,
 }: {
   type: RequestType
   category: ReviewFilterType
-  archived: boolean
+  archived?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
@@ -160,7 +160,7 @@ function ApprovalList({
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} sm={4}>
               {type === 'Upload' && (
                 <>
                   <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
@@ -222,36 +222,42 @@ function ApprovalList({
                 </>
               )}
             </Grid>
-            <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>
-                {requestObj.approvalType === 'Manager' && requestObj.version.managerApproved !== 'No Response' && (
-                  <Alert severity='info' sx={{ mt: 2 }}>
-                    {requestObj.version.managerApproved}
-                  </Alert>
-                )}
-                {requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved !== 'No Response' && (
-                  <Alert severity='info' sx={{ mt: 2 }}>
-                    {requestObj.version.reviewerApproved}
-                  </Alert>
-                )}
-
+            <Grid item container xs={12} sm={8}>
+              <Grid item xs={12} sx={{ display: 'flex' }}>
+                <Box ml='auto' mb={1}>
+                  {requestObj.approvalType === 'Manager' && requestObj.version.managerApproved !== 'No Response' && (
+                    <Chip
+                      label={requestObj.version.managerApproved}
+                      color={(requestObj.version.managerApproved === 'Declined' && 'warning') || 'success'}
+                      variant='outlined'
+                    />
+                  )}
+                  {requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved !== 'No Response' && (
+                    <Chip
+                      label={requestObj.version.reviewerApproved}
+                      color={(requestObj.version.reviewerApproved === 'Declined' && 'warning') || 'success'}
+                      variant='outlined'
+                    />
+                  )}
+                </Box>
+              </Grid>
+              <Grid item xs={12} sx={{ textAlign: 'right' }}>
                 <Button
                   color='secondary'
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Declined', requestObj)}
                   variant='outlined'
+                  onClick={() => changeState('Declined', requestObj)}
+                  sx={{ mr: 1 }}
                 >
                   Reject
                 </Button>
                 <Button
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Accepted', requestObj)}
                   variant='contained'
+                  onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
                 >
                   Approve
                 </Button>
-              </Box>
+              </Grid>
             </Grid>
           </Grid>
         </Box>
