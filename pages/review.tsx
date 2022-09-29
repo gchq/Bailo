@@ -50,18 +50,8 @@ export default function Review() {
             <Tab value='archived' label='Archived' />
           </Tabs>
         )}
-        {value === 'user' && (
-          <>
-            <ApprovalList type='Upload' category={value} />
-            <ApprovalList type='Deployment' category={value} />
-          </>
-        )}
-        {value === 'archived' && (
-          <>
-            <ApprovalList archived type='Upload' category={value} />
-            <ApprovalList archived type='Deployment' category={value} />
-          </>
-        )}
+        <ApprovalList type='Upload' category={value} archived={value === 'archived'} />
+        <ApprovalList type='Deployment' category={value} archived={value === 'archived'} />
       </>
     </Wrapper>
   )
@@ -159,8 +149,8 @@ function ApprovalList({
       </Typography>
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
-          <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} sm={4}>
+          <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+            <Grid item xs={12} md={6} lg={7}>
               {type === 'Upload' && (
                 <>
                   <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
@@ -222,34 +212,32 @@ function ApprovalList({
                 </>
               )}
             </Grid>
-            <Grid item container xs={12} sm={8}>
-              <Grid item xs={12} sx={{ display: 'flex' }}>
-                <Box ml='auto' mb={1}>
-                  {requestObj.approvalType === 'Manager' && requestObj.version.managerApproved !== 'No Response' && (
-                    <Chip
-                      label={requestObj.version.managerApproved}
-                      color={(requestObj.version.managerApproved === 'Declined' && 'warning') || 'success'}
-                      variant='outlined'
-                    />
-                  )}
-                  {requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved !== 'No Response' && (
-                    <Chip
-                      label={requestObj.version.reviewerApproved}
-                      color={(requestObj.version.reviewerApproved === 'Declined' && 'warning') || 'success'}
-                      variant='outlined'
-                    />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sx={{ textAlign: 'right' }}>
+            <Grid item xs={12} md sx={{ display: 'flex' }}>
+              <Box ml='auto' my='auto'>
+                {requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved !== 'No Response' && (
+                  <Chip
+                    label={requestObj.version?.managerApproved}
+                    color={requestObj.version?.managerApproved === 'Accepted' ? 'success' : 'error'}
+                  />
+                )}
+                {requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved !== 'No Response' && (
+                  <Chip
+                    label={requestObj.version?.reviewerApproved}
+                    color={requestObj.version?.reviewerApproved === 'Accepted' ? 'success' : 'error'}
+                  />
+                )}
+              </Box>
+            </Grid>
+            <Grid item sx={{ display: 'flex', width: 200 }}>
+              <Box ml='auto' my='auto'>
                 <Button
                   color='secondary'
                   variant='outlined'
                   onClick={() => changeState('Declined', requestObj)}
                   sx={{ mr: 1 }}
                   disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version.managerApproved === 'Declined') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved === 'Declined')
+                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Declined') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Declined')
                   }
                 >
                   Reject
@@ -259,13 +247,13 @@ function ApprovalList({
                   onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
                   disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version.managerApproved === 'Accepted') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version.reviewerApproved === 'Accepted')
+                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Accepted') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Accepted')
                   }
                 >
                   Approve
                 </Button>
-              </Grid>
+              </Box>
             </Grid>
           </Grid>
         </Box>
