@@ -1,5 +1,5 @@
 import { castArray } from 'lodash'
-import { ModelId } from '../../types/interfaces'
+import { DateString, ModelId } from '../../types/interfaces'
 import { UserDoc } from '../models/User'
 import VersionModel, { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
@@ -98,9 +98,17 @@ export async function createVersion(user: UserDoc, data: CreateVersion) {
 }
 
 export async function updateManagerLastViewed(id: ModelId) {
-  return VersionModel.findOneAndUpdate({ _id: id }, { $set: { managerLastViewed: new Date() } }, { timestamps: false })
+  return VersionModel.findOneAndUpdate(
+    { _id: id },
+    { $set: { managerLastViewed: new Date() as DateString } },
+    { timestamps: false }
+  )
 }
 
 export async function updateReviewerLastViewed(id: ModelId) {
-  return VersionModel.findOneAndUpdate({ _id: id }, { $set: { reviewerLastViewed: new Date() } }, { timestamps: false })
+  return VersionModel.findOneAndUpdate(
+    { _id: id },
+    { $set: { reviewerLastViewed: new Date() as DateString } },
+    { timestamps: false }
+  )
 }

@@ -45,8 +45,8 @@ const VersionSchema: any = new Schema<Version>(
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
     reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
-    managerLastViewed: { type: Date },
-    reviewerLastViewed: { type: Date },
+    managerLastViewed: { type: Schema.Types.Mixed },
+    reviewerLastViewed: { type: Schema.Types.Mixed },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],
