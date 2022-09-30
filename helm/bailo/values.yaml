@@ -2,12 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Bailo image location
 image:
-  repository: bailo
-  tag: "latest"
+  repository: "image repository location" # user defined
+  tag: "latest" # user defined
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 
+# non-identifying metadata
 podAnnotations: {}
 
 # Instance scaling
@@ -17,11 +19,11 @@ autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  targetCPUUtilizationPercentage: 80 # hpa configuration
+  targetMemoryUtilizationPercentage: 80 # hpa configuration
 
 
-# Pod Security
+# Pod Security settings
 podSecurityContext: {}
   # fsGroup: 2000
 securityContext:
@@ -33,11 +35,12 @@ securityContext:
   # runAsUser: 1002380001
 
 # Networking
+# Ingress is implemented as routes in OpenShift. See appPublicRoute below. 
 service:
   type: ClusterIP
   port: 3000
 ingress:
-  enabled: "true|false"
+  enabled: "false" # set to false for OpenShift
   className: "nginx"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
@@ -51,6 +54,7 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -70,20 +74,20 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-# Application Dependencies
+# Mongo Dependencies
 mongodb:
   enabled: true
   auth:
     enabled: true
     rootUser: ""
     rootPassword: ""
-    existingSecret: "bailo-mongodb"
-    usernames: [ bailo_user ]
-    passwords: [ ]
-    databases: [ bailo ]
+    existingSecret: "bailo-mongodb" # HELM generated Secret name
+    usernames: [ bailo_user ] # defined user for database connection
+    passwords: [ ] # HELM generated. Requried for ConfigMap bailo-config
+    databases: [ bailo ] # defined database for Mongo
   service:
-    port: 31110 #27017./config/default.js:21 host: 'localhost:8080'
-  collectionName: bailo #db used by bailo during connecting to mongo
+    port: 31110 #default 27017./config/default.js:21 host: 'localhost:8080'
+  collectionName: bailo # Collection name in Mongo
   persistence:
     size: 10Gi
   containerSecurityContext:
@@ -95,19 +99,20 @@ mongodb:
     repository: bitnami/mongodb
     tag: 4.4.13-debian-10-r0
 
+# MinIO Dependencies
 minio:
   enabled: true
   auth:
     rootUser: ""
     rootPassword: ""
-    existingSecret: "bailo-minio"
-  defaultBuckets: "uploads,registry"
-  uploadBucket: uploads
-  registryBucket: registry
-  host: "bailo-minio"
+    existingSecret: "bailo-minio" # Helm generated Secret
+  defaultBuckets: "uploads,registry" 
+  uploadBucket: uploads # required for Bailo
+  registryBucket: registry # required for Bailo
+  host: "bailo-minio" # service name
   service:
     ports:
-      api: 31111 #9000
+      api: 31111 # default 9000
   useSSL: false
   persistence:
     size: 10Gi
@@ -121,29 +126,33 @@ minio:
     tag: 2022.2.12-debian-10-r0
     debug: true
 
+# Registry Dependencies
 registry:
   repository: registry
   tag: 2
   enabled: true
-  host: "registry"
-  port: 31113 #5000
+  host: "registry" # service name
+  port: 31113 # default 5000
   insecure: true
   certDir: "/certs"
   certFile: "yourcert.pem"
   keyFile: "yourkey.pem"
 
+
+# Nginx Dependencies
 nginxAuth:
-  repository: nginxinc/nginx-unprivileged
+  repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
   tag: latest
-  host: "bailo-nginx-auth-proxy"
+  host: "bailo-nginx-auth-proxy" # service name
   #port: 8443
   port: 8080
   #certDir: "/certs"
   #certFile: "tls.crt"
   #keyFile: "tls.key"
 
+# Openshift specific configuration   
 openshift:
-  namespace: bailo
+  namespace: bailo # project
   appPublicRoute: 'openshift-route-url'
   dockerPushSecretName: 'registry-push-secret'
 
