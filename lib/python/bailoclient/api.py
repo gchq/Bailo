@@ -9,6 +9,7 @@ import io
 import requests
 import requests_pkcs12
 from requests.exceptions import JSONDecodeError
+from requests.models import Response
 
 from .auth import AuthenticationInterface, Pkcs12Authenticator, UnauthorizedException
 from .config import BailoConfig
@@ -274,19 +275,20 @@ class AuthorisedAPI(APIInterface):
 
         return self._handle_response(response)
 
-    def _handle_response(self, response, output_dir):
-        """_summary_
+    def _handle_response(self, response: Response, output_dir: str):
+        """Handle the response from the server
 
         Args:
-            response (_type_): _description_
-            output_dir (_type_): _description_
+            response (Response): Response from the server
+            output_dir (str): Directory to download any files to
 
         Raises:
-            UnauthorizedException: _description_
+            UnauthorizedException: Unathorised to access server
 
         Returns:
-            _type_: _description_
+            str: Response status or message
         """
+
         if 200 <= response.status_code < 300:
             if output_dir:
                 self.__decode_file_content(response.content, output_dir)
@@ -308,7 +310,6 @@ class AuthorisedAPI(APIInterface):
 
         except:
             response.raise_for_status()
-            return {}
 
 
     

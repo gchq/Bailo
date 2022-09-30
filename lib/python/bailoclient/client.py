@@ -23,6 +23,7 @@ from .models import Model, User
 from .utils.exceptions import (
     CannotIncrementVersion,
     DataInvalid,
+    DeploymentNotFound,
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
@@ -178,28 +179,41 @@ class Client:
         logger.warning("User with display name %s not found", name)
         return None
 
-    def download_model_files(self, deployment_uuid: str, model_version: str, file_type: str="binary", output_dir: str="./model/", overwrite: bool=False):
+    def download_model_files(
+        self,
+        deployment_uuid: str,
+        model_version: str,
+        file_type: str = "binary",
+        output_dir: str = "./model/",
+        overwrite: bool = False,
+    ):
         """Download the code or binary for a model. file_type can either be 'binary' or 'code'.
 
         Args:
             deployment_uuid (str): UUID of the deployment
             model_version (str): Version of the model
             file_type (str, optional): Model files to download. Either 'code' or 'binary'. Defaults to "binary".
-            dir (str, optional): Output directory for file downloads. Defaults to "./model/". 
-            overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False. 
+            dir (str, optional): Output directory for file downloads. Defaults to "./model/".
+            overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
         Returns:
             str: Response status code
         """
 
-        if not file_type in ['code', 'binary']:
-            raise InvalidFileRequested("Invalid file_type provided - file_type can either be 'code' or 'binary'")
+        if not file_type in ["code", "binary"]:
+            raise InvalidFileRequested(
+                "Invalid file_type provided - file_type can either be 'code' or 'binary'"
+            )
 
         if glob(output_dir) and not overwrite:
-            raise FileExistsError('A folder already exists at this location. Use overwrite=True if you want to overwrite the existing folder.')
+            raise FileExistsError(
+                "A folder already exists at this location. Use overwrite=True if you want to overwrite the existing folder."
+            )
 
-        return self.api.get(f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}", output_dir=output_dir)
-
+        return self.api.get(
+            f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
+            output_dir=output_dir,
+        )
 
     def get_deployment_by_uuid(self, deployment_uuid: str):
         """Get deployment by deployment UUID
@@ -219,29 +233,86 @@ class Client:
             user_id (str): ID of the user
 
         Returns:
-            dict: User
+            list[dict]: Deployments for user
         """
-        ## TODO
-        # Should this return a user object? 
         return self.api.get(f"/deployment/user/{user_id}")
 
     def get_my_deployments(self):
+        """Get deployments for the current user
+
+        Returns:
+            list[dict]: Deployments for the current user
+        """
         return self.get_user_deployments(self.get_me()._id)
 
-    def get_model_deployment(self, deployment_name, model_uuid, model_version: str = None, most_recent: bool = True):
+    def find_my_deployment(
+        self,
+        deployment_name: str,
+        model_uuid: str,
+        model_version: str = None,
+        most_recent: bool = True,
+    ):
+        """Find a particular deployment belonging to the current user.
+
+        Args:
+            deployment_name (str): Name of the deployment
+            model_uuid (str): UUID of the model associated with the deployment
+            model_version (str, optional): Version of the model that the deployment was created for. Defaults to None.
+            most_recent (bool, optional): Whether to return the most recent deployment if multiple matching deployments are found. Defaults to True.
+
+        Returns:
+            dict: Matching deployment
+        """
         user_deployments = self.get_my_deployments()
-        matching_deployments = [ deployment for deployment in user_deployments if self._deployment_matches(deployment, deployment_name, model_uuid, model_version)]
+
+        if not user_deployments:
+            raise DeploymentNotFound("You do not currently have any deployments.")
+
+        matching_deployments = [
+            deployment
+            for deployment in user_deployments
+            if self.__deployment_matches(
+                deployment, deployment_name, model_uuid, model_version
+            )
+        ]
+
+        if not matching_deployments:
+            raise DeploymentNotFound("Could not find any deployments for the current user matching the provided criteria. Please double check your parameters.")
 
         if most_recent:
-            timestamps = [ datetime.strptime(deployment['metadata']['timeStamp'], '%Y-%m-%dT%H:%M:%S.%fZ') for deployment in matching_deployments ]
+            timestamps = [
+                datetime.strptime(
+                    deployment["metadata"]["timeStamp"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                )
+                for deployment in matching_deployments
+            ]
             latest = timestamps.index(max(timestamps))
             return matching_deployments[latest]
 
-        return matching_deployments[0]
+        return matching_deployments
 
-    def _deployment_matches(self, deployment, deployment_name, model_uuid, model_version):
-        return (deployment['metadata']['highLevelDetails']['name'] == deployment_name) and (deployment['metadata']['highLevelDetails']['modelID'] == model_uuid) and (deployment['metadata']['highLevelDetails']['initialVersionRequested'] == model_version)
-        
+    def __deployment_matches(
+        self, deployment: dict, deployment_name: str, model_uuid: str, model_version: str
+    ):
+        """Check whether a deployment matches the provided filters. Returns True if deployment is a match.
+
+        Args:
+            deployment (dict): The model deployment
+            deployment_name (str): The name of the requested deployment
+            model_uuid (str): The model UUID of the requested deployment
+            model_version (str): The model version of the requested deployment
+
+        Returns:
+            bool: True if deployment matches provided filters
+        """
+
+        deployment_details = deployment["metadata"]["highLevelDetails"]
+
+        return (
+            (deployment_details["name"] == deployment_name)
+            and (deployment_details["modelID"] == model_uuid)
+            and (deployment_details["initialVersionRequested"] == model_version or not model_version)
+        )
 
     def __model(self, model: dict) -> Model:
         """Create Model with schema

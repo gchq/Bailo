@@ -38,3 +38,7 @@ class CannotIncrementVersion(Exception):
 
 class InvalidFileRequested(Exception):
     """Invalid file type requested for download"""
+
+
+class DeploymentNotFound(Exception):
+    """Could not find a deployment"""
