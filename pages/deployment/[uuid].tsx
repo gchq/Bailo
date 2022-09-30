@@ -40,7 +40,7 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { isVersionDoc } from '../../server/models/Version'
+import { VersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -50,6 +50,9 @@ type TabOptions = 'overview' | 'compliance' | 'build' | 'settings' | 'exports'
 function isTabOption(value: string): value is TabOptions {
   return ['overview', 'compliance', 'build', 'exports', 'settings'].includes(value)
 }
+
+const isVersionDoc = (value: unknown): value is VersionDoc =>
+  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
 
 function CodeLine({ line }) {
   const [openSnackbar, setOpenSnackbar] = useState(false)

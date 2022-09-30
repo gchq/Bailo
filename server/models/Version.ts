@@ -5,9 +5,6 @@ import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
 import { ModelDoc } from './Model'
 
-export const isVersionDoc = (value: unknown): value is VersionDoc =>
-  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
-
 export interface Version {
   model: ModelDoc | Types.ObjectId
   version: string
