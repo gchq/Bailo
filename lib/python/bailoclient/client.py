@@ -5,6 +5,8 @@
 import json
 import logging
 import os
+from datetime import datetime
+from glob import glob
 from functools import wraps
 from typing import Callable, Union
 
@@ -22,6 +24,7 @@ from .utils.exceptions import (
     CannotIncrementVersion,
     DataInvalid,
     InvalidFilePath,
+    InvalidFileRequested,
     InvalidMetadata,
     UnconnectedClient,
 )
@@ -174,6 +177,71 @@ class Client:
                 return user
         logger.warning("User with display name %s not found", name)
         return None
+
+    def download_model_files(self, deployment_uuid: str, model_version: str, file_type: str="binary", output_dir: str="./model/", overwrite: bool=False):
+        """Download the code or binary for a model. file_type can either be 'binary' or 'code'.
+
+        Args:
+            deployment_uuid (str): UUID of the deployment
+            model_version (str): Version of the model
+            file_type (str, optional): Model files to download. Either 'code' or 'binary'. Defaults to "binary".
+            dir (str, optional): Output directory for file downloads. Defaults to "./model/". 
+            overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False. 
+
+        Returns:
+            str: Response status code
+        """
+
+        if not file_type in ['code', 'binary']:
+            raise InvalidFileRequested("Invalid file_type provided - file_type can either be 'code' or 'binary'")
+
+        if glob(output_dir) and not overwrite:
+            raise FileExistsError('A folder already exists at this location. Use overwrite=True if you want to overwrite the existing folder.')
+
+        return self.api.get(f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}", output_dir=output_dir)
+
+
+    def get_deployment_by_uuid(self, deployment_uuid: str):
+        """Get deployment by deployment UUID
+
+        Args:
+            deployment_uuid (str): Deployment UUID
+
+        Returns:
+            dict: Deployment
+        """
+        return self.api.get(f"/deployment/{deployment_uuid}")
+
+    def get_user_deployments(self, user_id: str):
+        """Get deployments for a given user
+
+        Args:
+            user_id (str): ID of the user
+
+        Returns:
+            dict: User
+        """
+        ## TODO
+        # Should this return a user object? 
+        return self.api.get(f"/deployment/user/{user_id}")
+
+    def get_my_deployments(self):
+        return self.get_user_deployments(self.get_me()._id)
+
+    def get_model_deployment(self, deployment_name, model_uuid, model_version: str = None, most_recent: bool = True):
+        user_deployments = self.get_my_deployments()
+        matching_deployments = [ deployment for deployment in user_deployments if self._deployment_matches(deployment, deployment_name, model_uuid, model_version)]
+
+        if most_recent:
+            timestamps = [ datetime.strptime(deployment['metadata']['timeStamp'], '%Y-%m-%dT%H:%M:%S.%fZ') for deployment in matching_deployments ]
+            latest = timestamps.index(max(timestamps))
+            return matching_deployments[latest]
+
+        return matching_deployments[0]
+
+    def _deployment_matches(self, deployment, deployment_name, model_uuid, model_version):
+        return (deployment['metadata']['highLevelDetails']['name'] == deployment_name) and (deployment['metadata']['highLevelDetails']['modelID'] == model_uuid) and (deployment['metadata']['highLevelDetails']['initialVersionRequested'] == model_version)
+        
 
     def __model(self, model: dict) -> Model:
         """Create Model with schema

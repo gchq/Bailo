@@ -35,3 +35,6 @@ class InvalidMetadata(Exception):
 
 class CannotIncrementVersion(Exception):
     """Unable to automatically increment a model card version"""
+
+class InvalidFileRequested(Exception):
+    """Invalid file type requested for download"""

@@ -3,6 +3,9 @@
 import abc
 from typing import Dict, Optional
 
+import zipfile
+import subprocess
+import io
 import requests
 import requests_pkcs12
 from requests.exceptions import JSONDecodeError
@@ -126,6 +129,7 @@ class AuthorisedAPI(APIInterface):
         request_path: str,
         request_params: Optional[Dict[str, str]] = None,
         headers: Optional[Dict] = None,
+        output_dir: Optional[str] = None,
     ) -> Dict[str, str]:
         """Make a GET request against the API.
            This will not do any validation of parameters prior to sending.
@@ -167,7 +171,7 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        return self._handle_response(response)
+        return self._handle_response(response, output_dir)
 
     def post(
         self,
@@ -270,9 +274,26 @@ class AuthorisedAPI(APIInterface):
 
         return self._handle_response(response)
 
-    def _handle_response(self, response):
+    def _handle_response(self, response, output_dir):
+        """_summary_
+
+        Args:
+            response (_type_): _description_
+            output_dir (_type_): _description_
+
+        Raises:
+            UnauthorizedException: _description_
+
+        Returns:
+            _type_: _description_
+        """
         if 200 <= response.status_code < 300:
-            return response.json()
+            if output_dir:
+                self.__decode_file_content(response.content, output_dir)
+                return response.status_code
+
+            else:
+                return response.json()
 
         if response.status_code == 401:
             try:
@@ -281,6 +302,25 @@ class AuthorisedAPI(APIInterface):
             except JSONDecodeError:
                 response.raise_for_status()
 
-        response.raise_for_status()
+        try:
+            data = response.json()
+            return data
 
-        return {}
+        except:
+            response.raise_for_status()
+            return {}
+
+
+    
+    def __decode_file_content(self, content: bytes, output_dir: str):
+        """Decode bytes from HttpResponse into zip file
+
+        Args:
+            content (bytes): Content from the API response
+            output_dir (str): The directory to save the zip file to
+        """
+        z = zipfile.ZipFile(io.BytesIO(content))
+        z.extractall(output_dir)
+
+        # remove the __MACOSX file
+        subprocess.call([f"rm -r {output_dir}/__MACOSX"], shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
