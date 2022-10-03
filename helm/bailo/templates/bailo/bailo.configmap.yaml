@@ -40,6 +40,9 @@ data:
       s2i: {
         builderImage: '{{ .Values.config.s2i.image }}',
       },
+      build: {
+        environment: 'openshift',
+      },
       uiConfig: {
         banner: {
           enable: true,

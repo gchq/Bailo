@@ -38,13 +38,14 @@ module.exports = {
   },
 
   build: {
-    environment: 'openshift',
+    environment: 'img',
   },
 
+  // overwritten via Helm charts
   openshift: {
-    namespace: 'bailo',
-    appPublicRoute: 'https://appPublicRoute',
-    dockerPushSecretName: 'registry-push-secret',
+    namespace: '',
+    appPublicRoute: '',
+    dockerPushSecretName: '',
   },
 
   uiConfig: {
@@ -76,7 +77,7 @@ module.exports = {
 
   smtp: {
     enabled: true,
-    host: 'mail',
+    host: 'localhost',
     port: 1025,
     secure: false,
     auth: {
