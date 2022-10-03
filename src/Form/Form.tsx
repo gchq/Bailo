@@ -11,12 +11,12 @@ export default function Form({
   splitSchema,
   setSplitSchema,
   onSubmit,
-  modelUploading,
+  modelUploading = false,
 }: {
   splitSchema: SplitSchema
   onSubmit: () => void
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
-  modelUploading: boolean
+  modelUploading?: boolean
 }) {
   const [tab, setTab] = useState('designer')
   const onTabChange = (_event: any, newValue: any) => {

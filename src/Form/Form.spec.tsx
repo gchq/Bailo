@@ -27,7 +27,7 @@ describe('Form', () => {
   }
 
   it('renders an Form component with the FormDesigner component open', async () => {
-    render(<Form onSubmit={doNothing} setSplitSchema={doNothing} modelUploading={false} splitSchema={splitSchema} />)
+    render(<Form onSubmit={doNothing} setSplitSchema={doNothing} splitSchema={splitSchema} />)
 
     await waitFor(async () => {
       expect(await screen.findByText('test page')).not.toBeUndefined()
@@ -37,9 +37,7 @@ describe('Form', () => {
   })
 
   it('renders an Form component with the FormUpload component open', async () => {
-    const { container } = render(
-      <Form onSubmit={doNothing} setSplitSchema={doNothing} modelUploading={false} splitSchema={splitSchema} />
-    )
+    const { container } = render(<Form onSubmit={doNothing} setSplitSchema={doNothing} splitSchema={splitSchema} />)
 
     fireEvent(
       getByText(container, 'Upload Existing'),
