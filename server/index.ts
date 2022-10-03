@@ -24,11 +24,11 @@ import {
   deleteModel,
 } from './routes/v1/model'
 import { postUpload } from './routes/v1/upload'
+import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
 import { getUser } from './utils/user'
@@ -72,6 +72,7 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
+server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
