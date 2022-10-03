@@ -112,7 +112,7 @@ export const updateLastViewed = [
     if (!version) {
       throw BadReq({ code: 'version_not_found' }, 'Unabled to find requested version')
     }
-    if (user?.id !== version?.metadata.contacts[role]) {
+    if (user.id !== version?.metadata.contacts[role]) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
     if (role === 'manager') {

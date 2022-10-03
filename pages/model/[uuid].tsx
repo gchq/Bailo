@@ -49,7 +49,7 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
-import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -79,8 +79,8 @@ function Model() {
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
-  const [managerLastViewed, setManagerLastViewed] = useState<Date | undefined>()
-  const [reviewerLastViewed, setReviewerLastViewed] = useState<Date | undefined>()
+  const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
+  const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
 
@@ -124,11 +124,12 @@ function Model() {
 
   const updateLastViewed = useCallback(
     (role: string) => {
-      if (isManager && version?.updatedAt) {
-        const versionLastUpdatedAt = new Date(version?.updatedAt)
+      if (isManager && version && version.updatedAt && currentUser) {
+        const versionLastUpdatedAt = new Date(version.updatedAt)
         if (
-          (managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt!.getTime()) ||
-          (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt!.getTime())
+          ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
+          (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
+          currentUser.id !== version.metadata.contacts.uploader
         ) {
           setShowLastViewedWarning(true)
         }
@@ -151,7 +152,7 @@ function Model() {
 
   useEffect(() => {
     if (version && managerLastViewed === undefined) {
-      setManagerLastViewed(version!.managerLastViewed)
+      setManagerLastViewed(version.managerLastViewed)
     }
     if (version && reviewerLastViewed === undefined) {
       setReviewerLastViewed(version.reviewerLastViewed)
