@@ -124,19 +124,27 @@ function Model() {
 
   const updateLastViewed = useCallback(
     (role: string) => {
-      if (isManager && version && version.updatedAt && currentUser) {
-        const versionLastUpdatedAt = new Date(version.updatedAt)
+      if (isManager && version?.updatedAt && currentUser) {
+        const versionLastUpdatedAt = new Date(version?.updatedAt)
         if (
           ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
-          (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
-          currentUser.id !== version.metadata.contacts.uploader
+            (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
+          currentUser.id !== version?.metadata.contacts.uploader
         ) {
           setShowLastViewedWarning(true)
         }
         putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
       }
     },
-    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager]
+    [
+      managerLastViewed,
+      reviewerLastViewed,
+      currentUser,
+      version?.metadata.contacts.uploader,
+      version?._id,
+      version?.updatedAt,
+      isManager,
+    ]
   )
 
   useEffect(() => {
