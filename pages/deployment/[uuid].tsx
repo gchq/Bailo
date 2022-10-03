@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
@@ -147,6 +146,10 @@ export default function Deployment() {
     }
   }, [deployment])
 
+  const handleModelLinkClick = () => {
+    router.push(`/model/${deployment?.model.uuid}`)
+  }
+
   const handleClickOpen = () => {
     if (!isDeploymentLoading && deployment !== undefined) {
       setOpen(true)
@@ -189,6 +192,9 @@ export default function Deployment() {
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
           <Box sx={{ textAlign: 'right', pb: 3 }}>
+            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleModelLinkClick}>
+              Back to model
+            </Button>
             <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
               Show download commands
             </Button>
