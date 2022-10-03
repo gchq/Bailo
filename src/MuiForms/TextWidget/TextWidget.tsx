@@ -1,14 +1,12 @@
-import React from 'react'
-
 import TextField, { StandardTextFieldProps as TextFieldProps } from '@mui/material/TextField'
-
-import { WidgetProps, utils } from '@rjsf/core'
+import { utils, WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const { getDisplayLabel } = utils
 
 export type TextWidgetProps = WidgetProps & Pick<TextFieldProps, Exclude<keyof TextFieldProps, 'onBlur' | 'onFocus'>>
 
-const TextWidget = ({
+function TextWidget({
   id,
   placeholder,
   required,
@@ -28,7 +26,7 @@ const TextWidget = ({
   formContext,
   registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
-}: TextWidgetProps) => {
+}: TextWidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
     onChange(newValue === '' ? options.emptyValue : newValue)
   const _onBlur = ({ target: { value: newValue } }: React.FocusEvent<HTMLInputElement>) => onBlur(id, newValue)

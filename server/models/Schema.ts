@@ -1,4 +1,4 @@
-import { Schema as MongooseSchema, model } from 'mongoose'
+import { model, Schema as MongooseSchema } from 'mongoose'
 
 export interface Schema {
   name: string

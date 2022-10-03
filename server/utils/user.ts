@@ -1,13 +1,12 @@
-import { Request, Response, NextFunction } from 'express'
-import { User } from '../../types/interfaces'
 import { timingSafeEqual } from 'crypto'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { Forbidden, Unauthorised } from './result'
+import { NextFunction, Request, Response } from 'express'
 import Authorisation from '../external/Authorisation'
-import { findAndUpdateUser, findUserCached, getUserById } from '../services/user'
 import { UserDoc } from '../models/User'
+import { getAdminToken } from '../routes/v1/registryAuth'
+import { findUserCached, getUserById } from '../services/user'
+import { Forbidden, Unauthorised } from './result'
 
-const authorisation = new Authorisation()
+const auth = new Authorisation()
 
 function safelyCompareTokens(expected, actual) {
   // This is not constant time, which will allow a user to calculate the length
@@ -25,7 +24,7 @@ function safelyCompareTokens(expected, actual) {
   return true
 }
 
-// This is an authentication function.  Take care whilst editting it.  Notes:
+// This is an authentication function.  Take care whilst editing it.  Notes:
 // - the password is not hashed, so comparisons _must_ be done in constant time
 export async function getUserFromAuthHeader(header: string): Promise<{ error?: string; user?: any; admin?: boolean }> {
   const [method, code] = header.split(' ')
@@ -63,20 +62,21 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   // this function must never fail to call next, even when
   // no user is found.
 
-  const userInfo = await authorisation.getUserFromReq(req)
+  const userInfo = await auth.getUserFromReq(req)
 
-  if (!userInfo.userId || !userInfo.email) return next()
+  // no user found
+  if (!userInfo.userId) return next()
 
   const user = await findUserCached(userInfo)
   req.user = user
 
-  next()
+  return next()
 }
 
 export function hasRole(roles: Array<string> | string, user: UserDoc) {
   const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-  for (let role of arrayRoles) {
+  for (const role of arrayRoles) {
     if (!user.roles.includes(role)) {
       return false
     }
@@ -93,7 +93,7 @@ export function ensureUserRole(roles: Array<string> | string) {
 
     const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
-    for (let role of arrayRoles) {
+    for (const role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
         throw Unauthorised({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
       }

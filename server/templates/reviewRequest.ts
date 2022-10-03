@@ -1,11 +1,12 @@
+import config from 'config'
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
-import config from 'config'
-import { wrapper } from './partials'
-import { VersionDoc } from '../models/Version'
 import { DeploymentDoc } from '../models/Deployment'
-import { RequestTypes } from '../models/Request'
 import { ModelDoc } from '../models/Model'
+import { RequestTypes } from '../models/Request'
+import { VersionDoc } from '../models/Version'
+import createRequestUrl from '../utils/createRequestUrl'
+import { wrapper } from './partials'
 
 export interface ReviewRequestContext {
   document: VersionDoc | DeploymentDoc
@@ -18,11 +19,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return mjml2html(
     wrapper(`
@@ -68,11 +65,7 @@ export function text({ document, requestType }: ReviewRequestContext) {
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
     You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo.

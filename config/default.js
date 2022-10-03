@@ -59,9 +59,6 @@ module.exports = {
       supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
       contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
     },
-    help: {
-      documentationUrl: 'https://example.com',
-    },
     registry: {
       host: 'localhost:8080',
     },
@@ -95,6 +92,15 @@ module.exports = {
       enabled: false,
       level: 'info',
       path: './logs/out.log',
+    },
+
+    stroom: {
+      enabled: false,
+      folder: './logs/stroom',
+      url: 'http://localhost:8090/stroom/datafeed',
+      environment: 'insecure',
+      feed: 'bailo',
+      system: 'bailo',
     },
   },
 

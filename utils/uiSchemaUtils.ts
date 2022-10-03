@@ -8,7 +8,7 @@ export function createUiSchema(schema: any, customSchema: any) {
 }
 
 export function createBaseSchema(schema: any) {
-  let uiSchema = {}
+  const uiSchema = {}
 
   if (schema.maxLength) {
     uiSchema['ui:widget'] = 'textArea'
@@ -19,7 +19,7 @@ export function createBaseSchema(schema: any) {
   }
 
   if (schema.type === 'object') {
-    for (let [property, value] of Object.entries(schema.properties)) {
+    for (const [property, value] of Object.entries(schema.properties)) {
       uiSchema[property] = createBaseSchema(value)
     }
   }

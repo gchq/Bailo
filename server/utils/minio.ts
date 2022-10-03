@@ -1,5 +1,5 @@
-import * as Minio from 'minio'
 import config from 'config'
+import * as Minio from 'minio'
 import logger from './logger'
 
 export function getClient(): Minio.Client {
@@ -17,7 +17,9 @@ export async function ensureBucketExists(bucket: string) {
       waitForMinio = false
     } catch (e) {
       logger.error({ e }, 'Could not check bucket exists. Sleeping then trying again.')
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((r) => {
+        setTimeout(r, 1000)
+      })
     }
   }
   if (!exists) {
@@ -33,14 +35,12 @@ export async function emptyBucket(bucket: string) {
   const stream = client.listObjectsV2(bucket)
 
   const files: Array<Minio.BucketItem> = []
-  stream.on('data', function (obj) {
-    files.push(obj)
-  })
-  stream.on('error', function (err) {
-    logger.error({ error: err, bucket }, 'Error listing Minio files')
-  })
+  stream.on('data', (obj) => files.push(obj))
+  stream.on('error', (err) => logger.error({ error: err, bucket }, 'Error listing Minio files'))
 
-  await new Promise((resolve) => stream.on('close', resolve))
+  await new Promise((resolve) => {
+    stream.on('close', resolve)
+  })
   logger.info({ bucket }, 'Finished listing files in bucket')
 
   await client.removeObjects(
@@ -48,4 +48,10 @@ export async function emptyBucket(bucket: string) {
     files.map((file) => file.name)
   )
   logger.info({ bucket }, 'Removed all files from bucket')
+}
+
+export async function copyFile(from: string, to: string) {
+  const client = getClient()
+
+  await client.copyObject(config.get('minio.uploadBucket'), to, from, new Minio.CopyConditions())
 }

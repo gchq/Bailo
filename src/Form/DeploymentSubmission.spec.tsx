@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
-import DeploymentSubmission from './DeploymentSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import DeploymentSubmission from './DeploymentSubmission'
+import { doNothing } from '../../utils/tests'
 
 describe('DeploymentSubmission', () => {
   it('renders an DeploymentSubmission component', async () => {
@@ -22,7 +23,7 @@ describe('DeploymentSubmission', () => {
     const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
     uiConfigMock.mockReturnValue(mockedConfig)
 
-    render(<DeploymentSubmission onSubmit={() => {}} activeStep={1} setActiveStep={() => {}} />)
+    render(<DeploymentSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} />)
 
     await waitFor(async () => {
       expect(await screen.findByText('Request Deployment')).not.toBeUndefined()

@@ -1,36 +1,36 @@
-import Wrapper from 'src/Wrapper'
-import Paper from '@mui/material/Paper'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
+import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
-import DialogActions from '@mui/material/DialogActions'
-import Stack from '@mui/material/Stack'
-import useTheme from '@mui/styles/useTheme'
-import { useState } from 'react'
-import Link from 'next/link'
+import DialogTitle from '@mui/material/DialogTitle'
+import Grid from '@mui/material/Grid'
 import MuiLink from '@mui/material/Link'
-import EmptyBlob from '../src/common/EmptyBlob'
-import { Request } from '../types/interfaces'
-import { RequestType, ReviewFilterType, useListRequests, useGetNumRequests } from '../data/requests'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
+import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material'
+import Link from 'next/link'
+import { useState } from 'react'
+import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
+import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
 import { useGetCurrentUser } from '../data/user'
+import EmptyBlob from '../src/common/EmptyBlob'
+import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../src/theme'
+import { Request } from '../types/interfaces'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-  const theme: any = useTheme()
+  const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -72,7 +72,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()

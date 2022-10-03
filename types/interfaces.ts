@@ -1,14 +1,12 @@
-import { Date, Types } from 'mongoose'
 import Logger from 'bunyan'
+import { Date, Types } from 'mongoose'
+import { Dispatch, SetStateAction } from 'react'
 import { UserDoc } from '../server/models/User'
-import { XYPosition } from 'react-flow-renderer'
 
-export type { VersionDoc as Version } from '../server/models/Version'
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
 export type { RequestDoc as Request } from '../server/models/Request'
 export type { UserDoc as User } from '../server/models/User'
-
-export type { ApprovalStates } from '../server/models/Deployment'
+export type { VersionDoc as Version } from '../server/models/Version'
 
 declare global {
   namespace Express {
@@ -20,7 +18,7 @@ declare global {
     }
 
     interface Response {
-      error: Function
+      error: (code: number, error: any) => void
     }
   }
 }
@@ -47,6 +45,11 @@ export interface ModelMetadata {
     manager: string
 
     [x: string]: any
+  }
+
+  buildOptions?: {
+    exportRawModel: boolean
+    allowGuestDeployments: boolean
   }
 
   // allow other properties
@@ -93,10 +96,6 @@ export interface UiConfig {
     contactHref: string
   }
 
-  help: {
-    documentationUrl: string
-  }
-
   registry: {
     host: string
   }
@@ -126,12 +125,12 @@ export interface Step {
   section: string
   schemaRef: string
 
-  render: Function
-  renderBasic: Function
-  renderButtons: Function
+  render: (RenderInterface) => JSX.Element | null
+  renderBasic?: (RenderInterface) => JSX.Element | null
+  renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
-  isComplete: Function
+  isComplete: (step: Step) => boolean
 }
 
 export interface SplitSchema {
@@ -141,3 +140,49 @@ export interface SplitSchema {
 }
 
 export type ModelId = string | Types.ObjectId
+
+export interface RenderInterface {
+  step: Step
+  splitSchema: SplitSchema
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+}
+export const approvalStateOptions = ['Accepted', 'Declined', 'No Response']
+
+export enum ApprovalStates {
+  Accepted = 'Accepted',
+  Declined = 'Declined',
+  NoResponse = 'No Response',
+}
+
+export type DocHeading = {
+  title: string
+  slug: string
+  hasIndex: boolean
+  children: DocFileOrHeading[]
+  priority: number
+}
+
+export type DocFile = {
+  title: string
+  slug: string
+  priority: number
+}
+
+export type DocFileOrHeading = DocHeading | DocFile
+
+export type DocsMenuContent = DocFileOrHeading[]
+
+export enum ModelUploadType {
+  Zip = 'Code and binaries',
+  ModelCard = 'Model card only',
+  Docker = 'Upload an exported Docker container',
+}
+
+export enum UploadModes {
+  NewModel = 'newModel',
+  NewVersion = 'newVersion',
+}
+
+// Dates are in ISO 8601 format
+enum DateStringBrand {}
+export type DateString = string & DateStringBrand

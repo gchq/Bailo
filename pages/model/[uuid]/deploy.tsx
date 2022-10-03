@@ -1,31 +1,22 @@
-import { useRouter } from 'next/router'
-import React, { useState, useEffect } from 'react'
-import Paper from '@mui/material/Paper'
-import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import Wrapper from '../../../src/Wrapper'
+import Grid from '@mui/material/Grid'
+import Paper from '@mui/material/Paper'
+import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
+import { postEndpoint } from '../../../data/api'
 import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
-import { postEndpoint } from '../../../data/api'
-import { Schema, SplitSchema, Step } from '../../../types/interfaces'
-import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
+import DeploymentSubmission from '../../../src/Form/DeploymentSubmission'
+import Form from '../../../src/Form/Form'
+import { RenderButtonsInterface } from '../../../src/Form/RenderButtons'
 import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
-import Form from '../../../src/Form/Form'
-import DeploymentSubmission from '../../../src/Form/DeploymentSubmission'
+import Wrapper from '../../../src/Wrapper'
+import { Schema, SplitSchema } from '../../../types/interfaces'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
-function renderSubmissionTab(
-  _currentStep: Step,
-  _splitSchema: SplitSchema,
-  _setSplitSchema: (reference: string, steps: Array<Step>) => void,
-  activeStep: number,
-  setActiveStep: (step: number) => void,
-  onSubmit: () => void,
-  _openValidateError: boolean,
-  _setOpenValidateError: (validatorError: boolean) => void,
-  _modelUploading: boolean
-) {
+function renderSubmissionTab({ activeStep, setActiveStep, onSubmit }: RenderButtonsInterface) {
   return <DeploymentSubmission onSubmit={onSubmit} setActiveStep={setActiveStep} activeStep={activeStep} />
 }
 
@@ -128,7 +119,7 @@ export default function Deploy() {
         </Grid>
 
         <SubmissionError error={error} />
-        <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
+        <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} modelUploading={false} />
       </Paper>
     </Wrapper>
   )

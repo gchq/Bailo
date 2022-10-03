@@ -10,5 +10,9 @@
     "uploader": "user",
     "reviewer": "user",
     "manager": "user"
+  },
+  "buildOptions": {
+    "exportRawModel": true,
+    "uploadType": "Code and binaries"
   }
 }

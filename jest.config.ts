@@ -1,5 +1,5 @@
-import nextJest from 'next/jest'
 import type { Config } from '@jest/types'
+import nextJest from 'next/jest'
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
@@ -9,8 +9,10 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig: Config.InitialOptions = {
   moduleNameMapper: {
-    // Handle module aliases (this will be automatically configured for you soon)
-    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/data/(.*)$': '<rootDir>/data/$1',
+    '^@/src/(.*)$': '<rootDir>/src/$1',
+    '^@/types/(.*)$': '<rootDir>/types/$1',
+    '^@/utils/(.*)$': '<rootDir>/utils/$1',
   },
   testPathIgnorePatterns: ['__tests__/__utils__', 'config'],
   bail: true,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { TextWidgetProps } from '../TextWidget'
 
-const DateWidget = (props: TextWidgetProps) => {
+function DateWidget(props: TextWidgetProps) {
   const { registry } = props
   const { TextWidget } = registry.widgets
   return (

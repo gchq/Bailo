@@ -1,15 +1,14 @@
-import { Types } from 'mongoose'
 import { castArray } from 'lodash'
-
-import { Forbidden } from '../utils/result'
+import { Types } from 'mongoose'
+import { Model } from '../../types/interfaces'
 import ModelModel from '../models/Model'
-import { Model, User } from '../../types/interfaces'
-import AuthorisationBase from '../utils/AuthorisationBase'
+import { UserDoc } from '../models/User'
+import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
-import { UserDoc } from '../models/User'
+import { Forbidden } from '../utils/result'
 
-const authorisation = new AuthorisationBase()
+const auth = new Authorisation()
 
 export function serializedModelFields(): SerializerOptions {
   return {
@@ -20,7 +19,7 @@ export function serializedModelFields(): SerializerOptions {
 export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
   const models = castArray(unfiltered)
 
-  const filtered = await asyncFilter(models, (model: Model) => authorisation.canUserSeeModel(user, model))
+  const filtered = await asyncFilter(models, (model: Model) => auth.canUserSeeModel(user, model))
 
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
@@ -40,11 +39,11 @@ export interface ModelFilter {
   type: 'favourites' | 'user' | 'all'
 }
 
-export function isValidType(type: any): type is 'favourites' | 'user' | 'all' {
+export function isValidType(type: unknown): type is 'favourites' | 'user' | 'all' {
   return typeof type === 'string' && ['favourites', 'user', 'all'].includes(type)
 }
 
-export function isValidFilter(filter: any): filter is string {
+export function isValidFilter(filter: unknown): filter is string {
   return typeof filter === 'string'
 }
 
@@ -66,7 +65,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
 export async function createModel(user: UserDoc, data: Model) {
   const model = new ModelModel(data)
 
-  if (!(await authorisation.canUserSeeModel(user, model))) {
+  if (!(await auth.canUserSeeModel(user, model))) {
     throw Forbidden({ data }, 'Unable to create model, failed permissions check.')
   }
 

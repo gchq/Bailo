@@ -1,8 +1,7 @@
-import { Deployment } from '../types/interfaces'
-import useSWR from 'swr'
-
-import { fetcher } from 'utils/fetcher'
 import { Types } from 'mongoose'
+import useSWR from 'swr'
+import { fetcher } from 'utils/fetcher'
+import { Deployment } from '../types/interfaces'
 
 export function useGetDeployment(uuid?: string) {
   const { data, error, mutate } = useSWR<Deployment>(uuid ? `/api/v1/deployment/${uuid}` : null, fetcher)

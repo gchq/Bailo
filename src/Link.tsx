@@ -1,9 +1,9 @@
-import * as React from 'react'
-import clsx from 'clsx'
-import { useRouter } from 'next/router'
-import NextLink, { LinkProps as NextLinkProps } from 'next/link'
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link'
 import { styled } from '@mui/material/styles'
+import clsx from 'clsx'
+import NextLink, { LinkProps as NextLinkProps } from 'next/link'
+import { useRouter } from 'next/router'
+import * as React from 'react'
 
 // Add support for the sx prop for consistency with the other branches.
 const Anchor = styled('a')({})
@@ -16,10 +16,7 @@ interface NextLinkComposedProps
   href?: NextLinkProps['href']
 }
 
-export const NextLinkComposed = React.forwardRef<HTMLAnchorElement, NextLinkComposedProps>(function NextLinkComposed(
-  props,
-  ref
-) {
+export const NextLinkComposed = React.forwardRef<HTMLAnchorElement, NextLinkComposedProps>((props, ref) => {
   const { to, linkAs, href, replace, scroll, shallow, prefetch, locale, ...other } = props
 
   return (
@@ -48,7 +45,7 @@ export type LinkProps = {
 
 // A styled version of the Next.js Link component:
 // https://nextjs.org/docs/#with-link
-const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) {
+const Link = React.forwardRef<HTMLAnchorElement, LinkProps>((props, ref) => {
   const {
     activeClassName = 'active',
     as: linkAs,

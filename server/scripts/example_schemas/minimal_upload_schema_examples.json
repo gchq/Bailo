@@ -11,6 +11,9 @@
       "uploader": "user",
       "reviewer": "user",
       "manager": "user"
+    },
+    "buildOptions": {
+      "exportRawModel": true
     }
   },
   {
@@ -25,6 +28,10 @@
       "uploader": "user",
       "reviewer": "user",
       "manager": "user"
+    },
+    "buildOptions": {
+      "exportRawModel": true,
+      "uploadType": "Code and binaries"
     }
   },
   {
@@ -39,6 +46,9 @@
       "uploader": "user",
       "reviewer": "user",
       "manager": "user"
+    },
+    "buildOptions": {
+      "exportRawModel": true
     }
   }
 ]

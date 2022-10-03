@@ -1,22 +1,11 @@
+import Typography from '@mui/material/Typography'
+import { FieldProps } from '@rjsf/core'
 import React from 'react'
 
-import { FieldProps } from '@rjsf/core'
-
-import makeStyles from '@mui/styles/makeStyles'
-import Typography from '@mui/material/Typography'
-
-const useStyles = makeStyles({
-  root: {
-    marginTop: 5,
-  },
-})
-
-const DescriptionField = ({ description }: FieldProps) => {
+function DescriptionField({ description }: FieldProps) {
   if (description) {
-    const classes = useStyles()
-
     return (
-      <Typography variant='subtitle2' className={classes.root}>
+      <Typography variant='subtitle2' sx={{ mt: 5 }}>
         {description}
       </Typography>
     )

@@ -1,24 +1,24 @@
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
-import InputBase from '@mui/material/InputBase'
-import { useState } from 'react'
+import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
+import InputBase from '@mui/material/InputBase'
+import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material'
 import Link from 'next/link'
-import MuiLink from '@mui/material/Link'
-import useTheme from '@mui/styles/useTheme'
-import Wrapper from '../src/Wrapper'
-import useDebounce from '../utils/useDebounce'
+import { useState } from 'react'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { Model } from '../types/interfaces'
 import { lightTheme } from '../src/theme'
+import Wrapper from '../src/Wrapper'
+import { Model } from '../types/interfaces'
+import useDebounce from '../utils/useDebounce'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
@@ -27,7 +27,7 @@ export default function ExploreModels() {
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
-  const theme: any = useTheme() || lightTheme
+  const theme = useTheme() || lightTheme
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,

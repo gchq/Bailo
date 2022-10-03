@@ -1,10 +1,21 @@
-import { formatDate } from './dateUtils'
+import { formatDateString } from './dateUtils'
+import isObject from './isObject'
+import { consoleError } from './logging'
 
 const PROP_NOT_FOUND = 'Property not Found'
 const PROP_NOT_HANDLED_TYPE = 'Property not a Handled Type: '
 const PROP_NOT_ARRAY_TYPE = 'Property not an Array Type: '
 
-const printProperty = (prop: any, allowArrays: any, allowObjects: any, isOptional: any, format: any) => {
+type Property = {
+  key: string
+  value: unknown
+  name?: string
+}
+
+const isPropertyObject = (obj: unknown): obj is Property =>
+  !!(obj && (obj as Property).key !== undefined && (obj as Property).value !== undefined)
+
+const printProperty = (prop: unknown, allowArrays = false, allowObjects = false, isOptional = false, format = '') => {
   if (prop == null) {
     if (isOptional) {
       return null
@@ -13,7 +24,7 @@ const printProperty = (prop: any, allowArrays: any, allowObjects: any, isOptiona
   }
   if (typeof prop === 'string') {
     if (format === 'date-time') {
-      return formatDate(prop)
+      return formatDateString(prop)
     }
     return prop
   }
@@ -26,9 +37,9 @@ const printProperty = (prop: any, allowArrays: any, allowObjects: any, isOptiona
   if (allowArrays && Array.isArray(prop)) {
     return prop.map((p) => printProperty(p, allowArrays, allowObjects, isOptional, undefined)).join(', ')
   }
-  if (allowObjects && !Array.isArray(prop)) {
+  if (allowObjects && isObject(prop)) {
     const keys = Object.keys(prop)
-    if (keys.length === 2 && keys.indexOf('value') > -1) {
+    if (keys.length === 2 && isPropertyObject(prop)) {
       const key = prop.name || prop.key
       if (key) {
         return `${key}: ${prop.value}`
@@ -38,16 +49,13 @@ const printProperty = (prop: any, allowArrays: any, allowObjects: any, isOptiona
       .map((key) => `${key}: ${printProperty(prop[key], undefined, undefined, undefined, undefined)}`)
       .join(', ')
   }
-  console.error('Unhandled prop:')
-  console.error(prop)
+  consoleError('Unhandled prop: ', prop)
   return PROP_NOT_HANDLED_TYPE + typeof prop
 }
 
-const printPropertyOptional = (prop: any) => {
-  return printProperty(prop, false, false, true, undefined)
-}
+const printPropertyOptional = (prop: unknown) => printProperty(prop, false, false, true, undefined)
 
-const printPropertyArray = (prop: any, isOptional: any) => {
+const printPropertyArray = (prop: unknown, isOptional = false) => {
   if (!prop) {
     if (isOptional) {
       return null
@@ -57,16 +65,14 @@ const printPropertyArray = (prop: any, isOptional: any) => {
   if (Array.isArray(prop)) {
     return prop.join(', ')
   }
-  console.error('Not array prop:')
-  console.error(prop)
+  consoleError('Not array prop: ', prop)
   return PROP_NOT_ARRAY_TYPE + typeof prop
 }
 
-const printPropertyObject = (prop: any, isOptional: any) => {
-  return printProperty(prop, true, true, isOptional, undefined)
-}
+const printPropertyObject = (prop: unknown, isOptional = false) =>
+  printProperty(prop, true, true, isOptional, undefined)
 
-const printPropertyArrayOfObjects = (prop: any, isOptional: any) => {
+const printPropertyArrayOfObjects = (prop: unknown, isOptional = false) => {
   if (!prop) {
     if (isOptional) {
       return null
@@ -74,11 +80,10 @@ const printPropertyArrayOfObjects = (prop: any, isOptional: any) => {
     return PROP_NOT_FOUND
   }
   if (!Array.isArray(prop)) {
-    console.error('Not array prop:')
-    console.error(prop)
+    consoleError('Not array prop: ', prop)
     return PROP_NOT_ARRAY_TYPE + typeof prop
   }
-  return prop.map(printPropertyObject).join(', ')
+  return prop.map((obj) => printPropertyObject(obj)).join(', ')
 }
 
 export { printProperty, printPropertyArray, printPropertyObject, printPropertyArrayOfObjects, printPropertyOptional }

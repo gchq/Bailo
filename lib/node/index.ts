@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch'
-import qs from 'qs'
-import { FormData } from 'formdata-node'
 import { FormDataEncoder } from 'form-data-encoder'
+import { FormData } from 'formdata-node'
+import qs from 'qs'
 import { Readable } from 'stream'
 
 type Response = 'Accepted' | 'Declined'

@@ -1,10 +1,9 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-> Bailo is still in development and we have not yet completed all of the features we want it to have. See the roadmap for what we plan to build.
+> Bailo is still in development and we have not yet completed all of the features we want it to have. See the roadmap
+> for what we plan to build.
 
 <!-- PROJECT LOGO -->
 <br />
@@ -62,7 +61,8 @@
 
 [![Product Screen Shot][product-screenshot]](https://github.com/gchq/bailo)
 
-Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and sharing.
+Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and
+sharing.
 
 ### Built With
 
@@ -97,15 +97,21 @@ sed "s/user_id=REPLACE_WITH_UID/user_id=$UID/" docker-compose-dev.yml > docker-c
 docker-compose -f docker-compose-dev-personal.yml up --force-recreate --build -d
 ```
 
-The creation of docker-compose-dev-personal.yml gives the application user the same uid as you on your host machine. This allows the application to run the app from the files on your host machine, and populate node_modules (via npm install).
+The creation of docker-compose-dev-personal.yml gives the application user the same uid as you on your host machine.
+This allows the application to run the app from the files on your host machine, and populate node_modules (via npm
+install).
 
-On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an alternative type checker that is more rigorous. You should access the site via [localhost:8080](http://localhost:8080) which provides authentication as a test user.
+On first run, it may take a while (perhaps 30 seconds) to start up. It needs to build several hundred TypeScript
+modules. These are cached however, so future starts only require a few seconds. There's also `npm run dev2` for an
+alternative type checker that is more rigorous. You should access the site via [localhost:8080](http://localhost:8080)
+which provides authentication as a test user.
 
 <br />
 
 ### Setup:
 
-Some example schemas are installed by default. More schemas can be added by altering and running the `addDeploymentSchema.ts` and `addUploadSchema.ts` files.
+Some example schemas are installed by default. More schemas can be added by altering and running the
+`addDeploymentSchema.ts` and `addUploadSchema.ts` files.
 
 ```bash
 ts-node --project tsconfig.server.json server/scripts/addDeploymentSchema.ts
@@ -127,11 +133,17 @@ ts-node --project tsconfig.server.json server/scripts/addUploadSchema.ts
 | Minio UI   | 9001  | minioadmin:minioadmin  |
 | Minio      | 9000  | minioadmin:minioadmin  |
 
-\*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to something more secure.
+\*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to
+something more secure.
 
-Always connect to the project via 'Nginx', otherwise you will receive authentication failed errors. We expect the administrator to provide their own forms of authentication.
+Always connect to the project via 'Nginx', otherwise you will receive authentication failed errors. We expect the
+administrator to provide their own forms of authentication.
 
-You can test out your new deployment using the example models which can be found in `__tests__` [`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and [`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder [`minimal_upload_schema_examples.json`](server/scripts/example_schemas/minimal_upload_schema_examples.json) and [`minimal_deployment_schema_examples.json`](server/scripts/example_schemas/minimal_deployment_schema_examples.json).
+You can test out your new deployment using the example models which can be found in `__tests__`
+[`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and
+[`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder
+[`minimal_upload_schema_examples.json`](server/scripts/example_schemas/minimal_upload_schema_examples.json) and
+[`minimal_deployment_schema_examples.json`](server/scripts/example_schemas/minimal_deployment_schema_examples.json).
 
 <br />
 
@@ -139,12 +151,17 @@ You can test out your new deployment using the example models which can be found
 
 ![bailo diagram](public/mm-diagram.png)
 
-1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in `pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
-2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./data`. Each one exposes variables to specify if it is loading, errored, data, etc.
-3. Requests to the backend get routed through [express](https://expressjs.com/) within `server/index.ts`. Each route is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
+1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
+   `pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
+2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./data`. Each one exposes variables
+   to specify if it is loading, errored, data, etc.
+3. Requests to the backend get routed through [express](https://expressjs.com/) within `server/index.ts`. Each route is
+   an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
 4. Routes interact with the database via `mongoose`, which stores models in `./server/models`.
 
-Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are posted to a `mongodb` queue and processed by handlers in the `server/processors` folder. Mongodb queues are handled invisibly by `p-mongo-queue` (`server/utils/queues.ts`).
+Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are
+posted to a `mongodb` queue and processed by handlers in the `server/processors` folder. Mongodb queues are handled
+invisibly by `p-mongo-queue` (`server/utils/queues.ts`).
 
 <br />
 
@@ -156,11 +173,13 @@ Fix: Run `docker-compose down --rmi all` followed by `docker-compose up --build`
 
 _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
 
-Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run: `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
+Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
+`rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
 _Issue: Unable to authenticate to the Docker registry / compile binaries._
 
-Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your application is able to access the Docker registry internally as it will not provide user authentication.
+Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your
+application is able to access the Docker registry internally as it will not provide user authentication.
 
 <br />
 
@@ -205,7 +224,8 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 ## License
 
-Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `docs/LICENSE.txt` for more information.
+Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `docs/LICENSE.txt` for more
+information.
 
 <br />
 

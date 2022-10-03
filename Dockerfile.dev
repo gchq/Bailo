@@ -2,6 +2,8 @@ FROM node:16-alpine
 
 ARG user_id=1001
 
+RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
+
 # We use 'RUN' instead of 'ADD' here due to odd caching issues where 'ADD' would still
 # download S2I, then check that it hasn't changed before accepting it was cached.
 # 'RUN' instead caches based on text contents.
@@ -9,9 +11,7 @@ RUN mkdir /s2i && \
     wget -O s2i.tar.gz https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz && \
     tar -xvf s2i.tar.gz -C /s2i && \
     rm -rf s2i.tar.gz && \
-    apk update && \
-    apk add ca-certificates img docker shadow && \
-    rm -rf /var/cache/apk/*
+    apk add --no-cache ca-certificates img docker shadow libc6-compat
 
 RUN if [[ $user_id -eq 1000 ]]; then groupmod -g 1001 node && usermod -u 1001 -g 1001 node ; fi \
   && chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \

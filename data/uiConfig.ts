@@ -1,6 +1,5 @@
-import { UiConfig } from '../types/interfaces'
 import useSWRImmutable from 'swr/immutable'
-
+import { UiConfig } from '../types/interfaces'
 import { fetcher } from '../utils/fetcher'
 
 export function useGetUiConfig() {
