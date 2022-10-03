@@ -85,7 +85,7 @@ export const resetVersionApprovals = [
     const { user } = req
     const version = await findVersionById(req.user!, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unabled to find requested version')
+      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
     }
     if (user?.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
@@ -108,11 +108,11 @@ export const updateLastViewed = [
     if (!user) {
       throw Forbidden({ code: 'user_unauthorised' }, 'Not user details found in request.')
     }
-    const version = await findVersionById(req.user!, id, { populate: true })
+    const version = await findVersionById(user, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unabled to find requested version')
+      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
     }
-    if (user.id !== version?.metadata.contacts[role]) {
+    if (user.id !== version.metadata.contacts[role]) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
     if (role === 'manager') {
