@@ -27,6 +27,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
+import { ModelDoc } from 'server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -146,10 +147,6 @@ export default function Deployment() {
     }
   }, [deployment])
 
-  const handleModelLinkClick = () => {
-    router.push(`/model/${deployment?.model.uuid}`)
-  }
-
   const handleClickOpen = () => {
     if (!isDeploymentLoading && deployment !== undefined) {
       setOpen(true)
@@ -192,9 +189,15 @@ export default function Deployment() {
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
           <Box sx={{ textAlign: 'right', pb: 3 }}>
-            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleModelLinkClick}>
-              Back to model
-            </Button>
+            {deployment && (
+              <Button
+                variant='text'
+                color='primary'
+                onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
+              >
+                Back to model
+              </Button>
+            )}
             <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
               Show download commands
             </Button>
