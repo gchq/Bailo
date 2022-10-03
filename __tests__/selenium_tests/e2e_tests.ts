@@ -28,7 +28,7 @@ const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetada
 
 const modelInfo: any = {}
 const modelCardOnlyInfo: any = {}
-let deploymentUrl: string = ''
+let deploymentUrl = ''
 
 const BAILO_APP_URL = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 const BAILO_REGISTRY = `${config.get('app.host')}:${config.get('registry.port')}`
