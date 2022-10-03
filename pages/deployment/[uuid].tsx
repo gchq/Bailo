@@ -28,6 +28,8 @@ import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import { ModelDoc } from 'server/models/Model'
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import Grid from '@mui/material/Grid'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -188,20 +190,25 @@ export default function Deployment() {
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
-          <Box sx={{ textAlign: 'right', pb: 3 }}>
-            {deployment && (
-              <Button
-                variant='text'
-                color='primary'
-                onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
-              >
-                Back to model
+          <Grid container spacing={1}>
+            <Grid item xs={6} sx={{ textAlign: 'left', pb: 3 }}>
+              {deployment && (
+                <Button
+                  variant='text'
+                  color='primary'
+                  startIcon={<ArrowBackIosNewIcon />}
+                  onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
+                >
+                  Back to model
+                </Button>
+              )}
+            </Grid>
+            <Grid item xs={6} sx={{ textAlign: 'right', pb: 3 }}>
+              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+                Show download commands
               </Button>
-            )}
-            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-              Show download commands
-            </Button>
-          </Box>
+            </Grid>
+          </Grid>
         )}
         {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
           <Box sx={{ pb: 2 }}>
