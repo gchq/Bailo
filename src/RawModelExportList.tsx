@@ -32,6 +32,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                       variant='contained'
                       href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/code`}
                       target='_blank'
+                      data-test='downloadCodeFile'
                     >
                       Download code file
                     </Button>
@@ -39,6 +40,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                       variant='contained'
                       href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/binary`}
                       target='_blank'
+                      data-test='downloadBinaryFile'
                     >
                       Download binary file
                     </Button>

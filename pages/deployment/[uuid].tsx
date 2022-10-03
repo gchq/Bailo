@@ -284,6 +284,7 @@ export default function Deployment() {
                     Model Exports
                   </DisabledElementTooltip>
                 }
+                data-test='modelExportsTab'
               />
             </Tabs>
           </Box>
