@@ -12,7 +12,7 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
-import { useTheme } from '@mui/material'
+import useTheme from '@mui/material/styles/useTheme'
 
 import { ApprovalStates } from '../../types/interfaces'
 

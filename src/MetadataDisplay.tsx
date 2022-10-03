@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import useTheme from '@mui/material/styles/useTheme'
 import React, { useEffect, useState } from 'react'
 import { useGetSchemas } from '../data/schema'
 import { printProperty } from '../utils/propertyUtils'
