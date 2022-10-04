@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/material/styles/useTheme'
+import { useTheme } from '@mui/material/styles'
 import MetadataDisplay from './MetadataDisplay'
 import { DeploymentDoc } from '../server/models/Deployment'
 

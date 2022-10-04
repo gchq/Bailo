@@ -1,7 +1,7 @@
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
-import useTheme from '@mui/material/styles/useTheme'
+import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'

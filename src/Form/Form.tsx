@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import useTheme from '@mui/material/styles/useTheme'
+import { useTheme } from '@mui/material/styles'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
 import FormDesigner from './FormDesigner'
