@@ -188,43 +188,50 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
-          <Stack direction='row' justifyContent='space-between'>
-            {deployment && (
-              <Button
-                variant='text'
-                color='primary'
-                sx={{ pb: 3 }}
-                startIcon={<ArrowBackIosNewIcon />}
-                onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
-              >
-                Back to model
-              </Button>
+        {deployment && (
+          <Stack direction='row' alignItems='center' justifyContent='space-between'>
+            <Button
+              variant='text'
+              color='primary'
+              sx={{ pb: 3 }}
+              startIcon={<ArrowBackIosNewIcon />}
+              onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
+            >
+              Back to model
+            </Button>
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+              <Box sx={{ pb: 2 }}>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model version was uploaded as just a model card
+                </Alert>
+              </Box>
             )}
             <Box sx={{ pb: 3 }}>
-              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+              <Button
+                variant='outlined'
+                color='primary'
+                disabled={
+                  !hasUploadType ||
+                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                }
+                startIcon={<Info />}
+                onClick={handleClickOpen}
+              >
                 Show download commands
               </Button>
             </Box>
           </Stack>
-        )}
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-          <Box sx={{ pb: 2 }}>
-            <Alert
-              severity='info'
-              sx={{
-                width: 'fit-content',
-                m: 'auto',
-                backgroundColor: '#0288d1',
-                color: '#fff',
-                '& .MuiAlert-icon': {
-                  color: '#fff',
-                },
-              }}
-            >
-              This model version was uploaded as just a model card
-            </Alert>
-          </Box>
         )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
