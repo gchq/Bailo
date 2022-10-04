@@ -351,7 +351,7 @@ describe('End to end test', () => {
 
       logger.info('sending deployment information')
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
-      const deploymentInfo = { ...JSON.parse(deploymentData) }
+      const deploymentInfo = JSON.parse(deploymentData)
       await sendKeys(driver, By.css('textarea'), JSON.stringify({ ...deploymentInfo, modelID: modelInfo.name }))
 
       logger.info('clicking warning checkbox confirming upload is okay')
@@ -362,7 +362,6 @@ describe('End to end test', () => {
 
       logger.info(`found url contains deployment`)
       await driver.wait(until.urlContains('/deployment/'))
-      await driver.sleep(2000)
       deploymentUrl = await driver.getCurrentUrl()
       await driver.sleep(2000)
     } finally {
