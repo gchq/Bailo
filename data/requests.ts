@@ -4,14 +4,15 @@ import { Request } from '../types/interfaces'
 import { fetcher } from '../utils/fetcher'
 
 export type RequestType = 'Upload' | 'Deployment'
-export type ReviewFilterType = 'user' | 'all'
-export function useListRequests(type: RequestType, filter: ReviewFilterType) {
+export type ReviewFilterType = 'user' | 'archived'
+export function useListRequests(type: RequestType, filter: ReviewFilterType, archived: boolean) {
   const { data, error, mutate } = useSWR<{
     requests: Array<Request>
   }>(
     `/api/v1/requests?${qs.stringify({
       type,
       filter,
+      archived,
     })}`,
     fetcher
   )

@@ -146,7 +146,7 @@ export const resetDeploymentApprovals = [
     const { uuid } = req.params
     const deployment = await findDeploymentByUuid(req.user, uuid)
     if (!deployment) {
-      throw BadReq({ code: 'deployment_not_found', uuid }, `Unabled to find requested deployment: '${uuid}'`)
+      throw BadReq({ code: 'deployment_not_found', uuid }, `Unable to find requested deployment: '${uuid}'`)
     }
     if (user?.id !== deployment.metadata.contacts.requester) {
       throw Forbidden(

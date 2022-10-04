@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes, RequestDoc } from '../../models/Request'
 import { ApprovalStates } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
-import { findVersionById } from '../../services/version'
+import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
@@ -85,7 +85,7 @@ export const resetVersionApprovals = [
     const { user } = req
     const version = await findVersionById(req.user!, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unabled to find version for requested deployment')
+      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
     }
     if (user?.id !== version.metadata.contacts.uploader) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
@@ -97,5 +97,42 @@ export const resetVersionApprovals = [
 
     req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
     return res.json(version)
+  },
+]
+
+export const updateLastViewed = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id, role } = req.params
+    const { user } = req
+    if (!user) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'Not user details found in request.')
+    }
+    const version = await findVersionById(user, id, { populate: true })
+    if (!version) {
+      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
+    }
+    if (user.id !== version.metadata.contacts[role]) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+    if (role === 'manager') {
+      updateManagerLastViewed(id)
+      req.log.info(
+        { code: 'version_last_viewed_updated', version: id, role },
+        "Version's manager last viewed date has been updated"
+      )
+    } else if (role === 'reviewer') {
+      updateReviewerLastViewed(id)
+      req.log.info(
+        { code: 'version_last_viewed_updated', version: id, role },
+        "Version's reviewer last viewed date has been updated"
+      )
+    } else {
+      throw BadReq(
+        { code: 'invalid_version_role' },
+        'Cannot update last view date as role type specified is not recognised.'
+      )
+    }
+    return res.json({ version: id, role })
   },
 ]
