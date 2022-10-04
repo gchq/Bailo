@@ -21,6 +21,7 @@ export const getRequests = [
   async (req: Request, res: Response) => {
     const type = req.query.type as string
     const filter = req.query.filter as string
+    const archived = req.query.archived as string
 
     if (!['Upload', 'Deployment'].includes(type)) {
       return res.error(400, [
@@ -43,6 +44,7 @@ export const getRequests = [
     const requests = await readRequests({
       type: type as RequestTypes,
       filter: filter === 'all' ? undefined : req.user._id,
+      archived: archived === 'true',
     })
 
     req.log.info({ code: 'fetching_requests', requests }, 'User fetching requests')
