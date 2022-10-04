@@ -121,7 +121,7 @@ describe('End to end test', () => {
 
           logger.info({ modelInfo }, 'Received model information')
         } else {
-          logger.error(`No matches found for URL: ${modelUrl}`)
+          throw new Error(`No matches found for URL: ${modelUrl}`)
         }
       } finally {
         logger.info('quitting driver')
