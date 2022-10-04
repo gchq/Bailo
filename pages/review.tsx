@@ -28,7 +28,7 @@ import { Request } from '../types/interfaces'
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
 
-  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
+  const { isCurrentUserLoading } = useGetCurrentUser()
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
@@ -45,12 +45,12 @@ export default function Review() {
             value={value}
             onChange={handleChange}
           >
-            <Tab value='user' label='My approvals' />
-            <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
+            <Tab value='user' label='Approvals' />
+            <Tab value='archived' label='Archived' />
           </Tabs>
         )}
-        <ApprovalList type='Upload' category={value} />
-        <ApprovalList type='Deployment' category={value} />
+        <ApprovalList type='Upload' category={value} archived={value === 'archived'} />
+        <ApprovalList type='Deployment' category={value} archived={value === 'archived'} />
       </>
     </Wrapper>
   )
@@ -64,7 +64,15 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
+function ApprovalList({
+  type,
+  category,
+  archived = false,
+}: {
+  type: RequestType
+  category: ReviewFilterType
+  archived?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -73,7 +81,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
 
   const theme = useTheme()
 
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
+  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category, archived)
   const { mutateNumRequests } = useGetNumRequests()
 
   const managerStyling = {
@@ -140,8 +148,8 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
       </Typography>
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
-          <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} sm={8}>
+          <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+            <Grid item xs={12} md={6} lg={7}>
               {type === 'Upload' && (
                 <>
                   <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
@@ -203,21 +211,44 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                 </>
               )}
             </Grid>
-            <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>
+            <Grid item xs={12} md sx={{ display: 'flex' }}>
+              <Box ml='auto' my='auto'>
+                {requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved !== 'No Response' && (
+                  <Chip
+                    label={requestObj.version?.managerApproved}
+                    color={requestObj.version?.managerApproved === 'Accepted' ? 'success' : 'error'}
+                  />
+                )}
+                {requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved !== 'No Response' && (
+                  <Chip
+                    label={requestObj.version?.reviewerApproved}
+                    color={requestObj.version?.reviewerApproved === 'Accepted' ? 'success' : 'error'}
+                  />
+                )}
+              </Box>
+            </Grid>
+            <Grid item sx={{ display: 'flex', width: 200 }}>
+              <Box ml='auto' my='auto'>
                 <Button
                   color='secondary'
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Declined', requestObj)}
                   variant='outlined'
+                  onClick={() => changeState('Declined', requestObj)}
+                  sx={{ mr: 1 }}
+                  disabled={
+                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Declined') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Declined')
+                  }
                 >
                   Reject
                 </Button>
                 <Button
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Accepted', requestObj)}
                   variant='contained'
+                  onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
+                  disabled={
+                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Accepted') ||
+                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Accepted')
+                  }
                 >
                   Approve
                 </Button>
