@@ -67,7 +67,7 @@ export function useGetModelVersions(uuid?: string) {
   }
 }
 
-export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs=false) {
+export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs = false) {
   const getVersion = selectedVersion || 'latest'
 
   const { data, error, mutate } = useSWR<Version>(
