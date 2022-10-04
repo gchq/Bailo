@@ -1,6 +1,5 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
-import { useTheme } from '@mui/material/styles'
-import styled from '@mui/material/styles/styled'
+import { useTheme, styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import List from '@mui/material/List'
