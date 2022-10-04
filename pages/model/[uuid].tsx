@@ -35,19 +35,19 @@ import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
-import { deleteEndpoint, postEndpoint } from 'data/api'
+import { deleteEndpoint, postEndpoint, putEndpoint } from 'data/api'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
-import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -77,6 +77,11 @@ function Model() {
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
+  const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
+  const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
+  const [isManager, setIsManager] = useState(false)
+  const [isReviewer, setIsReviewer] = useState(false)
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -111,16 +116,68 @@ function Model() {
   }
 
   useEffect(() => {
-    if (tab !== undefined && isTabOption(tab)) {
-      setGroup(tab)
+    if (currentUser && version) {
+      setIsManager(currentUser.id === version.metadata.contacts.manager)
+      setIsReviewer(currentUser.id === version.metadata.contacts.reviewer)
     }
-  }, [tab])
+  }, [currentUser, version])
+
+  const updateLastViewed = useCallback(
+    (role: string) => {
+      if (isManager && version?.updatedAt && currentUser) {
+        const versionLastUpdatedAt = new Date(version?.updatedAt)
+        if (
+          ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
+            (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
+          currentUser.id !== version?.metadata.contacts.uploader
+        ) {
+          setShowLastViewedWarning(true)
+        }
+        putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
+      }
+    },
+    [
+      managerLastViewed,
+      reviewerLastViewed,
+      currentUser,
+      version?.metadata.contacts.uploader,
+      version?._id,
+      version?.updatedAt,
+      isManager,
+    ]
+  )
+
+  useEffect(() => {
+    if (currentUser) {
+      if (isManager) {
+        updateLastViewed('manager')
+      }
+      if (isReviewer) {
+        updateLastViewed('reviewer')
+      }
+    }
+  }, [currentUser, updateLastViewed, isManager, isReviewer])
+
+  useEffect(() => {
+    if (version && managerLastViewed === undefined) {
+      setManagerLastViewed(version.managerLastViewed)
+    }
+    if (version && reviewerLastViewed === undefined) {
+      setReviewerLastViewed(version.reviewerLastViewed)
+    }
+  }, [version, reviewerLastViewed, managerLastViewed])
 
   useEffect(() => {
     if (version) {
       setComplianceFlow(createComplianceFlow(version))
     }
   }, [version, setComplianceFlow])
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (!currentUser || !version?.model) return
@@ -199,6 +256,17 @@ function Model() {
         <Box sx={{ pb: 2 }}>
           <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
             This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
+      {showLastViewedWarning && (
+        <Box sx={{ pb: 2 }}>
+          <Alert
+            onClose={() => setShowLastViewedWarning(false)}
+            severity='warning'
+            sx={{ width: 'fit-content', m: 'auto' }}
+          >
+            This model version has been updated since you last viewed it
           </Alert>
         </Box>
       )}
