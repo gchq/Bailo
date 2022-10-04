@@ -248,6 +248,9 @@ describe('End to end test', () => {
 
       await driver.wait(until.urlContains('/model/'))
 
+      logger.info('waiting for model page to fully render')
+      await driver.sleep(2000)
+
       await driver.findElement(By.xpath("//*[text()[contains(.,'v2')]]"))
     } finally {
       logger.info('quitting driver')
