@@ -68,7 +68,7 @@ data:
                 proxy_hide_header WWW-Authenticate;
                 add_header WWW-Authenticate $new_www_authenticate always;
 
-                proxy_pass         https://registry:31113;
+                proxy_pass         https://registry:5000;
                 proxy_redirect     off;
                 proxy_set_header   Host $host;
                 proxy_set_header   X-Real-IP $remote_addr;

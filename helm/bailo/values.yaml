@@ -81,9 +81,9 @@ mongodb:
     enabled: true
     rootUser: ""
     rootPassword: ""
-    existingSecret: "bailo-mongodb" # HELM generated Secret name
-    usernames: [ bailo_user ] # defined user for database connection
-    passwords: [ ] # HELM generated. Requried for ConfigMap bailo-config
+    #existingSecret: "bailo-mongodb" # HELM generated Secret name. Uncomment Mongo Secret details from bailo.secret.yaml for dynamic password configuration.
+    usernames: [ bailo_user ] # defined user for database connection. required for ConfigMap bailo-config
+    passwords: [ ] # required for ConfigMap bailo-config
     databases: [ bailo ] # defined database for Mongo
   service:
     port: 31110 #default 27017./config/default.js:21 host: 'localhost:8080'
@@ -132,7 +132,7 @@ registry:
   tag: 2
   enabled: true
   host: "registry" # service name
-  port: 31113 # default 5000
+  port: 5000 # default 5000
   insecure: true
   certDir: "/certs"
   certFile: "yourcert.pem"
@@ -144,7 +144,6 @@ nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
   tag: latest
   host: "bailo-nginx-auth-proxy" # service name
-  #port: 8443
   port: 8080
   #certDir: "/certs"
   #certFile: "tls.crt"

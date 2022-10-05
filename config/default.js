@@ -1,12 +1,6 @@
 module.exports = {
   mongo: {
     uri: 'mongodb://localhost:27017/bailo',
-    connectionOptions: {
-      useFindAndModify: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    },
   },
 
   minio: {
@@ -19,7 +13,6 @@ module.exports = {
 
     uploadBucket: 'uploads',
     registryBucket: 'registry',
-    createBuckets: true,
   },
 
   registry: {
@@ -37,14 +30,8 @@ module.exports = {
     builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
   },
 
-  build: {
-    environment: 'openshift',
-  },
-
-  openshift: {
-    namespace: 'bailo',
-    appPublicRoute: 'https://appPublicRoute',
-    dockerPushSecretName: 'registry-push-secret',
+  kaniko: {
+    path: 'kaniko_executor',
   },
 
   uiConfig: {
@@ -57,9 +44,6 @@ module.exports = {
       label: 'Bailo Support Team',
       supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
       contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
-    },
-    help: {
-      documentationUrl: 'https://example.com',
     },
     registry: {
       host: 'localhost:8080',
@@ -76,7 +60,7 @@ module.exports = {
 
   smtp: {
     enabled: true,
-    host: 'mail',
+    host: 'localhost',
     port: 1025,
     secure: false,
     auth: {
@@ -86,6 +70,7 @@ module.exports = {
     tls: {
       rejectUnauthorized: false,
     },
+
     from: '"Bailo 📝" <bailo@example.org>',
   },
 
@@ -94,6 +79,15 @@ module.exports = {
       enabled: false,
       level: 'info',
       path: './logs/out.log',
+    },
+
+    stroom: {
+      enabled: false,
+      folder: './logs/stroom',
+      url: 'http://localhost:8090/stroom/datafeed',
+      environment: 'insecure',
+      feed: 'bailo',
+      system: 'bailo',
     },
   },
 

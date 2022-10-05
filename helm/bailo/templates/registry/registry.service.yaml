@@ -9,9 +9,8 @@ metadata:
 spec:
   ports:
     - port: {{ .Values.registry.port }}
-      targetPort: http
+      targetPort: {{ .Values.registry.port }}
       protocol: TCP
-      name: http
+      name: tcp
   selector:
     name: {{ .Values.registry.host }}
-    {{- include "bailo.selectorLabels" . | nindent 4 }}

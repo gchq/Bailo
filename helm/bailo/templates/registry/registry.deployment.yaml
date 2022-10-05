@@ -44,9 +44,9 @@ spec:
         - name: REGISTRY_AUTH_TOKEN_REALM
           value: "https://{{ .Values.openshift.appPublicRoute }}/api/v1/registry_auth"
         - name: REGISTRY_AUTH_TOKEN_SERVICE
-          value: "RegistryAith"
+          value: "RegistryAuth"
         - name: REGISTRY_AUTH_TOKEN_ISSUER
-          value: "ReigistryIssuer"
+          value: "RegistryIssuer"
         - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
           value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
         - name: REGISTRY_HTTP_SECRET

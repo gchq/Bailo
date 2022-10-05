@@ -1,11 +1,4 @@
 ---
-{{- define "mongoSecret" }}
-{{- $obj := (lookup "v1" "Secret" .Namespace .Name).data -}}
-{{- if $obj }}
-{{- index $obj .Key | b64dec -}}
-{{- end -}}
-{{- end }}
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -37,6 +30,11 @@ data:
         appPublicRoute: '{{ .Values.openshift.appPublicRoute }}',
         dockerPushSecretName: '{{ .Values.openshift.dockerPushSecretName }}',
       },
+      registry: {
+        host: 'registry:5000',
+        port: '{{ .Values.registry.port }}',
+      }, 
+
       s2i: {
         builderImage: '{{ .Values.config.s2i.image }}',
       },
@@ -59,7 +57,7 @@ data:
         },
       },
       mongo: {
-        uri: 'mongodb://{{ .Values.mongodb.username }}:{{- include "mongoSecret" (dict "Namespace" .Release.Namespace "Name" "bailo-mongodb" "Key" "mongodb-passwords") -}}@{{ .Values.mongodb.host }}',
+        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ .Values.mongodb.host }}',
         connectionOptions: {
           useFindAndModify: false,
           useNewUrlParser: true,
