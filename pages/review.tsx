@@ -136,7 +136,7 @@ function ApprovalList({
     }
   }
 
-  const getUploadType = (requestType: string) => (requestType === 'Upload' ? 'models' : 'deployments')
+  const getUploadType = (requestType: string) => (requestType === 'Upload' ? 'version' : 'deployment')
 
   if (isRequestsLoading || !requests) {
     return <Paper sx={{ mt: 2, mb: 2 }} />
@@ -145,7 +145,7 @@ function ApprovalList({
   return (
     <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
       <Typography sx={{ p: 3 }} variant='h4'>
-        {type === 'Upload' ? 'Models' : 'Deployments'}
+        {type === 'Upload' ? 'Model versions' : 'Deployments'}
       </Typography>
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
@@ -214,12 +214,17 @@ function ApprovalList({
             </Grid>
             <Grid item xs={12} md sx={{ display: 'flex' }}>
               <Box ml='auto' my='auto'>
-                {requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved !== 'No Response' && (
-                  <Chip
-                    label={requestObj.version?.managerApproved}
-                    color={requestObj.version?.managerApproved === 'Accepted' ? 'success' : 'error'}
-                  />
-                )}
+                {requestObj.approvalType === 'Manager' &&
+                  requestObj[getUploadType(requestObj.request)].managerApproved !== 'No Response' && (
+                    <Chip
+                      label={requestObj[getUploadType(requestObj.request)].managerApproved}
+                      color={
+                        requestObj[getUploadType(requestObj.request)].managerApproved === 'Accepted'
+                          ? 'success'
+                          : 'error'
+                      }
+                    />
+                  )}
                 {requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved !== 'No Response' && (
                   <Chip
                     label={requestObj.version?.reviewerApproved}
@@ -236,7 +241,8 @@ function ApprovalList({
                   onClick={() => changeState('Declined', requestObj)}
                   sx={{ mr: 1 }}
                   disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Declined') ||
+                    (requestObj.approvalType === 'Manager' &&
+                      requestObj[getUploadType(requestObj.request)].managerApproved === 'Declined') ||
                     (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Declined')
                   }
                 >
@@ -247,7 +253,8 @@ function ApprovalList({
                   onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
                   disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Accepted') ||
+                    (requestObj.approvalType === 'Manager' &&
+                      requestObj[getUploadType(requestObj.request)].managerApproved === 'Accepted') ||
                     (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Accepted')
                   }
                 >
@@ -272,7 +279,7 @@ function ApprovalList({
           </Button>
         </DialogActions>
       </Dialog>
-      {requests.length === 0 && <EmptyBlob text={`All done! No ${getUploadType(type)} are waiting for approvals`} />}
+      {requests.length === 0 && <EmptyBlob text={`All done! No ${getUploadType(type)}s are waiting for approvals`} />}
     </Paper>
   )
 }
