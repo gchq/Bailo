@@ -20,7 +20,6 @@ import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
 import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
-import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../src/theme'
@@ -28,8 +27,6 @@ import { Request } from '../types/interfaces'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
-
-  const { isCurrentUserLoading } = useGetCurrentUser()
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
@@ -38,21 +35,18 @@ export default function Review() {
 
   return (
     <Wrapper title='Reviews' page='review'>
-      <>
-        {!isCurrentUserLoading && (
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={value}
-            onChange={handleChange}
-          >
-            <Tab value='user' label='Approvals' />
-            <Tab value='archived' label='Archived' />
-          </Tabs>
-        )}
-        <ApprovalList type='Upload' category={value} archived={value === 'archived'} />
-        <ApprovalList type='Deployment' category={value} archived={value === 'archived'} />
-      </>
+      <Tabs
+        indicatorColor='secondary'
+        textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+        value={value}
+        onChange={handleChange}
+      >
+        <Tab value='user' label='Approvals' />
+        <Tab value='archived' label='Archived' />
+      </Tabs>
+
+      <ApprovalList type='Upload' category={value} />
+      <ApprovalList type='Deployment' category={value} />
     </Wrapper>
   )
 }
@@ -65,15 +59,7 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({
-  type,
-  category,
-  archived = false,
-}: {
-  type: RequestType
-  category: ReviewFilterType
-  archived?: boolean
-}) {
+function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -82,7 +68,7 @@ function ApprovalList({
 
   const theme = useTheme() || lightTheme
 
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category, archived)
+  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()
 
   const managerStyling = {
