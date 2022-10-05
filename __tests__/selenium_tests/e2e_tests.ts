@@ -247,7 +247,7 @@ describe('End to end test', () => {
       logger.info('waiting to redirect back to the model page')
 
       await driver.wait(until.urlContains('/model/'))
-      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'v2')]]")))      
+      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'v2')]]")))
     } finally {
       logger.info('quitting driver')
       await driver.quit()
