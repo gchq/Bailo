@@ -312,7 +312,7 @@ export default function Deployment() {
               </Typography>
               <Box mb={2}>
                 <Button variant='outlined' onClick={copyDeploymentCardToClipboard}>
-                  Copy Deployment metadata to Clipboard
+                  Copy deployment metadata to clipboard
                 </Button>
                 <Snackbar
                   open={copyDeploymentCardSnackbarOpen}

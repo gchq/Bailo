@@ -526,7 +526,7 @@ function Model() {
             </Typography>
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
-                Copy Model Card to Clipboard
+                Copy model card to clipboard
               </Button>
               <Snackbar
                 open={copyModelCardSnackbarOpen}
