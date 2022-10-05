@@ -341,7 +341,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </Link>
             <Link href='/help' passHref>
               <ListItem button selected={page === 'help'}>
-                <ListItemIcon>
+                <ListItemIcon data-test='supportLink'>
                   {!open ? (
                     <Tooltip title='Help & Support' arrow placement='right'>
                       <ContactSupportIcon />
