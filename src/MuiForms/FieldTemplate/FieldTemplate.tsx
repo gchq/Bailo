@@ -1,19 +1,15 @@
-import React from 'react'
-
-import { FieldTemplateProps } from '@rjsf/core'
-
 import FormControl from '@mui/material/FormControl'
 import FormHelperText from '@mui/material/FormHelperText'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
-
+import { FieldTemplateProps } from '@rjsf/core'
+import React from 'react'
 import WrapIfAdditional from './WrapIfAdditional'
 
-const FieldTemplate = ({
+function FieldTemplate({
   id,
   children,
-  classNames,
   disabled,
   displayLabel,
   hidden,
@@ -26,14 +22,13 @@ const FieldTemplate = ({
   rawHelp,
   rawDescription,
   schema,
-}: FieldTemplateProps) => {
+}: FieldTemplateProps) {
   if (hidden) {
     return children
   }
 
   return (
     <WrapIfAdditional
-      classNames={classNames}
       disabled={disabled}
       id={id}
       label={label}
@@ -43,7 +38,7 @@ const FieldTemplate = ({
       required={required}
       schema={schema}
     >
-      <FormControl fullWidth={true} error={rawErrors.length ? true : false} required={required}>
+      <FormControl fullWidth error={!!rawErrors.length} required={required}>
         {children}
         {displayLabel && rawDescription ? (
           <Typography variant='caption' color='textSecondary'>
@@ -51,14 +46,12 @@ const FieldTemplate = ({
           </Typography>
         ) : null}
         {rawErrors.length > 0 && (
-          <List dense={true} disablePadding={true}>
-            {rawErrors.map((error, i: number) => {
-              return (
-                <ListItem key={i} disableGutters={true}>
-                  <FormHelperText id={id}>{error}</FormHelperText>
-                </ListItem>
-              )
-            })}
+          <List dense disablePadding>
+            {rawErrors.map((error) => (
+              <ListItem key={`${id}-${error}`} disableGutters>
+                <FormHelperText id={id}>{error}</FormHelperText>
+              </ListItem>
+            ))}
           </List>
         )}
         {rawHelp && <FormHelperText id={id}>{rawHelp}</FormHelperText>}

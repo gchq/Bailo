@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
-import '../../utils/mockMongo'
-import { findAndUpdateUser } from '../../services/user'
 import RequestModel from '../../models/Request'
 import * as requestService from '../../services/request'
+import { findAndUpdateUser } from '../../services/user'
+import '../../utils/mockMongo'
+import { testRequest, testUser } from '../../utils/test/testModels'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
-import { testUser, testRequest } from '../../utils/test/testModels'
 
 let requestDoc: any
 

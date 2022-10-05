@@ -1,13 +1,12 @@
-import omit from 'lodash/omit'
-import get from 'lodash/get'
-import dropRight from 'lodash/dropRight'
-import remove from 'lodash/remove'
 import { Validator } from 'jsonschema'
-
-import { Schema, SplitSchema, Step, StepType } from '../types/interfaces'
+import dropRight from 'lodash/dropRight'
+import get from 'lodash/get'
+import omit from 'lodash/omit'
+import remove from 'lodash/remove'
+import { Dispatch, SetStateAction } from 'react'
+import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
 import RenderForm from '../src/Form/RenderForm'
-import RenderButtons from '../src/Form/RenderButtons'
-import TextareaWidget from '@/src/MuiForms/TextareaWidget'
+import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
 
 export function createStep({
@@ -28,12 +27,12 @@ export function createStep({
   state: any
   type: StepType
   section: string
-  render: Function
-  renderBasic?: Function
-  renderButtons?: Function
+  render: (props: RenderInterface) => JSX.Element | null
+  renderBasic?: (props: RenderInterface) => JSX.Element | null
+  renderButtons?: (props: RenderButtonsInterface) => JSX.Element | null
   index: number
   schemaRef: string
-  isComplete: Function
+  isComplete: (step: Step) => boolean
 }): Step {
   return {
     schema,
@@ -54,7 +53,12 @@ export function createStep({
   }
 }
 
-export function setStepState(_splitSchema: SplitSchema, setSplitSchema: Function, step: Step, state: any) {
+export function setStepState(
+  _splitSchema: SplitSchema,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
+  step: Step,
+  state: any
+) {
   setSplitSchema((oldSchema) => {
     if (oldSchema.reference !== step.schemaRef) {
       return oldSchema
@@ -72,7 +76,12 @@ export function setStepState(_splitSchema: SplitSchema, setSplitSchema: Function
   })
 }
 
-export function setStepValidate(splitSchema: SplitSchema, setSplitSchema: Function, step: Step, validate: boolean) {
+export function setStepValidate(
+  splitSchema: SplitSchema,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
+  step: Step,
+  validate: boolean
+) {
   const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
   const duplicatedSteps = [...splitSchema.steps]
@@ -88,7 +97,7 @@ export function getStepsFromSchema(
 ): Array<Step> {
   const schemaDupe = omit(schema.schema, omitFields) as any
 
-  for (let field of omitFields) {
+  for (const field of omitFields) {
     const fields = field.split('.')
     remove(get(schemaDupe, `${dropRight(fields, 2).join('.')}.required`, []), (v) => v === fields[fields.length - 1])
   }
@@ -123,7 +132,7 @@ export function getStepsFromSchema(
   return steps
 }
 
-export function getStepsData(splitSchema: SplitSchema, includeAll: boolean = false) {
+export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
   const data: any = {}
 
   splitSchema.steps.forEach((step) => {
@@ -135,7 +144,11 @@ export function getStepsData(splitSchema: SplitSchema, includeAll: boolean = fal
   return data
 }
 
-export function setStepsData(splitSchema: SplitSchema, setSplitSchema: Function, data: any) {
+export function setStepsData(
+  splitSchema: SplitSchema,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
+  data: any
+) {
   const newSteps = splitSchema.steps.map((step) => {
     if (!data[step.section]) return { ...step }
     if (step.type !== 'Form') return { ...step }

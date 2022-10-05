@@ -2,8 +2,9 @@
  * @jest-environment jsdom
  */
 
-import Form from './Form'
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
+import Form from './Form'
+import { doNothing } from '../../utils/tests'
 
 describe('Form', () => {
   const splitSchema: any = {
@@ -26,7 +27,7 @@ describe('Form', () => {
   }
 
   it('renders an Form component with the FormDesigner component open', async () => {
-    render(<Form onSubmit={() => {}} setSplitSchema={() => {}} modelUploading={false} splitSchema={splitSchema} />)
+    render(<Form onSubmit={doNothing} setSplitSchema={doNothing} modelUploading={false} splitSchema={splitSchema} />)
 
     await waitFor(async () => {
       expect(await screen.findByText('test page')).not.toBeUndefined()
@@ -37,7 +38,7 @@ describe('Form', () => {
 
   it('renders an Form component with the FormUpload component open', async () => {
     const { container } = render(
-      <Form onSubmit={() => {}} setSplitSchema={() => {}} modelUploading={false} splitSchema={splitSchema} />
+      <Form onSubmit={doNothing} setSplitSchema={doNothing} modelUploading={false} splitSchema={splitSchema} />
     )
 
     fireEvent(

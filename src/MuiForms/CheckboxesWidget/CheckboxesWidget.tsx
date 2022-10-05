@@ -1,11 +1,9 @@
-import React from 'react'
-
-import FormLabel from '@mui/material/FormLabel'
-import FormGroup from '@mui/material/FormGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-
+import FormControlLabel from '@mui/material/FormControlLabel'
+import FormGroup from '@mui/material/FormGroup'
+import FormLabel from '@mui/material/FormLabel'
 import { WidgetProps } from '@rjsf/core'
+import React from 'react'
 
 const selectValue = (value: any, selected: any, all: any) => {
   const at = all.indexOf(value)
@@ -16,11 +14,9 @@ const selectValue = (value: any, selected: any, all: any) => {
   return updated.sort((a: any, b: any) => all.indexOf(a) > all.indexOf(b))
 }
 
-const deselectValue = (value: any, selected: any) => {
-  return selected.filter((v: any) => v !== value)
-}
+const deselectValue = (value: any, selected: any) => selected.filter((v: any) => v !== value)
 
-const CheckboxesWidget = ({
+function CheckboxesWidget({
   schema,
   label,
   id,
@@ -33,7 +29,7 @@ const CheckboxesWidget = ({
   onChange,
   onBlur,
   onFocus,
-}: WidgetProps) => {
+}: WidgetProps) {
   const { enumOptions, enumDisabled, inline } = options
 
   const _onChange =
@@ -59,7 +55,7 @@ const CheckboxesWidget = ({
       <FormGroup row={!!inline}>
         {(enumOptions as any).map((option: any, index: number) => {
           const checked = value.indexOf(option.value) !== -1
-          const itemDisabled = enumDisabled && (enumDisabled as any).indexOf(option.value) != -1
+          const itemDisabled = enumDisabled && (enumDisabled as any).indexOf(option.value) !== -1
           const checkbox = (
             <Checkbox
               id={`${id}_${index}`}
@@ -71,7 +67,7 @@ const CheckboxesWidget = ({
               onFocus={_onFocus}
             />
           )
-          return <FormControlLabel control={checkbox} key={index} label={option.label} />
+          return <FormControlLabel control={checkbox} key={option.value} label={option.label} />
         })}
       </FormGroup>
     </>

@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import ModelOverview from './ModelOverview'
-import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
+import { render, screen, waitFor } from '@testing-library/react'
+import ModelOverview from './ModelOverview'
 import { lightTheme } from './theme'
 
 describe('ModelOverview', () => {

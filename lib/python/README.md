@@ -19,7 +19,8 @@ python3 -m pip install -e .
 
 > #### Note
 >
-> You may need to install some additional requirements for [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
+> You may need to install some additional requirements for
+> [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
 >
 > ```
 > sudo yum install gcc gmp python3-devel
@@ -27,7 +28,8 @@ python3 -m pip install -e .
 
 ## Environment
 
-You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the project as per the [example.env](./examples/resources/example.env) with the following parameters:
+You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the
+project as per the [example.env](./examples/resources/example.env) with the following parameters:
 
 **AWS_GATEWAY**
 

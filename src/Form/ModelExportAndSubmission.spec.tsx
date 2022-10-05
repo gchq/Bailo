@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
-import ModelExportAndSubmission from './ModelExportAndSubmission'
 import { render, screen, waitFor } from '@testing-library/react'
 import * as uiConfig from '../../data/uiConfig'
+import ModelExportAndSubmission from './ModelExportAndSubmission'
+import { doNothing } from '../../utils/tests'
 
 describe('ModelExportAndSubmission', () => {
   it('renders a ModelExportAndSubmission component', async () => {
@@ -53,9 +54,9 @@ describe('ModelExportAndSubmission', () => {
         formData={formData}
         schemaRef='test-schema'
         splitSchema={splitSchema}
-        onSubmit={() => {}}
+        onSubmit={doNothing}
         activeStep={1}
-        setActiveStep={() => {}}
+        setActiveStep={doNothing}
         modelUploading={false}
       />
     )

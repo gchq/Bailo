@@ -2,13 +2,13 @@
  * @jest-environment jsdom
  */
 
-import DeploymentOverview from './DeploymentOverview'
-import { render, screen, waitFor } from '@testing-library/react'
 import ThemeProvider from '@mui/system/ThemeProvider'
+import { render, screen, waitFor } from '@testing-library/react'
+import DeploymentOverview from './DeploymentOverview'
 import { lightTheme } from './theme'
 
 describe('DeploymentOverview', () => {
-  const version = {
+  const deployment = {
     metadata: {
       highLevelDetails: {
         name: 'test',
@@ -23,7 +23,7 @@ describe('DeploymentOverview', () => {
   it('renders a DeploymentOverview component', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <DeploymentOverview version={version} />
+        <DeploymentOverview deployment={deployment} />
       </ThemeProvider>
     )
 

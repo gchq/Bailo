@@ -5,8 +5,7 @@ from typing import Dict, Optional
 
 import requests
 import requests_pkcs12
-
-from bailoclient.utils.exceptions import NoServerResponseMessage
+from requests.exceptions import JSONDecodeError
 
 from .auth import AuthenticationInterface, Pkcs12Authenticator, UnauthorizedException
 from .config import BailoConfig
@@ -120,7 +119,7 @@ class AuthorisedAPI(APIInterface):
             input_headers.update(self.auth.get_authorisation_headers())
             return input_headers
 
-        return {**self.auth.get_authorisation_headers()}
+        return self.auth.get_authorisation_headers()
 
     def get(
         self,
@@ -168,19 +167,7 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        if 200 <= response.status_code < 300:
-            return response.json()
-
-        if response.status_code == 401:
-            try:
-                data = response.json()
-                raise UnauthorizedException(data)
-            except NoServerResponseMessage:
-                response.raise_for_status()
-
-        response.raise_for_status()
-
-        return {}
+        return self._handle_response(response)
 
     def post(
         self,
@@ -230,19 +217,7 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
-        if 200 <= response.status_code < 300:
-            return response.json()
-
-        if response.status_code == 401:
-            try:
-                data = response.json()
-                raise UnauthorizedException(data)
-            except NoServerResponseMessage:
-                response.raise_for_status()
-
-        response.raise_for_status()
-
-        return {}
+        return self._handle_response(response)
 
     def put(
         self,
@@ -293,6 +268,9 @@ class AuthorisedAPI(APIInterface):
                 verify=self.verify_certificates,
             )
 
+        return self._handle_response(response)
+
+    def _handle_response(self, response):
         if 200 <= response.status_code < 300:
             return response.json()
 
@@ -300,7 +278,7 @@ class AuthorisedAPI(APIInterface):
             try:
                 data = response.json()
                 raise UnauthorizedException(data)
-            except NoServerResponseMessage:
+            except JSONDecodeError:
                 response.raise_for_status()
 
         response.raise_for_status()

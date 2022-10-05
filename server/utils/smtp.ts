@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer'
 import config from 'config'
+import nodemailer from 'nodemailer'
 import logger from './logger'
 import { GenericError } from './result'
 

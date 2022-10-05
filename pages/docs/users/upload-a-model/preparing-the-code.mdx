@@ -1,0 +1,98 @@
+---
+priority: 10040
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Preparing the Code
+
+In addition to the model card, Bailo expects every upload to come with a `code` and `binary` file. These files contain
+the supporting code and binary data respectively.
+
+## Binary
+
+The `binary` file contains your models vectors or data. This is a model specific format and has no requirements beyond
+being uploaded as a compressed `.zip` file.
+
+## Code
+
+The `code` file should be a compressed `.zip` file with the following file structure:
+
+```txt
+code.zip/
+├─ Model.py
+├─ requirements.txt
+└─ basemodel/
+   ├─ basemodel.py
+   └─ __init__.py
+```
+
+- `model.py`: discussed under the [Model Wrapper](./model-wrapper) section.
+- `requirements.txt`: is a standard dependency file, explained in detail by
+  [PyPa](https://pip.pypa.io/en/stable/reference/requirements-file-format/).
+- `basemodel.py` & `__init__.py`: is an abstract class to help you implement the requirement functions. The template is
+  copied below:
+
+```python
+# __init__.py
+from .basemodel import BaseModel
+
+# basemodel.py
+from abc import ABC, abstractmethod
+
+
+class BaseModel(ABC):
+    """
+    The BaseModel class provides an abstract template for model contributors.
+    Models must provide a predict method but do not have to provide metrics or metadata
+    """
+
+    def __init__(self):
+        """
+        The model should be loaded here in the Model sub-class generated
+        from the BaseModel abstract class
+
+        Example:
+            self.model = load_model("model")
+        """
+        super().__init__()
+
+    def predict(self, input, features_names):
+        """
+        Provides a model prediction for a given input and set of feature names
+        :param input: Prediction input containing a data component
+        :param feature_names: Optional set of feature names
+        :return: JSON serialisable numpy array, list of values, string or bytes
+
+        Example:
+            data = input["data"]
+            result = self.model.predict(data)
+            return result
+        """
+        pass
+
+    def metrics(self):
+        """
+        Optional method for adding additional metrics
+        :return:
+
+        Example:
+            return an array of metrics tuples
+            metrics =  [{"type": "COUNTER", "key": "metric_1", "value": 1}]
+            return metrics
+        """
+        pass
+
+    def metadata(self):
+        """
+        Optional metadata method.
+        :return:
+
+        Example:
+            meta = {"field": "value"}
+            return meta
+        """
+        pass
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

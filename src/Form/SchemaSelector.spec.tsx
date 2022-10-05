@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import SchemaSelector from './SchemaSelector'
 import { render, screen, waitFor } from '@testing-library/react'
+import SchemaSelector from './SchemaSelector'
 
 describe('SchemaSelector', () => {
   const schema: any = {
@@ -20,7 +20,10 @@ describe('SchemaSelector', () => {
   schemas.push(schema)
 
   it('renders a SchemaSelector component', async () => {
-    render(<SchemaSelector currentSchema={schema} schemas={schemas} setCurrentSchema={() => {}} />)
+    const doNothing = () => {
+      /* do nothing */
+    }
+    render(<SchemaSelector currentSchema={schema} schemas={schemas} setCurrentSchema={doNothing} />)
 
     await waitFor(async () => {
       expect(await screen.findByLabelText('Test Schema')).not.toBeUndefined()

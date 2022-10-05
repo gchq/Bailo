@@ -1,15 +1,13 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-
-import TextField from '@mui/material/TextField'
+import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-
+import Checkbox from '@mui/material/Checkbox'
+import TextField from '@mui/material/TextField'
+import { Dispatch, SetStateAction, useState } from 'react'
+import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
 import { getStepsData, setStepsData } from '../../utils/formUtils'
-import Alert from '@mui/material/Alert'
-import Checkbox from '@mui/material/Checkbox'
-import AlertTitle from '@mui/material/AlertTitle'
-import { useGetUiConfig } from '../../data/uiConfig'
 
 export default function FormUpload({
   splitSchema,
@@ -48,50 +46,60 @@ export default function FormUpload({
     }
   }
 
+  if (isUiConfigError || isUiConfigLoading) {
+    return null
+  }
+
   return (
     <>
-      {!isUiConfigError && !isUiConfigLoading && (
-        <>
-          {dataSteps.map((step, index) => (
-            <Box key={`${index}`}>{step.renderBasic(step, splitSchema, setSplitSchema)}</Box>
-          ))}
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label='Metadata'
-            value={metadata}
-            onChange={handleMetadataChange}
-            error={validationErrorText !== ''}
-            helperText={validationErrorText}
-            data-test='metadataTextarea'
-          />
-          {uiConfig?.uploadWarning?.showWarning && (
-            <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-              <AlertTitle sx={{ m: 0 }}>
-                <Checkbox
-                  sx={{ p: '0px !important', mr: 1 }}
-                  checked={warningCheckboxVal}
-                  onChange={handleCheckboxChange}
-                  data-test='warningCheckbox'
-                />
-                {uiConfig.uploadWarning.checkboxText}
-              </AlertTitle>
-            </Alert>
-          )}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <Button
-              variant='contained'
-              onClick={onSubmit}
-              sx={{ mt: 3 }}
-              data-test='submitButton'
-              disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
-            >
-              Submit
-            </Button>
+      {dataSteps.map((step) => {
+        if (!step.renderBasic) {
+          return null
+        }
+
+        const RenderBasic = step.renderBasic
+        return (
+          <Box key={step.section}>
+            <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
           </Box>
-        </>
+        )
+      })}
+      <TextField
+        fullWidth
+        multiline
+        maxRows={20}
+        minRows={4}
+        label='Metadata'
+        value={metadata}
+        onChange={handleMetadataChange}
+        error={validationErrorText !== ''}
+        helperText={validationErrorText}
+        data-test='metadataTextarea'
+      />
+      {uiConfig?.uploadWarning?.showWarning && (
+        <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
+          <AlertTitle sx={{ m: 0 }}>
+            <Checkbox
+              sx={{ p: '0px !important', mr: 1 }}
+              checked={warningCheckboxVal}
+              onChange={handleCheckboxChange}
+              data-test='warningCheckbox'
+            />
+            {uiConfig.uploadWarning.checkboxText}
+          </AlertTitle>
+        </Alert>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <Button
+          variant='contained'
+          onClick={onSubmit}
+          sx={{ mt: 3 }}
+          data-test='submitButton'
+          disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
+        >
+          Submit
+        </Button>
+      </Box>
     </>
   )
 }

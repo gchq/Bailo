@@ -1,19 +1,19 @@
-import { MongoClient } from 'mongodb'
 import config from 'config'
 import mongoose from 'mongoose'
-import { simpleEmail } from '../templates/simpleEmail'
-import { sendEmail } from './smtp'
+// eslint-disable-next-line import/no-relative-packages
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { findVersionById, markVersionState } from '../services/version'
-import { getUserByInternalId } from '../services/user'
-import { findDeploymentById } from '../services/deployment'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
+import { findDeploymentById } from '../services/deployment'
+import { getUserByInternalId } from '../services/user'
+import { findVersionById, markVersionState } from '../services/version'
+import { simpleEmail } from '../templates/simpleEmail'
 import { connectToMongoose } from './database'
+import { sendEmail } from './smtp'
 
-let uploadQueue: PMongoQueue | undefined = undefined
-let deploymentQueue: PMongoQueue | undefined = undefined
-let mongoClient: mongoose.Connection | undefined = undefined
+let uploadQueue: PMongoQueue | undefined
+let deploymentQueue: PMongoQueue | undefined
+let mongoClient: mongoose.Connection | undefined
 
 export async function closeMongoInstance() {
   return mongoClient?.close()

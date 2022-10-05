@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Schema, model, Document, Types } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
-export interface Model {
+export interface Model extends SoftDeleteDocument {
   schemaRef: string
   uuid: string
 
@@ -18,7 +20,8 @@ export interface Model {
 
 export type ModelDoc = Model & Document<any, any, Model>
 
-const ModelSchema = new Schema<Model>(
+/* this should be typed */
+const ModelSchema: any = new Schema<Model>(
   {
     schemaRef: { type: String, required: true },
     uuid: { type: String, required: true, index: true, unique: true },
@@ -33,6 +36,8 @@ const ModelSchema = new Schema<Model>(
     timestamps: true,
   }
 )
+
+ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
 
 const ModelModel = model<Model>('Model', ModelSchema)
 

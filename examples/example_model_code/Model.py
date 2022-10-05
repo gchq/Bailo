@@ -1,5 +1,3 @@
-import json
-
 from basemodel import BaseModel
 
 class FileNotFoundError(Exception):

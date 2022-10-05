@@ -1,7 +1,7 @@
 import React from 'react'
 import { TextWidgetProps } from '../TextWidget'
 
-const URLWidget = (props: TextWidgetProps) => {
+function URLWidget(props: TextWidgetProps) {
   const { registry } = props
   const { TextWidget } = registry.widgets
   return <TextWidget type='url' {...props} />

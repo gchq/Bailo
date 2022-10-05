@@ -1,7 +1,7 @@
-import { ensureUserRole } from '../../utils/user'
 import config from 'config'
 import { Request, Response } from 'express'
 import { NotFound } from '../../utils/result'
+import { ensureUserRole } from '../../utils/user'
 
 export const getUiConfig = [
   ensureUserRole('user'),

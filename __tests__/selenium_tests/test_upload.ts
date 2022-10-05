@@ -1,24 +1,22 @@
-import { By, until, WebDriver } from 'selenium-webdriver'
-import { runCommand } from '../../server/utils/build'
-import fs from 'fs/promises'
-import Docker from 'dockerode'
 import axios from 'axios'
 import config from 'config'
+import Docker from 'dockerode'
+import fs from 'fs/promises'
+import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-
+import { runCommand } from '../../server/utils/build'
+import logger from '../../server/utils/logger'
 import {
   clearData,
+  click,
+  fromRelative,
+  getDriver,
+  pause,
+  selectOption,
+  sendKeys,
   waitForElement,
   waitForElements,
-  selectOption,
-  getDriver,
-  click,
-  sendKeys,
-  pause,
-  fromRelative,
-  screenshot,
 } from '../__utils__/helpers'
-import logger from '../../server/utils/logger'
 
 const binaryPath = fromRelative(config.get('samples.binary'))
 const codePath = fromRelative(config.get('samples.code'))
@@ -88,6 +86,9 @@ describe('End to end test', () => {
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
         const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+
+        logger.info(`model name is ${mName}`)
+
         modelInfo.url = modelUrl
         modelInfo.name = mName
 
@@ -187,11 +188,7 @@ describe('End to end test', () => {
       logger.info('sending deployment information')
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
       const deploymentInfo = JSON.parse(deploymentData)
-      await sendKeys(
-        driver,
-        By.css('textarea'),
-        JSON.stringify(Object.assign({}, deploymentInfo, { modelID: modelInfo.name }))
-      )
+      await sendKeys(driver, By.css('textarea'), JSON.stringify({ ...deploymentInfo, modelID: modelInfo.name }))
 
       logger.info('clicking warning checkbox confirming upload is okay')
       await click(driver, By.css('[data-test="warningCheckbox"]'))
@@ -268,6 +265,8 @@ describe('End to end test', () => {
         logger.error.bind(logger),
         { silentErrors: true }
       )
+
+      logger.info({ modelInfo }, 'the model info')
 
       logger.info('pulling container')
       await runCommand(`docker pull ${imageName}`, logger.debug.bind(logger), logger.error.bind(logger), {

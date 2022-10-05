@@ -1,38 +1,41 @@
+import config from 'config'
 import express from 'express'
-import next from 'next'
 import http from 'http'
+import next from 'next'
+import { createIndexes } from './models/Model'
+import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
-  getModelByUuid,
+  fetchRawModelFiles,
+  getCurrentUserDeployments,
+  getDeployment,
+  postDeployment,
+  resetDeploymentApprovals,
+} from './routes/v1/deployment'
+import getDocsMenuContent from './routes/v1/docs'
+import {
   getModelById,
+  getModelByUuid,
   getModelDeployments,
   getModels,
   getModelSchema,
   getModelVersion,
   getModelVersions,
+  deleteModel,
 } from './routes/v1/model'
 import { postUpload } from './routes/v1/upload'
+import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import config from 'config'
-import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
-import {
-  getDeployment,
-  getCurrentUserDeployments,
-  postDeployment,
-  resetDeploymentApprovals,
-} from './routes/v1/deployment'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import processDeployments from './processors/processDeployments'
 import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
 import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { pullBuilderImage } from './utils/build'
-import { createIndexes } from './models/Model'
 import { getSpecification } from './routes/v1/specification'
+import { pullBuilderImage } from './utils/build/build'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -59,15 +62,18 @@ server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
 server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
 server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
 server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
+server.delete('/api/v1/model/:uuid', ...deleteModel)
 
 server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getCurrentUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
+server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
+server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
@@ -87,6 +93,8 @@ server.post('/api/v1/request/:id/respond', ...postRequestResponse)
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
 server.get('/api/v1/specification', ...getSpecification)
+
+server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.use('/api', expressErrorHandler)
 
@@ -109,9 +117,8 @@ export async function startServer() {
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 
-  server.use((req, res) => {
-    return handle(req, res)
-  })
+  // handle next requests
+  server.use((req, res) => handle(req, res))
 
   http.createServer(server).listen(port)
   logger.info({ port }, `Listening on port ${port}`)

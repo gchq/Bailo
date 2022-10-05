@@ -6,6 +6,13 @@ const Input = styled('input')({
   display: 'none',
 })
 
+const displayFilename = (filename: string) => {
+  const parts = filename.split('.')
+  const ext = parts.pop()
+  const base = parts.join('.')
+  return base.length > 12 ? `${base}...${ext}` : filename
+}
+
 export default function FileInput({
   label,
   onChange,
@@ -29,7 +36,7 @@ export default function FileInput({
           {label}
         </Button>
       </label>
-      {file && <Typography variant='body2'>{file.name}</Typography>}
+      {file && <Typography variant='body2'>{displayFilename(file.name)}</Typography>}
     </>
   )
 }

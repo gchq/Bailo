@@ -1,17 +1,14 @@
-import { createTheme } from '@mui/material/styles'
 import { green, red, yellow } from '@mui/material/colors'
+import { createTheme } from '@mui/material/styles'
 
-export interface Theme {
-  palette: {
-    primary: {
-      main: string
-    }
-    secondary: {
-      main: string
-    }
-    error: {
-      main: string
-    }
+enum ThemeMode {
+  LIGHT = 'light',
+  DARK = 'dark',
+}
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    mode: ThemeMode
   }
 }
 
@@ -80,6 +77,15 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
@@ -96,6 +102,12 @@ export const darkTheme = createTheme({
         },
         contained: {
           color: '#fff',
+        },
+        text: {
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
         },
       },
     },

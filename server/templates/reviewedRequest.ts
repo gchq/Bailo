@@ -1,34 +1,31 @@
-import dedent from 'dedent-js'
-import { Document } from 'mongoose'
-import mjml2html from 'mjml'
 import config from 'config'
-import { wrapper } from './partials'
-import { VersionDoc } from '../models/Version'
+import dedent from 'dedent-js'
+import mjml2html from 'mjml'
 import { DeploymentDoc } from '../models/Deployment'
-import { RequestTypes } from '../models/Request'
 import { ModelDoc } from '../models/Model'
+import { RequestTypes } from '../models/Request'
+import { VersionDoc } from '../models/Version'
+import createRequestUrl from '../utils/createRequestUrl'
+import { wrapper } from './partials'
 
 export interface ReviewedRequestContext {
   document: VersionDoc | DeploymentDoc
   choice: string
   requestType: RequestTypes
+  reviewingUser: string
 }
 
-export function html({ document, requestType, choice }: ReviewedRequestContext) {
+export function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return mjml2html(
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -61,11 +58,7 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const requestUrl = model.uuid
-    ? `${base}/model/${model.uuid}`
-    : 'uuid' in document
-    ? `${base}/deployment/${document.uuid}`
-    : ''
+  const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
     '${model.currentMetadata.highLevelDetails.name}' has been reviewed
