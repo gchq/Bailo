@@ -34,7 +34,7 @@ export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T>
 
 export async function findVersionById(user: UserDoc, id: ModelId, opts?: GetVersionOptions) {
   let version = VersionModel.findById(id)
-  if (opts?.thin) version = version.select({ state: 0, logs: 0, metadata: 0 })
+  if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
   if (opts?.populate) version = version.populate('model')
 
@@ -43,7 +43,7 @@ export async function findVersionById(user: UserDoc, id: ModelId, opts?: GetVers
 
 export async function findVersionByName(user: UserDoc, model: ModelId, name: string, opts?: GetVersionOptions) {
   let version = VersionModel.findOne({ model, version: name })
-  if (opts?.thin) version = version.select({ state: 0, logs: 0, metadata: 0 })
+  if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
   if (opts?.populate) version = version.populate('model')
 
@@ -52,7 +52,7 @@ export async function findVersionByName(user: UserDoc, model: ModelId, name: str
 
 export async function findModelVersions(user: UserDoc, model: ModelId, opts?: GetVersionOptions) {
   let versions = VersionModel.find({ model })
-  if (opts?.thin) versions = versions.select({ state: 0, logs: 0 })
+  if (opts?.thin) versions = versions.select({ state: 0 })
   if (!opts?.showLogs) versions = versions.select({ logs: 0 })
   if (opts?.populate) versions = versions.populate('model')
 
