@@ -214,17 +214,8 @@ function ApprovalList({
             </Grid>
             <Grid item xs={12} md sx={{ display: 'flex' }}>
               <Box ml='auto' my='auto'>
-                {requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved !== 'No Response' && (
-                  <Chip
-                    label={requestObj.version?.managerApproved}
-                    color={requestObj.version?.managerApproved === 'Accepted' ? 'success' : 'error'}
-                  />
-                )}
-                {requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved !== 'No Response' && (
-                  <Chip
-                    label={requestObj.version?.reviewerApproved}
-                    color={requestObj.version?.reviewerApproved === 'Accepted' ? 'success' : 'error'}
-                  />
+                {requestObj.status !== 'No Response' && (
+                  <Chip label={requestObj.status} color={requestObj.status === 'Accepted' ? 'success' : 'error'} />
                 )}
               </Box>
             </Grid>
@@ -235,10 +226,7 @@ function ApprovalList({
                   variant='outlined'
                   onClick={() => changeState('Declined', requestObj)}
                   sx={{ mr: 1 }}
-                  disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Declined') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Declined')
-                  }
+                  disabled={requestObj.status === 'Declined'}
                 >
                   Reject
                 </Button>
@@ -246,10 +234,7 @@ function ApprovalList({
                   variant='contained'
                   onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
-                  disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Accepted') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Accepted')
-                  }
+                  disabled={requestObj.status === 'Accepted'}
                 >
                   Approve
                 </Button>
