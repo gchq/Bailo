@@ -247,8 +247,7 @@ describe('End to end test', () => {
       logger.info('waiting to redirect back to the model page')
 
       await driver.wait(until.urlContains('/model/'))
-
-      await driver.findElement(By.xpath("//*[text()[contains(.,'v2')]]"))
+      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'v2')]]")))      
     } finally {
       logger.info('quitting driver')
       await driver.quit()
@@ -362,8 +361,8 @@ describe('End to end test', () => {
 
       logger.info(`found url contains deployment`)
       await driver.wait(until.urlContains('/deployment/'))
+      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'Deployment name')]]")))
       deploymentUrl = await driver.getCurrentUrl()
-      await driver.sleep(2000)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
