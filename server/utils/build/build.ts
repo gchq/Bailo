@@ -23,11 +23,11 @@ export interface FileRef {
   name: string
 }
 
-export function logCommand(command: string, logger: BuildLogger) {
+export function logCommand(command: string, buildLogger: BuildLogger) {
   return runCommand(
     command,
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.info({}, msg)),
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.error({}, msg))
+    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.info({}, msg)),
+    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.error({}, msg))
   )
 }
 

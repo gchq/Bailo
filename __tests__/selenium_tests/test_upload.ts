@@ -4,7 +4,7 @@ import Docker from 'dockerode'
 import fs from 'fs/promises'
 import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import logger from '../../server/utils/logger'
 import {
   clearData,
