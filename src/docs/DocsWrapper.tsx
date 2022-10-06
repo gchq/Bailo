@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
-import isDocHeading from '@/utils/isDocHeading'
+import isDocHeading from '@/utils/type-guards/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
 
 type DocsWrapperProps = {
