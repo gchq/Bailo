@@ -288,7 +288,7 @@ function Model() {
                 aria-expanded={open ? 'true' : undefined}
                 onClick={actionMenuClicked}
                 variant='outlined'
-                data-test='requestDeploymentButton'
+                data-test='modelActionsButton'
                 endIcon={open ? <UpArrow /> : <DownArrow />}
               >
                 Actions
@@ -355,6 +355,7 @@ function Model() {
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
                       currentUser.id !== version?.metadata?.contacts?.uploader
                     }
+                    data-test='editModelButton'
                   >
                     <ListItemIcon>
                       <EditIcon fontSize='small' />
@@ -362,7 +363,11 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
+                <MenuItem
+                  onClick={uploadNewVersion}
+                  disabled={currentUser.id !== version.metadata?.contacts?.uploader}
+                  data-test='newVersionButton'
+                >
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -422,7 +427,7 @@ function Model() {
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' />
+            <Tab label='Settings' value='settings' data-test='settingsButton' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
@@ -544,7 +549,7 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={handleDelete}>
+            <Button variant='contained' color='error' onClick={handleDelete} data-test='deleteModelButton'>
               Delete Model
             </Button>
           </>

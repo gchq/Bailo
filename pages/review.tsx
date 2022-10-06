@@ -20,15 +20,12 @@ import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
 import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
-import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Request } from '../types/interfaces'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
-
-  const { isCurrentUserLoading } = useGetCurrentUser()
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
@@ -37,21 +34,18 @@ export default function Review() {
 
   return (
     <Wrapper title='Reviews' page='review'>
-      <>
-        {!isCurrentUserLoading && (
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={value}
-            onChange={handleChange}
-          >
-            <Tab value='user' label='Approvals' />
-            <Tab value='archived' label='Archived' />
-          </Tabs>
-        )}
-        <ApprovalList type='Upload' category={value} archived={value === 'archived'} />
-        <ApprovalList type='Deployment' category={value} archived={value === 'archived'} />
-      </>
+      <Tabs
+        indicatorColor='secondary'
+        textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+        value={value}
+        onChange={handleChange}
+      >
+        <Tab value='user' label='Approvals' />
+        <Tab value='archived' label='Archived' />
+      </Tabs>
+
+      <ApprovalList type='Upload' category={value} />
+      <ApprovalList type='Deployment' category={value} />
     </Wrapper>
   )
 }
@@ -64,15 +58,7 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({
-  type,
-  category,
-  archived = false,
-}: {
-  type: RequestType
-  category: ReviewFilterType
-  archived?: boolean
-}) {
+function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [request, setRequest] = useState<Request | undefined>(undefined)
@@ -81,7 +67,7 @@ function ApprovalList({
 
   const theme = useTheme()
 
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category, archived)
+  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()
 
   const managerStyling = {
@@ -213,17 +199,8 @@ function ApprovalList({
             </Grid>
             <Grid item xs={12} md sx={{ display: 'flex' }}>
               <Box ml='auto' my='auto'>
-                {requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved !== 'No Response' && (
-                  <Chip
-                    label={requestObj.version?.managerApproved}
-                    color={requestObj.version?.managerApproved === 'Accepted' ? 'success' : 'error'}
-                  />
-                )}
-                {requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved !== 'No Response' && (
-                  <Chip
-                    label={requestObj.version?.reviewerApproved}
-                    color={requestObj.version?.reviewerApproved === 'Accepted' ? 'success' : 'error'}
-                  />
+                {requestObj.status !== 'No Response' && (
+                  <Chip label={requestObj.status} color={requestObj.status === 'Accepted' ? 'success' : 'error'} />
                 )}
               </Box>
             </Grid>
@@ -234,10 +211,7 @@ function ApprovalList({
                   variant='outlined'
                   onClick={() => changeState('Declined', requestObj)}
                   sx={{ mr: 1 }}
-                  disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Declined') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Declined')
-                  }
+                  disabled={requestObj.status === 'Declined'}
                 >
                   Reject
                 </Button>
@@ -245,10 +219,7 @@ function ApprovalList({
                   variant='contained'
                   onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
-                  disabled={
-                    (requestObj.approvalType === 'Manager' && requestObj.version?.managerApproved === 'Accepted') ||
-                    (requestObj.approvalType === 'Reviewer' && requestObj.version?.reviewerApproved === 'Accepted')
-                  }
+                  disabled={requestObj.status === 'Accepted'}
                 >
                   Approve
                 </Button>
