@@ -86,7 +86,7 @@ function Model() {
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
-  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
+  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
@@ -526,7 +526,7 @@ function Model() {
             </Typography>
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
-                Copy Model Card to Clipboard
+                Copy model card to clipboard
               </Button>
               <Snackbar
                 open={copyModelCardSnackbarOpen}
