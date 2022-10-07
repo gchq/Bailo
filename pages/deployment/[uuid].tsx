@@ -189,18 +189,17 @@ export default function Deployment() {
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
         {deployment && (
-          <Stack direction='row' alignItems='center' justifyContent='space-between'>
+          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ pb: 3 }}>
             <Button
               variant='text'
               color='primary'
-              sx={{ pb: 3 }}
               startIcon={<ArrowBackIosNewIcon />}
               onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
             >
               Back to model
             </Button>
             {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-              <Box sx={{ pb: 2 }}>
+              <Box>
                 <Alert
                   severity='info'
                   sx={{
@@ -217,7 +216,7 @@ export default function Deployment() {
                 </Alert>
               </Box>
             )}
-            <Box sx={{ pb: 3 }}>
+            <Box>
               <Button
                 variant='outlined'
                 color='primary'
