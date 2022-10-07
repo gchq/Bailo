@@ -213,7 +213,7 @@ describe('End to end test', () => {
       logger.info('quitting driver')
       await driver.quit()
     }
-  }, 25000)
+  }, 30000)
 
   test('test we can upload a new version', async () => {
     logger.info('getting driver')

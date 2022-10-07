@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
@@ -31,6 +30,8 @@ import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -196,30 +197,49 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
-          <Box sx={{ textAlign: 'right', pb: 3 }}>
-            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-              Show download commands
-            </Button>
-          </Box>
-        )}
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-          <Box sx={{ pb: 2 }}>
-            <Alert
-              severity='info'
-              sx={{
-                width: 'fit-content',
-                m: 'auto',
-                backgroundColor: '#0288d1',
-                color: '#fff',
-                '& .MuiAlert-icon': {
-                  color: '#fff',
-                },
-              }}
+        {deployment && (
+          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ pb: 3 }}>
+            <Button
+              variant='text'
+              color='primary'
+              startIcon={<ArrowBackIosNewIcon />}
+              onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
             >
-              This model version was uploaded as just a model card
-            </Alert>
-          </Box>
+              Back to model
+            </Button>
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model version was uploaded as just a model card
+                </Alert>
+              </Box>
+            )}
+            <Box>
+              <Button
+                variant='outlined'
+                color='primary'
+                disabled={
+                  !hasUploadType ||
+                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                }
+                startIcon={<Info />}
+                onClick={handleClickOpen}
+              >
+                Show download commands
+              </Button>
+            </Box>
+          </Stack>
         )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
