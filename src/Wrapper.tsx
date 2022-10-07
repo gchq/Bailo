@@ -329,7 +329,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                     <LinkIcon />
                   )}
                 </ListItemIcon>
-                <ListItemText primary='Support' />
+                <ListItemText primary='API' />
               </ListItem>
             </Link>
             <Link href='/help' passHref>
