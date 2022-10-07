@@ -17,14 +17,17 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
+import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import Box from '@mui/system/Box'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
@@ -101,10 +104,11 @@ export default function Deployment() {
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
+  const [copyDeploymentCardSnackbarOpen, setCopyDeploymentCardSnackbarOpen] = useState(false)
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
+  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const theme = useTheme() || lightTheme
@@ -163,6 +167,11 @@ export default function Deployment() {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+  }
+
+  const copyDeploymentCardToClipboard = () => {
+    copy(JSON.stringify(deployment?.metadata, null, 2))
+    setCopyDeploymentCardSnackbarOpen(true)
   }
 
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
@@ -295,6 +304,32 @@ export default function Deployment() {
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+
+          {group === 'settings' && (
+            <>
+              <Typography variant='h6' sx={{ mb: 1 }}>
+                General
+              </Typography>
+              <Box mb={2}>
+                <Button variant='outlined' onClick={copyDeploymentCardToClipboard}>
+                  Copy deployment metadata to clipboard
+                </Button>
+                <Snackbar
+                  open={copyDeploymentCardSnackbarOpen}
+                  autoHideDuration={6000}
+                  onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
+                >
+                  <Alert
+                    onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
+                    severity='success'
+                    sx={{ width: '100%' }}
+                  >
+                    Copied deployment metadata to clipboard
+                  </Alert>
+                </Snackbar>
+              </Box>
+            </>
+          )}
 
           {group === 'exports' && deployment.managerApproved === 'Accepted' && (
             <RawModelExportList deployment={deployment} />
