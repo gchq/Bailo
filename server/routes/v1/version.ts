@@ -12,8 +12,10 @@ export const getVersion = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
+    const { logs } = req.query
+    const showLogs = logs === 'true'
 
-    const version = await findVersionById(req.user!, id)
+    const version = await findVersionById(req.user!, id, { showLogs })
 
     if (!version) {
       throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version')

@@ -67,11 +67,11 @@ export function useGetModelVersions(uuid?: string) {
   }
 }
 
-export function useGetModelVersion(uuid?: string, selectedVersion?: string) {
+export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs = false) {
   const getVersion = selectedVersion || 'latest'
 
   const { data, error, mutate } = useSWR<Version>(
-    uuid ? `/api/v1/model/${uuid}/version/${getVersion}` : null,
+    uuid ? `/api/v1/model/${uuid}/version/${getVersion}?logs=${logs}` : null,
     fetcher,
     {
       refreshInterval: 1000,
