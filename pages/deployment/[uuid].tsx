@@ -109,7 +109,7 @@ export default function Deployment() {
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
+  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const theme = useTheme() || lightTheme
