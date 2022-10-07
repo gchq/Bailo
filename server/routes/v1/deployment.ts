@@ -19,8 +19,10 @@ export const getDeployment = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
+    const { logs } = req.query
+    const showLogs = logs === 'true'
 
-    const deployment = await findDeploymentByUuid(req.user, uuid)
+    const deployment = await findDeploymentByUuid(req.user, uuid, { showLogs })
 
     if (!deployment) {
       throw NotFound({ code: 'deployment_not_found', uuid }, `Unable to find deployment '${uuid}'`)
@@ -35,8 +37,10 @@ export const getCurrentUserDeployments = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
+    const { logs } = req.query
+    const showLogs = logs === 'true'
 
-    const deployments = await findDeployments(req.user, { owner: id })
+    const deployments = await findDeployments(req.user, { owner: id }, { showLogs })
 
     req.log.info({ code: 'fetch_deployments_by_user', deployments }, 'Fetching deployments by user')
 
