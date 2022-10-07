@@ -2,7 +2,7 @@ import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
-import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
+import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
 
 export interface Version {
@@ -14,6 +14,8 @@ export interface Version {
   built: boolean
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
+  managerLastViewed: DateString
+  reviewerLastViewed: DateString
 
   files: {
     rawBinaryPath: string
@@ -43,6 +45,8 @@ const VersionSchema: any = new Schema<Version>(
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
     reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    managerLastViewed: { type: Schema.Types.Mixed },
+    reviewerLastViewed: { type: Schema.Types.Mixed },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],

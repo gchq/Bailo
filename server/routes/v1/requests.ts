@@ -43,6 +43,7 @@ export const getRequests = [
     const requests = await readRequests({
       type: type as RequestTypes,
       filter: filter === 'all' ? undefined : req.user._id,
+      archived: filter === 'archived',
     })
 
     req.log.info({ code: 'fetching_requests', requests }, 'User fetching requests')

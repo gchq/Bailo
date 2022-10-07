@@ -165,7 +165,15 @@ export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
 }
 
 export type RequestFilter = Types.ObjectId | undefined
-export async function readRequests({ type, filter }: { type: RequestTypes; filter: RequestFilter }) {
+export async function readRequests({
+  type,
+  filter,
+  archived,
+}: {
+  type: RequestTypes
+  filter: RequestFilter
+  archived: boolean
+}) {
   const query: any = {
     status: 'No Response',
     request: type,
@@ -173,6 +181,10 @@ export async function readRequests({ type, filter }: { type: RequestTypes; filte
 
   if (filter) {
     query.user = filter
+  }
+
+  if (archived) {
+    query.status = { $ne: 'No Response' }
   }
 
   return RequestModel.find(query)

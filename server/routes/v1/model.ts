@@ -114,6 +114,8 @@ export const getModelVersions = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
+    const { logs } = req.query
+    const showLogs = logs === 'true'
 
     const model = await findModelByUuid(req.user, uuid)
 
@@ -121,7 +123,7 @@ export const getModelVersions = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
-    const versions = await findModelVersions(req.user, model._id, { thin: true })
+    const versions = await findModelVersions(req.user, model._id, { thin: true, showLogs })
 
     req.log.info(
       { code: 'fetch_versions_for_model', modelId: model._id, versions },
@@ -135,6 +137,8 @@ export const getModelVersion = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid, version: versionName } = req.params
+    const { logs } = req.query
+    const showLogs = logs === 'true'
 
     const model = await findModelByUuid(req.user, uuid)
 
@@ -144,9 +148,9 @@ export const getModelVersion = [
 
     let version
     if (versionName === 'latest') {
-      version = await findVersionById(req.user, model.versions[model.versions.length - 1])
+      version = await findVersionById(req.user, model.versions[model.versions.length - 1], { showLogs })
     } else {
-      version = await findVersionByName(req.user, model._id, versionName)
+      version = await findVersionByName(req.user, model._id, versionName, { showLogs })
     }
 
     if (!version) {

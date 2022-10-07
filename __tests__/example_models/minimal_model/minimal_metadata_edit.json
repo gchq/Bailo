@@ -1,0 +1,18 @@
+{
+  "highLevelDetails": {
+    "tags": ["Test"],
+    "name": "Model card for Testing",
+    "modelInASentence": "This \"model\" reverses its input.",
+    "modelOverview": "This is an edit",
+    "modelCardVersion": "v1"
+  },
+  "contacts": {
+    "uploader": "user",
+    "reviewer": "user",
+    "manager": "user"
+  },
+  "buildOptions": {
+    "exportRawModel": true,
+    "uploadType": "Model card only"
+  }
+}

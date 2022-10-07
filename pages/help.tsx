@@ -75,7 +75,7 @@ export default function Help() {
                 </CardContent>
                 <CardActions>
                   <Link passHref href='/docs'>
-                    <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }}>
+                    <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }} data-test='documentationLink'>
                       View documentation
                     </Button>
                   </Link>
