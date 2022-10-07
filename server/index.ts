@@ -35,6 +35,7 @@ import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { getSpecification } from './routes/v1/specification'
+import { getApplicationLogs } from './routes/v1/admin'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -94,6 +95,8 @@ server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 server.get('/api/v1/specification', ...getSpecification)
 
 server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
+
+server.get('/api/v1/admin/logs', ...getApplicationLogs)
 
 server.use('/api', expressErrorHandler)
 

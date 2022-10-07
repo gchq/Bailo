@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import getAppRoot from 'app-root-path'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
@@ -13,6 +14,7 @@ import morgan from 'morgan'
 import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
+import mongoose from 'mongoose'
 import { StatusError } from '../../types/interfaces'
 import { serializedDeploymentFields } from '../services/deployment'
 import { serializedModelFields } from '../services/model'
@@ -21,6 +23,7 @@ import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
 import { ensurePathExists, getFilesInDir } from './filesystem'
 import { consoleError } from '../../utils/logging'
+import { connectToMongoose } from './database'
 
 const appRoot = getAppRoot.toString()
 
@@ -109,6 +112,34 @@ class Writer {
   }
 }
 
+class MongoWriter {
+  connected: Promise<void>
+
+  constructor() {
+    this.connected = connectToMongoose()
+    this.checkCap()
+  }
+
+  async checkCap() {
+    // We use a capped collection for logs to ensure high throughput
+    await this.connected
+
+    const { db } = mongoose.connection
+    const logs = db.collection('logs')
+
+    if (!(await logs.isCapped())) {
+      db.command({ convertToCapped: 'logs', size: 1024 * 1024 * 32 })
+    }
+  }
+
+  async write(data) {
+    await this.connected
+
+    const { db } = mongoose.connection
+    await db.collection('logs').insertOne(data)
+  }
+}
+
 export interface SerializerOptions {
   mandatory?: Array<string>
   optional?: Array<string>
@@ -146,11 +177,17 @@ export function createSerializer(options: SerializerOptions) {
   }
 }
 
-const streams: Array<bunyan.Stream> = []
+const streams: Array<bunyan.Stream> = [
+  {
+    level: 'trace',
+    type: 'raw',
+    stream: new MongoWriter(),
+  },
+]
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'info',
+    level: 'trace',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
@@ -279,6 +316,7 @@ const morganLog = morgan<any, any>(
         method: tokens.method(req, res),
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
+        code: 'request',
       },
       tokens.dev(morgan, req, res)
     )
