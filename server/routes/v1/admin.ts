@@ -47,8 +47,8 @@ function parseQueryArray(
 function parseString(
   property: string,
   query: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined
-): string {
-  if (typeof query !== 'string') {
+): string | undefined {
+  if (query !== undefined && typeof query !== 'string') {
     throw BadReq({ [property]: query }, `Must pass a string to ${property}`)
   }
 
@@ -81,6 +81,42 @@ export const getApplicationLogs = [
     const regex = req.query.regex === 'true'
 
     const logs = await getLogs({ after, before, levels, types, search, regex })
+
+    res.json({
+      logs: await logs.toArray(),
+    })
+  },
+]
+
+export const getItemLogs = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const after = parseDateQuery(req.query.after, new Date(0))
+    const before = parseDateQuery(req.query.before, new Date(Date.now()))
+
+    const filter = parseQueryArray('filter', req.query.filter)
+
+    const levels = filter.map((value) => parseInt(value, 10)).filter((value) => !Number.isNaN(value))
+
+    if (levels.length === 0) {
+      throw BadReq({ levels }, 'Error, provided no valid log levels')
+    }
+
+    const search = parseString('search', req.query.search)
+
+    const regex = req.query.regex === 'true'
+
+    let buildId
+    if (req.params.buildId) {
+      buildId = req.params.buildId
+    }
+
+    let reqId
+    if (req.params.reqId) {
+      reqId = req.params.reqId
+    }
+
+    const logs = await getLogs({ after, before, levels, search, regex, buildId, reqId })
 
     res.json({
       logs: await logs.toArray(),

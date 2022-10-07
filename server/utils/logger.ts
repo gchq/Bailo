@@ -117,19 +117,21 @@ class MongoWriter {
 
   constructor() {
     this.connected = connectToMongoose()
-    this.checkCap()
+    this.checkCollection()
   }
 
-  async checkCap() {
-    // We use a capped collection for logs to ensure high throughput
+  async checkCollection() {
     await this.connected
 
     const { db } = mongoose.connection
     const logs = db.collection('logs')
 
+    // We use a capped collection for logs to ensure high throughput
     if (!(await logs.isCapped())) {
       db.command({ convertToCapped: 'logs', size: 1024 * 1024 * 32 })
     }
+
+    logs.createIndex({ '$**': 'text' }, { name: 'logs-text-index' })
   }
 
   async write(data) {

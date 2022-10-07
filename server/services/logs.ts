@@ -1,4 +1,5 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
+import { ObjectId } from 'mongodb'
 import { checkConnection } from '../utils/database'
 
 export enum LogType {
@@ -20,20 +21,7 @@ export function getLogType(type: string): LogType | undefined {
   }
 }
 
-interface GetLogsArgs {
-  after: Date
-  before: Date
-  levels: Array<number>
-  types: Array<LogType>
-  search: string
-  regex: boolean
-}
-export async function getLogs({ after, before, levels, types, search, regex }: GetLogsArgs) {
-  await checkConnection()
-
-  const { db } = mongoose.connection
-  const collection = db.collection('logs')
-
+function transformTypeToMongoQuery(types: Array<LogType>) {
   const typeFilter: Array<unknown> = []
 
   let exhaustiveCheck: never
@@ -57,11 +45,69 @@ export async function getLogs({ after, before, levels, types, search, regex }: G
     }
   }
 
+  return typeFilter
+}
+
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+interface GetLogsArgs {
+  after: Date
+  before: Date
+  levels: Array<number>
+  types?: Array<LogType>
+  search?: string
+  regex: boolean
+  buildId?: string
+  reqId?: string
+}
+export async function getLogs({ after, before, levels, types, search, regex, buildId, reqId }: GetLogsArgs) {
+  await checkConnection()
+
+  const { db } = mongoose.connection
+  const collection = db.collection('logs')
+
+  let typeFilter = {}
+  if (types) {
+    typeFilter = {
+      $or: transformTypeToMongoQuery(types),
+    }
+  }
+
+  if (buildId) {
+    typeFilter = {
+      buildId,
+    }
+  }
+
+  if (reqId) {
+    typeFilter = {
+      id: reqId,
+    }
+  }
+
+  let searchFilter: any = {}
+  if (search) {
+    const match = regex ? { $regex: search } : { $regex: escapeRegExp(search) }
+    searchFilter = {
+      $or: [{ code: match }, { msg: match }],
+    }
+
+    if (!regex) {
+      if (mongoose.isValidObjectId(search)) {
+        const id = new ObjectId(search)
+        searchFilter.$or.push({ _id: id })
+      }
+    }
+  }
+
   return collection
     .find({
       time: { $gte: after, $lt: before },
       level: { $in: levels },
-      $or: typeFilter,
+      ...typeFilter,
+      ...searchFilter,
     })
     .limit(2000)
 }

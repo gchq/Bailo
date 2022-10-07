@@ -35,7 +35,7 @@ import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { getSpecification } from './routes/v1/specification'
-import { getApplicationLogs } from './routes/v1/admin'
+import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -97,6 +97,8 @@ server.get('/api/v1/specification', ...getSpecification)
 server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
+server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
+server.get('/api/v1/admin/logs/request/:reqId', ...getItemLogs)
 
 server.use('/api', expressErrorHandler)
 
