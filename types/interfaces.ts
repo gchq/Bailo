@@ -186,3 +186,18 @@ export enum UploadModes {
 // Dates are in ISO 8601 format
 enum DateStringBrand {}
 export type DateString = string & DateStringBrand
+
+export interface LogEntry {
+  _id: string
+  name: string
+  hostname: string
+  pid: number
+
+  level: number
+
+  msg: string
+
+  time: string
+
+  [x: string]: unknown
+}

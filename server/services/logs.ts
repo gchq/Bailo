@@ -52,7 +52,7 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-interface GetLogsArgs {
+export interface GetLogsArgs {
   after: Date
   before: Date
   levels: Array<number>
