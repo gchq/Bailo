@@ -128,7 +128,7 @@ describe('test request service', () => {
   })
 
   test('that we can read the requests', async () => {
-    const requests = await readRequests({ type: RequestTypes.Upload, filter: undefined })
+    const requests = await readRequests({ type: RequestTypes.Upload, filter: undefined, archived: false })
     expect(requests).not.toBe(undefined)
     expect(requests.length).toBe(1)
     expect(requests[0].request).toBe('Upload')

@@ -4,7 +4,7 @@ import { Request } from '../types/interfaces'
 import { fetcher } from '../utils/fetcher'
 
 export type RequestType = 'Upload' | 'Deployment'
-export type ReviewFilterType = 'user' | 'all'
+export type ReviewFilterType = 'user' | 'archived'
 export function useListRequests(type: RequestType, filter: ReviewFilterType) {
   const { data, error, mutate } = useSWR<{
     requests: Array<Request>
