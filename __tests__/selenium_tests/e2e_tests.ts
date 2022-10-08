@@ -297,8 +297,8 @@ describe('End to end test', () => {
       logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
 
-      logger.info('approving 2 requests')
-      await approveRequests(driver, 2)
+      logger.info('approving 4 requests')
+      await approveRequests(driver, 4)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
