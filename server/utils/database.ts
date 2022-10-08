@@ -10,6 +10,10 @@ export async function connectToMongoose() {
     return connection
   }
 
+  if (mongoose.connection) {
+    return mongoose
+  }
+
   try {
     connection = mongoose.connect(config.get('mongo.uri'), {
       useFindAndModify: false,
