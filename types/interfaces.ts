@@ -109,6 +109,10 @@ export interface UiConfig {
     showWarning: boolean
     checkboxText: string
   }
+
+  development: {
+    logUrl: string
+  }
 }
 
 export type RequestType = 'Upload' | 'Deployment'
@@ -198,6 +202,11 @@ export interface LogEntry {
   msg: string
 
   time: string
+
+  src?: {
+    file: string
+    line: number
+  }
 
   [x: string]: unknown
 }

@@ -98,7 +98,7 @@ server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
-server.get('/api/v1/admin/logs/request/:reqId', ...getItemLogs)
+server.get('/api/v1/admin/logs/request/:requestId', ...getItemLogs)
 
 server.use('/api', expressErrorHandler)
 

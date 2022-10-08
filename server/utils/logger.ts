@@ -231,7 +231,7 @@ async function processStroomFiles() {
       await sendLogsToStroom(name)
     } catch (e) {
       // ironically we cannot use our logger here.
-      consoleError('Unable to send logs to ACE', e)
+      consoleError('Unable to send logs to stroom', e)
     }
   }
 }
@@ -277,7 +277,7 @@ if (config.get('logging.stroom.enabled')) {
     },
   })
 
-  // send logs to ACE every hour
+  // send logs to troom every hour
   processStroomFiles()
   setInterval(() => {
     date = new Date()

@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { toTitleCase } from '../../utils/stringUtils'
 
 // TODO me - Use this to convert LogLevel to a number before sending to API
-enum LogLevelValue {
+export enum LogLevelValue {
   TRACE = 10,
   DEBUG = 20,
   INFO = 30,

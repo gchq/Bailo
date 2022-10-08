@@ -6,14 +6,25 @@ import { LogEntry } from '../types/interfaces'
 interface GetAppLogsArgs {
   after?: Date
   before?: Date
-  filter: Array<string>
+  level?: number
+  filter?: Array<string>
   search?: string
-  regex?: boolean
+  isRegex?: boolean
   buildId?: string
-  reqId?: string
+  requestId?: string
   disabled?: boolean
 }
-export function useGetAppLogs({ after, before, filter, search, regex, buildId, reqId, disabled }: GetAppLogsArgs) {
+export function useGetAppLogs({
+  level,
+  after,
+  before,
+  filter,
+  search,
+  isRegex,
+  buildId,
+  requestId,
+  disabled,
+}: GetAppLogsArgs) {
   const query: Record<string, unknown> = {
     filter,
   }
@@ -21,22 +32,15 @@ export function useGetAppLogs({ after, before, filter, search, regex, buildId, r
   if (after) query.after = after
   if (before) query.before = before
   if (search) query.search = search
-  if (regex) query.regex = regex
+  if (isRegex) query.isRegex = isRegex
+  if (level) query.level = level
 
   let group = ''
   if (buildId) group = `/build/${buildId}`
-  if (reqId) group = `/request/${reqId}`
+  if (requestId) group = `/request/${requestId}`
 
   const { data, error, mutate } = useSWR<{ logs: Array<LogEntry> }>(
-    disabled
-      ? null
-      : `/api/v1/admin/logs${group}?${qs.stringify({
-          after,
-          before,
-          filter,
-          search,
-          regex,
-        })}`,
+    disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query)}`,
     fetcher
   )
 

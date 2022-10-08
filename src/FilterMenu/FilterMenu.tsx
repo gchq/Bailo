@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react'
+import React, { Dispatch, ReactElement, useState, SetStateAction } from 'react'
 import FilterIcon from '@mui/icons-material/FilterAltTwoTone'
 import RegexIcon from '@mui/icons-material/NewReleases'
 import Box from '@mui/material/Box'
@@ -17,13 +17,31 @@ import { toTitleCase } from '../../utils/stringUtils'
 // TODO me - move into type-guards once that has been merged into main
 const isLogLevel = (value: LogLevel | string): value is LogLevel => !!LogLevel[value]
 
-export default function FilterMenu(): ReactElement {
+interface FilterMenuProps {
+  logLevel: LogLevel
+  setLogLevel: Dispatch<SetStateAction<LogLevel>>
+  buildId: string
+  setBuildId: Dispatch<SetStateAction<string>>
+  requestId: string
+  setRequestId: Dispatch<SetStateAction<string>>
+  search: string
+  setSearch: Dispatch<SetStateAction<string>>
+  isRegex: boolean
+  setIsRegex: Dispatch<SetStateAction<boolean>>
+}
+export default function FilterMenu({
+  logLevel,
+  setLogLevel,
+  buildId,
+  setBuildId,
+  requestId,
+  setRequestId,
+  search,
+  setSearch,
+  isRegex,
+  setIsRegex,
+}: FilterMenuProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const [logLevel, setLogLevel] = useState<LogLevel>(LogLevel.TRACE)
-  const [buildId, setBuildId] = useState('')
-  const [requestId, setRequestId] = useState('')
-  const [search, setSearch] = useState('')
-  const [isRegex, setIsRegex] = useState(false)
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)

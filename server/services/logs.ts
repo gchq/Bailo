@@ -1,4 +1,4 @@
-import mongoose, { Types } from 'mongoose'
+import mongoose from 'mongoose'
 import { ObjectId } from 'mongodb'
 import { checkConnection } from '../utils/database'
 
@@ -55,21 +55,21 @@ function escapeRegExp(string: string) {
 export interface GetLogsArgs {
   after: Date
   before: Date
-  levels: Array<number>
+  level: number
   types?: Array<LogType>
   search?: string
-  regex: boolean
+  isRegex: boolean
   buildId?: string
-  reqId?: string
+  requestId?: string
 }
-export async function getLogs({ after, before, levels, types, search, regex, buildId, reqId }: GetLogsArgs) {
+export async function getLogs({ after, before, level, types, search, isRegex, buildId, requestId }: GetLogsArgs) {
   await checkConnection()
 
   const { db } = mongoose.connection
   const collection = db.collection('logs')
 
   let typeFilter = {}
-  if (types) {
+  if (types && !search) {
     typeFilter = {
       $or: transformTypeToMongoQuery(types),
     }
@@ -81,20 +81,20 @@ export async function getLogs({ after, before, levels, types, search, regex, bui
     }
   }
 
-  if (reqId) {
+  if (requestId) {
     typeFilter = {
-      id: reqId,
+      id: requestId,
     }
   }
 
   let searchFilter: any = {}
   if (search) {
-    const match = regex ? { $regex: search } : { $regex: escapeRegExp(search) }
+    const match = isRegex ? { $regex: search } : { $regex: escapeRegExp(search) }
     searchFilter = {
       $or: [{ code: match }, { msg: match }],
     }
 
-    if (!regex) {
+    if (!isRegex) {
       if (mongoose.isValidObjectId(search)) {
         const id = new ObjectId(search)
         searchFilter.$or.push({ _id: id })
@@ -105,9 +105,10 @@ export async function getLogs({ after, before, levels, types, search, regex, bui
   return collection
     .find({
       time: { $gte: after, $lt: before },
-      level: { $in: levels },
+      level: { $gte: level },
       ...typeFilter,
       ...searchFilter,
     })
-    .limit(2000)
+    .sort({ time: -1 })
+    .limit(500)
 }

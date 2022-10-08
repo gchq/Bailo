@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -6,9 +6,16 @@ import Divider from '@mui/material/Divider'
 import Wrapper from '../src/Wrapper'
 import FilterMenu from '../src/FilterMenu/FilterMenu'
 import LogTree from '../src/LogTree'
+import { LogLevel } from '../src/FilterMenu/LogLevelSelect'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()
+
+  const [logLevel, setLogLevel] = useState<LogLevel>(LogLevel.TRACE)
+  const [buildId, setBuildId] = useState('')
+  const [requestId, setRequestId] = useState('')
+  const [search, setSearch] = useState('')
+  const [isRegex, setIsRegex] = useState(false)
 
   return (
     <Wrapper title='Admin' page='admin'>
@@ -29,14 +36,31 @@ export default function Admin(): ReactElement {
             <Box mx={1} height='100%'>
               <Box display='flex' mb={1} width='100%'>
                 <Box ml='auto'>
-                  <FilterMenu />
+                  <FilterMenu
+                    logLevel={logLevel}
+                    setLogLevel={setLogLevel}
+                    buildId={buildId}
+                    setBuildId={setBuildId}
+                    requestId={requestId}
+                    setRequestId={setRequestId}
+                    search={search}
+                    setSearch={setSearch}
+                    isRegex={isRegex}
+                    setIsRegex={setIsRegex}
+                  />
                   <Button variant='contained' size='small'>
                     Search
                   </Button>
                 </Box>
               </Box>
               <Box mx={1} height='100%' overflow='auto'>
-                <LogTree />
+                <LogTree
+                  logLevel={logLevel}
+                  buildId={buildId}
+                  requestId={requestId}
+                  search={search}
+                  isRegex={isRegex}
+                />
               </Box>
             </Box>
           </Box>

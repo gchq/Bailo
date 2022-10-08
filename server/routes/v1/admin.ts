@@ -62,15 +62,14 @@ export const getApplicationLogs = [
   async (req: Request, res: Response) => {
     const after = parseDateQuery(req.query.after, new Date(0))
     const before = parseDateQuery(req.query.before, new Date(Date.now()))
+    const level = parseInt(parseString('level', req.query.level) || '0', 10)
+
+    if (Number.isNaN(level)) {
+      throw BadReq({ level: req.query.level }, 'Level cannot be passed as number')
+    }
 
     const filter = parseQueryArray('filter', req.query.filter)
-
-    const levels = filter.map((value) => parseInt(value, 10)).filter((value) => !Number.isNaN(value))
     const types = filter.map((value) => getLogType(value)).filter(isLogType)
-
-    if (levels.length === 0) {
-      throw BadReq({ levels }, 'Error, provided no valid log levels')
-    }
 
     if (types.length === 0) {
       throw BadReq({ types }, 'Error, provided no valid types')
@@ -78,9 +77,9 @@ export const getApplicationLogs = [
 
     const search = parseString('search', req.query.search)
 
-    const regex = req.query.regex === 'true'
+    const isRegex = req.query.isRegex === 'true'
 
-    const logs = await getLogs({ after, before, levels, types, search, regex })
+    const logs = await getLogs({ after, before, level, types, search, isRegex })
 
     res.json({
       logs: await logs.toArray(),
@@ -93,30 +92,27 @@ export const getItemLogs = [
   async (req: Request, res: Response) => {
     const after = parseDateQuery(req.query.after, new Date(0))
     const before = parseDateQuery(req.query.before, new Date(Date.now()))
+    const level = parseInt(parseString('level', req.query.level) || '0', 10)
 
-    const filter = parseQueryArray('filter', req.query.filter)
-
-    const levels = filter.map((value) => parseInt(value, 10)).filter((value) => !Number.isNaN(value))
-
-    if (levels.length === 0) {
-      throw BadReq({ levels }, 'Error, provided no valid log levels')
+    if (Number.isNaN(level)) {
+      throw BadReq({ level: req.query.level }, 'Level cannot be passed as number')
     }
 
     const search = parseString('search', req.query.search)
 
-    const regex = req.query.regex === 'true'
+    const isRegex = req.query.isRegex === 'true'
 
     let buildId
     if (req.params.buildId) {
       buildId = req.params.buildId
     }
 
-    let reqId
-    if (req.params.reqId) {
-      reqId = req.params.reqId
+    let requestId
+    if (req.params.requestId) {
+      requestId = req.params.requestId
     }
 
-    const logs = await getLogs({ after, before, levels, search, regex, buildId, reqId })
+    const logs = await getLogs({ after, before, level, search, isRegex, buildId, requestId })
 
     res.json({
       logs: await logs.toArray(),
