@@ -254,37 +254,37 @@ describe('End to end test', () => {
     }
   }, 30000)
 
-  test('test we can delete a version version', async () => {
-    logger.info('getting driver')
-    const driver = await getDriver()
+  // test('test we can delete a version version', async () => {
+  //   logger.info('getting driver')
+  //   const driver = await getDriver()
 
-    try {
-      expect(modelCardOnlyInfo.url).not.toBeNull()
+  //   try {
+  //     expect(modelCardOnlyInfo.url).not.toBeNull()
 
-      logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
-      await driver.get(modelCardOnlyInfo.url)
+  //     logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
+  //     await driver.get(modelCardOnlyInfo.url)
 
-      logger.info('going to settings tab')
-      await click(driver, By.css('[data-test="settingsButton"]'))
+  //     logger.info('going to settings tab')
+  //     await click(driver, By.css('[data-test="settingsButton"]'))
 
-      logger.info('click delete model button')
-      await click(driver, By.css('[data-test="deleteModelButton"]'))
+  //     logger.info('click delete model button')
+  //     await click(driver, By.css('[data-test="deleteModelButton"]'))
 
-      logger.info('confirm model deletion')
-      await click(driver, By.css('[data-test="confirmDeleteButton"]'))
+  //     logger.info('confirm model deletion')
+  //     await click(driver, By.css('[data-test="confirmDeleteButton"]'))
 
-      await pause(3000)
+  //     await pause(3000)
 
-      const api = new Bailo(
-        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
-      )
-      const model = await api.getModel(modelCardOnlyInfo.name)
-      expect(model.model.message).toContain('Unable to find model')
-    } finally {
-      logger.info('quitting driver')
-      await driver.quit()
-    }
-  }, 30000)
+  //     const api = new Bailo(
+  //       `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+  //     )
+  //     const model = await api.getModel(modelCardOnlyInfo.name)
+  //     expect(model.model.message).toContain('Unable to find model')
+  //   } finally {
+  //     logger.info('quitting driver')
+  //     await driver.quit()
+  //   }
+  // }, 30000)
 
   test('test can approve models', async () => {
     logger.info('getting driver')
@@ -297,8 +297,8 @@ describe('End to end test', () => {
       logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
 
-      logger.info('approving 2 requests')
-      await approveRequests(driver, 2)
+      logger.info('approving 4 requests')
+      await approveRequests(driver, 4)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
