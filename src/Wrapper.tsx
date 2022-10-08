@@ -354,20 +354,22 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Support' />
               </ListItem>
             </Link>
-            <Link passHref href='/admin'>
-              <ListItem button selected={page === 'admin'}>
-                <ListItemIcon data-test='adminLink'>
-                  {!open ? (
-                    <Tooltip arrow title='Admin' placement='right'>
+            {currentUser && currentUser.roles.includes('admin') && (
+              <Link passHref href='/admin'>
+                <ListItem button selected={page === 'admin'}>
+                  <ListItemIcon data-test='adminLink'>
+                    {!open ? (
+                      <Tooltip arrow title='Admin' placement='right'>
+                        <AdminIcon />
+                      </Tooltip>
+                    ) : (
                       <AdminIcon />
-                    </Tooltip>
-                  ) : (
-                    <AdminIcon />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Admin' />
-              </ListItem>
-            </Link>
+                    )}
+                  </ListItemIcon>
+                  <ListItemText primary='Admin' />
+                </ListItem>
+              </Link>
+            )}
           </StyledList>
           <Divider />
         </Drawer>

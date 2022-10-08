@@ -40,7 +40,7 @@ const UserSchema = new Schema<User>(
   }
 )
 
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', function userPreSave(next) {
   if (!this.isModified('token') || !this.token) {
     next()
     return

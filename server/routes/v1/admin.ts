@@ -58,7 +58,7 @@ function parseString(
 const isLogType = (item: LogType | undefined): item is LogType => !!item
 
 export const getApplicationLogs = [
-  ensureUserRole('user'),
+  ensureUserRole(['user', 'admin']),
   async (req: Request, res: Response) => {
     const after = parseDateQuery(req.query.after, new Date(0))
     const before = parseDateQuery(req.query.before, new Date(Date.now()))
@@ -88,7 +88,7 @@ export const getApplicationLogs = [
 ]
 
 export const getItemLogs = [
-  ensureUserRole('user'),
+  ensureUserRole(['user', 'admin']),
   async (req: Request, res: Response) => {
     const after = parseDateQuery(req.query.after, new Date(0))
     const before = parseDateQuery(req.query.before, new Date(Date.now()))
