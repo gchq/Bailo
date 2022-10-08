@@ -2,11 +2,16 @@ import config from 'config'
 import mongoose from 'mongoose'
 import logger from './logger'
 
+// singleton connection instance across the whole application
 let connection: Promise<typeof mongoose> | undefined
 
 export async function connectToMongoose() {
+  if (connection !== undefined) {
+    return connection
+  }
+
   try {
-    connection = mongoose.connect(await config.get('mongo.uri'), {
+    connection = mongoose.connect(config.get('mongo.uri'), {
       useFindAndModify: false,
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -18,12 +23,7 @@ export async function connectToMongoose() {
     logger.info('Connected to Mongoose')
   } catch (error) {
     logger.error({ error }, 'Error')
-  }
-}
-
-export async function checkConnection() {
-  if (connection === undefined) {
-    connectToMongoose()
+    throw error
   }
 
   return connection

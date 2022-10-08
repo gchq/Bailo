@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { ObjectId } from 'mongodb'
-import { checkConnection } from '../utils/database'
+import { connectToMongoose } from '../utils/database'
 
 export enum LogType {
   Build = 'build',
@@ -63,7 +63,7 @@ export interface GetLogsArgs {
   requestId?: string
 }
 export async function getLogs({ after, before, level, types, search, isRegex, buildId, requestId }: GetLogsArgs) {
-  await checkConnection()
+  await connectToMongoose()
 
   const { db } = mongoose.connection
   const collection = db.collection('logs')
