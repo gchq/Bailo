@@ -113,7 +113,7 @@ class Writer {
 }
 
 class MongoWriter {
-  connected: Promise<void>
+  connected: Promise<typeof mongoose>
 
   constructor() {
     this.connected = connectToMongoose()
@@ -124,6 +124,8 @@ class MongoWriter {
     await this.connected
 
     const { db } = mongoose.connection
+
+    await db.createCollection('logs')
     const logs = db.collection('logs')
 
     // We use a capped collection for logs to ensure high throughput

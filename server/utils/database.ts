@@ -10,7 +10,15 @@ export async function connectToMongoose() {
     return connection
   }
 
+  // don't connect if already connected (e.g. test environment)
   if (mongoose.connection) {
+    // we need to check the connection is ready
+    if (mongoose.connection.readyState !== 2) {
+      await new Promise((resolve) => {
+        mongoose.connection.on('connected', resolve)
+      })
+    }
+
     return mongoose
   }
 
