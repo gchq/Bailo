@@ -331,6 +331,12 @@ export async function expressErrorHandler(
   const localLogger = err.logger || req.log
 
   localLogger.warn(err.data, err.message)
+
+  let code = err.code || 500
+  if (typeof code !== 'number') code = 500
+  if (code < 100) code = 500
+  if (code >= 600) code = 500
+
   return res.status(err.code || 500).json({
     message: err.message,
   })
