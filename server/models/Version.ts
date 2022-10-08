@@ -1,5 +1,4 @@
-import { Schema, model, Types, Document, IndexOptions } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
@@ -33,7 +32,7 @@ export interface Version {
 
 export type VersionDoc = Version & Document<any, any, Version>
 
-const VersionSchema: any = new Schema<Version>(
+const VersionSchema = new Schema<Version>(
   {
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
     version: { type: String, required: true },
@@ -56,8 +55,6 @@ const VersionSchema: any = new Schema<Version>(
   }
 )
 
-VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
-
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
 VersionSchema.methods.log = async function (level: string, msg: string) {
@@ -66,4 +63,5 @@ VersionSchema.methods.log = async function (level: string, msg: string) {
 }
 
 const VersionModel = model<Version>('Version', VersionSchema)
+
 export default VersionModel
