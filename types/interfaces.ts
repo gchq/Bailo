@@ -183,6 +183,12 @@ export enum UploadModes {
   NewVersion = 'newVersion',
 }
 
+export interface LogStatement {
+  timestamp: Date
+  level: string
+  msg: string
+}
+
 // Dates are in ISO 8601 format
 enum DateStringBrand {}
 export type DateString = string & DateStringBrand

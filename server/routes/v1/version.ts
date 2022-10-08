@@ -118,13 +118,13 @@ export const updateLastViewed = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
     if (role === 'manager') {
-      updateManagerLastViewed(id)
+      await updateManagerLastViewed(id)
       req.log.info(
         { code: 'version_last_viewed_updated', version: id, role },
         "Version's manager last viewed date has been updated"
       )
     } else if (role === 'reviewer') {
-      updateReviewerLastViewed(id)
+      await updateReviewerLastViewed(id)
       req.log.info(
         { code: 'version_last_viewed_updated', version: id, role },
         "Version's reviewer last viewed date has been updated"
