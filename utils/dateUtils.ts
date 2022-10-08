@@ -5,6 +5,8 @@ export const formatDateString = (value: string) => {
   return date.toLocaleDateString('en-GB')
 }
 
+export const plural = (value: number, phrase: string) => `${value} ${phrase}${value === 1 ? '' : 's'}`
+
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000
   const msPerHour = msPerMinute * 60
@@ -15,24 +17,24 @@ export const timeDifference = (current: Date, previous: Date) => {
   const elapsed = Number(current) - Number(previous)
 
   if (elapsed < msPerMinute) {
-    return `${Math.round(elapsed / 1000)} seconds ago`
+    return `${plural(Math.round(elapsed / 1000), 'sec')} ago`
   }
 
   if (elapsed < msPerHour) {
-    return `${Math.round(elapsed / msPerMinute)} minutes ago`
+    return `${plural(Math.round(elapsed / msPerMinute), 'min')} ago`
   }
 
   if (elapsed < msPerDay) {
-    return `${Math.round(elapsed / msPerHour)} hours ago`
+    return `${plural(Math.round(elapsed / msPerHour), 'hour')} ago`
   }
 
   if (elapsed < msPerMonth) {
-    return `approximately ${Math.round(elapsed / msPerDay)} days ago`
+    return `${plural(Math.round(elapsed / msPerDay), 'day')} ago`
   }
 
   if (elapsed < msPerYear) {
-    return `approximately ${Math.round(elapsed / msPerMonth)} months ago`
+    return `${plural(Math.round(elapsed / msPerMonth), 'month')} ago`
   }
 
-  return `approximately ${Math.round(elapsed / msPerYear)} years ago`
+  return `${plural(Math.round(elapsed / msPerYear), 'year')} ago`
 }

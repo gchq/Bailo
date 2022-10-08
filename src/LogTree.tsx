@@ -195,7 +195,7 @@ function LogChild({
 
   let message: string | ReactElement = log.msg
   if (type === LogType.Request) {
-    message = `${log.method} ${(log.url as string).split('?')[0]} ${log.status} ${log['response-time']}ms`
+    message = `${log.method} ${(log.url as string).split('?')[0]} ${log['response-time']}ms`
   }
 
   let location: ReactElement | null = null
