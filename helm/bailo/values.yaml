@@ -106,7 +106,8 @@ minio:
     rootUser: ""
     rootPassword: ""
     existingSecret: "bailo-minio" # Helm generated Secret
-  defaultBuckets: "uploads,registry" 
+  defaultBuckets: "uploads,registry"
+  createBuckets: "false" # attempt to create buckets
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
   host: "bailo-minio" # service name
@@ -169,7 +170,15 @@ config:
 
   smtp:
     host: 'example.com'
+    port: 1025
+    secure: false
+    rejectUnauthorized: false
+    user: 'mailuser'
+    pass: 'mailpass'
     from: 'bailo@example.com'
+
+  build:
+    environment: openshift # or img
 
   schema:
     script: 'schema-setup-script.sh'

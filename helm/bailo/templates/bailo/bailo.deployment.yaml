@@ -55,8 +55,6 @@ spec:
               value: {{ include "bailo.mongoConnectionURI" . | quote }}
             - name: SCHEMA_SETUP_SCRIPT
               value: {{ .Values.config.schema.script }}
-            - name: OPENSHIFT
-              value: "True"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

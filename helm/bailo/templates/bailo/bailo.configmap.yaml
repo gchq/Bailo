@@ -15,14 +15,14 @@ data:
         region: '',
         uploadBucket: '{{ .Values.minio.uploadBucket }}',
         registryBucket: '{{ .Values.minio.registryBucket }}',
-        createBuckets: false,
+        createBuckets: {{ .Values.minio.createBuckets }},
       },
       smtp: {
         host: '{{ .Values.config.smtp.host }}',
-        port: 1025,
-        secure: false,
-        auth: { user: 'mailuser', pass: 'mailpass' },
-        tls: { rejectUnauthorized: false },
+        port: {{ .Values.config.smtp.port }},
+        secure: {{ .Values.config.smtp.secure }},
+        auth: { user: '{{ .Values.config.smtp.user }}', pass: '{{ .Values.config.smtp.pass }}' },
+        tls: { rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }} },
         from: '{{ .Values.config.smtp.from }}',
       },
       openshift: {
@@ -31,15 +31,15 @@ data:
         dockerPushSecretName: '{{ .Values.openshift.dockerPushSecretName }}',
       },
       registry: {
-        host: 'registry:5000',
+        host: '{{ .Values.registry.host }}:{{ .Values.registry.port }}',
         port: '{{ .Values.registry.port }}',
-      }, 
+      },
 
       s2i: {
         builderImage: '{{ .Values.config.s2i.image }}',
       },
       build: {
-        environment: 'openshift',
+        environment: '{{ .Values.config.build.environment }}',
       },
       uiConfig: {
         banner: {
@@ -66,8 +66,8 @@ data:
           useNewUrlParser: true,
           useUnifiedTopology: true,
           useCreateIndex: true,
-          //ssl: false,
-          //sslValidate: false,
+          // ssl: false,
+          // sslValidate: false,
         },
       }
     }

@@ -7,8 +7,8 @@ metadata:
     name: mail
 spec:
   ports:
-    - port: 1080
-      targetPort: 1080
+    - port: {{ .Values.config.smtp.port }}
+      targetPort: {{ .Values.config.smtp.port }}
       protocol: TCP
       name: http
     - port: 1025

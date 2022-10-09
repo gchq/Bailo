@@ -16,9 +16,9 @@ spec:
       containers:
       - name: maildev
         image: maildev/maildev:2.0.2
-        args: ["-s", "1025", "-w", "1080"]
+        args: ["-s", "{{ .Values.config.smtp.port }}", "-w", "1080"]
         env:
         - name: MAILDEV_INCOMING_USER
-          value: mailuser
+          value: {{ .Values.config.smtp.user }}
         - name: MAILDEV_INCOMING_PASS
-          value: mailpass
+          value: {{ .Values.config.smtp.pass }}
