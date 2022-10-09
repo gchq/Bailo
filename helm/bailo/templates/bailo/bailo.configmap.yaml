@@ -33,6 +33,8 @@ data:
       registry: {
         host: '{{ .Values.registry.host }}:{{ .Values.registry.port }}',
         port: '{{ .Values.registry.port }}',
+
+        insecure: {{ .Values.registry.insecure }}
       },
 
       s2i: {
@@ -43,7 +45,7 @@ data:
       },
       uiConfig: {
         banner: {
-          enable: true,
+          enable: {{ .Values.config.ui.banner.enable }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
         },

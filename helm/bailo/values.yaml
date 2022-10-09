@@ -134,7 +134,7 @@ registry:
   enabled: true
   host: "registry" # service name
   port: 5000 # default 5000
-  insecure: true
+  insecure: "true"
   certDir: "/certs"
   certFile: "yourcert.pem"
   keyFile: "yourkey.pem"
@@ -165,6 +165,7 @@ config:
 
   ui:
     banner:
+      enable: "true"
       text: "Banner Text Here"
       colour: '#00CC00'
 
