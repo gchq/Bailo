@@ -7,7 +7,6 @@ import * as router from 'next/router'
 
 describe('Link', () => {
   it('renders a Link component', async () => {
-    const url = 'example_url'
     const mockedRouter: any = {
       pathName: 'test-path',
       prefetch: () => {

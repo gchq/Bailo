@@ -4,7 +4,7 @@ import Docker from 'dockerode'
 import fs from 'fs/promises'
 import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import logger from '../../server/utils/logger'
 import {
   clearData,
@@ -90,7 +90,10 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
         logger.info(`model name is ${mName}`)
 
@@ -106,7 +109,7 @@ describe('End to end test', () => {
         logger.info('getting api model')
         const model = await api.getModel(modelInfo.name)
 
-        while (true) {
+        for (;;) {
           logger.info('')
           const version = await model.getVersion('1')
 
@@ -159,7 +162,9 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
         logger.info(`model name is ${mName}`)
 
@@ -363,6 +368,8 @@ describe('End to end test', () => {
       await driver.wait(until.urlContains('/deployment/'))
       await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'Deployment name')]]")))
       deploymentUrl = await driver.getCurrentUrl()
+
+      logger.info(`deployment url is ${deploymentUrl}`)
     } finally {
       logger.info('quitting driver')
       await driver.quit()

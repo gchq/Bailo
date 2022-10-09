@@ -80,7 +80,7 @@ export async function getDeploymentQueue() {
   return deploymentQueue
 }
 
-async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
+async function setUploadState(msg: QueueMessage, state: string, _e: any) {
   const user = await getUserByInternalId(msg.payload.userId)
   if (!user) {
     throw new Error(`Unable to find user '${msg.payload.userId}'`)

@@ -188,7 +188,7 @@ export const fetchRawModelFiles = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const { uuid, version, fileType } = req.params
-    const deployment = await findDeploymentByUuid(req.user!, uuid)
+    const deployment = await findDeploymentByUuid(req.user, uuid)
 
     if (deployment === null) {
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
@@ -212,7 +212,7 @@ export const fetchRawModelFiles = [
       throw NotFound({ fileType }, 'Unknown file type specificed')
     }
 
-    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 
