@@ -101,8 +101,10 @@ export async function startServer() {
   // technically, we do need to wait for this, but it's so quick
   // that nobody should notice unless they want to upload an image
   // within the first few milliseconds of the _first_ time it's run
-  ensureBucketExists(config.get('minio.uploadBucket'))
-  ensureBucketExists(config.get('minio.registryBucket'))
+  if (config.get('minio.createBuckets')) {
+    ensureBucketExists(config.get('minio.uploadBucket'))
+    ensureBucketExists(config.get('minio.registryBucket'))
+  }
 
   // we don't actually need to wait for mongoose to connect before
   // we start serving connections

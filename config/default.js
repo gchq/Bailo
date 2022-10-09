@@ -17,6 +17,7 @@ module.exports = {
     secretKey: 'minioadmin',
     region: '',
 
+    createBuckets: true,
     uploadBucket: 'uploads',
     registryBucket: 'registry',
   },
