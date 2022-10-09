@@ -16,8 +16,8 @@ export async function clearStoredData() {
   await connectToMongoose()
 
   if (config.get('minio.createBuckets')) {
-    ensureBucketExists(config.get('minio.uploadBucket'))
-    ensureBucketExists(config.get('minio.registryBucket'))
+    await ensureBucketExists(config.get('minio.uploadBucket'))
+    await ensureBucketExists(config.get('minio.registryBucket'))
   }
 
   await Promise.all([
