@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import Tooltip from '@mui/material/Tooltip'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -29,6 +30,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import copy from 'copy-to-clipboard'
+import { postEndpoint, putEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { setTargetValue } from 'data/utils'
@@ -43,12 +45,10 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
-import { deleteEndpoint, postEndpoint, putEndpoint } from 'data/api'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
@@ -73,8 +73,8 @@ function Model() {
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [modelFavourited, setModelFavourited] = useState(false)
-  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState(false)
+  const [modelFavourited, setModelFavourited] = useState<boolean>(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
@@ -86,10 +86,8 @@ function Model() {
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
-  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
+  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
@@ -231,25 +229,6 @@ function Model() {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
-  const handleDelete = () => {
-    setDeleteModelErrorMessage('')
-    setDeleteConfirmOpen(true)
-  }
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false)
-  }
-
-  const handleDeleteConfirm = async () => {
-    const response = await deleteEndpoint(`/api/v1/model/${uuid}`)
-
-    if (response.ok) {
-      router.push('/')
-    } else {
-      setDeleteModelErrorMessage(`Error ${response.status}: ${response.statusText}`)
-    }
-  }
-
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
@@ -288,7 +267,7 @@ function Model() {
                 aria-expanded={open ? 'true' : undefined}
                 onClick={actionMenuClicked}
                 variant='outlined'
-                data-test='requestDeploymentButton'
+                data-test='modelActionsButton'
                 endIcon={open ? <UpArrow /> : <DownArrow />}
               >
                 Actions
@@ -355,6 +334,7 @@ function Model() {
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
                       currentUser.id !== version?.metadata?.contacts?.uploader
                     }
+                    data-test='editModelButton'
                   >
                     <ListItemIcon>
                       <EditIcon fontSize='small' />
@@ -362,7 +342,11 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
+                <MenuItem
+                  onClick={uploadNewVersion}
+                  disabled={currentUser.id !== version.metadata?.contacts?.uploader}
+                  data-test='newVersionButton'
+                >
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -422,7 +406,7 @@ function Model() {
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' />
+            <Tab label='Settings' value='settings' data-test='settingsButton' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
@@ -519,9 +503,10 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
+
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
-                Copy Model Card to Clipboard
+                Copy model card to clipboard
               </Button>
               <Snackbar
                 open={copyModelCardSnackbarOpen}
@@ -533,18 +518,13 @@ function Model() {
                 </Alert>
               </Snackbar>
             </Box>
+
             <Box sx={{ mb: 4 }} />
-            <ConfirmationDialogue
-              open={deleteConfirmOpen}
-              title='Delete model'
-              onConfirm={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-              errorMessage={deleteModelErrorMessage}
-            />
+
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={handleDelete}>
+            <Button variant='contained' color='error'>
               Delete Model
             </Button>
           </>

@@ -648,26 +648,6 @@ function generateSpecification() {
           },
         },
       },
-      '/model/{uuid}': {
-        delete: {
-          tags: ['model'],
-          description: 'Delete model and all versions',
-          parameters: [
-            {
-              name: 'uuid',
-              in: 'path',
-              description: 'uuid of the model to be deleted',
-              type: 'string',
-            },
-          ],
-          responses: {
-            '200': {
-              description: 'The uuid of the deleted model',
-              type: 'string',
-            },
-          },
-        },
-      },
       '/models': {
         get: {
           tags: ['model'],
@@ -782,6 +762,12 @@ function generateSpecification() {
               description: 'UUID of model to fetch the versions for',
               type: 'string',
             },
+            {
+              name: 'logs',
+              in: 'query',
+              description: 'Set to true in order to display logs.',
+              type: 'boolean',
+            },
           ],
           responses: {
             '200': {
@@ -812,6 +798,12 @@ function generateSpecification() {
               in: 'path',
               description: 'Version to fetch',
               type: 'string',
+            },
+            {
+              name: 'logs',
+              in: 'query',
+              description: 'Set to true in order to display logs.',
+              type: 'boolean',
             },
           ],
           responses: {
@@ -901,6 +893,12 @@ function generateSpecification() {
               description: 'UUID of deployment to fetch',
               type: 'string',
             },
+            {
+              name: 'logs',
+              in: 'query',
+              description: 'Set to true in order to display logs.',
+              type: 'boolean',
+            },
           ],
           responses: {
             '200': {
@@ -922,6 +920,12 @@ function generateSpecification() {
               in: 'path',
               description: 'ID of a user to fetch deployments for.',
               type: 'string',
+            },
+            {
+              name: 'logs',
+              in: 'query',
+              description: 'Set to true in order to display logs.',
+              type: 'boolean',
             },
           ],
           responses: {
@@ -1001,6 +1005,12 @@ function generateSpecification() {
               in: 'path',
               description: 'ID of version to get.',
               type: 'string',
+            },
+            {
+              name: 'logs',
+              in: 'query',
+              description: 'Set to true in order to display logs.',
+              type: 'boolean',
             },
           ],
           responses: {
