@@ -275,7 +275,7 @@ class AuthorisedAPI(APIInterface):
 
         return self._handle_response(response)
 
-    def _handle_response(self, response: Response, output_dir: str):
+    def _handle_response(self, response: Response, output_dir: str = None):
         """Handle the response from the server
 
         Args:
