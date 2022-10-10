@@ -250,7 +250,6 @@ class Client:
         deployment_name: str,
         model_uuid: str,
         model_version: str = None,
-        most_recent: bool = True,
     ):
         """Find a particular deployment belonging to the current user.
 
@@ -258,11 +257,11 @@ class Client:
             deployment_name (str): Name of the deployment
             model_uuid (str): UUID of the model associated with the deployment
             model_version (str, optional): Version of the model that the deployment was created for. Defaults to None.
-            most_recent (bool, optional): Whether to return the most recent deployment if multiple matching deployments are found. Defaults to True.
 
         Returns:
             dict: Matching deployment
         """
+
         user_deployments = self.get_my_deployments()
 
         if not user_deployments:
@@ -277,19 +276,22 @@ class Client:
         ]
 
         if not matching_deployments:
-            raise DeploymentNotFound("Could not find any deployments for the current user matching the provided criteria. Please double check your parameters.")
+            raise DeploymentNotFound("Could not find any deployments for the current user matching the provided criteria.")
 
-        if most_recent:
-            timestamps = [
-                datetime.strptime(
-                    deployment["metadata"]["timeStamp"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                )
-                for deployment in matching_deployments
-            ]
-            latest = timestamps.index(max(timestamps))
-            return matching_deployments[latest]
+        if len(matching_deployments) == 1:
+            return matching_deployments[0]
 
-        return matching_deployments
+
+        timestamps = [
+            datetime.strptime(
+                deployment["metadata"]["timeStamp"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+            for deployment in matching_deployments
+        ]
+        latest = timestamps.index(max(timestamps))
+
+        return matching_deployments[latest]
+
 
     def __deployment_matches(
         self, deployment: dict, deployment_name: str, model_uuid: str, model_version: str
