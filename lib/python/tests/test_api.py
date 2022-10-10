@@ -111,9 +111,7 @@ def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
         authorised_api._handle_response(MockResponse(None, 401))
 
 
-@patch.object(
-    AuthorisedAPI, "_AuthorisedAPI__decode_file_content", new_callable=PropertyMock
-)
+@patch.object(AuthorisedAPI, "_AuthorisedAPI__decode_file_content")
 def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(
     mock_decode_file_content, authorised_api, tmpdir
 ):
