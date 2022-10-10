@@ -1,6 +1,6 @@
 import os
 import re
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from glob import glob
@@ -76,6 +76,11 @@ class MockResponse:
         self.response_json = response_json
         self.status_code = status_code
 
+        with open(f'{MINIMAL_MODEL_PATH}/minimal_binary.zip', 'rb') as zipfile:
+            content = zipfile.read()
+
+        self.content = content
+
     def json(self):
         if not self.response_json:
             raise JSONDecodeError("msg", "doc", 1)
@@ -104,6 +109,13 @@ def test_handle_response_raises_unauthorised_exception_if_401_error_and_response
 def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
     with pytest.raises(NoServerResponseMessage, match=re.escape("Server returned 401")):
         authorised_api._handle_response(MockResponse(None, 401))
+
+
+@patch.object(AuthorisedAPI, '_AuthorisedAPI__decode_file_content', new_callable=PropertyMock)
+def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(mock_decode_file_content, authorised_api, tmpdir):
+    authorised_api._handle_response(MockResponse({"result": "success"}, 200), output_dir=tmpdir)
+
+    mock_decode_file_content.assert_called_once()
 
 
 @patch(
