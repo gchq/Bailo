@@ -92,7 +92,9 @@ update_resp = client.update_model(
 print(f"Updated model: {update_resp}")
 
 ## Create a new model
-with open("../../../__tests__/example_models/minimal_model/minimal_metadata.json") as json_file:
+with open(
+    "../../../__tests__/example_models/minimal_model/minimal_metadata.json"
+) as json_file:
     metadata = json.load(json_file)
 
 uploaded_model = client.upload_model(
@@ -115,4 +117,9 @@ deployment = user_deployments[0]
 ## To get a specific deployment
 # deployment = client.get_model_deployment(deployment_name='', deployment_model_uuid='', deployment_model_version='')
 
-resp = client.download_model_files(deployment['uuid'], deployment['metadata']['highLevelDetails']['initialVersionRequested'], file_type='code', overwrite=True)
+resp = client.download_model_files(
+    deployment["uuid"],
+    deployment["metadata"]["highLevelDetails"]["initialVersionRequested"],
+    file_type="code",
+    overwrite=True,
+)

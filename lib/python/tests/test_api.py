@@ -76,7 +76,7 @@ class MockResponse:
         self.response_json = response_json
         self.status_code = status_code
 
-        with open(f'{MINIMAL_MODEL_PATH}/minimal_binary.zip', 'rb') as zipfile:
+        with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
             content = zipfile.read()
 
         self.content = content
@@ -111,9 +111,15 @@ def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
         authorised_api._handle_response(MockResponse(None, 401))
 
 
-@patch.object(AuthorisedAPI, '_AuthorisedAPI__decode_file_content', new_callable=PropertyMock)
-def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(mock_decode_file_content, authorised_api, tmpdir):
-    authorised_api._handle_response(MockResponse({"result": "success"}, 200), output_dir=tmpdir)
+@patch.object(
+    AuthorisedAPI, "_AuthorisedAPI__decode_file_content", new_callable=PropertyMock
+)
+def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(
+    mock_decode_file_content, authorised_api, tmpdir
+):
+    authorised_api._handle_response(
+        MockResponse({"result": "success"}, 200), output_dir=tmpdir
+    )
 
     mock_decode_file_content.assert_called_once()
 
@@ -235,11 +241,13 @@ def test_put_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api)
     )
 
 
-def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(authorised_api, tmpdir):
+def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(
+    authorised_api, tmpdir
+):
 
-    with open(f'{MINIMAL_MODEL_PATH}/minimal_binary.zip', 'rb') as zipfile:
+    with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
         data = zipfile.read()
 
     authorised_api._AuthorisedAPI__decode_file_content(data, tmpdir)
 
-    assert glob(f'{tmpdir}/model.bin')
+    assert glob(f"{tmpdir}/model.bin")

@@ -276,11 +276,12 @@ class Client:
         ]
 
         if not matching_deployments:
-            raise DeploymentNotFound("Could not find any deployments for the current user matching the provided criteria.")
+            raise DeploymentNotFound(
+                "Could not find any deployments for the current user matching the provided criteria."
+            )
 
         if len(matching_deployments) == 1:
             return matching_deployments[0]
-
 
         timestamps = [
             datetime.strptime(
@@ -292,9 +293,12 @@ class Client:
 
         return matching_deployments[latest]
 
-
     def __deployment_matches(
-        self, deployment: dict, deployment_name: str, model_uuid: str, model_version: str
+        self,
+        deployment: dict,
+        deployment_name: str,
+        model_uuid: str,
+        model_version: str,
     ):
         """Check whether a deployment matches the provided filters. Returns True if deployment is a match.
 
@@ -313,7 +317,10 @@ class Client:
         return (
             (deployment_details["name"] == deployment_name)
             and (deployment_details["modelID"] == model_uuid)
-            and (deployment_details["initialVersionRequested"] == model_version or not model_version)
+            and (
+                deployment_details["initialVersionRequested"] == model_version
+                or not model_version
+            )
         )
 
     def __model(self, model: dict) -> Model:

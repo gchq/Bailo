@@ -311,8 +311,6 @@ class AuthorisedAPI(APIInterface):
         except:
             response.raise_for_status()
 
-
-    
     def __decode_file_content(self, content: bytes, output_dir: str):
         """Decode bytes from HttpResponse into zip file
 
@@ -324,4 +322,9 @@ class AuthorisedAPI(APIInterface):
         z.extractall(output_dir)
 
         # remove the __MACOSX file
-        subprocess.call([f"rm -r {output_dir}/__MACOSX"], shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        subprocess.call(
+            [f"rm -r {output_dir}/__MACOSX"],
+            shell=True,
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+        )

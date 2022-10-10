@@ -251,81 +251,145 @@ def test_upload_model_is_called_with_expected_params(
         headers={"Content-Type": payload.content_type},
     )
 
-def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(mock_client):
+
+def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
+    mock_client,
+):
     with pytest.raises(InvalidFileRequested):
-        mock_client.download_model_files(deployment_uuid="test", model_version="1", file_type="invalid")
+        mock_client.download_model_files(
+            deployment_uuid="test", model_version="1", file_type="invalid"
+        )
 
 
-def test_download_model_files_raises_error_if_output_dir_already_exists_and_user_has_not_specified_overwrite(mock_client, tmpdir):
+def test_download_model_files_raises_error_if_output_dir_already_exists_and_user_has_not_specified_overwrite(
+    mock_client, tmpdir
+):
     with pytest.raises(FileExistsError):
-        mock_client.download_model_files(deployment_uuid="test", model_version="1", output_dir=str(tmpdir))
+        mock_client.download_model_files(
+            deployment_uuid="test", model_version="1", output_dir=str(tmpdir)
+        )
 
 
-def test_download_model_files_overwrites_existing_output_dir_if_user_has_specified_overwrite(mock_client, tmpdir):
+def test_download_model_files_overwrites_existing_output_dir_if_user_has_specified_overwrite(
+    mock_client, tmpdir
+):
     deployment_uuid = "test"
     model_version = "1"
     file_type = "binary"
 
     mock_client.api.get = MagicMock(return_value=200)
 
-    mock_client.download_model_files(deployment_uuid=deployment_uuid, model_version=model_version, file_type=file_type, output_dir=str(tmpdir), overwrite=True)
+    mock_client.download_model_files(
+        deployment_uuid=deployment_uuid,
+        model_version=model_version,
+        file_type=file_type,
+        output_dir=str(tmpdir),
+        overwrite=True,
+    )
 
-    mock_client.api.get.assert_called_once_with(f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}", output_dir=str(tmpdir))
+    mock_client.api.get.assert_called_once_with(
+        f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
+        output_dir=str(tmpdir),
+    )
 
 
 @patch("bailoclient.client.Client.get_me", return_value=User(_id="user"))
-@patch("bailoclient.client.Client.get_user_deployments", return_value={"deployment_id": "deployment"})
-def test_get_my_deployments_gets_deployments_for_current_user(mock_get_user_deployments, mock_get_me, mock_client):
+@patch(
+    "bailoclient.client.Client.get_user_deployments",
+    return_value={"deployment_id": "deployment"},
+)
+def test_get_my_deployments_gets_deployments_for_current_user(
+    mock_get_user_deployments, mock_get_me, mock_client
+):
     mock_client.get_my_deployments()
-    
+
     mock_get_user_deployments.assert_called_once()
     mock_get_me.assert_called_once()
 
 
 @patch("bailoclient.client.Client.get_my_deployments", return_value=[])
-def test_find_my_deployment_raises_error_if_no_user_deployments_found(mock_get_my_deployments, mock_client):
+def test_find_my_deployment_raises_error_if_no_user_deployments_found(
+    mock_get_my_deployments, mock_client
+):
     with pytest.raises(DeploymentNotFound):
-        mock_client.find_my_deployment(deployment_name='deployment', model_uuid='model')
+        mock_client.find_my_deployment(deployment_name="deployment", model_uuid="model")
 
 
 def deployment():
-    return {'metadata': {'highLevelDetails': {'name': 'deployment_name', 'modelID': 'id', 'initialVersionRequested': '1'}, 'timeStamp': '2022-09-29T14:08:37.528Z'}}
+    return {
+        "metadata": {
+            "highLevelDetails": {
+                "name": "deployment_name",
+                "modelID": "id",
+                "initialVersionRequested": "1",
+            },
+            "timeStamp": "2022-09-29T14:08:37.528Z",
+        }
+    }
+
 
 def deployment_two():
-    return {'metadata': {'highLevelDetails': {'name': 'deployment_name', 'modelID': 'id', 'initialVersionRequested': '2'}, 'timeStamp': '2022-09-30T14:08:37.528Z'}}
+    return {
+        "metadata": {
+            "highLevelDetails": {
+                "name": "deployment_name",
+                "modelID": "id",
+                "initialVersionRequested": "2",
+            },
+            "timeStamp": "2022-09-30T14:08:37.528Z",
+        }
+    }
+
 
 @patch("bailoclient.client.Client.get_my_deployments")
-def test_find_my_deployment_raises_error_if_no_deployments_match(mock_get_my_deployments, mock_client):
+def test_find_my_deployment_raises_error_if_no_deployments_match(
+    mock_get_my_deployments, mock_client
+):
     mock_get_my_deployments.return_value = [deployment()]
 
     with pytest.raises(DeploymentNotFound):
-        mock_client.find_my_deployment(deployment_name='deployment_name', model_uuid='incorrect_id')
+        mock_client.find_my_deployment(
+            deployment_name="deployment_name", model_uuid="incorrect_id"
+        )
+
 
 @patch("bailoclient.client.Client.get_my_deployments")
-def test_find_my_deployment_finds_latest_version_if_most_recent_is_true(mock_get_my_deployments, mock_client):
+def test_find_my_deployment_finds_latest_version_if_most_recent_is_true(
+    mock_get_my_deployments, mock_client
+):
     older_deployment = deployment()
     newer_deployment = deployment_two()
 
     mock_get_my_deployments.return_value = [older_deployment, newer_deployment]
 
-    my_deployment = mock_client.find_my_deployment(deployment_name='deployment_name', model_uuid='id')
+    my_deployment = mock_client.find_my_deployment(
+        deployment_name="deployment_name", model_uuid="id"
+    )
 
     assert my_deployment == newer_deployment
 
 
-def test_deployment_matches_returns_false_if_deployment_does_not_match_criteria(mock_client):
+def test_deployment_matches_returns_false_if_deployment_does_not_match_criteria(
+    mock_client,
+):
     dep = deployment()
 
-    match = mock_client._Client__deployment_matches(dep, deployment_name="incorrect_name", model_uuid="id", model_version="1")
+    match = mock_client._Client__deployment_matches(
+        dep, deployment_name="incorrect_name", model_uuid="id", model_version="1"
+    )
 
     assert not match
 
 
 def test_deployment_matches_ignores_version_if_not_provided(mock_client):
     dep = deployment()
-    dep2 = deployment_two()    
+    dep2 = deployment_two()
 
-    match = mock_client._Client__deployment_matches(dep, deployment_name="deployment_name", model_uuid="id", model_version=None)
-    match2 = mock_client._Client__deployment_matches(dep2, deployment_name="deployment_name", model_uuid="id", model_version=None)
+    match = mock_client._Client__deployment_matches(
+        dep, deployment_name="deployment_name", model_uuid="id", model_version=None
+    )
+    match2 = mock_client._Client__deployment_matches(
+        dep2, deployment_name="deployment_name", model_uuid="id", model_version=None
+    )
 
     assert match and match2
