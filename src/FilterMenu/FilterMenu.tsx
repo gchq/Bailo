@@ -1,4 +1,4 @@
-import React, { Dispatch, ReactElement, useState, SetStateAction } from 'react'
+import React, { ReactElement, useState, ChangeEvent } from 'react'
 import FilterIcon from '@mui/icons-material/FilterAltTwoTone'
 import RegexIcon from '@mui/icons-material/NewReleases'
 import Box from '@mui/material/Box'
@@ -14,45 +14,38 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import LogLevelSelect, { LogLevel } from './LogLevelSelect'
 import { toTitleCase } from '../../utils/stringUtils'
 
-// TODO me - move into type-guards once that has been merged into main
-const isLogLevel = (value: LogLevel | string): value is LogLevel => !!LogLevel[value]
-
 interface FilterMenuProps {
   logLevel: LogLevel
-  setLogLevel: Dispatch<SetStateAction<LogLevel>>
+  onLogLevelChange: (event: SelectChangeEvent<LogLevel>) => void
   buildId: string
-  setBuildId: Dispatch<SetStateAction<string>>
+  onBuildIdChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   requestId: string
-  setRequestId: Dispatch<SetStateAction<string>>
+  onRequestIdChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   search: string
-  setSearch: Dispatch<SetStateAction<string>>
+  onSearchChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   isRegex: boolean
-  setIsRegex: Dispatch<SetStateAction<boolean>>
+  onIsRegexChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 export default function FilterMenu({
   logLevel,
-  setLogLevel,
+  onLogLevelChange,
   buildId,
-  setBuildId,
+  onBuildIdChange,
   requestId,
-  setRequestId,
+  onRequestIdChange,
   search,
-  setSearch,
+  onSearchChange,
   isRegex,
-  setIsRegex,
+  onIsRegexChange,
 }: FilterMenuProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleFiltersClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
     setAnchorEl(null)
-  }
-
-  const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
-    if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
   }
 
   return (
@@ -74,7 +67,7 @@ export default function FilterMenu({
         />
       )}
       <Tooltip title='Filter'>
-        <IconButton color='primary' size='small' aria-label='filters' onClick={handleClick} sx={{ mr: 1 }}>
+        <IconButton color='primary' size='small' aria-label='filters' onClick={handleFiltersClick} sx={{ mr: 1 }}>
           <FilterIcon />
         </IconButton>
       </Tooltip>
@@ -91,36 +84,40 @@ export default function FilterMenu({
           horizontal: 'right',
         }}
       >
-        {/* TODO me - dynamically size based on contents */}
         <Box width='500px' p={1}>
           <Box ml={1}>Filters</Box>
           <Divider sx={{ mt: 1, mb: 2 }} />
-          <LogLevelSelect value={logLevel} onChange={handleLogLevelChange} />
-          {/* TODO me - Figure out nice way to make buildId and requestId mutually exclusive input fields */}
-          <TextField
-            label='Build ID'
-            value={buildId}
-            size='small'
-            onChange={(event): void => setBuildId(event.target.value)}
-            sx={{ minWidth: '300px', mb: 1 }}
-          />
-          <TextField
-            label='Request ID'
-            value={requestId}
-            size='small'
-            onChange={(event): void => setRequestId(event.target.value)}
-            sx={{ minWidth: '300px', mb: 1 }}
-          />
+          <LogLevelSelect value={logLevel} onChange={onLogLevelChange} />
+          <Tooltip title={requestId ? 'Unable to provide a Build ID, a Request ID has already been provided.' : ''}>
+            <TextField
+              label='Build ID'
+              value={buildId}
+              size='small'
+              disabled={!!requestId}
+              onChange={onBuildIdChange}
+              sx={{ minWidth: '300px', mb: 1 }}
+            />
+          </Tooltip>
+          <Tooltip title={buildId ? 'Unable to provide a Request ID, a Build ID has already been provided.' : ''}>
+            <TextField
+              label='Request ID'
+              value={requestId}
+              size='small'
+              disabled={!!buildId}
+              onChange={onRequestIdChange}
+              sx={{ minWidth: '300px', mb: 1 }}
+            />
+          </Tooltip>
           <TextField
             label='Search'
             value={search}
             size='small'
-            onChange={(event): void => setSearch(event.target.value)}
+            onChange={onSearchChange}
             sx={{ minWidth: '300px', mb: 1 }}
           />
           <FormControlLabel
             label='Enable Regex'
-            control={<Checkbox checked={isRegex} onChange={(event): void => setIsRegex(event.target.checked)} />}
+            control={<Checkbox checked={isRegex} onChange={onIsRegexChange} />}
             sx={{ ml: 2 }}
           />
         </Box>

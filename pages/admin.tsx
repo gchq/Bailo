@@ -3,19 +3,24 @@ import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import { SelectChangeEvent } from '@mui/material/Select'
 import Wrapper from '../src/Wrapper'
 import FilterMenu from '../src/FilterMenu/FilterMenu'
 import LogTree from '../src/LogTree'
 import { LogLevel } from '../src/FilterMenu/LogLevelSelect'
+import isLogLevel from '../utils/type-guards/isLogLevel'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()
-
   const [logLevel, setLogLevel] = useState<LogLevel>(LogLevel.TRACE)
   const [buildId, setBuildId] = useState('')
   const [requestId, setRequestId] = useState('')
   const [search, setSearch] = useState('')
   const [isRegex, setIsRegex] = useState(false)
+
+  const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
+    if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
+  }
 
   return (
     <Wrapper title='Admin' page='admin'>
@@ -38,15 +43,15 @@ export default function Admin(): ReactElement {
                 <Box ml='auto'>
                   <FilterMenu
                     logLevel={logLevel}
-                    setLogLevel={setLogLevel}
+                    onLogLevelChange={handleLogLevelChange}
                     buildId={buildId}
-                    setBuildId={setBuildId}
+                    onBuildIdChange={(event): void => setBuildId(event.target.value)}
                     requestId={requestId}
-                    setRequestId={setRequestId}
+                    onRequestIdChange={(event): void => setRequestId(event.target.value)}
                     search={search}
-                    setSearch={setSearch}
+                    onSearchChange={(event): void => setSearch(event.target.value)}
                     isRegex={isRegex}
-                    setIsRegex={setIsRegex}
+                    onIsRegexChange={(event): void => setIsRegex(event.target.checked)}
                   />
                   <Button variant='contained' size='small'>
                     Search
