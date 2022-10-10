@@ -3,7 +3,7 @@ import re
 from unittest.mock import MagicMock, patch
 
 import pytest
-import responses
+from glob import glob
 from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
 from requests.exceptions import JSONDecodeError
 
@@ -13,6 +13,8 @@ from ..bailoclient.utils.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
 )
+
+MINIMAL_MODEL_PATH = os.getenv("MINIMAL_MODEL_PATH")
 
 
 @pytest.fixture
@@ -219,3 +221,13 @@ def test_put_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api)
         timeout=pki_authorised_api.timeout_period,
         verify=pki_authorised_api.verify_certificates,
     )
+
+
+def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(authorised_api, tmpdir):
+
+    with open(f'{MINIMAL_MODEL_PATH}/minimal_binary.zip', 'rb') as zipfile:
+        data = zipfile.read()
+
+    authorised_api._AuthorisedAPI__decode_file_content(data, tmpdir)
+
+    assert glob(f'{tmpdir}/model.bin')
