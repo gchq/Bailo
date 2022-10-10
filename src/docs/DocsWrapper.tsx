@@ -20,6 +20,11 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 
+  const linkColour = useMemo(
+    () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
+    [theme]
+  )
+
   const StyledList = styled(List)({
     paddingTop: 0,
     paddingBottom: 0,
@@ -73,7 +78,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
 
   return (
     <Wrapper title='Documentation' page='docs'>
-      {/* Banner height + Toolbar height == 96px */}
+      {/* Banner height + Toolbar height = 96px */}
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         {errorMessage ? (
           <Box mx='auto' mt={4}>
@@ -93,7 +98,19 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             </Box>
             <Box flex={1} overflow='auto'>
               <Box display='flex' flexDirection='column' height='100%'>
-                <Container maxWidth='lg'>{children}</Container>
+                <Container
+                  maxWidth='lg'
+                  sx={{
+                    'a:link': {
+                      color: linkColour,
+                    },
+                    'a:visited': {
+                      color: linkColour,
+                    },
+                  }}
+                >
+                  {children}
+                </Container>
                 <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
               </Box>
             </Box>
