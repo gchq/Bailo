@@ -155,7 +155,7 @@ export const deleteVersion = [
     const { id } = req.params
     const { user } = req
 
-    const version = await findVersionById(user, id, { populate: true })
+    const version = await findVersionById(user, id)
 
     if (!version) {
       throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
@@ -177,18 +177,24 @@ export const deleteVersion = [
       deployments.forEach(async(deployment) => {
         deployment.versions.remove(id)        
         if (deployment.versions.length === 0) {
-          await deployment.remove()
+          const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
+          if (deploymentRequests.length > 0) {
+            deploymentRequests.forEach(async (deploymentRequest) => {
+              await deploymentRequest.delete()
+            })
+          }
+          await deployment.delete()
         } else {
           await deployment.save()
         }
       })
     }
 
-    const model = await ModelModel.findById(id)
+    const model = await ModelModel.findById(version.model)
     if (model) {
       model.versions.remove(id)        
       if (model.versions.length === 0) {
-        await model.remove()
+        await model.delete()
       } else {
         await model.save()
       }  
