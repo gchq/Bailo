@@ -24,7 +24,7 @@ import {
   deleteModel,
 } from './routes/v1/model'
 import { postUpload } from './routes/v1/upload'
-import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
+import { deleteVersion, getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { connectToMongoose } from './utils/database'
 import { ensureBucketExists } from './utils/minio'
@@ -71,6 +71,7 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
+server.delete('/api/v1/version/:id', ...deleteVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
 server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
 

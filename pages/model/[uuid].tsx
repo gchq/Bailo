@@ -241,7 +241,7 @@ function Model() {
   }
 
   const handleDeleteConfirm = async () => {
-    const response = await deleteEndpoint(`/api/v1/model/${uuid}`)
+    const response = await deleteEndpoint(`/api/v1/version/${version._id}`)
 
     if (response.ok) {
       router.push('/')
@@ -541,7 +541,7 @@ function Model() {
             <Box sx={{ mb: 4 }} />
             <ConfirmationDialogue
               open={deleteConfirmOpen}
-              title='Delete model'
+              title='Delete version'
               onConfirm={handleDeleteConfirm}
               onCancel={handleDeleteCancel}
               errorMessage={deleteModelErrorMessage}
@@ -549,8 +549,8 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={handleDelete} data-test='deleteModelButton'>
-              Delete Model
+            <Button variant='contained' color='error' onClick={handleDelete} data-test='deleteVersionButton'>
+              Delete version
             </Button>
           </>
         )}

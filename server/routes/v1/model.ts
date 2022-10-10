@@ -4,7 +4,7 @@ import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
-import { BadReq, NotFound } from '../../utils/result'
+import { BadReq, NotFound, Unauthorised } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
 export const getModels = [
@@ -167,8 +167,12 @@ export const getModelVersion = [
 
 export const deleteModel = [
   ensureUserRole('user'),
-  async (req: Request, res: Response) => {
-    const { uuid } = req.params
+  async (_req: Request, _res: Response) => {
+
+    // This API is temporarily locked down
+    throw Unauthorised({}, 'This API call is temporarily unavailable')
+
+    /*const { uuid } = req.params
 
     const model = await findModelByUuid(req.user, uuid)
 
@@ -176,16 +180,18 @@ export const deleteModel = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
+
+
     const versions = await findModelVersions(req.user!, model._id, { thin: true })
     if (versions.length > 0) {
       versions.forEach(async (version) => {
         const versionRequests = await RequestModel.find({ version: version._id })
         if (versionRequests.length > 0) {
-          versionRequests.forEach((versionRequest) => {
-            versionRequest.delete()
+          versionRequests.forEach(async (versionRequest) => {
+            await versionRequest.delete()
           })
         }
-        version.delete()
+        await version.delete()
       })
     }
 
@@ -194,16 +200,16 @@ export const deleteModel = [
       deployments.forEach(async (deployment) => {
         const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
         if (deploymentRequests.length > 0) {
-          deploymentRequests.forEach((deploymentRequest) => {
-            deploymentRequest.delete()
+          deploymentRequests.forEach(async (deploymentRequest) => {
+            await deploymentRequest.delete()
           })
         }
-        deployment.delete()
+        await deployment.delete()
       })
     }
 
-    model.delete()
+    await model.delete()
 
-    return res.json(uuid)
+    return res.json(uuid)*/
   },
 ]

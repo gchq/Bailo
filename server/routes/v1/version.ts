@@ -7,6 +7,8 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
+import DeploymentModel from '../../models/Deployment'
+import ModelModel from '../../models/Model'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -137,4 +139,64 @@ export const updateLastViewed = [
     }
     return res.json({ version: id, role })
   },
+]
+
+/*
+ - (done) Delete all requests
+ - Find all deployments with this version, and remove from version array
+ - If last version, remove deployment
+ - Find model and remove from version array
+ - If last version, remove model
+ - Delete version
+*/
+export const deleteVersion = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { user } = req
+
+    const version = await findVersionById(user, id, { populate: true })
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
+    }
+
+    if (req.user.id !== version.metadata.contacts.uploader) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    const versionRequests = await RequestModel.find({ version: version._id })
+    if (versionRequests.length > 0) {
+      versionRequests.forEach(async (versionRequest) => {
+        await versionRequest.delete()
+      })
+    }
+
+    const deployments = await DeploymentModel.find({ versions: { $in: [id] }})
+    if (deployments.length > 0) {
+      deployments.forEach(async(deployment) => {
+        deployment.versions.remove(id)        
+        if (deployment.versions.length === 0) {
+          await deployment.remove()
+        } else {
+          await deployment.save()
+        }
+      })
+    }
+
+    const model = await ModelModel.findById(id)
+    if (model) {
+      model.versions.remove(id)        
+      if (model.versions.length === 0) {
+        await model.remove()
+      } else {
+        await model.save()
+      }  
+    }
+
+    await version.delete()
+
+    return res.json(id)
+
+  }
 ]
