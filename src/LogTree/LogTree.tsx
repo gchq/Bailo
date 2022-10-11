@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import ChildLogDetails from '@/src/LogTree/ChildLogDetails'
 import { LogEntry, LogLevel, LogType } from '../../types/interfaces'
 import { useGetAppLogs } from '../../data/admin'
