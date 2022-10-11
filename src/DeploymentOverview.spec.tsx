@@ -4,6 +4,7 @@
 
 import ThemeProvider from '@mui/system/ThemeProvider'
 import { render, screen, waitFor } from '@testing-library/react'
+import { DeploymentDoc } from '../server/models/Deployment'
 import DeploymentOverview from './DeploymentOverview'
 import { lightTheme } from './theme'
 
@@ -23,7 +24,7 @@ describe('DeploymentOverview', () => {
   it('renders a DeploymentOverview component', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <DeploymentOverview deployment={deployment} />
+        <DeploymentOverview deployment={deployment as DeploymentDoc} />
       </ThemeProvider>
     )
 

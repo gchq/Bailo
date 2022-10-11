@@ -14,7 +14,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
@@ -22,7 +22,6 @@ import { postEndpoint } from '../data/api'
 import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../src/theme'
 import { Request } from '../types/interfaces'
 
 export default function Review() {
@@ -66,7 +65,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()

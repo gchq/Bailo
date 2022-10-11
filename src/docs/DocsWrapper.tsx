@@ -1,12 +1,17 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
-import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, useTheme } from '@mui/material'
+import { useTheme, styled } from '@mui/material/styles'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
-import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
-import isDocHeading from '@/utils/isDocHeading'
+import isDocHeading from '@/utils/type-guards/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
 
 type DocsWrapperProps = {
@@ -16,7 +21,7 @@ type DocsWrapperProps = {
 const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 

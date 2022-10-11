@@ -1,5 +1,5 @@
 import { formatDateString } from './dateUtils'
-import isObject from './isObject'
+import isObject from './type-guards/isObject'
 import { consoleError } from './logging'
 
 const PROP_NOT_FOUND = 'Property not Found'
