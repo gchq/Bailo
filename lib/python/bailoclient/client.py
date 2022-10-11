@@ -128,19 +128,6 @@ class Client:
 
         return self.api.get(f"/model/{model_uuid}/schema")
 
-    
-    @handle_reconnect
-    def get_model_by_uuid(self, model_uuid: str):
-        """Get a model by its UUID
-
-        Args:
-            model_uuid (str): UUID of the model
-
-        Returns:
-            Dict: Model
-        """
-        return self.api.get(f"model/uuid/{model_uuid}")
-
     @handle_reconnect
     def get_upload_schemas(self):
         """Get list of available model schemas
@@ -214,7 +201,7 @@ class Client:
         Raises:
             ModelFileExportNotAllowed: Model files are not exportable for this model.
             InvalidFileRequested: Invalid file type - must be 'code' or 'binary'
-            FileExistsError: File already exists at filepath. Overwrite must be specified to overwrite. 
+            FileExistsError: File already exists at filepath. Overwrite must be specified to overwrite.
 
         Returns:
             str: Response status code
@@ -247,11 +234,10 @@ class Client:
         Returns:
             bool: True is model is exportable
         """
-        model_uuid = self.get_deployment_by_uuid(deployment_uuid)['model']['uuid']
-        model = self.get_model_by_uuid(model_uuid)
+        model_uuid = self.get_deployment_by_uuid(deployment_uuid)["model"]["uuid"]
+        model_card = self.get_model_card(model_uuid=model_uuid)
 
-        return model['currentMetadata']['buildOptions']['exportRawModel']
-
+        return model_card["currentMetadata"]["buildOptions"]["exportRawModel"]
 
     @handle_reconnect
     def get_deployment_by_uuid(self, deployment_uuid: str):
@@ -276,7 +262,6 @@ class Client:
             list[dict]: Deployments for user
         """
         return self.api.get(f"/deployment/user/{user_id}")
-
 
     @handle_reconnect
     def get_my_deployments(self):
