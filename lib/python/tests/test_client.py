@@ -15,6 +15,7 @@ from bailoclient.utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
+    ModelFileExportNotAllowed,
 )
 
 from tests.mocks.mock_api import MockAPI
@@ -252,7 +253,19 @@ def test_upload_model_is_called_with_expected_params(
     )
 
 
+@patch("bailoclient.client.Client._Client__allow_exports", return_value=False)
+def test_download_model_files_raises_error_if_model_files_are_not_exportable(
+    mock_allow_exports, mock_client
+):
+    with pytest.raises(ModelFileExportNotAllowed):
+        mock_client.download_model_files(
+            deployment_uuid="test", model_version="1", file_type="invalid"
+        )
+
+
+@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
+    mock_allow_exports,
     mock_client,
 ):
     with pytest.raises(InvalidFileRequested):
@@ -261,8 +274,9 @@ def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
         )
 
 
+@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_raises_error_if_output_dir_already_exists_and_user_has_not_specified_overwrite(
-    mock_client, tmpdir
+    mock_allow_exports, mock_client, tmpdir
 ):
     with pytest.raises(FileExistsError):
         mock_client.download_model_files(
@@ -270,8 +284,9 @@ def test_download_model_files_raises_error_if_output_dir_already_exists_and_user
         )
 
 
+@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_overwrites_existing_output_dir_if_user_has_specified_overwrite(
-    mock_client, tmpdir
+    mock_allow_exports, mock_client, tmpdir
 ):
     deployment_uuid = "test"
     model_version = "1"
@@ -291,6 +306,23 @@ def test_download_model_files_overwrites_existing_output_dir_if_user_has_specifi
         f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
         output_dir=str(tmpdir),
     )
+
+
+@patch("bailoclient.client.Client.get_deployment_by_uuid")
+@patch("bailoclient.client.Client.get_model_card")
+def test_allow_exports_returns_false_if_model_does_not_allow_exports(
+    mock_get_model_card, mock_get_deployment, mock_client
+):
+    mock_get_deployment.return_value = {"model": {"uuid": "123"}}
+    mock_get_model_card.return_value = {
+        "currentMetadata": {"buildOptions": {"exportRawModel": False}}
+    }
+
+    allow_exports = mock_client._Client__allow_exports("dep")
+
+    mock_get_deployment.mock_called_once_with("dep")
+    mock_get_model_card.assert_called_once_with(model_uuid="123")
+    assert not allow_exports
 
 
 @patch("bailoclient.client.Client.get_me", return_value=User(_id="user"))
