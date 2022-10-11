@@ -29,6 +29,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material'
 import copy from 'copy-to-clipboard'
+import { postEndpoint, putEndpoint, deleteEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { setTargetValue } from 'data/utils'
@@ -43,14 +44,13 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
-import { deleteEndpoint, postEndpoint, putEndpoint } from 'data/api'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { lightTheme } from '../../src/theme'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import ConfirmationDialogue from '@/src/common/ConfirmationDialogue'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -73,8 +73,8 @@ function Model() {
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [modelFavourited, setModelFavourited] = useState(false)
-  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState(false)
+  const [modelFavourited, setModelFavourited] = useState<boolean>(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
@@ -524,6 +524,7 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
+
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy model card to clipboard
@@ -538,6 +539,7 @@ function Model() {
                 </Alert>
               </Snackbar>
             </Box>
+
             <Box sx={{ mb: 4 }} />
             <ConfirmationDialogue
               open={deleteConfirmOpen}

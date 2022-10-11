@@ -268,10 +268,10 @@ describe('End to end test', () => {
       await click(driver, By.css('[data-test="settingsButton"]'))
 
       logger.info('click delete model button')
-      await click(driver, By.css('[data-test="deleteModelButton"]'))
+      await click(driver, By.css('[data-test="deleteVersionButton"]'))
 
       logger.info('confirm model deletion')
-      await click(driver, By.css('[data-test="confirmDeleteButton"]'))
+      await click(driver, By.css('[data-test="confirmButton"]'))
 
       await pause(3000)
 
@@ -279,7 +279,7 @@ describe('End to end test', () => {
         `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
       )
       const model = await api.getModel(modelCardOnlyInfo.name)
-      expect(model.model.message).toContain('Unable to find model')
+      expect(model.model.versions.length).toBe(1)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
@@ -297,8 +297,8 @@ describe('End to end test', () => {
       logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
 
-      logger.info('approving 2 requests')
-      await approveRequests(driver, 2)
+      logger.info('approving 6 requests')
+      await approveRequests(driver, 4)
     } finally {
       logger.info('quitting driver')
       await driver.quit()

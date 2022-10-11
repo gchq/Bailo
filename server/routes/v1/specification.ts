@@ -648,26 +648,6 @@ function generateSpecification() {
           },
         },
       },
-      '/model/{uuid}': {
-        delete: {
-          tags: ['model'],
-          description: 'Delete model and all versions',
-          parameters: [
-            {
-              name: 'uuid',
-              in: 'path',
-              description: 'uuid of the model to be deleted',
-              type: 'string',
-            },
-          ],
-          responses: {
-            '200': {
-              description: 'The uuid of the deleted model',
-              type: 'string',
-            },
-          },
-        },
-      },
       '/models': {
         get: {
           tags: ['model'],
@@ -1068,6 +1048,24 @@ function generateSpecification() {
             },
           },
         },
+        delete: {
+          tags: ['version'],
+          description: "Delete a specific version by it's internal ID. This will also delete any associated requests, and also any model/deployment documents depending on how many versions are left.",
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              description: 'ID of version to delete.',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'ID of the deleted version.',
+              type: 'string',
+            },
+          },
+        }
       },
       '/version/{id}/reset-approvals': {
         post: {

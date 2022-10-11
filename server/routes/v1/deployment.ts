@@ -194,6 +194,22 @@ export const fetchRawModelFiles = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
+    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
+
+    if (!versionDocument) {
+      throw NotFound(
+        { deployment, version },
+        `Version ${version} not found for deployment ${deployment.uuid}.`
+      )
+    }
+
+    if (!versionDocument.metadata.buildOptions?.exportRawModel) {
+      throw Unauthorised(
+        { deploymentOwner: deployment.owner },
+        `Raw model exports are not enabled for this version.`
+      )
+    }
+
     if (!req.user._id.equals(deployment.owner)) {
       throw Unauthorised(
         { deploymentOwner: deployment.owner },
@@ -212,7 +228,6 @@ export const fetchRawModelFiles = [
       throw NotFound({ fileType }, 'Unknown file type specificed')
     }
 
-    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 

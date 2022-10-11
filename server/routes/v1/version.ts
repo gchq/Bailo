@@ -82,7 +82,7 @@ export const putVersion = [
   },
 ]
 
-export const resetVersionApprovals = [
+export const postResetVersionApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -104,7 +104,7 @@ export const resetVersionApprovals = [
   },
 ]
 
-export const updateLastViewed = [
+export const putUpdateLastViewed = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id, role } = req.params
@@ -159,9 +159,7 @@ export const deleteVersion = [
 
     const versionRequests = await RequestModel.find({ version: version._id })
     if (versionRequests.length > 0) {
-      versionRequests.forEach(async (versionRequest) => {
-        await versionRequest.delete()
-      })
+      await Promise.all(versionRequests.map(versionRequest => versionRequest.delete()))
     }
 
     const deployments = await DeploymentModel.find({ versions: { $in: [id] } })
@@ -171,9 +169,7 @@ export const deleteVersion = [
         if (deployment.versions.length === 0) {
           const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
           if (deploymentRequests.length > 0) {
-            deploymentRequests.forEach(async (deploymentRequest) => {
-              await deploymentRequest.delete()
-            })
+            await Promise.all(deploymentRequests.map(deploymentRequest => deploymentRequest.delete()))
           }
           await deployment.delete()
         } else {
