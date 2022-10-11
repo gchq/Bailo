@@ -26,8 +26,14 @@ const metadataPathModelCardEdit = fromRelative(config.get('samples.uploadMetadat
 const metadataPathModelCardNewVersion = fromRelative(config.get('samples.uploadMetadataModelCardNewVersion'))
 const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetadata'))
 
-const modelInfo: any = {}
-const modelCardOnlyInfo: any = {}
+const modelInfo = {
+  name: '',
+  url: '',
+}
+const modelCardOnlyInfo = {
+  name: '',
+  url: '',
+}
 let deploymentUrl = ''
 
 const BAILO_APP_URL = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`

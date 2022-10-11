@@ -22,13 +22,13 @@ export const NextLinkComposed = React.forwardRef<HTMLAnchorElement, NextLinkComp
 
   return (
     <NextLink
+      passHref
       href={to}
       prefetch={prefetch}
       as={linkAs}
       replace={replace}
       scroll={scroll}
       shallow={shallow}
-      passHref
       locale={locale}
     >
       <Anchor ref={ref} {...omit(other, 'href')} />

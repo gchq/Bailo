@@ -21,18 +21,17 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
 import { postEndpoint, putEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
-import { setTargetValue } from 'data/utils'
 import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -47,7 +46,6 @@ import createComplianceFlow from 'utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../../src/theme'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
@@ -65,6 +63,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 
 function Model() {
   const router = useRouter()
+  const theme = useTheme()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const deploymentVersionsDisplayLimit = 5
@@ -90,8 +89,9 @@ function Model() {
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
 
-  const onVersionChange = setTargetValue(setSelectedVersion)
-  const theme = useTheme() || lightTheme
+  const onVersionChange = (event: SelectChangeEvent<string>) => {
+    setSelectedVersion(event.target.value)
+  }
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
