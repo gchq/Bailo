@@ -11,8 +11,9 @@ import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
 import { SelectChangeEvent } from '@mui/material/Select'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import LogLevelSelect, { LogLevel } from './LogLevelSelect'
-import { toTitleCase } from '../../utils/stringUtils'
+import LogLevelSelect from './LogLevelSelect'
+import { LogLevel } from '../../types/interfaces'
+import getLogLevelLabel from '../../utils/getLogLevelLabel'
 
 interface FilterMenuProps {
   logLevel: LogLevel
@@ -50,7 +51,7 @@ export default function FilterMenu({
 
   return (
     <>
-      <Chip label={`Log level: ${toTitleCase(LogLevel[logLevel])}`} sx={{ mr: 1 }} />
+      <Chip label={`Log level: ${getLogLevelLabel(logLevel)}`} sx={{ mr: 1 }} />
       {buildId && <Chip label={`Build ID: ${buildId}`} sx={{ mr: 1 }} />}
       {requestId && <Chip label={`Request ID: ${requestId}`} sx={{ mr: 1 }} />}
       {search && (

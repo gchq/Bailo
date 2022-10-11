@@ -6,9 +6,9 @@ import Divider from '@mui/material/Divider'
 import { SelectChangeEvent } from '@mui/material/Select'
 import Wrapper from '../src/Wrapper'
 import FilterMenu from '../src/FilterMenu/FilterMenu'
-import LogTree from '../src/LogTree'
-import { LogLevel } from '../src/FilterMenu/LogLevelSelect'
-import isLogLevel from '../utils/type-guards/isLogLevel'
+import LogTree from '../src/LogTree/LogTree'
+import isLogLevel, { isLogLevelString } from '../utils/type-guards/isLogLevel'
+import { LogLevel } from '../types/interfaces'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()
@@ -20,6 +20,7 @@ export default function Admin(): ReactElement {
 
   const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
     if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
+    else if (isLogLevelString(event.target.value)) setLogLevel(Number(event.target.value))
   }
 
   return (

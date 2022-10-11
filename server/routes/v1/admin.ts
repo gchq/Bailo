@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import QueryString from 'qs'
-import { getLogs, getLogType, LogType } from '../../services/logs'
+import { LogType } from '../../../types/interfaces'
+import { getLogs, getLogType } from '../../services/logs'
 import { BadReq } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
@@ -21,7 +22,7 @@ function parseDateQuery(
   return new Date(date)
 }
 
-function queryStringArrayTypeGuard(query: any): query is QueryString.ParsedQs[] {
+function queryStringArrayTypeGuard(query: unknown): query is QueryString.ParsedQs[] {
   return Array.isArray(query) && typeof query[0] === 'object'
 }
 
@@ -55,8 +56,6 @@ function parseString(
   return query
 }
 
-const isLogType = (item: LogType | undefined): item is LogType => !!item
-
 export const getApplicationLogs = [
   ensureUserRole(['user', 'admin']),
   async (req: Request, res: Response) => {
@@ -69,7 +68,11 @@ export const getApplicationLogs = [
     }
 
     const filter = parseQueryArray('filter', req.query.filter)
-    const types = filter.map((value) => getLogType(value)).filter(isLogType)
+    const types = filter.reduce<LogType[]>((logTypes, value) => {
+      const logType = getLogType(value)
+      if (logType) logTypes.push(logType)
+      return logTypes
+    }, [])
 
     if (types.length === 0) {
       throw BadReq({ types }, 'Error, provided no valid types')

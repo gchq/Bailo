@@ -14,6 +14,7 @@ interface GetAppLogsArgs {
   requestId?: string
   disabled?: boolean
 }
+
 export function useGetAppLogs({
   level,
   after,

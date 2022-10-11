@@ -1,12 +1,7 @@
 import mongoose from 'mongoose'
 import { ObjectId } from 'mongodb'
 import { connectToMongoose } from '../utils/database'
-
-export enum LogType {
-  Build = 'build',
-  Request = 'request',
-  Misc = 'misc',
-}
+import { LogType } from '../../types/interfaces'
 
 export function getLogType(type: string): LogType | undefined {
   switch (type) {

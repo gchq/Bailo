@@ -3,25 +3,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import { toTitleCase } from '../../utils/stringUtils'
-
-export enum LogLevelValue {
-  TRACE = 10,
-  DEBUG = 20,
-  INFO = 30,
-  WARN = 40,
-  ERROR = 50,
-  FATAL = 60,
-}
-
-export enum LogLevel {
-  TRACE = 'TRACE',
-  DEBUG = 'DEBUG',
-  INFO = 'INFO',
-  WARN = 'WARN',
-  ERROR = 'ERROR',
-  FATAL = 'FATAL',
-}
+import { LogLevel, LogLevelLabel } from '../../types/interfaces'
 
 type LogLevelSelectProps = {
   value: LogLevel
@@ -33,9 +15,9 @@ export default function LogLevelSelect({ value, onChange }: LogLevelSelectProps)
     <FormControl size='small' sx={{ minWidth: '300px', mb: 1 }}>
       <InputLabel>Log Level</InputLabel>
       <Select label='Log Level' value={value} onChange={onChange}>
-        {Object.keys(LogLevel).map((level) => (
-          <MenuItem value={LogLevel[level]} key={level}>
-            {toTitleCase(level)}
+        {Object.values(LogLevelLabel).map((level) => (
+          <MenuItem value={LogLevel[level.toUpperCase()]} key={level}>
+            {level}
           </MenuItem>
         ))}
       </Select>

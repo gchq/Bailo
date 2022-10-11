@@ -125,7 +125,8 @@ class MongoWriter {
 
     const { db } = mongoose.connection
 
-    await db.createCollection('logs')
+    const logsCollectionExists = await db.listCollections({ name: 'logs' }).hasNext()
+    if (!logsCollectionExists) await db.createCollection('logs')
     const logs = db.collection('logs')
 
     // We use a capped collection for logs to ensure high throughput
@@ -279,7 +280,7 @@ if (config.get('logging.stroom.enabled')) {
     },
   })
 
-  // send logs to troom every hour
+  // send logs to stroom every hour
   processStroomFiles()
   setInterval(() => {
     date = new Date()
