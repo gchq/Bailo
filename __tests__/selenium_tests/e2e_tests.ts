@@ -26,8 +26,14 @@ const metadataPathModelCardEdit = fromRelative(config.get('samples.uploadMetadat
 const metadataPathModelCardNewVersion = fromRelative(config.get('samples.uploadMetadataModelCardNewVersion'))
 const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetadata'))
 
-const modelInfo: any = {}
-const modelCardOnlyInfo: any = {}
+const modelInfo = {
+  name: '',
+  url: '',
+}
+const modelCardOnlyInfo = {
+  name: '',
+  url: '',
+}
 let deploymentUrl = ''
 
 const BAILO_APP_URL = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -90,35 +96,41 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+        const matches = modelUrl.match('/.*/model/(?<name>[^/]*)')
 
-        logger.info(`model name is ${mName}`)
+        if (matches && matches.groups) {
+          const mName = matches.groups.name
 
-        modelInfo.url = modelUrl
-        modelInfo.name = mName
+          logger.info(`model name is ${mName}`)
 
-        logger.info({ modelInfo }, 'setting model info')
+          modelInfo.url = modelUrl
+          modelInfo.name = mName
 
-        const api = new Bailo(
-          `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
-        )
+          logger.info({ modelInfo }, 'setting model info')
 
-        logger.info('getting api model')
-        const model = await api.getModel(modelInfo.name)
+          const api = new Bailo(
+            `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+          )
 
-        while (true) {
-          logger.info('')
-          const version = await model.getVersion('1')
+          logger.info('getting api model')
+          const model = await api.getModel(modelInfo.name)
 
-          if (version.version.built) {
-            break
+          while (true) {
+            logger.info('')
+            const version = await model.getVersion('1')
+
+            if (version.version.built) {
+              break
+            }
+
+            logger.info('Model not built, retrying in 2 seconds.')
+            await pause(2000)
           }
 
-          logger.info('Model not built, retrying in 2 seconds.')
-          await pause(2000)
+          logger.info({ modelInfo }, 'Received model information')
+        } else {
+          throw new Error(`No matches found for URL: ${modelUrl}`)
         }
-
-        logger.info({ modelInfo }, 'Received model information')
       } finally {
         logger.info('quitting driver')
         await driver.quit()
@@ -159,14 +171,20 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+        const matches = modelUrl.match('/.*/model/(?<name>[^/]*)')
 
-        logger.info(`model name is ${mName}`)
+        if (matches && matches.groups) {
+          const mName = matches.groups.name
 
-        modelCardOnlyInfo.url = modelUrl
-        modelCardOnlyInfo.name = mName
+          logger.info(`model name is ${mName}`)
 
-        logger.info({ modelCardOnlyInfo }, 'Received model information')
+          modelCardOnlyInfo.url = modelUrl
+          modelCardOnlyInfo.name = mName
+
+          logger.info({ modelCardOnlyInfo }, 'Received model information')
+        } else {
+          throw new Error(`No matches found for URL: ${modelUrl}`)
+        }
       } finally {
         logger.info('quitting driver')
         await driver.quit()
@@ -213,7 +231,7 @@ describe('End to end test', () => {
       logger.info('quitting driver')
       await driver.quit()
     }
-  }, 25000)
+  }, 30000)
 
   test('test we can upload a new version', async () => {
     logger.info('getting driver')
@@ -254,37 +272,37 @@ describe('End to end test', () => {
     }
   }, 30000)
 
-  test('test we can delete a version version', async () => {
-    logger.info('getting driver')
-    const driver = await getDriver()
+  // test('test we can delete a version version', async () => {
+  //   logger.info('getting driver')
+  //   const driver = await getDriver()
 
-    try {
-      expect(modelCardOnlyInfo.url).not.toBeNull()
+  //   try {
+  //     expect(modelCardOnlyInfo.url).not.toBeNull()
 
-      logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
-      await driver.get(modelCardOnlyInfo.url)
+  //     logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
+  //     await driver.get(modelCardOnlyInfo.url)
 
-      logger.info('going to settings tab')
-      await click(driver, By.css('[data-test="settingsButton"]'))
+  //     logger.info('going to settings tab')
+  //     await click(driver, By.css('[data-test="settingsButton"]'))
 
-      logger.info('click delete model button')
-      await click(driver, By.css('[data-test="deleteModelButton"]'))
+  //     logger.info('click delete model button')
+  //     await click(driver, By.css('[data-test="deleteModelButton"]'))
 
-      logger.info('confirm model deletion')
-      await click(driver, By.css('[data-test="confirmDeleteButton"]'))
+  //     logger.info('confirm model deletion')
+  //     await click(driver, By.css('[data-test="confirmDeleteButton"]'))
 
-      await pause(3000)
+  //     await pause(3000)
 
-      const api = new Bailo(
-        `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
-      )
-      const model = await api.getModel(modelCardOnlyInfo.name)
-      expect(model.model.message).toContain('Unable to find model')
-    } finally {
-      logger.info('quitting driver')
-      await driver.quit()
-    }
-  }, 30000)
+  //     const api = new Bailo(
+  //       `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+  //     )
+  //     const model = await api.getModel(modelCardOnlyInfo.name)
+  //     expect(model.model.message).toContain('Unable to find model')
+  //   } finally {
+  //     logger.info('quitting driver')
+  //     await driver.quit()
+  //   }
+  // }, 30000)
 
   test('test can approve models', async () => {
     logger.info('getting driver')
@@ -297,8 +315,8 @@ describe('End to end test', () => {
       logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
 
-      logger.info('approving 2 requests')
-      await approveRequests(driver, 2)
+      logger.info('approving 6 requests')
+      await approveRequests(driver, 6)
     } finally {
       logger.info('quitting driver')
       await driver.quit()

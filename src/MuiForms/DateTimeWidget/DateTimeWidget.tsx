@@ -8,7 +8,7 @@ function DateTimeWidget(props: TextWidgetProps) {
   const { registry, value: propsValue, onChange: propsOnChange } = props
   const { TextWidget } = registry.widgets
   const value = utcToLocal(propsValue)
-  const onChange = (newValue: any) => {
+  const onChange = (newValue: string) => {
     propsOnChange(localToUTC(newValue))
   }
 

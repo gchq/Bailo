@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, MouseEvent, ReactElement } from 'react'
-
 import Close from '@mui/icons-material/CloseTwoTone'
 import Done from '@mui/icons-material/DoneTwoTone'
 import Chip from '@mui/material/Chip'
@@ -12,7 +11,7 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 import { ApprovalStates } from '../../types/interfaces'
 

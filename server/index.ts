@@ -21,20 +21,20 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
-  deleteModel,
 } from './routes/v1/model'
-import { postUpload } from './routes/v1/upload'
-import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
-import { getUiConfig } from './routes/v1/uiConfig'
-import { connectToMongoose } from './utils/database'
-import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
-import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
+import { getUiConfig } from './routes/v1/uiConfig'
+import { postUpload } from './routes/v1/upload'
+import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
+import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
+import { connectToMongoose } from './utils/database'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { ensureBucketExists } from './utils/minio'
+
+import { getUser } from './utils/user'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -61,7 +61,6 @@ server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
 server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
 server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
 server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
-server.delete('/api/v1/model/:uuid', ...deleteModel)
 
 server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
