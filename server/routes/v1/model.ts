@@ -168,11 +168,10 @@ export const getModelVersion = [
 export const deleteModel = [
   ensureUserRole('user'),
   async (_req: Request, _res: Response) => {
-
     // This API is temporarily locked down
     throw Unauthorised({}, 'This API call is temporarily unavailable')
 
-    /*const { uuid } = req.params
+    /*  const { uuid } = req.params
 
     const model = await findModelByUuid(req.user, uuid)
 
@@ -210,6 +209,6 @@ export const deleteModel = [
 
     await model.delete()
 
-    return res.json(uuid)*/
+    return res.json(uuid) */
   },
 ]

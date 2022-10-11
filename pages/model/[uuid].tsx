@@ -549,9 +549,29 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={handleDelete} data-test='deleteVersionButton'>
-              Delete version
-            </Button>
+            <Stack direction='row' spacing={2}>
+              <DisabledElementTooltip
+                conditions={[
+                  currentUser.id !== version?.metadata?.contacts?.uploader
+                    ? 'You do not have permission to delete this version.'
+                    : '',
+                ]}
+                placement='bottom'
+              >
+                <Button
+                  variant='contained'
+                  disabled={currentUser.id !== version?.metadata?.contacts?.uploader}
+                  color='error'
+                  onClick={handleDelete}
+                  data-test='deleteVersionButton'
+                >
+                  Delete version
+                </Button>
+              </DisabledElementTooltip>
+              <Button variant='contained' color='error' disabled data-test='deleteVersionButton'>
+                Delete model
+              </Button>
+            </Stack>
           </>
         )}
       </Paper>

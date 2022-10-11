@@ -141,14 +141,6 @@ export const updateLastViewed = [
   },
 ]
 
-/*
- - (done) Delete all requests
- - Find all deployments with this version, and remove from version array
- - If last version, remove deployment
- - Find model and remove from version array
- - If last version, remove model
- - Delete version
-*/
 export const deleteVersion = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
@@ -172,10 +164,10 @@ export const deleteVersion = [
       })
     }
 
-    const deployments = await DeploymentModel.find({ versions: { $in: [id] }})
+    const deployments = await DeploymentModel.find({ versions: { $in: [id] } })
     if (deployments.length > 0) {
-      deployments.forEach(async(deployment) => {
-        deployment.versions.remove(id)        
+      deployments.forEach(async (deployment) => {
+        deployment.versions.remove(id)
         if (deployment.versions.length === 0) {
           const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
           if (deploymentRequests.length > 0) {
@@ -192,17 +184,16 @@ export const deleteVersion = [
 
     const model = await ModelModel.findById(version.model)
     if (model) {
-      model.versions.remove(id)        
+      model.versions.remove(id)
       if (model.versions.length === 0) {
         await model.delete()
       } else {
         await model.save()
-      }  
+      }
     }
 
     await version.delete()
 
     return res.json(id)
-
-  }
+  },
 ]
