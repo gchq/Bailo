@@ -43,3 +43,7 @@ class InvalidFileRequested(Exception):
 
 class DeploymentNotFound(Exception):
     """Could not find a deployment"""
+
+
+class ModelFileExportNotAllowed(Exception):
+    """Exporting model files not allowed for this model"""

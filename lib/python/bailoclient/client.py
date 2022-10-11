@@ -27,6 +27,7 @@ from .utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
+    ModelFileExportNotAllowed,
     UnconnectedClient,
 )
 from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
@@ -127,6 +128,19 @@ class Client:
 
         return self.api.get(f"/model/{model_uuid}/schema")
 
+    
+    @handle_reconnect
+    def get_model_by_uuid(self, model_uuid: str):
+        """Get a model by its UUID
+
+        Args:
+            model_uuid (str): UUID of the model
+
+        Returns:
+            Dict: Model
+        """
+        return self.api.get(f"model/uuid/{model_uuid}")
+
     @handle_reconnect
     def get_upload_schemas(self):
         """Get list of available model schemas
@@ -179,6 +193,7 @@ class Client:
         logger.warning("User with display name %s not found", name)
         return None
 
+    @handle_reconnect
     def download_model_files(
         self,
         deployment_uuid: str,
@@ -196,9 +211,17 @@ class Client:
             dir (str, optional): Output directory for file downloads. Defaults to "./model/".
             overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
+        Raises:
+            ModelFileExportNotAllowed: Model files are not exportable for this model.
+            InvalidFileRequested: Invalid file type - must be 'code' or 'binary'
+            FileExistsError: File already exists at filepath. Overwrite must be specified to overwrite. 
+
         Returns:
             str: Response status code
         """
+
+        if not self.__allow_exports(deployment_uuid):
+            raise ModelFileExportNotAllowed("Files are not exportable for this model")
 
         if not file_type in ["code", "binary"]:
             raise InvalidFileRequested(
@@ -215,6 +238,22 @@ class Client:
             output_dir=output_dir,
         )
 
+    def __allow_exports(self, deployment_uuid: str):
+        """Check whether the model files associated with a deployment are allowed to be exported
+
+        Args:
+            deployment_uuid (str): UUID of the delpoyment
+
+        Returns:
+            bool: True is model is exportable
+        """
+        model_uuid = self.get_deployment_by_uuid(deployment_uuid)['model']['uuid']
+        model = self.get_model_by_uuid(model_uuid)
+
+        return model['currentMetadata']['buildOptions']['exportRawModel']
+
+
+    @handle_reconnect
     def get_deployment_by_uuid(self, deployment_uuid: str):
         """Get deployment by deployment UUID
 
@@ -226,6 +265,7 @@ class Client:
         """
         return self.api.get(f"/deployment/{deployment_uuid}")
 
+    @handle_reconnect
     def get_user_deployments(self, user_id: str):
         """Get deployments for a given user
 
@@ -237,6 +277,8 @@ class Client:
         """
         return self.api.get(f"/deployment/user/{user_id}")
 
+
+    @handle_reconnect
     def get_my_deployments(self):
         """Get deployments for the current user
 
