@@ -2,13 +2,12 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
-import { lightTheme } from './theme'
+import { useTheme } from '@mui/material/styles'
 import MetadataDisplay from './MetadataDisplay'
 
 function ModelOverview(props: any) {
   const { version } = props
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   return (
     <Grid container spacing={2}>

@@ -53,7 +53,7 @@ export const postDeployment = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     req.log.info({ code: 'requesting_deployment' }, 'User requesting deployment')
-    const body = req.body as any
+    const { body } = req
 
     const schema = await findSchemaByRef(body.schemaRef)
     if (!schema) {
@@ -96,7 +96,7 @@ export const postDeployment = [
           modelId: body.highLevelDetails.modelID,
           version: body.highLevelDetails.initialVersionRequested,
         },
-        `Unable to find verison with name: '${body.highLevelDetails.initialVersionRequested}'`
+        `Unable to find version with name: '${body.highLevelDetails.initialVersionRequested}'`
       )
     }
 
@@ -188,7 +188,7 @@ export const fetchRawModelFiles = [
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const { uuid, version, fileType } = req.params
-    const deployment = await findDeploymentByUuid(req.user!, uuid)
+    const deployment = await findDeploymentByUuid(req.user, uuid)
 
     if (deployment === null) {
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
@@ -209,10 +209,10 @@ export const fetchRawModelFiles = [
     }
 
     if (fileType !== 'code' && fileType !== 'binary') {
-      throw NotFound({ fileType }, 'Unknown file type specificed')
+      throw NotFound({ fileType }, 'Unknown file type specified')
     }
 
-    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 

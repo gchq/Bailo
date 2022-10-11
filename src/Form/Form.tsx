@@ -1,10 +1,9 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
-import { lightTheme } from '../theme'
 import FormDesigner from './FormDesigner'
 import FormUpload from './FormUpload'
 
@@ -12,19 +11,19 @@ export default function Form({
   splitSchema,
   setSplitSchema,
   onSubmit,
-  modelUploading,
+  modelUploading = false,
 }: {
   splitSchema: SplitSchema
   onSubmit: () => void
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
-  modelUploading: boolean
+  modelUploading?: boolean
 }) {
   const [tab, setTab] = useState('designer')
   const onTabChange = (_event: any, newValue: any) => {
     setTab(newValue)
   }
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   return (
     <>
