@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from bailoclient.client import Client
@@ -177,7 +177,7 @@ def test_post_model_raises_error_if_invalid_mode_given(mock_client):
 
 
 def test_increment_version_increases_version_by_one(mock_client):
-    mock_client.api.get = MagicMock(return_value=[{"version": "1"}, {"version": "2"}])
+    mock_client.api.get = Mock(return_value=[{"version": "1"}, {"version": "2"}])
 
     version = mock_client._increment_version("model_uuid")
 
@@ -187,7 +187,7 @@ def test_increment_version_increases_version_by_one(mock_client):
 def test_increment_version_raises_error_if_unable_to_increase_version_by_one(
     mock_client,
 ):
-    mock_client.api.get = MagicMock(return_value=[{"version": "a"}, {"version": "b"}])
+    mock_client.api.get = Mock(return_value=[{"version": "a"}, {"version": "b"}])
 
     with pytest.raises(
         CannotIncrementVersion,
@@ -208,7 +208,7 @@ def test_update_model_is_called_with_expected_params(
 
     mock_generate_payload.return_value = payload
     mock_increment_version.return_value = "3"
-    mock_client.api.post = MagicMock(return_value={"uuid": model_uuid})
+    mock_client.api.post = Mock(return_value={"uuid": model_uuid})
 
     mock_client.update_model(
         model_card=Model(
@@ -237,7 +237,7 @@ def test_upload_model_is_called_with_expected_params(
     model_uuid = "model"
 
     mock_generate_payload.return_value = payload
-    mock_client.api.post = MagicMock(return_value={"uuid": model_uuid})
+    mock_client.api.post = Mock(return_value={"uuid": model_uuid})
 
     mock_client.upload_model(
         metadata={"key": "value"},
@@ -277,7 +277,7 @@ def test_download_model_files_overwrites_existing_output_dir_if_user_has_specifi
     model_version = "1"
     file_type = "binary"
 
-    mock_client.api.get = MagicMock(return_value=200)
+    mock_client.api.get = Mock(return_value=200)
 
     mock_client.download_model_files(
         deployment_uuid=deployment_uuid,
@@ -354,7 +354,7 @@ def test_find_my_deployment_raises_error_if_no_deployments_match(
 
 
 @patch("bailoclient.client.Client.get_my_deployments")
-def test_find_my_deployment_finds_latest_version_if_most_recent_is_true(
+def test_find_my_deployment_finds_latest_version_if_multiple_matching_deployments_found(
     mock_get_my_deployments, mock_client
 ):
     older_deployment = deployment()
@@ -382,14 +382,14 @@ def test_deployment_matches_returns_false_if_deployment_does_not_match_criteria(
 
 
 def test_deployment_matches_ignores_version_if_not_provided(mock_client):
-    dep = deployment()
-    dep2 = deployment_two()
+    dep_v1 = deployment()
+    dep_v2 = deployment_two()
 
-    match = mock_client._Client__deployment_matches(
-        dep, deployment_name="deployment_name", model_uuid="id", model_version=None
+    match_v1 = mock_client._Client__deployment_matches(
+        dep_v1, deployment_name="deployment_name", model_uuid="id", model_version=None
     )
-    match2 = mock_client._Client__deployment_matches(
-        dep2, deployment_name="deployment_name", model_uuid="id", model_version=None
+    match_v2 = mock_client._Client__deployment_matches(
+        dep_v2, deployment_name="deployment_name", model_uuid="id", model_version=None
     )
 
-    assert match and match2
+    assert match_v1 and match_v2

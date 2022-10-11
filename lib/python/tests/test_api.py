@@ -1,6 +1,6 @@
 import os
 import re
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from glob import glob
@@ -72,14 +72,15 @@ def test_get_headers_returns_auth_headers(authorised_api):
 
 
 class MockResponse:
-    def __init__(self, response_json, status_code):
+    def __init__(self, response_json, status_code, content_required=False):
         self.response_json = response_json
         self.status_code = status_code
 
-        with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
-            content = zipfile.read()
+        if content_required:
+            with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
+                content = zipfile.read()
 
-        self.content = content
+            self.content = content
 
     def json(self):
         if not self.response_json:
@@ -116,7 +117,8 @@ def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(
     mock_decode_file_content, authorised_api, tmpdir
 ):
     authorised_api._handle_response(
-        MockResponse({"result": "success"}, 200), output_dir=tmpdir
+        MockResponse({"result": "success"}, 200, content_required=True),
+        output_dir=tmpdir,
     )
 
     mock_decode_file_content.assert_called_once()
@@ -242,7 +244,6 @@ def test_put_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api)
 def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(
     authorised_api, tmpdir
 ):
-
     with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
         data = zipfile.read()
 

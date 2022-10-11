@@ -312,7 +312,7 @@ class AuthorisedAPI(APIInterface):
             response.raise_for_status()
 
     def __decode_file_content(self, content: bytes, output_dir: str):
-        """Decode bytes from HttpResponse into zip file
+        """Decode zipfile bytes from HttpResponse into model files
 
         Args:
             content (bytes): Content from the API response

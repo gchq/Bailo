@@ -251,7 +251,7 @@ class Client:
         model_uuid: str,
         model_version: str = None,
     ):
-        """Find a particular deployment belonging to the current user.
+        """Find a particular deployment belonging to the current user. If multiple matching deployments are found, return the most recent deployment.
 
         Args:
             deployment_name (str): Name of the deployment

@@ -109,14 +109,17 @@ schema = client.get_model_schema(model_uuid)
 ## You can download the code and binary for a model if you have a deployment
 
 user_deployments = client.get_my_deployments()
-deployment = user_deployments[0]
+
+if user_deployments:
+    deployment = user_deployments[0]
+
+    resp = client.download_model_files(
+        deployment["uuid"],
+        deployment["metadata"]["highLevelDetails"]["initialVersionRequested"],
+        file_type="code",
+        overwrite=True,
+    )
+
 
 ## To get a specific deployment
-# deployment = client.get_model_deployment(deployment_name='', deployment_model_uuid='', deployment_model_version='')
-
-resp = client.download_model_files(
-    deployment["uuid"],
-    deployment["metadata"]["highLevelDetails"]["initialVersionRequested"],
-    file_type="code",
-    overwrite=True,
-)
+# deployment = client.find_my_deployment(deployment_name='', model_uuid='', model_version='')
