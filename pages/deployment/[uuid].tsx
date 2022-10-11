@@ -3,6 +3,7 @@ import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -22,8 +23,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
-import Box from '@mui/system/Box'
+import { useTheme } from '@mui/material/styles'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import copy from 'copy-to-clipboard'
@@ -40,14 +40,13 @@ import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
-import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { VersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
+import isVersionDoc from '../../utils/type-guards/isVersionDoc'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -93,9 +92,6 @@ function CodeLine({ line }) {
   )
 }
 
-const isVersionDoc = (value: unknown): value is VersionDoc =>
-  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
-
 export default function Deployment() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -112,7 +108,7 @@ export default function Deployment() {
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const initialVersionRequested = useMemo(() => {
     if (!deployment) return undefined
@@ -319,7 +315,7 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 

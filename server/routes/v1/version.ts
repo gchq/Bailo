@@ -159,7 +159,7 @@ export const deleteVersion = [
 
     const versionRequests = await RequestModel.find({ version: version._id })
     if (versionRequests.length > 0) {
-      await Promise.all(versionRequests.map(versionRequest => versionRequest.delete()))
+      await Promise.all(versionRequests.map((versionRequest) => versionRequest.delete()))
     }
 
     const deployments = await DeploymentModel.find({ versions: { $in: [id] } })
@@ -169,7 +169,7 @@ export const deleteVersion = [
         if (deployment.versions.length === 0) {
           const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
           if (deploymentRequests.length > 0) {
-            await Promise.all(deploymentRequests.map(deploymentRequest => deploymentRequest.delete()))
+            await Promise.all(deploymentRequests.map((deploymentRequest) => deploymentRequest.delete()))
           }
           await deployment.delete()
         } else {

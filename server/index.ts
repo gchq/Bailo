@@ -29,7 +29,13 @@ import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
-import { deleteVersion,getVersion, putVersion, postResetVersionApprovals, putUpdateLastViewed } from './routes/v1/version'
+import {
+  deleteVersion,
+  getVersion,
+  putVersion,
+  postResetVersionApprovals,
+  putUpdateLastViewed,
+} from './routes/v1/version'
 import { connectToMongoose } from './utils/database'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
