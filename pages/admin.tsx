@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react'
+import React, { ReactElement, useCallback, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -17,11 +17,14 @@ export default function Admin(): ReactElement {
   const [requestId, setRequestId] = useState('')
   const [search, setSearch] = useState('')
   const [isRegex, setIsRegex] = useState(false)
+  const [doSearch, setDoSearch] = useState(false)
 
   const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
     if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
     else if (isLogLevelString(event.target.value)) setLogLevel(Number(event.target.value))
   }
+
+  const handleResetDoSearch = useCallback((): void => setDoSearch(false), [])
 
   return (
     <Wrapper title='Admin' page='admin'>
@@ -54,18 +57,20 @@ export default function Admin(): ReactElement {
                     isRegex={isRegex}
                     onIsRegexChange={(event): void => setIsRegex(event.target.checked)}
                   />
-                  <Button variant='contained' size='small'>
+                  <Button variant='contained' size='small' onClick={(): void => setDoSearch(true)}>
                     Search
                   </Button>
                 </Box>
               </Box>
               <Box mx={1} height='100%' overflow='auto'>
                 <LogTree
-                  logLevel={logLevel}
+                  level={logLevel}
                   buildId={buildId}
                   requestId={requestId}
                   search={search}
                   isRegex={isRegex}
+                  doSearch={doSearch}
+                  resetDoSearch={handleResetDoSearch}
                 />
               </Box>
             </Box>
