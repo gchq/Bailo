@@ -1,6 +1,6 @@
 import { LogLevel } from '../../types/interfaces'
 
-type LogLevelString = '10' | '20' | '30' | '40' | '50' | '60'
+type LogLevelString = `${LogLevel}`
 
 export const isLogLevelString = (value: string): value is LogLevelString =>
   typeof value === 'string' && !!LogLevel[value]
