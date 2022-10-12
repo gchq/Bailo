@@ -4,7 +4,7 @@ import Docker from 'dockerode'
 import fs from 'fs/promises'
 import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import logger from '../../server/utils/logger'
 import {
   clearData,
@@ -96,41 +96,38 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const matches = modelUrl.match('/.*/model/(?<name>[^/]*)')
 
-        if (matches && matches.groups) {
-          const mName = matches.groups.name
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
-          logger.info(`model name is ${mName}`)
+        logger.info(`model name is ${mName}`)
 
-          modelInfo.url = modelUrl
-          modelInfo.name = mName
+        modelInfo.url = modelUrl
+        modelInfo.name = mName
 
-          logger.info({ modelInfo }, 'setting model info')
+        logger.info({ modelInfo }, 'setting model info')
 
-          const api = new Bailo(
-            `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
-          )
+        const api = new Bailo(
+          `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+        )
 
-          logger.info('getting api model')
-          const model = await api.getModel(modelInfo.name)
+        logger.info('getting api model')
+        const model = await api.getModel(modelInfo.name)
 
-          while (true) {
-            logger.info('')
-            const version = await model.getVersion('1')
+        for (;;) {
+          logger.info('')
+          const version = await model.getVersion('1')
 
-            if (version.version.built) {
-              break
-            }
-
-            logger.info('Model not built, retrying in 2 seconds.')
-            await pause(2000)
+          if (version.version.built) {
+            break
           }
 
-          logger.info({ modelInfo }, 'Received model information')
-        } else {
-          throw new Error(`No matches found for URL: ${modelUrl}`)
+          logger.info('Model not built, retrying in 2 seconds.')
+          await pause(2000)
         }
+
+        logger.info({ modelInfo }, 'Received model information')
       } finally {
         logger.info('quitting driver')
         await driver.quit()
@@ -171,20 +168,16 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const matches = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
-        if (matches && matches.groups) {
-          const mName = matches.groups.name
+        logger.info(`model name is ${mName}`)
 
-          logger.info(`model name is ${mName}`)
+        modelCardOnlyInfo.url = modelUrl
+        modelCardOnlyInfo.name = mName
 
-          modelCardOnlyInfo.url = modelUrl
-          modelCardOnlyInfo.name = mName
-
-          logger.info({ modelCardOnlyInfo }, 'Received model information')
-        } else {
-          throw new Error(`No matches found for URL: ${modelUrl}`)
-        }
+        logger.info({ modelCardOnlyInfo }, 'Received model information')
       } finally {
         logger.info('quitting driver')
         await driver.quit()
@@ -381,6 +374,8 @@ describe('End to end test', () => {
       await driver.wait(until.urlContains('/deployment/'))
       await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'Deployment name')]]")))
       deploymentUrl = await driver.getCurrentUrl()
+
+      logger.info(`deployment url is ${deploymentUrl}`)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
