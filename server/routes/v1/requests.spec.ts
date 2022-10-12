@@ -6,14 +6,12 @@ import '../../utils/mockMongo'
 import { testRequest, testUser } from '../../utils/test/testModels'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
 
-let requestDoc: any
-
 describe('test requests routes', () => {
   beforeAll(async () => {
     const userDoc: any = await findAndUpdateUser(testUser)
     testUser._id = userDoc._id
     testRequest.user = userDoc._id
-    requestDoc = await RequestModel.create(testRequest)
+    await RequestModel.create(testRequest)
   })
 
   test('that we can fetch requests', async () => {

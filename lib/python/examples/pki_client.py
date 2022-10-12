@@ -89,7 +89,9 @@ update_resp = client.update_model(
 print(f"Updated model: {update_resp}")
 
 # Create a new model
-with open("../../../__tests__/example_models/minimal_model/minimal_metadata.json") as json_file:
+with open(
+    "../../../__tests__/example_models/minimal_model/minimal_metadata.json"
+) as json_file:
     metadata = json.load(json_file)
 
 uploaded_model = client.upload_model(
@@ -102,3 +104,22 @@ print(f"Created new model: {uploaded_model}")
 
 # You can also grab and inspect the model schema used for validation:
 schema = client.get_model_schema(model_uuid)
+
+
+## You can download the code and binary for a model if you have a deployment
+
+user_deployments = client.get_my_deployments()
+
+if user_deployments:
+    deployment = user_deployments[0]
+
+    resp = client.download_model_files(
+        deployment["uuid"],
+        deployment["metadata"]["highLevelDetails"]["initialVersionRequested"],
+        file_type="code",
+        overwrite=True,
+    )
+
+
+## To get a specific deployment
+# deployment = client.find_my_deployment(deployment_name='', model_uuid='', model_version='')

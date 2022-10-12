@@ -57,7 +57,7 @@ UserSchema.pre('save', function userPreSave(next) {
   })
 })
 
-UserSchema.methods.compareToken = function (candidateToken: string) {
+UserSchema.methods.compareToken = function compareToken(candidateToken: string) {
   return new Promise((resolve, reject) => {
     if (!this.token) {
       resolve(false)

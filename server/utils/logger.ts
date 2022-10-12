@@ -156,7 +156,7 @@ export function createSerializer(options: SerializerOptions) {
   const optional = options.optional || []
   const serializable = options.serializable || []
 
-  return function (unserialized: any) {
+  return function serializer(unserialized: any) {
     if (!unserialized) {
       return unserialized
     }

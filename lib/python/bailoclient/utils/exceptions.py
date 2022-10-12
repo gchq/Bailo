@@ -35,3 +35,15 @@ class InvalidMetadata(Exception):
 
 class CannotIncrementVersion(Exception):
     """Unable to automatically increment a model card version"""
+
+
+class InvalidFileRequested(Exception):
+    """Invalid file type requested for download"""
+
+
+class DeploymentNotFound(Exception):
+    """Could not find a deployment"""
+
+
+class ModelFileExportNotAllowed(Exception):
+    """Exporting model files not allowed for this model"""

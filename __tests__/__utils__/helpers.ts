@@ -34,7 +34,7 @@ export async function screenshot(driver: WebDriver, name: string) {
 }
 
 export async function waitForElement(driver: WebDriver, selector: By) {
-  while (true) {
+  for (;;) {
     const element = await driver.wait(until.elementLocated(selector))
     await driver.sleep(500)
 

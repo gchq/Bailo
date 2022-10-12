@@ -65,7 +65,12 @@ function formatKid(keyBuffer: Buffer) {
     output += alphabet[idx]
   }
 
-  return output.match(/.{1,4}/g)!.join(':')
+  const match = output.match(/.{1,4}/g)
+  if (match === null) {
+    throw new Error('KeyBuffer format failed, match did not find any sections.')
+  }
+
+  return match.join(':')
 }
 
 async function getKid() {

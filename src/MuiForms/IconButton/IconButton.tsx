@@ -5,6 +5,7 @@ import Remove from '@mui/icons-material/Remove'
 import Button from '@mui/material/Button'
 import { IconButtonProps as MuiIconButtonProps } from '@mui/material/IconButton'
 import React from 'react'
+import { omit } from 'lodash'
 
 const mappings: any = {
   remove: Remove,
@@ -19,9 +20,17 @@ type IconButtonProps = MuiIconButtonProps & {
 }
 
 function IconButton(props: IconButtonProps) {
-  const { icon, className, iconProps, ...otherProps } = props
+  const { icon, ...otherProps } = props
   const IconComp = mappings[icon]
-  return <Button startIcon={<IconComp />} {...otherProps} variant='text' color='secondary' size='small' />
+  return (
+    <Button
+      startIcon={<IconComp />}
+      {...omit(otherProps, ['className', 'iconProps'])}
+      variant='text'
+      color='secondary'
+      size='small'
+    />
+  )
 }
 
 export default IconButton
