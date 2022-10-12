@@ -20,7 +20,6 @@ type IconButtonProps = MuiIconButtonProps & {
 }
 
 function IconButton(props: IconButtonProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { icon, ...otherProps } = props
   const IconComp = mappings[icon]
   return (
