@@ -1,14 +1,13 @@
-import UserModel from "../models/User"
-import { testUser } from "./test/testModels"
-import { getUserFromAuthHeader } from "./user"
+import UserModel from '../models/User'
+import { testUser } from './test/testModels'
+import { getUserFromAuthHeader } from './user'
 import './mockMongo'
 
 describe('user utils', () => {
-
   beforeEach(async () => {
     await UserModel.create({
       ...testUser,
-      token: 'password'
+      token: 'password',
     })
   })
 

@@ -5,8 +5,8 @@ module.exports = {
       useFindAndModify: false,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true
-    }
+      useCreateIndex: true,
+    },
   },
 
   minio: {
