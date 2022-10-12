@@ -1,6 +1,7 @@
 import TextField, { StandardTextFieldProps as TextFieldProps } from '@mui/material/TextField'
 import { utils, WidgetProps } from '@rjsf/core'
 import React from 'react'
+import { omit } from 'lodash'
 
 const { getDisplayLabel } = utils
 
@@ -23,8 +24,6 @@ function TextWidget({
   schema,
   uiSchema,
   rawErrors = [],
-  formContext,
-  registry, // pull out the registry so it doesn't end up in the textFieldProps
   ...textFieldProps
 }: TextWidgetProps) {
   const _onChange = ({ target: { value: newValue } }: React.ChangeEvent<HTMLInputElement>) =>
@@ -49,7 +48,7 @@ function TextWidget({
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
-      {...(textFieldProps as TextFieldProps)}
+      {...(omit(textFieldProps, ['formContext', 'registry']) as TextFieldProps)}
     />
   )
 }
