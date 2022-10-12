@@ -21,7 +21,7 @@ export default function Admin(): ReactElement {
 
   const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
     if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
-    else if (isLogLevelString(event.target.value)) setLogLevel(Number(event.target.value))
+    else if (isLogLevelString(event.target.value)) setLogLevel(parseInt(event.target.value, 10))
   }
 
   const handleResetDoSearch = useCallback((): void => setDoSearch(false), [])
