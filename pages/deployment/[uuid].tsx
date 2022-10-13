@@ -46,7 +46,7 @@ import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
-import isVersionDoc from '../../utils/type-guards/isVersionDoc'
+import { VersionDoc } from 'server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -110,13 +110,12 @@ export default function Deployment() {
 
   const theme = useTheme()
 
-  const initialVersionRequested = useMemo(() => {
+  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
     if (!deployment) return undefined
     const initialVersion = deployment.versions.find(
-      (version) =>
-        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
     )
-    return isVersionDoc(initialVersion) ? initialVersion : undefined
+    return initialVersion
   }, [deployment])
 
   const hasUploadType = useMemo(
@@ -227,7 +226,7 @@ export default function Deployment() {
                 color='primary'
                 disabled={
                   !hasUploadType ||
-                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                  initialVersionRequested?.metadata?.buildOptions.uploadType === ModelUploadType.ModelCard
                 }
                 startIcon={<Info />}
                 onClick={handleClickOpen}
