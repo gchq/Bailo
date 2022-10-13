@@ -46,7 +46,7 @@ import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
-import { VersionDoc } from 'server/models/Version'
+import { VersionDoc } from '../../server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
