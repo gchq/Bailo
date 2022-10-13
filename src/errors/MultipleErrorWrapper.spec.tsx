@@ -15,7 +15,9 @@ describe('MultipleErrorWrapper', () => {
   })
 
   it('renders an MultipleErrorWrapper component', async () => {
-    render(errorWrapper!)
+    if (errorWrapper) {
+      render(errorWrapper)
+    }
 
     await waitFor(async () => {
       expect(await screen.findByText('There was an error!')).not.toBeUndefined()

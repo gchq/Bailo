@@ -3,7 +3,7 @@ import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import React, { useMemo } from 'react'
+import React, { ChangeEvent, useMemo } from 'react'
 import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
@@ -17,12 +17,12 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
     [splitSchema.steps]
   )
 
-  const handleCodeChange = (e: any) => {
-    setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
+  const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, code: event.target.files[0] })
   }
 
-  const handleBinaryChange = (e: any) => {
-    setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
+  const handleBinaryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, binary: event.target.files[0] })
   }
 
   return (
@@ -77,18 +77,18 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     [step]
   )
 
-  const handleCodeChange = (e: any) => {
-    setStepState(splitSchema, setSplitSchema, step, { ...state, code: e.target.files[0] })
+  const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, code: event.target.files[0] })
   }
 
-  const handleBinaryChange = (e: any) => {
-    setStepState(splitSchema, setSplitSchema, step, { ...state, binary: e.target.files[0] })
+  const handleBinaryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, binary: event.target.files[0] })
   }
 
   const hasUploadType = useMemo(() => !!buildOptionsStep.state.uploadType, [buildOptionsStep])
 
   return (
-    <Box sx={{ pb: 4, pt: 4 }}>
+    <Box sx={{ py: 4 }}>
       {(!hasUploadType ||
         (buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip)) && (
         <Stack direction='row' spacing={2} alignItems='center'>
@@ -97,7 +97,7 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
         </Stack>
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
-        <Typography sx={{ pt: 2, pb: 2 }}>Uploading a model card without any code or binary files</Typography>
+        <Typography sx={{ py: 2 }}>Uploading a model card without any code or binary files</Typography>
       )}
     </Box>
   )

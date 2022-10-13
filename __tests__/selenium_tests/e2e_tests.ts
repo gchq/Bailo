@@ -26,8 +26,14 @@ const metadataPathModelCardEdit = fromRelative(config.get('samples.uploadMetadat
 const metadataPathModelCardNewVersion = fromRelative(config.get('samples.uploadMetadataModelCardNewVersion'))
 const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetadata'))
 
-const modelInfo: any = {}
-const modelCardOnlyInfo: any = {}
+const modelInfo = {
+  name: '',
+  url: '',
+}
+const modelCardOnlyInfo = {
+  name: '',
+  url: '',
+}
 let deploymentUrl = ''
 
 const BAILO_APP_URL = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -90,7 +96,10 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
         logger.info(`model name is ${mName}`)
 
@@ -106,7 +115,7 @@ describe('End to end test', () => {
         logger.info('getting api model')
         const model = await api.getModel(modelInfo.name)
 
-        while (true) {
+        for (;;) {
           logger.info('')
           const version = await model.getVersion('1')
 
@@ -159,7 +168,9 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
         logger.info(`model name is ${mName}`)
 
@@ -363,6 +374,8 @@ describe('End to end test', () => {
       await driver.wait(until.urlContains('/deployment/'))
       await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'Deployment name')]]")))
       deploymentUrl = await driver.getCurrentUrl()
+
+      logger.info(`deployment url is ${deploymentUrl}`)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
