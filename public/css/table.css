@@ -1,0 +1,13 @@
+table {
+  border-spacing: 0px;
+}
+
+td,
+th {
+  border-bottom: 1px solid rgba(81, 81, 81, 1);
+  padding: 8px;
+}
+
+tbody > tr:last-child > td {
+  border-bottom: 0;
+}
