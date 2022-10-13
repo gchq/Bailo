@@ -45,7 +45,7 @@ data:
       },
       uiConfig: {
         banner: {
-          enable: {{ .Values.config.ui.banner.enable }},
+          enable: {{ .Values.config.ui.banner.enabled }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
         },

@@ -165,7 +165,7 @@ config:
 
   ui:
     banner:
-      enable: "true"
+      enabled: "true"
       text: "Banner Text Here"
       colour: '#00CC00'
 
