@@ -90,7 +90,7 @@ function Model() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
-  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
