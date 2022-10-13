@@ -120,7 +120,7 @@ export default function Deployment() {
   }, [deployment])
 
   const hasUploadType = useMemo(
-    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions?.uploadType,
     [initialVersionRequested]
   )
 
@@ -184,7 +184,7 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -366,7 +366,7 @@ export default function Deployment() {
                 </Link>
                 page) {theme.palette.mode}
               </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
               <br />
 
               <p style={{ margin: 0 }}># Pull model</p>

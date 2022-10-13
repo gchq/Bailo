@@ -87,7 +87,7 @@ function Model() {
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
-  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)

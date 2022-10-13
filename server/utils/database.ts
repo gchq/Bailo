@@ -4,12 +4,7 @@ import logger from './logger'
 
 export async function connectToMongoose() {
   try {
-    await mongoose.connect(await config.get('mongo.uri'), {
-      useFindAndModify: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    })
+    await mongoose.connect(await config.get('mongo.uri'), config.get('mongo.connectionOptions'))
     logger.info('Connected to Mongoose')
   } catch (error) {
     logger.error({ error }, 'Error')
