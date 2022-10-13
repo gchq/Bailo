@@ -71,6 +71,7 @@
     "nodemon": "^2.0.15",
     "open": "^8.4.0",
     "openshift-rest-client": "^7.0.0",
+    "pako": "^2.0.4",
     "pretty-ms": "^7.0.1",
     "qs": "^6.10.3",
     "randomcolor": "^0.6.2",
