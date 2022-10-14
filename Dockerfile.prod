@@ -34,7 +34,11 @@ RUN apk add --no-cache libc6-compat img docker
 ENV NODE_ENV production
 ARG user_id=1001
 
-RUN adduser -D -u $user_id nextjs
+RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
+    && adduser -D -u $user_id nextjs \
+    && mkdir -p /run/user/$user_id \
+    && chown -R nextjs /run/user/$user_id /home/nextjs \
+    && echo nextjs:100000:65536 | tee /etc/subuid | tee /etc/subgid
 
 COPY --from=builder --chown=nextjs:0 /app/dist ./dist
 COPY --from=builder --chown=nextjs:0 /app/lib/p-mongo-queue ./dist/lib/p-mongo-queue
@@ -55,6 +59,7 @@ ENV USER nextjs
 ENV HOME /home/nextjs
 ENV PORT 3000
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV XDG_RUNTIME_DIR=/run/user/$user_id
 
 EXPOSE 3000
 
