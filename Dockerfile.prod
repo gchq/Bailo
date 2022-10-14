@@ -38,9 +38,13 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
     && adduser -D -u $user_id nextjs \
     && mkdir -p /run/user/$user_id \
     && chown -R nextjs /run/user/$user_id /home/nextjs \
-    && echo nextjs:100000:65536 | tee /etc/subuid | tee /etc/subgid \
     && addgroup -S certs \
-    && addgroup nextjs certs
+    && addgroup nextjs certs \
+    && chgrp certs /etc/ssl/certs \
+    && chmod 775 /etc/ssl/certs \
+    && chgrp certs /usr/local/share/ca-certificates \
+    && chmod 775 /usr/local/share/ca-certificates \
+    && echo nextjs:100000:65536 | tee /etc/subuid | tee /etc/subgid
 
 COPY --from=builder --chown=nextjs:0 /app/dist ./dist
 COPY --from=builder --chown=nextjs:0 /app/lib/p-mongo-queue ./dist/lib/p-mongo-queue
