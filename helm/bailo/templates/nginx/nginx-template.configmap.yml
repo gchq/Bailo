@@ -11,8 +11,6 @@ data:
     pid /tmp/nginx.pid; 
 
     error_log  /var/log/nginx/error.log;
-
-
     events { worker_connections 1024; }
 
     http {
@@ -22,13 +20,18 @@ data:
 
         sendfile on;
 
-        map $http_x_userid $req_userid {                                                 
-            default   $http_x_userid;                                               
-            ""        "user";                                                      
+        map $http_x_userid $req_userid {
+            default   $http_x_userid;
+            ""        "user";
+        }
+
+        map $http_x_userid $external_registry {
+            default   "https://{{ .Values.openshift.appPublicRoute }}";
+            ""        "https://{{ .Values.openshift.appPublicRoute }}";
         }
 
         map $upstream_http_www_authenticate $new_www_authenticate {
-            ~(?<pre_auth>.*realm=")(.*?)(?<post_auth>\/api\/v1\/registry_auth".*)   "$pre_auth$scheme://$host:$server_port$post_auth";
+            ~(?<pre_auth>.*realm=")(.*?)(?<post_auth>\/api\/v1\/registry_auth".*)   "$pre_auth$external_registry$post_auth";
             default "";
         }
 
