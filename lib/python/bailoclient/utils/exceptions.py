@@ -35,3 +35,15 @@ class InvalidMetadata(Exception):
 
 class CannotIncrementVersion(Exception):
     """Unable to automatically increment a model card version"""
+
+
+class UnableToCreateBailoClient(Exception):
+    """Unable to create BAILO client based on user input"""
+
+
+class MissingDotEnvFile(Exception):
+    """Unable to find dotenv file containing authentication parameters"""
+
+
+class IncompleteDotEnvFile(Exception):
+    """Dotenv file doesn't contain all required parameters for client authentication"""
