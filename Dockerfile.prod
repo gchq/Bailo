@@ -35,6 +35,8 @@ ENV NODE_ENV production
 ARG user_id=1001
 
 RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
+    && addgroup -S certs \
+    && addgroup nextjs certs \
     && adduser -D -u $user_id nextjs \
     && mkdir -p /run/user/$user_id \
     && chown -R nextjs /run/user/$user_id /home/nextjs \
