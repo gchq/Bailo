@@ -89,7 +89,9 @@ update_resp = client.update_model(
 print(f"Updated model: {update_resp}")
 
 # Create a new model
-with open("../../../__tests__/example_models/minimal_model/minimal_metadata.json") as json_file:
+with open(
+    "../../../__tests__/example_models/minimal_model/minimal_metadata.json"
+) as json_file:
     metadata = json.load(json_file)
 
 uploaded_model = client.upload_model(

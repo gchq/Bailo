@@ -1,8 +1,4 @@
-from bailoclient.utils.exceptions import (
-    IncompleteDotEnvFile,
-    MissingDotEnvFile,
-    UnableToCreateBailoClient,
-)
+from bailoclient.utils.exceptions import IncompleteDotEnvFile, MissingDotEnvFile, UnableToCreateBailoClient
 from .bindings import create_cognito_client, create_pki_client
 
 from dotenv import load_dotenv
@@ -155,13 +151,13 @@ class Bailo:
 
     def get_cognito_auth_properties(self):
         try:
-            userpool = os.environ["BAILO_USERPOOL"]
-            client_id = os.environ["BAILO_CLIENT_ID"]
-            client_secret = os.environ["BAILO_CLIENT_SECRET"]
-            region = os.environ["BAILO_REGION"]
+            userpool = os.environ["COGNITO_USERPOOL"]
+            client_id = os.environ["COGNITO_CLIENT_ID"]
+            client_secret = os.environ["COGNITO_CLIENT_SECRET"]
+            region = os.environ["COGNITO_REGION"]
             url = os.environ["BAILO_URL"]
-            username = os.environ["BAILO_USERNAME"]
-            password = os.environ["BAILO_PASSWORD"]
+            username = os.environ["COGNITO_USERNAME"]
+            password = os.environ["COGNITO_PASSWORD"]
 
         except KeyError as e:
             logger.info(
