@@ -84,7 +84,6 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
-          steps,
         },
         schemaRef: reference,
 
@@ -115,6 +114,10 @@ function Upload() {
         isComplete: () => true,
       })
     )
+
+    for (const step of steps) {
+      step.steps = steps
+    }
 
     setSplitSchema({ reference, steps })
   }, [currentSchema, user])

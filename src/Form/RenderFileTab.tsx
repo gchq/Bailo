@@ -96,13 +96,11 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 }
 
 export function fileTabComplete(step: Step) {
-  const buildOptionsStep = step.state.steps.find(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )
+  if (!step.steps) return false
 
-  const hasUploadType = !!buildOptionsStep.state.uploadType
+  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
 
-  console.log('buildOptionsStep', buildOptionsStep)
+  const hasUploadType = !!buildOptionsStep?.state?.uploadType
 
   if (!hasUploadType) {
     return false
@@ -124,9 +122,7 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
   const { state } = step
   const { binary, code, docker } = state
 
-  const buildOptionsStep = step.state.steps.find(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )
+  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
 
   const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, code: event.target.files[0] })

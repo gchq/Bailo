@@ -121,6 +121,8 @@ export interface Step {
   state: any
   index: number
 
+  steps?: Array<Step>
+
   type: StepType
   section: string
   schemaRef: string
