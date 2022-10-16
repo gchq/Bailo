@@ -17,8 +17,9 @@ export interface Version {
   reviewerLastViewed: DateString
 
   files: {
-    rawBinaryPath: string
-    rawCodePath: string
+    rawBinaryPath?: string
+    rawCodePath?: string
+    rawDockerPath?: string
   }
 
   state: any
