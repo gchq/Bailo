@@ -155,7 +155,7 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
         <Typography sx={{ py: 2 }}>Uploading a model card without any code or binary files</Typography>
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.Docker && (
-        <FileInput label='Select Docker' file={docker} onChange={handleDockerChange} accepts='.tar' />
+        <FileInput label='Select Docker Tar' file={docker} onChange={handleDockerChange} accepts='.tar' />
       )}
     </Box>
   )
