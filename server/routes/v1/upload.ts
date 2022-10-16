@@ -208,7 +208,7 @@ export const postUpload = [
           const rawBinaryPath = `model/${model._id}/version/${version._id}/raw/binary/${files.binary[0].path}`
           await moveFile(bucket, binaryFrom, rawBinaryPath)
 
-          const codeFrom = `${files.binary[0].bucket}/${files.binary[0].path}`
+          const codeFrom = `${files.code[0].bucket}/${files.code[0].path}`
           const rawCodePath = `model/${model._id}/version/${version._id}/raw/code/${files.code[0].path}`
           await moveFile(bucket, codeFrom, rawCodePath)
 
