@@ -140,7 +140,7 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
   }
 
-  const hasUploadType = !!buildOptionsStep.state.uploadType
+  const hasUploadType = !!buildOptionsStep?.state?.uploadType
 
   return (
     <Box sx={{ py: 4 }}>
