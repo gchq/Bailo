@@ -40,7 +40,7 @@ const VersionSchema = new Schema<Version>(
 
     metadata: { type: Schema.Types.Mixed },
 
-    files: { type: Schema.Types.Mixed, required: true },
+    files: { type: Schema.Types.Mixed, required: true, default: {} },
 
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },

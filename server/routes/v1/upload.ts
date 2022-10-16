@@ -114,7 +114,10 @@ export const postUpload = [
     let mode: UploadModes
     if (!req.query.mode) {
       mode = UploadModes.NewModel
-    } else if (typeof req.query.mode === 'string' && req.query.mode in UploadModes) {
+    } else if (
+      typeof req.query.mode === 'string' &&
+      Object.values(UploadModes).includes(req.query.mode as UploadModes)
+    ) {
       mode = UploadModes[req.query.mode]
     } else {
       throw BadReq(
