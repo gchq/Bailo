@@ -122,6 +122,10 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
   const { state } = step
   const { binary, code, docker } = state
 
+  if (!step.steps) {
+    return null
+  }
+
   const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
 
   const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
