@@ -220,6 +220,24 @@ export default function Deployment() {
                 </Alert>
               </Box>
             )}
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model was not built by Bailo and may not follow the standard format.
+                </Alert>
+              </Box>
+            )}
             <Box>
               <Button
                 variant='outlined'
@@ -294,13 +312,19 @@ export default function Deployment() {
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}
-                disabled={deployment.managerApproved !== 'Accepted'}
+                disabled={
+                  deployment.managerApproved !== 'Accepted' ||
+                  (hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType)
+                }
                 value='exports'
                 label={
                   <DisabledElementTooltip
                     conditions={[
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
+                        : '',
+                      hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType
+                        ? 'Model does not have raw artifacts attached'
                         : '',
                     ]}
                     placement='top'
