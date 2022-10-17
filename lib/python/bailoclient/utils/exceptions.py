@@ -47,3 +47,15 @@ class MissingDotEnvFile(Exception):
 
 class IncompleteDotEnvFile(Exception):
     """Dotenv file doesn't contain all required parameters for client authentication"""
+
+
+class InvalidFileRequested(Exception):
+    """Invalid file type requested for download"""
+
+
+class DeploymentNotFound(Exception):
+    """Could not find a deployment"""
+
+
+class ModelFileExportNotAllowed(Exception):
+    """Exporting model files not allowed for this model"""

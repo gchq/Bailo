@@ -1,7 +1,7 @@
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 
-export default function Copyright(props: any) {
+export default function Copyright(props: Record<string, unknown>) {
   return (
     <Typography variant='body2' color='text.secondary' align='center' {...props}>
       {'Copyright © '}

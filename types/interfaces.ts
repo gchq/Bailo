@@ -182,3 +182,7 @@ export enum UploadModes {
   NewModel = 'newModel',
   NewVersion = 'newVersion',
 }
+
+// Dates are in ISO 8601 format
+enum DateStringBrand {}
+export type DateString = string & DateStringBrand

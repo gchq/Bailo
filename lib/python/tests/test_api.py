@@ -3,7 +3,7 @@ import re
 from unittest.mock import MagicMock, patch
 
 import pytest
-import responses
+from glob import glob
 from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
 from requests.exceptions import JSONDecodeError
 
@@ -13,6 +13,8 @@ from ..bailoclient.utils.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
 )
+
+MINIMAL_MODEL_PATH = os.getenv("MINIMAL_MODEL_PATH")
 
 
 @pytest.fixture
@@ -70,9 +72,15 @@ def test_get_headers_returns_auth_headers(authorised_api):
 
 
 class MockResponse:
-    def __init__(self, response_json, status_code):
+    def __init__(self, response_json, status_code, content_required=False):
         self.response_json = response_json
         self.status_code = status_code
+
+        if content_required:
+            with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
+                content = zipfile.read()
+
+            self.content = content
 
     def json(self):
         if not self.response_json:
@@ -102,6 +110,18 @@ def test_handle_response_raises_unauthorised_exception_if_401_error_and_response
 def test_handle_response_raises_for_status_if_no_response_json(authorised_api):
     with pytest.raises(NoServerResponseMessage, match=re.escape("Server returned 401")):
         authorised_api._handle_response(MockResponse(None, 401))
+
+
+@patch.object(AuthorisedAPI, "_AuthorisedAPI__decode_file_content")
+def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(
+    mock_decode_file_content, authorised_api, tmpdir
+):
+    authorised_api._handle_response(
+        MockResponse({"result": "success"}, 200, content_required=True),
+        output_dir=tmpdir,
+    )
+
+    mock_decode_file_content.assert_called_once()
 
 
 @patch(
@@ -219,3 +239,14 @@ def test_put_calls_pkcs12_requests_get_if_pki_auth(mock_get, pki_authorised_api)
         timeout=pki_authorised_api.timeout_period,
         verify=pki_authorised_api.verify_certificates,
     )
+
+
+def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(
+    authorised_api, tmpdir
+):
+    with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
+        data = zipfile.read()
+
+    authorised_api._AuthorisedAPI__decode_file_content(data, tmpdir)
+
+    assert glob(f"{tmpdir}/model.bin")

@@ -24,7 +24,7 @@ function ObjectFieldTemplate({
     <>
       {(uiSchema['ui:title'] || title) && <TitleField id={`${idSchema.$id}-title`} title={title} required={required} />}
       {description && <DescriptionField id={`${idSchema.$id}-description`} description={description} />}
-      <Grid container spacing={2} sx={{ mt: 10 }}>
+      <Grid container spacing={2} sx={{ mt: '10px' }}>
         {properties.map((element) =>
           // Remove the <Grid> if the inner element is hidden as the <Grid>
           // itself would otherwise still take up space.

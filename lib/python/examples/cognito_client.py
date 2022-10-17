@@ -13,7 +13,7 @@ load_dotenv()
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-### Configure client based on local secrets
+## Configure client based on local secrets
 client = create_cognito_client(
     user_pool_id=os.getenv("COGNITO_USERPOOL"),
     client_id=os.getenv("COGNITO_CLIENT_ID"),
@@ -26,7 +26,7 @@ client = create_cognito_client(
 username = os.getenv("COGNITO_USERNAME")
 password = os.getenv("COGNITO_PASSWORD")
 
-### Connect to the Bailo instance
+## Connect to the Bailo instance
 client.connect(username=username, password=password)
 
 ## Get all models and output their ids

@@ -14,22 +14,18 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
 import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
-import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../src/theme'
 import { Request } from '../types/interfaces'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
-
-  const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
@@ -38,21 +34,18 @@ export default function Review() {
 
   return (
     <Wrapper title='Reviews' page='review'>
-      <>
-        {!isCurrentUserLoading && (
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={value}
-            onChange={handleChange}
-          >
-            <Tab value='user' label='My approvals' />
-            <Tab value='all' disabled={!currentUser?.roles.includes('admin')} label='All approvals (Admin)' />
-          </Tabs>
-        )}
-        <ApprovalList type='Upload' category={value} />
-        <ApprovalList type='Deployment' category={value} />
-      </>
+      <Tabs
+        indicatorColor='secondary'
+        textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+        value={value}
+        onChange={handleChange}
+      >
+        <Tab value='user' label='Approvals' />
+        <Tab value='archived' label='Archived' />
+      </Tabs>
+
+      <ApprovalList type='Upload' category={value} />
+      <ApprovalList type='Deployment' category={value} />
     </Wrapper>
   )
 }
@@ -72,7 +65,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
   const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
   const { mutateNumRequests } = useGetNumRequests()
@@ -141,8 +134,8 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
       </Typography>
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
-          <Grid container sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} sm={8}>
+          <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+            <Grid item xs={12} md={6} lg={7}>
               {type === 'Upload' && (
                 <>
                   <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
@@ -204,21 +197,29 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                 </>
               )}
             </Grid>
-            <Grid item xs={12} sm={4} sx={{ m: 'auto', textAlign: 'right' }}>
-              <Box>
+            <Grid item xs={12} md sx={{ display: 'flex' }}>
+              <Box ml='auto' my='auto'>
+                {requestObj.status !== 'No Response' && (
+                  <Chip label={requestObj.status} color={requestObj.status === 'Accepted' ? 'success' : 'error'} />
+                )}
+              </Box>
+            </Grid>
+            <Grid item sx={{ display: 'flex', width: 200 }}>
+              <Box ml='auto' my='auto'>
                 <Button
                   color='secondary'
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Declined', requestObj)}
                   variant='outlined'
+                  onClick={() => changeState('Declined', requestObj)}
+                  sx={{ mr: 1 }}
+                  disabled={requestObj.status === 'Declined'}
                 >
                   Reject
                 </Button>
                 <Button
-                  sx={{ m: 1 }}
-                  onClick={() => changeState('Accepted', requestObj)}
                   variant='contained'
+                  onClick={() => changeState('Accepted', requestObj)}
                   data-test='approveButton'
+                  disabled={requestObj.status === 'Accepted'}
                 >
                   Approve
                 </Button>

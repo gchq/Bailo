@@ -12,7 +12,7 @@ import SubmissionError from '../../../../src/Form/SubmissionError'
 import Wrapper from '../../../../src/Wrapper'
 import { SplitSchema } from '../../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
-import useCacheVariable from '../../../../utils/useCacheVariable'
+import useCacheVariable from '../../../../utils/hooks/useCacheVariable'
 
 function renderSubmissionTab({ activeStep, setActiveStep, onSubmit, modelUploading }: RenderButtonsInterface) {
   return (
@@ -117,7 +117,7 @@ function Upload() {
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <SubmissionError error={error} />
-      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} modelUploading={false} />
+      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
     </Paper>
   )
 }
