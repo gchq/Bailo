@@ -1,5 +1,7 @@
 """ Facade for Bailo client """
 
+# pylint: disable="line-too-long"
+
 import os
 import logging
 import getpass
@@ -215,7 +217,7 @@ class Bailo:
 
         except KeyError as err:
             logger.info(
-                "Can't find required environment variables for Cognito authentication: %s not found",
+                "Unable to find required environment variables for Cognito authentication: %s not found",
                 str(err),
             )
             raise KeyError(str(err)) from err
@@ -235,7 +237,7 @@ class Bailo:
 
         except KeyError as err:
             logger.info(
-                "Can't find required environment variables for PKI authentication: %s not found",
+                "Unable to find required environment variables for PKI authentication: %s not found",
                 str(err),
             )
             raise KeyError(str(err)) from err

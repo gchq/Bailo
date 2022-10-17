@@ -1,6 +1,0 @@
-[tool.pylint.messages_control]
-disable = [
-    "too-many-arguments",
-    "too-many-return-statements",
-    "too-many-boolean-expressions",
-]
