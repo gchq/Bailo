@@ -1,4 +1,8 @@
-from bailoclient.utils.exceptions import IncompleteDotEnvFile, MissingDotEnvFile, UnableToCreateBailoClient
+from bailoclient.utils.exceptions import (
+    IncompleteDotEnvFile,
+    MissingDotEnvFile,
+    UnableToCreateBailoClient,
+)
 from .bindings import create_cognito_client, create_pki_client
 
 from dotenv import load_dotenv
@@ -46,7 +50,7 @@ class Bailo:
                     "Unable to find a .env file in the project directory"
                 )
 
-            self.client = self.create_client_from_env()
+            self.client = self.__create_client_from_env()
             return
 
         # create pki client from input
@@ -79,7 +83,7 @@ class Bailo:
             "Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"
         )
 
-    def create_client_from_env(self):
+    def __create_client_from_env(self):
         cognito_success = True
         pki_success = True
 
@@ -93,30 +97,30 @@ class Bailo:
                 url,
                 username,
                 password,
-            ) = self.get_cognito_auth_properties()
+            ) = self.__get_cognito_auth_properties()
 
         except:
             cognito_success = False
 
+        # attempt to create cognito client
+        if cognito_success:
+            return self.cognito_client(
+                user_pool_id, client_id, client_secret, region, url, username, password
+            )
+
         # attempt to get p12 credentials
         try:
-            p12_file, ca_file, url = self.get_pki_auth_properties()
+            p12_file, ca_file, url = self.__get_pki_auth_properties()
 
         except:
             pki_success = False
 
-        if not cognito_success and not pki_success:
-            raise IncompleteDotEnvFile(
-                "Unable to get all the required Cognito or PKI auth properties from .env file"
-            )
-
-        # attempt to create pki client with p12 file
+        # attempt to create pki client
         if pki_success:
             return self.pki_client(p12_file, ca_file, url)
 
-        # attempt to create cognito client
-        return self.cognito_client(
-            user_pool_id, client_id, client_secret, region, url, username, password
+        raise IncompleteDotEnvFile(
+            "Unable to get all the required Cognito or PKI auth properties from .env file"
         )
 
     def cognito_client(
@@ -147,9 +151,11 @@ class Bailo:
             ca_verify=ca_verify,
         )
 
+        client.connect()
+
         return client
 
-    def get_cognito_auth_properties(self):
+    def __get_cognito_auth_properties(self):
         try:
             userpool = os.environ["COGNITO_USERPOOL"]
             client_id = os.environ["COGNITO_CLIENT_ID"]
@@ -164,10 +170,11 @@ class Bailo:
                 "Unable to find required environment variables for Cognito authentication: %s not found",
                 str(e),
             )
+            raise KeyError(str(e))
 
         return userpool, client_id, client_secret, region, url, username, password
 
-    def get_pki_auth_properties(self):
+    def __get_pki_auth_properties(self):
         try:
             p12_file = os.environ["P12_FILE"]
             ca_file = os.environ["CA_FILE"]
@@ -178,5 +185,6 @@ class Bailo:
                 "Unable to find required environment variables for PKI authentication: %s not found",
                 str(e),
             )
+            raise KeyError(str(e))
 
         return p12_file, ca_file, bailo_url
