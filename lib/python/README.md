@@ -79,7 +79,7 @@ You will need to add the additional authentication credentials in your .env file
 
 This example assumes the user will enter the certificate password manually so that the password is not stored on disk.
 
-You will need a CA file and a P12 file for authentication. The filepaths should be passed to the client. 
+You will need a CA file and a P12 file for authentication. The filepaths should be passed to the client.
 
 **P12_FILE**
 
@@ -99,8 +99,6 @@ You will need a CA file and a P12 file for authentication. The filepaths should 
 
 If authentication is not required you can use MockAuthentication()
 
-
-
 ## Testing
 
 To run the tests, run the following from the top-level directory of the Bailo Client (Bailo/lib/python):
@@ -115,18 +113,17 @@ To run the end-to-end tests:
 make e2e-test
 ```
 
+## Example usage
 
-## Example usage 
-
-It is recommended that you use the BAILO interface for interacting with the BAILO client. 
+It is recommended that you use the BAILO interface for interacting with the BAILO client.
 
 ### Using PKI
 
 ```
 from bailoclient import Bailo
 
-bailo = Bailo(pki_p12='path/to/p12', 
-                pki_ca='path/to/ca', 
+bailo = Bailo(pki_p12='path/to/p12',
+                pki_ca='path/to/ca',
                 bailo_url='http://localhost:8080/api/v1'
             )
 client = bailo.client
@@ -137,6 +134,7 @@ client.get_my_models()
 You will be prompted for your certificate password before you can connect.
 
 ### Using Cognito
+
 ```
 from bailoclient import Bailo
 
@@ -154,7 +152,7 @@ client.get_my_models()
 
 ```
 
-### Using a .env file 
+### Using a .env file
 
 With a .env file configured you can create your bailo instance with no config.
 
@@ -167,7 +165,6 @@ client = bailo.client
 client.get_my_models()
 
 ```
-
 
 There are example files for interacting direcly with the BAILO library at:
 
