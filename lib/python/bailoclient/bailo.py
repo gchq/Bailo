@@ -1,3 +1,11 @@
+""" Facade for Bailo client """
+
+import os
+import logging
+import getpass
+
+from dotenv import load_dotenv
+
 from bailoclient.utils.exceptions import (
     IncompleteDotEnvFile,
     MissingDotEnvFile,
@@ -5,17 +13,12 @@ from bailoclient.utils.exceptions import (
 )
 from .bindings import create_cognito_client, create_pki_client
 
-from dotenv import load_dotenv
-import getpass
-
-import logging
-import os
-
-
 logger = logging.getLogger(__name__)
 
 
 class Bailo:
+    """Facade for Bailo client"""
+
     def __init__(
         self,
         bailo_url: str = None,
@@ -80,10 +83,19 @@ class Bailo:
             return
 
         raise UnableToCreateBailoClient(
-            "Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"
+            """Ensure you have provided all the required Cognito or PKI parameters
+                and a valid BAILO URL"""
         )
 
     def __create_client_from_env(self):
+        """Create a Client from configuration saved in a .env file
+
+        Raises:
+            IncompleteDotEnvFile: .env file doesn't contain all the required config
+
+        Returns:
+            Client: Authorised client
+        """
         cognito_success = True
         pki_success = True
 
@@ -99,7 +111,7 @@ class Bailo:
                 password,
             ) = self.__get_cognito_auth_properties()
 
-        except:
+        except KeyError:
             cognito_success = False
 
         # attempt to create cognito client
@@ -112,7 +124,7 @@ class Bailo:
         try:
             p12_file, ca_file, url = self.__get_pki_auth_properties()
 
-        except:
+        except KeyError:
             pki_success = False
 
         # attempt to create pki client
@@ -124,22 +136,53 @@ class Bailo:
         )
 
     def cognito_client(
-        self, user_pool_id, client_id, client_secret, region, url, username, password
+        self,
+        user_pool_id: str,
+        client_id: str,
+        client_secret: str,
+        region: str,
+        bailo_url: str,
+        username: str,
+        password: str,
     ):
+        """Create an authorised Cognito client
+
+        Args:
+            user_pool_id (str): Cognito user pool ID
+            client_id (str): Cognito client ID
+            client_secret (str): Cognito client secret
+            region (str): Cognito region
+            bailo_url (str): Bailo URL
+            username (str): Cognito username
+            password (str): Cognito password
+
+        Returns:
+            Client: Authorised Bailo Client
+        """
 
         client = create_cognito_client(
             user_pool_id=user_pool_id,
             client_id=client_id,
             client_secret=client_secret,
             region=region,
-            url=url,
+            url=bailo_url,
         )
 
         client.connect(username=username, password=password)
 
         return client
 
-    def pki_client(self, p12_file, ca_verify, url):
+    def pki_client(self, p12_file: str, ca_verify: str, url: str):
+        """Create an authorised PKI client
+
+        Args:
+            p12_file (str): Path to P12 file
+            ca_verify (str): Path to CA file
+            url (str): Bailo URL
+
+        Returns:
+            Client: Authorised Bailo Client
+        """
         p12_pwd = getpass.getpass(
             prompt=f"Enter your password for {os.getenv('p12_file')}: "
         )
@@ -156,6 +199,11 @@ class Bailo:
         return client
 
     def __get_cognito_auth_properties(self):
+        """Extract properties required for Cognito auth from environment
+
+        Returns:
+            Tuple[str]): Values for Cognito config
+        """
         try:
             userpool = os.environ["COGNITO_USERPOOL"]
             client_id = os.environ["COGNITO_CLIENT_ID"]
@@ -165,26 +213,31 @@ class Bailo:
             username = os.environ["COGNITO_USERNAME"]
             password = os.environ["COGNITO_PASSWORD"]
 
-        except KeyError as e:
+        except KeyError as err:
             logger.info(
-                "Unable to find required environment variables for Cognito authentication: %s not found",
-                str(e),
+                "Can't find required environment variables for Cognito authentication: %s not found",
+                str(err),
             )
-            raise KeyError(str(e))
+            raise KeyError(str(err)) from err
 
         return userpool, client_id, client_secret, region, url, username, password
 
     def __get_pki_auth_properties(self):
+        """Extract properties required for PKI auth from environment
+
+        Returns:
+            Tuple[str]): Values for PKI config
+        """
         try:
             p12_file = os.environ["P12_FILE"]
             ca_file = os.environ["CA_FILE"]
             bailo_url = os.environ["BAILO_URL"]
 
-        except KeyError as e:
+        except KeyError as err:
             logger.info(
-                "Unable to find required environment variables for PKI authentication: %s not found",
-                str(e),
+                "Can't find required environment variables for PKI authentication: %s not found",
+                str(err),
             )
-            raise KeyError(str(e))
+            raise KeyError(str(err)) from err
 
         return p12_file, ca_file, bailo_url
