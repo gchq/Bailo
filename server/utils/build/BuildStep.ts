@@ -17,9 +17,12 @@ export abstract class BuildStep {
     retryable: false,
   }
 
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, _props?: any) {
+  props: any
+
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props?: any) {
     this.opts = { ...this.opts, ...opts }
     this.logger = logger
+    this.props = props
   }
 
   abstract name(version: VersionDoc, files: Files, state: any): Promise<string>

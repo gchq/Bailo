@@ -1,6 +1,12 @@
 module.exports = {
   mongo: {
     uri: 'mongodb://localhost:27017/bailo',
+    connectionOptions: {
+      useFindAndModify: false,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    },
   },
 
   minio: {
@@ -18,6 +24,7 @@ module.exports = {
   registry: {
     host: 'localhost:8080',
     port: 8080,
+    protocol: 'https',
 
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
