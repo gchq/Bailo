@@ -1,6 +1,6 @@
-from re import L
 from unittest import TestCase
 from unittest.mock import patch, Mock
+from bailoclient.auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from bailoclient.bailo import Bailo
 from bailoclient.utils.exceptions import (
     IncompleteDotEnvFile,
@@ -15,15 +15,30 @@ from tests.mocks.mock_api import MockAPI
 from tests.mocks.mock_auth import MockAuthentication
 from bailoclient.client import Client
 
-import logging
-
 BAILO_URL = os.environ["BAILO_URL"]
+
+
+@pytest.fixture()
+def mock_client():
+    config = BailoConfig(
+        api=APIConfig(url=BAILO_URL, ca_verify=True),
+    )
+    auth = MockAuthentication()
+    api = MockAPI(config, auth, "tests/resources/responses/responses.json")
+    return Client(config, authenticator=auth, api=api)
 
 
 @pytest.fixture()
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
 @patch("bailoclient.bailo.Bailo._Bailo__create_client_from_env")
 def bailo_client(mock_create_client, mock_load_dotenv):
+    config = BailoConfig(
+        api=APIConfig(url=BAILO_URL, ca_verify=True),
+    )
+    auth = MockAuthentication()
+
+    mock_create_client.return_value = config, auth
+
     return Bailo()
 
 
@@ -51,7 +66,7 @@ def test_create_client_from_env_raises_error_if_unable_to_find_complete_cognito_
         bailo_client._Bailo__create_client_from_env()
 
 
-@patch("bailoclient.bailo.Bailo.cognito_client")
+@patch("bailoclient.bailo.Bailo.cognito_client", return_value=("auth", "config"))
 def test_create_client_creates_cognito_client_if_properties_exist(
     mock_cognito_client, bailo_client
 ):
@@ -61,11 +76,9 @@ def test_create_client_creates_cognito_client_if_properties_exist(
         "client_secret",
         "region",
         "url",
-        "username",
-        "pwd",
     )
     bailo_client._Bailo__get_cognito_auth_properties = Mock(
-        return_value=cognito_properties
+        return_value=(*cognito_properties, "username", "password")
     )
 
     bailo_client._Bailo__create_client_from_env()
@@ -73,7 +86,7 @@ def test_create_client_creates_cognito_client_if_properties_exist(
     mock_cognito_client.assert_called_once_with(*cognito_properties)
 
 
-@patch("bailoclient.bailo.Bailo.pki_client")
+@patch("bailoclient.bailo.Bailo.pki_client", return_value=("auth", "config"))
 @patch(
     "bailoclient.bailo.Bailo._Bailo__get_cognito_auth_properties", side_effect=KeyError
 )
@@ -89,7 +102,7 @@ def test_create_client_creates_pki_if_cognito_success_false_and_pki_properties_e
     mock_pki_client.assert_called_once_with(*pki_properties)
 
 
-@patch("bailoclient.bailo.Bailo.cognito_client")
+@patch("bailoclient.bailo.Bailo.cognito_client", return_value=("one", "two"))
 @patch("bailoclient.bailo.Bailo._Bailo__get_pki_auth_properties")
 def test_create_client_skips_pki_if_cognito_client_success(
     mock_get_pki_properties, mock_cognito_client, bailo_client
@@ -166,43 +179,21 @@ def test_get_pki_auth_properties_raises_error_if_unable_to_find_properties_in_en
         bailo_client._Bailo__get_pki_auth_properties()
 
 
-@pytest.fixture()
-def mock_client():
-    config = BailoConfig(
-        api=APIConfig(url=BAILO_URL, ca_verify=True),
-    )
-    auth = MockAuthentication()
-    api = MockAPI(config, auth, "tests/resources/responses/responses.json")
-    return Client(config, authenticator=auth, api=api)
-
-
-@patch("bailoclient.client.Client.connect")
-def test_cognito_client_creates_connected_client(
-    mock_client_connect, mock_client, bailo_client
-):
-    bailo_client.create_cognito_client = Mock(return_value=mock_client)
-    bailo_client.create_cognito_client("id", "id", "secret", "region", "url")
-
-    bailo_client.cognito_client(
-        "pool_id", "client_id", "secret", "region", "url", "username", "password"
+def test_cognito_client_creates_config_for_authentication(bailo_client):
+    config, auth = bailo_client.cognito_client(
+        "pool_id", "client_id", "secret", "region", "url"
     )
 
-    bailo_client.create_cognito_client.assert_called_once()
-    mock_client.connect.assert_called_once()
+    assert isinstance(config, BailoConfig)
+    assert auth == CognitoSRPAuthenticator
 
 
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
-@patch("bailoclient.client.Client.connect")
-def test_pki_client_creates_connected_client(
-    mock_client_connect, mock_get_pass, mock_client, bailo_client
-):
-    bailo_client.create_pki_client = Mock(return_value=mock_client)
-    bailo_client.create_pki_client("p12/file", "ca/file", "url")
+def test_pki_client_creates_config_for_authentication(mock_get_pass, bailo_client):
+    config, auth = bailo_client.pki_client("p12/file", "ca/file", "url")
 
-    bailo_client.pki_client("p12/file", "ca/file", "url")
-
-    bailo_client.create_pki_client.assert_called_once()
-    mock_client.connect.assert_called_once()
+    assert isinstance(config, BailoConfig)
+    assert auth == Pkcs12Authenticator
 
 
 class TestLogging(TestCase):

@@ -5,6 +5,7 @@
 import os
 import logging
 import getpass
+from typing import Union
 
 from dotenv import load_dotenv
 
@@ -13,12 +14,16 @@ from bailoclient.utils.exceptions import (
     MissingDotEnvFile,
     UnableToCreateBailoClient,
 )
-from .bindings import create_cognito_client, create_pki_client
+from .client import Client
+
+from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
+from .client import Client
+from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
 
 logger = logging.getLogger(__name__)
 
 
-class Bailo:
+class Bailo(Client):
     """Facade for Bailo client"""
 
     def __init__(
@@ -55,12 +60,21 @@ class Bailo:
                     "Unable to find a .env file in the project directory"
                 )
 
-            self.client = self.__create_client_from_env()
+            config, auth, *creds = self.__create_client_from_env()
+            super().__init__(config, auth)
+
+            if creds:
+                username, password = creds
+                self.connect(username=username, password=password)
+            else:
+                self.connect()
             return
 
         # create pki client from input
         if pki_p12 and pki_ca and bailo_url:
-            self.client = self.pki_client(pki_p12, pki_ca, bailo_url)
+            config, auth = self.pki_client(pki_p12, pki_ca, bailo_url)
+            super().__init__(config, auth)
+            self.connect()
             return
 
         # create cognito client from input
@@ -73,20 +87,19 @@ class Bailo:
             and cognito_pwd
             and bailo_url
         ):
-            self.client = self.cognito_client(
+            config, auth = self.cognito_client(
                 cognito_user_pool_id,
                 cognito_client_id,
                 cognito_client_secret,
                 cognito_region,
                 bailo_url,
-                cognito_username,
-                cognito_pwd,
             )
+            super().__init__(config, auth)
+            self.connect(cognito_username, cognito_pwd)
             return
 
         raise UnableToCreateBailoClient(
-            """Ensure you have provided all the required Cognito or PKI parameters
-                and a valid BAILO URL"""
+            """Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"""
         )
 
     def __create_client_from_env(self):
@@ -118,9 +131,10 @@ class Bailo:
 
         # attempt to create cognito client
         if cognito_success:
-            return self.cognito_client(
-                user_pool_id, client_id, client_secret, region, url, username, password
+            config, auth = self.cognito_client(
+                user_pool_id, client_id, client_secret, region, url
             )
+            return config, auth, username, password
 
         # attempt to get p12 credentials
         try:
@@ -131,7 +145,8 @@ class Bailo:
 
         # attempt to create pki client
         if pki_success:
-            return self.pki_client(p12_file, ca_file, url)
+            config, auth = self.pki_client(p12_file, ca_file, url)
+            return config, auth
 
         raise IncompleteDotEnvFile(
             "Unable to get all the required Cognito or PKI auth properties from .env file"
@@ -144,8 +159,7 @@ class Bailo:
         client_secret: str,
         region: str,
         bailo_url: str,
-        username: str,
-        password: str,
+        ca_verify: Union[bool, str] = True,
     ):
         """Create an authorised Cognito client
 
@@ -162,17 +176,16 @@ class Bailo:
             Client: Authorised Bailo Client
         """
 
-        client = create_cognito_client(
+        cognito_config = CognitoConfig(
             user_pool_id=user_pool_id,
             client_id=client_id,
             client_secret=client_secret,
             region=region,
-            url=bailo_url,
         )
+        api_config = APIConfig(url=bailo_url, ca_verify=ca_verify)
+        config = BailoConfig(cognito=cognito_config, api=api_config)
 
-        client.connect(username=username, password=password)
-
-        return client
+        return config, CognitoSRPAuthenticator
 
     def pki_client(self, p12_file: str, ca_verify: str, url: str):
         """Create an authorised PKI client
@@ -189,16 +202,11 @@ class Bailo:
             prompt=f"Enter your password for {os.getenv('p12_file')}: "
         )
 
-        client = create_pki_client(
-            url=url,
-            pkcs12_filename=p12_file,
-            pkcs12_password=p12_pwd,
-            ca_verify=ca_verify,
-        )
+        pki_config = Pkcs12Config(pkcs12_filename=p12_file, pkcs12_password=p12_pwd)
+        api_config = APIConfig(url=url, ca_verify=ca_verify)
+        config = BailoConfig(pki=pki_config, api=api_config)
 
-        client.connect()
-
-        return client
+        return config, Pkcs12Authenticator
 
     def __get_cognito_auth_properties(self):
         """Extract properties required for Cognito auth from environment
