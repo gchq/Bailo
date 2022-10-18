@@ -250,28 +250,65 @@ class Client:
         ]
 
     @handle_reconnect
-    def get_model_card(self, model_uuid: str = None, model_id: str = None):
-        """Retrieve model card by either the external model UUID or the internal model ID
+    def get_model_card(self, model_uuid: str, model_version: str = None):
+        """Get a model by its UUID. Optionally retrieve a specific version of a model.
 
         Args:
-            model_uuid (str): external UUID of a model, e.g. fasttext-language-identification-89knco
-            model_id (str): internal ID of a model, e.g. 62d9abb7e5eb14ee63823618
+            model_uuid (str): Model UUID
+            model_version (str, optional): Model version name/number. Defaults to None.
+
+        Returns:
+            dict: Requested model
         """
 
-        if model_uuid:
-            return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
+        if model_version:
+            return self.__model(
+                self.api.get(f"model/{model_uuid}/version/{model_version}")
+            )
 
-        if model_id:
-            return self.__model(self.api.get(f"model/id/{model_id}"))
+        return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
 
-        raise ValueError(
-            "You must provide either a model_uuid or model_id to retrieve a model card"
-        )
+    @handle_reconnect
+    def _get_model_card_by_id(self, model_id: str):
+        """Internal method to retrieve model card by its internal ID (e.g. 62d9abb7e5eb14ee63823618)
+
+        Args:
+            model_id (str): Internal model ID
+
+        Returns:
+            dict: Requested model
+        """
+        return self.__model(self.api.get(f"model/id/{model_id}"))
+
+    @handle_reconnect
+    def get_model_versions(self, model_uuid: str):
+        """Get all versions of a model
+
+        Args:
+            model_uuid (str): Model UUID
+
+        Returns:
+            List[dict]: List of versions
+        """
+        return self.api.get(f"model/{model_uuid}/versions")
+
+    @handle_reconnect
+    def get_model_deployments(self, model_uuid: str):
+        """Get all deployments of a model
+
+        Args:
+            model_uuid (str): Model UUID
+
+        Returns:
+            List[dict]: List of deployments of the model
+        """
+        return self.api.get(f"model/{model_uuid}/deployments")
 
     def _validate_uploads(
         self,
         card: Model = None,
         metadata: dict = None,
+        minimal_metadata_path: str = None,
         binary_file: str = None,
         code_file: str = None,
     ):
@@ -302,23 +339,24 @@ class Client:
                 raise DataInvalid(f"Model invalid: {validation.errors}")
 
         if metadata:
-            result = self.__validate_metadata(metadata)
+            result = self.__validate_metadata(metadata, minimal_metadata_path)
 
             if not result["valid"]:
                 raise InvalidMetadata(
                     f"Metadata {result['error_message']} - refer to minimal_metadata"
                 )
 
-        for file_path in [binary_file, code_file]:
-            # TODO check that it's some compressed format supported by Patool
-            # (used in workflow-extract-files-from-minio)
-            if file_path and not os.path.exists(file_path):
-                raise InvalidFilePath(f"{file_path} does not exist")
+        if binary_file and code_file:
+            for file_path in [binary_file, code_file]:
+                # TODO check that it's some compressed format supported by Patool
+                # (used in workflow-extract-files-from-minio)
+                if file_path and not os.path.exists(file_path):
+                    raise InvalidFilePath(f"{file_path} does not exist")
 
-            if file_path and os.path.isdir(file_path):
-                raise InvalidFilePath(f"{file_path} is a directory")
+                if file_path and os.path.isdir(file_path):
+                    raise InvalidFilePath(f"{file_path} is a directory")
 
-    def __validate_metadata(self, model_metadata: dict):
+    def __validate_metadata(self, model_metadata: dict, minimal_metadata_path: str):
         """Validate user metadata against the minimal metadata required to
            upload a model
 
@@ -328,9 +366,7 @@ class Client:
         Returns:
             dict: Dictionary of validity and error messages
         """
-        with open(
-            "bailoclient/resources/minimal_metadata.json", encoding="utf-8"
-        ) as json_file:
+        with open(minimal_metadata_path, encoding="utf-8") as json_file:
             minimal_metadata = json.load(json_file)
 
         return minimal_keys_in_dictionary(minimal_metadata, model_metadata)
@@ -374,8 +410,8 @@ class Client:
     def _generate_payload(
         self,
         metadata: dict,
-        binary_file: str,
-        code_file: str,
+        binary_file: str = None,
+        code_file: str = None,
     ) -> MultipartEncoder:
         """Generate payload for posting a new or updated model
 
@@ -392,10 +428,11 @@ class Client:
         """
         payloads = [("metadata", metadata)]
 
-        for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
-            fname, mtype = get_filename_and_mimetype(full_filename)
-            with open(full_filename, "rb") as file:
-                payloads.append((tag, (fname, file.read(), mtype)))
+        if binary_file and code_file:
+            for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
+                fname, mtype = get_filename_and_mimetype(full_filename)
+                with open(full_filename, "rb") as file:
+                    payloads.append((tag, (fname, file.read(), mtype)))
 
         data = MultipartEncoder(payloads)
 
@@ -434,7 +471,10 @@ class Client:
         metadata_json = json.dumps(metadata)
 
         self._validate_uploads(
-            binary_file=binary_file, code_file=code_file, metadata=metadata
+            binary_file=binary_file,
+            code_file=code_file,
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
         )
 
         payload = self._generate_payload(metadata_json, binary_file, code_file)
@@ -466,6 +506,22 @@ class Client:
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
+
+    @handle_reconnect
+    def request_deployment(self, metadata):
+
+        # validate that the metadata contains all the required fields (add a similar method for the model one)
+        # generate the payload from the metadata
+        # do the post
+
+        self._validate_uploads(
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/deployment.json",
+        )
+
+        payload = self._generate_payload(metadata)
+
+        self.api.post("/deployment", request_body=payload)
 
     @handle_reconnect
     def update_model(
