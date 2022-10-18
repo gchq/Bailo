@@ -57,7 +57,7 @@ export const putVersion = [
       getUserById(version.metadata.contacts.reviewer),
     ])
 
-    await RequestModel.remove({
+    await RequestModel.deleteMany({
       version: version._id,
       request: 'Upload',
       $or: [

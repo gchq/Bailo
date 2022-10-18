@@ -71,6 +71,10 @@ function Upload() {
       })
     )
 
+    for (const step of schemaSteps) {
+      step.steps = schemaSteps
+    }
+
     setSplitSchema({ reference: cSchema.reference, steps: schemaSteps })
   }, [cSchema, cVersion, splitSchema.steps.length])
 

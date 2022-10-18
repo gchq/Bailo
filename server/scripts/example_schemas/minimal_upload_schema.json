@@ -109,8 +109,9 @@
         "uploadType": {
           "type": "string",
           "title": "Upload type",
+          "default": "Code and binaries",
           "description": "Select the type of model upload that you want",
-          "enum": ["Code and binaries", "Model card only"]
+          "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
         }
       },
       "required": ["uploadType"]
