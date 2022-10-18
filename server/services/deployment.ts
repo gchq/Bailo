@@ -97,10 +97,10 @@ export async function createDeployment(user: UserDoc, data: CreateDeployment) {
 
 export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, version: VersionDoc) {
   const deployments = await findDeployments(user, { model: modelId })
-  if (deployments.length !== 0) {
-    deployments.forEach((deployment: DeploymentDoc) => {
+  await Promise.all(
+    deployments.map((deployment) => {
       deployment.versions.push(version)
-      deployment.save()
+      return deployment.save()
     })
-  }
+  )
 }
