@@ -14,7 +14,6 @@ from bailoclient.utils.exceptions import (
     MissingDotEnvFile,
     UnableToCreateBailoClient,
 )
-from .client import Client
 
 from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from .client import Client
@@ -61,21 +60,10 @@ class Bailo(Client):
                 )
 
             config, auth, *creds = self.__create_client_from_env()
-            super().__init__(config, auth)
-
-            if creds:
-                username, password = creds
-                self.connect(username=username, password=password)
-            else:
-                self.connect()
-            return
 
         # create pki client from input
         if pki_p12 and pki_ca and bailo_url:
             config, auth = self.pki_client(pki_p12, pki_ca, bailo_url)
-            super().__init__(config, auth)
-            self.connect()
-            return
 
         # create cognito client from input
         if (
@@ -94,13 +82,22 @@ class Bailo(Client):
                 cognito_region,
                 bailo_url,
             )
-            super().__init__(config, auth)
-            self.connect(cognito_username, cognito_pwd)
-            return
+            creds = cognito_username, cognito_pwd
 
-        raise UnableToCreateBailoClient(
-            """Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"""
-        )
+        try:
+            super().__init__(config, auth)
+
+        except NameError as err:
+            raise UnableToCreateBailoClient(
+                """Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"""
+            ) from err
+
+        try:
+            username, password = creds
+            self.connect(username=username, password=password)
+
+        except ValueError:
+            self.connect()
 
     def __create_client_from_env(self):
         """Create a Client from configuration saved in a .env file

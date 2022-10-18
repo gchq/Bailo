@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import MagicMock, patch, Mock
 from bailoclient.auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from bailoclient.bailo import Bailo
 from bailoclient.utils.exceptions import (
@@ -186,6 +186,71 @@ def test_cognito_client_creates_config_for_authentication(bailo_client):
 
     assert isinstance(config, BailoConfig)
     assert auth == CognitoSRPAuthenticator
+
+
+@patch("bailoclient.bailo.load_dotenv", return_value=True)
+@patch(
+    "bailoclient.bailo.Bailo._Bailo__create_client_from_env",
+    return_value=("config", "auth", ("username", "pwd")),
+)
+def test_bailo_calls_super_init_if_auth_config_found(
+    mock_create_client_env, mock_load_dotenv
+):
+    Client.__init__ = MagicMock()
+    Client.connect = Mock()
+
+    bailo = Bailo()
+
+    Client.__init__.assert_called_once_with("config", "auth")
+
+
+@patch("bailoclient.bailo.load_dotenv", return_value=True)
+def test_bailo_raises_error_if_not_all_config_provided_for_auth(mock_load_dotenv):
+    Client.__init__ = MagicMock()
+
+    with pytest.raises(UnableToCreateBailoClient):
+        bailo = Bailo(cognito_client_id="id")
+
+
+@patch.dict(
+    os.environ,
+    {
+        "COGNITO_USERPOOL": "id",
+        "COGNITO_CLIENT_ID": "client_id",
+        "COGNITO_CLIENT_SECRET": "client_secret",
+        "COGNITO_REGION": "region",
+        "BAILO_URL": "url",
+        "COGNITO_USERNAME": "username",
+        "COGNITO_PASSWORD": "password",
+    },
+)
+@patch("bailoclient.bailo.load_dotenv", return_value=True)
+def test_bailo_calls_connect_with_username_and_password_if_cognito_auth(
+    mock_load_dotenv,
+):
+    Client.__init__ = MagicMock()
+    Client.connect = Mock()
+
+    bailo = Bailo()
+
+    Client.connect.assert_called_once_with(username="username", password="password")
+
+
+@patch.dict(
+    os.environ,
+    {"P12_FILE": "file/path", "CA_FILE": "ca/file/path", "BAILO_URL": "bailo_url"},
+)
+@patch("bailoclient.bailo.load_dotenv", return_value=True)
+@patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
+def test_bailo_calls_connect_with_no_params_if_pki_auth(
+    mock_get_pass, mock_load_dotenv
+):
+    Client.__init__ = MagicMock()
+    Client.connect = Mock()
+
+    bailo = Bailo()
+
+    Client.connect.assert_called_once_with()
 
 
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
