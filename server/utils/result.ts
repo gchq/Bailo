@@ -32,3 +32,7 @@ export function NotFound(data: any, message: string, logger?: any) {
 export function Conflict(data: any, message: string, logger?: any) {
   return GenericError(data, message, 409, logger)
 }
+
+export function NotImplemented(data: any, message: string, logger?: any) {
+  return GenericError(data, message, 501, logger)
+}

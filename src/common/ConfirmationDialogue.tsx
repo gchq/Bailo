@@ -19,14 +19,14 @@ export default function ConfirmationDialogue({
   title,
   onCancel,
   onConfirm,
-  errorMessage,
+  errorMessage = '',
 }: ConfirmationDialogProps) {
   return (
     <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>Are you sure you want to perform this action?</Typography>
-        {errorMessage && (
+        {errorMessage !== '' && (
           <Alert severity='error' sx={{ mt: 2 }}>
             {errorMessage}
           </Alert>

@@ -246,7 +246,7 @@ function Model() {
     if (response.ok) {
       router.push('/')
     } else {
-      setDeleteModelErrorMessage(`Error ${response.status}: ${response.statusText}`)
+      setDeleteModelErrorMessage(`Error ${response.statusText}: ${(await response.json()).message}`)
     }
   }
 

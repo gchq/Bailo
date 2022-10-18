@@ -22,8 +22,8 @@ describe('ConfirmationDialogue', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText(testTitle)).not.toBeUndefined()
-      expect(await screen.findByText(testError)).not.toBeUndefined()
+      expect(await screen.findByText(testTitle)).toBeDefined()
+      expect(await screen.findByText(testError)).toBeDefined()
     })
   })
 

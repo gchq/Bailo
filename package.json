@@ -62,6 +62,7 @@
     "mongodb": "^4.5.0",
     "mongodb-memory-server": "^8.5.2",
     "mongoose": "^5.13.14",
+    "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.4",
     "nanoid": "^3.1.31",

@@ -7,8 +7,12 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
-import DeploymentModel from '../../models/Deployment'
-import ModelModel from '../../models/Model'
+import {
+  deleteDeploymentsByInitialVersion,
+  deleteVersionRequests,
+  updateDeploymentsByVersion,
+  updateModelByVersion,
+} from '../../utils/modelCleanUp'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -157,36 +161,10 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const versionRequests = await RequestModel.find({ version: version._id })
-    if (versionRequests.length > 0) {
-      await Promise.all(versionRequests.map((versionRequest) => versionRequest.delete()))
-    }
-
-    const deployments = await DeploymentModel.find({ versions: { $in: [id] } })
-    if (deployments.length > 0) {
-      deployments.forEach(async (deployment) => {
-        deployment.versions.remove(id)
-        if (deployment.versions.length === 0) {
-          const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
-          if (deploymentRequests.length > 0) {
-            await Promise.all(deploymentRequests.map((deploymentRequest) => deploymentRequest.delete()))
-          }
-          await deployment.delete()
-        } else {
-          await deployment.save()
-        }
-      })
-    }
-
-    const model = await ModelModel.findById(version.model)
-    if (model) {
-      model.versions.remove(id)
-      if (model.versions.length === 0) {
-        await model.delete()
-      } else {
-        await model.save()
-      }
-    }
+    await deleteVersionRequests(version)
+    await updateDeploymentsByVersion(version, user)
+    await deleteDeploymentsByInitialVersion(version)
+    await updateModelByVersion(version)
 
     await version.delete()
 

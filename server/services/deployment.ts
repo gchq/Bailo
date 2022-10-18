@@ -1,4 +1,6 @@
 import { castArray } from 'lodash'
+import https from 'https'
+import config from 'config'
 import { ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
@@ -8,6 +10,7 @@ import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
+import { getAccessToken } from '../routes/v1/registryAuth'
 
 const auth = new Authorisation()
 
@@ -15,6 +18,10 @@ interface GetDeploymentOptions {
   populate?: boolean
   showLogs?: boolean
 }
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: !config.get('registry.insecure'),
+})
 
 export function serializedDeploymentFields(): SerializerOptions {
   return {
@@ -103,4 +110,37 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
       deployment.save()
     })
   }
+}
+
+export async function deleteRegistryObjects(user: UserDoc, deployment: DeploymentDoc, namespace: string) {
+  let digest = ''
+  const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
+
+  const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
+    { type: 'repository', name: `internal/${modelID}`, actions: ['delete'] },
+    { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
+    { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull', 'delete'] },
+  ])
+  const authorisation = `Bearer ${token}`
+  const registry = `https://${config.get('registry.host')}/v2`
+
+  await fetch(`${registry}/${namespace}/${modelID}/manifests/${initialVersionRequested}`, {
+    method: 'HEAD',
+    headers: {
+      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+      Authorization: authorisation,
+    },
+    agent: httpsAgent,
+  } as RequestInit).then((res: any) => {
+    digest = res.headers.get('docker-content-digest')
+  })
+
+  await fetch(`${registry}/${namespace}/${modelID}/manifests/${digest}`, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+      Authorization: authorisation,
+    },
+    agent: httpsAgent,
+  } as RequestInit).then((res: any) => res.json())
 }

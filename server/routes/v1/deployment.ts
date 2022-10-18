@@ -202,7 +202,7 @@ export const fetchRawModelFiles = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
-    const versionDocument = await findVersionByName(req.user!, deployment.model, version)
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
 
     if (!versionDocument) {
       throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)

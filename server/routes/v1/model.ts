@@ -3,7 +3,7 @@ import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
-import { BadReq, NotFound, Unauthorised } from '../../utils/result'
+import { BadReq, NotFound, NotImplemented } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
 export const getModels = [
@@ -167,7 +167,6 @@ export const getModelVersion = [
 export const deleteModel = [
   ensureUserRole('user'),
   async (_req: Request, _res: Response) => {
-    // This API is temporarily locked down
-    throw Unauthorised({}, 'This API call is temporarily unavailable')
+    throw NotImplemented({}, 'This API call is temporarily unavailable')
   },
 ]
