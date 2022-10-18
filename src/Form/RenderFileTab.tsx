@@ -12,10 +12,11 @@ import FileInput from '../common/FileInput'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code } = state
+  const { binary, code, docker } = state
 
   const codeId = 'select-code-file'
   const binaryId = 'select-binary-file'
+  const dockerId = 'select-docker-file'
 
   const Input = styled('input')({
     display: 'none',
@@ -32,6 +33,10 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 
   const handleBinaryChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, binary: event.target.files[0] })
+  }
+
+  const handleDockerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
   }
 
   const displayFilename = (filename: string) => {
@@ -73,35 +78,55 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
         <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
       )}
+      {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Docker && (
+        <Box sx={{ textAlign: 'center' }}>
+          <label htmlFor={dockerId}>
+            <Typography sx={{ p: 1 }} variant='h5'>
+              Upload a Docker file (.tar)
+            </Typography>
+            <Input style={{ margin: '10px' }} id={dockerId} type='file' onChange={handleDockerChange} accept='.tar' />
+            <Button variant='outlined' component='span'>
+              {docker ? displayFilename(docker.name) : 'Upload Docker'}
+            </Button>
+          </label>
+        </Box>
+      )}
     </Grid>
   )
 }
 
 export function fileTabComplete(step: Step) {
-  const buildOptionsStep = step.state.steps.find(
-    (buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'
-  )
-  const hasUploadType = !!buildOptionsStep.state.uploadType
+  if (!step.steps) return false
+
+  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
+
+  const hasUploadType = !!buildOptionsStep?.state?.uploadType
+
   if (!hasUploadType) {
-    return true
+    return false
   }
-  return (
-    (buildOptionsStep !== undefined &&
-      buildOptionsStep.state.uploadType === ModelUploadType.Zip &&
-      step.state.binary &&
-      step.state.code) ||
-    buildOptionsStep.state.uploadType === ModelUploadType.ModelCard
-  )
+
+  switch (buildOptionsStep.state.uploadType) {
+    case ModelUploadType.ModelCard:
+      return true
+    case ModelUploadType.Zip:
+      return step.state.binary && step.state.code
+    case ModelUploadType.Docker:
+      return !!step.state.docker
+    default:
+      return false
+  }
 }
 
 export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code } = state
+  const { binary, code, docker } = state
 
-  const buildOptionsStep = useMemo(
-    () => step.state.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
-    [step]
-  )
+  if (!step.steps) {
+    return null
+  }
+
+  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
 
   const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, code: event.target.files[0] })
@@ -111,7 +136,11 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, binary: event.target.files[0] })
   }
 
-  const hasUploadType = useMemo(() => !!buildOptionsStep.state.uploadType, [buildOptionsStep])
+  const handleDockerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
+  }
+
+  const hasUploadType = !!buildOptionsStep?.state?.uploadType
 
   return (
     <Box sx={{ py: 4 }}>
@@ -124,6 +153,9 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
         <Typography sx={{ py: 2 }}>Uploading a model card without any code or binary files</Typography>
+      )}
+      {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.Docker && (
+        <FileInput label='Select Docker Tar' file={docker} onChange={handleDockerChange} accepts='.tar' />
       )}
     </Box>
   )

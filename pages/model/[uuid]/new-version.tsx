@@ -98,6 +98,10 @@ function Upload() {
       })
     )
 
+    for (const step of steps) {
+      step.steps = steps
+    }
+
     setSplitSchema({ reference: cSchema.reference, steps })
   }, [cModel, cSchema])
 
