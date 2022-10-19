@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,7 +11,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "bailo.selectorLabels" . | nindent 6 }}
+      {{- include "bailo.selectorLabels" . | nindent 6}}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,6 +21,7 @@ spec:
       labels:
         {{- include "bailo.selectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: bailo-builder
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -30,7 +32,8 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          #image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: MINIO_ACCESS_KEY
@@ -44,15 +47,17 @@ spec:
                   name: {{ include "bailo.fullname" . }}-minio
                   key: root-password
             - name: MONGO_PASSWORD
-              valueFrom: 
+              valueFrom:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-mongodb
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
               value: {{ include "bailo.mongoConnectionURI" . | quote }}
+            - name: SCHEMA_SETUP_SCRIPT
+              value: {{ .Values.config.schema.script }}
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -77,6 +82,9 @@ spec:
               mountPath: /tmp
             - name: cache
               mountPath: /app/.next/cache
+            - name: certs
+              mountPath: /usr/local/share/ca-certificates/bailo.pem
+              subPath: cert.pem
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -92,7 +100,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "bailo.fullname" . }}
+            name: {{ include "bailo.fullname" . }}-config
             items:
               - key: production.js
                 path: production.js
@@ -100,7 +108,7 @@ spec:
                 path: custom-environment-variables.js
         - name: certs
           secret:
-            secretName: {{ include "bailo.fullname" . }}
+            secretName: {{ include "bailo.fullname" . }}-certs
             items:
               - key: cert.pem
                 path: cert.pem

@@ -1,0 +1,19 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ include "bailo.fullname" . }}
+  namespace: {{ .Values.openshift.namespace }}
+  labels:
+    name: nginx
+spec:
+  host: {{ .Values.openshift.appPublicRoute }}
+  to:
+    kind: Service
+    name: nginxauth
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
