@@ -1,5 +1,7 @@
+import config from 'config'
+
 // eslint-disable-next-line import/no-relative-packages
-import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
+import { QueueMessage } from '../../lib/p-mongo-queue'
 import { findVersionById, markVersionBuilt } from '../services/version'
 import logger from '../utils/logger'
 import { getUserByInternalId } from '../services/user'
@@ -10,6 +12,7 @@ import getRawFiles from '../utils/build/GetRawFiles'
 import extractFiles from '../utils/build/ExtractFiles'
 import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile'
 import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile'
+import openshiftBuildDockerfile from '../utils/build/OpenShiftBuildDockerfile'
 import pushDockerTar from '../utils/build/PushDockerTar'
 import { getUploadQueue } from '../utils/queues'
 import { ModelUploadType } from '../../types/interfaces'
@@ -44,8 +47,13 @@ export default async function processUploads() {
           },
           { construct: extractFiles() },
           { construct: getSeldonDockerfile() },
-          { construct: imgBuildDockerfile() },
         ])
+
+        if (config.get('build.environment') === 'openshift') {
+          tasks.push({ construct: openshiftBuildDockerfile() })
+        } else {
+          tasks.push({ construct: imgBuildDockerfile() })
+        }
         break
       case ModelUploadType.Docker:
         tasks = tasks.concat([
@@ -58,7 +66,6 @@ export default async function processUploads() {
     }
 
     const buildHandler = new BuildHandler(tasks)
-
     await buildHandler.process(version, {
       binary: msg.payload.binary,
       code: msg.payload.code,

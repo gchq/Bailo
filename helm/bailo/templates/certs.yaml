@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "bailo.fullname" . }}
+  name: {{ include "bailo.fullname" . }}-certs
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
 type: Opaque

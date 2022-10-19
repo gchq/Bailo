@@ -1,6 +1,21 @@
 import { exec } from 'shelljs'
+import config from 'config'
 
+import logger from '../logger'
 import { BuildLogger } from './BuildLogger'
+
+export async function pullBuilderImage() {
+  if (config.get('build.environment') === 'openshift') {
+    logger.info('Running in Openshift, so not pulling base image')
+    return
+  }
+
+  await runCommand(
+    `img pull ${config.get('s2i.builderImage')}`,
+    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.info({}, msg)),
+    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.error({}, msg))
+  )
+}
 
 export interface FileRef {
   path: string
@@ -8,11 +23,11 @@ export interface FileRef {
   name: string
 }
 
-export function logCommand(command: string, logger: BuildLogger) {
+export function logCommand(command: string, buildLogger: BuildLogger) {
   return runCommand(
     command,
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.info({}, msg)),
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.error({}, msg))
+    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.info({}, msg)),
+    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.error({}, msg))
   )
 }
 

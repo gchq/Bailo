@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bailo.fullname" . }}-registry
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+data:
+  registry.conf: |
+    version: 0.1
+    log:
+      level: debug
+      fields:
+        service: registry
+    storage:
+      cache:
+        blobdescriptor: inmemory
+      s3:
+        regionendpoint: {{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
+        bucket: {{ .Values.minio.registryBucket }}
+        secure: {{ .Values.minio.useSSL }}
+        region: ignored-for-minio
+      redirect:
+        disable: true
+      delete:
+        enabled: true
+      maintenance:
+        uploadpurging:
+          enabled: true
+          age: 168h
+          interval: 24h
+          dryrun: false
+        readonly:
+          enabled: false
+    http:
+      addr: :{{ .Values.registry.port }}
+      relativeurls: true
+      headers:
+        X-Content-Type-Options: [nosniff]
+    health:
+      storagedriver:
+        enabled: true
+        interval: 10s
+        threshold: 3
