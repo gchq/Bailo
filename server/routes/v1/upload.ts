@@ -17,6 +17,7 @@ import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
 import { ModelUploadType, UploadModes } from '../../../types/interfaces'
+import { getPropertyFromEnumValue } from '../../utils/general'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
 export interface MulterFiles {
@@ -112,17 +113,16 @@ export const postUpload = [
     }
 
     let mode: UploadModes
+
+    const prop = typeof req.query.mode === 'string' ? getPropertyFromEnumValue(UploadModes, req.query.mode) : undefined
     if (!req.query.mode) {
       mode = UploadModes.NewModel
-    } else if (
-      typeof req.query.mode === 'string' &&
-      Object.values(UploadModes).includes(req.query.mode as UploadModes)
-    ) {
-      mode = UploadModes[req.query.mode]
+    } else if (prop) {
+      mode = prop as UploadModes
     } else {
       throw BadReq(
         { code: 'upload_mode_invalid' },
-        `Upload mode ${req.query.mode} is not valid.  Must be either 'newModel' or 'newVersion'.`
+        `Upload mode ${req.query.mode} is not valid.  Must be one of ${Object.keys(UploadModes).join(', ')}.`
       )
     }
 
