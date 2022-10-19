@@ -122,7 +122,7 @@ export const postUpload = [
     } else {
       throw BadReq(
         { code: 'upload_mode_invalid' },
-        `Upload mode ${req.query.mode} is not valid.  Must be either 'newModel' or 'newVersion'.`
+        `Upload mode ${req.query.mode} is not valid.  Must be either 'NewModel' or 'NewVersion'.`
       )
     }
 

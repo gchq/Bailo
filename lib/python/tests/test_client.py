@@ -169,7 +169,7 @@ def test_post_model_raises_error_if_invalid_mode_given(mock_client):
 
     with pytest.raises(
         ValueError,
-        match=re.escape("Invalid mode - must be either newVersion or newModel"),
+        match=re.escape("Invalid mode - must be either NewVersion or NewModel"),
     ):
         mock_client._post_model(
             model_data="",
@@ -204,7 +204,7 @@ def test_update_model_is_called_with_expected_params(
 ):
 
     payload = Mock({"payload": "data"}, content_type="content")
-    mode = "newVersion"
+    mode = "NewVersion"
     model_uuid = "model"
 
     mock_generate_payload.return_value = payload

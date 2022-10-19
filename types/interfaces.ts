@@ -181,8 +181,8 @@ export enum ModelUploadType {
 }
 
 export enum UploadModes {
-  NewModel = 'newModel',
-  NewVersion = 'newVersion',
+  NewModel = 'NewModel',
+  NewVersion = 'NewVersion',
 }
 
 // Dates are in ISO 8601 format
