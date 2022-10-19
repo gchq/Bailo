@@ -74,7 +74,6 @@ export default function ExploreModels() {
               value={group}
               onChange={handleGroupChange}
               aria-label='basic tabs example'
-              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
               indicatorColor='secondary'
             >
               <Tab label='All Models' value='all' />
@@ -103,7 +102,7 @@ export default function ExploreModels() {
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                      color='primary'
                       sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
                       key={`chip-${tag}`}
                       label={tag}

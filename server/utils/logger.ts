@@ -121,7 +121,7 @@ class MongoWriter {
   }
 
   async checkCollection() {
-    await this.connected
+    await this.connected 
 
     const { db } = mongoose.connection
 

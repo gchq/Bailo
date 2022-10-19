@@ -37,7 +37,7 @@ export default function Help() {
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon
                     sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                    color='primary'
                   />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Bug reports
@@ -63,7 +63,7 @@ export default function Help() {
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon
                     sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                    color='primary'
                   />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Documentation
@@ -86,7 +86,7 @@ export default function Help() {
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon
                     sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                    color='primary'
                   />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Get in touch

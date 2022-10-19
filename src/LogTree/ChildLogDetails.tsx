@@ -117,7 +117,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
 
     return (
       <Link href={`${`${uiConfig.development.logUrl}server/${path}`}:${line}:${1}`}>
-        <Typography>
+        <Typography variant='body1'>
           {path}:{line}
         </Typography>
       </Link>

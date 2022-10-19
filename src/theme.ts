@@ -22,11 +22,11 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#6a6a6a',
+      main: '#f37f58',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#f37f58',
+      main: '#6a6a6a',
     },
     error: {
       main: red.A200,
