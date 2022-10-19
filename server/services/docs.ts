@@ -29,7 +29,7 @@ const extractFrontMatterFromFile = async (fileOrDirPath: string): Promise<DocsFr
   return matter(fileContents).data
 }
 
-const extractFrontMatterFromDir = async (
+export const extractFrontMatterFromDir = async (
   dirPath: string,
   partialSlug = ''
 ): Promise<{

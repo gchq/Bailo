@@ -44,8 +44,8 @@ laid out on this page. This includes making use of a template model class, which
 consistency with respect to the code structure, but avoids imposing unnecessary restrictions. At present, this class
 must be present in your codebase but the intention is to make it available for import as an external library.
 
-The model code is uploaded as a <b>zip file</b> on the upload files section on the user interface upload form. The
-uploaded code must contain:
+The model code is uploaded as a <b>zip file</b> or a <b>docker container</b> on the upload files section on the user
+interface upload form. The uploaded code must contain:
 
 - The top-level model class
 - Any supporting code
