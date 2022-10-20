@@ -188,26 +188,31 @@ def test_cognito_client_creates_config_for_authentication(bailo_client):
     assert auth == CognitoSRPAuthenticator
 
 
+@pytest.fixture(scope="module")
+def useless_client():
+    pass
+
+
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
 @patch(
     "bailoclient.bailo.Bailo._Bailo__create_client_from_env",
     return_value=("config", "auth", ("username", "pwd")),
 )
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_super_init_if_auth_config_found(
-    mock_create_client_env, mock_load_dotenv
+    mock_client_connect, mock_client_init, mock_create_client_env, mock_load_dotenv
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.__init__.assert_called_once_with("config", "auth")
+    mock_client_init.assert_called_once_with("config", "auth")
 
 
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
-def test_bailo_raises_error_if_not_all_config_provided_for_auth(mock_load_dotenv):
-    Client.__init__ = MagicMock()
-
+@patch("bailoclient.bailo.Client.__init__")
+def test_bailo_raises_error_if_not_all_config_provided_for_auth(
+    mock_client_init, mock_load_dotenv
+):
     with pytest.raises(UnableToCreateBailoClient):
         bailo = Bailo(cognito_client_id="id")
 
@@ -225,15 +230,18 @@ def test_bailo_raises_error_if_not_all_config_provided_for_auth(mock_load_dotenv
     },
 )
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_connect_with_username_and_password_if_cognito_auth(
+    mock_client_connect,
+    mock_client_init,
     mock_load_dotenv,
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.connect.assert_called_once_with(username="username", password="password")
+    mock_client_connect.assert_called_once_with(
+        username="username", password="password"
+    )
 
 
 @patch.dict(
@@ -242,15 +250,14 @@ def test_bailo_calls_connect_with_username_and_password_if_cognito_auth(
 )
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_connect_with_no_params_if_pki_auth(
-    mock_get_pass, mock_load_dotenv
+    mock_client_connect, mock_client_init, mock_get_pass, mock_load_dotenv
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.connect.assert_called_once_with()
+    mock_client_connect.assert_called_once_with()
 
 
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
