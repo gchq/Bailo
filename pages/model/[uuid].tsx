@@ -21,35 +21,32 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
+import { postEndpoint, putEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
-import { setTargetValue } from 'data/utils'
 import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
-import { deleteEndpoint, postEndpoint } from 'data/api'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { lightTheme } from '../../src/theme'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
-import { Deployment, User, Version, ModelUploadType } from '../../types/interfaces'
+import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -66,6 +63,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 
 function Model() {
   const router = useRouter()
+  const theme = useTheme()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const deploymentVersionsDisplayLimit = 5
@@ -73,23 +71,27 @@ function Model() {
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [modelFavourited, setModelFavourited] = useState(false)
-  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState(false)
+  const [modelFavourited, setModelFavourited] = useState<boolean>(false)
+  const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
   const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
+  const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
+  const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
+  const [isManager, setIsManager] = useState(false)
+  const [isReviewer, setIsReviewer] = useState(false)
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
-  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion)
+  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
-  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions.uploadType, [version])
+  const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
 
-  const onVersionChange = setTargetValue(setSelectedVersion)
-  const theme = useTheme() || lightTheme
+  const onVersionChange = (event: SelectChangeEvent<string>) => {
+    setSelectedVersion(event.target.value)
+  }
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
@@ -111,16 +113,68 @@ function Model() {
   }
 
   useEffect(() => {
-    if (tab !== undefined && isTabOption(tab)) {
-      setGroup(tab)
+    if (currentUser && version) {
+      setIsManager(currentUser.id === version.metadata.contacts.manager)
+      setIsReviewer(currentUser.id === version.metadata.contacts.reviewer)
     }
-  }, [tab])
+  }, [currentUser, version])
+
+  const updateLastViewed = useCallback(
+    (role: string) => {
+      if (isManager && version?.updatedAt && currentUser) {
+        const versionLastUpdatedAt = new Date(version?.updatedAt)
+        if (
+          ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
+            (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
+          currentUser.id !== version?.metadata.contacts.uploader
+        ) {
+          setShowLastViewedWarning(true)
+        }
+        putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
+      }
+    },
+    [
+      managerLastViewed,
+      reviewerLastViewed,
+      currentUser,
+      version?.metadata.contacts.uploader,
+      version?._id,
+      version?.updatedAt,
+      isManager,
+    ]
+  )
+
+  useEffect(() => {
+    if (currentUser) {
+      if (isManager) {
+        updateLastViewed('manager')
+      }
+      if (isReviewer) {
+        updateLastViewed('reviewer')
+      }
+    }
+  }, [currentUser, updateLastViewed, isManager, isReviewer])
+
+  useEffect(() => {
+    if (version && managerLastViewed === undefined) {
+      setManagerLastViewed(version.managerLastViewed)
+    }
+    if (version && reviewerLastViewed === undefined) {
+      setReviewerLastViewed(version.reviewerLastViewed)
+    }
+  }, [version, reviewerLastViewed, managerLastViewed])
 
   useEffect(() => {
     if (version) {
       setComplianceFlow(createComplianceFlow(version))
     }
   }, [version, setComplianceFlow])
+
+  useEffect(() => {
+    if (tab !== undefined && isTabOption(tab)) {
+      setGroup(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (!currentUser || !version?.model) return
@@ -174,31 +228,23 @@ function Model() {
     await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
-  const handleDelete = () => {
-    setDeleteModelErrorMessage('')
-    setDeleteConfirmOpen(true)
-  }
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false)
-  }
-
-  const handleDeleteConfirm = async () => {
-    const response = await deleteEndpoint(`/api/v1/model/${uuid}`)
-
-    if (response.ok) {
-      router.push('/')
-    } else {
-      setDeleteModelErrorMessage(`Error ${response.status}: ${response.statusText}`)
-    }
-  }
-
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
           <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
             This model version was uploaded as just a model card
+          </Alert>
+        </Box>
+      )}
+      {showLastViewedWarning && (
+        <Box sx={{ pb: 2 }}>
+          <Alert
+            onClose={() => setShowLastViewedWarning(false)}
+            severity='warning'
+            sx={{ width: 'fit-content', m: 'auto' }}
+          >
+            This model version has been updated since you last viewed it
           </Alert>
         </Box>
       )}
@@ -220,7 +266,7 @@ function Model() {
                 aria-expanded={open ? 'true' : undefined}
                 onClick={actionMenuClicked}
                 variant='outlined'
-                data-test='requestDeploymentButton'
+                data-test='modelActionsButton'
                 endIcon={open ? <UpArrow /> : <DownArrow />}
               >
                 Actions
@@ -287,6 +333,7 @@ function Model() {
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
                       currentUser.id !== version?.metadata?.contacts?.uploader
                     }
+                    data-test='editModelButton'
                   >
                     <ListItemIcon>
                       <EditIcon fontSize='small' />
@@ -294,7 +341,11 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem onClick={uploadNewVersion} disabled={currentUser.id !== version.metadata?.contacts?.uploader}>
+                <MenuItem
+                  onClick={uploadNewVersion}
+                  disabled={currentUser.id !== version.metadata?.contacts?.uploader}
+                  data-test='newVersionButton'
+                >
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -354,7 +405,7 @@ function Model() {
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' />
+            <Tab label='Settings' value='settings' data-test='settingsButton' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
@@ -451,9 +502,10 @@ function Model() {
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
+
             <Box mb={2}>
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
-                Copy Model Card to Clipboard
+                Copy model card to clipboard
               </Button>
               <Snackbar
                 open={copyModelCardSnackbarOpen}
@@ -465,18 +517,13 @@ function Model() {
                 </Alert>
               </Snackbar>
             </Box>
+
             <Box sx={{ mb: 4 }} />
-            <ConfirmationDialogue
-              open={deleteConfirmOpen}
-              title='Delete model'
-              onConfirm={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-              errorMessage={deleteModelErrorMessage}
-            />
+
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error' onClick={handleDelete}>
+            <Button variant='contained' color='error'>
               Delete Model
             </Button>
           </>

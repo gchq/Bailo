@@ -4,7 +4,7 @@ import Docker from 'dockerode'
 import fs from 'fs/promises'
 import { By, until, WebDriver } from 'selenium-webdriver'
 import Bailo from '../../lib/node'
-import { runCommand } from '../../server/utils/build'
+import { runCommand } from '../../server/utils/build/build'
 import logger from '../../server/utils/logger'
 import {
   clearData,
@@ -21,9 +21,20 @@ import {
 const binaryPath = fromRelative(config.get('samples.binary'))
 const codePath = fromRelative(config.get('samples.code'))
 const metadataPath = fromRelative(config.get('samples.uploadMetadata'))
+const metadataPathModelCard = fromRelative(config.get('samples.uploadMetadataModelCard'))
+const metadataPathModelCardEdit = fromRelative(config.get('samples.uploadMetadataEdit'))
+const metadataPathModelCardNewVersion = fromRelative(config.get('samples.uploadMetadataModelCardNewVersion'))
 const deploymentMetadataPath = fromRelative(config.get('samples.deploymentMetadata'))
 
-const modelInfo: any = {}
+const modelInfo = {
+  name: '',
+  url: '',
+}
+const modelCardOnlyInfo = {
+  name: '',
+  url: '',
+}
+let deploymentUrl = ''
 
 const BAILO_APP_URL = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 const BAILO_REGISTRY = `${config.get('app.host')}:${config.get('registry.port')}`
@@ -85,7 +96,10 @@ describe('End to end test', () => {
         logger.info('waiting until url contains model')
         await driver.wait(until.urlContains('/model/'))
         const modelUrl = await driver.getCurrentUrl()
-        const mName = modelUrl.match('/.*/model/(?<name>[^/]*)')!.groups!.name
+
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
 
         logger.info(`model name is ${mName}`)
 
@@ -101,7 +115,7 @@ describe('End to end test', () => {
         logger.info('getting api model')
         const model = await api.getModel(modelInfo.name)
 
-        while (true) {
+        for (;;) {
           logger.info('')
           const version = await model.getVersion('1')
 
@@ -121,7 +135,167 @@ describe('End to end test', () => {
     },
     1000 * 9 * 60
   ) // give it up to 9 minutes since Github tests will run with a pull of seldon image (3-5 min)
-  // then another 3-ish minutes for initial image build (no existing cache)
+  // // then another 3-ish minutes for initial image build (no existing cache)
+
+  test(
+    'Test can upload a model card only',
+    async () => {
+      const driver = await getDriver()
+
+      try {
+        logger.info('getting bailo homepage')
+        await driver.get(BAILO_APP_URL)
+
+        logger.info('going to upload page')
+        await click(driver, By.css('[data-test="uploadModelLink"]'))
+
+        logger.info('going to json tab')
+        await click(driver, By.css('[data-test="uploadJsonTab"]'))
+
+        logger.info('selecting correct schema')
+        await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
+
+        logger.info('setting metadata')
+        const metadata = await fs.readFile(metadataPathModelCard, { encoding: 'utf-8' })
+        await sendKeys(driver, By.css('div[data-test="metadataTextarea"] div textarea:nth-child(1)'), metadata)
+
+        logger.info('clicking warning checkbox confirming upload is okay')
+        await click(driver, By.css('[data-test="warningCheckbox"]'))
+
+        logger.info('submitting upload')
+        await click(driver, By.css('[data-test="submitButton"]'))
+
+        logger.info('waiting until url contains model')
+        await driver.wait(until.urlContains('/model/'))
+        const modelUrl = await driver.getCurrentUrl()
+        const match = modelUrl.match('/.*/model/(?<name>[^/]*)')
+        if (!match || !match.groups) throw new Error('Could not parse model UUID from URL')
+        const mName = match.groups.name
+
+        logger.info(`model name is ${mName}`)
+
+        modelCardOnlyInfo.url = modelUrl
+        modelCardOnlyInfo.name = mName
+
+        logger.info({ modelCardOnlyInfo }, 'Received model information')
+      } finally {
+        logger.info('quitting driver')
+        await driver.quit()
+      }
+    },
+    1000 * 9 * 60
+  )
+
+  test('test we can edit an existing model', async () => {
+    logger.info('getting driver')
+    const driver = await getDriver()
+
+    try {
+      expect(modelCardOnlyInfo.url).not.toBeNull()
+
+      logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
+      await driver.get(modelCardOnlyInfo.url)
+
+      logger.info('opening action button')
+      await click(driver, By.css('[data-test="modelActionsButton"]'))
+
+      logger.info('going to edit model page')
+      await click(driver, By.css('[data-test="editModelButton"]'))
+
+      logger.info('going to json tab')
+      await click(driver, By.css('[data-test="uploadJsonTab"]'))
+
+      logger.info('setting metadata')
+      const metadata = await fs.readFile(metadataPathModelCardEdit, { encoding: 'utf-8' })
+      await sendKeys(driver, By.css('div[data-test="metadataTextarea"] div textarea:nth-child(1)'), metadata)
+
+      logger.info('clicking warning checkbox confirming upload is okay')
+      await click(driver, By.css('[data-test="warningCheckbox"]'))
+
+      logger.info('submitting upload')
+      await click(driver, By.css('[data-test="submitButton"]'))
+
+      logger.info('waiting to redirect back to the model page')
+      await pause(2000)
+      await driver.wait(until.urlContains('/model/'))
+
+      await driver.findElement(By.xpath("//*[text()[contains(.,'This is an edit')]]"))
+    } finally {
+      logger.info('quitting driver')
+      await driver.quit()
+    }
+  }, 30000)
+
+  test('test we can upload a new version', async () => {
+    logger.info('getting driver')
+    const driver = await getDriver()
+
+    try {
+      expect(modelCardOnlyInfo.url).not.toBeNull()
+
+      logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
+      await driver.get(modelCardOnlyInfo.url)
+
+      logger.info('opening action button')
+      await click(driver, By.css('[data-test="modelActionsButton"]'))
+
+      logger.info('going to edit model page')
+      await click(driver, By.css('[data-test="newVersionButton"]'))
+
+      logger.info('going to json tab')
+      await click(driver, By.css('[data-test="uploadJsonTab"]'))
+
+      logger.info('setting metadata')
+      const metadata = await fs.readFile(metadataPathModelCardNewVersion, { encoding: 'utf-8' })
+      await sendKeys(driver, By.css('div[data-test="metadataTextarea"] div textarea:nth-child(1)'), metadata)
+
+      logger.info('clicking warning checkbox confirming upload is okay')
+      await click(driver, By.css('[data-test="warningCheckbox"]'))
+
+      logger.info('submitting upload')
+      await click(driver, By.css('[data-test="submitButton"]'))
+
+      logger.info('waiting to redirect back to the model page')
+
+      await driver.wait(until.urlContains('/model/'))
+      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'v2')]]")))
+    } finally {
+      logger.info('quitting driver')
+      await driver.quit()
+    }
+  }, 30000)
+
+  // test('test we can delete a version version', async () => {
+  //   logger.info('getting driver')
+  //   const driver = await getDriver()
+
+  //   try {
+  //     expect(modelCardOnlyInfo.url).not.toBeNull()
+
+  //     logger.info(`getting model page '${modelCardOnlyInfo.url}'`)
+  //     await driver.get(modelCardOnlyInfo.url)
+
+  //     logger.info('going to settings tab')
+  //     await click(driver, By.css('[data-test="settingsButton"]'))
+
+  //     logger.info('click delete model button')
+  //     await click(driver, By.css('[data-test="deleteModelButton"]'))
+
+  //     logger.info('confirm model deletion')
+  //     await click(driver, By.css('[data-test="confirmDeleteButton"]'))
+
+  //     await pause(3000)
+
+  //     const api = new Bailo(
+  //       `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}/api/v1`
+  //     )
+  //     const model = await api.getModel(modelCardOnlyInfo.name)
+  //     expect(model.model.message).toContain('Unable to find model')
+  //   } finally {
+  //     logger.info('quitting driver')
+  //     await driver.quit()
+  //   }
+  // }, 30000)
 
   test('test can approve models', async () => {
     logger.info('getting driver')
@@ -134,8 +308,8 @@ describe('End to end test', () => {
       logger.info('clicking on review page')
       await click(driver, By.css('[data-test="reviewLink"]'))
 
-      logger.info('approving 2 requests')
-      await approveRequests(driver, 2)
+      logger.info('approving 6 requests')
+      await approveRequests(driver, 6)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
@@ -173,7 +347,7 @@ describe('End to end test', () => {
       expect(version.version.reviewerApproved).toBe('Accepted')
 
       logger.info('opening deployment button')
-      await click(driver, By.css('[data-test="requestDeploymentButton"]'))
+      await click(driver, By.css('[data-test="modelActionsButton"]'))
 
       logger.info('going to deployment')
       await click(driver, By.css('[data-test="submitDeployment"]'))
@@ -198,6 +372,10 @@ describe('End to end test', () => {
 
       logger.info(`found url contains deployment`)
       await driver.wait(until.urlContains('/deployment/'))
+      await driver.wait(until.elementsLocated(By.xpath("//*[text()[contains(.,'Deployment name')]]")))
+      deploymentUrl = await driver.getCurrentUrl()
+
+      logger.info(`deployment url is ${deploymentUrl}`)
     } finally {
       logger.info('quitting driver')
       await driver.quit()
@@ -320,4 +498,24 @@ describe('End to end test', () => {
     },
     1000 * 5 * 60
   )
+
+  test('test in-app documentation renders', async () => {
+    logger.info('getting driver')
+    const driver = await getDriver()
+    try {
+      logger.info('getting bailo homepage')
+      await driver.get(BAILO_APP_URL)
+
+      logger.info('getting support link')
+      await click(driver, By.css('[data-test="supportLink"]'))
+
+      logger.info('getting documentation link')
+      await click(driver, By.css('[data-test="documentationLink"]'))
+
+      await driver.findElement(By.xpath("//*[text()[contains(.,'Documentation')]]"))
+    } finally {
+      logger.info('quitting final')
+      await driver.quit()
+    }
+  }, 20000)
 })

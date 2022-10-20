@@ -13,6 +13,7 @@ const auth = new Authorisation()
 
 interface GetDeploymentOptions {
   populate?: boolean
+  showLogs?: boolean
 }
 
 export function serializedDeploymentFields(): SerializerOptions {
@@ -33,8 +34,9 @@ export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findDeploymentByUuid(user: UserDoc, uuid: string, _opts?: GetDeploymentOptions) {
+export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findOne({ uuid })
+  if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
   deployment = deployment.populate('model', ['_id', 'uuid']).populate('versions', ['version', 'metadata'])
 
   return filterDeployment(user, await deployment)
@@ -43,6 +45,7 @@ export async function findDeploymentByUuid(user: UserDoc, uuid: string, _opts?: 
 export async function findDeploymentById(user: UserDoc, id: ModelId, opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findById(id)
   if (opts?.populate) deployment = deployment.populate('model')
+  if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
 
   return filterDeployment(user, await deployment)
 }
@@ -52,13 +55,16 @@ export interface DeploymentFilter {
   model?: ModelId
 }
 
-export async function findDeployments(user: UserDoc, { owner, model }: DeploymentFilter) {
+export async function findDeployments(user: UserDoc, { owner, model }: DeploymentFilter, opts?: GetDeploymentOptions) {
   const query: any = {}
 
   if (owner) query.owner = owner
   if (model) query.model = model
 
-  const models = await DeploymentModel.find(query).sort({ updatedAt: -1 })
+  let models = DeploymentModel.find(query).sort({ updatedAt: -1 })
+
+  if (!opts?.showLogs) models = models.select({ logs: 0 })
+
   return filterDeployment(user, models)
 }
 
@@ -91,10 +97,10 @@ export async function createDeployment(user: UserDoc, data: CreateDeployment) {
 
 export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, version: VersionDoc) {
   const deployments = await findDeployments(user, { model: modelId })
-  if (deployments.length !== 0) {
-    deployments.forEach((deployment: DeploymentDoc) => {
+  await Promise.all(
+    deployments.map((deployment) => {
       deployment.versions.push(version)
-      deployment.save()
+      return deployment.save()
     })
-  }
+  )
 }

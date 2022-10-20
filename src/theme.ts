@@ -1,17 +1,6 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { createTheme } from '@mui/material/styles'
 
-enum ThemeMode {
-  LIGHT = 'light',
-  DARK = 'dark',
-}
-
-declare module '@mui/material/styles' {
-  interface Theme {
-    mode: ThemeMode
-  }
-}
-
 // Create a theme instance.
 export const lightTheme = createTheme({
   palette: {

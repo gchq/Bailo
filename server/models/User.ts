@@ -40,7 +40,7 @@ const UserSchema = new Schema<User>(
   }
 )
 
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', function userPreSave(next) {
   if (!this.isModified('token') || !this.token) {
     next()
     return
@@ -57,7 +57,7 @@ UserSchema.pre('save', function (next) {
   })
 })
 
-UserSchema.methods.compareToken = function (candidateToken: string) {
+UserSchema.methods.compareToken = function compareToken(candidateToken: string) {
   return new Promise((resolve, reject) => {
     if (!this.token) {
       resolve(false)

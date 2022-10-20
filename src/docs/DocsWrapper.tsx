@@ -1,12 +1,17 @@
 import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
-import { Box, Container, List, ListItem, ListItemButton, ListItemText, styled, useTheme } from '@mui/material'
+import { useTheme, styled } from '@mui/material/styles'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
-import { lightTheme } from '@/src/theme'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
-import isDocHeading from '@/utils/isDocHeading'
+import isDocHeading from '@/utils/type-guards/isDocHeading'
 import { DocFileOrHeading } from '@/types/interfaces'
 
 type DocsWrapperProps = {
@@ -16,9 +21,14 @@ type DocsWrapperProps = {
 const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
+
+  const linkColour = useMemo(
+    () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
+    [theme]
+  )
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -73,7 +83,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
 
   return (
     <Wrapper title='Documentation' page='docs'>
-      {/* Banner height + Toolbar height == 96px */}
+      {/* Banner height + Toolbar height = 96px */}
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         {errorMessage ? (
           <Box mx='auto' mt={4}>
@@ -93,7 +103,19 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             </Box>
             <Box flex={1} overflow='auto'>
               <Box display='flex' flexDirection='column' height='100%'>
-                <Container maxWidth='lg'>{children}</Container>
+                <Container
+                  maxWidth='lg'
+                  sx={{
+                    'a:link': {
+                      color: linkColour,
+                    },
+                    'a:visited': {
+                      color: linkColour,
+                    },
+                  }}
+                >
+                  {children}
+                </Container>
                 <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
               </Box>
             </Box>

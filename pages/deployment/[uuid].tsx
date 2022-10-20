@@ -1,9 +1,9 @@
-import { ObjectId } from 'mongoose'
 import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -17,17 +17,21 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
+import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
-import { useTheme } from '@mui/material'
-import Box from '@mui/system/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
@@ -36,14 +40,13 @@ import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
-import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { VersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
+import { VersionDoc } from '../../server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -89,9 +92,6 @@ function CodeLine({ line }) {
   )
 }
 
-const isVersionDoc = (value: unknown): value is VersionDoc =>
-  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
-
 export default function Deployment() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -101,25 +101,25 @@ export default function Deployment() {
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
+  const [copyDeploymentCardSnackbarOpen, setCopyDeploymentCardSnackbarOpen] = useState(false)
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid)
+  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
-  const initialVersionRequested = useMemo(() => {
+  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
     if (!deployment) return undefined
     const initialVersion = deployment.versions.find(
-      (version) =>
-        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
     )
-    return isVersionDoc(initialVersion) ? initialVersion : undefined
+    return initialVersion
   }, [deployment])
 
   const hasUploadType = useMemo(
-    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions?.uploadType,
     [initialVersionRequested]
   )
 
@@ -165,6 +165,11 @@ export default function Deployment() {
     setAnchorEl(null)
   }
 
+  const copyDeploymentCardToClipboard = () => {
+    copy(JSON.stringify(deployment?.metadata, null, 2))
+    setCopyDeploymentCardSnackbarOpen(true)
+  }
+
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
     isDeploymentError,
     isUiConfigError,
@@ -178,7 +183,7 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -187,30 +192,67 @@ export default function Deployment() {
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Zip && (
-          <Box sx={{ textAlign: 'right', pb: 3 }}>
-            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-              Show download commands
-            </Button>
-          </Box>
-        )}
-        {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-          <Box sx={{ pb: 2 }}>
-            <Alert
-              severity='info'
-              sx={{
-                width: 'fit-content',
-                m: 'auto',
-                backgroundColor: '#0288d1',
-                color: '#fff',
-                '& .MuiAlert-icon': {
-                  color: '#fff',
-                },
-              }}
+        {deployment && (
+          <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ pb: 3 }}>
+            <Button
+              variant='text'
+              color='primary'
+              startIcon={<ArrowBackIosNewIcon />}
+              onClick={() => router.push(`/model/${(deployment.model as ModelDoc).uuid}`)}
             >
-              This model version was uploaded as just a model card
-            </Alert>
-          </Box>
+              Back to model
+            </Button>
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model version was uploaded as just a model card
+                </Alert>
+              </Box>
+            )}
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model was not built by Bailo and may not follow the standard format.
+                </Alert>
+              </Box>
+            )}
+            <Box>
+              <Button
+                variant='outlined'
+                color='primary'
+                disabled={
+                  !hasUploadType ||
+                  initialVersionRequested?.metadata?.buildOptions.uploadType === ModelUploadType.ModelCard
+                }
+                startIcon={<Info />}
+                onClick={handleClickOpen}
+              >
+                Show download commands
+              </Button>
+            </Box>
+          </Stack>
         )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
@@ -270,7 +312,10 @@ export default function Deployment() {
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}
-                disabled={deployment.managerApproved !== 'Accepted'}
+                disabled={
+                  deployment.managerApproved !== 'Accepted' ||
+                  (hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType)
+                }
                 value='exports'
                 label={
                   <DisabledElementTooltip
@@ -278,22 +323,52 @@ export default function Deployment() {
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
                         : '',
+                      hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType
+                        ? 'Model does not have raw artifacts attached'
+                        : '',
                     ]}
                     placement='top'
                   >
                     Model Exports
                   </DisabledElementTooltip>
                 }
+                data-test='modelExportsTab'
               />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
+
+          {group === 'settings' && (
+            <>
+              <Typography variant='h6' sx={{ mb: 1 }}>
+                General
+              </Typography>
+              <Box mb={2}>
+                <Button variant='outlined' onClick={copyDeploymentCardToClipboard}>
+                  Copy deployment metadata to clipboard
+                </Button>
+                <Snackbar
+                  open={copyDeploymentCardSnackbarOpen}
+                  autoHideDuration={6000}
+                  onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
+                >
+                  <Alert
+                    onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
+                    severity='success'
+                    sx={{ width: '100%' }}
+                  >
+                    Copied deployment metadata to clipboard
+                  </Alert>
+                </Snackbar>
+              </Box>
+            </>
+          )}
 
           {group === 'exports' && deployment.managerApproved === 'Accepted' && (
             <RawModelExportList deployment={deployment} />
@@ -314,7 +389,7 @@ export default function Deployment() {
                 </Link>
                 page) {theme.palette.mode}
               </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
               <br />
 
               <p style={{ margin: 0 }}># Pull model</p>

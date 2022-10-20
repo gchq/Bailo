@@ -21,20 +21,21 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
-  deleteModel,
 } from './routes/v1/model'
-import { postUpload } from './routes/v1/upload'
-import { getUiConfig } from './routes/v1/uiConfig'
-import { connectToMongoose } from './utils/database'
-import { ensureBucketExists } from './utils/minio'
-import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
-import { getVersion, putVersion, resetVersionApprovals } from './routes/v1/version'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import { getUsers, getLoggedInUser, postRegenerateToken, favouriteModel, unfavouriteModel } from './routes/v1/users'
-import { getUser } from './utils/user'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
+import { getUiConfig } from './routes/v1/uiConfig'
+import { postUpload } from './routes/v1/upload'
+import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
+import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
+import { connectToMongoose } from './utils/database'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger'
+import { ensureBucketExists } from './utils/minio'
+
+import { getUser } from './utils/user'
+import { pullBuilderImage } from './utils/build/build'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -61,7 +62,6 @@ server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
 server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
 server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
 server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
-server.delete('/api/v1/model/:uuid', ...deleteModel)
 
 server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
@@ -72,6 +72,7 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
+server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
@@ -100,8 +101,10 @@ export async function startServer() {
   // technically, we do need to wait for this, but it's so quick
   // that nobody should notice unless they want to upload an image
   // within the first few milliseconds of the _first_ time it's run
-  ensureBucketExists(config.get('minio.uploadBucket'))
-  ensureBucketExists(config.get('minio.registryBucket'))
+  if (config.get('minio.createBuckets')) {
+    ensureBucketExists(config.get('minio.uploadBucket'))
+    ensureBucketExists(config.get('minio.registryBucket'))
+  }
 
   // we don't actually need to wait for mongoose to connect before
   // we start serving connections
@@ -109,6 +112,9 @@ export async function startServer() {
 
   // lazily create indexes for full text search
   createIndexes()
+
+  // pull builder image
+  pullBuilderImage()
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 

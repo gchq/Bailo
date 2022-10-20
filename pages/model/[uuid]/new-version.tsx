@@ -14,7 +14,7 @@ import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
-import useCacheVariable from '../../../utils/useCacheVariable'
+import useCacheVariable from '../../../utils/hooks/useCacheVariable'
 
 function renderSubmissionTab({
   splitSchema,
@@ -97,6 +97,10 @@ function Upload() {
         isComplete: () => true,
       })
     )
+
+    for (const step of steps) {
+      step.steps = steps
+    }
 
     setSplitSchema({ reference: cSchema.reference, steps })
   }, [cModel, cSchema])
