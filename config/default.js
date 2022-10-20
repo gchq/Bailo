@@ -17,6 +17,7 @@ module.exports = {
     secretKey: 'minioadmin',
     region: '',
 
+    createBuckets: true,
     uploadBucket: 'uploads',
     registryBucket: 'registry',
   },
@@ -37,8 +38,15 @@ module.exports = {
     builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
   },
 
-  kaniko: {
-    path: 'kaniko_executor',
+  build: {
+    environment: 'img',
+  },
+
+  // overwritten via Helm charts
+  openshift: {
+    namespace: '',
+    appPublicRoute: '',
+    dockerPushSecretName: '',
   },
 
   uiConfig: {
