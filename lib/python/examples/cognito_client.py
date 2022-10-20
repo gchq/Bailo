@@ -15,16 +15,16 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 ## Configure client based on local secrets
 client = create_cognito_client(
-    user_pool_id=os.getenv("BAILO_USERPOOL"),
-    client_id=os.getenv("BAILO_CLIENT_ID"),
-    client_secret=os.getenv("BAILO_CLIENT_SECRET"),
-    region=os.getenv("BAILO_REGION"),
+    user_pool_id=os.getenv("COGNITO_USERPOOL"),
+    client_id=os.getenv("COGNITO_CLIENT_ID"),
+    client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+    region=os.getenv("COGNITO_REGION"),
     url=os.getenv("BAILO_URL"),
 )
 
-## Load username from local secrets file
-username = os.getenv("BAILO_USERNAME")
-password = os.getenv("BAILO_PASSWORD")
+### Load username from local secrets file
+username = os.getenv("COGNITO_USERNAME")
+password = os.getenv("COGNITO_PASSWORD")
 
 ## Connect to the Bailo instance
 client.connect(username=username, password=password)
@@ -109,7 +109,7 @@ print(f"Created new model: {uploaded_model}")
 schema = client.get_model_schema(model_uuid)
 
 
-## You can download the code and binary for a model if you have a deployment
+# You can download the code and binary for a model if you have a deployment
 
 user_deployments = client.get_my_deployments()
 
