@@ -88,7 +88,7 @@ function Deployments() {
                 <DisplaySettings sx={{ color: '#757575', mr: 1 }} />
                 <Typography>Arrange by</Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ p: 2, backgroundColor: 'whitesmoke' }}>
+              <AccordionDetails sx={{ p: 2 }}>
                 <FormControl component='fieldset'>
                   <RadioGroup
                     defaultValue='date'
