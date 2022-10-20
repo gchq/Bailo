@@ -353,7 +353,7 @@ class Client:
         """
 
         self._validate_uploads(
-            card=model_card, binary_file=binary_file, code_file=code_file
+            model_card=model_card, binary_file=binary_file, code_file=code_file
         )
 
         if not model_version:
@@ -388,7 +388,7 @@ class Client:
 
     def _validate_uploads(
         self,
-        card: Model = None,
+        model_card: Model = None,
         metadata: dict = None,
         minimal_metadata_path: str = None,
         binary_file: str = None,
@@ -397,7 +397,7 @@ class Client:
         """Validate the model and files provided for upload
 
         Args:
-            card (Model, optional): Model card of the model to update. Defaults to None.
+            model_card (Model, optional): Model card of the model to update. Defaults to None.
             metadata (dict, optional): Metadata required for uploading a new model. Must
                                        match the minimal metadata. Defaults to None.
             binary_file (str, optional): File path to model binary. Defaults to None.
@@ -409,34 +409,35 @@ class Client:
             InvalidMetadata: Metadata does not meet the minimal metadata
         """
 
-        if card:
-            validation = card.validate()
-            if not validation.is_valid:
-                logger.error(
-                    """Submitted model card did not validate against model schema provided by %s""",
-                    {self.config.api.url},
-                )
-                for err in validation.errors:
-                    logger.error(err)
-                raise DataInvalid(f"Model invalid: {validation.errors}")
+        if model_card:
+            self.__validate_model_card(model_card)
 
         if metadata:
-            result = self.__validate_metadata(metadata, minimal_metadata_path)
-
-            if not result["valid"]:
-                raise InvalidMetadata(
-                    f"Metadata {result['error_message']} - refer to minimal_metadata"
-                )
+            self.__validate_metadata(metadata, minimal_metadata_path)
 
         if binary_file and code_file:
-            for file_path in [binary_file, code_file]:
-                # TODO check that it's some compressed format supported by Patool
-                # (used in workflow-extract-files-from-minio)
-                if file_path and not os.path.exists(file_path):
-                    raise InvalidFilePath(f"{file_path} does not exist")
+            self.__validate_file_paths(binary_file, code_file)
 
-                if file_path and os.path.isdir(file_path):
-                    raise InvalidFilePath(f"{file_path} is a directory")
+    def __validate_model_card(self, model_card: Model):
+        """Validate supplied model card
+
+        Args:
+            model_card (Model): Model
+
+        Raises:
+            DataInvalid: Model card is not valid
+        """
+        validation = model_card.validate()
+        if not validation.is_valid:
+            logger.error(
+                """Submitted model card did not validate against model schema provided by %s""",
+                {self.config.api.url},
+            )
+
+            for err in validation.errors:
+                logger.error(err)
+
+            raise DataInvalid(f"Model invalid: {validation.errors}")
 
     def __validate_metadata(self, metadata: dict, minimal_metadata_path: str):
         """Validate supplied metadata against a minimal metadata file
@@ -445,13 +446,37 @@ class Client:
             metadata (dict): Supplied metadata for model or deployment
             minimal_metadata_path (str): Path to minimal model/deployment metadata for validation
 
+        Raises:
+            InvalidMetadata: Supplied metadata does not contain all the required parameters
+
         Returns:
             dict: Dictionary of validity and error messages
         """
         with open(minimal_metadata_path, encoding="utf-8") as json_file:
             minimal_metadata = json.load(json_file)
 
-        return minimal_keys_in_dictionary(minimal_metadata, metadata)
+        result = minimal_keys_in_dictionary(minimal_metadata, metadata)
+
+        if not result["valid"]:
+            raise InvalidMetadata(
+                f"Metadata {result['error_message']} - refer to minimal_metadata"
+            )
+
+    def __validate_file_paths(self, *args):
+        """Validate any filepaths exist and are not directories. Takes any number of string filepaths
+
+        Raises:
+            InvalidFilePath: File path does not exist
+            InvalidFilePath: File path is a directory
+        """
+        for file_path in args:
+            # TODO check that it's some compressed format supported by Patool
+            # (used in workflow-extract-files-from-minio)
+            if file_path and not os.path.exists(file_path):
+                raise InvalidFilePath(f"{file_path} does not exist")
+
+            if file_path and os.path.isdir(file_path):
+                raise InvalidFilePath(f"{file_path} is a directory")
 
     def _post_model(
         self,
@@ -511,10 +536,7 @@ class Client:
         payloads = [("metadata", metadata)]
 
         if binary_file and code_file:
-            for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
-                fname, mtype = get_filename_and_mimetype(full_filename)
-                with open(full_filename, "rb") as file:
-                    payloads.append((tag, (fname, file.read(), mtype)))
+            payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
 
         data = MultipartEncoder(payloads)
 
@@ -524,6 +546,21 @@ class Client:
             )
 
         return data
+
+    def __add_files_to_payload(self, payloads: list, binary_file: str, code_file: str):
+        """Add code and binary files to the payload
+
+        Args:
+            payloads (list): List of payloads
+            binary_file (str): File path of binary
+            code_file (str): File path of code
+        """
+        for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
+            fname, mtype = get_filename_and_mimetype(full_filename)
+            with open(full_filename, "rb") as file:
+                payloads.append((tag, (fname, file.read(), mtype)))
+
+        return payloads
 
     @staticmethod
     def _too_large_for_gateway(data) -> bool:
