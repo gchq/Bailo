@@ -1,0 +1,13 @@
+{
+  "schemaRef": "/Minimal/Deployment/v6",
+  "highLevelDetails": {
+    "endDate": {
+      "hasEndDate": false
+    },
+    "name": "Test Deployment"
+  },
+  "contacts": {
+    "requester": "user",
+    "secondPOC": "user"
+  }
+}

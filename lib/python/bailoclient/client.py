@@ -304,6 +304,88 @@ class Client:
         """
         return self.api.get(f"model/{model_uuid}/deployments")
 
+    @handle_reconnect
+    def upload_model(self, metadata: dict, binary_file: str, code_file: str):
+        """Upload a new model
+
+        Args:
+            metadata (dict): Required metadata for upload
+            binary_file (str): Path to model binary file
+            code_file (str): Path to model code file
+
+        Returns:
+            str: UUID of the new model
+        """
+
+        metadata_json = json.dumps(metadata)
+
+        self._validate_uploads(
+            binary_file=binary_file,
+            code_file=code_file,
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
+        )
+
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
+
+        return self._post_model(payload)
+
+    @handle_reconnect
+    def update_model(
+        self,
+        model_card: Model,
+        binary_file: str,
+        code_file: str,
+        model_version: str = None,
+    ):
+        """Update an existing model based on its UUID.
+
+        Args:
+            model_card (Model): The model card of the existing model
+            binary_file (str): Path to the model binary file
+            code_file (str): Path to the model code file
+            model_version (str, optional): Incremented mode version number.
+                                           Automatically attempts to increase by 1 if None.
+                                           Defaults to None.
+
+        Returns:
+            str: UUID of the updated model
+        """
+
+        self._validate_uploads(
+            card=model_card, binary_file=binary_file, code_file=code_file
+        )
+
+        if not model_version:
+            model_version = self._increment_model_version(model_card["uuid"])
+
+        metadata = model_card["currentMetadata"]
+        metadata.highLevelDetails.modelCardVersion = model_version
+        metadata = metadata.toJSON()
+
+        payload = self._generate_payload(metadata, binary_file, code_file)
+
+        return self._post_model(
+            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
+        )
+
+    @handle_reconnect
+    def request_deployment(self, metadata: dict):
+        """Request a new deployment of a model
+
+        Args:
+            metadata (dict): Deployment metadata. See deployment.json for minimal metadata required.
+        """
+        self._validate_uploads(
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/deployment.json",
+        )
+
+        metadata_json = json.dumps(metadata)
+        payload = self._generate_payload(metadata_json)
+
+        self.api.post("/deployment", request_body=payload)
+
     def _validate_uploads(
         self,
         card: Model = None,
@@ -356,12 +438,12 @@ class Client:
                 if file_path and os.path.isdir(file_path):
                     raise InvalidFilePath(f"{file_path} is a directory")
 
-    def __validate_metadata(self, model_metadata: dict, minimal_metadata_path: str):
-        """Validate user metadata against the minimal metadata required to
-           upload a model
+    def __validate_metadata(self, metadata: dict, minimal_metadata_path: str):
+        """Validate supplied metadata against a minimal metadata file
 
         Args:
-            model_metadata (dict): Metadata for the model
+            metadata (dict): Supplied metadata for model or deployment
+            minimal_metadata_path (str): Path to minimal model/deployment metadata for validation
 
         Returns:
             dict: Dictionary of validity and error messages
@@ -369,7 +451,7 @@ class Client:
         with open(minimal_metadata_path, encoding="utf-8") as json_file:
             minimal_metadata = json.load(json_file)
 
-        return minimal_keys_in_dictionary(minimal_metadata, model_metadata)
+        return minimal_keys_in_dictionary(minimal_metadata, metadata)
 
     def _post_model(
         self,
@@ -413,12 +495,12 @@ class Client:
         binary_file: str = None,
         code_file: str = None,
     ) -> MultipartEncoder:
-        """Generate payload for posting a new or updated model
+        """Generate payload for posting model or deployment
 
         Args:
-            metadata (dict): Model metadata
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
+            metadata (dict): Metadata (model or deployment)
+            binary_file (str, optional): Path to model binary file if posting model. Defaults to None.
+            code_file (str, optional): Path to model code file if posting model. Defaults to None.
 
         Raises:
             ValueError: Payload is too large for the AWS gateway (if using)
@@ -455,33 +537,7 @@ class Client:
         """
         return os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000
 
-    @handle_reconnect
-    def upload_model(self, metadata: dict, binary_file: str, code_file: str):
-        """Upload a new model
-
-        Args:
-            metadata (dict): Required metadata for upload
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
-
-        Returns:
-            str: UUID of the new model
-        """
-
-        metadata_json = json.dumps(metadata)
-
-        self._validate_uploads(
-            binary_file=binary_file,
-            code_file=code_file,
-            metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
-        )
-
-        payload = self._generate_payload(metadata_json, binary_file, code_file)
-
-        return self._post_model(payload)
-
-    def _increment_version(self, model_uuid: str):
+    def _increment_model_version(self, model_uuid: str):
         """Increment the latest version of a model by 1
 
         Args:
@@ -506,58 +562,3 @@ class Client:
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
-
-    @handle_reconnect
-    def request_deployment(self, metadata):
-
-        # validate that the metadata contains all the required fields (add a similar method for the model one)
-        # generate the payload from the metadata
-        # do the post
-
-        self._validate_uploads(
-            metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/deployment.json",
-        )
-
-        payload = self._generate_payload(metadata)
-
-        self.api.post("/deployment", request_body=payload)
-
-    @handle_reconnect
-    def update_model(
-        self,
-        model_card: Model,
-        binary_file: str,
-        code_file: str,
-        model_version: str = None,
-    ):
-        """Update an existing model based on its UUID.
-
-        Args:
-            model_card (Model): The model card of the existing model
-            binary_file (str): Path to the model binary file
-            code_file (str): Path to the model code file
-            model_version (str, optional): Incremented mode version number.
-                                           Automatically attempts to increase by 1 if None.
-                                           Defaults to None.
-
-        Returns:
-            str: UUID of the updated model
-        """
-
-        self._validate_uploads(
-            card=model_card, binary_file=binary_file, code_file=code_file
-        )
-
-        if not model_version:
-            model_version = self._increment_version(model_card["uuid"])
-
-        metadata = model_card["currentMetadata"]
-        metadata.highLevelDetails.modelCardVersion = model_version
-        metadata = metadata.toJSON()
-
-        payload = self._generate_payload(metadata, binary_file, code_file)
-
-        return self._post_model(
-            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
-        )

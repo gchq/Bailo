@@ -67,13 +67,27 @@ def test_get_user_by_name_returns_None_if_no_matching_users(
     assert user is None
 
 
-def test_get_model_card_errors_if_no_model_id_or_uuid_provided(mock_client):
+@patch("bailoclient.client.Client._Client__model")
+def test_get_model_card_gets_version_if_version_provided(mock_model, mock_client):
+    model_uuid = "id"
+    model_version = "version"
 
-    with pytest.raises(
-        ValueError,
-        match="You must provide either a model_uuid or model_id to retrieve a model card",
-    ):
-        mock_client.get_model_card()
+    mock_client.api.get = Mock()
+    mock_client.get_model_card(model_uuid=model_uuid, model_version=model_version)
+
+    mock_client.api.get.assert_called_once_with(
+        f"model/{model_uuid}/version/{model_version}"
+    )
+
+
+@patch("bailoclient.client.Client._Client__model")
+def test_get_model_card_gets_model_if_no_version_provided(mock_model, mock_client):
+    model_uuid = "id"
+
+    mock_client.api.get = Mock()
+    mock_client.get_model_card(model_uuid=model_uuid)
+
+    mock_client.api.get.assert_called_once_with(f"model/uuid/{model_uuid}")
 
 
 def test_validate_uploads_raises_error_if_filepath_does_not_exist(mock_client):
@@ -124,7 +138,7 @@ def test_validate_uploads_raises_error_if_model_card_is_invalid(
         )
 
 
-@patch("bailoclient.client.minimal_keys_in_dictionary")
+@patch("bailoclient.client.Client._Client__validate_metadata")
 def test_validate_uploads_raises_error_if_metadata_is_invalid(
     mock_validate_metadata, mock_client
 ):
@@ -139,6 +153,7 @@ def test_validate_uploads_raises_error_if_metadata_is_invalid(
     ):
         mock_client._validate_uploads(
             metadata=metadata,
+            minimal_metadata_path="",
             binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
             code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
         )
@@ -174,15 +189,15 @@ def test_post_model_raises_error_if_invalid_mode_given(mock_client):
         )
 
 
-def test_increment_version_increases_version_by_one(mock_client):
+def test_increment_model_version_increases_version_by_one(mock_client):
     mock_client.api.get = MagicMock(return_value=[{"version": "1"}, {"version": "2"}])
 
-    version = mock_client._increment_version("model_uuid")
+    version = mock_client._increment_model_version("model_uuid")
 
     assert version == "3"
 
 
-def test_increment_version_raises_error_if_unable_to_increase_version_by_one(
+def test_increment_model_version_raises_error_if_unable_to_increase_version_by_one(
     mock_client,
 ):
     mock_client.api.get = MagicMock(return_value=[{"version": "a"}, {"version": "b"}])
@@ -191,11 +206,11 @@ def test_increment_version_raises_error_if_unable_to_increase_version_by_one(
         CannotIncrementVersion,
         match="Please manually provide an updated version number",
     ):
-        mock_client._increment_version("model_uuid")
+        mock_client._increment_model_version("model_uuid")
 
 
 @patch("bailoclient.client.Client._generate_payload")
-@patch("bailoclient.client.Client._increment_version")
+@patch("bailoclient.client.Client._increment_model_version")
 def test_update_model_is_called_with_expected_params(
     mock_increment_version, mock_generate_payload, mock_client
 ):
