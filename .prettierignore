@@ -25,5 +25,6 @@ public/css/fonts.css
 public/css/highlight.css
 
 helm/**/*.yaml
+helm/**/*.yml
 
 coverage

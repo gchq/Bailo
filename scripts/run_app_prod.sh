@@ -9,4 +9,5 @@ else
 fi
 
 echo "Running 'npm run start'"
-npm run start
+#npm run start
+NODE_ENV=production node dist/server/index.js

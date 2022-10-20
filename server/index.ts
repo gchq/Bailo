@@ -35,6 +35,7 @@ import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
 
 import { getUser } from './utils/user'
+import { pullBuilderImage } from './utils/build/build'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -100,8 +101,10 @@ export async function startServer() {
   // technically, we do need to wait for this, but it's so quick
   // that nobody should notice unless they want to upload an image
   // within the first few milliseconds of the _first_ time it's run
-  ensureBucketExists(config.get('minio.uploadBucket'))
-  ensureBucketExists(config.get('minio.registryBucket'))
+  if (config.get('minio.createBuckets')) {
+    ensureBucketExists(config.get('minio.uploadBucket'))
+    ensureBucketExists(config.get('minio.registryBucket'))
+  }
 
   // we don't actually need to wait for mongoose to connect before
   // we start serving connections
@@ -109,6 +112,9 @@ export async function startServer() {
 
   // lazily create indexes for full text search
   createIndexes()
+
+  // pull builder image
+  pullBuilderImage()
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
 

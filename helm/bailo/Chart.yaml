@@ -1,6 +1,6 @@
 apiVersion: v2
 name: bailo
-description: A Helm chart for installing Baio
+description: A Helm chart for installing Bailo
 
 # A chart can be either an 'application' or a 'library' chart.
 #

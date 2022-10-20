@@ -1,0 +1,82 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bailo.fullname" . }}-config
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+data:
+  production.js: |
+    module.exports = {
+      minio: {
+        endPoint: '{{ include "bailo.minio.host" .}}',
+        port: {{ .Values.minio.service.ports.api }},
+        useSSL: {{ .Values.minio.useSSL }},
+        region: '',
+        uploadBucket: '{{ .Values.minio.uploadBucket }}',
+        registryBucket: '{{ .Values.minio.registryBucket }}',
+        createBuckets: {{ .Values.minio.createBuckets }},
+      },
+      smtp: {
+        host: '{{ .Values.config.smtp.host }}',
+        port: {{ .Values.config.smtp.port }},
+        secure: {{ .Values.config.smtp.secure }},
+        auth: { user: '{{ .Values.config.smtp.user }}', pass: '{{ .Values.config.smtp.pass }}' },
+        tls: { rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }} },
+        from: '{{ .Values.config.smtp.from }}',
+      },
+      openshift: {
+        namespace: '{{ .Values.openshift.namespace }}',
+        appPublicRoute: '{{ .Values.openshift.appPublicRoute }}',
+        dockerPushSecretName: '{{ .Values.openshift.dockerPushSecretName }}',
+      },
+      registry: {
+        host: '{{ .Values.registry.host }}:{{ .Values.registry.port }}',
+        port: '{{ .Values.registry.port }}',
+
+        insecure: {{ .Values.registry.insecure }}
+      },
+
+      s2i: {
+        builderImage: '{{ .Values.config.s2i.image }}',
+      },
+      build: {
+        environment: '{{ .Values.config.build.environment }}',
+      },
+      uiConfig: {
+        banner: {
+          enable: {{ .Values.config.ui.banner.enabled }},
+          text: '{{ .Values.config.ui.banner.text }}',
+          colour: '{{ .Values.config.ui.banner.colour }}',
+        },
+        issues: {
+          label: 'Bailo Support Team',
+          supportHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Support',
+          contactHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Contact',
+        },
+        help: {
+          documentationUrl: '{{ .Values.config.documentationLink }}',
+        },
+        registry: {
+          host: '{{ .Values.openshift.appPublicRoute }}',
+        },
+      },
+      mongo: {
+        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ .Values.mongodb.host }}',
+        connectionOptions: {
+          useFindAndModify: false,
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+          useCreateIndex: true,
+          // ssl: false,
+          // sslValidate: false,
+        },
+      }
+    }
+  custom-environment-variables.js: |
+    module.exports = {
+      minio: {
+        accessKey: 'MINIO_ACCESS_KEY',
+        secretKey: 'MINIO_SECRET_KEY',
+      },
+    }
