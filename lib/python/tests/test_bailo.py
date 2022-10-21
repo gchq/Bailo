@@ -188,11 +188,6 @@ def test_cognito_client_creates_config_for_authentication(bailo_client):
     assert auth == CognitoSRPAuthenticator
 
 
-@pytest.fixture(scope="module")
-def useless_client():
-    pass
-
-
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
 @patch(
     "bailoclient.bailo.Bailo._Bailo__create_client_from_env",
