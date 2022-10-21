@@ -4,7 +4,9 @@
     "endDate": {
       "hasEndDate": false
     },
-    "name": "Test Deployment"
+    "name": "Test Deployment",
+    "modelID": "test-4ceebe",
+    "initialVersionRequested": "test"
   },
   "contacts": {
     "requester": "user",

@@ -557,9 +557,12 @@ class Client:
         )
 
         metadata_json = json.dumps(metadata)
-        payload = self._generate_payload(metadata_json)
 
-        self.api.post("/deployment", request_body=payload)
+        return self.api.post(
+            "/deployment",
+            request_body=metadata_json,
+            headers={"Content-Type": "application/json"},
+        )
 
     def _validate_uploads(
         self,
@@ -692,15 +695,15 @@ class Client:
     def _generate_payload(
         self,
         metadata: dict,
-        binary_file: str = None,
-        code_file: str = None,
+        binary_file: str,
+        code_file: str,
     ) -> MultipartEncoder:
         """Generate payload for posting model or deployment
 
         Args:
-            metadata (dict): Metadata (model or deployment)
-            binary_file (str, optional): Path to model binary file if posting model. Defaults to None.
-            code_file (str, optional): Path to model code file if posting model. Defaults to None.
+            metadata (dict): Model metadata
+            binary_file (str): Path to model binary file
+            code_file (str): Path to model code file
 
         Raises:
             ValueError: Payload is too large for the AWS gateway (if using)
@@ -709,9 +712,7 @@ class Client:
             MultipartEncoder: Payload of model data
         """
         payloads = [("metadata", metadata)]
-
-        if binary_file and code_file:
-            payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
+        payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
 
         data = MultipartEncoder(payloads)
 
