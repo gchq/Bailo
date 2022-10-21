@@ -1,4 +1,4 @@
-import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
+import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useTheme, styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -12,7 +12,12 @@ import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/type-guards/isDocHeading'
-import { DocFileOrHeading } from '@/types/interfaces'
+import { DocFileOrHeading, DocsMenuContent } from '@/types/interfaces'
+import Stack from '@mui/system/Stack'
+import Button from '@mui/material/Button'
+import ArrowForward from '@mui/icons-material/ArrowForward'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import Divider from '@mui/material/Divider'
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -22,13 +27,18 @@ const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
-  const { pathname } = useRouter()
+  const router = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
+  const [flattenedPages, setFlattenedPages] = useState<DocsMenuContent>([])
 
   const linkColour = useMemo(
     () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
     [theme]
   )
+
+  useEffect(() => {
+    setFlattenedPages(flattenPages(docsMenuContent))
+  }, [docsMenuContent])
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -52,7 +62,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           <Fragment key={doc.slug}>
             {doc.hasIndex ? (
               <Link passHref href={`/docs/${doc.slug}`}>
-                <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+                <ListItemButton dense selected={router.pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
                   {headingText}
                 </ListItemButton>
               </Link>
@@ -67,19 +77,38 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       }
       return (
         <Link passHref href={`/docs/${doc.slug}`} key={doc.slug}>
-          <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+          <ListItemButton dense selected={router.pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
             <ListItemText primary={doc.title} />
           </ListItemButton>
         </Link>
       )
     },
-    [pathname]
+    [router.pathname]
   )
 
   const docsMenu = useMemo(
     () => docsMenuContent.map((doc) => createDocElement(doc)),
     [docsMenuContent, createDocElement]
   )
+
+  function flattenPages(array) {
+    let result: DocsMenuContent = []
+    array.forEach(function (a) {
+      result.push(a)
+      if (Array.isArray(a.children)) {
+        result = result.concat(flattenPages(a.children))
+      }
+    })
+    return result.filter((item: DocFileOrHeading) => item.hasIndex || item.hasIndex === undefined)
+  }
+
+  const reducedPath = router.pathname.replace(/^(\/docs\/)/, '')
+  const currentIndex = flattenedPages.findIndex((item) => item.slug === reducedPath)
+
+  function changePage(newIndex: number) {
+    const newPage = flattenedPages[newIndex]
+    router.push(`/docs/${newPage.slug}`)
+  }
 
   return (
     <Wrapper title='Documentation' page='docs'>
@@ -116,7 +145,26 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 >
                   {children}
                 </Container>
-                <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
+                <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 'auto' }}>
+                  <Divider flexItem />
+                  {flattenedPages.length > 0 && (
+                    <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
+                      <Stack direction='row' justifyContent={currentIndex === 0 ? 'flex-end' : 'space-between'}>
+                        {currentIndex > 0 && (
+                          <Button startIcon={<ArrowBack />} onClick={() => changePage(currentIndex - 1)}>
+                            {flattenedPages[currentIndex - 1].title}
+                          </Button>
+                        )}
+                        {currentIndex < flattenedPages.length - 1 && (
+                          <Button endIcon={<ArrowForward />} onClick={() => changePage(currentIndex + 1)} sx={{}}>
+                            {flattenedPages[currentIndex + 1].title}
+                          </Button>
+                        )}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+                <Copyright sx={{ pb: 2, pt: 4 }} />
               </Box>
             </Box>
           </>
