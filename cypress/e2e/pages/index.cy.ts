@@ -16,3 +16,5 @@ describe('Home page', () => {
     cy.get('[data-test=appBar]').should('have.css', 'background-color', 'rgb(39, 89, 142)')
   })
 })
+
+export {}
