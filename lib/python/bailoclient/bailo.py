@@ -248,3 +248,89 @@ class Bailo(Client):
             raise KeyError(str(err)) from err
 
         return p12_file, ca_file, bailo_url
+
+    def bundle_model(
+        self,
+        output_path: str,
+        model=None,
+        model_binary: str = None,
+        model_code: str = None,
+        model_requirements: str = None,
+        model_flavour: str = None,
+        additional_files: list = None,
+    ):
+
+        # For Mlflow bundling
+
+        if model and not model_flavour:
+            raise Exception("Must provide model flavour for Mlflow bundling")
+
+        if model:
+            return self.do_mlflow_bundling(
+                model,
+                output_path,
+                model_flavour,
+                additional_files,
+                model_requirements,
+                model_code,
+            )
+
+        # For normal bundling
+
+        if not model_binary:
+            raise Exception("Must provide model binary or model object and flavour")
+
+        if os.path.isdir(model_binary):
+            model_binary = self.extract_model_binary(model_binary)
+
+        if os.path.isdir(model_code):
+            model_code, model_requirements, additional_files = self.extract_code_files(
+                model_code
+            )
+
+        if not model_code and not model_flavour:
+            raise Exception(
+                "If no model code provided you must provide a model flavour"
+            )
+
+        if not model_code:
+            model_code = self.identify_model_template(model_flavour)
+
+        if not model_requirements:
+            model_requirements = self.generate_requirements_file()
+
+        self.zip_model_files(
+            model_code, model_requirements, additional_files, model_binary, output_path
+        )
+
+    def do_mlflow_bundling(
+        self,
+        model,
+        output_path: str,
+        model_flavour: str,
+        additional_files: str = None,
+        model_requirements: str = None,
+        model_code: str = None,
+    ):
+        pass
+
+    def identify_model_template(self, model_flavour: str):
+        pass
+
+    def extract_code_files(self, model_code: str):
+        pass
+
+    def extract_model_binary(self, model_binary: str):
+        pass
+
+    def generate_requirements_file(self):
+        pass
+
+    def zip_model_files(
+        model_code: str,
+        model_requirements: str,
+        additional_files: str,
+        model_binary: str,
+        output_path: str,
+    ):
+        pass

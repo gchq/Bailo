@@ -24,6 +24,7 @@ setup(
             "pylint",
             "pre-commit",
         ],
+        "bundling": ["mlflow"],
     },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
