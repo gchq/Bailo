@@ -5,8 +5,8 @@
       "hasEndDate": false
     },
     "name": "Test Deployment",
-    "modelID": "test-4ceebe",
-    "initialVersionRequested": "test"
+    "modelID": "test-model-abcde",
+    "initialVersionRequested": "v1.0"
   },
   "contacts": {
     "requester": "user",
