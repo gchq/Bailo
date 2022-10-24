@@ -13,14 +13,14 @@ def test_upload_and_update_model():
 
     ### Configure client based on local secrets
     client = create_cognito_client(
-        user_pool_id=os.getenv("BAILO_USERPOOL"),
-        client_id=os.getenv("BAILO_CLIENT_ID"),
-        client_secret=os.getenv("BAILO_CLIENT_SECRET"),
-        region=os.getenv("BAILO_REGION"),
+        user_pool_id=os.getenv("COGNITO_USERPOOL"),
+        client_id=os.getenv("COGNITO_CLIENT_ID"),
+        client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+        region=os.getenv("COGNITO_REGION"),
         url=os.getenv("BAILO_URL"),
     )
-    username = os.getenv("BAILO_USERNAME")
-    password = os.getenv("BAILO_PASSWORD")
+    username = os.getenv("COGNITO_USERNAME")
+    password = os.getenv("COGNITO_PASSWORD")
 
     client.connect(username=username, password=password)
 
