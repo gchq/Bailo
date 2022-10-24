@@ -150,7 +150,7 @@ function Upload() {
 
     await axios({
       method: 'post',
-      url: `/api/v1/model?mode=NewVersion&modelUuid=${model.uuid}`,
+      url: `/api/v1/model?mode=newVersion&modelUuid=${model.uuid}`,
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
       onUploadProgress: (progressEvent) => {

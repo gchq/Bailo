@@ -520,7 +520,7 @@ class Client:
 
         Args:
             model_data (MultipartEncoder): encoded payload for uploading
-            mode (str, optional): newModel or NewVersion. Defaults to "NewModel".
+            mode (str, optional): newModel or newVersion. Defaults to "newModel".
             model_uuid (str, optional): Model UUID if updating an existing model. Defaults to None.
 
         Raises:
@@ -530,21 +530,21 @@ class Client:
             str: Model UUID
         """
 
-        if mode == "NewVersion":
+        if mode == "newVersion":
             return self.api.post(
                 f"/model?mode={mode}&modelUuid={model_uuid}",
                 request_body=model_data,
                 headers={"Content-Type": model_data.content_type},
             )
 
-        if mode == "NewModel":
+        if mode == "newModel":
             return self.api.post(
                 f"/model?mode={mode}",
                 request_body=model_data,
                 headers={"Content-Type": model_data.content_type},
             )
 
-        raise ValueError("Invalid mode - must be either NewVersion or NewModel")
+        raise ValueError("Invalid mode - must be either newVersion or newModel")
 
     def _generate_payload(
         self,
@@ -678,5 +678,5 @@ class Client:
         payload = self._generate_payload(metadata, binary_file, code_file)
 
         return self._post_model(
-            model_data=payload, mode="NewVersion", model_uuid=model_card["uuid"]
+            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
         )

@@ -8,9 +8,9 @@ export function getPropertyFromEnumValue<Enum extends { [key: string]: string | 
 ): string | undefined {
   const entries = Object.entries(t)
 
-  for (const [index, value] of entries) {
+  for (const [_index, value] of entries) {
     if (value === key) {
-      return index
+      return value
     }
   }
 
