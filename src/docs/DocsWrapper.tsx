@@ -36,9 +36,20 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     [theme]
   )
 
+  const flattenPages = useCallback((array) => {
+    let result: DocsMenuContent = []
+    array.forEach((a) => {
+      result.push(a)
+      if (Array.isArray(a.children)) {
+        result = result.concat(flattenPages(a.children))
+      }
+    })
+    return result.filter((item: any) => item.hasIndex || item.hasIndex === undefined)
+  }, [])
+
   useEffect(() => {
     setFlattenedPages(flattenPages(docsMenuContent))
-  }, [docsMenuContent])
+  }, [docsMenuContent, flattenPages])
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -90,17 +101,6 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     () => docsMenuContent.map((doc) => createDocElement(doc)),
     [docsMenuContent, createDocElement]
   )
-
-  function flattenPages(array) {
-    let result: DocsMenuContent = []
-    array.forEach(function (a) {
-      result.push(a)
-      if (Array.isArray(a.children)) {
-        result = result.concat(flattenPages(a.children))
-      }
-    })
-    return result.filter((item: DocFileOrHeading) => item.hasIndex || item.hasIndex === undefined)
-  }
 
   const reducedPath = router.pathname.replace(/^(\/docs\/)/, '')
   const currentIndex = flattenedPages.findIndex((item) => item.slug === reducedPath)
