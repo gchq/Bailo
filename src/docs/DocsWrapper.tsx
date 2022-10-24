@@ -110,6 +110,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     router.push(`/docs/${newPage.slug}`)
   }
 
+  function changePageToDocsHome() {
+    router.push('/docs')
+  }
+
   return (
     <Wrapper title='Documentation' page='docs'>
       {/* Banner height + Toolbar height = 96px */}
@@ -149,7 +153,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <Divider flexItem />
                   {flattenedPages.length > 0 && (
                     <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                      <Stack direction='row' justifyContent={currentIndex === 0 ? 'flex-end' : 'space-between'}>
+                      <Stack direction='row' justifyContent={'space-between'}>
+                        {currentIndex === 0 && (
+                          <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
+                            Home
+                          </Button>
+                        )}
                         {currentIndex > 0 && (
                           <Button startIcon={<ArrowBack />} onClick={() => changePage(currentIndex - 1)}>
                             {flattenedPages[currentIndex - 1].title}
