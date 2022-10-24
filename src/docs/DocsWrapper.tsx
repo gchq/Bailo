@@ -153,7 +153,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <Divider flexItem />
                   {flattenedPages.length > 0 && (
                     <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                      <Stack direction='row' justifyContent={'space-between'}>
+                      <Stack direction='row' justifyContent='space-between'>
                         {currentIndex === 0 && (
                           <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
                             Home
