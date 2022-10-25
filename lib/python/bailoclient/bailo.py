@@ -265,13 +265,11 @@ class Bailo(Client):
         additional_files: list = None,
     ):
 
-        # TODO decide add or remove
         # remove trailing /
         if output_path.endswith("/"):
             output_path = output_path[0:-1]
 
-        # For Mlflow bundling
-
+        ## For Mlflow bundling
         if model and not model_flavour:
             raise Exception("Must provide model flavour for Mlflow bundling")
 
@@ -285,18 +283,25 @@ class Bailo(Client):
                 model_code,
             )
 
-        # For normal bundling
-
+        ## For normal bundling
         if not model_binary:
             raise Exception("Must provide model binary or model object and flavour")
 
-        if os.path.isdir(model_binary):
-            model_binary = self.extract_model_binary(model_binary)
-
-        if os.path.isdir(model_code):
-            model_code, model_requirements, additional_files = self.extract_code_files(
-                model_code
+        if not model_requirements:
+            raise Exception(
+                "Provide either path to requirements.txt or your python file/notebook/module to generate requirements.txt"
             )
+
+        # if code dir contains all required files, bundle the model
+        if os.path.isdir(model_code):
+            if self.contains_required_code_files(model_code):
+                return self.zip_model_files(
+                    model_code,
+                    model_requirements,
+                    additional_files,
+                    model_binary,
+                    output_path,
+                )
 
         if not model_code and not model_flavour:
             raise Exception(
@@ -306,10 +311,7 @@ class Bailo(Client):
         if not model_code:
             model_code = self.identify_model_template(model_flavour)
 
-        if not model_requirements:
-            model_requirements = self.generate_requirements_file()
-
-        self.zip_model_files(
+        return self.zip_model_files(
             model_code, model_requirements, additional_files, model_binary, output_path
         )
 
@@ -577,14 +579,11 @@ class Bailo(Client):
                 "Model flavour not recognised, must be one of Mlflow supported"
             )
 
-    def extract_code_files(self, model_code: str):
-        pass
-
-    def extract_model_binary(self, model_binary: str):
-        pass
-
-    def generate_requirements_file(self):
-        pass
+    def contains_required_code_files(self, code_dir: str):
+        code_files = [
+            file.lower() for _, _, files in os.walk(code_dir) for file in files
+        ]
+        return "requirements.txt" in code_files and "model.py" in code_files
 
     def zip_model_files(
         self,
@@ -594,7 +593,29 @@ class Bailo(Client):
         model_binary: str,
         output_path: str,
     ):
-        pass
+        tmpdir = tempfile.TemporaryDirectory()
+
+        code_path = os.path.join(tmpdir.name, "code")
+        binary_path = os.path.join(tmpdir.name, "binary")
+
+        # move model files
+        if model_requirements != "requirements.txt":
+            self.generate_requirements_file(
+                model_requirements, f"{code_path}/requirements.txt"
+            )
+
+        else:
+            subprocess.run(["cp", model_requirements, code_path])
+
+        subprocess.run(["cp", model_code, code_path])
+        subprocess.run(["cp", additional_files, code_path])
+        subprocess.run(["cp", model_binary, binary_path])
+
+        # create zips
+        self.zip_files(binary_path, f"{output_path}/binary.zip")
+        self.zip_files(code_path, f"{output_path}/code.zip")
+
+        tmpdir.cleanup()
 
     def zip_files(self, file_path: str, zip_path: str):
         if os.path.isdir(file_path):
@@ -612,3 +633,6 @@ class Bailo(Client):
         else:
             with ZipFile(zip_path, "w") as zf:
                 zf.write(file_path)
+
+    def generate_requirements_file(self, module_path: str, output_path: str):
+        subprocess.run(["pipreqsnb", module_path, "--savepath", output_path])
