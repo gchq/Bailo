@@ -82,7 +82,7 @@ function CodeLine({ line }) {
         }}
       >
         <Tooltip title='Copy to clipboard' arrow>
-          <Box sx={{ backgroundColor: 'whitesmoke', color: '#383838', p: 1, borderRadius: 2 }}>
+          <Box sx={{ color: '#383838', p: 1, borderRadius: 2 }}>
             $ <b>{line}</b>
           </Box>
         </Tooltip>

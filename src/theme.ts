@@ -100,5 +100,15 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
   },
 })
