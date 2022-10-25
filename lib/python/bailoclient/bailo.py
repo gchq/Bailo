@@ -5,7 +5,11 @@
 import os
 import logging
 import getpass
+import tempfile
+import subprocess
 from typing import Union
+from glob import glob
+from zipfile import ZipFile
 
 from dotenv import load_dotenv
 
@@ -18,6 +22,7 @@ from bailoclient.utils.exceptions import (
 from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from .client import Client
 from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
+from .utils.enums import ModelFlavours
 
 logger = logging.getLogger(__name__)
 
@@ -260,6 +265,11 @@ class Bailo(Client):
         additional_files: list = None,
     ):
 
+        # TODO decide add or remove
+        # remove trailing /
+        if output_path.endswith("/"):
+            output_path = output_path[0:-1]
+
         # For Mlflow bundling
 
         if model and not model_flavour:
@@ -312,10 +322,260 @@ class Bailo(Client):
         model_requirements: str = None,
         model_code: str = None,
     ):
-        pass
+
+        import mlflow
+
+        tmpdir = tempfile.TemporaryDirectory()
+
+        code_path = os.path.join(tmpdir.name, "code")
+        binary_path = os.path.join(tmpdir.name, "binary")
+
+        if model_flavour == ModelFlavours.H2O:
+            mlflow.h2o.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/h2o.py"
+
+        elif model_flavour == ModelFlavours.KERAS:
+            mlflow.keras.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/keras.py"
+
+        elif model_flavour == ModelFlavours.MLEAP:
+            if not model_code:
+                raise Exception("no template available for MLeap models")
+
+            mlflow.mleap.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+        elif model_flavour == ModelFlavours.PYTORCH:
+            mlflow.pytorch.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/pytorch.py"
+
+        elif model_flavour == ModelFlavours.SKLEARN:
+            mlflow.sklearn.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/sklearn.py"
+
+        elif model_flavour == ModelFlavours.SPARK:
+            mlflow.spark.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/spark.py"
+
+        elif model_flavour == ModelFlavours.TENSORFLOW:
+            mlflow.tensorflow.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/tensorflow.py"
+
+        elif model_flavour == ModelFlavours.ONNX:
+            mlflow.onnx.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/onnx.py"
+
+        elif model_flavour == ModelFlavours.GLUON:
+            mlflow.gluon.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/gluon.py"
+
+        elif model_flavour == ModelFlavours.XGBOOST:
+            mlflow.xgboost.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/xgboost.py"
+
+        elif model_flavour == ModelFlavours.LIGHTGBM:
+            mlflow.lightgbm.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/lightgbm.py"
+
+        elif model_flavour == ModelFlavours.CATBOOST:
+            mlflow.catboost.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/catboost.py"
+
+        elif model_flavour == ModelFlavours.SPACY:
+            mlflow.spacy.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/spacy.py"
+
+        elif model_flavour == ModelFlavours.FASTAI:
+            mlflow.fastai.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/fastai.py"
+
+        elif model_flavour == ModelFlavours.STATSMODELS:
+            mlflow.statsmodels.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/statsmodels.py"
+
+        elif model_flavour == ModelFlavours.PROPHET:
+            mlflow.prophet.save_model(
+                model,
+                path=code_path,
+                code_paths=additional_files,
+                pip_requirements=model_requirements,
+            )
+
+            if not model_code:
+                model_code = "./resouces/templates/prophet.py"
+
+        else:
+            raise Exception(
+                "Model flavour not recognised, must be one of Mlflow supported"
+            )
+
+        # copy model.py into tmpdir containing model files
+        subprocess.run(["cp", model_code, f"{code_path}/model.py"])
+
+        # move binary file into new folder in tmpdir
+        subprocess.run(["mv", glob(f"{code_path}/data/model*")[0], binary_path])
+
+        # create zips
+        self.zip_files(binary_path, f"{output_path}/binary.zip")
+        self.zip_files(code_path, f"{output_path}/code.zip")
+
+        tmpdir.cleanup()
 
     def identify_model_template(self, model_flavour: str):
-        pass
+        if model_flavour == ModelFlavours.H2O:
+            return "./resouces/templates/h2o.py"
+
+        elif model_flavour == ModelFlavours.KERAS:
+            return "./resouces/templates/keras.py"
+
+        elif model_flavour == ModelFlavours.MLEAP:
+            raise Exception("no template available for MLeap models")
+
+        elif model_flavour == ModelFlavours.PYTORCH:
+            return "./resouces/templates/pytorch.py"
+
+        elif model_flavour == ModelFlavours.SKLEARN:
+            return "./resouces/templates/sklearn.py"
+
+        elif model_flavour == ModelFlavours.SPARK:
+            return "./resouces/templates/spark.py"
+
+        elif model_flavour == ModelFlavours.TENSORFLOW:
+            return "./resouces/templates/tensorflow.py"
+
+        elif model_flavour == ModelFlavours.ONNX:
+            return "./resouces/templates/onnx.py"
+
+        elif model_flavour == ModelFlavours.GLUON:
+            return "./resouces/templates/gluon.py"
+
+        elif model_flavour == ModelFlavours.XGBOOST:
+            return "./resouces/templates/xgboost.py"
+
+        elif model_flavour == ModelFlavours.LIGHTGBM:
+            return "./resouces/templates/lightgbm.py"
+
+        elif model_flavour == ModelFlavours.CATBOOST:
+            return "./resouces/templates/catboost.py"
+
+        elif model_flavour == ModelFlavours.SPACY:
+            return "./resouces/templates/spacy.py"
+
+        elif model_flavour == ModelFlavours.FASTAI:
+            return "./resouces/templates/fastai.py"
+
+        elif model_flavour == ModelFlavours.STATSMODELS:
+            return "./resouces/templates/statsmodels.py"
+
+        elif model_flavour == ModelFlavours.PROPHET:
+            return "./resouces/templates/prophet.py"
+
+        else:
+            raise Exception(
+                "Model flavour not recognised, must be one of Mlflow supported"
+            )
 
     def extract_code_files(self, model_code: str):
         pass
@@ -327,6 +587,7 @@ class Bailo(Client):
         pass
 
     def zip_model_files(
+        self,
         model_code: str,
         model_requirements: str,
         additional_files: str,
@@ -334,3 +595,20 @@ class Bailo(Client):
         output_path: str,
     ):
         pass
+
+    def zip_files(self, file_path: str, zip_path: str):
+        if os.path.isdir(file_path):
+            with ZipFile(zip_path, "w") as zf:
+                for dir_path, _, files in os.walk(file_path):
+                    if dir_path == file_path:
+                        pth = ""
+
+                    else:
+                        pth = os.path.join(*os.path.split(dir_path)[1:]) + os.path.sep
+
+                    for file in files:
+                        zf.write(filename=f"{dir_path}/{file}", arcname=f"{pth}{file}")
+
+        else:
+            with ZipFile(zip_path, "w") as zf:
+                zf.write(file_path)
