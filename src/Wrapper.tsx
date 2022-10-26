@@ -194,14 +194,13 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 </a>
               </Link>
             </Box>
-            <Typography
-              variant='h6'
-              noWrap
-              component='div'
-              sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex' } }}
-            >
-              Bailo
-            </Typography>
+            <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
+              <Link href='/' passHref>
+                <a style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}>
+                  Bailo
+                </a>
+              </Link>
+            </Box>
             {headerTitle}
             <Link href='/review' passHref>
               <IconButton color='inherit'>
