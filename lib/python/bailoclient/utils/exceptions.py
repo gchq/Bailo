@@ -59,3 +59,11 @@ class DeploymentNotFound(Exception):
 
 class ModelFileExportNotAllowed(Exception):
     """Exporting model files not allowed for this model"""
+
+
+class ModelFlavourNotRecognised(Exception):
+    """MLflow model flavour not recognised"""
+
+
+class TemplateNotAvailable(Exception):
+    """No model.py template code available"""

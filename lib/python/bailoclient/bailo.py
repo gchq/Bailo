@@ -5,11 +5,7 @@
 import os
 import logging
 import getpass
-import tempfile
-import subprocess
-from typing import Union
-from glob import glob
-from zipfile import ZipFile
+from typing import Union, List
 
 from dotenv import load_dotenv
 
@@ -22,7 +18,7 @@ from bailoclient.utils.exceptions import (
 from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from .client import Client
 from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
-from .utils.enums import ModelFlavours
+from .bundler import Bundler
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +38,8 @@ class Bailo(Client):
         cognito_username: str = None,
         cognito_pwd: str = None,
     ):
+
+        self.bundler = Bundler()
 
         # if no config provided, try and load dotenv file
         if not any(
@@ -259,380 +257,64 @@ class Bailo(Client):
         output_path: str,
         model=None,
         model_binary: str = None,
-        model_code: str = None,
+        model_py: str = None,
         model_requirements: str = None,
         model_flavour: str = None,
-        additional_files: list = None,
+        additional_files: List[str] = None,
     ):
+        """Bundle model files into the required structure for the code.zip and binary.zip
+            for uploading to BAILO.
 
-        # remove trailing /
-        if output_path.endswith("/"):
-            output_path = output_path[0:-1]
+            To save and bundle a model object, provide the model object and the model_flavour.
+            Model bundling will be done using Mlflow, which you will need to have installed
+            in your environment.
 
-        ## For Mlflow bundling
-        if model and not model_flavour:
-            raise Exception("Must provide model flavour for Mlflow bundling")
+            To bundle a pre-saved model, you will need to provide the model_binary as a minimum.
+            If you are not providing model_code you will need to provide a model_flavour so that
+            the appropriate model template can be bundled with your model.
 
-        if model:
-            return self.do_mlflow_bundling(
-                model,
-                output_path,
-                model_flavour,
-                additional_files,
-                model_requirements,
-                model_code,
-            )
+        Args:
+            output_path (str): Path to output code.zip and binary.zip files to
+            model (any, optional): Model object to save via Mlflow. Must be one of
+                                    the formats supported by Mlflow.
+                                    See https://www.mlflow.org/docs/latest/models.html#built-in-model-flavors
+                                    Defaults to None.
+            model_binary (str, optional): Path to model binary. Can be a file or directory. Defaults to None.
+            model_py (str, optional): Path to model.py file. If not provided, you must provide
+                                        a model flavour. Defaults to None.
+            model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
+                                                module or notebook from which to generate the
+                                                requirements.txt. Defaults to None.
+            model_flavour (str, optional): Name of the flavour of model. Supported flavours are
+                                            those provided by MLflow. Defaults to None.
+            additional_files (list[str], optional): List of file paths of additional dependencies
+                                                    or directories of dependencies for the model.
+                                                    Defaults to None.
+        """
 
-        ## For normal bundling
-        if not model_binary:
-            raise Exception("Must provide model binary or model object and flavour")
-
-        if not model_requirements:
-            raise Exception(
-                "Provide either path to requirements.txt or your python file/notebook/module to generate requirements.txt"
-            )
-
-        # if code dir contains all required files, bundle the model
-        if os.path.isdir(model_code):
-            if self.contains_required_code_files(model_code):
-                return self.zip_model_files(
-                    model_code,
-                    model_requirements,
-                    additional_files,
-                    model_binary,
-                    output_path,
-                )
-
-        if not model_code and not model_flavour:
-            raise Exception(
-                "If no model code provided you must provide a model flavour"
-            )
-
-        if not model_code:
-            model_code = self.identify_model_template(model_flavour)
-
-        return self.zip_model_files(
-            model_code, model_requirements, additional_files, model_binary, output_path
+        self.bundler.bundle_model(
+            output_path,
+            model,
+            model_binary,
+            model_py,
+            model_requirements,
+            model_flavour,
+            additional_files,
         )
 
-    def do_mlflow_bundling(
-        self,
-        model,
-        output_path: str,
-        model_flavour: str,
-        additional_files: str = None,
-        model_requirements: str = None,
-        model_code: str = None,
-    ):
+    def generate_requirements_file(self, module_path: str, output_dir: str):
+        """Generate requirements.txt file based on imports within a Notebook, Python file,
+            or Python project. Output_dir must be a directory.
 
-        import mlflow
+        Args:
+            module_path (str): Path to the Python file used to generate requirements.txt
+            output_dir (str): Output path in format output/path/
+        """
 
-        tmpdir = tempfile.TemporaryDirectory()
+        if output_dir.endswith("requirements.txt"):
+            output_dir = os.path.split(output_dir)[0]
 
-        code_path = os.path.join(tmpdir.name, "code")
-        binary_path = os.path.join(tmpdir.name, "binary")
+        if not os.path.exists(output_dir):
+            self.bundler.create_dir(output_dir)
 
-        if model_flavour == ModelFlavours.H2O:
-            mlflow.h2o.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/h2o.py"
-
-        elif model_flavour == ModelFlavours.KERAS:
-            mlflow.keras.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/keras.py"
-
-        elif model_flavour == ModelFlavours.MLEAP:
-            if not model_code:
-                raise Exception("no template available for MLeap models")
-
-            mlflow.mleap.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-        elif model_flavour == ModelFlavours.PYTORCH:
-            mlflow.pytorch.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/pytorch.py"
-
-        elif model_flavour == ModelFlavours.SKLEARN:
-            mlflow.sklearn.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/sklearn.py"
-
-        elif model_flavour == ModelFlavours.SPARK:
-            mlflow.spark.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/spark.py"
-
-        elif model_flavour == ModelFlavours.TENSORFLOW:
-            mlflow.tensorflow.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/tensorflow.py"
-
-        elif model_flavour == ModelFlavours.ONNX:
-            mlflow.onnx.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/onnx.py"
-
-        elif model_flavour == ModelFlavours.GLUON:
-            mlflow.gluon.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/gluon.py"
-
-        elif model_flavour == ModelFlavours.XGBOOST:
-            mlflow.xgboost.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/xgboost.py"
-
-        elif model_flavour == ModelFlavours.LIGHTGBM:
-            mlflow.lightgbm.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/lightgbm.py"
-
-        elif model_flavour == ModelFlavours.CATBOOST:
-            mlflow.catboost.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/catboost.py"
-
-        elif model_flavour == ModelFlavours.SPACY:
-            mlflow.spacy.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/spacy.py"
-
-        elif model_flavour == ModelFlavours.FASTAI:
-            mlflow.fastai.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/fastai.py"
-
-        elif model_flavour == ModelFlavours.STATSMODELS:
-            mlflow.statsmodels.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/statsmodels.py"
-
-        elif model_flavour == ModelFlavours.PROPHET:
-            mlflow.prophet.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_code:
-                model_code = "./resouces/templates/prophet.py"
-
-        else:
-            raise Exception(
-                "Model flavour not recognised, must be one of Mlflow supported"
-            )
-
-        # copy model.py into tmpdir containing model files
-        subprocess.run(["cp", model_code, f"{code_path}/model.py"])
-
-        # move binary file into new folder in tmpdir
-        subprocess.run(["mv", glob(f"{code_path}/data/model*")[0], binary_path])
-
-        # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip")
-        self.zip_files(code_path, f"{output_path}/code.zip")
-
-        tmpdir.cleanup()
-
-    def identify_model_template(self, model_flavour: str):
-        if model_flavour == ModelFlavours.H2O:
-            return "./resouces/templates/h2o.py"
-
-        elif model_flavour == ModelFlavours.KERAS:
-            return "./resouces/templates/keras.py"
-
-        elif model_flavour == ModelFlavours.MLEAP:
-            raise Exception("no template available for MLeap models")
-
-        elif model_flavour == ModelFlavours.PYTORCH:
-            return "./resouces/templates/pytorch.py"
-
-        elif model_flavour == ModelFlavours.SKLEARN:
-            return "./resouces/templates/sklearn.py"
-
-        elif model_flavour == ModelFlavours.SPARK:
-            return "./resouces/templates/spark.py"
-
-        elif model_flavour == ModelFlavours.TENSORFLOW:
-            return "./resouces/templates/tensorflow.py"
-
-        elif model_flavour == ModelFlavours.ONNX:
-            return "./resouces/templates/onnx.py"
-
-        elif model_flavour == ModelFlavours.GLUON:
-            return "./resouces/templates/gluon.py"
-
-        elif model_flavour == ModelFlavours.XGBOOST:
-            return "./resouces/templates/xgboost.py"
-
-        elif model_flavour == ModelFlavours.LIGHTGBM:
-            return "./resouces/templates/lightgbm.py"
-
-        elif model_flavour == ModelFlavours.CATBOOST:
-            return "./resouces/templates/catboost.py"
-
-        elif model_flavour == ModelFlavours.SPACY:
-            return "./resouces/templates/spacy.py"
-
-        elif model_flavour == ModelFlavours.FASTAI:
-            return "./resouces/templates/fastai.py"
-
-        elif model_flavour == ModelFlavours.STATSMODELS:
-            return "./resouces/templates/statsmodels.py"
-
-        elif model_flavour == ModelFlavours.PROPHET:
-            return "./resouces/templates/prophet.py"
-
-        else:
-            raise Exception(
-                "Model flavour not recognised, must be one of Mlflow supported"
-            )
-
-    def contains_required_code_files(self, code_dir: str):
-        code_files = [
-            file.lower() for _, _, files in os.walk(code_dir) for file in files
-        ]
-        return "requirements.txt" in code_files and "model.py" in code_files
-
-    def zip_model_files(
-        self,
-        model_code: str,
-        model_requirements: str,
-        additional_files: str,
-        model_binary: str,
-        output_path: str,
-    ):
-        tmpdir = tempfile.TemporaryDirectory()
-
-        code_path = os.path.join(tmpdir.name, "code")
-        binary_path = os.path.join(tmpdir.name, "binary")
-
-        # move model files
-        if model_requirements != "requirements.txt":
-            self.generate_requirements_file(
-                model_requirements, f"{code_path}/requirements.txt"
-            )
-
-        else:
-            subprocess.run(["cp", model_requirements, code_path])
-
-        subprocess.run(["cp", model_code, code_path])
-        subprocess.run(["cp", additional_files, code_path])
-        subprocess.run(["cp", model_binary, binary_path])
-
-        # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip")
-        self.zip_files(code_path, f"{output_path}/code.zip")
-
-        tmpdir.cleanup()
-
-    def zip_files(self, file_path: str, zip_path: str):
-        if os.path.isdir(file_path):
-            with ZipFile(zip_path, "w") as zf:
-                for dir_path, _, files in os.walk(file_path):
-                    if dir_path == file_path:
-                        pth = ""
-
-                    else:
-                        pth = os.path.join(*os.path.split(dir_path)[1:]) + os.path.sep
-
-                    for file in files:
-                        zf.write(filename=f"{dir_path}/{file}", arcname=f"{pth}{file}")
-
-        else:
-            with ZipFile(zip_path, "w") as zf:
-                zf.write(file_path)
-
-    def generate_requirements_file(self, module_path: str, output_path: str):
-        subprocess.run(["pipreqsnb", module_path, "--savepath", output_path])
+        self.bundler.generate_requirements_file(module_path, output_dir)
