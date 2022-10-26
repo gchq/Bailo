@@ -336,9 +336,6 @@ def test_allow_exports_returns_false_if_model_does_not_allow_exports(
     mock_get_model_card, mock_get_deployment, mock_client
 ):
     mock_get_deployment.return_value = {"model": {"uuid": "123"}}
-    mock_get_model_card.return_value = {
-        "currentMetadata": {"buildOptions": {"exportRawModel": False}}
-    }
 
     allow_exports = mock_client._Client__allow_exports("dep")
 
