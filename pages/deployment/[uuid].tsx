@@ -292,13 +292,7 @@ export default function Deployment() {
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
-            <Tabs
-              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-              indicatorColor='secondary'
-              value={group}
-              onChange={handleTabChange}
-              aria-label='basic tabs example'
-            >
+            <Tabs value={group} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
               <Tab

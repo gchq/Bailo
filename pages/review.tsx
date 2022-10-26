@@ -26,7 +26,6 @@ import { Request } from '../types/interfaces'
 
 export default function Review() {
   const [value, setValue] = useState<ReviewFilterType>('user')
-  const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
     setValue(newValue)
@@ -34,12 +33,7 @@ export default function Review() {
 
   return (
     <Wrapper title='Reviews' page='review'>
-      <Tabs
-        indicatorColor='secondary'
-        textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-        value={value}
-        onChange={handleChange}
-      >
+      <Tabs value={value} onChange={handleChange}>
         <Tab value='user' label='Approvals' />
         <Tab value='archived' label='Archived' />
       </Tabs>
@@ -147,13 +141,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                     </MuiLink>
                   </Link>
                   <Stack direction='row' spacing={2}>
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      label={requestObj.approvalType}
-                      size='small'
-                    />
-
+                    <Chip color='primary' label={requestObj.approvalType} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
                         {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}

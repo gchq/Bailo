@@ -25,11 +25,6 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   const { pathname } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 
-  const linkColour = useMemo(
-    () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
-    [theme]
-  )
-
   const StyledList = styled(List)({
     paddingTop: 0,
     paddingBottom: 0,
@@ -107,10 +102,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   maxWidth='lg'
                   sx={{
                     'a:link': {
-                      color: linkColour,
+                      color: theme.palette.primary.main,
                     },
                     'a:visited': {
-                      color: linkColour,
+                      color: theme.palette.primary.main,
                     },
                   }}
                 >

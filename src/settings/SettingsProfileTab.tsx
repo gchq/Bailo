@@ -7,14 +7,11 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
 import React, { useState } from 'react'
 
 function SettingsProfileTab({ user }: { user: any }) {
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
-
-  const theme = useTheme()
 
   const regenerateToken = async () => {
     const { token } = await fetch('/api/v1/user/token', {
@@ -44,14 +41,9 @@ function SettingsProfileTab({ user }: { user: any }) {
           Roles
         </Typography>
         <Divider sx={{ pt: 1, mb: 1 }} />
-        <Stack direction='row' sx={{ p: 1 }}>
+        <Stack direction='row' spacing={1} sx={{ p: 1 }}>
           {user.roles.map((role: any) => (
-            <Chip
-              color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-              sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-              key={`chip-role-${role}`}
-              label={role}
-            />
+            <Chip color='primary' key={`chip-role-${role}`} label={role} />
           ))}
         </Stack>
       </Box>
