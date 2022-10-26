@@ -75,7 +75,7 @@ jobs:
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
-      # Run Cypress integration tests 
+      # Run Cypress integration tests
       - run: npm run cy:run
 
       # Run Selenium integration tests
