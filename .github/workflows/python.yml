@@ -28,7 +28,7 @@ jobs:
       - name: Check formatting with black
         run: |
           cd lib/python
-          black --check --verbose
+          black --check --verbose .
       - name: Test with pytest
         run: |
           cd lib/python
