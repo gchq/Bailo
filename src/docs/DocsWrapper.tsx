@@ -27,29 +27,26 @@ const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
-  const router = useRouter()
+  const { pathname, push } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
-  const [flattenedPages, setFlattenedPages] = useState<DocsMenuContent>([])
 
   const linkColour = useMemo(
     () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
     [theme]
   )
 
-  const flattenPages = useCallback((array) => {
+  const flattenPages = useCallback((array: DocsMenuContent) => {
     let result: DocsMenuContent = []
-    array.forEach((a) => {
-      result.push(a)
-      if (Array.isArray(a.children)) {
-        result = result.concat(flattenPages(a.children))
+    array.forEach((item) => {
+      result.push(item)
+      if (isDocHeading(item)) {
+        result = result.concat(flattenPages(item.children))
       }
     })
-    return result.filter((item: any) => item.hasIndex || item.hasIndex === undefined)
+    return result.filter((item) => !isDocHeading(item) || item.hasIndex)
   }, [])
 
-  useEffect(() => {
-    setFlattenedPages(flattenPages(docsMenuContent))
-  }, [docsMenuContent, flattenPages])
+  const flattenedPages = useMemo(() => flattenPages(docsMenuContent), [docsMenuContent, flattenPages])
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -73,7 +70,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           <Fragment key={doc.slug}>
             {doc.hasIndex ? (
               <Link passHref href={`/docs/${doc.slug}`}>
-                <ListItemButton dense selected={router.pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+                <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
                   {headingText}
                 </ListItemButton>
               </Link>
@@ -88,13 +85,13 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       }
       return (
         <Link passHref href={`/docs/${doc.slug}`} key={doc.slug}>
-          <ListItemButton dense selected={router.pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
+          <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
             <ListItemText primary={doc.title} />
           </ListItemButton>
         </Link>
       )
     },
-    [router.pathname]
+    [pathname]
   )
 
   const docsMenu = useMemo(
@@ -102,16 +99,20 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     [docsMenuContent, createDocElement]
   )
 
-  const reducedPath = router.pathname.replace(/^(\/docs\/)/, '')
-  const currentIndex = flattenedPages.findIndex((item) => item.slug === reducedPath)
+  const reducedPath = useMemo(() => pathname.replace(/^(\/docs\/)/, ''), [pathname])
+
+  const currentIndex = useMemo(
+    () => flattenedPages.findIndex((item) => item.slug === reducedPath),
+    [flattenedPages, reducedPath]
+  )
 
   function changePage(newIndex: number) {
     const newPage = flattenedPages[newIndex]
-    router.push(`/docs/${newPage.slug}`)
+    push(`/docs/${newPage.slug}`)
   }
 
   function changePageToDocsHome() {
-    router.push('/docs')
+    push('/docs')
   }
 
   return (
@@ -165,7 +166,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                           </Button>
                         )}
                         {currentIndex < flattenedPages.length - 1 && (
-                          <Button endIcon={<ArrowForward />} onClick={() => changePage(currentIndex + 1)} sx={{}}>
+                          <Button endIcon={<ArrowForward />} onClick={() => changePage(currentIndex + 1)}>
                             {flattenedPages[currentIndex + 1].title}
                           </Button>
                         )}
