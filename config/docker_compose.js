@@ -15,10 +15,6 @@ module.exports = {
     path: '/s2i/s2i',
   },
 
-  kaniko: {
-    path: '/kaniko/executor',
-  },
-
   uiConfig: {
     banner: {
       enable: true,

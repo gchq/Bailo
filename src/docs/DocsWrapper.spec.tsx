@@ -4,21 +4,13 @@
 
 import { ThemeProvider } from '@mui/system'
 import { render, screen, waitFor } from '@testing-library/react'
-import * as router from 'next/router'
+import { mockNextUseRouter } from '../../utils/testUtils'
 import { lightTheme } from '../theme'
 import DocsWrapper from './DocsWrapper'
 
 describe('DocsWrapper', () => {
   it('renders a DocsWrapper component', async () => {
-    const mockedRouter: any = {
-      pathname: 'test-path',
-      prefetch: () => {
-        /* do nothing */
-      },
-    }
-
-    const mockRouter = jest.spyOn(router, 'useRouter')
-    mockRouter.mockReturnValue(mockedRouter)
+    mockNextUseRouter({ pathname: '/docs' })
 
     render(
       <ThemeProvider theme={lightTheme}>

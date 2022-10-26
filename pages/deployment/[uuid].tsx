@@ -3,6 +3,7 @@ import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -22,8 +23,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material'
-import Box from '@mui/system/Box'
+import { useTheme } from '@mui/material/styles'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import copy from 'copy-to-clipboard'
@@ -40,14 +40,13 @@ import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
-import { lightTheme } from '../../src/theme'
 import Wrapper from '../../src/Wrapper'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { VersionDoc } from '../../server/models/Version'
 import { ModelUploadType } from '../../types/interfaces'
+import { VersionDoc } from '../../server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -93,9 +92,6 @@ function CodeLine({ line }) {
   )
 }
 
-const isVersionDoc = (value: unknown): value is VersionDoc =>
-  !!value && (value as VersionDoc)._id && (value as VersionDoc).version
-
 export default function Deployment() {
   const router = useRouter()
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
@@ -112,19 +108,18 @@ export default function Deployment() {
   const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const theme = useTheme() || lightTheme
+  const theme = useTheme()
 
-  const initialVersionRequested = useMemo(() => {
+  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
     if (!deployment) return undefined
     const initialVersion = deployment.versions.find(
-      (version) =>
-        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
     )
-    return isVersionDoc(initialVersion) ? initialVersion : undefined
+    return initialVersion
   }, [deployment])
 
   const hasUploadType = useMemo(
-    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions?.uploadType,
     [initialVersionRequested]
   )
 
@@ -188,7 +183,7 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -225,13 +220,31 @@ export default function Deployment() {
                 </Alert>
               </Box>
             )}
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model was not built by Bailo and may not follow the standard format.
+                </Alert>
+              </Box>
+            )}
             <Box>
               <Button
                 variant='outlined'
                 color='primary'
                 disabled={
                   !hasUploadType ||
-                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                  initialVersionRequested?.metadata?.buildOptions.uploadType === ModelUploadType.ModelCard
                 }
                 startIcon={<Info />}
                 onClick={handleClickOpen}
@@ -299,13 +312,19 @@ export default function Deployment() {
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}
-                disabled={deployment.managerApproved !== 'Accepted'}
+                disabled={
+                  deployment.managerApproved !== 'Accepted' ||
+                  (hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType)
+                }
                 value='exports'
                 label={
                   <DisabledElementTooltip
                     conditions={[
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
+                        : '',
+                      hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType
+                        ? 'Model does not have raw artifacts attached'
                         : '',
                     ]}
                     placement='top'
@@ -319,7 +338,7 @@ export default function Deployment() {
           </Box>
           <Box sx={{ marginBottom: 3 }} />
 
-          {group === 'overview' && <DeploymentOverview deployment={deployment} use='DEPLOYMENT' />}
+          {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
           {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
 
@@ -370,7 +389,7 @@ export default function Deployment() {
                 </Link>
                 page) {theme.palette.mode}
               </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
               <br />
 
               <p style={{ margin: 0 }}># Pull model</p>

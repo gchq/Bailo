@@ -63,6 +63,10 @@ export default function Deploy() {
       })
     )
 
+    for (const step of newSteps) {
+      step.steps = newSteps
+    }
+
     setSplitSchema({ reference, steps: newSteps })
   }, [currentSchema])
 
@@ -119,7 +123,7 @@ export default function Deploy() {
         </Grid>
 
         <SubmissionError error={error} />
-        <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} modelUploading={false} />
+        <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
       </Paper>
     </Wrapper>
   )

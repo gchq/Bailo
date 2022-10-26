@@ -1,4 +1,4 @@
-type ErrorInfo = Error & { info: any; status: number }
+type ErrorInfo = Error & { info: unknown; status: number }
 
 export const fetcher = async (input: RequestInfo, init: RequestInit) => {
   const res = await fetch(input, init)
@@ -6,10 +6,11 @@ export const fetcher = async (input: RequestInfo, init: RequestInit) => {
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.') as ErrorInfo
-    // Attach extra info to the error object.
-    error.info = await res.json()
-    error.status = res.status
+    const error: ErrorInfo = {
+      ...new Error('An error occurred while fetching the data.'),
+      info: await res.json(),
+      status: res.status,
+    }
     throw error
   }
 
