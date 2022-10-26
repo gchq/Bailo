@@ -1,5 +1,4 @@
 import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
-import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
@@ -57,7 +56,7 @@ const VersionSchema = new Schema<Version>(
 
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
-VersionSchema.methods.log = async function (level: string, msg: string) {
+VersionSchema.methods.log = async function log(level: string, msg: string) {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
