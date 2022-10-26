@@ -64,7 +64,15 @@ function SettingsProfileTab({ user }: { user: any }) {
           <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='showTokenButton'>
             Regenerate Token
           </Button>
-          <Box sx={{ backgroundColor: '#f5f5f5', color: '#000000de', pr: 2, pl: 2, display: 'flex', mr: 1 }}>
+          <Box
+            sx={{
+              backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a',
+              pr: 2,
+              pl: 2,
+              display: 'flex',
+              mr: 1,
+            }}
+          >
             <Box component={Stack} direction='column' justifyContent='center'>
               <Typography variant='body1' data-test='dockerPassword'>
                 {displayToken ? displayedToken : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}

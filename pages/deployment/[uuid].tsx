@@ -57,6 +57,7 @@ function isTabOption(value: string): value is TabOptions {
 }
 
 function CodeLine({ line }) {
+  const theme = useTheme()
   const [openSnackbar, setOpenSnackbar] = useState(false)
 
   const handleButtonClick = () => {
@@ -82,7 +83,7 @@ function CodeLine({ line }) {
         }}
       >
         <Tooltip title='Copy to clipboard' arrow>
-          <Box sx={{ color: '#383838', p: 1, borderRadius: 2 }}>
+          <Box sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', p: 1, borderRadius: 2 }}>
             $ <b>{line}</b>
           </Box>
         </Tooltip>
