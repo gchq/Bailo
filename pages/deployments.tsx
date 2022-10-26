@@ -136,7 +136,7 @@ function Deployments() {
                     <ModelNameFromKey modelId={key} />
                     <Divider flexItem />
                     {groupedDeployments[key].map((deployment) => (
-                      <Box sx={{ p: 1, m: 1, backgroundColor: '#f3f1f1', borderRadius: 2 }} key={deployment.uuid}>
+                      <Box sx={{ p: 1, m: 1, borderRadius: 2 }} key={deployment.uuid}>
                         <Box>
                           <Link href={`/deployment/${deployment?.uuid}`} passHref>
                             <MuiLink
