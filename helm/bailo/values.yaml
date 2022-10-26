@@ -150,6 +150,10 @@ nginxAuth:
   #certFile: "tls.crt"
   #keyFile: "tls.key"
 
+# Maildev
+maildev:
+  enabled: true
+
 # Openshift specific configuration   
 openshift:
   namespace: bailo # project
