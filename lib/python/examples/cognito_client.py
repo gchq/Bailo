@@ -85,22 +85,21 @@ if result.is_valid:
 ## Update the model and model card
 update_resp = client.update_model(
     model_card=model_card,
-    binary_file="../../../__tests__/example_models/minimal_model/minimal_binary.zip",
-    code_file="../../../__tests__/example_models/minimal_model/minimal_code.zip",
+    model_version="new_python_client_version",
+    binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
+    code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
 )
 
 print(f"Updated model: {update_resp}")
 
 ## Create a new model
-with open(
-    "../../../__tests__/example_models/minimal_model/minimal_metadata.json"
-) as json_file:
+with open("examples/resources/example_metadata.json") as json_file:
     metadata = json.load(json_file)
 
 uploaded_model = client.upload_model(
     metadata=metadata,
-    binary_file="../../../__tests__/example_models/minimal_model/minimal_binary.zip",
-    code_file="../../../__tests__/example_models/minimal_model/minimal_code.zip",
+    binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
+    code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
 )
 
 print(f"Created new model: {uploaded_model}")
@@ -126,3 +125,8 @@ if user_deployments:
 
 ## To get a specific deployment
 # deployment = client.find_my_deployment(deployment_name='', model_uuid='', model_version='')
+
+with open("bailoclient/resources/deployment.json", "r") as json_file:
+    metadata = json.load(json_file)
+
+client.request_deployment(metadata)
