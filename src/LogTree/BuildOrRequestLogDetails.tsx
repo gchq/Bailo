@@ -1,6 +1,6 @@
 import React, { ReactElement, useMemo } from 'react'
+import { LogFilters } from '@/src/FilterMenu/FilterMenu'
 import { LogEntry, LogType, UiConfig } from '../../types/interfaces'
-import { LogQuery } from './LogTree'
 import ChildLogDetails from './ChildLogDetails'
 import MiscLogDetails from './MiscLogDetails'
 
@@ -9,7 +9,7 @@ type BuildOrRequestLogDetailsProps = {
   log: LogEntry
   childLogs: Array<LogEntry>
   indent: number
-  query: LogQuery
+  query: LogFilters
   filterCode: string
 }
 

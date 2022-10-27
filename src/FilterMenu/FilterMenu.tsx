@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, ChangeEvent } from 'react'
+import React, { ReactElement, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import FilterIcon from '@mui/icons-material/FilterAltTwoTone'
 import RegexIcon from '@mui/icons-material/NewReleases'
@@ -13,54 +13,59 @@ import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
 import { SelectChangeEvent } from '@mui/material/Select'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import isLogLevel, { isLogLevelString } from '@/utils/type-guards/isLogLevel'
 import LogLevelSelect from './LogLevelSelect'
 import { LogLevel } from '../../types/interfaces'
 import getLogLevelLabel from '../../utils/getLogLevelLabel'
 
-interface FilterMenuProps {
-  logLevel: LogLevel
-  onLogLevelChange: (event: SelectChangeEvent<LogLevel>) => void
+export type LogFilters = {
+  level: LogLevel
   buildId: string
-  onBuildIdChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   requestId: string
-  onRequestIdChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   search: string
-  onSearchChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   isRegex: boolean
-  onIsRegexChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onGetLogs: () => void
 }
-export default function FilterMenu({
-  logLevel,
-  onLogLevelChange,
-  buildId,
-  onBuildIdChange,
-  requestId,
-  onRequestIdChange,
-  search,
-  onSearchChange,
-  isRegex,
-  onIsRegexChange,
-  onGetLogs,
-}: FilterMenuProps): ReactElement {
+
+type FilterMenuProps = {
+  currentFilters: LogFilters
+  onGetLogs: (filters: LogFilters) => void
+}
+export default function FilterMenu({ currentFilters, onGetLogs }: FilterMenuProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [level, setLevel] = useState<LogLevel>(LogLevel.TRACE)
+  const [buildId, setBuildId] = useState('')
+  const [requestId, setRequestId] = useState('')
+  const [search, setSearch] = useState('')
+  const [isRegex, setIsRegex] = useState(false)
 
   const handleFiltersClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = () => {
+  const handleClose = (resetFilters = false) => {
+    if (resetFilters) {
+      setLevel(currentFilters.level)
+      setBuildId(currentFilters.buildId)
+      setRequestId(currentFilters.requestId)
+      setSearch(currentFilters.search)
+      setIsRegex(currentFilters.isRegex)
+    }
     setAnchorEl(null)
+  }
+
+  const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
+    if (isLogLevel(event.target.value)) setLevel(event.target.value)
+    else if (isLogLevelString(event.target.value)) setLevel(parseInt(event.target.value, 10))
   }
 
   const handleGetLogs = () => {
     handleClose()
-    onGetLogs()
+    onGetLogs({ level, buildId, requestId, search, isRegex })
   }
 
   return (
     <>
-      <Chip label={`Log level: ${getLogLevelLabel(logLevel)}`} color='primary' sx={{ mr: 1 }} />
+      <Chip label={`Log level: ${getLogLevelLabel(level)}`} color='primary' sx={{ mr: 1 }} />
       {buildId && <Chip label={`Build ID: ${buildId}`} color='primary' sx={{ mr: 1 }} />}
       {requestId && <Chip label={`Request ID: ${requestId}`} color='primary' sx={{ mr: 1 }} />}
       {search && (
@@ -77,7 +82,7 @@ export default function FilterMenu({
           sx={{ mr: 1 }}
         />
       )}
-      <Tooltip title='Filter'>
+      <Tooltip title='Filters'>
         <IconButton color='primary' size='small' aria-label='filters' onClick={handleFiltersClick} sx={{ mr: 1 }}>
           <FilterIcon />
         </IconButton>
@@ -85,7 +90,7 @@ export default function FilterMenu({
       <Popover
         open={!!anchorEl}
         anchorEl={anchorEl}
-        onClose={handleClose}
+        onClose={(): void => handleClose(true)}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'left',
@@ -98,20 +103,20 @@ export default function FilterMenu({
         <Box width='500px' p={1}>
           <Box display='flex' ml={1}>
             <Box mt='auto'>Filters</Box>
-            <IconButton size='small' onClick={handleClose} sx={{ ml: 'auto', mr: -0.5, mt: -0.5 }}>
+            <IconButton size='small' onClick={(): void => handleClose(true)} sx={{ ml: 'auto', mr: -0.5, mt: -0.5 }}>
               <CloseIcon />
             </IconButton>
           </Box>
           <Divider sx={{ mt: 1, mb: 2 }} />
           <Box sx={{ mx: 1 }}>
-            <LogLevelSelect value={logLevel} onChange={onLogLevelChange} />
+            <LogLevelSelect value={level} onChange={handleLogLevelChange} />
             <Tooltip title={requestId ? 'Unable to provide a Build ID, a Request ID has already been provided.' : ''}>
               <TextField
                 label='Build ID'
                 value={buildId}
                 size='small'
                 disabled={!!requestId}
-                onChange={onBuildIdChange}
+                onChange={(event): void => setBuildId(event.target.value)}
                 sx={{ minWidth: '300px', mb: 1 }}
               />
             </Tooltip>
@@ -121,7 +126,7 @@ export default function FilterMenu({
                 value={requestId}
                 size='small'
                 disabled={!!buildId}
-                onChange={onRequestIdChange}
+                onChange={(event): void => setRequestId(event.target.value)}
                 sx={{ minWidth: '300px', mb: 1 }}
               />
             </Tooltip>
@@ -130,12 +135,12 @@ export default function FilterMenu({
               label='Search'
               value={search}
               size='small'
-              onChange={onSearchChange}
+              onChange={(event): void => setSearch(event.target.value)}
               sx={{ minWidth: '300px', mb: 1 }}
             />
             <FormControlLabel
               label='Enable Regex'
-              control={<Checkbox checked={isRegex} onChange={onIsRegexChange} />}
+              control={<Checkbox checked={isRegex} onChange={(event): void => setIsRegex(event.target.checked)} />}
               sx={{ ml: 1 }}
             />
           </Box>

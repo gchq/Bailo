@@ -13,8 +13,8 @@ import Link from '@/src/Link'
 import getLogLevelLabel from '@/utils/getLogLevelLabel'
 import { timeDifference } from '@/utils/dateUtils'
 import BuildOrRequestLogDetails from '@/src/LogTree/BuildOrRequestLogDetails'
+import { LogFilters } from '@/src/FilterMenu/FilterMenu'
 import { useGetAppLogs } from '../../data/admin'
-import { LogQuery } from './LogTree'
 import { LogEntry, LogLevel, LogType, UiConfig } from '../../types/interfaces'
 
 const getLogLevelColour = (level: number): ChipProps['color'] => {
@@ -34,7 +34,7 @@ type ChildLogDetailsProps = {
   log: LogEntry
   type: LogType
   indent: number
-  query: LogQuery
+  query: LogFilters
 }
 
 export default function ChildLogDetails({ uiConfig, log, type, indent, query }: ChildLogDetailsProps): ReactElement {

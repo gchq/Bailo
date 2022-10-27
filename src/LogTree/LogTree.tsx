@@ -1,6 +1,7 @@
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { ReactElement } from 'react'
 import ChildLogDetails from '@/src/LogTree/ChildLogDetails'
-import { LogEntry, LogLevel, LogType } from '../../types/interfaces'
+import { LogFilters } from '@/src/FilterMenu/FilterMenu'
+import { LogEntry, LogType } from '../../types/interfaces'
 import { useGetAppLogs } from '../../data/admin'
 import { useGetUiConfig } from '../../data/uiConfig'
 
@@ -15,59 +16,17 @@ function getLogType(log: LogEntry): LogType {
   }
 }
 
-export interface LogQuery {
-  level: LogLevel
-  buildId: string
-  requestId: string
-  search: string
-  isRegex: boolean
+type LogTreeProps = {
+  query: LogFilters
 }
 
-interface LogTreeProps {
-  level: LogLevel
-  buildId: string
-  requestId: string
-  search: string
-  isRegex: boolean
-  doGetLogs: boolean
-  resetDoGetLogs: () => void
-}
-
-export default function LogTree({
-  level,
-  buildId,
-  requestId,
-  search,
-  isRegex,
-  doGetLogs,
-  resetDoGetLogs,
-}: LogTreeProps): ReactElement {
+export default function LogTree({ query }: LogTreeProps): ReactElement {
   const { uiConfig } = useGetUiConfig()
-  const [query, setQuery] = useState({
-    level,
-    buildId,
-    requestId,
-    search,
-    isRegex,
-  })
 
   const { logs } = useGetAppLogs({
     ...query,
     filter: ['request', 'build', 'misc'],
   })
-
-  useEffect(() => {
-    if (doGetLogs) {
-      setQuery({
-        level,
-        buildId,
-        requestId,
-        search,
-        isRegex,
-      })
-      resetDoGetLogs()
-    }
-  }, [buildId, doGetLogs, isRegex, level, requestId, search, resetDoGetLogs])
 
   if (!logs || !uiConfig) {
     return <>Loading...</>
