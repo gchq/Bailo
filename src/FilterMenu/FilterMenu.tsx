@@ -1,4 +1,5 @@
 import React, { ReactElement, useState, ChangeEvent } from 'react'
+import CloseIcon from '@mui/icons-material/Close'
 import FilterIcon from '@mui/icons-material/FilterAltTwoTone'
 import RegexIcon from '@mui/icons-material/NewReleases'
 import Box from '@mui/material/Box'
@@ -95,43 +96,51 @@ export default function FilterMenu({
         }}
       >
         <Box width='500px' p={1}>
-          <Box ml={1}>Filters</Box>
+          <Box display='flex' ml={1}>
+            <Box mt='auto'>Filters</Box>
+            <IconButton size='small' onClick={handleClose} sx={{ ml: 'auto', mr: -0.5, mt: -0.5 }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
           <Divider sx={{ mt: 1, mb: 2 }} />
-          <LogLevelSelect value={logLevel} onChange={onLogLevelChange} />
-          <Tooltip title={requestId ? 'Unable to provide a Build ID, a Request ID has already been provided.' : ''}>
+          <Box sx={{ mx: 1 }}>
+            <LogLevelSelect value={logLevel} onChange={onLogLevelChange} />
+            <Tooltip title={requestId ? 'Unable to provide a Build ID, a Request ID has already been provided.' : ''}>
+              <TextField
+                label='Build ID'
+                value={buildId}
+                size='small'
+                disabled={!!requestId}
+                onChange={onBuildIdChange}
+                sx={{ minWidth: '300px', mb: 1 }}
+              />
+            </Tooltip>
+            <Tooltip title={buildId ? 'Unable to provide a Request ID, a Build ID has already been provided.' : ''}>
+              <TextField
+                label='Request ID'
+                value={requestId}
+                size='small'
+                disabled={!!buildId}
+                onChange={onRequestIdChange}
+                sx={{ minWidth: '300px', mb: 1 }}
+              />
+            </Tooltip>
             <TextField
-              label='Build ID'
-              value={buildId}
+              multiline
+              label='Search'
+              value={search}
               size='small'
-              disabled={!!requestId}
-              onChange={onBuildIdChange}
+              onChange={onSearchChange}
               sx={{ minWidth: '300px', mb: 1 }}
             />
-          </Tooltip>
-          <Tooltip title={buildId ? 'Unable to provide a Request ID, a Build ID has already been provided.' : ''}>
-            <TextField
-              label='Request ID'
-              value={requestId}
-              size='small'
-              disabled={!!buildId}
-              onChange={onRequestIdChange}
-              sx={{ minWidth: '300px', mb: 1 }}
+            <FormControlLabel
+              label='Enable Regex'
+              control={<Checkbox checked={isRegex} onChange={onIsRegexChange} />}
+              sx={{ ml: 1 }}
             />
-          </Tooltip>
-          <TextField
-            label='Search'
-            value={search}
-            size='small'
-            onChange={onSearchChange}
-            sx={{ minWidth: '300px', mb: 1 }}
-          />
-          <FormControlLabel
-            label='Enable Regex'
-            control={<Checkbox checked={isRegex} onChange={onIsRegexChange} />}
-            sx={{ ml: 2 }}
-          />
+          </Box>
           <Box display='flex'>
-            <Button variant='contained' size='small' onClick={handleGetLogs} sx={{ mx: 'auto', mt: 1 }}>
+            <Button variant='contained' size='small' onClick={handleGetLogs} sx={{ mx: 'auto', mt: 1, mb: 0.5 }}>
               Get Logs
             </Button>
           </Box>
