@@ -330,8 +330,8 @@ class Bundler:
         subprocess.run(["mv", glob(f"{code_path}/data/model*")[0], binary_path])
 
         # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip", tmpdir.name)
-        self.zip_files(code_path, f"{output_path}/code.zip", tmpdir.name)
+        self.zip_files(binary_path, f"{output_path}/binary.zip")
+        self.zip_files(code_path, f"{output_path}/code.zip")
 
         tmpdir.cleanup()
 
@@ -454,12 +454,12 @@ class Bundler:
         subprocess.run(["cp", "-r", model_binary, binary_path])
 
         # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip", tmpdir.name)
-        self.zip_files(code_path, f"{output_path}/code.zip", tmpdir.name)
+        self.zip_files(binary_path, f"{output_path}/binary.zip")
+        self.zip_files(code_path, f"{output_path}/code.zip")
 
         tmpdir.cleanup()
 
-    def zip_files(self, file_path: str, zip_path: str, tmp_dir: str):
+    def zip_files(self, file_path: str, zip_path: str):
         """Create zip file at the specified zip path from a file or folder path
 
         Args:
@@ -467,12 +467,12 @@ class Bundler:
             zip_path (str): Path to create the new zip at
         """
         if os.path.isdir(file_path):
-            self.__zip_directory(file_path, zip_path, tmp_dir)
+            self.__zip_directory(file_path, zip_path)
 
         else:
-            self.__zip_file(file_path, zip_path, tmp_dir)
+            self.__zip_file(file_path, zip_path)
 
-    def __zip_file(self, file_path: str, zip_path: str, tmp_dir: str):
+    def __zip_file(self, file_path: str, zip_path: str):
         """Zip a single file into new zip created at zip_path
 
         Args:
@@ -484,7 +484,7 @@ class Bundler:
         with ZipFile(zip_path, "w") as zf:
             zf.write(file_path, arcname=file_name)
 
-    def __zip_directory(self, file_path: str, zip_path: str, tmp_dir: str):
+    def __zip_directory(self, file_path: str, zip_path: str):
         """Zip a directory of files into new zip created at the zip_path
 
         Args:
@@ -493,14 +493,14 @@ class Bundler:
         """
         with ZipFile(zip_path, "w") as zf:
             for dir_path, _, files in os.walk(file_path):
-                output_dir = self.__get_output_dir(dir_path, file_path, tmp_dir)
+                output_dir = self.__get_output_dir(dir_path, file_path)
 
                 for file in files:
                     zf.write(
                         filename=f"{dir_path}/{file}", arcname=f"{output_dir}{file}"
                     )
 
-    def __get_output_dir(self, file_path: str, dir_path: str, tmp_dir: str):
+    def __get_output_dir(self, file_path: str, dir_path: str):
         """Remove top level folder to get the output dir required for the zip files
 
         Args:
