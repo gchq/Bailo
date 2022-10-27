@@ -84,6 +84,7 @@ function Upload() {
         state: {
           binary: undefined,
           code: undefined,
+          seldonVersion: '',
         },
         schemaRef: reference,
 

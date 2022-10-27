@@ -27,7 +27,7 @@ import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/re
 import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
-import { postUpload } from './routes/v1/upload'
+import { getSeldonVersions, postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
 import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
 import { connectToMongoose } from './utils/database'
@@ -54,6 +54,7 @@ server.use(getUser)
 server.use(expressLogger)
 
 server.post('/api/v1/model', ...postUpload)
+server.get('/api/v1/seldon/versions', ...getSeldonVersions)
 
 server.get('/api/v1/models', ...getModels)
 server.get('/api/v1/model/uuid/:uuid', ...getModelByUuid)
