@@ -1,4 +1,5 @@
 import ContentCopy from '@mui/icons-material/ContentCopy'
+import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -10,6 +11,7 @@ import Typography from '@mui/material/Typography'
 import React, { useState } from 'react'
 
 function SettingsProfileTab({ user }: { user: any }) {
+  const theme = useTheme()
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
 
@@ -58,7 +60,7 @@ function SettingsProfileTab({ user }: { user: any }) {
           </Button>
           <Box
             sx={{
-              backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a',
+              backgroundColor: theme.palette.container.main,
               pr: 2,
               pl: 2,
               display: 'flex',
