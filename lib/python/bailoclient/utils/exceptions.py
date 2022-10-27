@@ -67,3 +67,7 @@ class ModelFlavourNotRecognised(Exception):
 
 class TemplateNotAvailable(Exception):
     """No model.py template code available"""
+
+
+class DirectoryNotFound(Exception):
+    """Unable to find directory"""

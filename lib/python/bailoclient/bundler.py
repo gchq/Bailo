@@ -10,7 +10,11 @@ from glob import glob
 from zipfile import ZipFile
 from typing import List
 
-from bailoclient.utils.exceptions import ModelFlavourNotRecognised, TemplateNotAvailable
+from bailoclient.utils.exceptions import (
+    ModelFlavourNotRecognised,
+    TemplateNotAvailable,
+    DirectoryNotFound,
+)
 
 from .utils.enums import ModelFlavours
 
@@ -59,9 +63,7 @@ class Bundler:
         if not os.path.exists(output_path):
             self.create_dir(output_path)
 
-        # remove trailing /
-        if output_path.endswith("/"):
-            output_path = output_path[0:-1]
+        output_path = self.format_directory_path(output_path)
 
         if additional_files and not isinstance(additional_files, list):
             raise TypeError("Expected additional_files to be a list of file paths")
@@ -102,13 +104,6 @@ class Bundler:
         return self.zip_model_files(
             model_py, model_requirements, additional_files, model_binary, output_path
         )
-
-    def create_dir(self, output_dir: str):
-        try:
-            subprocess.run(["mkdir", "-p", output_dir])
-
-        except subprocess.SubprocessError:
-            raise subprocess.SubprocessError("Unable to create directory") from None
 
     def do_mlflow_bundling(
         self,
@@ -531,10 +526,31 @@ class Bundler:
         Raises:
             Exception: Unable to create requirements.txt from specified file at specified location
         """
+
+        output_dir, _ = os.path.split(output_path)
+        if not os.path.exists(output_dir):
+            raise DirectoryNotFound("Output directory could not be found")
+
         try:
-            subprocess.run(["pipreqsnb", module_path, "--savepath", output_path])
+            subprocess.run(
+                ["pipreqsnb", module_path, "--savepath", output_path],
+                stderr=subprocess.STDOUT,
+            )
 
         except subprocess.CalledProcessError:
-            raise Exception(
-                "Unable to create requirements file. Check your filepath"
+            raise subprocess.CalledProcessError(
+                "Unable to create requirements file at the specified location"
             ) from None
+
+    def create_dir(self, output_dir: str):
+        try:
+            subprocess.run(["mkdir", "-p", output_dir])
+
+        except (subprocess.SubprocessError, ValueError):
+            raise subprocess.SubprocessError("Unable to create directory") from None
+
+    def format_directory_path(self, dir_path):
+        if not dir_path.endswith("/"):
+            return dir_path + os.path.sep
+
+        return dir_path
