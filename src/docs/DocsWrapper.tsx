@@ -12,7 +12,12 @@ import Wrapper from '@/src/Wrapper'
 import Copyright from '@/src/Copyright'
 import DocsMenuContext from '@/src/contexts/docsMenuContext'
 import isDocHeading from '@/utils/type-guards/isDocHeading'
-import { DocFileOrHeading } from '@/types/interfaces'
+import { DocFileOrHeading, DocsMenuContent } from '@/types/interfaces'
+import Stack from '@mui/system/Stack'
+import Button from '@mui/material/Button'
+import ArrowForward from '@mui/icons-material/ArrowForward'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import Divider from '@mui/material/Divider'
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -22,8 +27,21 @@ const paddingIncrement = 2
 
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
-  const { pathname } = useRouter()
+  const { pathname, push } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
+
+  const flattenPages = useCallback((array: DocsMenuContent) => {
+    let result: DocsMenuContent = []
+    array.forEach((item) => {
+      result.push(item)
+      if (isDocHeading(item)) {
+        result = result.concat(flattenPages(item.children))
+      }
+    })
+    return result.filter((item) => !isDocHeading(item) || item.hasIndex)
+  }, [])
+
+  const flattenedPages = useMemo(() => flattenPages(docsMenuContent), [docsMenuContent, flattenPages])
 
   const StyledList = styled(List)({
     paddingTop: 0,
@@ -76,6 +94,22 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     [docsMenuContent, createDocElement]
   )
 
+  const reducedPath = useMemo(() => pathname.replace(/^(\/docs\/)/, ''), [pathname])
+
+  const currentIndex = useMemo(
+    () => flattenedPages.findIndex((item) => item.slug === reducedPath),
+    [flattenedPages, reducedPath]
+  )
+
+  function changePage(newIndex: number) {
+    const newPage = flattenedPages[newIndex]
+    push(`/docs/${newPage.slug}`)
+  }
+
+  function changePageToDocsHome() {
+    push('/docs')
+  }
+
   return (
     <Wrapper title='Documentation' page='docs'>
       {/* Banner height + Toolbar height = 96px */}
@@ -111,7 +145,31 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 >
                   {children}
                 </Container>
-                <Copyright sx={{ pb: 2, pt: 4, mt: 'auto' }} />
+                <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 'auto' }}>
+                  <Divider flexItem />
+                  {flattenedPages.length > 0 && (
+                    <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
+                      <Stack direction='row' justifyContent='space-around'>
+                        {currentIndex === 0 && (
+                          <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
+                            Home
+                          </Button>
+                        )}
+                        {currentIndex > 0 && (
+                          <Button startIcon={<ArrowBack />} onClick={() => changePage(currentIndex - 1)}>
+                            {flattenedPages[currentIndex - 1].title}
+                          </Button>
+                        )}
+                        {currentIndex < flattenedPages.length - 1 && (
+                          <Button endIcon={<ArrowForward />} onClick={() => changePage(currentIndex + 1)}>
+                            {flattenedPages[currentIndex + 1].title}
+                          </Button>
+                        )}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+                <Copyright sx={{ pb: 2, pt: 4 }} />
               </Box>
             </Box>
           </>

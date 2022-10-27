@@ -1,3 +1,4 @@
+import { consoleLog } from '@/utils/logging'
 import { getAccessToken } from '../routes/v1/registryAuth'
 
 async function main() {
@@ -7,7 +8,7 @@ async function main() {
     { type: 'repository', name: model, actions: ['push', 'pull'] },
   ])
 
-  console.log(token)
+  consoleLog(token)
 }
 
 main()

@@ -30,6 +30,15 @@
       "@/utils/*": ["utils/*"]
     }
   },
-  "exclude": ["dist", ".next", "out", "next.config.mjs", "node_modules"],
+  "exclude": [
+    "dist",
+    ".next",
+    "out",
+    "next.config.mjs",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/testUtils.ts"
+  ],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
 }
