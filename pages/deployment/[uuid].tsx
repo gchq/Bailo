@@ -370,9 +370,7 @@ export default function Deployment() {
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>
-          Pull from Docker
-        </DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme.palette.container.main }}>Pull from Docker</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ p: 2 }}>
             <Box>

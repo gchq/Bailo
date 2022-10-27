@@ -68,13 +68,13 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
     mb: 2,
     borderLeft: '.3rem solid #283593',
     p: 2,
-    backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a',
+    backgroundColor: theme.palette.container.main,
   }
   const reviewerStyling = {
     mb: 2,
     borderLeft: '.3rem solid #de3c30',
     p: 2,
-    backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a',
+    backgroundColor: theme.palette.container.main,
   }
 
   const handleClose = () => {
