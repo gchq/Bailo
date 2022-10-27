@@ -73,3 +73,19 @@ def test_minimal_keys_in_dict_validates_multilevel_dictionaries():
     )
 
     assert result["valid"]
+
+
+def test_minimal_keys_in_dict_allows_false_as_valid_value():
+    result = utils.minimal_keys_in_dictionary(
+        {"key1": {"key2": {"key3": "value"}}}, {"key1": {"key2": {"key3": False}}}
+    )
+
+    assert result["valid"]
+
+
+def test_minimal_keys_in_dict_does_not_allow_empty_string_as_valid_value():
+    result = utils.minimal_keys_in_dictionary(
+        {"key1": {"key2": {"key3": "value"}}}, {"key1": {"key2": {"key3": ""}}}
+    )
+
+    assert not result["valid"]

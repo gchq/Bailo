@@ -37,7 +37,7 @@ export default async function processDeployments() {
 
       const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
-      const registry = `https://${config.get('registry.host')}/v2`
+      const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
       const tag = `${modelID}:${initialVersionRequested}`
       const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
 

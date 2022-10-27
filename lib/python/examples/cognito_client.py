@@ -15,16 +15,16 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 ## Configure client based on local secrets
 client = create_cognito_client(
-    user_pool_id=os.getenv("BAILO_USERPOOL"),
-    client_id=os.getenv("BAILO_CLIENT_ID"),
-    client_secret=os.getenv("BAILO_CLIENT_SECRET"),
-    region=os.getenv("BAILO_REGION"),
+    user_pool_id=os.getenv("COGNITO_USERPOOL"),
+    client_id=os.getenv("COGNITO_CLIENT_ID"),
+    client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+    region=os.getenv("COGNITO_REGION"),
     url=os.getenv("BAILO_URL"),
 )
 
-## Load username from local secrets file
-username = os.getenv("BAILO_USERNAME")
-password = os.getenv("BAILO_PASSWORD")
+### Load username from local secrets file
+username = os.getenv("COGNITO_USERNAME")
+password = os.getenv("COGNITO_PASSWORD")
 
 ## Connect to the Bailo instance
 client.connect(username=username, password=password)
@@ -85,22 +85,21 @@ if result.is_valid:
 ## Update the model and model card
 update_resp = client.update_model(
     model_card=model_card,
-    binary_file="../../../__tests__/example_models/minimal_model/minimal_binary.zip",
-    code_file="../../../__tests__/example_models/minimal_model/minimal_code.zip",
+    model_version="new_python_client_version",
+    binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
+    code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
 )
 
 print(f"Updated model: {update_resp}")
 
 ## Create a new model
-with open(
-    "../../../__tests__/example_models/minimal_model/minimal_metadata.json"
-) as json_file:
+with open("examples/resources/example_metadata.json") as json_file:
     metadata = json.load(json_file)
 
 uploaded_model = client.upload_model(
     metadata=metadata,
-    binary_file="../../../__tests__/example_models/minimal_model/minimal_binary.zip",
-    code_file="../../../__tests__/example_models/minimal_model/minimal_code.zip",
+    binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
+    code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
 )
 
 print(f"Created new model: {uploaded_model}")
@@ -109,7 +108,7 @@ print(f"Created new model: {uploaded_model}")
 schema = client.get_model_schema(model_uuid)
 
 
-## You can download the code and binary for a model if you have a deployment
+# You can download the code and binary for a model if you have a deployment
 
 user_deployments = client.get_my_deployments()
 
@@ -126,3 +125,8 @@ if user_deployments:
 
 ## To get a specific deployment
 # deployment = client.find_my_deployment(deployment_name='', model_uuid='', model_version='')
+
+with open("bailoclient/resources/deployment.json", "r") as json_file:
+    metadata = json.load(json_file)
+
+client.request_deployment(metadata)

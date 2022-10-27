@@ -16,8 +16,9 @@ export interface Version {
   reviewerLastViewed: DateString
 
   files: {
-    rawBinaryPath: string
-    rawCodePath: string
+    rawBinaryPath?: string
+    rawCodePath?: string
+    rawDockerPath?: string
   }
 
   state: any
@@ -38,7 +39,7 @@ const VersionSchema = new Schema<Version>(
 
     metadata: { type: Schema.Types.Mixed },
 
-    files: { type: Schema.Types.Mixed, required: true },
+    files: { type: Schema.Types.Mixed, required: true, default: {} },
 
     built: { type: Boolean, default: false },
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },

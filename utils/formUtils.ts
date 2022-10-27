@@ -72,6 +72,10 @@ export function setStepState(
       ...state,
     }
 
+    for (const duplicatedStep of duplicatedSteps) {
+      duplicatedStep.steps = duplicatedSteps
+    }
+
     return { ...oldSchema, steps: duplicatedSteps }
   })
 }
@@ -86,6 +90,11 @@ export function setStepValidate(
 
   const duplicatedSteps = [...splitSchema.steps]
   duplicatedSteps[index].shouldValidate = validate
+
+  for (const duplicatedStep of duplicatedSteps) {
+    duplicatedStep.steps = duplicatedSteps
+  }
+
   setSplitSchema({ ...splitSchema, steps: duplicatedSteps })
 }
 
@@ -158,6 +167,10 @@ export function setStepsData(
       state: data[step.section],
     }
   })
+
+  for (const step of newSteps) {
+    step.steps = newSteps
+  }
 
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }

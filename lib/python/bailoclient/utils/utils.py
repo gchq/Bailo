@@ -18,7 +18,7 @@ def get_filename_and_mimetype(full_path_file: str):
     return filename, m_type
 
 
-def minimal_keys_in_dictionary(minimal_dict: dict, dict_2: dict):
+def minimal_keys_in_dictionary(minimal_dict: dict, test_dict: dict):
     """Check that a dictionary contains all the keys within a minimal dictionary
 
     Args:
@@ -29,13 +29,13 @@ def minimal_keys_in_dictionary(minimal_dict: dict, dict_2: dict):
     """
     for key, value in minimal_dict.items():
         try:
-            dict_2[key]
+            test_dict[key]
         except KeyError:
             return {"valid": False, "error_message": f"must contain '{key}'"}
 
-        model_value = dict_2.get(key)
+        model_value = test_dict.get(key)
 
-        if not model_value:
+        if not model_value and model_value != False:
             return {"valid": False, "error_message": f"'{key}' cannot be empty"}
 
         if isinstance(value, dict) and not isinstance(model_value, dict):

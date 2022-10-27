@@ -63,6 +63,10 @@ export default function Deploy() {
       })
     )
 
+    for (const step of newSteps) {
+      step.steps = newSteps
+    }
+
     setSplitSchema({ reference, steps: newSteps })
   }, [currentSchema])
 

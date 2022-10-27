@@ -46,7 +46,7 @@ import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
-import isVersionDoc from '../../utils/type-guards/isVersionDoc'
+import { VersionDoc } from '../../server/models/Version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -110,17 +110,16 @@ export default function Deployment() {
 
   const theme = useTheme()
 
-  const initialVersionRequested = useMemo(() => {
+  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
     if (!deployment) return undefined
     const initialVersion = deployment.versions.find(
-      (version) =>
-        isVersionDoc(version) && version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
     )
-    return isVersionDoc(initialVersion) ? initialVersion : undefined
+    return initialVersion
   }, [deployment])
 
   const hasUploadType = useMemo(
-    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions.uploadType,
+    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions?.uploadType,
     [initialVersionRequested]
   )
 
@@ -184,7 +183,7 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${currentUser.id}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
 
   const requestApprovalReset = async () => {
     await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
@@ -221,13 +220,31 @@ export default function Deployment() {
                 </Alert>
               </Box>
             )}
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This model was not built by Bailo and may not follow the standard format.
+                </Alert>
+              </Box>
+            )}
             <Box>
               <Button
                 variant='outlined'
                 color='primary'
                 disabled={
                   !hasUploadType ||
-                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
+                  initialVersionRequested?.metadata?.buildOptions.uploadType === ModelUploadType.ModelCard
                 }
                 startIcon={<Info />}
                 onClick={handleClickOpen}
@@ -295,13 +312,19 @@ export default function Deployment() {
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}
-                disabled={deployment.managerApproved !== 'Accepted'}
+                disabled={
+                  deployment.managerApproved !== 'Accepted' ||
+                  (hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType)
+                }
                 value='exports'
                 label={
                   <DisabledElementTooltip
                     conditions={[
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
+                        : '',
+                      hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType
+                        ? 'Model does not have raw artifacts attached'
                         : '',
                     ]}
                     placement='top'
@@ -366,7 +389,7 @@ export default function Deployment() {
                 </Link>
                 page) {theme.palette.mode}
               </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
               <br />
 
               <p style={{ margin: 0 }}># Pull model</p>

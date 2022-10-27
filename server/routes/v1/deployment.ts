@@ -12,6 +12,7 @@ import { findVersionByName } from '../../services/version'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
+import { getUserById } from '../../services/user'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -69,7 +70,10 @@ export const postDeployment = [
     // first, we verify the schema
     const schemaIsInvalid = validateSchema(body, schema.schema)
     if (schemaIsInvalid) {
-      throw NotFound({ code: 'invalid_schema', errors: schemaIsInvalid }, 'Rejected due to invalid schema')
+      throw BadReq(
+        { code: 'invalid_schema', errors: schemaIsInvalid, schemaRef: body.schemaRef },
+        `Your deployment does not conform to the schema: '${body.schemaRef}'`
+      )
     }
 
     const model = await findModelByUuid(req.user, body.highLevelDetails.modelID)
@@ -102,6 +106,13 @@ export const postDeployment = [
 
     const versionArray = [version._id]
 
+    const requesterId = body.contacts.requester
+    const requester = await getUserById(requesterId)
+
+    if (!requester) {
+      throw NotFound({ code: 'requester_not_found' }, `Unable to find requester with name '${requesterId}'`)
+    }
+
     const deployment = await createDeployment(req.user, {
       schemaRef: body.schemaRef,
       uuid,
@@ -110,7 +121,7 @@ export const postDeployment = [
       model: model._id,
       metadata: body,
 
-      owner: req.user._id,
+      owner: requester._id,
     })
 
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')

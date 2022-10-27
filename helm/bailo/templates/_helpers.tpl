@@ -74,7 +74,7 @@ Create the name of the service account to use
 Create the mongo connection URI
 */}}
 {{- define "bailo.mongoConnectionURI" -}}
-mongodb://mongodb:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}
+mongodb://bailo_user:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}
 {{- end }}
 
 {{- define "bailo.minio.host" -}}

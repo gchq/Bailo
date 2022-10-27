@@ -8,7 +8,7 @@ import subprocess
 import io
 import requests
 import requests_pkcs12
-from requests.exceptions import JSONDecodeError
+from json import JSONDecodeError
 from requests.models import Response
 
 from .auth import AuthenticationInterface, Pkcs12Authenticator, UnauthorizedException

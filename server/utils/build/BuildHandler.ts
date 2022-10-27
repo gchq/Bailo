@@ -8,6 +8,7 @@ import { BuildLogger } from './BuildLogger'
 import { BuildStep, Files } from './BuildStep'
 
 type BuildConstructor = (logger: BuildLogger, props?: any) => BuildStep
+export type BuildTasks = { construct: BuildConstructor; props?: any }[]
 
 function formatError(e: unknown): string {
   if (e instanceof Error) {

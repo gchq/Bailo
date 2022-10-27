@@ -2,6 +2,13 @@ import config from 'config'
 import mongoose from 'mongoose'
 import logger from './logger'
 
+type ConnectionOptions = {
+  useFindAndModify: boolean
+  useNewUrlParser: boolean
+  useUnifiedTopology: boolean
+  useCreateIndex: boolean
+}
+
 // singleton connection instance across the whole application
 let connection: Promise<typeof mongoose> | undefined
 
@@ -15,12 +22,10 @@ export async function connectToMongoose() {
   }
 
   try {
-    connection = mongoose.connect(config.get('mongo.uri'), {
-      useFindAndModify: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    })
+    connection = mongoose.connect(
+      await config.get('mongo.uri'),
+      config.get<ConnectionOptions>('mongo.connectionOptions')
+    )
 
     await connection
 
