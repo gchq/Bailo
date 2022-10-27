@@ -1,7 +1,6 @@
 import React, { ReactElement, useCallback, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import { SelectChangeEvent } from '@mui/material/Select'
 import Wrapper from '../src/Wrapper'
@@ -17,14 +16,14 @@ export default function Admin(): ReactElement {
   const [requestId, setRequestId] = useState('')
   const [search, setSearch] = useState('')
   const [isRegex, setIsRegex] = useState(false)
-  const [doSearch, setDoSearch] = useState(false)
+  const [doGetLogs, setDoGetLogs] = useState(false)
 
   const handleLogLevelChange = (event: SelectChangeEvent<LogLevel>): void => {
     if (isLogLevel(event.target.value)) setLogLevel(event.target.value)
     else if (isLogLevelString(event.target.value)) setLogLevel(parseInt(event.target.value, 10))
   }
 
-  const handleResetDoSearch = useCallback((): void => setDoSearch(false), [])
+  const handleResetDoGetLogs = useCallback((): void => setDoGetLogs(false), [])
 
   return (
     <Wrapper title='Admin' page='admin'>
@@ -56,10 +55,8 @@ export default function Admin(): ReactElement {
                     onSearchChange={(event): void => setSearch(event.target.value)}
                     isRegex={isRegex}
                     onIsRegexChange={(event): void => setIsRegex(event.target.checked)}
+                    onGetLogs={(): void => setDoGetLogs(true)}
                   />
-                  <Button variant='contained' size='small' onClick={(): void => setDoSearch(true)}>
-                    Search
-                  </Button>
                 </Box>
               </Box>
               <Box mx={1} height='100%' overflow='auto'>
@@ -69,8 +66,8 @@ export default function Admin(): ReactElement {
                   requestId={requestId}
                   search={search}
                   isRegex={isRegex}
-                  doSearch={doSearch}
-                  resetDoSearch={handleResetDoSearch}
+                  doGetLogs={doGetLogs}
+                  resetDoGetLogs={handleResetDoGetLogs}
                 />
               </Box>
             </Box>

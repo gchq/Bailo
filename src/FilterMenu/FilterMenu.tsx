@@ -2,6 +2,7 @@ import React, { ReactElement, useState, ChangeEvent } from 'react'
 import FilterIcon from '@mui/icons-material/FilterAltTwoTone'
 import RegexIcon from '@mui/icons-material/NewReleases'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Popover from '@mui/material/Popover'
@@ -26,6 +27,7 @@ interface FilterMenuProps {
   onSearchChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   isRegex: boolean
   onIsRegexChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onGetLogs: () => void
 }
 export default function FilterMenu({
   logLevel,
@@ -38,6 +40,7 @@ export default function FilterMenu({
   onSearchChange,
   isRegex,
   onIsRegexChange,
+  onGetLogs,
 }: FilterMenuProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
@@ -49,14 +52,20 @@ export default function FilterMenu({
     setAnchorEl(null)
   }
 
+  const handleGetLogs = () => {
+    handleClose()
+    onGetLogs()
+  }
+
   return (
     <>
-      <Chip label={`Log level: ${getLogLevelLabel(logLevel)}`} sx={{ mr: 1 }} />
-      {buildId && <Chip label={`Build ID: ${buildId}`} sx={{ mr: 1 }} />}
-      {requestId && <Chip label={`Request ID: ${requestId}`} sx={{ mr: 1 }} />}
+      <Chip label={`Log level: ${getLogLevelLabel(logLevel)}`} color='primary' sx={{ mr: 1 }} />
+      {buildId && <Chip label={`Build ID: ${buildId}`} color='primary' sx={{ mr: 1 }} />}
+      {requestId && <Chip label={`Request ID: ${requestId}`} color='primary' sx={{ mr: 1 }} />}
       {search && (
         <Chip
           label={`Search: ${search}`}
+          color='primary'
           icon={
             isRegex ? (
               <Tooltip title='Regex enabled'>
@@ -121,6 +130,11 @@ export default function FilterMenu({
             control={<Checkbox checked={isRegex} onChange={onIsRegexChange} />}
             sx={{ ml: 2 }}
           />
+          <Box display='flex'>
+            <Button variant='contained' size='small' onClick={handleGetLogs} sx={{ mx: 'auto', mt: 1 }}>
+              Get Logs
+            </Button>
+          </Box>
         </Box>
       </Popover>
     </>

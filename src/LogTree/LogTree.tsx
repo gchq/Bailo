@@ -29,8 +29,8 @@ interface LogTreeProps {
   requestId: string
   search: string
   isRegex: boolean
-  doSearch: boolean
-  resetDoSearch: () => void
+  doGetLogs: boolean
+  resetDoGetLogs: () => void
 }
 
 export default function LogTree({
@@ -39,8 +39,8 @@ export default function LogTree({
   requestId,
   search,
   isRegex,
-  doSearch,
-  resetDoSearch,
+  doGetLogs,
+  resetDoGetLogs,
 }: LogTreeProps): ReactElement {
   const { uiConfig } = useGetUiConfig()
   const [query, setQuery] = useState({
@@ -57,7 +57,7 @@ export default function LogTree({
   })
 
   useEffect(() => {
-    if (doSearch) {
+    if (doGetLogs) {
       setQuery({
         level,
         buildId,
@@ -65,9 +65,9 @@ export default function LogTree({
         search,
         isRegex,
       })
-      resetDoSearch()
+      resetDoGetLogs()
     }
-  }, [buildId, doSearch, isRegex, level, requestId, search, resetDoSearch])
+  }, [buildId, doGetLogs, isRegex, level, requestId, search, resetDoGetLogs])
 
   if (!logs || !uiConfig) {
     return <>Loading...</>
