@@ -9,6 +9,7 @@ import Button from '@mui/material/Button'
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import { ModelDoc } from '../server/models/Model'
+import EmptyBlob from './common/EmptyBlob'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const modelFromDeployment: ModelDoc = deployment.model as ModelDoc
@@ -16,7 +17,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const { versions } = useGetModelVersions(model?.uuid)
 
   return (
-    <Box>
+    <>
       {versions &&
         versions.map((version: any) => (
           <Box key={version.version}>
@@ -46,7 +47,8 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
             <Divider orientation='horizontal' />
           </Box>
         ))}
-    </Box>
+      {versions && versions.length === 0 && <EmptyBlob text='No exportable versions' />}
+    </>
   )
 }
 
