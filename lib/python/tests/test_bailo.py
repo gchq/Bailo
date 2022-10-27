@@ -132,7 +132,7 @@ def test_create_client_skips_pki_if_cognito_client_success(
         "COGNITO_CLIENT_ID": "client_id",
         "COGNITO_CLIENT_SECRET": "client_secret",
         "COGNITO_REGION": "region",
-        "BAILO_URL": "url",
+        "BAILO_URL": os.environ["BAILO_URL"],
         "COGNITO_USERNAME": "username",
         "COGNITO_PASSWORD": "password",
     },
@@ -147,7 +147,7 @@ def test_get_cognito_auth_properties_extracts_required_cognito_properties_from_e
         "client_id",
         "client_secret",
         "region",
-        "url",
+        os.environ["BAILO_URL"],
         "username",
         "password",
     )
@@ -162,14 +162,18 @@ def test_get_cognito_auth_properties_raises_error_if_unable_to_find_properties_i
 
 @patch.dict(
     os.environ,
-    {"P12_FILE": "file/path", "CA_FILE": "ca/file/path", "BAILO_URL": "bailo_url"},
+    {
+        "P12_FILE": "file/path",
+        "CA_FILE": "ca/file/path",
+        "BAILO_URL": os.environ["BAILO_URL"],
+    },
 )
 def test_get_pki_auth_properties_extracts_required_cognito_properties_from_env(
     bailo_client,
 ):
     result = bailo_client._Bailo__get_pki_auth_properties()
 
-    assert result == ("file/path", "ca/file/path", "bailo_url")
+    assert result == ("file/path", "ca/file/path", os.environ["BAILO_URL"])
 
 
 def test_get_pki_auth_properties_raises_error_if_unable_to_find_properties_in_env(
@@ -181,7 +185,7 @@ def test_get_pki_auth_properties_raises_error_if_unable_to_find_properties_in_en
 
 def test_cognito_client_creates_config_for_authentication(bailo_client):
     config, auth = bailo_client.cognito_client(
-        "pool_id", "client_id", "secret", "region", "url"
+        "pool_id", "client_id", "secret", "region", os.environ["BAILO_URL"]
     )
 
     assert isinstance(config, BailoConfig)
@@ -193,21 +197,21 @@ def test_cognito_client_creates_config_for_authentication(bailo_client):
     "bailoclient.bailo.Bailo._Bailo__create_client_from_env",
     return_value=("config", "auth", ("username", "pwd")),
 )
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_super_init_if_auth_config_found(
-    mock_create_client_env, mock_load_dotenv
+    mock_client_connect, mock_client_init, mock_create_client_env, mock_load_dotenv
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.__init__.assert_called_once_with("config", "auth")
+    mock_client_init.assert_called_once_with("config", "auth")
 
 
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
-def test_bailo_raises_error_if_not_all_config_provided_for_auth(mock_load_dotenv):
-    Client.__init__ = MagicMock()
-
+@patch("bailoclient.bailo.Client.__init__")
+def test_bailo_raises_error_if_not_all_config_provided_for_auth(
+    mock_client_init, mock_load_dotenv
+):
     with pytest.raises(UnableToCreateBailoClient):
         bailo = Bailo(cognito_client_id="id")
 
@@ -219,43 +223,51 @@ def test_bailo_raises_error_if_not_all_config_provided_for_auth(mock_load_dotenv
         "COGNITO_CLIENT_ID": "client_id",
         "COGNITO_CLIENT_SECRET": "client_secret",
         "COGNITO_REGION": "region",
-        "BAILO_URL": "url",
+        "BAILO_URL": os.environ["BAILO_URL"],
         "COGNITO_USERNAME": "username",
         "COGNITO_PASSWORD": "password",
     },
 )
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_connect_with_username_and_password_if_cognito_auth(
+    mock_client_connect,
+    mock_client_init,
     mock_load_dotenv,
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.connect.assert_called_once_with(username="username", password="password")
+    mock_client_connect.assert_called_once_with(
+        username="username", password="password"
+    )
 
 
 @patch.dict(
     os.environ,
-    {"P12_FILE": "file/path", "CA_FILE": "ca/file/path", "BAILO_URL": "bailo_url"},
+    {
+        "P12_FILE": "file/path",
+        "CA_FILE": "ca/file/path",
+        "BAILO_URL": os.environ["BAILO_URL"],
+    },
 )
 @patch("bailoclient.bailo.load_dotenv", return_value=True)
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
+@patch("bailoclient.bailo.Client.__init__")
+@patch("bailoclient.bailo.Client.connect")
 def test_bailo_calls_connect_with_no_params_if_pki_auth(
-    mock_get_pass, mock_load_dotenv
+    mock_client_connect, mock_client_init, mock_get_pass, mock_load_dotenv
 ):
-    Client.__init__ = MagicMock()
-    Client.connect = Mock()
-
     bailo = Bailo()
 
-    Client.connect.assert_called_once_with()
+    mock_client_connect.assert_called_once_with()
 
 
 @patch("bailoclient.bailo.getpass.getpass", return_value="pwd")
 def test_pki_client_creates_config_for_authentication(mock_get_pass, bailo_client):
-    config, auth = bailo_client.pki_client("p12/file", "ca/file", "url")
+    config, auth = bailo_client.pki_client(
+        "p12/file", "ca/file", os.environ["BAILO_URL"]
+    )
 
     assert isinstance(config, BailoConfig)
     assert auth == Pkcs12Authenticator

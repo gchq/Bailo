@@ -425,35 +425,157 @@ class Client:
         ]
 
     @handle_reconnect
-    def get_model_card(self, model_uuid: str = None, model_id: str = None):
-        """Retrieve model card by either the external model UUID or the internal model ID
+    def get_model_card(self, model_uuid: str, model_version: str = None):
+        """Get a model by its UUID. Optionally retrieve a specific version of a model.
 
         Args:
-            model_uuid (str): external UUID of a model, e.g. fasttext-language-identification-89knco
-            model_id (str): internal ID of a model, e.g. 62d9abb7e5eb14ee63823618
+            model_uuid (str): Model UUID
+            model_version (str, optional): Model version name/number. Defaults to None.
+
+        Returns:
+            dict: Requested model
         """
 
-        if model_uuid:
-            return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
+        if model_version:
+            return self.__model(
+                self.api.get(f"model/{model_uuid}/version/{model_version}")
+            )
 
-        if model_id:
-            return self.__model(self.api.get(f"model/id/{model_id}"))
+        return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
 
-        raise ValueError(
-            "You must provide either a model_uuid or model_id to retrieve a model card"
+    @handle_reconnect
+    def _get_model_card_by_id(self, model_id: str):
+        """Internal method to retrieve model card by its internal ID (e.g. 62d9abb7e5eb14ee63823618)
+
+        Args:
+            model_id (str): Internal model ID
+
+        Returns:
+            dict: Requested model
+        """
+        return self.__model(self.api.get(f"model/id/{model_id}"))
+
+    @handle_reconnect
+    def get_model_versions(self, model_uuid: str):
+        """Get all versions of a model
+
+        Args:
+            model_uuid (str): Model UUID
+
+        Returns:
+            List[dict]: List of versions
+        """
+        return self.api.get(f"model/{model_uuid}/versions")
+
+    @handle_reconnect
+    def get_model_deployments(self, model_uuid: str):
+        """Get all deployments of a model
+
+        Args:
+            model_uuid (str): Model UUID
+
+        Returns:
+            List[dict]: List of deployments of the model
+        """
+        return self.api.get(f"model/{model_uuid}/deployments")
+
+    @handle_reconnect
+    def upload_model(self, metadata: dict, binary_file: str, code_file: str):
+        """Upload a new model
+
+        Args:
+            metadata (dict): Required metadata for upload
+            binary_file (str): Path to model binary file
+            code_file (str): Path to model code file
+
+        Returns:
+            str: UUID of the new model
+        """
+
+        metadata_json = json.dumps(metadata)
+
+        self._validate_uploads(
+            binary_file=binary_file,
+            code_file=code_file,
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
+        )
+
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
+
+        return self._post_model(payload)
+
+    @handle_reconnect
+    def update_model(
+        self,
+        model_card: Model,
+        binary_file: str,
+        code_file: str,
+        model_version: str = None,
+    ):
+        """Update an existing model based on its UUID.
+
+        Args:
+            model_card (Model): The model card of the existing model
+            binary_file (str): Path to the model binary file
+            code_file (str): Path to the model code file
+            model_version (str, optional): Incremented mode version number.
+                                           Automatically attempts to increase by 1 if None.
+                                           Defaults to None.
+
+        Returns:
+            str: UUID of the updated model
+        """
+
+        self._validate_uploads(
+            model_card=model_card, binary_file=binary_file, code_file=code_file
+        )
+
+        if not model_version:
+            model_version = self._increment_model_version(model_card["uuid"])
+
+        metadata = model_card["currentMetadata"]
+        metadata.highLevelDetails.modelCardVersion = model_version
+        metadata = metadata.toJSON()
+
+        payload = self._generate_payload(metadata, binary_file, code_file)
+
+        return self._post_model(
+            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
+        )
+
+    @handle_reconnect
+    def request_deployment(self, metadata: dict):
+        """Request a new deployment of a model
+
+        Args:
+            metadata (dict): Deployment metadata. See deployment.json for minimal metadata required.
+        """
+        self._validate_uploads(
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/deployment.json",
+        )
+
+        metadata_json = json.dumps(metadata)
+
+        return self.api.post(
+            "/deployment",
+            request_body=metadata_json,
+            headers={"Content-Type": "application/json"},
         )
 
     def _validate_uploads(
         self,
-        card: Model = None,
+        model_card: Model = None,
         metadata: dict = None,
+        minimal_metadata_path: str = None,
         binary_file: str = None,
         code_file: str = None,
     ):
         """Validate the model and files provided for upload
 
         Args:
-            card (Model, optional): Model card of the model to update. Defaults to None.
+            model_card (Model, optional): Model card of the model to update. Defaults to None.
             metadata (dict, optional): Metadata required for uploading a new model. Must
                                        match the minimal metadata. Defaults to None.
             binary_file (str, optional): File path to model binary. Defaults to None.
@@ -465,26 +587,67 @@ class Client:
             InvalidMetadata: Metadata does not meet the minimal metadata
         """
 
-        if card:
-            validation = card.validate()
-            if not validation.is_valid:
-                logger.error(
-                    """Submitted model card did not validate against model schema provided by %s""",
-                    {self.config.api.url},
-                )
-                for err in validation.errors:
-                    logger.error(err)
-                raise DataInvalid(f"Model invalid: {validation.errors}")
+        if model_card:
+            self.__validate_model_card(model_card)
 
         if metadata:
-            result = self.__validate_metadata(metadata)
+            self.__validate_metadata(metadata, minimal_metadata_path)
 
-            if not result["valid"]:
-                raise InvalidMetadata(
-                    f"Metadata {result['error_message']} - refer to minimal_metadata"
-                )
+        if binary_file and code_file:
+            self.__validate_file_paths(binary_file, code_file)
 
-        for file_path in [binary_file, code_file]:
+    def __validate_model_card(self, model_card: Model):
+        """Validate supplied model card
+
+        Args:
+            model_card (Model): Model
+
+        Raises:
+            DataInvalid: Model card is not valid
+        """
+        validation = model_card.validate()
+        if not validation.is_valid:
+            logger.error(
+                """Submitted model card did not validate against model schema provided by %s""",
+                {self.config.api.url},
+            )
+
+            for err in validation.errors:
+                logger.error(err)
+
+            raise DataInvalid(f"Model invalid: {validation.errors}")
+
+    def __validate_metadata(self, metadata: dict, minimal_metadata_path: str):
+        """Validate supplied metadata against a minimal metadata file
+
+        Args:
+            metadata (dict): Supplied metadata for model or deployment
+            minimal_metadata_path (str): Path to minimal model/deployment metadata for validation
+
+        Raises:
+            InvalidMetadata: Supplied metadata does not contain all the required parameters
+
+        Returns:
+            dict: Dictionary of validity and error messages
+        """
+        with open(minimal_metadata_path, encoding="utf-8") as json_file:
+            minimal_metadata = json.load(json_file)
+
+        result = minimal_keys_in_dictionary(minimal_metadata, metadata)
+
+        if not result["valid"]:
+            raise InvalidMetadata(
+                f"Metadata {result['error_message']} - refer to minimal_metadata"
+            )
+
+    def __validate_file_paths(self, *args):
+        """Validate any filepaths exist and are not directories. Takes any number of string filepaths
+
+        Raises:
+            InvalidFilePath: File path does not exist
+            InvalidFilePath: File path is a directory
+        """
+        for file_path in args:
             # TODO check that it's some compressed format supported by Patool
             # (used in workflow-extract-files-from-minio)
             if file_path and not os.path.exists(file_path):
@@ -492,23 +655,6 @@ class Client:
 
             if file_path and os.path.isdir(file_path):
                 raise InvalidFilePath(f"{file_path} is a directory")
-
-    def __validate_metadata(self, model_metadata: dict):
-        """Validate user metadata against the minimal metadata required to
-           upload a model
-
-        Args:
-            model_metadata (dict): Metadata for the model
-
-        Returns:
-            dict: Dictionary of validity and error messages
-        """
-        with open(
-            "bailoclient/resources/minimal_metadata.json", encoding="utf-8"
-        ) as json_file:
-            minimal_metadata = json.load(json_file)
-
-        return minimal_keys_in_dictionary(minimal_metadata, model_metadata)
 
     def _post_model(
         self,
@@ -552,7 +698,7 @@ class Client:
         binary_file: str,
         code_file: str,
     ) -> MultipartEncoder:
-        """Generate payload for posting a new or updated model
+        """Generate payload for posting model or deployment
 
         Args:
             metadata (dict): Model metadata
@@ -566,11 +712,7 @@ class Client:
             MultipartEncoder: Payload of model data
         """
         payloads = [("metadata", metadata)]
-
-        for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
-            fname, mtype = get_filename_and_mimetype(full_filename)
-            with open(full_filename, "rb") as file:
-                payloads.append((tag, (fname, file.read(), mtype)))
+        payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
 
         data = MultipartEncoder(payloads)
 
@@ -580,6 +722,21 @@ class Client:
             )
 
         return data
+
+    def __add_files_to_payload(self, payloads: list, binary_file: str, code_file: str):
+        """Add code and binary files to the payload
+
+        Args:
+            payloads (list): List of payloads
+            binary_file (str): File path of binary
+            code_file (str): File path of code
+        """
+        for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
+            fname, mtype = get_filename_and_mimetype(full_filename)
+            with open(full_filename, "rb") as file:
+                payloads.append((tag, (fname, file.read(), mtype)))
+
+        return payloads
 
     @staticmethod
     def _too_large_for_gateway(data) -> bool:
@@ -593,30 +750,7 @@ class Client:
         """
         return os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000
 
-    @handle_reconnect
-    def upload_model(self, metadata: dict, binary_file: str, code_file: str):
-        """Upload a new model
-
-        Args:
-            metadata (dict): Required metadata for upload
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
-
-        Returns:
-            str: UUID of the new model
-        """
-
-        metadata_json = json.dumps(metadata)
-
-        self._validate_uploads(
-            binary_file=binary_file, code_file=code_file, metadata=metadata
-        )
-
-        payload = self._generate_payload(metadata_json, binary_file, code_file)
-
-        return self._post_model(payload)
-
-    def _increment_version(self, model_uuid: str):
+    def _increment_model_version(self, model_uuid: str):
         """Increment the latest version of a model by 1
 
         Args:
@@ -641,42 +775,3 @@ class Client:
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
-
-    @handle_reconnect
-    def update_model(
-        self,
-        model_card: Model,
-        binary_file: str,
-        code_file: str,
-        model_version: str = None,
-    ):
-        """Update an existing model based on its UUID.
-
-        Args:
-            model_card (Model): The model card of the existing model
-            binary_file (str): Path to the model binary file
-            code_file (str): Path to the model code file
-            model_version (str, optional): Incremented mode version number.
-                                           Automatically attempts to increase by 1 if None.
-                                           Defaults to None.
-
-        Returns:
-            str: UUID of the updated model
-        """
-
-        self._validate_uploads(
-            card=model_card, binary_file=binary_file, code_file=code_file
-        )
-
-        if not model_version:
-            model_version = self._increment_version(model_card["uuid"])
-
-        metadata = model_card["currentMetadata"]
-        metadata.highLevelDetails.modelCardVersion = model_version
-        metadata = metadata.toJSON()
-
-        payload = self._generate_payload(metadata, binary_file, code_file)
-
-        return self._post_model(
-            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
-        )

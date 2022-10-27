@@ -21,7 +21,7 @@ setup(
     ],
     extras_require={
         "dev": [
-            "black",
+            "black[jupyter]",
             "pylint",
             "pre-commit",
         ],

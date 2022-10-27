@@ -81,7 +81,6 @@ sharing.
 
 - Node v16
 - Docker / Docker Compose
-- S2I
 
 <br />
 
