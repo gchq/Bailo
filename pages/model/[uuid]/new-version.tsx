@@ -143,7 +143,8 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
+    form.append('seldonVersion', data.files.seldonVersion)
+    form.append('docker', data.files.docker)
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
