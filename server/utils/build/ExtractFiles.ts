@@ -4,7 +4,7 @@ import { rm } from 'shelljs'
 import unzip from 'unzipper'
 import { readdir } from 'fs/promises'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 
@@ -37,7 +37,7 @@ class ExtractFiles extends BuildStep {
     return 'Extract Files'
   }
 
-  async build(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(_version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (!state.binaryPath || !state.codePath) {
       throw new Error('Extract files requires a binary and code path')
     }
@@ -56,7 +56,7 @@ class ExtractFiles extends BuildStep {
     await displayFileTree((message: string) => this.logger.info({}, message), state.workingDirectory, 1)
   }
 
-  async rollback(_version: VersionDoc, _files: Files, _state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, _state: any): Promise<void> {
     // nothing to do
   }
 }

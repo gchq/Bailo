@@ -2,7 +2,7 @@ import { Document, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
-import { VersionDoc } from './Version'
+import { VersionDoc } from '../../types/models/version'
 import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
 
 export interface LogStatement {

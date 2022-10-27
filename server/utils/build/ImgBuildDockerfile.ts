@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import config from 'config'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { ModelDoc } from '../../models/Model'
@@ -19,7 +19,7 @@ class ImgBuildDockerfile extends BuildStep {
     return 'Build Dockerfile using Img'
   }
 
-  async build(version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (!state.workingDirectory) {
       throw new Error('Build dockerfile requires a working directory')
     }
@@ -51,14 +51,14 @@ class ImgBuildDockerfile extends BuildStep {
     await logCommand(`img push ${tag}`, this.logger)
   }
 
-  async rollback(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (state.tag) {
       const removeImageCmd = `img rm ${state.tag}`
       await logCommand(removeImageCmd, this.logger)
     }
   }
 
-  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionWithModel, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

@@ -9,7 +9,7 @@ import defaultAxios, { AxiosInstance } from 'axios'
 import { createHash } from 'crypto'
 import https from 'https'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { getAccessToken } from '../../routes/v1/registryAuth'
@@ -97,7 +97,7 @@ class PushDockerTar extends BuildStep {
     return 'Push Docker Tar'
   }
 
-  async build(version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (!state.dockerPath) {
       throw new Error('Push docker tar requires a docker path')
     }
@@ -171,7 +171,7 @@ class PushDockerTar extends BuildStep {
     rm(state.dockerPath)
   }
 
-  async rollback(_version: VersionDoc, _files: Files, _state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, _state: any): Promise<void> {
     // Nothing to do, working directory is cleared by the
     // CreateWorkingDirectory build step.
   }

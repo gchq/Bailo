@@ -7,10 +7,11 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
+import { GetVersionServer } from '../../../types/models/version'
 
 export const getVersion = [
   ensureUserRole('user'),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response<GetVersionServer>) => {
     const { id } = req.params
     const { logs } = req.query
     const showLogs = logs === 'true'

@@ -4,11 +4,11 @@ import { OpenshiftClient } from 'openshift-rest-client'
 import AdmZip from 'adm-zip'
 import { createReadStream } from 'fs'
 
-import { VersionDoc } from '../../models/Version'
+import { ModelDoc } from '../../models/Model'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
-import { ModelDoc } from '../../models/Model'
 import { getAdminToken } from '../../routes/v1/registryAuth'
+import { VersionWithModel } from '../../../types/models/version'
 
 class OpenShiftBuildDockerfile extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
@@ -21,7 +21,7 @@ class OpenShiftBuildDockerfile extends BuildStep {
     return 'Build Dockerfile using OpenShift Builder'
   }
 
-  async build(version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (!state.workingDirectory) {
       throw new Error('Build dockerfile requires a working directory')
     }
@@ -154,11 +154,11 @@ class OpenShiftBuildDockerfile extends BuildStep {
     this.logger.info({}, 'Not yet complete')
   }
 
-  async rollback(_version: VersionDoc, _files: Files, _state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, _state: any): Promise<void> {
     // TODO rollback
   }
 
-  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionWithModel, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

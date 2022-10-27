@@ -1,6 +1,6 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import { UserDoc } from './User'
-import { VersionDoc } from './Version'
+import { VersionDoc } from '../../types/models/version'
 
 export interface Model {
   schemaRef: string

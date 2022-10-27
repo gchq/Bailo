@@ -1,4 +1,4 @@
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { FileRef } from './build'
 import { BuildLogger } from './BuildLogger'
 
@@ -25,13 +25,13 @@ export abstract class BuildStep {
     this.props = props
   }
 
-  abstract name(version: VersionDoc, files: Files, state: any): Promise<string>
+  abstract name(version: VersionWithModel, files: Files, state: any): Promise<string>
 
-  abstract build(version: VersionDoc, files: Files, state: any): Promise<any>
+  abstract build(version: VersionWithModel, files: Files, state: any): Promise<any>
 
-  abstract rollback(version: VersionDoc, files: Files, state: any): Promise<any>
+  abstract rollback(version: VersionWithModel, files: Files, state: any): Promise<any>
 
-  async tidyUp(_version: VersionDoc, _files: Files, _state: any): Promise<any> {
+  async tidyUp(_version: VersionWithModel, _files: Files, _state: any): Promise<any> {
     // tidying up is optional
   }
 }

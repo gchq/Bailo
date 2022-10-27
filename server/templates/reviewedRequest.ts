@@ -4,7 +4,7 @@ import mjml2html from 'mjml'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { RequestTypes } from '../models/Request'
-import { VersionDoc } from '../models/Version'
+import { VersionDoc } from '../../types/models/version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 

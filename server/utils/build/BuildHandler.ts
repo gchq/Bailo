@@ -2,7 +2,7 @@ import indentString from 'indent-string'
 import prettyMs from 'pretty-ms'
 import { v4 as uuidv4 } from 'uuid'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import logger from '../logger'
 import { BuildLogger } from './BuildLogger'
 import { BuildStep, Files } from './BuildStep'
@@ -27,7 +27,7 @@ export class BuildHandler {
     this.steps = steps
   }
 
-  async process(version: VersionDoc, files: Files) {
+  async process(version: VersionWithModel, files: Files) {
     const startTime = new Date()
     const buildId = uuidv4()
     const vlog = logger.child({ versionId: version._id, buildId })

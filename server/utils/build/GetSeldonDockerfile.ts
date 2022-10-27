@@ -7,7 +7,7 @@ import { writeFile } from 'fs/promises'
 import dedent from 'dedent-js'
 import config from 'config'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { logCommand } from './build'
@@ -23,7 +23,7 @@ class GetSeldonDockerfile extends BuildStep {
     return 'Get Seldon Dockerfile'
   }
 
-  async build(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async build(_version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (!state.workingDirectory) {
       throw new Error('Get dockerfile requires a working directory')
     }
@@ -65,7 +65,7 @@ class GetSeldonDockerfile extends BuildStep {
     state.dockerfilePath = dockerfilePath
   }
 
-  async rollback(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, state: any): Promise<void> {
     if (state.workingDirectory) {
       rm('-rf', join(state.workingDirectory, '.s2i'))
     }
@@ -75,7 +75,7 @@ class GetSeldonDockerfile extends BuildStep {
     }
   }
 
-  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionWithModel, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

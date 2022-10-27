@@ -46,7 +46,7 @@ import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
-import { VersionDoc } from '../../server/models/Version'
+import { VersionDoc } from '../../types/models/version'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -110,10 +110,10 @@ export default function Deployment() {
 
   const theme = useTheme()
 
-  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
+  const initialVersionRequested: any = useMemo(() => {
     if (!deployment) return undefined
     const initialVersion = deployment.versions.find(
-      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
+      (version: any) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
     )
     return initialVersion
   }, [deployment])

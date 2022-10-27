@@ -2,7 +2,7 @@
 import { join } from 'path'
 import { rm } from 'shelljs'
 
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { getClient } from '../minio'
@@ -18,7 +18,7 @@ class GetRawFiles extends BuildStep {
     return 'Download Raw Files'
   }
 
-  async build(_version: VersionDoc, files: Files, state: any): Promise<void> {
+  async build(_version: VersionWithModel, files: Files, state: any): Promise<void> {
     if (!state.workingDirectory) {
       throw new Error('Download raw files requires a working directory')
     }
@@ -39,7 +39,7 @@ class GetRawFiles extends BuildStep {
     await Promise.all(downloads)
   }
 
-  async rollback(_version: VersionDoc, _files: Files, state: any): Promise<void> {
+  async rollback(_version: VersionWithModel, _files: Files, state: any): Promise<void> {
     for (const fileRef of this.props.files) {
       const key = `${fileRef.file}Path`
 
@@ -50,7 +50,7 @@ class GetRawFiles extends BuildStep {
     }
   }
 
-  async tidyUp(version: VersionDoc, files: Files, state: any): Promise<void> {
+  async tidyUp(version: VersionWithModel, files: Files, state: any): Promise<void> {
     return this.rollback(version, files, state)
   }
 }

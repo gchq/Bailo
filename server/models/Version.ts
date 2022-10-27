@@ -1,37 +1,9 @@
-import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
+import mongoose, { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
-
-export interface Version {
-  model: ModelDoc | Types.ObjectId
-  version: string
-
-  metadata: any
-
-  built: boolean
-  managerApproved: ApprovalStates
-  reviewerApproved: ApprovalStates
-  managerLastViewed: DateString
-  reviewerLastViewed: DateString
-
-  files: {
-    rawBinaryPath?: string
-    rawCodePath?: string
-    rawDockerPath?: string
-  }
-
-  state: any
-  logs: Types.Array<LogStatement>
-
-  createdAt: Date
-  updatedAt: Date
-
-  log: (level: string, msg: string) => Promise<void>
-}
-
-export type VersionDoc = Version & Document<any, any, Version>
+import { Version } from '../../types/models/version'
 
 const VersionSchema = new Schema<Version>(
   {
@@ -43,10 +15,10 @@ const VersionSchema = new Schema<Version>(
     files: { type: Schema.Types.Mixed, required: true, default: {} },
 
     built: { type: Boolean, default: false },
-    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
-    reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
-    managerLastViewed: { type: Schema.Types.Mixed },
-    reviewerLastViewed: { type: Schema.Types.Mixed },
+    managerApproved: { type: String, required: true, enum: ApprovalStates, default: ApprovalStates.NoResponse },
+    reviewerApproved: { type: String, required: true, enum: ApprovalStates, default: ApprovalStates.NoResponse },
+    managerLastViewed: { type: Date },
+    reviewerLastViewed: { type: Date },
 
     state: { type: Schema.Types.Mixed, default: {} },
     logs: [{ timestamp: Date, level: String, msg: String }],
@@ -56,12 +28,13 @@ const VersionSchema = new Schema<Version>(
   }
 )
 
-VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
+VersionSchema.index({ model: 1, version: 1 }, { unique: true })
 
 VersionSchema.methods.log = async function log(level: string, msg: string) {
   logger[level]({ versionId: this._id }, msg)
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
+  await mongoose
+    .model('Version')
+    .findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
 
 const VersionModel = model<Version>('Version', VersionSchema)

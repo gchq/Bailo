@@ -46,7 +46,8 @@ import createComplianceFlow from 'utils/complianceFlow'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
+import { Deployment, User, ModelUploadType, DateString } from '../../types/interfaces'
+import { VersionClient } from '../../types/models/version'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -130,7 +131,7 @@ function Model() {
         ) {
           setShowLastViewedWarning(true)
         }
-        putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
+        putEndpoint(`/api/v1/version/${version._id}/lastViewed/${role}`)
       }
     },
     [
@@ -380,7 +381,7 @@ function Model() {
                   label='Version'
                   onChange={onVersionChange}
                 >
-                  {versions.map((versionObj: Version) => (
+                  {versions.map((versionObj: VersionClient) => (
                     <MenuItem key={`item-${versionObj._id}`} value={versionObj.version}>
                       {versionObj.version}
                     </MenuItem>
@@ -471,7 +472,7 @@ function Model() {
                     </Typography>
                     {deployment.versions.length > 0 &&
                       versions
-                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
+                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id as any))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
                           <Chip
@@ -484,7 +485,7 @@ function Model() {
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
                         versions.filter((deploymentVersionForLimit) =>
-                          deployment.versions.includes(deploymentVersionForLimit._id)
+                          deployment.versions.includes(deploymentVersionForLimit._id as any)
                         ).length - deploymentVersionsDisplayLimit
                       } more`}</Typography>
                     )}

@@ -1,12 +1,12 @@
 import Logger from 'bunyan'
-import { VersionDoc } from '../../models/Version'
+import { VersionWithModel } from '../../../types/models/version'
 
 export class BuildLogger {
-  version: VersionDoc
+  version: VersionWithModel
 
   logger: Logger
 
-  constructor(version: VersionDoc, logger: Logger) {
+  constructor(version: VersionWithModel, logger: Logger) {
     this.version = version
     this.logger = logger
   }
