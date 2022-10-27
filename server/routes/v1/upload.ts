@@ -273,10 +273,3 @@ export const postUpload = [
     })
   },
 ]
-
-export const getSeldonVersions = [
-  ensureUserRole('user'),
-  async (_req: Request, res: Response) => {    
-    return res.json(["v1", "v2", "v3"])
-  },
-]

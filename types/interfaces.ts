@@ -109,6 +109,10 @@ export interface UiConfig {
     showWarning: boolean
     checkboxText: string
   }
+
+  seldon: {
+    versions: Array<string>
+  }
 }
 
 export type RequestType = 'Upload' | 'Deployment'

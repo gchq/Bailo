@@ -1,3 +1,4 @@
+import config from 'config'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
@@ -11,23 +12,20 @@ import React, { ChangeEvent, useMemo } from 'react'
 import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
-import { getEndpoint } from '../../data/api'
+import { useGetUiConfig } from '../../data/uiConfig'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code, docker, seldonVersion } = state
-  const [ seldonVersions, setSeldonVersions ] = React.useState([])
+  const { uiConfig } = useGetUiConfig()
 
-  const fetchSeldonVersions = React.useCallback(async () => {
-    const versions = await (await getEndpoint('/api/v1/seldon/versions')).json()
-    if (versions !== undefined) {
-      setSeldonVersions(versions)
-    }
-  }, [])
+  const [seldonVersions, setSeldonVersions] = React.useState<Array<string>>([])
 
   React.useEffect(() => {
-    fetchSeldonVersions()
-  }, [])
+    if (uiConfig !== undefined) {
+      setSeldonVersions(uiConfig.seldon.versions)
+    }
+  }, [uiConfig])
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
@@ -47,44 +45,41 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   }
 
   const handleSeldonVersionChange = (event: SelectChangeEvent<string>) => {
-    if (event.target.value) setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
+    if (event.target.value)
+      setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
   }
 
   return (
     <Grid container justifyContent='center'>
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
         <>
-        <Stack direction='row' spacing={3} sx={{ p: 3 }} alignItems='center'>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant='h5'>
-              Upload a code file (.zip)
-            </Typography>
-            <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
-          </Box>
-          <Divider orientation='vertical' flexItem />
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant='h5'>
-              Upload a binary file (.zip)
-            </Typography>
-            <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
-          </Box>
-          <Divider orientation='vertical' flexItem />
-          <FormControl>
-            <InputLabel id="demo-simple-select-label">Seldon version</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={seldonVersion}
-              label="Age"
-              onChange={handleSeldonVersionChange}
-              sx={{ minWidth: 200 }}
-            >
-              {seldonVersions.map(version => (
-                <MenuItem value={version}>{version}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
+          <Stack direction='row' spacing={3} sx={{ p: 3 }} alignItems='center'>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant='h5'>Upload a code file (.zip)</Typography>
+              <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
+            </Box>
+            <Divider orientation='vertical' flexItem />
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant='h5'>Upload a binary file (.zip)</Typography>
+              <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
+            </Box>
+            <Divider orientation='vertical' flexItem />
+            <FormControl>
+              <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
+              <Select
+                labelId='demo-simple-select-label'
+                id='demo-simple-select'
+                value={seldonVersion}
+                label='Age'
+                onChange={handleSeldonVersionChange}
+                sx={{ minWidth: 200 }}
+              >
+                {seldonVersions.map((version) => (
+                  <MenuItem value={version}>{version}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
         </>
       )}
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
@@ -129,21 +124,19 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
   const { state } = step
   const { binary, code, docker, seldonVersion } = state
 
-  const [ seldonVersions, setSeldonVersions ] = React.useState([])
+  const { uiConfig } = useGetUiConfig()
 
-  const fetchSeldonVersions = React.useCallback(async () => {
-    const versions = await (await getEndpoint('/api/v1/seldon/versions')).json()
-    if (versions !== undefined) {
-      setSeldonVersions(versions)
-    }
-  }, [])
+  const [seldonVersions, setSeldonVersions] = React.useState<Array<string>>([])
 
   React.useEffect(() => {
-    fetchSeldonVersions()
-  }, [])
+    if (uiConfig !== undefined) {
+      setSeldonVersions(uiConfig.seldon.versions)
+    }
+  }, [uiConfig])
 
   const handleSeldonVersionChange = (event: SelectChangeEvent<string>) => {
-    if (event.target.value) setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
+    if (event.target.value)
+      setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
   }
 
   if (!step.steps) {
@@ -174,16 +167,16 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
           <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
           <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
           <FormControl>
-            <InputLabel id="demo-simple-select-label">Seldon version</InputLabel>
+            <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+              labelId='demo-simple-select-label'
+              id='demo-simple-select'
               value={seldonVersion}
-              label="Age"
+              label='Age'
               onChange={handleSeldonVersionChange}
               sx={{ minWidth: 200 }}
             >
-              {seldonVersions.map(version => (
+              {seldonVersions.map((version) => (
                 <MenuItem value={version}>{version}</MenuItem>
               ))}
             </Select>

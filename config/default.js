@@ -71,6 +71,9 @@ module.exports = {
       showWarning: true,
       checkboxText: 'By checking here you confirm that the information is correct',
     },
+    seldon: {
+      versions: ['v1', 'v2'],
+    },
   },
 
   smtp: {
