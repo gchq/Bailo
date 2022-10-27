@@ -27,7 +27,6 @@ from .utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
-    ModelFileExportNotAllowed,
     UnconnectedClient,
 )
 from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
@@ -199,7 +198,6 @@ class Client:
             overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
         Raises:
-            ModelFileExportNotAllowed: Model files are not exportable for this model.
             InvalidFileRequested: Invalid file type - must be 'code' or 'binary'
             FileExistsError: File already exists at filepath. Overwrite must be specified to overwrite.
 

@@ -15,7 +15,6 @@ from bailoclient.utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
-    ModelFileExportNotAllowed,
 )
 
 from tests.mocks.mock_api import MockAPI
