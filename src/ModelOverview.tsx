@@ -19,8 +19,8 @@ function ModelOverview(props: any) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
-            <Typography variant='body1'>
-              <pre style={{ fontFamily: 'inherit' }}>{version.metadata.highLevelDetails.modelOverview}</pre>
+            <Typography variant='body1' style={{ whiteSpace: 'pre-line' }}>
+              {version.metadata.highLevelDetails.modelOverview}
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
