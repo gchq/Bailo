@@ -7,9 +7,9 @@
     "modelCardVersion": "1"
   },
   "contacts": {
-    "uploader": "user",
-    "reviewer": "user",
-    "manager": "user"
+    "uploader": [{ "kind": "user", "id": "user" }],
+    "reviewer": [{ "kind": "user", "id": "user" }],
+    "manager": [{ "kind": "user", "id": "user" }]
   },
   "buildOptions": {
     "exportRawModel": true,
