@@ -169,7 +169,7 @@ def test_post_model_raises_error_if_invalid_mode_given(mock_client):
 
     with pytest.raises(
         ValueError,
-        match=re.escape("Invalid mode - must be either newVersion or ewModel"),
+        match=re.escape("Invalid mode - must be either newVersion or newModel"),
     ):
         mock_client._post_model(
             model_data="",

@@ -7,12 +7,7 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
-import {
-  deleteDeploymentsByInitialVersion,
-  deleteVersionRequests,
-  updateDeploymentsByVersion,
-  updateModelByVersion,
-} from '../../utils/modelCleanUp'
+import { deleteVersionRequests, deleteDeploymentsByVersion, deleteModelByVersion } from '../../utils/modelCleanUp'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -161,10 +156,11 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    await deleteVersionRequests(version)
-    await updateDeploymentsByVersion(version, user)
-    await deleteDeploymentsByInitialVersion(version)
-    await updateModelByVersion(version)
+    await Promise.all([
+      deleteVersionRequests(version),
+      deleteDeploymentsByVersion(version, user),
+      deleteModelByVersion(version),
+    ])
 
     await version.delete()
 

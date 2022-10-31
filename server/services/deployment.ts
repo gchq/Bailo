@@ -8,9 +8,10 @@ import { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
-import { Forbidden } from '../utils/result'
+import { BadReq, Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 import { getAccessToken } from '../routes/v1/registryAuth'
+import { getErrorMessage } from '../../utils/fetcher'
 
 const auth = new Authorisation()
 
@@ -112,35 +113,53 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
   )
 }
 
-export async function deleteRegistryObjects(user: UserDoc, deployment: DeploymentDoc, namespace: string) {
-  let digest = ''
+export async function deleteRegistryObjects(deployment: DeploymentDoc, namespace: string) {
   const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
 
   const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
-    { type: 'repository', name: `internal/${modelID}`, actions: ['delete'] },
-    { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
-    { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull', 'delete'] },
+    { type: 'repository', name: `${namespace}/${modelID}`, actions: ['push', 'pull', 'delete'] },
   ])
   const authorisation = `Bearer ${token}`
   const registry = `https://${config.get('registry.host')}/v2`
 
-  await fetch(`${registry}/${namespace}/${modelID}/manifests/${initialVersionRequested}`, {
-    method: 'HEAD',
-    headers: {
-      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
-      Authorization: authorisation,
-    },
-    agent: httpsAgent,
-  } as RequestInit).then((res: any) => {
-    digest = res.headers.get('docker-content-digest')
-  })
+  const headResponse: any = await registryFetch(
+    registry,
+    namespace,
+    modelID,
+    initialVersionRequested,
+    authorisation,
+    'HEAD'
+  )
 
-  await fetch(`${registry}/${namespace}/${modelID}/manifests/${digest}`, {
-    method: 'DELETE',
+  if (headResponse.ok) {
+    const deleteResponse: any = await registryFetch(
+      registry,
+      namespace,
+      modelID,
+      headResponse.headers.get('docker-content-digest'),
+      authorisation,
+      'DELETE'
+    )
+    if (!deleteResponse.ok) {
+      throw BadReq({}, await getErrorMessage(deleteResponse))
+    }
+  }
+}
+
+async function registryFetch(
+  registry: string,
+  namespace: string,
+  modelID: string,
+  image: string,
+  authorisation: string,
+  method: string
+) {
+  return fetch(`${registry}/${namespace}/${modelID}/manifests/${image}`, {
+    method,
     headers: {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
       Authorization: authorisation,
     },
     agent: httpsAgent,
-  } as RequestInit).then((res: any) => res.json())
+  } as RequestInit).then((res: any) => res)
 }

@@ -49,6 +49,7 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
+import { getErrorMessage } from '../../utils/fetcher'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -246,7 +247,7 @@ function Model() {
     if (response.ok) {
       router.push('/')
     } else {
-      setDeleteModelErrorMessage(`Error ${response.statusText}: ${(await response.json()).message}`)
+      setDeleteModelErrorMessage(await getErrorMessage(response))
     }
   }
 

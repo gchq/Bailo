@@ -208,10 +208,6 @@ export const fetchRawModelFiles = [
       throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
     }
 
-    if (!versionDocument.metadata.buildOptions?.exportRawModel) {
-      throw Unauthorised({ deploymentOwner: deployment.owner }, `Raw model exports are not enabled for this version.`)
-    }
-
     if (!req.user._id.equals(deployment.owner)) {
       throw Unauthorised(
         { deploymentOwner: deployment.owner },
@@ -242,10 +238,8 @@ export const fetchRawModelFiles = [
       filePath = versionDocument.files.rawBinaryPath
     }
 
-    // Stat object to get size so browser can determine progress
     const { size } = await client.statObject(bucketName, filePath)
 
-    // res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
     res.set('Content-disposition', `attachment; filename=${fileType}.zip`)
     res.set('Content-Type', 'application/zip')
     res.set('Cache-Control', 'private, max-age=604800, immutable')

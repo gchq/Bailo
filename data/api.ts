@@ -5,7 +5,7 @@ export async function fetchEndpoint(url: string, method: string, data?: unknown)
       ...(!data && data !== 0 && { 'Content-Length': '0' }),
       'Content-Type': 'application/json',
     },
-    ...(data != null && { body: JSON.stringify(data) }),
+    ...(data !== undefined && { body: JSON.stringify(data) }),
   })
 }
 
