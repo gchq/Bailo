@@ -159,6 +159,7 @@ openshift:
   namespace: bailo # project
   appPublicRoute: 'openshift-route-url'
   dockerPushSecretName: 'registry-push-secret'
+  termination: edge
 
 # Instance Settings
 config:
