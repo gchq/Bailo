@@ -65,7 +65,7 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   const userInfo = await auth.getUserFromReq(req)
 
   // no user found
-  if (!userInfo.userId) return next()
+  if (userInfo.userId === undefined) return next()
 
   const user = process.env.NODE_ENV !== 'test' ? await findUserCached(userInfo) : await findAndUpdateUser(userInfo)
   req.user = user

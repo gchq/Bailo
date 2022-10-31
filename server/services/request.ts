@@ -190,7 +190,7 @@ export async function readRequests({
     const user = await getUserByInternalId(filter)
 
     if (!user) {
-      throw new Error(`Finding requests for user that does not exist: ${userId}`)
+      throw new Error(`Finding requests for user that does not exist: ${filter}`)
     }
 
     const userEntities = await getEntitiesForUser(user)
