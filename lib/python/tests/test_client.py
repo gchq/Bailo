@@ -273,6 +273,7 @@ def test_upload_model_is_called_with_expected_params(
         headers={"Content-Type": payload.content_type},
     )
 
+
 def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
     mock_client,
 ):
@@ -281,6 +282,7 @@ def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
             deployment_uuid="test", model_version="1", file_type="invalid"
         )
 
+
 def test_download_model_files_raises_error_if_output_dir_already_exists_and_user_has_not_specified_overwrite(
     mock_client, tmpdir
 ):
@@ -288,6 +290,7 @@ def test_download_model_files_raises_error_if_output_dir_already_exists_and_user
         mock_client.download_model_files(
             deployment_uuid="test", model_version="1", output_dir=str(tmpdir)
         )
+
 
 def test_download_model_files_overwrites_existing_output_dir_if_user_has_specified_overwrite(
     mock_client, tmpdir
