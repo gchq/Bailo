@@ -436,7 +436,11 @@ describe('End to end test', () => {
         username: config.get('user.id'),
         password: dockerPassword,
       }
-      const imageName = `${BAILO_REGISTRY}/${config.get('user.id')}/${modelInfo.name}:1`
+
+      const deploymentUuid = deploymentUrl.split('/').slice(-1)[0]
+      logger.info(`deploying uuid is ${deploymentUuid}`)
+
+      const imageName = `${BAILO_REGISTRY}/${deploymentUuid}/${modelInfo.name}:1`
       await runCommand(
         `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
         logger.debug.bind(logger),
