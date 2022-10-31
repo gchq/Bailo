@@ -1,4 +1,3 @@
-import config from 'config'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
@@ -52,35 +51,35 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   return (
     <Grid container justifyContent='center'>
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
-        <>
-          <Stack direction='row' spacing={3} sx={{ p: 3 }} alignItems='center'>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant='h5'>Upload a code file (.zip)</Typography>
-              <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
-            </Box>
-            <Divider orientation='vertical' flexItem />
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant='h5'>Upload a binary file (.zip)</Typography>
-              <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
-            </Box>
-            <Divider orientation='vertical' flexItem />
-            <FormControl>
-              <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
-              <Select
-                labelId='demo-simple-select-label'
-                id='demo-simple-select'
-                value={seldonVersion}
-                label='Age'
-                onChange={handleSeldonVersionChange}
-                sx={{ minWidth: 200 }}
-              >
-                {seldonVersions.map((version) => (
-                  <MenuItem value={version}>{version}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-        </>
+        <Stack direction='row' spacing={3} sx={{ p: 3 }} alignItems='center'>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant='h5'>Upload a code file (.zip)</Typography>
+            <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
+          </Box>
+          <Divider orientation='vertical' flexItem />
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant='h5'>Upload a binary file (.zip)</Typography>
+            <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
+          </Box>
+          <Divider orientation='vertical' flexItem />
+          <FormControl>
+            <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
+            <Select
+              labelId='demo-simple-select-label'
+              id='demo-simple-select'
+              value={seldonVersion}
+              label='Age'
+              onChange={handleSeldonVersionChange}
+              sx={{ minWidth: 200 }}
+            >
+              {seldonVersions.map((version) => (
+                <MenuItem key={`sledon-version-${version}`} value={version}>
+                  {version}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
       )}
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
         <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
@@ -177,7 +176,9 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
               sx={{ minWidth: 200 }}
             >
               {seldonVersions.map((version) => (
-                <MenuItem value={version}>{version}</MenuItem>
+                <MenuItem key={`sledon-version-${version}`} value={version}>
+                  {version}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
