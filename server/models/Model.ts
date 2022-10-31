@@ -1,5 +1,4 @@
 import { Document, model, Schema, Types } from 'mongoose'
-import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
 export interface Model {
@@ -9,8 +8,6 @@ export interface Model {
   parent: ModelDoc
   versions: Types.Array<VersionDoc | Types.ObjectId>
   currentMetadata: any
-
-  owner: UserDoc | Types.ObjectId
 
   createdAt: Date
   updatedAt: Date
@@ -26,8 +23,6 @@ const ModelSchema = new Schema<Model>(
     parent: { type: Schema.Types.ObjectId, ref: 'Model' },
     versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     currentMetadata: { type: Schema.Types.Mixed },
-
-    owner: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   },
   {
     timestamps: true,

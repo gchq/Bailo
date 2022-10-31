@@ -64,8 +64,6 @@ export interface Model {
   versions: Array<Types.ObjectId>
 
   currentMetadata: ModelMetadata
-
-  owner: Types.ObjectId
 }
 
 export interface LogStatement {
@@ -188,3 +186,13 @@ export enum UploadModes {
 // Dates are in ISO 8601 format
 enum DateStringBrand {}
 export type DateString = string & DateStringBrand
+
+export interface Entity {
+  kind: 'user'
+  id: string
+}
+
+export interface ParsedEntity {
+  kind: 'user'
+  entity: UserDoc
+}

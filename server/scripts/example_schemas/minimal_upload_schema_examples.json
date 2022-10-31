@@ -8,12 +8,13 @@
       "modelCardVersion": "v1.0"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true
+      "exportRawModel": true,
+      "uploadType": "Model card only"
     }
   },
   {
@@ -25,9 +26,9 @@
       "modelCardVersion": "v1.8"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
       "exportRawModel": true,
@@ -43,12 +44,13 @@
       "modelCardVersion": "v1.8"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true
+      "exportRawModel": true,
+      "uploadType": "Code and binaries"
     }
   }
 ]

@@ -1,7 +1,6 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import { DeploymentDoc } from './Deployment'
-import { approvalStateOptions, ApprovalStates } from '../../types/interfaces'
-import { UserDoc } from './User'
+import { Entity, approvalStateOptions, ApprovalStates } from '../../types/interfaces'
 import { VersionDoc } from './Version'
 
 export const approvalTypeOptions = ['Manager', 'Reviewer']
@@ -22,7 +21,7 @@ export interface Request {
   version: Types.ObjectId | VersionDoc | undefined
   deployment: Types.ObjectId | DeploymentDoc | undefined
 
-  user: UserDoc
+  approvers: Array<Entity>
   status: ApprovalStates
 
   approvalType: ApprovalTypes
@@ -40,7 +39,19 @@ const RequestSchema = new Schema<Request>(
     version: { type: Schema.Types.ObjectId, ref: 'Version' },
     deployment: { type: Schema.Types.ObjectId, ref: 'Deployment' },
 
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    approvers: [
+      {
+        kind: {
+          type: String,
+          enum: ['user'],
+          required: true,
+        },
+        id: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     status: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     approvalType: { type: String, enum: approvalTypeOptions },

@@ -16,9 +16,9 @@ describe('ModelOverview', () => {
         tags: ['tag1'],
       },
       contacts: {
-        uploader: 'user1',
-        reviewer: 'user2',
-        manager: 'user3',
+        uploader: [{ kind: 'user', id: 'user1' }],
+        reviewer: [{ kind: 'user', id: 'user2' }],
+        manager: [{ kind: 'user', id: 'user3' }],
       },
     },
   }

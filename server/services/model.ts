@@ -7,6 +7,7 @@ import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
+import { getEntitiesForUser } from '../utils/entity'
 
 const auth = new Authorisation()
 
@@ -55,7 +56,11 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
   if (type === 'favourites') {
     query._id = { $in: user.favourites }
   } else if (type === 'user') {
-    query.owner = user._id
+    const userEntities = await getEntitiesForUser(user)
+
+    query.$or = userEntities.map((userEntity) => ({
+      'currentMetadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+    }))
   }
 
   const models = await ModelModel.find(query).sort({ updatedAt: -1 })

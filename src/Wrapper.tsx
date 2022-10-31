@@ -224,7 +224,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
-                  <UserAvatar username={currentUser.id} size='chip' />
+                  <UserAvatar entity={{ kind: 'user', id: currentUser.id }} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>

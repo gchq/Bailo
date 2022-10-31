@@ -6,6 +6,7 @@ import { Theme as MaterialUITheme } from '../MuiForms'
 import Nothing from '../MuiForms/Nothing'
 import TextareaWidget from '../MuiForms/TextareaWidget'
 import UserSelector from '../MuiForms/UserSelector'
+import EntitySelector from '../MuiForms/EntitySelector'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
@@ -22,6 +23,7 @@ export default function RenderForm({
     if (form.schema.title !== step.schema.title) {
       return
     }
+
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
@@ -32,6 +34,7 @@ export default function RenderForm({
       onChange={onFormChange}
       widgets={{
         userSelector: UserSelector,
+        entitySelector: EntitySelector,
         textArea: TextareaWidget,
         nothing: Nothing,
       }}

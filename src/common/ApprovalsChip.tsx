@@ -13,10 +13,10 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 
-import { ApprovalStates } from '../../types/interfaces'
+import { ApprovalStates, Entity } from '../../types/interfaces'
 
 type Approval = {
-  reviewer: string
+  reviewers: Array<Entity>
   status: ApprovalStates
 }
 
@@ -45,7 +45,7 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
   const getRequestResponses = useCallback((approval: Approval, index: number) => {
     let Icon
     let secondaryText = ''
-    const primaryText = approval.reviewer
+    const primaryText = approval.reviewers.map((reviewer) => reviewer.id).join(', ')
 
     if (approval.status === ApprovalStates.Accepted) {
       Icon = Done

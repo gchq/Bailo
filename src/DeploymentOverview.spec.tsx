@@ -15,8 +15,10 @@ describe('DeploymentOverview', () => {
         name: 'test',
       },
       contacts: {
-        requester: 'user1',
-        secondPOC: 'user2',
+        owner: [
+          { kind: 'user', id: 'user1' },
+          { kind: 'user', id: 'user2' },
+        ],
       },
     },
   }
@@ -30,9 +32,7 @@ describe('DeploymentOverview', () => {
 
     await waitFor(async () => {
       expect(await screen.findByText('Owner')).not.toBeUndefined()
-      expect(await screen.findByText('user1')).not.toBeUndefined()
-      expect(await screen.findByText('Point of Contact')).not.toBeUndefined()
-      expect(await screen.findByText('user2')).not.toBeUndefined()
+      expect(await screen.findByText('user1, user2')).not.toBeUndefined()
     })
   })
 })

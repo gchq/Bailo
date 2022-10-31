@@ -71,7 +71,7 @@ function Upload() {
 
     const { reference } = currentSchema
     const defaultState = {
-      contacts: { uploader: user.id },
+      contacts: { uploader: [{ kind: 'user', id: user.id }] },
     }
 
     const steps = getStepsFromSchema(currentSchema, {}, [], defaultState)

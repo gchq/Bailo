@@ -30,6 +30,7 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
 import { postEndpoint, putEndpoint } from 'data/api'
+import { useGetVersionAccess } from 'data/version'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { Types } from 'mongoose'
@@ -86,8 +87,13 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const { versionAccess } = useGetVersionAccess(version?._id)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
+
+  // possiblyUploader stores whether an uploader could plausibly have access to privileged functions.
+  // It defaults to true, until it hears false from the network access check.
+  const possiblyUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
@@ -113,35 +119,27 @@ function Model() {
   }
 
   useEffect(() => {
-    if (currentUser && version) {
-      setIsManager(currentUser.id === version.metadata.contacts.manager)
-      setIsReviewer(currentUser.id === version.metadata.contacts.reviewer)
+    if (versionAccess) {
+      setIsManager(versionAccess.manager)
+      setIsReviewer(versionAccess.reviewer)
     }
-  }, [currentUser, version])
+  }, [versionAccess])
 
   const updateLastViewed = useCallback(
     (role: string) => {
-      if (isManager && version?.updatedAt && currentUser) {
+      if (isManager && version?.updatedAt) {
         const versionLastUpdatedAt = new Date(version?.updatedAt)
         if (
           ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
             (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
-          currentUser.id !== version?.metadata.contacts.uploader
+          !possiblyUploader
         ) {
           setShowLastViewedWarning(true)
         }
         putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
       }
     },
-    [
-      managerLastViewed,
-      reviewerLastViewed,
-      currentUser,
-      version?.metadata.contacts.uploader,
-      version?._id,
-      version?.updatedAt,
-      isManager,
-    ]
+    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, possiblyUploader]
   )
 
   useEffect(() => {
@@ -254,8 +252,8 @@ function Model() {
             <Stack direction='row' spacing={2}>
               <ApprovalsChip
                 approvals={[
-                  { reviewer: version.metadata.contacts.manager, status: version.managerApproved },
-                  { reviewer: version.metadata.contacts.reviewer, status: version.reviewerApproved },
+                  { reviewers: version.metadata.contacts.manager, status: version.managerApproved },
+                  { reviewers: version.metadata.contacts.reviewer, status: version.reviewerApproved },
                 ]}
               />
               <Divider orientation='vertical' flexItem />
@@ -322,16 +320,14 @@ function Model() {
                     version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
                       ? 'Version has already been approved by both a manager and a technical reviewer.'
                       : '',
-                    currentUser.id !== version?.metadata?.contacts?.uploader
-                      ? 'You do not have permission to edit this model.'
-                      : '',
+                    !possiblyUploader ? 'You do not have permission to edit this model.' : '',
                   ]}
                 >
                   <MenuItem
                     onClick={editModel}
                     disabled={
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
-                      currentUser.id !== version?.metadata?.contacts?.uploader
+                      !possiblyUploader
                     }
                     data-test='editModelButton'
                   >
@@ -341,11 +337,7 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem
-                  onClick={uploadNewVersion}
-                  disabled={currentUser.id !== version.metadata?.contacts?.uploader}
-                  data-test='newVersionButton'
-                >
+                <MenuItem onClick={uploadNewVersion} disabled={!possiblyUploader} data-test='newVersionButton'>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -449,18 +441,15 @@ function Model() {
                     <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
                       Contacts:
                     </Typography>
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
-                      label={deployment.metadata.contacts.requester}
-                    />
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
-                      label={deployment.metadata.contacts.secondPOC}
-                    />
+                    {deployment.metadata.contacts.owner.map((owner) => (
+                      <Chip
+                        key={owner.id}
+                        color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+                        sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                        avatar={<UserAvatar entity={owner} size='chip' />}
+                        label={owner.id}
+                      />
+                    ))}
                   </Stack>
                 </Box>
 

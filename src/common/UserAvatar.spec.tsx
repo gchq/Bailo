@@ -7,7 +7,7 @@ import UserAvatar from './UserAvatar'
 
 describe('UserAvatar', () => {
   it('renders an UserAvatar component', async () => {
-    render(<UserAvatar username='Zebra' />)
+    render(<UserAvatar entity={{ kind: 'user', id: 'Zebra' }} />)
 
     await waitFor(async () => {
       expect(await screen.findByText('Z')).not.toBeUndefined()

@@ -8,6 +8,8 @@ import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
+import { getUserByInternalId } from './user'
+import { getEntitiesForUser } from '../utils/entity'
 
 const auth = new Authorisation()
 
@@ -58,7 +60,19 @@ export interface DeploymentFilter {
 export async function findDeployments(user: UserDoc, { owner, model }: DeploymentFilter, opts?: GetDeploymentOptions) {
   const query: any = {}
 
-  if (owner) query.owner = owner
+  if (owner) {
+    const ownerUser = await getUserByInternalId(owner)
+
+    if (!ownerUser) {
+      throw new Error(`Finding deployments for user that does not exist: ${owner}`)
+    }
+
+    const userEntities = await getEntitiesForUser(user)
+
+    query.$or = userEntities.map((userEntity) => ({
+      owner: { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+    }))
+  }
   if (model) query.model = model
 
   let models = DeploymentModel.find(query).sort({ updatedAt: -1 })

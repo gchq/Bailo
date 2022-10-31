@@ -18,13 +18,27 @@ export const uploadData: any = {
     modelID: 'test-model',
   },
   contacts: {
-    requester: 'user',
+    uploader: [{ kind: 'user', id: 'user' }],
+    reviewer: [{ kind: 'user', id: 'reviewer' }],
+    manager: [{ kind: 'user', id: 'manager' }],
+  },
+}
+
+export const deploymentData: any = {
+  schemaRef: 'test-schema3',
+  highLevelDetails: {
+    initialVersionRequested: 1,
+    name: 'test-deployment',
+    modelID: 'test-model',
+  },
+  contacts: {
+    owner: [{ kind: 'user', id: 'user' }],
   },
 }
 
 export const testUser: any = {
   id: 'user',
-  email: 'test',
+  email: 'test@example.com',
 }
 export const userDoc = new UserModel(testUser)
 
@@ -78,9 +92,9 @@ export const testVersion: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: 'user', id: 'user' }],
+      reviewer: [{ kind: 'user', id: 'reviewer' }],
+      manager: [{ kind: 'user', id: 'manager' }],
     },
   },
   files: {
@@ -104,9 +118,9 @@ export const testVersion2: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: 'user', id: 'user' }],
+      reviewer: [{ kind: 'user', id: 'reviewer' }],
+      manager: [{ kind: 'user', id: 'manager' }],
     },
   },
   files: {
@@ -128,7 +142,6 @@ export const testModel: any = {
   schemaRef: 'test-schema',
   uuid: modelUuid,
   currentMetadata: uploadData,
-  owner: userDoc,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -138,7 +151,6 @@ export const testModel2: any = {
   schemaRef: 'test-schema',
   uuid: 'model-test2',
   currentMetadata: uploadData,
-  owner: userDoc,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -149,8 +161,7 @@ export const testDeployment: any = {
   schemaRef: 'test-schema3',
   uuid: deploymentUuid,
   model: modelId,
-  metadata: uploadData,
-  owner: new ObjectId(),
+  metadata: deploymentData,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -163,10 +174,9 @@ export const testDeployment2: any = {
   model: modelId,
   metadata: {
     contacts: {
-      requester: requesterId,
+      owner: [{ kind: 'user', id: 'user' }],
     },
   },
-  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }
