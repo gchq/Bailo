@@ -2,7 +2,7 @@ import { UserDoc } from '../models/User'
 import DeploymentModel from '../models/Deployment'
 import RequestModel from '../models/Request'
 import { VersionDoc } from '../models/Version'
-import { deleteRegistryObjects } from '../services/deployment'
+import { deleteRegistryObjects } from './deployment'
 import ModelModel from '../models/Model'
 
 export async function deleteVersionRequests(version: VersionDoc) {
