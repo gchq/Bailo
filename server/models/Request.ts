@@ -52,7 +52,7 @@ const RequestSchema = new Schema<Request>(
   }
 )
 
-RequestSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
+RequestSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const RequestModel = model<Request>('Request', RequestSchema)
 export default RequestModel

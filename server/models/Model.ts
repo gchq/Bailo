@@ -35,7 +35,7 @@ const ModelSchema = new Schema<Model>(
   }
 )
 
-ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
+ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const ModelModel = model<Model>('Model', ModelSchema)
 

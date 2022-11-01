@@ -57,7 +57,7 @@ const VersionSchema = new Schema<Version>(
   }
 )
 
-VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
+VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 

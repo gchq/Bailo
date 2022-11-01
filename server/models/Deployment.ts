@@ -56,7 +56,11 @@ const DeploymentSchema = new Schema<Deployment>(
   }
 )
 
-DeploymentSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: String })
+DeploymentSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+})
 
 DeploymentSchema.methods.log = async function log(level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)

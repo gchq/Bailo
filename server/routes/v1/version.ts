@@ -162,7 +162,7 @@ export const deleteVersion = [
       deleteModelByVersion(version, user),
     ])
 
-    await version.delete(user.id)
+    await version.delete(user._id)
 
     return res.json({ id })
   },
