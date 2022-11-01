@@ -232,7 +232,7 @@ function Model() {
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
-          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
           </Alert>
         </Box>
