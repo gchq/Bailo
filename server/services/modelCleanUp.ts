@@ -14,7 +14,7 @@ export async function deleteDeploymentsByVersion(version: VersionDoc, user: User
   const deployments = await DeploymentModel.find({ versions: { $in: [version._id] } })
   await Promise.all(
     deployments.map(async (deployment) => {
-      await deleteRegistryObjects(deployment, user.id)
+      await deleteRegistryObjects(deployment.metadata.highLevelDetails.modelID, version.version, user.id)
       await deployment.versions.remove(version._id)
       const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
       await Promise.all(deploymentRequests.map((deploymentRequest) => deploymentRequest.delete()))

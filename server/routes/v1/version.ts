@@ -7,7 +7,7 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
-import { deleteVersionRequests, deleteDeploymentsByVersion, deleteModelByVersion } from '../../utils/modelCleanUp'
+import { deleteVersionRequests, deleteDeploymentsByVersion, deleteModelByVersion } from '../../services/modelCleanUp'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -164,6 +164,6 @@ export const deleteVersion = [
 
     await version.delete()
 
-    return res.json(id)
+    return res.json({ id })
   },
 ]

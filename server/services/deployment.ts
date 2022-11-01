@@ -113,29 +113,20 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
   )
 }
 
-export async function deleteRegistryObjects(deployment: DeploymentDoc, namespace: string) {
-  const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
-
+export async function deleteRegistryObjects(model: string, version: string, namespace: string) {
   const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
-    { type: 'repository', name: `${namespace}/${modelID}`, actions: ['push', 'pull', 'delete'] },
+    { type: 'repository', name: `${namespace}/${model}`, actions: ['push', 'pull', 'delete'] },
   ])
   const authorisation = `Bearer ${token}`
   const registry = `https://${config.get('registry.host')}/v2`
 
-  const headResponse: any = await registryFetch(
-    registry,
-    namespace,
-    modelID,
-    initialVersionRequested,
-    authorisation,
-    'HEAD'
-  )
+  const headResponse: any = await registryFetch(registry, namespace, model, version, authorisation, 'HEAD')
 
   if (headResponse.ok) {
     const deleteResponse: any = await registryFetch(
       registry,
       namespace,
-      modelID,
+      model,
       headResponse.headers.get('docker-content-digest'),
       authorisation,
       'DELETE'
