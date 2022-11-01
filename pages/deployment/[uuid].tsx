@@ -2,7 +2,7 @@ import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
-import Alert from '@mui/material/Alert'
+import Alert, { AlertColor } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -47,6 +47,7 @@ import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
 import { VersionDoc } from '../../server/models/Version'
+import { getErrorMessage } from '../../utils/fetcher'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -103,10 +104,13 @@ export default function Deployment() {
   const [tag, setTag] = useState<string>('')
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [copyDeploymentCardSnackbarOpen, setCopyDeploymentCardSnackbarOpen] = useState(false)
+  const [resetSnackbarOpen, setResetSnackbarOpen] = useState(false)
+  const [resetSnackbarStatus, setResetSnackbarStatus] = useState<AlertColor>('info')
+  const [resetSnackbarMessage, setResetSnackbarMessage] = useState('')
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
+  const { deployment, isDeploymentLoading, isDeploymentError, mutateDeployment } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const theme = useTheme()
@@ -187,7 +191,22 @@ export default function Deployment() {
   const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {})
+    // response = await deleteEndpoint(`/api/v1/version/${version._id}`)
+
+    if (response.ok) {
+      setResetSnackbarStatus('success')
+      setResetSnackbarMessage('Approvals reset')
+      mutateDeployment()
+    } else {
+      setResetSnackbarStatus('error')
+      setResetSnackbarMessage(await getErrorMessage(response))
+    }
+    setResetSnackbarOpen(true)
+  }
+
+  const handleResetSnackbarClose = () => {
+    setResetSnackbarOpen(false)
   }
 
   return (
@@ -292,6 +311,11 @@ export default function Deployment() {
               </DisabledElementTooltip>
             </MenuList>
           </Menu>
+          <Snackbar open={resetSnackbarOpen} autoHideDuration={6000} onClose={handleResetSnackbarClose}>
+            <Alert onClose={handleResetSnackbarClose} severity={resetSnackbarStatus} sx={{ width: '100%' }}>
+              {resetSnackbarMessage}
+            </Alert>
+          </Snackbar>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
             <Tabs
               textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
