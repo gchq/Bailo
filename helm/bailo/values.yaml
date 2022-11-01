@@ -77,6 +77,8 @@ affinity: {}
 # Mongo Dependencies
 mongodb:
   enabled: true
+  ssl: false
+  sslValidate: false
   auth:
     enabled: true
     rootUser: ""

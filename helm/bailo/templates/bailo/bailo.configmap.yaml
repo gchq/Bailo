@@ -68,8 +68,8 @@ data:
           useNewUrlParser: true,
           useUnifiedTopology: true,
           useCreateIndex: true,
-          // ssl: false,
-          // sslValidate: false,
+          ssl: {{ .Values.mongodb.ssl }},
+          sslValidate: {{ .Values.mongodb.sslValidate }},
         },
       }
     }
