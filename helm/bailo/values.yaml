@@ -77,6 +77,8 @@ affinity: {}
 # Mongo Dependencies
 mongodb:
   enabled: true
+  ssl: false
+  sslValidate: false
   auth:
     enabled: true
     rootUser: ""
@@ -150,11 +152,16 @@ nginxAuth:
   #certFile: "tls.crt"
   #keyFile: "tls.key"
 
+# Maildev
+maildev:
+  enabled: true
+
 # Openshift specific configuration   
 openshift:
   namespace: bailo # project
   appPublicRoute: 'openshift-route-url'
   dockerPushSecretName: 'registry-push-secret'
+  termination: edge
 
 # Instance Settings
 config:
