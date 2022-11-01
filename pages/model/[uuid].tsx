@@ -403,9 +403,10 @@ function Model() {
               label='Build Logs'
               value='build'
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' data-test='settingsButton' />
+            <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />

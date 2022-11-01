@@ -77,7 +77,12 @@ describe('End to end test', () => {
         await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
         logger.info('selecting correct schema')
-        await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
+        await selectOption(
+          driver,
+          By.css('[data-test="selectSchemaInput"]'),
+          By.css('[role="option"]'),
+          config.get('schemas.model')
+        )
 
         logger.info('adding code files')
         await sendKeys(driver, By.id('select-code-file'), codePath)
@@ -153,7 +158,12 @@ describe('End to end test', () => {
         await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
         logger.info('selecting correct schema')
-        await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.model'))
+        await selectOption(
+          driver,
+          By.css('[data-test="selectSchemaInput"]'),
+          By.css('[role="option"]'),
+          config.get('schemas.model')
+        )
 
         logger.info('setting metadata')
         const metadata = await fs.readFile(metadataPathModelCard, { encoding: 'utf-8' })
@@ -276,7 +286,7 @@ describe('End to end test', () => {
   //     await driver.get(modelCardOnlyInfo.url)
 
   //     logger.info('going to settings tab')
-  //     await click(driver, By.css('[data-test="settingsButton"]'))
+  //     await click(driver, By.css('[data-test="settingsTab"]'))
 
   //     logger.info('click delete model button')
   //     await click(driver, By.css('[data-test="deleteModelButton"]'))
@@ -357,7 +367,12 @@ describe('End to end test', () => {
       await click(driver, By.css('[data-test="uploadJsonTab"]'))
 
       logger.info(`selected current schema`)
-      await selectOption(driver, By.id('schema-selector'), By.css('[role="option"]'), config.get('schemas.deployment'))
+      await selectOption(
+        driver,
+        By.css('[data-test="selectSchemaInput"]'),
+        By.css('[role="option"]'),
+        config.get('schemas.deployment')
+      )
 
       logger.info('sending deployment information')
       const deploymentData = await fs.readFile(deploymentMetadataPath, { encoding: 'utf-8' })
