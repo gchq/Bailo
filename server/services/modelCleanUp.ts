@@ -5,9 +5,9 @@ import { VersionDoc } from '../models/Version'
 import { deleteRegistryObjects } from './deployment'
 import ModelModel from '../models/Model'
 
-export async function deleteVersionRequests(version: VersionDoc) {
+export async function deleteVersionRequests(version: VersionDoc, user: UserDoc) {
   const versionRequests = await RequestModel.find({ version: version._id })
-  await Promise.all(versionRequests.map((versionRequest) => versionRequest.delete()))
+  await Promise.all(versionRequests.map((versionRequest) => versionRequest.delete(user.id)))
 }
 
 export async function deleteDeploymentsByVersion(version: VersionDoc, user: UserDoc) {
@@ -17,9 +17,9 @@ export async function deleteDeploymentsByVersion(version: VersionDoc, user: User
       await deleteRegistryObjects(deployment.metadata.highLevelDetails.modelID, version.version, user.id)
       await deployment.versions.remove(version._id)
       const deploymentRequests = await RequestModel.find({ deployment: deployment._id })
-      await Promise.all(deploymentRequests.map((deploymentRequest) => deploymentRequest.delete()))
+      await Promise.all(deploymentRequests.map((deploymentRequest) => deploymentRequest.delete(user.id)))
       if (deployment.versions.length === 0) {
-        await deployment.delete()
+        await deployment.delete(user.id)
       } else {
         await deployment.save()
       }
@@ -27,12 +27,12 @@ export async function deleteDeploymentsByVersion(version: VersionDoc, user: User
   )
 }
 
-export async function deleteModelByVersion(version: VersionDoc) {
+export async function deleteModelByVersion(version: VersionDoc, user: UserDoc) {
   const model = await ModelModel.findById(version.model)
   if (model) {
     await model.versions.remove(version._id)
     if (model.versions.length === 0) {
-      await model.delete()
+      await model.delete(user.id)
     } else {
       await model.save()
     }

@@ -157,12 +157,12 @@ export const deleteVersion = [
     }
 
     await Promise.all([
-      deleteVersionRequests(version),
+      deleteVersionRequests(version, user),
       deleteDeploymentsByVersion(version, user),
-      deleteModelByVersion(version),
+      deleteModelByVersion(version, user),
     ])
 
-    await version.delete()
+    await version.delete(user.id)
 
     return res.json({ id })
   },
