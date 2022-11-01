@@ -192,7 +192,6 @@ export default function Deployment() {
 
   const requestApprovalReset = async () => {
     const response = await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {})
-    // response = await deleteEndpoint(`/api/v1/version/${version._id}`)
 
     if (response.ok) {
       setResetSnackbarStatus('success')
