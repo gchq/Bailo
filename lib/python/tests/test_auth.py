@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+import os
 
 from ..bailoclient.auth import CognitoSRPAuthenticator
 from ..bailoclient.config import APIConfig, BailoConfig, CognitoConfig
@@ -18,7 +19,7 @@ def cognito_authenticator():
 
     config = BailoConfig(
         cognito=cognito_config,
-        api=APIConfig(url="http://localhost:8080", ca_verify=True),
+        api=APIConfig(url=os.environ["BAILO_URL"], ca_verify=True),
     )
 
     authenticator = CognitoSRPAuthenticator(config)
