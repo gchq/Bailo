@@ -33,8 +33,7 @@ data:
       registry: {
         host: '{{ .Values.registry.host }}:{{ .Values.registry.port }}',
         port: '{{ .Values.registry.port }}',
-
-        insecure: {{ .Values.registry.insecure }}
+        insecure: {{ .Values.registry.insecure }},
       },
 
       s2i: {
