@@ -23,10 +23,12 @@ describe('Model with model card only', () => {
 
     cy.log('Checking for model card alert message')
     cy.get('[data-test=modelCardPageAlert]').contains('This model version was uploaded as just a model card')
+    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
 
     cy.log('Select edit version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
     cy.get('[data-test=editModelButton]').click({ force: true })
+    cy.get('[data-test=uploadFormTabs]').contains('Designer')
 
     cy.log('Inputting edited metadata')
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
@@ -41,6 +43,27 @@ describe('Model with model card only', () => {
     cy.get('[data-test=submitButton]').click()
     cy.url().should('contain', '/model/', { timeout: 10000 })
     cy.get('[data-test=metadataDisplay]').contains('This is an edit')
+    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
+
+    cy.log('Select new version')
+    cy.get('[data-test=modelActionsButton]').click({ force: true })
+    cy.get('[data-test=newVersionButton]').click({ force: true })
+    cy.get('[data-test=uploadFormTabs]').contains('Designer')
+
+    cy.log('Inputting new version metadata')
+    cy.get('[data-test=uploadJsonTab]').click({ force: true })
+    cy.fixture('minimal_metadata_modelcard_new_version.json').then((metadata) => {
+      cy.get('[data-test=metadataTextarea]')
+        .clear()
+        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+    })
+
+    cy.log('Submitting new version')
+    cy.get('[data-test=warningCheckbox]').click()
+    cy.get('[data-test=submitButton]').click()
+    cy.url().should('contain', '/model/', { timeout: 10000 })
+    cy.get('[data-test=metadataDisplay]').contains('v2')
+    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
 
   })
 })
