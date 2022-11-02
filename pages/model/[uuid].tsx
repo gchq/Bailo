@@ -6,7 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
-import MuiAlert, { AlertProps } from '@mui/material/Alert'
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -43,6 +43,7 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import { getErrorMessage } from '@/utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
@@ -81,6 +82,9 @@ function Model() {
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
+  const [resetSnackbarOpen, setResetSnackbarOpen] = useState(false)
+  const [resetSnackbarStatus, setResetSnackbarStatus] = useState<AlertColor>('info')
+  const [resetSnackbarMessage, setResetSnackbarMessage] = useState('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -225,7 +229,21 @@ function Model() {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
+
+    if (response.ok) {
+      setResetSnackbarStatus('success')
+      setResetSnackbarMessage('Approvals reset')
+      mutateVersion()
+    } else {
+      setResetSnackbarStatus('error')
+      setResetSnackbarMessage(await getErrorMessage(response))
+    }
+    setResetSnackbarOpen(true)
+  }
+
+  const handleResetSnackbarClose = () => {
+    setResetSnackbarOpen(false)
   }
 
   return (
@@ -370,6 +388,11 @@ function Model() {
                 </DisabledElementTooltip>
               </MenuList>
             </Menu>
+            <Snackbar open={resetSnackbarOpen} autoHideDuration={6000} onClose={handleResetSnackbarClose}>
+              <Alert onClose={handleResetSnackbarClose} severity={resetSnackbarStatus} sx={{ width: '100%' }}>
+                {resetSnackbarMessage}
+              </Alert>
+            </Snackbar>
             <Stack direction='row' spacing={2}>
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel id='version-label'>Version</InputLabel>
