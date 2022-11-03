@@ -13,7 +13,7 @@
       "manager": "user"
     },
     "buildOptions": {
-      "exportRawModel": true
+      "uploadType": "Code and binaries"
     }
   },
   {
@@ -30,7 +30,6 @@
       "manager": "user"
     },
     "buildOptions": {
-      "exportRawModel": true,
       "uploadType": "Code and binaries"
     }
   },
@@ -48,7 +47,7 @@
       "manager": "user"
     },
     "buildOptions": {
-      "exportRawModel": true
+      "uploadType": "Code and binaries"
     }
   }
 ]

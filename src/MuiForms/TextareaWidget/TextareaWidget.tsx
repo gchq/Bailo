@@ -46,7 +46,7 @@ function TextareaWidget({
       autoFocus={autofocus}
       required={required}
       disabled={disabled || readonly}
-      type={inputType as string}
+      type={inputType}
       multiline={isMultiline}
       value={value || value === 0 ? value : ''}
       error={rawErrors.length > 0}

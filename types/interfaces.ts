@@ -48,8 +48,7 @@ export interface ModelMetadata {
   }
 
   buildOptions?: {
-    exportRawModel: boolean
-    allowGuestDeployments: boolean
+    uploadType: ModelUploadType
   }
 
   // allow other properties

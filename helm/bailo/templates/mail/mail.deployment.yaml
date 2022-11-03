@@ -1,3 +1,4 @@
+{{- if .Values.maildev.enabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,3 +23,4 @@ spec:
           value: {{ .Values.config.smtp.user }}
         - name: MAILDEV_INCOMING_PASS
           value: {{ .Values.config.smtp.pass }}
+{{- end }}
