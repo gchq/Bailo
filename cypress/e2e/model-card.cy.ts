@@ -9,7 +9,9 @@ describe('Model with model card only', () => {
     cy.fixture('schema_names.json').then((schemaNames) => {
       cy.get(`[role=option]:contains(${schemaNames.model})`).click()
     })
+
     cy.fixture('minimal_metadata_modelcard.json').then((metadata) => {
+      metadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
@@ -31,11 +33,12 @@ describe('Model with model card only', () => {
     cy.log('Select edit version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
     cy.get('[data-test=editModelButton]').click({ force: true })
-    cy.get('[data-test=uploadFormTabs]').contains('Designer')
 
     cy.log('Inputting edited metadata')
-    cy.get('[data-test=uploadJsonTab]').click({ force: true })
-    cy.fixture('minimal_metadata_edit.json').then((metadata) => {
+    cy.get('[data-test=uploadJsonTab]', { timeout: 10000 }).click({ force: true })
+    cy.fixture('minimal_metadata.json').then((metadata) => {
+      metadata.highLevelDetails.modelOverview = 'This is an edit'
+      metadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
@@ -46,18 +49,18 @@ describe('Model with model card only', () => {
     cy.get('[data-test=submitButton]').click()
     cy.url().should('contain', '/model/', { timeout: 10000 })
     cy.get('[data-test=metadataDisplay]').contains('This is an edit')
-    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
   })
 
   it('Can upload a new version of an existing model version', () => {
     cy.log('Select new version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
     cy.get('[data-test=newVersionButton]').click({ force: true })
-    cy.get('[data-test=uploadFormTabs]').contains('Designer')
 
     cy.log('Inputting new version metadata')
-    cy.get('[data-test=uploadJsonTab]').click({ force: true })
+    cy.get('[data-test=uploadJsonTab]', { timeout: 10000 }).click({ force: true })
     cy.fixture('minimal_metadata_modelcard_new_version.json').then((metadata) => {
+      metadata.highLevelDetails.modelCardVersion = 'v2'
+      metadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })

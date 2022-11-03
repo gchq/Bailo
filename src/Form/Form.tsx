@@ -33,7 +33,6 @@ export default function Form({
           textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
           value={tab}
           onChange={onTabChange}
-          data-test='uploadFormTabs'
         >
           <Tab label='Designer' value='designer' />
           <Tab label='Upload Existing' value='upload' data-test='uploadJsonTab' />
