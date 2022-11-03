@@ -109,6 +109,35 @@
           "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
         }
       },
+      "dependencies": {
+        "uploadType": {
+          "oneOf": [
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Model card only", "Prebuilt Docker image"]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Code and binaries"]
+                },
+                "seldonVersion": {
+                  "title": "Seldon version",
+                  "description": "Select a seldon version for your build.",
+                  "type": "string",
+                  "widget": "seldonVersionSelector"
+                }
+              },
+              "required": ["uploadType", "seldonVersion"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
       "required": ["uploadType"]
     }
   },

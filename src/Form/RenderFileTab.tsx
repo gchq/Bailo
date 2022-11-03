@@ -15,16 +15,7 @@ import { useGetUiConfig } from '../../data/uiConfig'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker, seldonVersion } = state
-  const { uiConfig } = useGetUiConfig()
-
-  const [seldonVersions, setSeldonVersions] = React.useState<Array<string>>([])
-
-  React.useEffect(() => {
-    if (uiConfig !== undefined) {
-      setSeldonVersions(uiConfig.seldon.versions)
-    }
-  }, [uiConfig])
+  const { binary, code, docker, } = state
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
@@ -43,11 +34,6 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
   }
 
-  const handleSeldonVersionChange = (event: SelectChangeEvent<string>) => {
-    if (event.target.value)
-      setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
-  }
-
   return (
     <Grid container justifyContent='center'>
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
@@ -61,24 +47,6 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
             <Typography variant='h5'>Upload a binary file (.zip)</Typography>
             <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
           </Box>
-          <Divider orientation='vertical' flexItem />
-          <FormControl>
-            <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
-            <Select
-              labelId='demo-simple-select-label'
-              id='demo-simple-select'
-              value={seldonVersion}
-              label='Age'
-              onChange={handleSeldonVersionChange}
-              sx={{ minWidth: 200 }}
-            >
-              {seldonVersions.map((version) => (
-                <MenuItem key={`sledon-version-${version}`} value={version}>
-                  {version}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Stack>
       )}
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
@@ -121,17 +89,7 @@ export function fileTabComplete(step: Step) {
 
 export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker, seldonVersion } = state
-
-  const { uiConfig } = useGetUiConfig()
-
-  const [seldonVersions, setSeldonVersions] = React.useState<Array<string>>([])
-
-  React.useEffect(() => {
-    if (uiConfig !== undefined) {
-      setSeldonVersions(uiConfig.seldon.versions)
-    }
-  }, [uiConfig])
+  const { binary, code, docker } = state
 
   const handleSeldonVersionChange = (event: SelectChangeEvent<string>) => {
     if (event.target.value)
@@ -165,23 +123,6 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
         <Stack direction='row' spacing={2} alignItems='center'>
           <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
           <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
-          <FormControl>
-            <InputLabel id='demo-simple-select-label'>Seldon version</InputLabel>
-            <Select
-              labelId='demo-simple-select-label'
-              id='demo-simple-select'
-              value={seldonVersion}
-              label='Age'
-              onChange={handleSeldonVersionChange}
-              sx={{ minWidth: 200 }}
-            >
-              {seldonVersions.map((version) => (
-                <MenuItem key={`sledon-version-${version}`} value={version}>
-                  {version}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Stack>
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
