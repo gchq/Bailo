@@ -6,7 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
-import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert'
+import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -49,6 +49,7 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -82,9 +83,6 @@ function Model() {
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
-  const [resetSnackbarOpen, setResetSnackbarOpen] = useState(false)
-  const [resetSnackbarStatus, setResetSnackbarStatus] = useState<AlertColor>('info')
-  const [resetSnackbarMessage, setResetSnackbarMessage] = useState('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -92,6 +90,7 @@ function Model() {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
+  const sendNotification = useNotification()
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
@@ -232,18 +231,11 @@ function Model() {
     const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
 
     if (response.ok) {
-      setResetSnackbarStatus('success')
-      setResetSnackbarMessage('Approvals reset')
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
       mutateVersion()
     } else {
-      setResetSnackbarStatus('error')
-      setResetSnackbarMessage(await getErrorMessage(response))
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
     }
-    setResetSnackbarOpen(true)
-  }
-
-  const handleResetSnackbarClose = () => {
-    setResetSnackbarOpen(false)
   }
 
   return (
@@ -388,11 +380,6 @@ function Model() {
                 </DisabledElementTooltip>
               </MenuList>
             </Menu>
-            <Snackbar open={resetSnackbarOpen} autoHideDuration={6000} onClose={handleResetSnackbarClose}>
-              <Alert onClose={handleResetSnackbarClose} severity={resetSnackbarStatus} sx={{ width: '100%' }}>
-                {resetSnackbarMessage}
-              </Alert>
-            </Snackbar>
             <Stack direction='row' spacing={2}>
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel id='version-label'>Version</InputLabel>
