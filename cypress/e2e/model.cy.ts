@@ -41,6 +41,12 @@ describe('Model with code and binary files', () => {
         })
     })
 
+    cy.log('Checking model cannot be deployed before being approved')
+    cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 0/2')
+    cy.get('[data-test="modelActionsButton"]').click({ force: true })
+    cy.get('[data-test=submitDeployment]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('body').type('{esc}')
+
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
     cy.get('[data-test=terminalLog] > :last-child', { timeout: 20000 }).should(
@@ -49,7 +55,7 @@ describe('Model with code and binary files', () => {
     )
   })
 
-  it('Can review and deploy a model', function () {
+  it('Can review and deploy and test a model', function () {
     cy.log('Navigating to review page')
     cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
@@ -63,9 +69,6 @@ describe('Model with code and binary files', () => {
 
     cy.log('Navigating to model page')
     cy.visit(this.modelUrl)
-    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
-      cy.url().should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
-    })
 
     cy.log('Checking model has been approved')
     cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 2/2')
@@ -113,7 +116,6 @@ describe('Model with code and binary files', () => {
 
           cy.log('Navigating to deployment page')
           cy.visit(this.deploymentUrl)
-          cy.url().should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
 
           cy.log('Checking deployment has been approved')
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
