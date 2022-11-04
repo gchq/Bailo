@@ -273,7 +273,11 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           </Toolbar>
           <StyledList>
             <Link href='/' passHref>
-              <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
+              <ListItem
+                button
+                selected={page === 'marketplace' || page === 'model' || page === 'deployment'}
+                data-test='marketplaceLink'
+              >
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Marketplace' arrow placement='right'>
@@ -287,7 +291,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/deployments' passHref>
-              <ListItem button selected={page === 'deployments'}>
+              <ListItem button selected={page === 'deployments'} data-test='deploymentsLink'>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='My Deployments' arrow placement='right'>
@@ -301,8 +305,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/upload' passHref>
-              <ListItem button selected={page === 'upload'}>
-                <ListItemIcon data-test='uploadModelLink'>
+              <ListItem button selected={page === 'upload'} data-test='uploadModelLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Upload Model' arrow placement='right'>
                       <FileUploadIcon />
@@ -315,8 +319,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/review' passHref>
-              <ListItem button selected={page === 'review'}>
-                <ListItemIcon data-test='reviewLink'>
+              <ListItem button selected={page === 'review'} data-test='reviewLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
                       <ListAltIcon />
@@ -330,7 +334,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </Link>
             <Divider />
             <Link href='/docs/api' passHref>
-              <ListItem button selected={page === 'api'}>
+              <ListItem button selected={page === 'api'} data-test='apiDocsLink'>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='API' arrow placement='right'>
@@ -344,8 +348,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/help' passHref>
-              <ListItem button selected={page === 'help'}>
-                <ListItemIcon data-test='supportLink'>
+              <ListItem button selected={page === 'help'} data-test='supportLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Help & Support' arrow placement='right'>
                       <ContactSupportIcon />

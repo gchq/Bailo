@@ -218,7 +218,9 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                 <Button
                   variant='contained'
                   onClick={() => changeState('Accepted', requestObj)}
-                  data-test='approveButton'
+                  data-test={`approveButton${requestObj.approvalType}${
+                    type === 'Upload' ? requestObj.version?.model?.uuid : requestObj.deployment?.uuid
+                  }`}
                   disabled={requestObj.status === 'Accepted'}
                 >
                   Approve
