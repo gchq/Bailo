@@ -22,7 +22,6 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -76,7 +75,6 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
@@ -108,11 +106,7 @@ function Model() {
 
   const copyModelCardToClipboard = () => {
     copy(JSON.stringify(version?.metadata, null, 2))
-    setCopyModelCardSnackbarOpen(true)
-  }
-
-  const handleCopyModelCardSnackbarClose = () => {
-    setCopyModelCardSnackbarOpen(false)
+    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
   }
 
   useEffect(() => {
@@ -517,15 +511,6 @@ function Model() {
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy model card to clipboard
               </Button>
-              <Snackbar
-                open={copyModelCardSnackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleCopyModelCardSnackbarClose}
-              >
-                <Alert onClose={handleCopyModelCardSnackbarClose} severity='success' sx={{ width: '100%' }}>
-                  Copied model card to clipboard
-                </Alert>
-              </Snackbar>
             </Box>
 
             <Box sx={{ mb: 4 }} />
