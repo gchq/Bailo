@@ -298,7 +298,11 @@ function Model() {
                 </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(true)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='favouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <FavoriteBorder fontSize='small' />
@@ -308,7 +312,11 @@ function Model() {
                   </MenuItem>
                 )}
                 {modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(false)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(false)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='unfavouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <Favorite fontSize='small' />

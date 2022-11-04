@@ -1,9 +1,9 @@
+import { v4 as uuidv4 } from 'uuid'
+
 describe('Model favouriting', () => {
+  const modelName = `Test model ${uuidv4()}`
 
-  let modelUuid = ''
-
-  before(async() => 
-  {
+  before(() => {
     cy.log('Navigate to Upload page and json tab')
     cy.visit('/upload')
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
@@ -15,6 +15,7 @@ describe('Model favouriting', () => {
     })
     cy.fixture('minimal_metadata.json').then((metadata) => {
       const updatedMetadata = { ...metadata }
+      updatedMetadata.highLevelDetails.name = modelName
       updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
@@ -24,21 +25,28 @@ describe('Model favouriting', () => {
     cy.log('Submitting model')
     cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/', { timeout: 10000 })
-
-    // we need to wait for this somehow so we can use modelUuid through the tests...
-    cy.url().then(url => {
-      const match = url.match('/.*/model/(?<name>[^/]*)')
-      modelUuid = match.groups.name
-    })
-
+    cy.url({ timeout: 10000 }).as('modelUrl').should('contain', '/model/')
   })
 
-  it('Correctly displays a model card only view', () => {
-    cy.log('Checking for model card alert message')
-    cy.get('[data-test=modelCardPageAlert]').contains('This model version was uploaded as just a model card')
-    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
+  it('Is able to favourite and unfavourite a model', function favouriteModelTest() {
+    cy.visit(this.modelUrl)
 
-    cy.visit(`/model/${modelUuid}`)
+    cy.log('Select favourite')
+    cy.get('[data-test=modelActionsButton]').click({ force: true })
+    cy.get('[data-test=favouriteModelButton]').click({ force: true })
+
+    cy.visit('/')
+    cy.get('[data-test=favouriteModelsTab]').click({ force: true })
+    cy.get('[data-test=modelListBox]').contains(modelName)
+
+    cy.visit(this.modelUrl)
+
+    cy.log('Select unfavourite')
+    cy.get('[data-test=modelActionsButton]').click({ force: true })
+    cy.get('[data-test=unfavouriteModelButton]').click({ force: true })
+
+    cy.visit('/')
+    cy.get('[data-test=favouriteModelsTab]').click({ force: true })
+    cy.get('[data-test=modelListBox]').contains(modelName).should('not.exist')
   })
 })
