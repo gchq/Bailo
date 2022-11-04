@@ -13,7 +13,9 @@ describe('Model favouriting', () => {
     cy.fixture('schema_names.json').then((schemaNames) => {
       cy.get(`[role=option]:contains(${schemaNames.model})`).click()
     })
-    cy.fixture('minimal_metadata_modelcard.json').then((metadata) => {
+    cy.fixture('minimal_metadata.json').then((metadata) => {
+      const updatedMetadata = { ...metadata }
+      updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
