@@ -11,16 +11,17 @@ describe('Model with model card only', () => {
     })
 
     cy.fixture('minimal_metadata_modelcard.json').then((metadata) => {
-      metadata.buildOptions.uploadType = 'Model card only'
+      const updatedMetadata = { ...metadata }
+      updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
-        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+        .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
     })
 
     cy.log('Submitting model')
     cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/', { timeout: 10000 })
+    cy.url().should('contain', '/model/')
   })
 
   it('Correctly displays a model card only view', () => {
@@ -37,17 +38,18 @@ describe('Model with model card only', () => {
     cy.log('Inputting edited metadata')
     cy.get('[data-test=uploadJsonTab]', { timeout: 10000 }).click({ force: true })
     cy.fixture('minimal_metadata.json').then((metadata) => {
-      metadata.highLevelDetails.modelOverview = 'This is an edit'
-      metadata.buildOptions.uploadType = 'Model card only'
+      const updatedMetadata = { ...metadata }
+      updatedMetadata.highLevelDetails.modelOverview = 'This is an edit'
+      updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
-        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+        .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
     })
 
     cy.log('Submitting edited model')
     cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/', { timeout: 10000 })
+    cy.url().should('contain', '/model/')
     cy.get('[data-test=metadataDisplay]').contains('This is an edit')
   })
 
@@ -59,17 +61,18 @@ describe('Model with model card only', () => {
     cy.log('Inputting new version metadata')
     cy.get('[data-test=uploadJsonTab]', { timeout: 10000 }).click({ force: true })
     cy.fixture('minimal_metadata_modelcard_new_version.json').then((metadata) => {
-      metadata.highLevelDetails.modelCardVersion = 'v2'
-      metadata.buildOptions.uploadType = 'Model card only'
+      const updatedMetadata = { ...metadata }
+      updatedMetadata.highLevelDetails.modelCardVersion = 'v2'
+      updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
-        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+        .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
     })
 
     cy.log('Submitting new version')
     cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/', { timeout: 10000 })
+    cy.url().should('contain', '/model/')
     cy.get('[data-test=metadataDisplay]').contains('v2')
     cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
   })
