@@ -1,57 +1,57 @@
 const getUuidFromUrl = (url: string): string => url.slice(url.lastIndexOf('/') + 1)
 
+const convertNameToUrlFormat = (name: string): string => name.toLowerCase().replace(/ /g, '-')
+
 let modelUuid = ''
+let deploymentUuid = ''
 
 describe('Model with code and binary files', () => {
   before(() => {
-    // Navigate to Upload page
+    cy.log('Navigating to upload page')
     cy.visit('/upload')
 
-    // Navigate to json tab
+    cy.log('Uploading model')
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
 
-    // Select correct schema
+    cy.log('Selecting schema')
     cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
     cy.fixture('schema_names.json').then((schemaNames) => {
       cy.get(`[role=option]:contains(${schemaNames.model})`).click()
     })
 
-    // Add code and binary files
+    cy.log('Selecting code and binary files')
     cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip')
     cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip')
 
-    // Input metadata
-    cy.fixture('minimal_metadata.json').then((metadata) => {
+    cy.log('Inputting deployment metadata')
+    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
-        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+        .type(JSON.stringify(modelMetadata), { parseSpecialCharSequences: false, delay: 0 })
     })
-
-    // Click warning checkbox
     cy.get('[data-test=warningCheckbox]').click()
 
-    // Submit upload
+    cy.log('Submitting model')
     cy.get('[data-test=submitButton]').click()
 
-    // Check URL has been updated
-    cy.url({ timeout: 10000 })
-      .as('modelUrl')
-      .should('contain', '/model/')
-      .then((url) => {
-        modelUuid = getUuidFromUrl(url)
-      })
+    cy.log('Checking URL has been updated')
+    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+      cy.url({ timeout: 10000 })
+        .as('modelUrl')
+        .should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
+        .then((url) => {
+          modelUuid = getUuidFromUrl(url)
+        })
+    })
 
-    // Navigate to Build Logs tab
+    cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-
-    // Wait for model to be built
     cy.get('[data-test=terminalLog] > :last-child', { timeout: 20000 }).should(
       'contain',
       'Successfully completed build'
     )
   })
 
-  // uploading a model with code and binaries, review the model, wait for build, deploy model, test deployment
   it('Can review and deploy a model', function () {
     cy.log('Navigating to review page')
     cy.get('[data-test=reviewLink]').click()
@@ -66,13 +66,62 @@ describe('Model with code and binary files', () => {
 
     cy.log('Navigating to model page')
     cy.visit(this.modelUrl)
-    cy.url().should('contain', '/model/')
+    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+      cy.url().should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
+    })
+
+    cy.log('Checking model has been approved')
+    cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 2/2')
 
     cy.log('Deploying model')
     cy.get('[data-test="modelActionsButton"]').click({ force: true })
     cy.get('[data-test=submitDeployment]').click()
-    cy.url().should('contain', '/deploy')
+    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+      cy.url()
+        .should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
+        .should('contain', '/deploy')
+    })
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
+
+    cy.log('Selecting schema and inputting deployment metadata')
+    cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
+    cy.fixture('schema_names.json').then((schemaNames) => {
+      cy.get(`[role=option]:contains(${schemaNames.deployment})`).click()
+    })
+    cy.fixture('deployment.json').then((metadata) => {
+      cy.get('[data-test=metadataTextarea]')
+        .clear()
+        .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+    })
+    cy.get('[data-test=warningCheckbox]').click()
+
+    cy.log('Submitting deployment')
+    cy.get('[data-test=submitButton]').click()
+
+    cy.log('Checking URL has been updated')
+    cy.fixture('deployment.json').then((deploymentMetadata) => {
+      cy.url({ timeout: 10000 })
+        .as('deploymentUrl')
+        .should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
+        .then((url) => {
+          deploymentUuid = getUuidFromUrl(url)
+
+          cy.log('Navigating to review page')
+          cy.get('[data-test=reviewLink]').click()
+          cy.url().should('contain', '/review')
+
+          cy.log('Approving deployment')
+          cy.get(`[data-test=approveButtonManager${deploymentUuid}]`).click({ force: true })
+          cy.get('[data-test=confirmButton]').click()
+
+          cy.log('Navigating to deployment page')
+          cy.visit(this.deploymentUrl)
+          cy.url().should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
+
+          cy.log('Checking deployment has been approved')
+          cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
+        })
+    })
   })
 })
 
