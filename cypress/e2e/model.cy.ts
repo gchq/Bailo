@@ -1,6 +1,5 @@
-const getUuidFromUrl = (url: string): string => url.slice(url.lastIndexOf('/') + 1)
-
-const convertNameToUrlFormat = (name: string): string => name.toLowerCase().replace(/ /g, '-')
+import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
+import getUuidFromUrl from '../utils/getUuidFromUrl'
 
 let modelUuid = ''
 let deploymentUuid = ''
@@ -28,14 +27,12 @@ describe('Model with code and binary files', () => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(modelMetadata), { parseSpecialCharSequences: false, delay: 0 })
-    })
-    cy.get('[data-test=warningCheckbox]').click()
+      cy.get('[data-test=warningCheckbox]').click()
 
-    cy.log('Submitting model')
-    cy.get('[data-test=submitButton]').click()
+      cy.log('Submitting model')
+      cy.get('[data-test=submitButton]').click()
 
-    cy.log('Checking URL has been updated')
-    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+      cy.log('Checking URL has been updated')
       cy.url({ timeout: 10000 })
         .as('modelUrl')
         .should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
@@ -77,7 +74,7 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test="modelActionsButton"]').click({ force: true })
     cy.get('[data-test=submitDeployment]').click()
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
-      cy.url()
+      cy.url({ timeout: 10000 })
         .should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
         .should('contain', '/deploy')
     })

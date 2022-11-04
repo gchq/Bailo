@@ -1,3 +1,5 @@
+import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
+
 describe('Model with model card only', () => {
   before(() => {
     cy.log('Navigate to Upload page and json tab')
@@ -10,18 +12,18 @@ describe('Model with model card only', () => {
       cy.get(`[role=option]:contains(${schemaNames.model})`).click()
     })
 
-    cy.fixture('minimal_metadata.json').then((metadata) => {
-      const updatedMetadata = { ...metadata }
+    cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+      const updatedMetadata = { ...modelMetadata }
       updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
-    })
 
-    cy.log('Submitting model')
-    cy.get('[data-test=warningCheckbox]').click()
-    cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/')
+      cy.log('Submitting model')
+      cy.get('[data-test=warningCheckbox]').click()
+      cy.get('[data-test=submitButton]').click()
+      cy.url().should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
+    })
   })
 
   it('Correctly displays a model card only view', () => {
@@ -44,13 +46,13 @@ describe('Model with model card only', () => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
-    })
 
-    cy.log('Submitting edited model')
-    cy.get('[data-test=warningCheckbox]').click()
-    cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/')
-    cy.get('[data-test=metadataDisplay]').contains('This is an edit')
+      cy.log('Submitting edited model')
+      cy.get('[data-test=warningCheckbox]').click()
+      cy.get('[data-test=submitButton]').click()
+      cy.url().should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
+      cy.get('[data-test=metadataDisplay]').contains('This is an edit')
+    })
   })
 
   it('Can upload a new version of an existing model version', () => {
@@ -67,14 +69,14 @@ describe('Model with model card only', () => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(updatedMetadata), { parseSpecialCharSequences: false, delay: 0 })
-    })
 
-    cy.log('Submitting new version')
-    cy.get('[data-test=warningCheckbox]').click()
-    cy.get('[data-test=submitButton]').click()
-    cy.url().should('contain', '/model/')
-    cy.get('[data-test=metadataDisplay]').contains('v2')
-    cy.get('[data-test=metadataDisplay]').contains('Minimal Model for Testing')
+      cy.log('Submitting new version')
+      cy.get('[data-test=warningCheckbox]').click()
+      cy.get('[data-test=submitButton]').click()
+      cy.url().should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
+      cy.get('[data-test=metadataDisplay]').contains('v2')
+      cy.get('[data-test=metadataDisplay]').contains('Minimal Model for Testing')
+    })
   })
 })
 
