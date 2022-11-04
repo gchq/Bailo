@@ -75,12 +75,15 @@ function Upload() {
     }
 
     const steps = getStepsFromSchema(
-      currentSchema, 
-      {buildOptions: {
-        seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
-      }}, 
-      [], 
-      defaultState)
+      currentSchema,
+      {
+        buildOptions: {
+          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+        },
+      },
+      [],
+      defaultState
+    )
 
     steps.push(
       createStep({
