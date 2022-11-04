@@ -10,7 +10,7 @@ describe('Model with model card only', () => {
       cy.get(`[role=option]:contains(${schemaNames.model})`).click()
     })
 
-    cy.fixture('minimal_metadata_modelcard.json').then((metadata) => {
+    cy.fixture('minimal_metadata.json').then((metadata) => {
       const updatedMetadata = { ...metadata }
       updatedMetadata.buildOptions.uploadType = 'Model card only'
       cy.get('[data-test=metadataTextarea]')
@@ -27,7 +27,7 @@ describe('Model with model card only', () => {
   it('Correctly displays a model card only view', () => {
     cy.log('Checking for model card alert message')
     cy.get('[data-test=modelCardPageAlert]').contains('This model version was uploaded as just a model card')
-    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
+    cy.get('[data-test=metadataDisplay]').contains('Minimal Model for Testing')
   })
 
   it('Can edit an existing model version', () => {
@@ -60,7 +60,7 @@ describe('Model with model card only', () => {
 
     cy.log('Inputting new version metadata')
     cy.get('[data-test=uploadJsonTab]', { timeout: 10000 }).click({ force: true })
-    cy.fixture('minimal_metadata_modelcard_new_version.json').then((metadata) => {
+    cy.fixture('minimal_metadata.json').then((metadata) => {
       const updatedMetadata = { ...metadata }
       updatedMetadata.highLevelDetails.modelCardVersion = 'v2'
       updatedMetadata.buildOptions.uploadType = 'Model card only'
@@ -74,7 +74,7 @@ describe('Model with model card only', () => {
     cy.get('[data-test=submitButton]').click()
     cy.url().should('contain', '/model/')
     cy.get('[data-test=metadataDisplay]').contains('v2')
-    cy.get('[data-test=metadataDisplay]').contains('Model card for Testing')
+    cy.get('[data-test=metadataDisplay]').contains('Minimal Model for Testing')
   })
 })
 
