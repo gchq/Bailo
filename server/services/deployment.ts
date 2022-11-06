@@ -70,7 +70,7 @@ export async function findDeployments(user: UserDoc, { owner, model }: Deploymen
     const userEntities = await getEntitiesForUser(user)
 
     query.$or = userEntities.map((userEntity) => ({
-      owner: { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+      'metadata.contacts.owner': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
     }))
   }
   if (model) query.model = model

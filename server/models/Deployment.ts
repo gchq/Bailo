@@ -2,7 +2,7 @@ import { Document, model, Schema, Types } from 'mongoose'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { VersionDoc } from './Version'
-import { ApprovalStates, approvalStateOptions, Entity } from '../../types/interfaces'
+import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
 
 export interface LogStatement {
   timestamp: Date

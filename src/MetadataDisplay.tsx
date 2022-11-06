@@ -26,7 +26,7 @@ function MetadataDisplay({
   useEffect(() => {
     if (!schemas) return
 
-    const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
+    const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user', 'contacts']
 
     const currentSchema = schemas.filter(({ reference }) => reference === item.schemaRef)[0].schema
     const keys = Object.keys(currentSchema.properties).filter(

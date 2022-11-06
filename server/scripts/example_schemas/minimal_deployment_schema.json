@@ -113,7 +113,7 @@
       "type": "object",
       "properties": {
         "owner": {
-          "title": "Deployment Owner",
+          "title": "Deployment Owners",
           "description": "At least two users must own a deployment, in case the model owner needs to contact them.",
           "type": "array",
           "items": { "$ref": "#/definitions/entity" },

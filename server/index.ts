@@ -32,7 +32,7 @@ import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
 import { getVersion, getVersionAccess, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
-import { connectToMongoose } from './utils/database'
+import { connectToMongoose, runMigrations } from './utils/database'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
 
@@ -112,9 +112,9 @@ export async function startServer() {
     ensureBucketExists(config.get('minio.registryBucket'))
   }
 
-  // we don't actually need to wait for mongoose to connect before
-  // we start serving connections
-  connectToMongoose()
+  // connect to mongoose and run migrations
+  await connectToMongoose()
+  await runMigrations()
 
   // lazily create indexes for full text search
   createIndexes()
