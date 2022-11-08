@@ -216,7 +216,7 @@ function Model() {
     if (version.model !== undefined) {
       setFavouriteButtonDisabled(true)
       await postEndpoint(`/api/v1/user/${favourite ? 'favourite' : 'unfavourite'}/${version?.model}`, {})
-        .then((res) => res.data)
+        .then((res) => res.json())
         .then((user: User) => {
           setFavouriteButtonDisabled(false)
           mutateCurrentUser(user)
@@ -225,7 +225,7 @@ function Model() {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.data)
+    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
   }
 
   return (

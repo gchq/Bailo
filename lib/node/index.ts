@@ -3,7 +3,6 @@ import { FormDataEncoder } from 'form-data-encoder'
 import { FormData } from 'formdata-node'
 import qs from 'qs'
 import { Readable } from 'stream'
-import axios from 'axios'
 
 type Response = 'Accepted' | 'Declined'
 class Request {
@@ -118,17 +117,17 @@ export default class API {
   }
 
   apiGet(endpoint: string) {
-    return axios(`${this.base}${endpoint}`).then((res) => res.data)
+    return fetch(`${this.base}${endpoint}`).then((res) => res.json())
   }
 
   apiPost(endpoint: string, body: any) {
-    return axios(`${this.base}${endpoint}`, {
+    return fetch(`${this.base}${endpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      data: JSON.stringify(body),
-    }).then((res) => res.data)
+      body: JSON.stringify(body),
+    }).then((res) => res.json())
   }
 
   async getModels(type: ModelsType, filter?: string) {
@@ -156,11 +155,11 @@ export default class API {
     form.append('metadata', JSON.stringify(metadata))
 
     const encoder = new FormDataEncoder(form)
-    return await axios(`${this.base}/model`, {
+    return await fetch(`${this.base}/model`, {
       method: 'POST',
       headers: encoder.headers,
-      data: Readable.from(encoder) as any,
-    }).then((res) => res.data)
+      body: Readable.from(encoder) as any,
+    }).then((res) => res.json())
   }
 
   async getDeployment(uuid: string) {

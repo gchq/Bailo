@@ -97,7 +97,7 @@ export default function Deploy() {
     if (deploy.status >= 400) {
       let errorMessage = deploy.statusText
       try {
-        errorMessage = `${deploy.statusText}: ${(await deploy.data).message}`
+        errorMessage = `${deploy.statusText}: ${(await deploy.json()).message}`
       } catch (e) {
         // failed to get json from server
       }
@@ -106,7 +106,7 @@ export default function Deploy() {
       return
     }
 
-    const { uuid } = await deploy.data
+    const { uuid } = await deploy.json()
     router.push(`/deployment/${uuid}`)
   }
 
