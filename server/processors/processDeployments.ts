@@ -1,6 +1,7 @@
 import config from 'config'
 import https from 'https'
 import prettyMs from 'pretty-ms'
+import axios from 'axios'
 import { getAccessToken } from '../routes/v1/registryAuth'
 import { findDeploymentById, markDeploymentBuilt } from '../services/deployment'
 import { getUserByInternalId } from '../services/user'
@@ -51,32 +52,32 @@ export default async function processDeployments() {
       const authorisation = `Bearer ${token}`
 
       deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
-      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
+      const manifest = await axios(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
         headers: {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
         },
-        agent: httpsAgent,
-      } as RequestInit).then((res: any) => {
+        httpsAgent,
+      }).then((res: any) => {
         logger.info({
           status: res.status,
         })
-        return res.json()
+        return res.data
       })
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)
 
       await Promise.all(
         manifest.layers.map(async (layer: any) => {
-          const res = await fetch(
+          const res = await axios(
             `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
             {
               method: 'POST',
               headers: {
                 Authorization: authorisation,
               },
-              agent: httpsAgent,
-            } as RequestInit
+              httpsAgent,
+            }
           )
 
           if (res.status >= 400) {
@@ -87,15 +88,15 @@ export default async function processDeployments() {
         })
       )
 
-      const mountPostRes = await fetch(
+      const mountPostRes = await axios(
         `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
         {
           method: 'POST',
           headers: {
             Authorization: authorisation,
           },
-          agent: httpsAgent,
-        } as RequestInit
+          httpsAgent,
+        }
       )
 
       if (mountPostRes.status >= 400) {
@@ -104,15 +105,15 @@ export default async function processDeployments() {
 
       deployment.log('info', `Copied manifest to new repository`)
 
-      const manifestPutRes = await fetch(`${registry}/${user.id}/${modelID}/manifests/${initialVersionRequested}`, {
+      const manifestPutRes = await axios(`${registry}/${user.id}/${modelID}/manifests/${initialVersionRequested}`, {
         method: 'PUT',
-        body: JSON.stringify(manifest),
+        data: JSON.stringify(manifest),
         headers: {
           Authorization: authorisation,
           'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
         },
-        agent: httpsAgent,
-      } as RequestInit)
+        httpsAgent,
+      })
 
       if (manifestPutRes.status >= 400) {
         throw new Error(`Invalid status response in manifest put: ${manifestPutRes.status}`)

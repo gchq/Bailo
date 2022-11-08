@@ -13,6 +13,8 @@ import morgan from 'morgan'
 import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
+import axios from 'axios'
+import { isSuccessResponse } from '@/utils/apiUtils'
 import { StatusError } from '../../types/interfaces'
 import { serializedDeploymentFields } from '../services/deployment'
 import { serializedModelFields } from '../services/model'
@@ -200,9 +202,9 @@ async function processStroomFiles() {
 async function sendLogsToStroom(file: string) {
   const logBuffer = await fsPromise.readFile(file)
 
-  const res = await fetch(config.get('logging.stroom.url'), {
+  const res = await axios(config.get('logging.stroom.url'), {
     method: 'POST',
-    body: await gzip(logBuffer),
+    data: await gzip(logBuffer),
     headers: {
       Compression: 'gzip',
       Feed: config.get('logging.stroom.feed'),
@@ -211,7 +213,7 @@ async function sendLogsToStroom(file: string) {
     },
   })
 
-  if (!res.ok) {
+  if (isSuccessResponse(res)) {
     throw new Error('Failed to send logs to stroom')
   }
 

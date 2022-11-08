@@ -9,6 +9,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import React, { useState } from 'react'
+import axios from 'axios'
 
 function SettingsProfileTab({ user }: { user: any }) {
   const [displayToken, setDisplayToken] = useState(false)
@@ -17,9 +18,9 @@ function SettingsProfileTab({ user }: { user: any }) {
   const theme = useTheme()
 
   const regenerateToken = async () => {
-    const { token } = await fetch('/api/v1/user/token', {
+    const { token } = await axios('/api/v1/user/token', {
       method: 'POST',
-    }).then((res) => res.json())
+    }).then((res) => res.data)
 
     return token
   }

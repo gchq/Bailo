@@ -92,7 +92,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/request/${request?._id}/respond`, { choice }).then((res) => res.json())
+    await postEndpoint(`/api/v1/request/${request?._id}/respond`, { choice }).then((res) => res.data)
 
     mutateRequests()
     mutateNumRequests()

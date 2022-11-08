@@ -1,11 +1,14 @@
-export async function fetchEndpoint(url: string, method: string, data?: unknown) {
-  return fetch(url, {
+import axios, { Method } from 'axios'
+
+export async function fetchEndpoint(url: string, method?: Method, data?: unknown) {
+  return axios({
     method,
-    body: JSON.stringify(data),
+    url,
     headers: {
       ...(!data && data !== 0 && { 'Content-Length': '0' }),
       'Content-Type': 'application/json',
     },
+    data,
   })
 }
 
