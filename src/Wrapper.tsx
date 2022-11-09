@@ -7,7 +7,6 @@ import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
@@ -214,13 +213,6 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </Link>
             </Box>
             {headerTitle}
-            <Link href='/review' passHref color='inherit' underline='none'>
-              <IconButton color='inherit'>
-                <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Link>
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
@@ -319,7 +311,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemIcon data-test='reviewLink'>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <ListAltIcon />
+                      <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
+                        <ListAltIcon />
+                      </Badge>
                     </Tooltip>
                   ) : (
                     <ListAltIcon />
