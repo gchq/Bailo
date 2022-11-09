@@ -1,0 +1,18 @@
+---
+priority: 100
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Isolated Network Deployment
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+
+## HELM and docker dependency
+
+- MinIO version tag ~10.0.1 https://charts.bitnami.com/bitnami
+- MongoDB version tag ~10.31.3 https://charts.bitnami.com/bitnami
+- Registy version tag 2
+- seldon/seldon-core-s2i-python37:1.10.0
+- maildev/maildev:20.0.2
+- nginxinc/nginx-unprivileged

@@ -1,0 +1,35 @@
+---
+priority: 300
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Helm Deployments
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+
+## Prerequisite
+
+OpenShift CLI: https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz HELM CLI:
+https://github.com/helm/helm/releases
+
+##
+
+Below deployment is configured for OpenShift. You will have to change route configuraiton to ingress for k8s.
+
+## Deployment
+
+- Configure OpenShift CLI and HELM CLI
+- MinIO and MongoDB is enabled by default. See values.yaml.
+- Existing MongoDB can be configured using \{\{ .Values.mongodb.host \}\}
+
+```
+$ git clone https://github.com/gchq/Bailo.git
+$ cd Bailo/helm/bailo
+$ vim local.yaml //update local.yaml with your overriding key:value
+- create self-signed cert using certs/san.cnf and place them at; certs/key.pem and certs/cert.pem //This is not for ingress route connecting to your defined URL
+$ helm dependency update
+$ helm install --values ./local.yaml bailo .
+```
+
+After successful deployment you should be able to browse to your configured route/ingress URL.

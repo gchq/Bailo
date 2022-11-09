@@ -1,0 +1,19 @@
+---
+priority: 200
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Building a Docker Image
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+
+## Prerequisite
+
+Ensure docker daemon is running.
+
+## To build docker image
+
+```
+$ docker build -t "bailo:\<version\>" -f Dockerfile.prod .
+```

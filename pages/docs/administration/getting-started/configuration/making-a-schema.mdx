@@ -1,0 +1,19 @@
+---
+priority: 200
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Making a Schema
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+
+- The schemas use a JSON schema (existing examples are in server/scripts/example_schemas)
+- Use the widget attribute to use a Balio widget (e.g. user widget)
+- Add the schema using the addDeploymentSchema.ts or addUploadSchema.ts scripts
+  - Edit the fields in CreateSchema as appropriate
+  - Run the following command:
+
+```
+npm run script -- addUploadSchema
+```
