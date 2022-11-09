@@ -38,6 +38,7 @@ import { ensureBucketExists } from './utils/minio'
 
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
+import { copyDockerImage } from './utils/registry'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -115,6 +116,14 @@ export async function startServer() {
   // connect to mongoose and run migrations
   await connectToMongoose()
   await runMigrations()
+
+  // await copyDockerImage(
+  //   { namespace: 'internal', image: 'minimal-model-for-testing-67qqm0', version: '1' },
+  //   { namespace: 'internal', image: 'minimal-model-for-testing-67qqm0', version: 'v1.8' },
+  //   (level, message) => {
+  //     console.log(level, message)
+  //   }
+  // )
 
   // lazily create indexes for full text search
   createIndexes()
