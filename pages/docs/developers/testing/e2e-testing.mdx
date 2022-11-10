@@ -60,8 +60,8 @@ cy.fixture('my_data.json').then((data) => {
 
 ### `before()` & `beforeEach()`
 
-Sometimes there is code that should be ran at the start of the workflow, or before each test. For the former, you would use the `before()` function, whereas for 
-the latter you will need to use `beforeEach()`. 
+Sometimes there is code that should be ran at the start of the workflow, or before each test. `before()` is called at the start of the workflow before all tests, 
+whereas `beforeEach()` is called before each individual test.
 
 ```
 describe('My workflow', () => {
@@ -70,7 +70,7 @@ describe('My workflow', () => {
     cy.log('This is run once')
   })
 
-  before(() => {
+  beforeEach(() => {
     cy.log('This will be run twice')
   })
 
