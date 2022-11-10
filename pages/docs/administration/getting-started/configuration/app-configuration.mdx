@@ -8,10 +8,11 @@ import DocsWrapper from '@/src/docs/DocsWrapper'
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
 
-Default application configuration is applied from config/default.js.
+## Note
 
-Below lists application default override:
+Below listed configurations can be changed during dockerbuild.
 
+- default application configuration is applied from config/default.js.
 - production.js overwrites mongo configuration.
 - production.js overwrites minio configuration.
 - production.js overwrites registry configurration.

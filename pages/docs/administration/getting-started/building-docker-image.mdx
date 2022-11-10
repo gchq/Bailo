@@ -12,6 +12,19 @@ export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
 
 Ensure docker daemon is running.
 
+## Note
+
+Below lists options to change application configuration during dockerbuild.
+
+- default application configuration is applied from config/default.js.
+- production.js overwrites mongo configuration.
+- production.js overwrites minio configuration.
+- production.js overwrites registry configurration.
+- build.environment: openshift //must be set for OpenShift
+- openshift.[ namespace | appPublicRoute ] //must be set for OpenShift
+- smtp.enabled: true //must be set, else Bailo does not start the s2i build
+- logging.file.enabled: false //set true to debug Bailo
+
 ## To build docker image
 
 ```
