@@ -200,16 +200,18 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' passHref color='inherit' underline='none'>
-                <a>
-                  <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
-                </a>
+                <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' passHref color='inherit' underline='none'>
-                <a style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}>
-                  Bailo
-                </a>
+              <Link
+                href='/'
+                passHref
+                color='inherit'
+                underline='none'
+                style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
+              >
+                Bailo
               </Link>
             </Box>
             {headerTitle}
