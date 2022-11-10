@@ -1,0 +1,30 @@
+---
+priority: 303
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Project Layout
+
+The root of the project is used to store configuration files for various tools/dependencies.
+
+```txt
+
+├─ certs - Certificates required for Docker registry. Used to generate registry access tokens.
+├─ config - Project configuration for various environments/tools.
+├─ cypress - Cypress testing suite.
+├─ data - SWR hooks used to provide the UI with quick and easy access to server side data.
+├─ examples - Example model code.
+├─ helm - Deployment templates for Bailo's entire infrastructure.
+├─ lib - Python client code and dependencies.
+├─ pages - Used by NextJS to define UI routing its related components.
+├─ public -
+├─ scripts -
+├─ server -
+├─ src - UI components and related files.
+├─ types - Project-wide typescript interfaces.
+└─ utils -
+
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,0 +1,57 @@
+# Bailo image pulled from OpenShift Registry
+image:
+  repository: "image-registry.openshift-image-registry.svc:5000/bailo/bailo"
+  tag: "0.0.8"
+
+# Instance Settings
+config:
+  s2i:
+    image: seldonio/seldon-core-s2i-python37:1.10.0
+  supportEmail: "support@example.com"
+  documentationLink: "https://example.com/support"
+ 
+  ui:
+    banner:
+      enabled: true
+      text: "UK OFFICIAL SENSITIVE"
+      colour: 'CornflowerBlue'
+ 
+  smtp:
+    host: 'mail'
+    from: 'bailo@example.com'
+ 
+  schema:
+    script: "dist/server/scripts/exampleSetAllSchemas.js"
+ 
+# Used for k8s not openshift
+ingress:
+  enabled: false
+ 
+# Mongo dependencies defined in values.yaml
+mongodb:
+ auth:
+   passwords:
+     - MongoDBPassword
+   usernames:
+     - bailo_user
+ image:
+   registry: docker.io
+ host: 'bailo-mongodb.bailo.svc.cluster.local:31110/bailo'
+ 
+# MinIO dependencies defined in values.yaml
+minio:
+  image:
+    registry: docker.io
+  persistence:
+    size: 20Gi
+ 
+# Registry dependencies defined in values.yaml
+registry:
+  repository: registry
+  certFile: cert.pem
+  keyFile: key.pem
+ 
+# OpenShift ingress route configuration
+openshift:
+  namespace: bailo
+  appPublicRoute: bailo.apps.os1.uksouth.gss.gov.uk
