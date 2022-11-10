@@ -22,7 +22,6 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -43,11 +42,13 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import { getErrorMessage } from '@/utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -74,7 +75,6 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
@@ -88,6 +88,7 @@ function Model() {
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
+  const sendNotification = useNotification()
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
@@ -105,11 +106,7 @@ function Model() {
 
   const copyModelCardToClipboard = () => {
     copy(JSON.stringify(version?.metadata, null, 2))
-    setCopyModelCardSnackbarOpen(true)
-  }
-
-  const handleCopyModelCardSnackbarClose = () => {
-    setCopyModelCardSnackbarOpen(false)
+    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
   }
 
   useEffect(() => {
@@ -225,7 +222,14 @@ function Model() {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
+      mutateVersion()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
   }
 
   return (
@@ -507,15 +511,6 @@ function Model() {
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy model card to clipboard
               </Button>
-              <Snackbar
-                open={copyModelCardSnackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleCopyModelCardSnackbarClose}
-              >
-                <Alert onClose={handleCopyModelCardSnackbarClose} severity='success' sx={{ width: '100%' }}>
-                  Copied model card to clipboard
-                </Alert>
-              </Snackbar>
             </Box>
 
             <Box sx={{ mb: 4 }} />

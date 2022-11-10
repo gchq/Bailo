@@ -130,8 +130,8 @@ export function createDeploymentComplianceFlow(deployment: Deployment) {
       style: { background: availableStyle },
     },
     { id: '1', source: 'deployment', target: 'metadata_validated', type: 'smoothstep' },
-    { id: '999', source: 'metadata_validated', target: 'deployment_built', type: 'smoothstep' },
-    { id: '2', source: 'deployment_built', target: 'manager_checks', type: 'smoothstep' },
-    { id: '4', source: 'manager_checks', target: 'deployment_available', type: 'smoothstep' },
+    { id: '999', source: 'metadata_validated', target: 'manager_checks', type: 'smoothstep' },
+    { id: '2', source: 'manager_checks', target: 'deployment_built', type: 'smoothstep' },
+    { id: '4', source: 'deployment_built', target: 'deployment_available', type: 'smoothstep' },
   ]
 }
