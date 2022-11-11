@@ -1,12 +1,12 @@
 import logger from '../utils/logger'
-import Deployment from '../models/Deployment'
-import Model from '../models/Model'
-import Request from '../models/Request'
-import Version from '../models/Version'
-import User from '../models/User'
+import DeploymentModel from '../models/Deployment'
+import ModelModel from '../models/Model'
+import RequestModel from '../models/Request'
+import VersionModel from '../models/Version'
+import UserModel from '../models/User'
 
 export async function up() {
-  const deployments = await Deployment.find({})
+  const deployments = await DeploymentModel.find({})
 
   logger.info({ count: deployments.length }, 'Processing deployments')
   for (const deployment of deployments) {
@@ -31,7 +31,7 @@ export async function up() {
     await deployment.save()
   }
 
-  const models = await Model.find({})
+  const models = await ModelModel.find({})
 
   logger.info({ count: models.length }, 'Processing models')
   for (const model of models) {
@@ -51,7 +51,7 @@ export async function up() {
     await model.save()
   }
 
-  const requests = await Request.find({})
+  const requests = await RequestModel.find({})
 
   logger.info({ count: requests.length }, 'Processing requests')
   for (const request of requests) {
@@ -59,7 +59,7 @@ export async function up() {
       continue
     }
 
-    const user = await User.findById(request.get('user'))
+    const user = await UserModel.findById(request.get('user'))
 
     if (!user) {
       throw new Error('Tried to migrate request but could not identify user')
@@ -71,9 +71,9 @@ export async function up() {
     await request.save()
   }
 
-  await Request.updateMany({}, { $unset: { user: 1 } }, { strict: false })
+  await RequestModel.updateMany({}, { $unset: { user: 1 } }, { strict: false })
 
-  const versions = await Version.find({})
+  const versions = await VersionModel.find({})
 
   logger.info({ count: versions.length }, 'Processing versions')
   for (const version of versions) {

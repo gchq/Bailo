@@ -68,16 +68,6 @@ export default async function processDeployments() {
 
       await Promise.all(
         manifest.layers.map(async (layer: any) => {
-          console.log(
-            `${registry}/${deployment.uuid}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
-            {
-              method: 'POST',
-              headers: {
-                Authorization: authorisation,
-              },
-            }
-          )
-
           const res = await fetch(
             `${registry}/${deployment.uuid}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
             {

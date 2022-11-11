@@ -117,14 +117,6 @@ export async function startServer() {
   await connectToMongoose()
   await runMigrations()
 
-  await copyDockerImage(
-    { namespace: 'internal', image: 'minimal-model-for-testing-sl3cnv', version: '1' },
-    { namespace: 'example-production-deployment-tefvey', image: 'minimal-model-for-testing-67qqm0', version: 'v1.8' },
-    (level, message) => {
-      console.log(level, message)
-    }
-  )
-
   // lazily create indexes for full text search
   createIndexes()
 

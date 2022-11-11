@@ -16,13 +16,15 @@ const httpsAgent = new https.Agent({
 export async function makeRegistryRequest({
   endpoint,
   authorisation,
-  headers,
-  metadata,
-  method,
+  body,
+  headers = {},
+  metadata = {},
+  method = 'GET',
   json = true,
 }: {
   endpoint: string
   authorisation: string
+  body?: string
   method?: string
   headers?: any
   metadata?: any
@@ -30,22 +32,14 @@ export async function makeRegistryRequest({
 }) {
   const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
 
-  console.log(`${registry}${endpoint}`, {
-    ...metadata,
-    ...(method ? { method } : {}),
-    headers: {
-      ...headers,
-      Authorization: 'authorisation bearer',
-    },
-  })
-
   return fetch(`${registry}${endpoint}`, {
     ...metadata,
-    ...(method ? {} : { method }),
+    method,
     headers: {
       ...headers,
       Authorization: authorisation,
     },
+    body,
     agent: httpsAgent,
   } as RequestInit).then((res: any) => {
     logger.info(
@@ -83,8 +77,6 @@ export async function copyDockerImage(from: ImageRef, to: ImageRef, log: (level:
     },
   })
 
-  console.log(manifest)
-
   await Promise.all(
     manifest.layers.map(async (layer: any) => {
       await makeRegistryRequest({
@@ -102,6 +94,7 @@ export async function copyDockerImage(from: ImageRef, to: ImageRef, log: (level:
     endpoint: `/${to.namespace}/${to.image}/blobs/uploads/?mount=${manifest.config.digest}&from=${from.namespace}/${from.image}`,
     method: 'POST',
     authorisation,
+    json: false,
   })
 
   log('info', 'Copied manifest to new repository')
@@ -110,6 +103,8 @@ export async function copyDockerImage(from: ImageRef, to: ImageRef, log: (level:
     endpoint: `/${to.namespace}/${to.image}/manifests/${to.version}`,
     method: 'PUT',
     authorisation,
+    body: JSON.stringify(manifest),
+    json: false,
     headers: {
       'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
     },
