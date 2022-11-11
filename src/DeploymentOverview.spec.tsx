@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { DeploymentDoc } from '../server/models/Deployment'
 import DeploymentOverview from './DeploymentOverview'
 import { lightTheme } from './theme'
+import { EntityKind } from '../types/interfaces'
 
 describe('DeploymentOverview', () => {
   const deployment = {
@@ -16,8 +17,8 @@ describe('DeploymentOverview', () => {
       },
       contacts: {
         owner: [
-          { kind: 'user', id: 'user1' },
-          { kind: 'user', id: 'user2' },
+          { kind: EntityKind.USER, id: 'user1' },
+          { kind: EntityKind.USER, id: 'user2' },
         ],
       },
     },

@@ -1,6 +1,6 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
 global.TextEncoder = TextEncoder
@@ -18,9 +18,9 @@ export const uploadData: any = {
     modelID: 'test-model',
   },
   contacts: {
-    uploader: [{ kind: 'user', id: 'user' }],
-    reviewer: [{ kind: 'user', id: 'reviewer' }],
-    manager: [{ kind: 'user', id: 'manager' }],
+    uploader: [{ kind: EntityKind.USER, id: 'user' }],
+    reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+    manager: [{ kind: EntityKind.USER, id: 'manager' }],
   },
 }
 
@@ -32,7 +32,7 @@ export const deploymentData: any = {
     modelID: 'test-model',
   },
   contacts: {
-    owner: [{ kind: 'user', id: 'user' }],
+    owner: [{ kind: EntityKind.USER, id: 'user' }],
   },
 }
 
@@ -92,9 +92,9 @@ export const testVersion: any = {
       name: 'test',
     },
     contacts: {
-      uploader: [{ kind: 'user', id: 'user' }],
-      reviewer: [{ kind: 'user', id: 'reviewer' }],
-      manager: [{ kind: 'user', id: 'manager' }],
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
     },
   },
   files: {
@@ -118,9 +118,9 @@ export const testVersion2: any = {
       name: 'test',
     },
     contacts: {
-      uploader: [{ kind: 'user', id: 'user' }],
-      reviewer: [{ kind: 'user', id: 'reviewer' }],
-      manager: [{ kind: 'user', id: 'manager' }],
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
     },
   },
   files: {
@@ -174,7 +174,7 @@ export const testDeployment2: any = {
   model: modelId,
   metadata: {
     contacts: {
-      owner: [{ kind: 'user', id: 'user' }],
+      owner: [{ kind: EntityKind.USER, id: 'user' }],
     },
   },
   createdAt: new Date(),

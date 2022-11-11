@@ -4,6 +4,7 @@ import ModelModel from '../models/Model'
 import RequestModel from '../models/Request'
 import VersionModel from '../models/Version'
 import UserModel from '../models/User'
+import { EntityKind } from '../../types/interfaces'
 
 export async function up() {
   const deployments = await DeploymentModel.find({})
@@ -20,8 +21,8 @@ export async function up() {
     }
 
     deployment.metadata.contacts.owner = [
-      { kind: 'user', id: deployment.metadata.contacts.requester },
-      { kind: 'user', id: deployment.metadata.contacts.secondPOC },
+      { kind: EntityKind.USER, id: deployment.metadata.contacts.requester },
+      { kind: EntityKind.USER, id: deployment.metadata.contacts.secondPOC },
     ]
 
     delete deployment.metadata.contacts.requester
@@ -43,9 +44,9 @@ export async function up() {
       continue
     }
 
-    model.currentMetadata.contacts.uploader = [{ kind: 'user', id: model.currentMetadata.contacts.uploader }]
-    model.currentMetadata.contacts.reviewer = [{ kind: 'user', id: model.currentMetadata.contacts.reviewer }]
-    model.currentMetadata.contacts.manager = [{ kind: 'user', id: model.currentMetadata.contacts.manager }]
+    model.currentMetadata.contacts.uploader = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.uploader }]
+    model.currentMetadata.contacts.reviewer = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.reviewer }]
+    model.currentMetadata.contacts.manager = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.manager }]
 
     model.markModified('currentMetadata')
     await model.save()
@@ -67,7 +68,7 @@ export async function up() {
 
     const { id } = user
 
-    request.approvers = [{ kind: 'user', id }]
+    request.approvers = [{ kind: EntityKind.USER, id }]
     await request.save()
   }
 
@@ -85,9 +86,9 @@ export async function up() {
       continue
     }
 
-    version.metadata.contacts.uploader = [{ kind: 'user', id: version.metadata.contacts.uploader }]
-    version.metadata.contacts.reviewer = [{ kind: 'user', id: version.metadata.contacts.reviewer }]
-    version.metadata.contacts.manager = [{ kind: 'user', id: version.metadata.contacts.manager }]
+    version.metadata.contacts.uploader = [{ kind: EntityKind.USER, id: version.metadata.contacts.uploader }]
+    version.metadata.contacts.reviewer = [{ kind: EntityKind.USER, id: version.metadata.contacts.reviewer }]
+    version.metadata.contacts.manager = [{ kind: EntityKind.USER, id: version.metadata.contacts.manager }]
 
     version.markModified('metadata')
     await version.save()

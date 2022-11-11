@@ -4,7 +4,7 @@
 
 import ThemeProvider from '@mui/system/ThemeProvider'
 import { render, screen, waitFor } from '@testing-library/react'
-import { ApprovalStates } from '../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../types/interfaces'
 import { lightTheme } from '../theme'
 import ApprovalsChip from './ApprovalsChip'
 
@@ -14,8 +14,8 @@ describe('ApprovalsChip', () => {
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
           approvals={[
-            { reviewers: [{ kind: 'user', id: 'Alice' }], status: ApprovalStates.NoResponse },
-            { reviewers: [{ kind: 'user', id: 'Bob' }], status: ApprovalStates.NoResponse },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.NoResponse },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.NoResponse },
           ]}
         />
       </ThemeProvider>
@@ -31,8 +31,8 @@ describe('ApprovalsChip', () => {
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
           approvals={[
-            { reviewers: [{ kind: 'user', id: 'Alice' }], status: ApprovalStates.Accepted },
-            { reviewers: [{ kind: 'user', id: 'Bob' }], status: ApprovalStates.NoResponse },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.NoResponse },
           ]}
         />
       </ThemeProvider>
@@ -48,8 +48,8 @@ describe('ApprovalsChip', () => {
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
           approvals={[
-            { reviewers: [{ kind: 'user', id: 'Alice' }], status: ApprovalStates.Accepted },
-            { reviewers: [{ kind: 'user', id: 'Bob' }], status: ApprovalStates.Accepted },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted },
+            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.Accepted },
           ]}
         />
       </ThemeProvider>
@@ -64,7 +64,7 @@ describe('ApprovalsChip', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[{ reviewers: [{ kind: 'user', id: 'Alice' }], status: ApprovalStates.NoResponse }]}
+          approvals={[{ reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.NoResponse }]}
         />
       </ThemeProvider>
     )
@@ -77,7 +77,9 @@ describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 1/1 approvals', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
-        <ApprovalsChip approvals={[{ reviewers: [{ kind: 'user', id: 'Alice' }], status: ApprovalStates.Accepted }]} />
+        <ApprovalsChip
+          approvals={[{ reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted }]}
+        />
       </ThemeProvider>
     )
 

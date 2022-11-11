@@ -1,6 +1,6 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import { DeploymentDoc } from './Deployment'
-import { Entity, approvalStateOptions, ApprovalStates } from '../../types/interfaces'
+import { Entity, approvalStateOptions, ApprovalStates, EntityKind } from '../../types/interfaces'
 import { VersionDoc } from './Version'
 
 export const approvalTypeOptions = ['Manager', 'Reviewer']
@@ -43,7 +43,7 @@ const RequestSchema = new Schema<Request>(
       {
         kind: {
           type: String,
-          enum: ['user'],
+          enum: Object.values(EntityKind),
           required: true,
         },
         id: {

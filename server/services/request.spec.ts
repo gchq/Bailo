@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
 import RequestModel, { RequestTypes } from '../models/Request'
@@ -37,9 +37,9 @@ const versionData: any = {
       name: 'model1',
     },
     contacts: {
-      uploader: [{ kind: 'user', id: 'user1' }],
-      reviewer: [{ kind: 'user', id: 'user1' }],
-      manager: [{ kind: 'user', id: 'manager1' }],
+      uploader: [{ kind: EntityKind.USER, id: 'user1' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'user1' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager1' }],
     },
   },
   built: false,
@@ -64,7 +64,7 @@ const deploymentData: any = {
       name: 'deployment1',
     },
     contacts: {
-      owner: [{ kind: 'user', id: 'user1' }],
+      owner: [{ kind: EntityKind.USER, id: 'user1' }],
     },
   },
   createdAt: new Date(),
@@ -92,7 +92,7 @@ const testRequest = {
   _id: requestId,
   approvalType: 'Manager',
   request: 'Upload',
-  approvers: [{ kind: 'user', id: 'user1' }],
+  approvers: [{ kind: EntityKind.USER, id: 'user1' }],
   version: null,
   __v: 0,
   createdAt: new Date(),

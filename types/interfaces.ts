@@ -186,12 +186,16 @@ export enum UploadModes {
 enum DateStringBrand {}
 export type DateString = string & DateStringBrand
 
+export enum EntityKind {
+  USER = 'user',
+}
+
 export interface Entity {
-  kind: 'user'
+  kind: EntityKind
   id: string
 }
 
 export interface ParsedEntity {
-  kind: 'user'
+  kind: EntityKind
   entity: UserDoc
 }

@@ -1,5 +1,5 @@
 import { getUserById } from '../services/user'
-import { Entity, ParsedEntity } from '../../types/interfaces'
+import { Entity, ParsedEntity, EntityKind } from '../../types/interfaces'
 import { UserDoc } from '../models/User'
 
 export async function parseEntity(
@@ -108,5 +108,5 @@ export async function isUserInEntityList(user: UserDoc, rawEntities: Array<Entit
 
 export async function getEntitiesForUser(user: UserDoc) {
   // at the moment, it's just the user itself!
-  return [{ kind: 'user', id: user.id }]
+  return [{ kind: EntityKind.USER, id: user.id }]
 }

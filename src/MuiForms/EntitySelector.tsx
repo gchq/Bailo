@@ -3,6 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
 import { useListUsers } from '../../data/user'
+import { EntityKind } from '../../types/interfaces'
 
 interface Entity {
   kind: string
@@ -21,7 +22,7 @@ export default function EntitySelector(props: any) {
     if (users)
       tempEntities = tempEntities.concat(
         users.map((user) => ({
-          kind: 'user',
+          kind: EntityKind.USER,
           id: user.id,
           data: user,
         }))
