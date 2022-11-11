@@ -4,6 +4,7 @@ import ModelModel from '../models/Model'
 import RequestModel from '../models/Request'
 import UserModel from '../models/User'
 import VersionModel from '../models/Version'
+import MigrationModel from '../models/Migration'
 import { connectToMongoose, disconnectFromMongoose } from './database'
 import { emptyBucket, ensureBucketExists } from './minio'
 
@@ -27,6 +28,7 @@ export async function clearStoredData() {
     ModelModel.deleteMany({}),
     UserModel.deleteMany({}),
     VersionModel.deleteMany({}),
+    MigrationModel.deleteMany({}),
 
     // empty minio buckets
     emptyBucket(config.get('minio.uploadBucket')),
