@@ -5,7 +5,7 @@ priority: 4000
 import DocsWrapper from '@/src/docs/DocsWrapper'
 import Image from 'next/image'
 import Box from '@mui/material/Box'
-import bailoMarketplaceIcon from '../../../public/docs/bailo_marketplace_icon.png'
+import bailoMarketplaceIcon from '../../../../public/docs/bailo_marketplace_icon.png'
 
 ## Marketplace
 
@@ -16,9 +16,6 @@ by clicking the Marketplace icon:
   <Image src={bailoMarketplaceIcon} />
 </Box>
 
-Models in Bailo are viewable in the Marketplace, and you can use the "Filter Models" search bar to look for specific
-(types of) models.
-
-In the future, only approved models will be visible via the Marketplace.
+Models in Bailo are viewable in the Marketplace, with a search bar in the top-right to filter the list.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
