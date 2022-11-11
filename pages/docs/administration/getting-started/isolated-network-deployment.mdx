@@ -10,7 +10,7 @@ export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
 
 ## HELM and docker dependency
 
-Private/Internal hosted registry is required with below listed docker imanges.
+Bailo depends on HELM charts provided by Bitnami and docker images found in dockerhub.Therfore, for isolated network without internet connectivity, internal hosted registry is required for:
 
 - MinIO version tag ~10.0.1 https://charts.bitnami.com/bitnami
 - MongoDB version tag ~10.31.3 https://charts.bitnami.com/bitnami
@@ -21,10 +21,10 @@ Private/Internal hosted registry is required with below listed docker imanges.
 
 ## NPM
 
-Private/Internal hosted npm repository is required.
+Internal hosted npm repository is required.
 
 ## Optional dependencies
-
+Selinium-webdriver and Sharp can be removed for isolated network deployment.
 ```
 npm remove selenium-webdriver sharp
 ```

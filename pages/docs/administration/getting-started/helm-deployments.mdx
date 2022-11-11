@@ -10,24 +10,25 @@ export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
 
 ## Note
 
-Below deployment is configured for OpenShift. You will have to change route configuraiton to ingress for k8s.
+`Bailo/helm/bailo` lists HELM deployment configuration. In it's current form, the deployment is configured for OpenShift. Route configuraiton must be changed to ingress for k8s deployment.
 
 ## Prerequisite
 
+Required binaries for OpenShift and HELM can be found at:
 - [OpenShift CLI](https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz)
 - [HELM CLI](https://github.com/helm/helm/releases)
 
 ## Deployment
 
-- Configure OpenShift CLI and HELM CLI
-- MinIO and MongoDB is enabled by default. See values.yaml.
-- Existing MongoDB can be connected using \{\{ .Values.mongodb.host \}\}
+OpenShift CLI and HELM CLI must be confiured on host OS to be able to deploy using HELM.
+ 
+HELM templates are configured such that deployment behaviour can be changed by subsituting values in `Bailo/helm/bailo/values.yaml`, for example, existing MongoDB can be connected using \{\{ .Values.mongodb.host \}\} and setting `mongodb.enabled: false`.
 
 ```
 $ git clone https://github.com/gchq/Bailo.git
 $ cd Bailo/helm/bailo
-$ vim values.yaml //update with required key:value
-- create self-signed cert using certs/san.cnf and place them at; certs/key.pem and certs/cert.pem //This is not for ingress route connecting to your defined URL
+$ vim values.yaml #update with required key:value`
+- create self-signed cert using certs/san.cnf and place them at; certs/key.pem and certs/cert.pem. Note that this is not for ingress or route configured URL.
 $ helm dependency update
 $ helm install bailo .
 ```

@@ -8,23 +8,9 @@ import DocsWrapper from '@/src/docs/DocsWrapper'
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
 
-## Note
 
-Below listed configurations can be changed during dockerbuild.
+# Configuration Files
+Bailo configuration can be found at `Bailo/config` and file load order is as per [node-config](https://github.com/node-config/node-config/wiki/Configuration-Files)
 
-- default application configuration is applied from config/default.js.
-- production.js overwrites mongo configuration.
-- production.js overwrites minio configuration.
-- production.js overwrites registry configurration.
-- build.environment: openshift //must be set for OpenShift
-- openshift.[ namespace | appPublicRoute ] //must be set for OpenShift
-- smtp.enabled: true //must be set, else Bailo does not start the s2i build
-- logging.file.enabled: false //set true to debug Bailo
+App configuration can also be changed during runtime. For example, production.js can be overwritten during HELM deployment `helm/bailo/templates/bailo/bailo.configmap.yaml`
 
-## production.js
-
-production.js can be overwritten during HELM deployment. See helm/bailo/templates/bailo/bailo.configmap.yaml
-
-## **default.js**
-
-This is stored at config/default.js
