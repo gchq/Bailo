@@ -6,11 +6,12 @@ import DocsWrapper from '@/src/docs/DocsWrapper'
 
 # App Configuration
 
+## Configuration Files
+
+Bailo configuration can be found in the `config` directory and file load order is as per the
+[node-config](https://github.com/node-config/node-config/wiki/Configuration-Files) docs.
+
+App configuration can also be changed during runtime. For example, production.js can be overwritten during HELM
+deployment `helm/bailo/templates/bailo/bailo.configmap.yaml`
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
-
-
-# Configuration Files
-Bailo configuration can be found at `Bailo/config` and file load order is as per [node-config](https://github.com/node-config/node-config/wiki/Configuration-Files)
-
-App configuration can also be changed during runtime. For example, production.js can be overwritten during HELM deployment `helm/bailo/templates/bailo/bailo.configmap.yaml`
-

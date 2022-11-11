@@ -1,20 +1,19 @@
 ---
-priority: 10400
+priority: 10300
 ---
 
 import DocsWrapper from '@/src/docs/DocsWrapper'
 
 # Isolated Network Deployment
 
-export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
-
 ## HELM and docker dependency
 
-Bailo depends on HELM charts provided by Bitnami and docker images found in dockerhub.Therfore, for isolated network without internet connectivity, internal hosted registry is required for:
+Bailo depends on HELM charts provided by Bitnami and docker images found in Dockerhub. Therefore, for isolated network
+without internet connectivity, internal hosted registry is required for:
 
 - MinIO version tag ~10.0.1 https://charts.bitnami.com/bitnami
 - MongoDB version tag ~10.31.3 https://charts.bitnami.com/bitnami
-- Registy version tag 2
+- Registry version tag 2
 - seldon/seldon-core-s2i-python37:1.10.0
 - maildev/maildev:20.0.2
 - nginxinc/nginx-unprivileged
@@ -24,7 +23,11 @@ Bailo depends on HELM charts provided by Bitnami and docker images found in dock
 Internal hosted npm repository is required.
 
 ## Optional dependencies
-Selinium-webdriver and Sharp can be removed for isolated network deployment.
+
+Selenium-webdriver and Sharp can be removed for isolated network deployment.
+
 ```
 npm remove selenium-webdriver sharp
 ```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

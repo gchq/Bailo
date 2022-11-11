@@ -6,23 +6,25 @@ import DocsWrapper from '@/src/docs/DocsWrapper'
 
 # Helm Deployments
 
-export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
-
 ## Note
 
-`Bailo/helm/bailo` lists HELM deployment configuration. In it's current form, the deployment is configured for OpenShift. Route configuraiton must be changed to ingress for k8s deployment.
+`Bailo/helm/bailo` lists HELM deployment configuration. In it's current form, the deployment is configured for
+OpenShift. Route configuration must be changed to ingress for k8s deployment.
 
 ## Prerequisite
 
 Required binaries for OpenShift and HELM can be found at:
+
 - [OpenShift CLI](https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz)
 - [HELM CLI](https://github.com/helm/helm/releases)
 
 ## Deployment
 
-OpenShift CLI and HELM CLI must be confiured on host OS to be able to deploy using HELM.
- 
-HELM templates are configured such that deployment behaviour can be changed by subsituting values in `Bailo/helm/bailo/values.yaml`, for example, existing MongoDB can be connected using \{\{ .Values.mongodb.host \}\} and setting `mongodb.enabled: false`.
+OpenShift CLI and HELM CLI must be configured on host OS to be able to deploy using HELM.
+
+HELM templates are configured such that deployment behaviour can be changed by substituting values in
+`Bailo/helm/bailo/values.yaml`, for example, existing MongoDB can be connected using \{\{ .Values.mongodb.host \}\} and
+setting `mongodb.enabled: false`.
 
 ```
 $ git clone https://github.com/gchq/Bailo.git
@@ -34,3 +36,5 @@ $ helm install bailo .
 ```
 
 After successful deployment you should be able to browse to your configured route/ingress URL.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
