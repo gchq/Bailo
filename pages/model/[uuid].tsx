@@ -92,9 +92,9 @@ function Model() {
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
   const sendNotification = useNotification()
 
-  // possiblyUploader stores whether an uploader could plausibly have access to privileged functions.
+  // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
   // It defaults to true, until it hears false from the network access check.
-  const possiblyUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
+  const isPotentialUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
@@ -129,14 +129,14 @@ function Model() {
         if (
           ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
             (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
-          !possiblyUploader
+          !isPotentialUploader
         ) {
           setShowLastViewedWarning(true)
         }
         putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
       }
     },
-    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, possiblyUploader]
+    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, isPotentialUploader]
   )
 
   useEffect(() => {
@@ -324,14 +324,14 @@ function Model() {
                     version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
                       ? 'Version has already been approved by both a manager and a technical reviewer.'
                       : '',
-                    !possiblyUploader ? 'You do not have permission to edit this model.' : '',
+                    !isPotentialUploader ? 'You do not have permission to edit this model.' : '',
                   ]}
                 >
                   <MenuItem
                     onClick={editModel}
                     disabled={
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
-                      !possiblyUploader
+                      !isPotentialUploader
                     }
                     data-test='editModelButton'
                   >
@@ -341,7 +341,7 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem onClick={uploadNewVersion} disabled={!possiblyUploader} data-test='newVersionButton'>
+                <MenuItem onClick={uploadNewVersion} disabled={!isPotentialUploader} data-test='newVersionButton'>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
