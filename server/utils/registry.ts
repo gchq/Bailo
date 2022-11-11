@@ -30,6 +30,15 @@ export async function makeRegistryRequest({
 }) {
   const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
 
+  console.log(`${registry}${endpoint}`, {
+    ...metadata,
+    ...(method ? { method } : {}),
+    headers: {
+      ...headers,
+      Authorization: 'authorisation bearer',
+    },
+  })
+
   return fetch(`${registry}${endpoint}`, {
     ...metadata,
     ...(method ? {} : { method }),
@@ -81,9 +90,6 @@ export async function copyDockerImage(from: ImageRef, to: ImageRef, log: (level:
       await makeRegistryRequest({
         endpoint: `/${to.namespace}/${to.image}/blobs/uploads/?mount=${layer.digest}&from=${from.namespace}/${from.image}`,
         authorisation,
-        headers: {
-          Accept: 'application/vnd.docker.distribution.manifest.v2+json',
-        },
         json: false,
         method: 'POST',
       })
