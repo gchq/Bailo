@@ -7,7 +7,6 @@ import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
@@ -31,7 +30,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from './Link'
 import { useGetNumRequests } from '../data/requests'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
@@ -200,27 +199,22 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' passHref>
-                <a>
-                  <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
-                </a>
+              <Link href='/' passHref color='inherit' underline='none'>
+                <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' passHref>
-                <a style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}>
-                  Bailo
-                </a>
+              <Link
+                href='/'
+                passHref
+                color='inherit'
+                underline='none'
+                style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
+              >
+                Bailo
               </Link>
             </Box>
             {headerTitle}
-            <Link href='/review' passHref>
-              <IconButton color='inherit'>
-                <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Link>
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
@@ -239,7 +233,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                         inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </MenuItem>
-                    <Link href='/settings' passHref>
+                    <Link href='/settings' passHref color='inherit' underline='none'>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
                           <Settings fontSize='small' />
@@ -269,7 +263,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
           </Toolbar>
           <StyledList>
-            <Link href='/' passHref>
+            <Link href='/' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
@@ -283,7 +277,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Marketplace' />
               </ListItem>
             </Link>
-            <Link href='/deployments' passHref>
+            <Link href='/deployments' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'deployments'}>
                 <ListItemIcon>
                   {!open ? (
@@ -297,7 +291,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItem>
             </Link>
-            <Link href='/upload' passHref>
+            <Link href='/upload' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'upload'}>
                 <ListItemIcon data-test='uploadModelLink'>
                   {!open ? (
@@ -311,12 +305,14 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Upload' />
               </ListItem>
             </Link>
-            <Link href='/review' passHref>
+            <Link href='/review' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'review'}>
                 <ListItemIcon data-test='reviewLink'>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <ListAltIcon />
+                      <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
+                        <ListAltIcon />
+                      </Badge>
                     </Tooltip>
                   ) : (
                     <ListAltIcon />
@@ -326,7 +322,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Divider />
-            <Link href='/docs/api' passHref>
+            <Link href='/docs/api' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'api'}>
                 <ListItemIcon>
                   {!open ? (
@@ -340,7 +336,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='API' />
               </ListItem>
             </Link>
-            <Link href='/help' passHref>
+            <Link href='/help' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'help'}>
                 <ListItemIcon data-test='supportLink'>
                   {!open ? (

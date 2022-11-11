@@ -25,7 +25,9 @@ function ModelOverview(props: any) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
-            <Typography variant='body1'>{version.metadata.highLevelDetails.modelOverview}</Typography>
+            <Typography variant='body1' style={{ whiteSpace: 'pre-line' }}>
+              {version.metadata.highLevelDetails.modelOverview}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model tags</Typography>

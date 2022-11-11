@@ -1,10 +1,9 @@
 import LoadingButton from '@mui/lab/LoadingButton'
-import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-import Snackbar from '@mui/material/Snackbar'
 import { Dispatch, SetStateAction } from 'react'
+import useNotification from '../common/Snackbar'
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepValidate, validateForm } from '../../utils/formUtils'
 
@@ -18,9 +17,6 @@ export interface RenderButtonsInterface {
 
   onSubmit: () => void
 
-  openValidateError: boolean
-  setOpenValidateError: Dispatch<SetStateAction<boolean>>
-
   modelUploading: boolean
 }
 
@@ -31,19 +27,18 @@ export default function RenderButtons({
   activeStep,
   setActiveStep,
   onSubmit,
-  openValidateError,
-  setOpenValidateError,
   modelUploading,
 }: RenderButtonsInterface) {
   const isFirstStep = activeStep === 0
   const isLastStep = activeStep === splitSchema.steps.length - 1
+  const sendNotification = useNotification()
 
   const onClickNextSection = () => {
     const isValid = validateForm(step)
 
     if (!isValid) {
       setStepValidate(splitSchema, setSplitSchema, step, true)
-      setOpenValidateError(true)
+      sendNotification({ variant: 'error', msg: 'This tab is not complete.' })
       return
     }
     document.getElementById('form-page-stepper')?.scrollIntoView({ behavior: 'smooth' })
@@ -60,7 +55,7 @@ export default function RenderButtons({
 
     if (!isValid) {
       setStepValidate(splitSchema, setSplitSchema, step, true)
-      setOpenValidateError(true)
+      sendNotification({ variant: 'error', msg: 'This tab is not complete.' })
       return
     }
 
@@ -90,12 +85,6 @@ export default function RenderButtons({
           )}
         </Grid>
       </Grid>
-
-      <Snackbar open={openValidateError} autoHideDuration={6000} onClose={() => setOpenValidateError(false)}>
-        <Alert onClose={() => setOpenValidateError(false)} severity='error' sx={{ width: '100%' }}>
-          This tab is not complete.
-        </Alert>
-      </Snackbar>
     </>
   )
 }
