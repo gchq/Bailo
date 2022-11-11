@@ -42,8 +42,8 @@ export const darkTheme = createTheme({
     },
     action: {
       active: '#fff',
-      hover: '#fff',
-      focus: '#fff',
+      hover: 'rgba(106, 106, 106, 0.16)',
+      focus: 'rgba(106, 106, 106, 0.16)',
       selected: '#fff',
     },
   },
