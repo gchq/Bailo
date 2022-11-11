@@ -9,8 +9,6 @@ describe('Model favouriting', () => {
     cy.visit('/upload')
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
 
-    cy.log(modelName)
-
     cy.log('Selecting schema and inputting metadata')
     cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
     cy.fixture('schema_names.json').then((schemaNames) => {
@@ -30,8 +28,6 @@ describe('Model favouriting', () => {
         .as('modelUrl')
         .should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
     })
-
-    cy.url({ timeout: 10000 }).as('modelUrl').should('contain', '/model/')
   })
 
   it('Is able to favourite and unfavourite a model', function () {
