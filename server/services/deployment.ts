@@ -7,7 +7,7 @@ import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
-import { createSerializer, SerializerOptions } from '../utils/logger'
+import logger, { createSerializer, SerializerOptions } from '../utils/logger'
 import { BadReq, Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 import { getAccessToken } from '../routes/v1/registryAuth'
@@ -120,20 +120,27 @@ export async function deleteRegistryObjects(model: string, version: string, name
   const authorisation = `Bearer ${token}`
   const registry = `https://${config.get('registry.host')}/v2`
 
-  const headResponse: any = await registryFetch(registry, namespace, model, version, authorisation, 'HEAD')
+  const headResponse = await registryFetch(registry, namespace, model, version, authorisation, 'HEAD')
 
-  if (headResponse.ok) {
-    const deleteResponse: any = await registryFetch(
-      registry,
-      namespace,
-      model,
-      headResponse.headers.get('docker-content-digest'),
-      authorisation,
-      'DELETE'
-    )
-    if (!deleteResponse.ok) {
-      throw BadReq({}, await getErrorMessage(deleteResponse))
-    }
+  if (!headResponse.ok) {
+    const error = `Unable to get registry image: ${await headResponse.text()}`
+    logger.error({ registry, namespace, model, version }, error)
+    throw new Error(error)
+  }
+
+  const deleteResponse = await registryFetch(
+    registry,
+    namespace,
+    model,
+    headResponse.headers.get('docker-content-digest'),
+    authorisation,
+    'DELETE'
+  )
+
+  if (!deleteResponse.ok) {
+    const error = `Unable to delete registry image: ${await headResponse.text()}`
+    logger.error({ registry, namespace, model }, error)
+    throw new Error(error)
   }
 }
 
