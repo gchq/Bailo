@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
 
 describe('Model favouriting', () => {
   const modelName = `Test model ${uuidv4()}`
@@ -7,6 +8,8 @@ describe('Model favouriting', () => {
     cy.log('Navigate to Upload page and json tab')
     cy.visit('/upload')
     cy.get('[data-test=uploadJsonTab]').click({ force: true })
+
+    cy.log(modelName)
 
     cy.log('Selecting schema and inputting metadata')
     cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
@@ -20,15 +23,18 @@ describe('Model favouriting', () => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
         .type(JSON.stringify(metadata), { parseSpecialCharSequences: false, delay: 0 })
+      cy.log('Submitting model')
+      cy.get('[data-test=warningCheckbox]').click()
+      cy.get('[data-test=submitButton]').click()
+      cy.url({ timeout: 10000 })
+        .as('modelUrl')
+        .should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
     })
 
-    cy.log('Submitting model')
-    cy.get('[data-test=warningCheckbox]').click()
-    cy.get('[data-test=submitButton]').click()
     cy.url({ timeout: 10000 }).as('modelUrl').should('contain', '/model/')
   })
 
-  it('Is able to favourite and unfavourite a model', function favouriteModelTest() {
+  it('Is able to favourite and unfavourite a model', function () {
     cy.visit(this.modelUrl)
 
     cy.log('Select favourite')
