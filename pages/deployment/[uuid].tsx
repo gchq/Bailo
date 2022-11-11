@@ -17,7 +17,6 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -36,7 +35,6 @@ import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
-import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
@@ -47,6 +45,8 @@ import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { ModelUploadType } from '../../types/interfaces'
 import { VersionDoc } from '../../server/models/Version'
+import { getErrorMessage } from '../../utils/fetcher'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -58,38 +58,35 @@ function isTabOption(value: string): value is TabOptions {
 
 function CodeLine({ line }) {
   const theme = useTheme()
-  const [openSnackbar, setOpenSnackbar] = useState(false)
+  const sendNotification = useNotification()
 
   const handleButtonClick = () => {
     navigator.clipboard.writeText(line)
-    setOpenSnackbar(true)
+    sendNotification({ variant: 'success', msg: 'Copied to clipboard' })
   }
 
   return (
-    <>
-      <div
-        style={{
-          cursor: 'pointer',
-        }}
-        role='button'
-        tabIndex={0}
-        onClick={() => {
+    <div
+      style={{
+        cursor: 'pointer',
+      }}
+      role='button'
+      tabIndex={0}
+      onClick={() => {
+        handleButtonClick()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
           handleButtonClick()
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleButtonClick()
-          }
-        }}
-      >
-        <Tooltip title='Copy to clipboard' arrow>
-          <Box sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', p: 1, borderRadius: 2 }}>
-            $ <b>{line}</b>
-          </Box>
-        </Tooltip>
-      </div>
-      <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
-    </>
+        }
+      }}
+    >
+      <Tooltip title='Copy to clipboard' arrow>
+        <Box sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', p: 1, borderRadius: 2 }}>
+          $ <b>{line}</b>
+        </Box>
+      </Tooltip>
+    </div>
   )
 }
 
@@ -102,14 +99,14 @@ export default function Deployment() {
   const [open, setOpen] = useState<boolean>(false)
   const [tag, setTag] = useState<string>('')
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [copyDeploymentCardSnackbarOpen, setCopyDeploymentCardSnackbarOpen] = useState(false)
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
+  const { deployment, isDeploymentLoading, isDeploymentError, mutateDeployment } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
     if (!deployment) return undefined
@@ -168,7 +165,7 @@ export default function Deployment() {
 
   const copyDeploymentCardToClipboard = () => {
     copy(JSON.stringify(deployment?.metadata, null, 2))
-    setCopyDeploymentCardSnackbarOpen(true)
+    sendNotification({ variant: 'success', msg: 'Copied deployment metadata to clipboard' })
   }
 
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
@@ -187,7 +184,14 @@ export default function Deployment() {
   const deploymentTag = `${uiConfig?.registry.host}/${deployment.uuid}/${tag}`
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
+      mutateDeployment()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
   }
 
   return (
@@ -354,19 +358,6 @@ export default function Deployment() {
                 <Button variant='outlined' onClick={copyDeploymentCardToClipboard}>
                   Copy deployment metadata to clipboard
                 </Button>
-                <Snackbar
-                  open={copyDeploymentCardSnackbarOpen}
-                  autoHideDuration={6000}
-                  onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
-                >
-                  <Alert
-                    onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
-                    severity='success'
-                    sx={{ width: '100%' }}
-                  >
-                    Copied deployment metadata to clipboard
-                  </Alert>
-                </Snackbar>
               </Box>
             </>
           )}

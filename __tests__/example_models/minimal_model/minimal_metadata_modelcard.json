@@ -12,7 +12,6 @@
     "manager": [{ "kind": "user", "id": "user" }]
   },
   "buildOptions": {
-    "exportRawModel": true,
     "uploadType": "Model card only"
   }
 }

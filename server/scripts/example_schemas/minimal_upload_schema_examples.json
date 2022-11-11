@@ -13,7 +13,6 @@
       "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true,
       "uploadType": "Model card only"
     }
   },
@@ -31,7 +30,6 @@
       "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true,
       "uploadType": "Code and binaries"
     }
   },
@@ -49,7 +47,6 @@
       "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true,
       "uploadType": "Code and binaries"
     }
   }

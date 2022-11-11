@@ -78,7 +78,9 @@ function MetadataDisplay({
     return schemaPart ? (
       <Box sx={{ p: 2 }}>
         {subHeading(schemaPart.title)}
-        <div>{printProperty(value, true, true, true, format)}</div>
+        <div>
+          <Typography style={{ whiteSpace: 'pre-line' }}>{printProperty(value, true, true, true, format)}</Typography>
+        </div>
       </Box>
     ) : null
   }
