@@ -11,11 +11,17 @@ interface Entity {
   data: any
 }
 
-export default function EntitySelector(props: any) {
-  const { users, isUsersLoading } = useListUsers()
+interface EntitySelectorProps {
+  label?: string
+  required?: boolean
+  value: Array<Omit<Entity, 'data'>>
+  onChange: (newValue: Array<Omit<Entity, 'data'>>) => void
+}
+
+export default function EntitySelector(props: EntitySelectorProps) {
+  const { users, isUsersLoading: isLoading } = useListUsers()
   const [open, setOpen] = React.useState(false)
 
-  const isLoading = isUsersLoading
   const entities = React.useMemo(() => {
     let tempEntities: Array<Entity> = []
 
