@@ -6,35 +6,62 @@ import DocsWrapper from '@/src/docs/DocsWrapper'
 
 # Helm Deployments
 
-## Note
+> At the moment `helm/bailo` is configured for OpenShift deployment, our default deployment target. Support for
+> Kubernetes is on the way. We have heard that external organisations have had success already by disabling 'routes' and
+> setting 'ingresses' instead.
 
-`Bailo/helm/bailo` lists HELM deployment configuration. In it's current form, the deployment is configured for
-OpenShift. Route configuration must be changed to ingress for k8s deployment.
+## Requirements
 
-## Prerequisite
+- [HELM CLI](https://github.com/helm/helm/releases)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/)
 
-Required binaries for OpenShift and HELM can be found at:
+### Optional
+
+OC is required for deployments to OpenShift
 
 - [OpenShift CLI](https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz)
-- [HELM CLI](https://github.com/helm/helm/releases)
 
 ## Deployment
 
-OpenShift CLI and HELM CLI must be configured on host OS to be able to deploy using HELM.
+### Setup
 
-HELM templates are configured such that deployment behaviour can be changed by substituting values in
-`Bailo/helm/bailo/values.yaml`, for example, existing MongoDB can be connected using \{\{ .Values.mongodb.host \}\} and
-setting `mongodb.enabled: false`.
+All commands assume they are run in the `helm/bailo` directory. The user should have already authenticated `kubectl` to
+their cluster and changed to the correct context:
+
+1. `kubectl config set-context --current --namespace=bailo`
+
+To deploy to `OpenShift`, `oc` must also be configured correctly.
+
+### Configuration
+
+Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by
+using `--set <option>=<value>`.
+
+We do not host built images of Bailo, thus at the very minimum the configuration should include the location of a Bailo
+image:
 
 ```
-$ git clone https://github.com/gchq/Bailo.git
-$ cd Bailo/helm/bailo
-$ vim values.yaml #update with required key:value`
-- create self-signed cert using certs/san.cnf and place them at; certs/key.pem and certs/cert.pem. Note that this is not for ingress or route configured URL.
-$ helm dependency update
-$ helm install bailo .
+---
+image:
+  repository: some.repository.com/bailo
+  tag: 'latest'
 ```
 
-After successful deployment you should be able to browse to your configured route/ingress URL.
+This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is
+called `local.yaml` in the `helm/bailo` folder.
+
+#### Installing Bailo
+
+1. `helm dependency update`
+2. `helm install --values ./local.yaml bailo .`
+3. `helm list # list current deployments`
+
+#### Upgrading Bailo
+
+1. `helm upgrade --values ./local.yaml bailo .`
+
+#### Removing Bailo
+
+1. `helm uninstall bailo`
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

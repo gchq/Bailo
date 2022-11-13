@@ -6,4 +6,6 @@
 
 import AuthorisationBase from '../utils/AuthorisationBase'
 
-export default AuthorisationBase
+class Authorisation extends AuthorisationBase {}
+
+export default Authorisation
