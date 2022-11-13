@@ -126,6 +126,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 backgroundColor: theme.palette.background.paper,
                 borderRight: `1px solid ${theme.palette.divider}`,
                 overflow: 'auto',
+                py: 2,
               }}
             >
               <StyledList>{docsMenu}</StyledList>

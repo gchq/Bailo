@@ -1,0 +1,104 @@
+---
+priority: 1400
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Authentication
+
+Bailo is intended to be run in multiple different environments, each of which will have their own standard
+authentication and authorisation methods. To enable this, Bailo exposes a class of methods that can be overridden to
+integrate with various services.
+
+By default, we expect the Bailo instance to be run behind a reverse proxy, which sets the following headers to identify
+users and their roles:
+
+- `x-userid` is a unique identifier for a user.
+- `x-email` is an optional email address (to send notifications).
+- `x-user` is a JSON encoded object containing any other user data.
+
+Within Nginx, these can be set via the `proxy_set_header` declaration:
+
+```
+proxy_set_header X-UserId "user";
+proxy_set_header X-Email "user@example.com";
+proxy_set_header X-User '{"some":"data"}';
+```
+
+To support other authentication mechanisms, an administrator can override the `getUserFromReq` method to get this
+information from any other method. To do this edit `server/external/Authorisation.ts` to override the required methods
+from `server/utils/AuthorisationBase.ts`. E.g.
+
+```javascript
+// server/external/Authorisation.ts
+import AuthorisationBase from '../utils/AuthorisationBase'
+import { Request } from 'express'
+
+class Authorisation extends AuthorisationBase {
+  async getUserFromReq(_req: Request) {
+    const username = req.get('x-username')
+
+    return {
+      userId: username,
+      email: await getUserEmail(username),
+      data: await getUserData(username),
+    }
+  }
+}
+
+export default Authorisation
+```
+
+In the above example, instead of getting this data from headers passed into the application, we now get the username
+from headers and get the users email and data from another method.
+
+This is called on each request and not cached, so you may want to implement this yourself if you are using expensive
+cryptographic functions or making external network requests.
+
+# Authorisation
+
+By default Bailo protects models from deployment by requiring an approval by the model owner. Also, only the model owner
+is capable of editting a model that has been uploaded. All users can view all models uploaded to the system.
+
+This is unlikely to be suitable for large organisations, who may wish to integrate their own internal authorisation
+system into Bailo. An administrator can integrate with their internal authorisation system by overriding one of the
+`canUserSeeX` functions, visible in `server/utils/AuthorisationBase.ts`. Each functino takes in a user object, as well
+as the object to view. The function is then expected to return either `true` or `false` depending on if the user can
+view that object.
+
+This authorisation affects both users directly viewing a model, as well as the models visible in the marketplace.
+
+An example authorisation implemention:
+
+```javascript
+// server/external/Authorisation.ts
+import AuthorisationBase from '../utils/AuthorisationBase'
+import { UserDoc } from '../models/User'
+import { VersionDoc } from '../models/Version'
+
+class Authorisation extends AuthorisationBase {
+  async getUserFromReq(_req: Request) {
+    // we now include roles in the user object
+    return {
+      userId: 'user',
+      data: { roles: ['alpha', 'beta', 'gamma'] },
+    }
+  }
+
+  async canUserSeeVersion(user: UserDoc, model: VersionDoc) {
+    // we can access the roles from the user document
+    const userRoles = user.data.roles
+    // our schema has a 'role' field we need users to have to see it
+    const versionRole = version.metadata.authorisation.role
+
+    // check if the user has the required role
+    const canAccess = userRoles.includes(versionRole))
+
+    return canAccess
+  }
+}
+
+export default Authorisation
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
