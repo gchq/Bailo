@@ -46,7 +46,12 @@ export default async function processUploads() {
             },
           },
           { construct: extractFiles() },
-          { construct: getSeldonDockerfile() },
+          {
+            construct: getSeldonDockerfile(),
+            props: {
+              seldonDockerfile: 'seldonio/seldon-core-s2i-python37:1.10.0',
+            },
+          },
         ])
 
         if (config.get('build.environment') === 'openshift') {
