@@ -2,6 +2,13 @@ import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
+import logger from '../utils/logger'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function doNotUse() {
+  // I'm lost on why this is required.
+  logger.info('Code does not work without this log')
+}
 
 export interface Version {
   model: ModelDoc | Types.ObjectId
