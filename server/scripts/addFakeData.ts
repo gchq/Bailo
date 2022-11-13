@@ -11,6 +11,7 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
     data: {
       special: 'data',
     },
+    roles: ['user', 'admin'],
   })
 
   setTimeout(disconnectFromMongoose, 50)
