@@ -3,7 +3,20 @@ import { omit } from 'lodash'
 import { ReactElement } from 'react'
 import { LogEntry } from '../../types/interfaces'
 
-export const miscIgnoreList = ['_id', 'src', 'time', 'name', 'hostname', 'pid', 'level', 'msg', 'v']
+export const miscIgnoreList = [
+  '_id',
+  'src',
+  'time',
+  'name',
+  'hostname',
+  'pid',
+  'level',
+  'msg',
+  'v',
+  '__v',
+  'createdAt',
+  'updatedAt',
+]
 
 type MiscLogDetailsProps = {
   log: LogEntry
