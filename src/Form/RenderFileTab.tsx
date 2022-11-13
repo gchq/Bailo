@@ -1,21 +1,16 @@
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import React, { ChangeEvent, useMemo } from 'react'
 import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
-import { useGetUiConfig } from '../../data/uiConfig'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker, } = state
+  const { binary, code, docker } = state
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
@@ -90,11 +85,6 @@ export function fileTabComplete(step: Step) {
 export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code, docker } = state
-
-  const handleSeldonVersionChange = (event: SelectChangeEvent<string>) => {
-    if (event.target.value)
-      setStepState(splitSchema, setSplitSchema, step, { ...state, seldonVersion: event.target.value })
-  }
 
   if (!step.steps) {
     return null
