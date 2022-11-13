@@ -386,13 +386,7 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={group}
-            onChange={handleGroupChange}
-            aria-label='basic tabs example'
-          >
+          <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab
@@ -448,8 +442,7 @@ function Model() {
                     {deployment.metadata.contacts.owner.map((owner) => (
                       <Chip
                         key={owner.id}
-                        color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                        sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                        color='primary'
                         avatar={<UserAvatar entity={owner} size='chip' />}
                         label={owner.id}
                       />
@@ -467,12 +460,7 @@ function Model() {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip
-                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                            key={filteredVersion.version}
-                            label={filteredVersion.version}
-                          />
+                          <Chip color='primary' key={filteredVersion.version} label={filteredVersion.version} />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
