@@ -1,6 +1,8 @@
 import { Document, model, Schema } from 'mongoose'
 
 export interface Log {
+  id?: string
+
   createdAt: Date
   updatedAt: Date
 }
@@ -8,7 +10,9 @@ export interface Log {
 export type LogDoc = Log & Document<any, any, Log>
 
 const LogSchema = new Schema<Log>(
-  {},
+  {
+    id: { type: String },
+  },
   {
     timestamps: true,
     capped: { size: 1024 * 1024 * 32, autoIndexId: true },
