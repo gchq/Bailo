@@ -21,7 +21,8 @@ export async function disconnectFromMongoose() {
 }
 
 export async function runMigrations() {
-  const base = join(getAppRoot.toString(), './server/migrations/')
+  const path = process.env.NODE_ENV === 'production' ? './dist/server/migrations/' : './server/migrations/'
+  const base = join(getAppRoot.toString(), path)
   const files = await readdir(base)
   files.sort()
 
