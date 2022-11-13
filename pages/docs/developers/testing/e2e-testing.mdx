@@ -1,0 +1,116 @@
+---
+priority: 3210
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# End to End Testing
+
+In order to test that Bailo is working correctly we make use of the [Cypress](https://www.cypress.io/) testing library.
+Much like Jest, Cypress is a vastly used and effective library for testing end to end workflows.
+
+Whilst components might pass inidividual unit tests there might be instances where they do not work as expected when
+used in conjunction with each other.
+
+## File structure
+
+All of our end to end tests are located within the `cypress` directory found at the root of the project. Inside there is
+a `e2e` directory that includes all of the workflows. Each workflow must have be suffixed with 'cy.ts'.
+
+A workflow is a collection of tests that test not just one aspect of the application, but a set of related actions. For
+example, uploading a model, reviewing said model and requesting a deployment of a model would be three separate actions,
+but all tied in one workflow. Much like unit tests, individual workflow tests must be able to be run independently of
+each other, despite all being in the same workflow.
+
+The `fixtures` directory contains any common mocked data that might be required for testing.
+
+## Running the tests
+
+In order to check that your tests work locally, you can run the following command:
+
+```
+npm run cy:open
+```
+
+## Examples
+
+### Example of a workflow
+
+Throughout the source of Bailo you might see data-test properties in various components. These are used for Cypress to
+easily find elements in the DOM so that the tests can check that the page is correctly rendered, and also for actions to
+be taken (such as button clicks).
+
+#### MyComponent.tsx
+
+```
+...
+<Button data-test='myButton'>Click me!</Button>
+...
+```
+
+#### my-workflow.cy.ts
+
+```
+describe('My workflow', () => {
+
+  it('test we can click the button', function() {
+    cy.get('[data-test=myButton]').click()
+  })
+
+})
+```
+
+### Example of interacting with fixtures
+
+Fixtures are used for storing test data; not only does it mean that all test data is stored in one centralised place, it
+also allows Cypress to fetch it using the `cy.fixture()` function.
+
+```
+cy.fixture('my_data.json').then((data) => {
+  cy.get(`[role=option]:contains(${data.property})`).click()
+})
+```
+
+### `before()` & `beforeEach()`
+
+Sometimes there is code that should be ran at the start of the workflow, or before each test. `before()` is called at
+the start of the workflow before all tests, whereas `beforeEach()` is called before each individual test.
+
+```
+describe('My workflow', () => {
+
+  before(() => {
+    cy.log('This is run once')
+  })
+
+  beforeEach(() => {
+    cy.log('This will be run twice')
+  })
+
+  it('test 1', function() {
+    // Test stuff here
+  })
+
+  it('test 2', function() {
+    // Test stuff here
+  })
+
+})
+```
+
+### Sharing Context
+
+An important part of tests is being able to share values between them. Below is an example of setting a value inside our
+beforeEach call and then accessing it inside a test.
+
+```
+beforeEach(() => {
+  cy.get('button').invoke('text').as('text')
+})
+
+it('has access to text', function () {
+  this.text // is now available
+})
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
