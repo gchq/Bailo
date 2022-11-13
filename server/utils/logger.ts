@@ -113,6 +113,11 @@ class Writer {
 
 class MongoWriter {
   async write(data: any) {
+    // sometimes we are unable to write log messages to the database
+    if (data.log === false) {
+      return
+    }
+
     const log = new LogModel(data)
     await log.save()
   }

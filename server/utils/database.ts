@@ -9,36 +9,23 @@ type ConnectionOptions = {
   useCreateIndex: boolean
 }
 
-// singleton connection instance across the whole application
-let connection: Promise<typeof mongoose> | undefined
-
 export async function connectToMongoose() {
-  if (connection !== undefined) {
-    return connection
-  }
-
-  if (process.env.NODE_ENV === 'test') {
-    return mongoose
+  // is it already connected
+  if (Number(mongoose.connection.readyState) === 1) {
+    return
   }
 
   try {
-    connection = mongoose.connect(
-      await config.get('mongo.uri'),
-      config.get<ConnectionOptions>('mongo.connectionOptions')
-    )
-
-    await connection
+    await mongoose.connect(await config.get('mongo.uri'), config.get<ConnectionOptions>('mongo.connectionOptions'))
 
     logger.info('Connected to Mongoose')
   } catch (error) {
     logger.error({ error }, 'Error')
     throw error
   }
-
-  return connection
 }
 
 export async function disconnectFromMongoose() {
   await mongoose.disconnect()
-  logger.info('Disconnected from Mongoose')
+  logger.info({ log: false }, 'Disconnected from Mongoose')
 }

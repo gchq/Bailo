@@ -59,8 +59,8 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
 
 describe('End to end test', () => {
   beforeAll(async () => {
-    await clearData()
     await connectToMongoose()
+    await clearData()
   }, 40000)
 
   test(
