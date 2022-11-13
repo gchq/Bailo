@@ -3,6 +3,7 @@ import express from 'express'
 import http from 'http'
 import next from 'next'
 import { createIndexes } from './models/Model'
+import { logCreateIndexes } from './models/Log'
 import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
@@ -116,6 +117,7 @@ export async function startServer() {
 
   // lazily create indexes for full text search
   createIndexes()
+  logCreateIndexes()
 
   // pull builder image
   pullBuilderImage()

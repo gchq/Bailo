@@ -14,7 +14,6 @@ import morgan from 'morgan'
 import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
-import mongoose from 'mongoose'
 import { StatusError } from '../../types/interfaces'
 import { serializedDeploymentFields } from '../services/deployment'
 import { serializedModelFields } from '../services/model'
@@ -23,7 +22,7 @@ import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
 import { ensurePathExists, getFilesInDir } from './filesystem'
 import { consoleError } from '../../utils/logging'
-import { connectToMongoose } from './database'
+import LogModel from '../models/Log'
 
 const appRoot = getAppRoot.toString()
 
@@ -113,35 +112,9 @@ class Writer {
 }
 
 class MongoWriter {
-  connected: Promise<typeof mongoose>
-
-  constructor() {
-    this.connected = connectToMongoose()
-    this.checkCollection()
-  }
-
-  async checkCollection() {
-    await this.connected
-
-    const { db } = mongoose.connection
-
-    const logsCollectionExists = await db.listCollections({ name: 'logs' }).hasNext()
-    if (!logsCollectionExists) await db.createCollection('logs')
-    const logs = db.collection('logs')
-
-    // We use a capped collection for logs to ensure high throughput
-    if (!(await logs.isCapped())) {
-      db.command({ convertToCapped: 'logs', size: 1024 * 1024 * 32 })
-    }
-
-    logs.createIndex({ '$**': 'text' }, { name: 'logs-text-index' })
-  }
-
-  async write(data) {
-    await this.connected
-
-    const { db } = mongoose.connection
-    await db.collection('logs').insertOne(data)
+  async write(data: any) {
+    const log = new LogModel(data)
+    await log.save()
   }
 }
 
