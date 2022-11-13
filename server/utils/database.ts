@@ -27,6 +27,10 @@ export async function runMigrations() {
   files.sort()
 
   for (const file of files) {
+    if (!file.endsWith('.js') || !file.endsWith('.ts')) {
+      continue
+    }
+
     if (!(await doesMigrationExist(file))) {
       logger.info({ file }, `Running migration ${file}`)
 
