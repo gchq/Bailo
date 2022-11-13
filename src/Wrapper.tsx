@@ -228,19 +228,16 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                         <DarkModeIcon fontSize='small' />
                       </ListItemIcon>
                       <Switch
+                        size='small'
                         checked={localStorage.getItem('dark_mode_enabled') === 'true'}
                         onChange={toggleDarkMode}
                         inputProps={{ 'aria-label': 'controlled' }}
-                        color='secondary'
                       />
                     </MenuItem>
                     <Link href='/settings' passHref color='inherit' underline='none'>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
-                          <Settings
-                            fontSize='small'
-                            sx={{ '&:hover': { color: theme.palette.mode === 'dark' ? '#4c4c4c' : '' } }}
-                          />
+                          <Settings fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                       </MenuItem>

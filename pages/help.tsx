@@ -1,7 +1,6 @@
 import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
 import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
 import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
-import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -16,8 +15,6 @@ import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()
-
-  const theme = useTheme()
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
@@ -35,10 +32,7 @@ export default function Help() {
             <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <BugReportIcon
-                    sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                  />
+                  <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Bug reports
                   </Typography>
@@ -61,10 +55,7 @@ export default function Help() {
             <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ArticleIcon
-                    sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                  />
+                  <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Documentation
                   </Typography>
@@ -84,10 +75,7 @@ export default function Help() {
             <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
-                  <ContactSupportIcon
-                    sx={{ pt: 2, fontSize: 75 }}
-                    color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                  />
+                  <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4'>
                     Get in touch
                   </Typography>

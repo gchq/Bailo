@@ -1,3 +1,7 @@
+---
+priority: 301
+---
+
 ### Contributing
 
 If you’re looking for an existing issue to help with, check out the
@@ -35,3 +39,7 @@ This is a list of steps you should make prior to making a pull request
 - `npm run build` (ensure code can be built)
 - `npm run test` (unit tests)
 - Manual testing of feature (in lieu of automated tests temporarily)
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
