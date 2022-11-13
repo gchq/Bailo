@@ -51,7 +51,6 @@ COPY --from=builder --chown=nextjs:0 /app/lib/p-mongo-queue ./dist/lib/p-mongo-q
 COPY --from=builder --chown=nextjs:0 /app/config ./config
 COPY --from=builder --chown=nextjs:0 /app/public ./public
 COPY --from=builder --chown=nextjs:0 /app/.next ./.next
-COPY --from=builder --chown=nextjs:0 /app/docs ./docs
 COPY --from=prod_deps --chown=nextjs:0 /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:0 /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:0 /s2i /s2i

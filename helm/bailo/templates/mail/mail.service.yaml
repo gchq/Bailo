@@ -1,3 +1,4 @@
+{{- if .Values.maildev.enabled }}
 ---
 apiVersion: v1
 kind: Service
@@ -7,13 +8,14 @@ metadata:
     name: mail
 spec:
   ports:
-    - port: {{ .Values.config.smtp.port }}
-      targetPort: {{ .Values.config.smtp.port }}
+    - port: 1080
+      targetPort: 1080
       protocol: TCP
       name: http
-    - port: 1025
-      targetPort: 1025
+    - port: {{ .Values.config.smtp.port }}
+      targetPort: {{ .Values.config.smtp.port }}
       protocol: TCP
       name: smtp
   selector:
     name: maildev
+{{- end }}

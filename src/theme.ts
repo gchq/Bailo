@@ -1,7 +1,15 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { createTheme } from '@mui/material/styles'
 
-// Create a theme instance.
+declare module '@mui/material/styles/createPalette' {
+  interface Palette {
+    container: PaletteColor
+  }
+  interface PaletteOptions {
+    container?: PaletteColorOptions
+  }
+}
+
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
@@ -14,10 +22,12 @@ export const lightTheme = createTheme({
     error: {
       main: red.A400,
     },
+    container: {
+      main: '#f3f1f1',
+    },
   },
 })
 
-// Create a theme instance.
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
@@ -42,9 +52,12 @@ export const darkTheme = createTheme({
     },
     action: {
       active: '#fff',
-      hover: '#fff',
-      focus: '#fff',
+      hover: 'rgba(106, 106, 106, 0.16)',
+      focus: 'rgba(106, 106, 106, 0.16)',
       selected: '#fff',
+    },
+    container: {
+      main: '#5a5a5a',
     },
   },
   components: {

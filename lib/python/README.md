@@ -166,7 +166,7 @@ client.get_my_models()
 
 ```
 
-There are example files for interacting direcly with the BAILO library at:
+There are example files for interacting directly with the BAILO library at:
 
 - [bailo-demo.ipynb](./examples/bailo-demo.ipynb) (no authentication)
 

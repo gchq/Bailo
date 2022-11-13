@@ -78,7 +78,9 @@ function MetadataDisplay({
     return schemaPart ? (
       <Box sx={{ p: 2 }}>
         {subHeading(schemaPart.title)}
-        <div>{printProperty(value, true, true, true, format)}</div>
+        <div>
+          <Typography style={{ whiteSpace: 'pre-line' }}>{printProperty(value, true, true, true, format)}</Typography>
+        </div>
       </Box>
     ) : null
   }
@@ -149,11 +151,7 @@ function MetadataDisplay({
       ) : null
     })
   }
-  return (
-    <Box sx={{ p: 4, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }}>
-      {printSections()}
-    </Box>
-  )
+  return <Box sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }}>{printSections()}</Box>
 }
 
 export default MetadataDisplay

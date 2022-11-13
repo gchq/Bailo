@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { ThemeProvider } from '@mui/system'
+import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { mockNextUseRouter } from '../../utils/testUtils'
 import { lightTheme } from '../theme'
