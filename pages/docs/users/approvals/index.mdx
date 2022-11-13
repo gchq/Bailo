@@ -44,4 +44,11 @@ retriggers reviews. Reviews can be rerequested at any point using the 'Reset App
   <Image src={bailoResetApprovals} />
 </Box>
 
+# Deployment Approvals
+
+Deployment approvals follow the same pattern as model approvals. The differences are as follows:
+
+- A deployment requires only one approval by the model owner, instead of two approvals from reviewers.
+- A deployment is only built _after_ it has been approved, instead of immediately.
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

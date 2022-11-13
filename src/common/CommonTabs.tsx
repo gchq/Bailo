@@ -2,7 +2,6 @@ import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { useTheme } from '@mui/material/styles'
 import React, { useEffect } from 'react'
 
 function a11yProps(index: any) {
@@ -23,8 +22,6 @@ const getTitle = (title: any, index: any) => {
 export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any }) {
   const [value, setValue] = React.useState(0)
 
-  const theme = useTheme()
-
   useEffect(() => {
     if (tabs.length === 1) {
       setValue(0)
@@ -38,13 +35,7 @@ export default function CommonTabs({ tabs, tabName }: { tabs: any; tabName: any 
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: 'white' }}>
       <AppBar position='static'>
-        <Tabs
-          indicatorColor='secondary'
-          textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-          value={value}
-          onChange={handleChange}
-          aria-label={`${tabName} tab bar`}
-        >
+        <Tabs value={value} onChange={handleChange} aria-label={`${tabName} tab bar`}>
           {tabs.map((tab: any, index: any) => (
             <Tab
               label={tabName !== undefined ? getTitle(tabName, index) : tab.name}

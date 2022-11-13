@@ -44,6 +44,13 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
+    if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
+      throw Forbidden(
+        { code: 'user_unauthorised' },
+        'User is not able to edit a model if it has already been approved.'
+      )
+    }
+
     version.metadata = metadata
 
     const [manager, reviewer] = await Promise.all([

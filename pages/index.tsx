@@ -70,20 +70,12 @@ export default function ExploreModels() {
       <Box>
         <Paper sx={{ py: 2, px: 4 }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              value={group}
-              onChange={handleGroupChange}
-              aria-label='basic tabs example'
-              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-              indicatorColor='secondary'
-            >
+            <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='user' />
               <Tab label='Favourites' value='favourites' />
             </Tabs>
           </Box>
-          <Box sx={{ marginBottom: 2 }} />
-
           {models &&
             models.map((model: Model, index: number) => (
               <Box key={model.uuid}>
@@ -95,24 +87,14 @@ export default function ExploreModels() {
                     {model.currentMetadata.highLevelDetails.name}
                   </MuiLink>
                 </Link>
-
                 <Typography variant='body1' sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.modelInASentence}
                 </Typography>
-
                 <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                   {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      key={`chip-${tag}`}
-                      label={tag}
-                      size='small'
-                      variant='outlined'
-                    />
+                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                   ))}
                 </Stack>
-
                 {index !== models.length - 1 && (
                   <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                 )}
