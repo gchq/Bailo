@@ -16,7 +16,7 @@ import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
-import { ModelUploadType, UploadModes } from '../../../types/interfaces'
+import { ModelUploadType, SeldonVersion, UploadModes } from '../../../types/interfaces'
 import { getPropertyFromEnumValue } from '../../utils/general'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
@@ -110,6 +110,12 @@ export const postUpload = [
         break
       default:
         throw BadReq({ uploadType }, 'Unknown upload type')
+    }
+
+    const { seldonVersion } = metadata.buildOptions
+    const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+    if (seldonVersionsFromConfig.filter((version) => version.image === seldonVersion).length === 0) {
+      throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
     }
 
     let mode: UploadModes

@@ -1,3 +1,4 @@
+import { SeldonVersion } from '@/types/interfaces'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import Box from '@mui/system/Box'
@@ -7,11 +8,11 @@ import { useGetUiConfig } from '../../data/uiConfig'
 export default function SeldonVersionSelector(props: any) {
   const { uiConfig } = useGetUiConfig()
 
-  const [seldonVersions, setSeldonVersions] = React.useState<Array<string>>([])
+  const [seldonVersions, setSeldonVersions] = React.useState<Array<SeldonVersion>>([])
 
   React.useEffect(() => {
     if (uiConfig !== undefined) {
-      setSeldonVersions(uiConfig.seldon.versions)
+      setSeldonVersions(uiConfig.seldonVersions)
     }
   }, [uiConfig])
 
@@ -32,8 +33,8 @@ export default function SeldonVersionSelector(props: any) {
       onChange={_onChange}
     >
       {seldonVersions.map((version: any) => (
-        <MenuItem key={`item-${version}`} value={version}>
-          {version}
+        <MenuItem key={`item-${version.name}`} value={version.image}>
+          {version.name}
         </MenuItem>
       ))}
     </Select>

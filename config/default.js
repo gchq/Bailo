@@ -71,9 +71,12 @@ module.exports = {
       showWarning: true,
       checkboxText: 'By checking here you confirm that the information is correct',
     },
-    seldon: {
-      versions: ['v1', 'v2'],
-    },
+    seldonVersions: [
+      {
+        name: 'seldonio - 1.10.0',
+        image: 'seldonio/seldon-core-s2i-python37:1.10.0',
+      },
+    ],
   },
 
   smtp: {

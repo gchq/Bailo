@@ -1,7 +1,8 @@
 import bodyParser from 'body-parser'
+import config from 'config'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes } from '../../models/Request'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalStates, SeldonVersion } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
@@ -49,6 +50,14 @@ export const putVersion = [
         { code: 'user_unauthorised' },
         'User is not able to edit a model if it has already been approved.'
       )
+    }
+
+    const { seldonVersion } = metadata.buildOptions
+    const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+    if (
+      seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length === 0
+    ) {
+      throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
     }
 
     version.metadata = metadata
