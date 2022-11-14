@@ -30,7 +30,7 @@ describe('Model favouriting', () => {
     })
   })
 
-  it('Is able to favourite and unfavourite a model', function () {
+  it('Is able to favourite and un-favourite a model', function () {
     cy.visit(this.modelUrl)
 
     cy.log('Select favourite')
