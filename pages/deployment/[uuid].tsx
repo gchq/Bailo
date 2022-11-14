@@ -82,7 +82,7 @@ function CodeLine({ line }) {
       }}
     >
       <Tooltip title='Copy to clipboard' arrow>
-        <Box sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', p: 1, borderRadius: 2 }}>
+        <Box sx={{ backgroundColor: theme.palette.container.main, p: 1, borderRadius: 2 }}>
           $ <b>{line}</b>
         </Box>
       </Tooltip>
@@ -297,13 +297,7 @@ export default function Deployment() {
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
-            <Tabs
-              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-              indicatorColor='secondary'
-              value={group}
-              onChange={handleTabChange}
-              aria-label='basic tabs example'
-            >
+            <Tabs value={group} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
               <Tab
@@ -368,9 +362,7 @@ export default function Deployment() {
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>
-          Pull from Docker
-        </DialogTitle>
+        <DialogTitle sx={{ backgroundColor: theme.palette.container.main }}>Pull from Docker</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ p: 2 }}>
             <Box>

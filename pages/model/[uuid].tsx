@@ -394,13 +394,7 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={group}
-            onChange={handleGroupChange}
-            aria-label='basic tabs example'
-          >
+          <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab
@@ -454,14 +448,12 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                      color='primary'
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                      color='primary'
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
                     />
@@ -478,12 +470,7 @@ function Model() {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip
-                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                            key={filteredVersion.version}
-                            label={filteredVersion.version}
-                          />
+                          <Chip color='primary' key={filteredVersion.version} label={filteredVersion.version} />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
