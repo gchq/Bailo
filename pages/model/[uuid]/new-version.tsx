@@ -132,7 +132,7 @@ function Upload() {
     setError(undefined)
 
     if (!splitSchema.steps.every((e) => e.isComplete(e))) {
-      return setError('Ensure all steps are complete before submitting')
+      return setError('Ensure that all steps are complete before submitting')
     }
 
     const data = getStepsData(splitSchema, true)
