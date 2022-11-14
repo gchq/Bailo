@@ -13,6 +13,7 @@ import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/terminal.css'
 import '../public/css/highlight.css'
+import { SnackbarProvider } from 'notistack'
 import createEmotionCache from '../src/createEmotionCache'
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -43,10 +44,12 @@ export default function MyApp(props: MyAppProps) {
       {mounted && (
         <ThemeProvider theme={themeModeValue.theme}>
           <ThemeModeContext.Provider value={themeModeValue}>
-            <DocsMenuContext.Provider value={docsMenuValue}>
-              <CssBaseline />
-              <Component {...pageProps} />
-            </DocsMenuContext.Provider>
+            <SnackbarProvider>
+              <DocsMenuContext.Provider value={docsMenuValue}>
+                <CssBaseline />
+                <Component {...pageProps} />
+              </DocsMenuContext.Provider>
+            </SnackbarProvider>
           </ThemeModeContext.Provider>
         </ThemeProvider>
       )}

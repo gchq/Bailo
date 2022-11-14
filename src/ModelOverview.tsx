@@ -12,7 +12,13 @@ function ModelOverview(props: any) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={4}>
-        <Box sx={{ backgroundColor: theme.palette.primary.main, color: 'white', borderRadius: 2 }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            borderRadius: 2,
+          }}
+        >
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model name</Typography>
             <Typography variant='body1'>{version.metadata.highLevelDetails.name}</Typography>
@@ -34,13 +40,10 @@ function ModelOverview(props: any) {
               {version?.metadata?.highLevelDetails?.tags !== undefined &&
                 version?.metadata?.highLevelDetails?.tags.map((tag: any) => (
                   <Chip
-                    sx={{
-                      color: theme.palette.mode === 'light' ? 'white' : 'primary',
-                      backgroundColor: 'primary',
-                    }}
                     key={`chip-${tag}`}
                     label={tag}
                     variant='outlined'
+                    sx={{ color: 'white', borderColor: 'white' }}
                   />
                 ))}
             </Box>

@@ -1,0 +1,207 @@
+---
+priority: 100200
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Creating and Uploading schemas
+
+Bailo makes use of the [RJSF](https://react-jsonschema-form.readthedocs.io/en/latest/) (react-jsonschema-form) library
+in order to dynamically create its upload & deployment forms. These forms can be constructed of various existing
+widgets, or even use custom widgets defined in Bailo.
+
+## Example / minimal schemas
+
+Bailo includes both an example schema for uploads and for deployments. You can find them in
+`server/scripts/example_schemas`. It is important to note that these schemas contain all of mandatory fields that the
+application needs in order to run. These fields are hard-coded in various places in the source code.
+
+## Create a schema
+
+### Simple questions
+
+A typical object inside the schema will look like this:
+
+```
+"firstName": {
+  "type": "string",
+  "title": "First name",
+  "default": "Chuck",
+  "description": "This is for your first name"
+}
+```
+
+The type property can be altered depending on what value you want the question to return. The title property will be
+displayed as the question itself, and the description will appear under the question to include any additional
+information that might help the user. Please note that if you do not include a title property, the library will use the
+name of the object (in this case firstName) instead.
+
+### Dates
+
+Dates can be added like this:
+
+```
+"date": {
+  "type": "string",
+  "title": "Date of birth",
+  "format": "date"
+}
+```
+
+### Sections
+
+When using Bailo you will see that the upload form is made up of a number of pages. Each page is a separate object
+inside the first "properties" property of the schema. For example:
+
+```
+"properties": {
+  "firstPage": {
+    "type": "object",
+    "title": "Page 1",
+    "properties": {
+      ...
+    }
+  },
+  "secondPage": {
+    "type": "object",
+    "title": "Page 2",
+    "properties": {
+      ...
+    }
+  }
+}
+```
+
+Creating sub-sections works identically to how we defined our pages above. If we take the first page of our example
+above, and then amend it so it looks like this:
+
+```
+"properties": {
+  "firstPage": {
+    "type": "object",
+    "title": "Page 1",
+    "properties": {
+      "sectionOne": {
+        "type": "object",
+        "title": "Section 1"
+        "properties": {
+          "questionOne": {
+            "type": "number",
+            "title": "Enter a number",
+          }
+        }
+      },
+      "sectionTwo": {
+        "type": "object",
+        "title": "Section 2"
+        "properties": {
+          "questionTwo": {
+            "type": "string",
+            "title": "Enter a string",
+          }
+        }
+      }
+    },
+  ...
+}
+```
+
+### Dependencies
+
+A dependency is useful when the answer to one question might warrant some additional information; for example, a boolean
+question might not need a detailed response if the answer is 'no', but if the user answer is 'yes' you might want to ask
+them for some additional details.
+
+To avoid validation errors, Bailo schema dependencies need to be handled slightly differently to the ones provided in
+the RJSF documentation. Here is an example of how we handle dependencies for Bailo schemas:
+
+```
+"myPage": {
+  "title": "Page 1",
+  "type": "object",
+  "properties": {
+    "questionOne": {
+      "type": "boolean",
+      "title": "True or false?",
+    },
+    "questionTwo": {
+      "title": "More information please!",
+      "type": "string",
+    }
+  },
+  "dependencies": {
+    "questionOne": {
+      "oneOf": [
+        {
+          "properties": {
+            "questionOne": {
+              "enum": [false],
+              "readOnly": false
+            },
+            "questionTwo": {
+              "readOnly": true
+            }
+          },
+          "required": ["questionOne"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "questionOne": {
+              "enum": [true],
+              "readOnly": false
+            },
+            "questionTwo": {
+              "readOnly": false
+            }
+          },
+          "required": ["questionOne", "questionTwo"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": ["questionOne"]
+}
+```
+
+Inside `dependencies` we have defined a case of only having one of two different situations. Firstly, if `questionOne`
+is set to `false`, then `questionTwo` will be set to read only, whereas if we set `questionOne` to `true` then
+`questionTwo` will not be set as read only. This method might seem slightly more convoluted than the documentation
+online, but it allows for answers to be changed without making the schema invalid. The current design of RJSF's
+dependencies works as so:
+
+- User selects `true` for `questionOne`
+- User enters data into `questionTwo`
+- User changes their mind and selects `false` for `questionOne`
+- User data for `questionTwo` remains in the form data, despite not being visible on the form itself
+
+This behaviour is so that any user data is retained in case the user wishes to select `true` for `questionOne` again.
+From a user perspective this nice as it means there is less chance of data being lost when changing answers, but it does
+have a knock-on affect whereby in certain situations it will make the schema fail validation. Our approach is set the
+additional questions to read only when they are not in use. The downside to this approach is that we potentially include
+unwanted additional data, but this can be removed by the user if this happens.
+
+## Uploading a schema
+
+There are two ways of uploading a schema to Bailo. The first is by manually adding it to the `schemas` collection in
+Mongo directly, or, by using the addUploadSchemas.ts / addDeploymentScript.ts scripts found within `server/scripts`.
+This process is not currently very graceful and requires some minor editing of the scripts themselves.
+
+First, you will need to change the import at the top of the file so that it points to your new schema, and not the
+minimal schema. Next, where we call `createSchema()` you will need to amend the supplied parameters of `name` and
+`reference` as Mongo will not accept multiple schemas with the same name or reference.
+
+Once this script has been changed, run:
+
+```
+npm run script -- addUploadSchema
+```
+
+Or for deployments:
+
+```
+npm run script -- addDeploymentSchema
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

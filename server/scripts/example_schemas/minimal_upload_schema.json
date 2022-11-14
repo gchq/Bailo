@@ -49,7 +49,8 @@
         "modelCardVersion": {
           "type": "string",
           "title": "Model version",
-          "maxLength": 100
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
         },
         "tags": {
           "title": "Descriptive tags for the model.",

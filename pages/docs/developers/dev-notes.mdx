@@ -1,3 +1,11 @@
+---
+priority: 304
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Developer Notes
+
 A quick list of things that developers think of when coding.
 
 - Never use `console.log` on the server, always use `logger` from utils.
@@ -5,3 +13,5 @@ A quick list of things that developers think of when coding.
 - Don't run `npm run build` and `npm run dev` simultaneously.
 - VS: Code TypeScript messing around? Try `Ctrl + Shift + P` -> `Typescript: Restart TS Server`
 - Never respond with status codes, instead `throw BadReq` and let the error handler sort it.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

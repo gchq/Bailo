@@ -30,11 +30,6 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   const { pathname, push } = useRouter()
   const { docsMenuContent, errorMessage } = useContext(DocsMenuContext)
 
-  const linkColour = useMemo(
-    () => (theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main),
-    [theme]
-  )
-
   const flattenPages = useCallback((array: DocsMenuContent) => {
     let result: DocsMenuContent = []
     array.forEach((item) => {
@@ -131,6 +126,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 backgroundColor: theme.palette.background.paper,
                 borderRight: `1px solid ${theme.palette.divider}`,
                 overflow: 'auto',
+                py: 2,
               }}
             >
               <StyledList>{docsMenu}</StyledList>
@@ -141,10 +137,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   maxWidth='lg'
                   sx={{
                     'a:link': {
-                      color: linkColour,
+                      color: theme.palette.primary.main,
                     },
                     'a:visited': {
-                      color: linkColour,
+                      color: theme.palette.primary.main,
                     },
                   }}
                 >

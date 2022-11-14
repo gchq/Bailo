@@ -71,6 +71,7 @@
     "next": "~12.1.6",
     "nodemailer": "^6.7.2",
     "nodemon": "^2.0.15",
+    "notistack": "^2.0.8",
     "open": "^8.4.0",
     "openshift-rest-client": "^7.0.0",
     "pako": "^2.0.4",
