@@ -79,14 +79,14 @@ export default function ExploreModels() {
             >
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='user' />
-              <Tab label='Favourites' value='favourites' />
+              <Tab label='Favourites' value='favourites' data-test='favouriteModelsTab' />
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 2 }} />
 
           {models &&
             models.map((model: Model, index: number) => (
-              <Box key={model.uuid}>
+              <Box key={model.uuid} data-test='modelListBox'>
                 <Link href={`/model/${model.uuid}`} passHref>
                   <MuiLink
                     variant='h5'
