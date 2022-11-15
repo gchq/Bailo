@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Production node_modules
-FROM node:16-alpine as prod_deps
+FROM node:16-alpine3.15 as prod_deps
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
@@ -24,7 +24,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --production
 
 # Production image, copy all the files and run next
-FROM node:16-alpine as runner
+FROM node:16-alpine3.15 as runner
 
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
