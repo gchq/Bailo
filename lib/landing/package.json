@@ -28,7 +28,8 @@
     "react-dom": "18.2.0",
     "rehype-highlight": "^6.0.0",
     "remark-frontmatter": "^4.0.1",
-    "remark-gfm": "^3.0.1"
+    "remark-gfm": "^3.0.1",
+    "shelljs": "^0.8.5"
   },
   "devDependencies": {
     "@types/node": "18.11.9",
