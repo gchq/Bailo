@@ -49,6 +49,6 @@ describe('Model favouriting', () => {
 
     cy.visit('/')
     cy.get('[data-test=favouriteModelsTab]').click({ force: true })
-    cy.get('[data-test=modelListBox]').contains(modelName).should('not.exist')
+    cy.get('body').contains(modelName).should('not.exist')
   })
 })

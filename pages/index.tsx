@@ -119,7 +119,7 @@ export default function ExploreModels() {
               </Box>
             ))}
 
-          {models?.length === 0 && <EmptyBlob text='No models here' />}
+          {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
         </Paper>
       </Box>
     </Wrapper>
