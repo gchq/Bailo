@@ -57,7 +57,8 @@ export const putVersion = [
       const { seldonVersion } = metadata.buildOptions
       const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
       if (
-        seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length === 0
+        seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length ===
+        0
       ) {
         throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
       }
