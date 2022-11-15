@@ -35,3 +35,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+src
+pages/docs
+public
