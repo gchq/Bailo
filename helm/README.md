@@ -45,6 +45,9 @@ called `local.yaml` in the `helm/bailo` folder.
 
 1. `helm upgrade --values ./local.yaml bailo .`
 
+#### Test Bailo infrastructure
+1. helm test bailo
+
 #### Removing Bailo
 
 1. `helm uninstall bailo`
