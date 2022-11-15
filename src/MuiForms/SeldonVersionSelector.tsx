@@ -1,11 +1,22 @@
 import { SeldonVersion } from '@/types/interfaces'
 import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
-import Box from '@mui/system/Box'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import * as React from 'react'
 import { useGetUiConfig } from '../../data/uiConfig'
 
-export default function SeldonVersionSelector(props: any) {
+export default function SeldonVersionSelector({
+  onChange,
+  value: currentValue,
+  required,
+  label,
+  readonly,
+}: {
+  onChange: (value: string) => void
+  value: string
+  required: boolean
+  label: string
+  readonly: boolean
+}) {
   const { uiConfig } = useGetUiConfig()
 
   const [seldonVersions, setSeldonVersions] = React.useState<Array<SeldonVersion>>([])
@@ -16,23 +27,13 @@ export default function SeldonVersionSelector(props: any) {
     }
   }, [uiConfig])
 
-  const { onChange, value: currentValue, required, label, readonly } = props
-
-  const _onChange = (_event: any, newValue: any) => {
-    onChange(newValue?.props.value)
+  const handleChange = (event: SelectChangeEvent<unknown>) => {
+    onChange(event.target.value as string)
   }
 
-  return readonly ? (
-    <Box />
-  ) : (
-    <Select
-      labelId='seldon-version-label'
-      id='seldon-version-selector'
-      value={currentValue || ''}
-      label={label + (required ? ' *' : '')}
-      onChange={_onChange}
-    >
-      {seldonVersions.map((version: any) => (
+  return readonly ? null : (
+    <Select value={currentValue || ''} label={label + (required ? ' *' : '')} onChange={handleChange}>
+      {seldonVersions.map((version: SeldonVersion) => (
         <MenuItem key={`item-${version.name}`} value={version.image}>
           {version.name}
         </MenuItem>
