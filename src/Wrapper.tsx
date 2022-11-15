@@ -179,7 +179,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           open={open}
           position='absolute'
           data-test='appBar'
-          sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }}
+          sx={{ ...pageTopStyling, top: 'unset', backgroundColor: theme.palette.primary.main }}
         >
           <Toolbar
             sx={{
