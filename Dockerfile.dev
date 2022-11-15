@@ -2,7 +2,7 @@ FROM node:16-alpine3.15
 
 ARG user_id=1001
 
-RUN [ ! -f /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
+RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 # We use 'RUN' instead of 'ADD' here due to odd caching issues where 'ADD' would still
 # download S2I, then check that it hasn't changed before accepting it was cached.
