@@ -108,6 +108,44 @@
           "default": "Code and binaries",
           "description": "Select the type of model upload that you want",
           "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
+        },
+        "seldonVersion": {
+          "title": "Seldon version",
+          "type": "string",
+          "widget": "seldonVersionSelector"
+        }
+      },
+      "dependencies": {
+        "uploadType": {
+          "oneOf": [
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Model card only", "Prebuilt Docker image"],
+                  "readOnly": false
+                },
+                "seldonVersion": {
+                  "readOnly": true
+                }
+              },
+              "required": ["uploadType"],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Code and binaries"],
+                  "readOnly": true
+                },
+                "seldonVersion": {
+                  "description": "Select a seldon version for your build.",
+                  "readOnly": false
+                }
+              },
+              "required": ["uploadType", "seldonVersion"],
+              "additionalProperties": false
+            }
+          ]
         }
       },
       "required": ["uploadType"]

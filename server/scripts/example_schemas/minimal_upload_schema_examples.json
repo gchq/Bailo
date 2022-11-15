@@ -13,7 +13,8 @@
       "manager": "user"
     },
     "buildOptions": {
-      "uploadType": "Code and binaries"
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
     }
   },
   {
@@ -30,7 +31,8 @@
       "manager": "user"
     },
     "buildOptions": {
-      "uploadType": "Code and binaries"
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
     }
   },
   {
@@ -47,7 +49,8 @@
       "manager": "user"
     },
     "buildOptions": {
-      "uploadType": "Code and binaries"
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
     }
   }
 ]
