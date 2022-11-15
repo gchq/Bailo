@@ -83,6 +83,13 @@ function checkTarFile(name: string, file: Array<MinioFile>) {
   }
 }
 
+function checkSeldonVersion(seldonVersion: string) {
+  const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+  if (seldonVersionsFromConfig.filter((version) => version.image === seldonVersion).length === 0) {
+    throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+  }
+}
+
 export const postUpload = [
   ensureUserRole('user'),
   upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }]),
@@ -101,6 +108,7 @@ export const postUpload = [
       case ModelUploadType.Zip:
         checkZipFile('binary', files.binary)
         checkZipFile('code', files.code)
+        checkSeldonVersion(metadata.buildOptions.seldonVersion)
         break
       case ModelUploadType.Docker:
         checkTarFile('docker', files.docker)
@@ -110,12 +118,6 @@ export const postUpload = [
         break
       default:
         throw BadReq({ uploadType }, 'Unknown upload type')
-    }
-
-    const { seldonVersion } = metadata.buildOptions
-    const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
-    if (seldonVersionsFromConfig.filter((version) => version.image === seldonVersion).length === 0) {
-      throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
     }
 
     let mode: UploadModes

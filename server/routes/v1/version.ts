@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import config from 'config'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes } from '../../models/Request'
-import { ApprovalStates, SeldonVersion } from '../../../types/interfaces'
+import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
@@ -36,6 +36,7 @@ export const putVersion = [
     const metadata = req.body
 
     const version = await findVersionById(req.user, id, { populate: true })
+    const uploadType = metadata.buildOptions.uploadType as ModelUploadType
 
     if (!version) {
       throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
@@ -52,12 +53,14 @@ export const putVersion = [
       )
     }
 
-    const { seldonVersion } = metadata.buildOptions
-    const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
-    if (
-      seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length === 0
-    ) {
-      throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+    if (uploadType === ModelUploadType.Zip) {
+      const { seldonVersion } = metadata.buildOptions
+      const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+      if (
+        seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length === 0
+      ) {
+        throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+      }
     }
 
     version.metadata = metadata
