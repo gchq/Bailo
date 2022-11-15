@@ -22,6 +22,7 @@
     "@next/font": "13.0.2",
     "@next/mdx": "^13.0.3",
     "dedent-js": "^1.0.1",
+    "gray-matter": "^4.0.3",
     "mdx-mermaid": "^1.3.2",
     "next": "13.0.2",
     "react": "18.2.0",
