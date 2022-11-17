@@ -14,6 +14,7 @@ import getLogLevelLabel from '@/utils/getLogLevelLabel'
 import { timeDifference } from '@/utils/dateUtils'
 import BuildOrRequestLogDetails from '@/src/LogTree/BuildOrRequestLogDetails'
 import { LogFilters } from '@/src/FilterMenu/FilterMenu'
+import { useTheme, darken } from '@mui/material/styles'
 import { useGetAppLogs } from '../../data/admin'
 import { LogEntry, LogLevel, LogType, UiConfig } from '../../types/interfaces'
 
@@ -40,6 +41,7 @@ type ChildLogDetailsProps = {
 export default function ChildLogDetails({ uiConfig, log, type, indent, query }: ChildLogDetailsProps): ReactElement {
   const [isExpanded, setIsExpanded] = useState(false)
   const [shouldFetch, setShouldFetch] = useState(false)
+  const theme = useTheme()
 
   const buildId = useMemo(
     () => (type === LogType.Build && typeof log.buildId === 'string' ? log.buildId : undefined),
@@ -172,23 +174,27 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
   const currentDate = new Date(Date.now())
 
   return (
-    <>
-      <Grid container justifyContent='space-between' alignItems='center'>
-        <Stack direction='row' alignItems='center' gap={1} sx={{ ml: indent * 6 }}>
-          {icon}
-          {statusChip}
-          <Typography sx={{ p: 0, mb: 0 }} variant='body1' component='p'>
-            {message}
-          </Typography>
-        </Stack>
-        <Stack direction='row' alignItems='center' gap={1}>
-          <Tooltip arrow placement='left' title={log.time}>
-            <Typography sx={{ color: '#A9A9A9' }}>{timeDifference(currentDate, new Date(log.time))}</Typography>
-          </Tooltip>
-          {location}
+    <Grid container sx={{ mb: 1, '&:hover': { backgroundColor: darken(theme.palette.container.main, 0.1) } }}>
+      <Grid item xs={12}>
+        <Stack direction='row' alignItems='center' justifyContent='space-between'>
+          <Stack direction='row' alignItems='center' spacing={1} sx={{ ml: indent * 6 }}>
+            {icon}
+            {statusChip}
+            <Typography variant='body1' component='p'>
+              {message}
+            </Typography>
+          </Stack>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Tooltip arrow placement='left' title={log.time}>
+              <Typography sx={{ color: '#A9A9A9' }}>{timeDifference(currentDate, new Date(log.time))}</Typography>
+            </Tooltip>
+            {location}
+          </Stack>
         </Stack>
       </Grid>
-      {expansion}
-    </>
+      <Grid item xs={12}>
+        {expansion}
+      </Grid>
+    </Grid>
   )
 }
