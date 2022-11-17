@@ -12,9 +12,13 @@ import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { logCommand } from './build'
 
+interface GetSeldonDockerfileProps {
+  seldonDockerfile: string
+}
+
 class GetSeldonDockerfile extends BuildStep {
-  constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
-    super(logger, opts)
+  constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: GetSeldonDockerfileProps) {
+    super(logger, opts, props)
 
     this.opts.retryable = true
   }
@@ -52,7 +56,7 @@ class GetSeldonDockerfile extends BuildStep {
     await mkdir(buildDir)
     state.buildDir = buildDir
 
-    const builder = config.get('s2i.builderImage')
+    const builder = this.props.seldonDockerfile
     const builderScriptsUrl = '/s2i/bin'
 
     const dockerfilePath = join(buildDir, 'Dockerfile')
@@ -81,5 +85,5 @@ class GetSeldonDockerfile extends BuildStep {
 }
 
 export default function getSeldonDockerfile(opts: Partial<BuildOpts> = {}) {
-  return (logger: BuildLogger) => new GetSeldonDockerfile(logger, opts)
+  return (logger: BuildLogger, props: GetSeldonDockerfileProps) => new GetSeldonDockerfile(logger, opts, props)
 }

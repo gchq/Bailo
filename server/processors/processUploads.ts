@@ -46,7 +46,12 @@ export default async function processUploads() {
             },
           },
           { construct: extractFiles() },
-          { construct: getSeldonDockerfile() },
+          {
+            construct: getSeldonDockerfile(),
+            props: {
+              seldonDockerfile: version.metadata.buildOptions.seldonVersion,
+            },
+          },
         ])
 
         if (config.get('build.environment') === 'openshift') {

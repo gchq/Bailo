@@ -1,0 +1,64 @@
+---
+priority: 3200
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Unit Testing
+
+Bailo makes use of the [Jest](https://jestjs.io/) library for unit testing. It is popular, robust and widely documented.
+
+## File structure
+
+Instead of using a dedicated testing directory, all unit tests should go in the same directory as the component that is
+being tested. File names should also correspond to their associated component, with the word 'spec' added before the
+file extension. For example, if you have a component called 'HelloWorld.tsx', its unit test would be
+'HelloWorld.spec.tsx'.
+
+## Running the tests
+
+In order to check that your tests work locally, you can run the following command:
+
+```
+npm run test
+```
+
+Or if you would like to test a specific component:
+
+```
+npm run test /path/to/MyComponent.spec.tsx
+```
+
+## Examples
+
+Below is a very simple example of a unit test for a React component.
+
+```
+/**
+ * @jest-environment jsdom
+ */
+
+import { render, screen, waitFor } from '@testing-library/react'
+import EmptyBlob from './EmptyBlob'
+
+describe('EmptyBlob', () => {
+  it('renders an EmptyBlob component with the text of string', async () => {
+    render(<EmptyBlob text='string' />)
+    await waitFor(async () => {
+      expect(await screen.findByText('string')).not.toBeUndefined()
+    })
+  })
+})
+```
+
+In the above example we describe which component is being tested and then state the nature of an individual test, in
+this case, checking whether it has rendered or not. It is important that the comment at the top of the test is kept in
+as this is used for Jest to run tests in the Node test environment.
+
+The aptly named `render()` function is called to render the component that needs to be tested (in this case,
+EmptyBlob.tsx), from there we can make use of `screen` to find aspects of the rendered component and test for their
+existence and / or displayed properties. When rendering components it is vital that any providers or wrappers that the
+component relies on will need to surround the component being tested, just as if it were to be rendered in the
+application itself.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
