@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:16-alpine3.15
 
 ARG user_id=1001
 

@@ -1,0 +1,38 @@
+# Test limited to infrastructure/Pods running with expected listening ports
+# Application test is done seperately
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bailo-test-script
+data:
+  testconn.sh: |-
+    nc -vz bailo {{ .Values.service.port }}
+    nc -vz mail {{ .Values.config.smtp.port }}
+    nc -vz bailo-minio {{ .Values.minio.service.ports.api }}
+    nc -vz bailo-mongodb {{ .Values.mongodb.service.port }}
+    nc -vz nginxauth {{ .Values.nginxAuth.port }}
+    nc -vz registry {{ .Values.registry.port }}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "bailo-test"
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: bailo-test
+      image: busybox
+      command: ['/bin/sh']
+      args: [ '-c', '/scripts/testconn.sh' ]
+      volumeMounts:
+        - name: bailo-test-script
+          mountPath: /scripts
+  restartPolicy: Never
+  volumes:
+    - name: bailo-test-script
+      configMap:
+        name: bailo-test-script
+        defaultMode: 0777
