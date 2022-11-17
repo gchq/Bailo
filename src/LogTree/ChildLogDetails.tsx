@@ -180,9 +180,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
           <Stack direction='row' alignItems='center' spacing={1} sx={{ ml: indent * 6 }}>
             {icon}
             {statusChip}
-            <Typography variant='body1' component='p'>
-              {message}
-            </Typography>
+            <Typography component='p'>{message}</Typography>
           </Stack>
           <Stack direction='row' alignItems='center' spacing={1}>
             <Tooltip arrow placement='left' title={log.time}>
