@@ -1,0 +1,32 @@
+---
+priority: 1100
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+import Image from 'next/image'
+import Box from '@mui/material/Box'
+
+import bailoMMDiagram from '../../../../public/mm-diagram.png'
+
+# Logical Project Flow
+
+{/* TODO: fix to use improved theme when available */}
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }} backgroundColor='whitesmoke'>
+  <Image src={bailoMMDiagram} />
+</Box>
+
+1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
+   `pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
+2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./data`. Each one exposes variables
+   to specify if it is loading, errored, data, etc.
+3. Requests to the backend get routed through [express](https://expressjs.com/) within `server/index.ts`. Each route is
+   an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
+4. Routes interact with the database via `mongoose`, which stores models in `./server/models`.
+
+Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are
+posted to a `mongodb` queue and processed by handlers in the `server/processors` folder. Mongodb queues are handled
+invisibly by `p-mongo-queue` (`server/utils/queues.ts`).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

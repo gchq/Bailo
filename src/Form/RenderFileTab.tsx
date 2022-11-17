@@ -32,18 +32,14 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   return (
     <Grid container justifyContent='center'>
       {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip && (
-        <Stack direction='row' spacing={2} sx={{ p: 3 }}>
+        <Stack direction='row' spacing={3} sx={{ p: 3 }} alignItems='center'>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography sx={{ p: 1 }} variant='h5'>
-              Upload a code file (.zip)
-            </Typography>
+            <Typography variant='h5'>Upload a code file (.zip)</Typography>
             <FileInput label='Select Code' onChange={handleCodeChange} file={code} accepts='.zip' />
           </Box>
           <Divider orientation='vertical' flexItem />
           <Box sx={{ textAlign: 'center' }}>
-            <Typography sx={{ p: 1 }} variant='h5'>
-              Upload a binary file (.zip)
-            </Typography>
+            <Typography variant='h5'>Upload a binary file (.zip)</Typography>
             <FileInput label='Select Binary' onChange={handleBinaryChange} file={binary} accepts='.zip' />
           </Box>
         </Stack>

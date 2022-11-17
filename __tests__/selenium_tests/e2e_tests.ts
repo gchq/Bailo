@@ -324,7 +324,7 @@ describe('End to end test', () => {
       logger.info('quitting driver')
       await driver.quit()
     }
-  }, 25000)
+  }, 30000)
 
   test('test submit deployment for model', async () => {
     logger.info('getting selenium driver')

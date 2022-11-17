@@ -56,7 +56,16 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema, {}, [], cModel.currentMetadata)
+    const steps = getStepsFromSchema(
+      cSchema,
+      {
+        buildOptions: {
+          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+        },
+      },
+      [],
+      cModel.currentMetadata
+    )
 
     steps.push(
       createStep({
@@ -123,7 +132,7 @@ function Upload() {
     setError(undefined)
 
     if (!splitSchema.steps.every((e) => e.isComplete(e))) {
-      return setError('Ensure all steps are complete before submitting')
+      return setError('Ensure that all steps are complete before submitting')
     }
 
     const data = getStepsData(splitSchema, true)
@@ -142,7 +151,7 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
+    form.append('docker', data.files.docker)
     delete data.files
 
     form.append('metadata', JSON.stringify(data))

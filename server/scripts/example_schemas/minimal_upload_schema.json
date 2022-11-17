@@ -49,7 +49,8 @@
         "modelCardVersion": {
           "type": "string",
           "title": "Model version",
-          "maxLength": 100
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
         },
         "tags": {
           "title": "Descriptive tags for the model.",
@@ -101,17 +102,50 @@
       "description": "Optional build options for a model",
       "type": "object",
       "properties": {
-        "exportRawModel": {
-          "title": "Export raw models",
-          "description": "If enabled, allow raw uploaded model files to be downloaded by deployments.",
-          "type": "boolean"
-        },
         "uploadType": {
           "type": "string",
           "title": "Upload type",
           "default": "Code and binaries",
           "description": "Select the type of model upload that you want",
           "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
+        },
+        "seldonVersion": {
+          "title": "Seldon version",
+          "type": "string",
+          "widget": "seldonVersionSelector"
+        }
+      },
+      "dependencies": {
+        "uploadType": {
+          "oneOf": [
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Model card only", "Prebuilt Docker image"],
+                  "readOnly": false
+                },
+                "seldonVersion": {
+                  "readOnly": true
+                }
+              },
+              "required": ["uploadType"],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "uploadType": {
+                  "enum": ["Code and binaries"],
+                  "readOnly": true
+                },
+                "seldonVersion": {
+                  "description": "Select a seldon version for your build.",
+                  "readOnly": false
+                }
+              },
+              "required": ["uploadType", "seldonVersion"],
+              "additionalProperties": false
+            }
+          ]
         }
       },
       "required": ["uploadType"]

@@ -27,7 +27,6 @@ from .utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
-    ModelFileExportNotAllowed,
     UnconnectedClient,
 )
 from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
@@ -199,16 +198,12 @@ class Client:
             overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
         Raises:
-            ModelFileExportNotAllowed: Model files are not exportable for this model.
             InvalidFileRequested: Invalid file type - must be 'code' or 'binary'
             FileExistsError: File already exists at filepath. Overwrite must be specified to overwrite.
 
         Returns:
             str: Response status code
         """
-
-        if not self.__allow_exports(deployment_uuid):
-            raise ModelFileExportNotAllowed("Files are not exportable for this model")
 
         if not file_type in ["code", "binary"]:
             raise InvalidFileRequested(
@@ -224,20 +219,6 @@ class Client:
             f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
             output_dir=output_dir,
         )
-
-    def __allow_exports(self, deployment_uuid: str):
-        """Check whether the model files associated with a deployment are allowed to be exported
-
-        Args:
-            deployment_uuid (str): UUID of the delpoyment
-
-        Returns:
-            bool: True is model is exportable
-        """
-        model_uuid = self.get_deployment_by_uuid(deployment_uuid)["model"]["uuid"]
-        model_card = self.get_model_card(model_uuid=model_uuid)
-
-        return model_card["currentMetadata"]["buildOptions"]["exportRawModel"]
 
     @handle_reconnect
     def get_deployment_by_uuid(self, deployment_uuid: str):

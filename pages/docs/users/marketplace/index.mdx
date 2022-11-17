@@ -1,0 +1,21 @@
+---
+priority: 4000
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+import Image from 'next/image'
+import Box from '@mui/material/Box'
+import bailoMarketplaceIcon from '../../../../public/docs/bailo_marketplace_icon.png'
+
+## Marketplace
+
+The Marketplace is the default landing page when you access Bailo. You can return to it from any other location in Bailo
+by clicking the Marketplace icon:
+
+<Box sx={{ maxWidth: '250px', margin: 'auto' }}>
+  <Image src={bailoMarketplaceIcon} />
+</Box>
+
+Models in Bailo are viewable in the Marketplace, with a search bar in the top-right to filter the list.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
