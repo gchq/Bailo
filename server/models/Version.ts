@@ -4,12 +4,6 @@ import { approvalStateOptions, ApprovalStates, DateString } from '../../types/in
 import { ModelDoc } from './Model'
 import logger from '../utils/logger'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function doNotUse() {
-  // I'm lost on why this is required.
-  logger.info('Code does not work without this log')
-}
-
 export interface Version {
   model: ModelDoc | Types.ObjectId
   version: string
@@ -65,6 +59,7 @@ const VersionSchema = new Schema<Version>(
 VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
 
 VersionSchema.methods.log = async function log(level: string, msg: string) {
+  logger[level]({ versionId: this._id }, msg)
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await VersionModel.findOneAndUpdate({ _id: this._id }, { $push: { logs: { timestamp: new Date(), level, msg } } })
 }
