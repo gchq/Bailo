@@ -64,7 +64,7 @@ export const getApplicationLogs = [
     const level = parseInt(parseString('level', req.query.level) || '0', 10)
 
     if (Number.isNaN(level)) {
-      throw BadReq({ level: req.query.level }, 'Level cannot be passed as number')
+      throw BadReq({ level: req.query.level }, 'Level cannot be parsed as a number')
     }
 
     const filter = parseQueryArray('filter', req.query.filter)
@@ -98,7 +98,7 @@ export const getItemLogs = [
     const level = parseInt(parseString('level', req.query.level) || '0', 10)
 
     if (Number.isNaN(level)) {
-      throw BadReq({ level: req.query.level }, 'Level cannot be passed as number')
+      throw BadReq({ level: req.query.level }, 'Level cannot be parsed as a number')
     }
 
     const search = parseString('search', req.query.search)
