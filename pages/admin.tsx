@@ -23,7 +23,6 @@ export default function Admin(): ReactElement {
 
   return (
     <Wrapper title='Admin' page='admin'>
-      {/* TODO me - This dodgy height is probably causing the scrolling issue */}
       <Box display='flex' width='100%' height='calc(100vh - 196px)'>
         <Box flex={1} height='100%' overflow='auto'>
           <Box
