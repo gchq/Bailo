@@ -132,14 +132,17 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
             <Grid item xs={12} md={6} lg={7}>
               {type === 'Upload' && (
                 <>
-                  <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                    >
-                      {requestObj.version?.metadata?.highLevelDetails?.name}
-                    </MuiLink>
-                  </Link>
+                  <Stack direction='row' spacing={2} alignItems='center'>
+                    <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
+                      <MuiLink
+                        variant='h5'
+                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                      >
+                        {requestObj.version?.metadata?.highLevelDetails?.name}
+                      </MuiLink>
+                    </Link>
+                    <Box>Version: {requestObj.version?.version}</Box>
+                  </Stack>
                   <Stack direction='row' spacing={2}>
                     <Chip color='primary' label={requestObj.approvalType} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
