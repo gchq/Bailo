@@ -1,5 +1,3 @@
-import Docker from 'dockerode'
-import { runCommand } from '../utils/build'
 import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
 import getUuidFromUrl from '../utils/getUuidFromUrl'
 
@@ -104,7 +102,7 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=submitButton]').click()
 
     cy.log('Checking URL has been updated')
-    cy.fixture('deployment.json').then((deploymentMetadata) => {
+     cy.fixture('deployment.json').then((deploymentMetadata) => {
       cy.url({ timeout: 10000 })
         .as('deploymentUrl')
         .should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
@@ -124,7 +122,7 @@ describe('Model with code and binary files', () => {
 
           cy.log('Checking deployment has been approved')
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
-
+     
           cy.log('Checking model runs as expected')
           cy.get('[data-test=userMenuButton]').click()
 
@@ -133,73 +131,21 @@ describe('Model with code and binary files', () => {
           cy.url().should('contain', '/settings')
 
           cy.log('Getting docker password')
-          cy.get('[data-test=showTokenButton]').click()
-          cy.get('[data-test=dockerPassword]').invoke('text').as('dockerPassword')
+          cy.get('[data-test=showTokenButton]').click().wait(2000)
+          cy.get('[data-test=dockerPassword]').invoke('text').then((dockerPassword) => {
+            const imageName = `${BAILO_REGISTRY}/user/${modelUuid}:1`
 
-          cy.log('Authenticating to docker')
-          const docker = new Docker()
-          const auth = {
-            username: 'user',
-            password: this.dockerPassword,
-          }
-          const imageName = `${BAILO_REGISTRY}/user/${modelUuid}:1`
-
-          // await runCommand(
-          //   `docker login ${BAILO_REGISTRY} -u ${auth.username} -p ${auth.password}`,
-          //   // logger.debug.bind(logger),
-          //   // logger.error.bind(logger),
-          //   { silentErrors: true }
-          // )
-
-          // cy.log('Pulling container')
-          // await runCommand(
-          //   `docker pull ${imageName}`,
-          //   // logger.debug.bind(logger),
-          //   // logger.error.bind(logger),
-          //   { silentErrors: true }
-          // )
-
-    //       cy.log('Setting up container')
-    //       const container = await docker.createContainer({
-    //         Image: imageName,
-    //         AttachStdin: false,
-    //         AttachStdout: false,
-    //         AttachStderr: false,
-    //         Tty: false,
-    //         OpenStdin: false,
-    //         StdinOnce: false,
-    //         ExposedPorts: {
-    //           '5000/tcp': {},
-    //           '9000/tcp': {},
-    //         },
-    //         PortBindings: {
-    //           '9000/tcp': [
-    //             {
-    //               HostPort: '9999',
-    //               HostIp: '',
-    //             },
-    //           ],
-    //         },
-    //       })
-
-    //       cy.log('Starting container')
-    //       await container.start()
-    //       // TODO me - might have to wait here
-    //       // Can we use cy.intercept and cy.wait to know when to stop waiting?
-
-    //       cy.log('Making request to container')
-    //       cy.request('http://localhost:9999/predict', {
-    //         jsonData: { data: ['should be returned backwards'] },
-    //       }).then(async (response: any) => {
-    //         expect(response.status).to.equal(200)
-    //         expect(response.data.data.ndarray[0]).to.equal('sdrawkcab denruter eb dluohs')
-
-    //         cy.log('stopping container')
-    //         await container.stop()
-
-    //         cy.log('removing container')
-    //         await container.remove()
-    //       })
+            cy.exec(`docker login ${BAILO_REGISTRY} -u ${'user'} -p ${dockerPassword}`)
+            cy.exec(`docker pull ${imageName}`)
+            cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`) 
+            cy.wait(5000)
+            cy.request('POST', 'http://localhost:9999/predict', {jsonData: { data: ['should be returned backwards'] }}).then(
+              (response) => {
+                expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
+              }
+            )
+            cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`) 
+          })
         })
     })
   })
