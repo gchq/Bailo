@@ -134,10 +134,9 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
               {type === 'Upload' && (
                 <>
                   <Stack
-                    direction='row'
-                    sx={{ flexWrap: 'wrap' }}
-                    spacing={2}
-                    alignItems='center'
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={{ xs: 0, sm: 2 }}
+                    alignItems={{ xs: 'left', sm: 'center' }}
                     justifyContent='flex-start'
                   >
                     <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
