@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import { flexbox } from '@mui/system'
 import Grid from '@mui/material/Grid'
 import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
@@ -132,7 +133,13 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
             <Grid item xs={12} md={6} lg={7}>
               {type === 'Upload' && (
                 <>
-                  <Stack direction='row' spacing={2} alignItems='center'>
+                  <Stack
+                    direction='row'
+                    sx={{ flexWrap: 'wrap' }}
+                    spacing={2}
+                    alignItems='center'
+                    justifyContent='flex-start'
+                  >
                     <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
                       <MuiLink
                         variant='h5'
@@ -141,7 +148,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                         {requestObj.version?.metadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
-                    <Box>Version: {requestObj.version?.version}</Box>
+                    <div>Version: {requestObj.version?.version}</div>
                   </Stack>
                   <Stack direction='row' spacing={2}>
                     <Chip color='primary' label={requestObj.approvalType} size='small' />
