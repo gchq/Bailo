@@ -136,6 +136,11 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                   <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={{ xs: 0, sm: 2 }}
+                    sx={{
+                      [theme.breakpoints.down('xs')]: {
+                        mb: 1,
+                      },
+                    }}
                     alignItems={{ xs: 'left', sm: 'center' }}
                     justifyContent='flex-start'
                   >
