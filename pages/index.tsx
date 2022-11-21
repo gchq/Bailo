@@ -69,7 +69,7 @@ export default function ExploreModels() {
       </Paper>
       <Box>
         <Paper sx={{ py: 2, px: 4 }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='user' />
