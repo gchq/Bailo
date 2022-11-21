@@ -12,8 +12,10 @@ import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import Link from './Link'
-import Image from 'next/image'
+import Image from 'next/legacy/image'
 import imageLoader from '@/components/imageLoader'
+
+import bailoLogo from '../public/Bailo-logo-reverse.png'
 
 const pages = [
   { name: 'Home', path: '/' },
@@ -74,7 +76,7 @@ export default function NavBar() {
             </Menu>
           </Box>
           <Link href='/'>
-            <Image loader={imageLoader} src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} />
+            <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={55} height={55} />
           </Link>
           <Link href='/'>
             <Typography
