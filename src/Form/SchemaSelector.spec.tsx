@@ -26,7 +26,7 @@ describe('SchemaSelector', () => {
     render(<SchemaSelector currentSchema={schema} schemas={schemas} setCurrentSchema={doNothing} />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Test Schema')).not.toBeUndefined()
+      expect(await screen.findByText('Test Schema')).not.toBeUndefined()
     })
   })
 })
