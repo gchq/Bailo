@@ -78,9 +78,6 @@ jobs:
       # Run Cypress integration tests
       - run: npm run cy:run
 
-      # Run Selenium integration tests
-      - run: HEADLESS=true npm run integration
-
       - name: Dump docker-compose logs
         if: always()
         run: docker-compose logs > logs/stack.log

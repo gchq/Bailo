@@ -1,5 +1,7 @@
 import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
 
+let modelUrl = ''
+
 describe('Model with model card only', () => {
   before(() => {
     cy.log('Navigate to Upload page and json tab')
@@ -22,17 +24,23 @@ describe('Model with model card only', () => {
       cy.log('Submitting model')
       cy.get('[data-test=warningCheckbox]').click()
       cy.get('[data-test=submitButton]').click()
-      cy.url().should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
+      cy.url({ timeout: 15000 })
+        .should('contain', `/model/${convertNameToUrlFormat(updatedMetadata.highLevelDetails.name)}`)
+        .then((url) => {
+          modelUrl = url
+        })
     })
   })
 
   it('Correctly displays a model card only view', () => {
+    cy.visit(modelUrl)
     cy.log('Checking for model card alert message')
     cy.get('[data-test=modelCardPageAlert]').contains('This model version was uploaded as just a model card')
     cy.get('[data-test=metadataDisplay]').contains('Minimal Model for Testing')
   })
 
   it('Can edit an existing model version', () => {
+    cy.visit(modelUrl)
     cy.log('Select edit version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
     cy.get('[data-test=editModelButton]').click({ force: true })

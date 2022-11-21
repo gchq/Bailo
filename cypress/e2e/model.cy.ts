@@ -1,14 +1,18 @@
 import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
 import getUuidFromUrl from '../utils/getUuidFromUrl'
 
-// TODO me - Use node-config variables for this. Figure out how to use node modules in cypress tests. By default only deps that run in the browser will work (at least tha†'s what a quick google suggests)
-const BAILO_REGISTRY = 'localhost:8080'
+const BASE_URL = Cypress.config('baseUrl')
 
 let modelUuid = ''
 let deploymentUuid = ''
+let containerUrl = ''
+let registryUrl = ''
 
 describe('Model with code and binary files', () => {
   before(() => {
+    registryUrl = BASE_URL.replace('http://', '')
+    containerUrl = BASE_URL.replace('8080', '9999')
+
     cy.log('Navigating to upload page')
     cy.visit('/upload')
 
@@ -52,7 +56,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > :last-child', { timeout: 20000 }).should(
+    cy.get('[data-test=terminalLog] > :last-child', { timeout: 40000 }).should(
       'contain',
       'Successfully completed build'
     )
@@ -102,7 +106,7 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=submitButton]').click()
 
     cy.log('Checking URL has been updated')
-     cy.fixture('deployment.json').then((deploymentMetadata) => {
+    cy.fixture('deployment.json').then((deploymentMetadata) => {
       cy.url({ timeout: 10000 })
         .as('deploymentUrl')
         .should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
@@ -122,7 +126,7 @@ describe('Model with code and binary files', () => {
 
           cy.log('Checking deployment has been approved')
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
-     
+
           cy.log('Checking model runs as expected')
           cy.get('[data-test=userMenuButton]').click()
 
@@ -132,20 +136,22 @@ describe('Model with code and binary files', () => {
 
           cy.log('Getting docker password')
           cy.get('[data-test=showTokenButton]').click().wait(2000)
-          cy.get('[data-test=dockerPassword]').invoke('text').then((dockerPassword) => {
-            const imageName = `${BAILO_REGISTRY}/user/${modelUuid}:1`
+          cy.get('[data-test=dockerPassword]')
+            .invoke('text')
+            .then((dockerPassword) => {
+              const imageName = `${registryUrl}/user/${modelUuid}:1`
 
-            cy.exec(`docker login ${BAILO_REGISTRY} -u ${'user'} -p ${dockerPassword}`)
-            cy.exec(`docker pull ${imageName}`)
-            cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`) 
-            cy.wait(5000)
-            cy.request('POST', 'http://localhost:9999/predict', {jsonData: { data: ['should be returned backwards'] }}).then(
-              (response) => {
+              cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
+              cy.exec(`docker pull ${imageName}`)
+              cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
+              cy.wait(5000)
+              cy.request('POST', `${containerUrl}/predict`, {
+                jsonData: { data: ['should be returned backwards'] },
+              }).then((response) => {
                 expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
-              }
-            )
-            cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`) 
-          })
+              })
+              cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`)
+            })
         })
     })
   })

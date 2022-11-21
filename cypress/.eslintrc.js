@@ -6,5 +6,6 @@ module.exports = {
   extends: ['plugin:cypress/recommended'],
   rules: {
     'func-names': 'off',
+    'cypress/no-unnecessary-waiting': 'off',
   },
 }
