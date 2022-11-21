@@ -10,8 +10,7 @@ let registryUrl = ''
 
 describe('Model with code and binary files', () => {
   before(() => {
-
-    if (BASE_URL !== null || BASE_URL !== '') {
+    if (BASE_URL) {
       registryUrl = BASE_URL.replace('http://', '')
       containerUrl = BASE_URL.replace('8080', '9999')
     }
