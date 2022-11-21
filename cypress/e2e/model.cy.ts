@@ -10,8 +10,11 @@ let registryUrl = ''
 
 describe('Model with code and binary files', () => {
   before(() => {
-    registryUrl = BASE_URL.replace('http://', '')
-    containerUrl = BASE_URL.replace('8080', '9999')
+
+    if (BASE_URL !== null || BASE_URL !== '') {
+      registryUrl = BASE_URL.replace('http://', '')
+      containerUrl = BASE_URL.replace('8080', '9999')
+    }
 
     cy.log('Navigating to upload page')
     cy.visit('/upload')
