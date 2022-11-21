@@ -137,7 +137,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={{ xs: 0, sm: 2 }}
                     sx={{
-                      [theme.breakpoints.down('xs')]: {
+                      [theme.breakpoints.down('sm')]: {
                         mb: 1,
                       },
                     }}
