@@ -130,19 +130,19 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} md={6} lg={7}>
+            <Grid item xs={12} md={6}>
               {type === 'Upload' && (
                 <>
                   <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={{ xs: 0, sm: 2 }}
+                    alignItems={{ xs: 'left', sm: 'center' }}
+                    justifyContent='flex-start'
                     sx={{
                       [theme.breakpoints.down('sm')]: {
                         mb: 1,
                       },
                     }}
-                    alignItems={{ xs: 'left', sm: 'center' }}
-                    justifyContent='flex-start'
                   >
                     <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
                       <MuiLink
