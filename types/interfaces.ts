@@ -109,6 +109,10 @@ export interface UiConfig {
     checkboxText: string
   }
 
+  development: {
+    logUrl: string
+  }
+
   seldonVersions: Array<SeldonVersion>
 }
 
@@ -194,3 +198,47 @@ export enum UploadModes {
 // Dates are in ISO 8601 format
 enum DateStringBrand {}
 export type DateString = string & DateStringBrand
+
+export enum LogLevel {
+  TRACE = 10,
+  DEBUG = 20,
+  INFO = 30,
+  WARN = 40,
+  ERROR = 50,
+  FATAL = 60,
+}
+
+export enum LogLevelLabel {
+  TRACE = 'trace',
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+  FATAL = 'fatal',
+}
+
+export interface LogEntry {
+  _id: string
+  name: string
+  hostname: string
+  pid: number
+
+  level: LogLevel
+
+  msg: string
+
+  time: string
+
+  src?: {
+    file: string
+    line: number
+  }
+
+  [x: string]: unknown
+}
+
+export enum LogType {
+  Build = 'build',
+  Request = 'request',
+  Misc = 'misc',
+}
