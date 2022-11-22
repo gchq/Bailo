@@ -42,6 +42,7 @@ describe('Model favouriting', () => {
     cy.get('[data-test=favouriteModelsTab]')
       .click({ force: true })
       .then(() => {
+        cy.wait(15000)
         cy.get('[data-test=modelListBox]').should('contain.text', modelName)
       })
 
