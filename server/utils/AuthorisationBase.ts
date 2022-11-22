@@ -9,11 +9,13 @@ export default class AuthorisationBase {
     const userId = req.get('x-userid')
     const email = req.get('x-email')
     const data = JSON.parse(req.get('x-user') ?? '{}')
+    const roles = JSON.parse(req.get('x-roles') ?? '["user"]')
 
     return {
       userId,
       email,
       data,
+      roles,
     }
   }
 

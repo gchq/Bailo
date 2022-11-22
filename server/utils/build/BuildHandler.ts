@@ -34,7 +34,7 @@ export class BuildHandler {
     const buildLogger = new BuildLogger(version, vlog)
     let state = {}
 
-    buildLogger.info({ buildId }, `=== Building ${buildId}\n`)
+    buildLogger.info({ buildId, code: 'starting_model_build' }, `=== Building ${buildId}\n`)
 
     for (const [i, { construct, props }] of Object.entries(this.steps)) {
       const step: BuildStep = construct(buildLogger, props)
