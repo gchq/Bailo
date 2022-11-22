@@ -39,12 +39,8 @@ describe('Model favouriting', () => {
 
     cy.visit('/')
     cy.get('[data-test=indexPageTabs]').should('contain.text', 'Favourites')
-    cy.get('[data-test=favouriteModelsTab]')
-      .click({ force: true })
-      .then(() => {
-        cy.wait(15000)
-        cy.get('[data-test=modelListBox]').should('contain.text', modelName)
-      })
+    cy.get('[data-test=favouriteModelsTab]').click({ force: true })
+    cy.get('[data-test=modelListBox]', { timeout: 30000 }).should('contain.text', modelName)
 
     cy.visit(this.modelUrl)
 
