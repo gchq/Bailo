@@ -55,7 +55,6 @@ COPY --from=prod_deps --chown=nextjs:0 /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:0 /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:0 /s2i /s2i
 COPY --from=builder --chown=nextjs:0 /app/pages ./page
-
 COPY --chown=nextjs:0 ./scripts/run_app_prod.sh ./scripts/run_app_prod.sh
 
 RUN chmod -R g=u /app
