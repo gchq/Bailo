@@ -38,10 +38,11 @@ describe('Model favouriting', () => {
     cy.get('[data-test=favouriteModelButton]').click({ force: true })
 
     cy.visit('/')
+    cy.get('[data-test=indexPageTabs]').should('contain.text', 'Favourites')
     cy.get('[data-test=favouriteModelsTab]')
       .click({ force: true })
       .then(() => {
-        cy.get('[data-test=modelListBox]').should('exist').contains(modelName)
+        cy.get('[data-test=modelListBox]').should('contain.text', modelName)
       })
 
     cy.visit(this.modelUrl)
