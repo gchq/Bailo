@@ -9,6 +9,7 @@ import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
+import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
@@ -175,12 +176,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
-        <AppBar
-          open={open}
-          position='absolute'
-          data-test='appBar'
-          sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }}
-        >
+        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -350,6 +346,22 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Support' />
               </ListItem>
             </Link>
+            {currentUser && currentUser.roles.includes('admin') && (
+              <Link passHref href='/admin'>
+                <ListItem button selected={page === 'admin'}>
+                  <ListItemIcon data-test='adminLink'>
+                    {!open ? (
+                      <Tooltip arrow title='Admin' placement='right'>
+                        <AdminIcon />
+                      </Tooltip>
+                    ) : (
+                      <AdminIcon />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText primary='Admin' />
+                </ListItem>
+              </Link>
+            )}
           </StyledList>
           <Divider />
         </Drawer>
@@ -371,7 +383,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
                   {children}
                 </Container>
-                <Copyright sx={{ pb: 2 }} />
+                <Copyright sx={{ mb: 2 }} />
               </>
             )}
           </Box>

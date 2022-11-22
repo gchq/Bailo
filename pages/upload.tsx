@@ -74,7 +74,16 @@ function Upload() {
       contacts: { uploader: user.id },
     }
 
-    const steps = getStepsFromSchema(currentSchema, {}, [], defaultState)
+    const steps = getStepsFromSchema(
+      currentSchema,
+      {
+        buildOptions: {
+          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+        },
+      },
+      [],
+      defaultState
+    )
 
     steps.push(
       createStep({

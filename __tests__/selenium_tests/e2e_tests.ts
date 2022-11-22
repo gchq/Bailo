@@ -3,6 +3,7 @@ import config from 'config'
 import Docker from 'dockerode'
 import fs from 'fs/promises'
 import { By, until, WebDriver } from 'selenium-webdriver'
+import { connectToMongoose, disconnectFromMongoose } from '../../server/utils/database'
 import Bailo from '../../lib/node'
 import { runCommand } from '../../server/utils/build/build'
 import logger from '../../server/utils/logger'
@@ -58,6 +59,7 @@ async function approveRequests(driver: WebDriver, expectedApprovals: number) {
 
 describe('End to end test', () => {
   beforeAll(async () => {
+    await connectToMongoose()
     await clearData()
   }, 40000)
 
@@ -518,4 +520,9 @@ describe('End to end test', () => {
       await driver.quit()
     }
   }, 20000)
+
+  afterAll(async () => {
+    await pause(250)
+    await disconnectFromMongoose()
+  }, 2000)
 })
