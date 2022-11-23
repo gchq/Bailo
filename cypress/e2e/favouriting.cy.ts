@@ -41,7 +41,7 @@ describe('Model favouriting', () => {
 
     cy.get('[data-test=indexPageTabs]').should('contain.text', 'Favourites')
     cy.get('[data-test=favouriteModelsTab]').click({ force: true })
-    cy.contains('[data-test=modelListBox]', modelName)
+    cy.contains('[data-test=modelListBox] > :first-child', modelName)
 
     cy.visit(this.modelUrl)
 
