@@ -129,7 +129,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={9}>
               {type === 'Upload' && (
                 <>
                   <Stack
