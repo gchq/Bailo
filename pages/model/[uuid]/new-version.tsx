@@ -42,7 +42,7 @@ function Upload() {
   const router = useRouter()
   const { uuid: modelUuid }: { uuid?: string } = router.query
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
   const { versions } = useGetModelVersions(modelUuid)
 
@@ -166,7 +166,10 @@ function Upload() {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
-      .then((res) => router.push(`/model/${res.data.uuid}`))
+      .then((res) => {
+        mutateModel()
+        router.push(`/model/${res.data.uuid}`)
+      })
       .catch((e) => {
         setModelUploading(false)
         setError(e.response.data.message)
