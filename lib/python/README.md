@@ -6,14 +6,14 @@
 
 ### Developers
 
-```
+```bash
 python3 -m pip install -r requirements.txt
 pre-commit install
 ```
 
 ### Users
 
-```
+```bash
 python3 -m pip install -e .
 ```
 
@@ -22,7 +22,7 @@ python3 -m pip install -e .
 > You may need to install some additional requirements for
 > [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
 >
-> ```
+> ```bash
 > sudo yum install gcc gmp python3-devel
 > ```
 
@@ -103,13 +103,13 @@ If authentication is not required you can use MockAuthentication()
 
 To run the tests, run the following from the top-level directory of the Bailo Client (Bailo/lib/python):
 
-```
+```bash
 make test
 ```
 
 To run the end-to-end tests:
 
-```
+```bash
 make e2e-test
 ```
 
@@ -119,7 +119,7 @@ It is recommended that you use the BAILO interface for interacting with the BAIL
 
 ### Using PKI
 
-```
+```python
 from bailoclient import Bailo
 
 bailo = Bailo(pki_p12='path/to/p12',
@@ -135,7 +135,7 @@ You will be prompted for your certificate password before you can connect.
 
 ### Using Cognito
 
-```
+```python
 from bailoclient import Bailo
 
 bailo = Bailo(cognito_user_pool_id="eu-west-2_xx1xxx1xx",
@@ -156,7 +156,7 @@ client.get_my_models()
 
 With a .env file configured you can create your bailo instance with no config.
 
-```
+```python
 from bailoclient import Bailo
 
 bailo = Bailo()
