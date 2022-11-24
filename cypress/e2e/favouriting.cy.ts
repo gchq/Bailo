@@ -42,7 +42,7 @@ describe('Model favouriting', () => {
     cy.get('[data-test=indexPageTabs]').should('contain.text', 'Favourites')
     cy.get('[data-test=favouriteModelsTab]').click({ force: true })
     // For some reason Cypress retries do not work here, using arbitrary wait as a temporary fix
-    cy.wait(5000)
+    cy.wait(10000)
     cy.contains('[data-test=modelListBox] > :first-child', modelName)
 
     cy.visit(this.modelUrl)
