@@ -38,7 +38,8 @@
     "node_modules",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "**/testUtils.ts"
+    "**/testUtils.ts",
+    "lib/landing"
   ],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
 }

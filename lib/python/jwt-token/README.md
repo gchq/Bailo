@@ -11,7 +11,7 @@ app_client_secret = the app client secret. This can be found on the same page ab
 
 How to use:
 
-```
+```bash
 python3 generate_jwt.py <username> <password> <app_client_id> <app_client_secret>
 ```
 

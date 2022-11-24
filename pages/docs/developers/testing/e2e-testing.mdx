@@ -28,7 +28,7 @@ The `fixtures` directory contains any common mocked data that might be required 
 
 In order to check that your tests work locally, you can run the following command:
 
-```
+```bash
 npm run cy:open
 ```
 
@@ -42,7 +42,7 @@ be taken (such as button clicks).
 
 #### MyComponent.tsx
 
-```
+```typescript
 ...
 <Button data-test='myButton'>Click me!</Button>
 ...
@@ -50,13 +50,11 @@ be taken (such as button clicks).
 
 #### my-workflow.cy.ts
 
-```
+```typescript
 describe('My workflow', () => {
-
-  it('test we can click the button', function() {
+  it('test we can click the button', function () {
     cy.get('[data-test=myButton]').click()
   })
-
 })
 ```
 
@@ -65,7 +63,7 @@ describe('My workflow', () => {
 Fixtures are used for storing test data; not only does it mean that all test data is stored in one centralised place, it
 also allows Cypress to fetch it using the `cy.fixture()` function.
 
-```
+```typescript
 cy.fixture('my_data.json').then((data) => {
   cy.get(`[role=option]:contains(${data.property})`).click()
 })
@@ -76,9 +74,8 @@ cy.fixture('my_data.json').then((data) => {
 Sometimes there is code that should be ran at the start of the workflow, or before each test. `before()` is called at
 the start of the workflow before all tests, whereas `beforeEach()` is called before each individual test.
 
-```
+```typescript
 describe('My workflow', () => {
-
   before(() => {
     cy.log('This is run once')
   })
@@ -87,14 +84,13 @@ describe('My workflow', () => {
     cy.log('This will be run twice')
   })
 
-  it('test 1', function() {
+  it('test 1', function () {
     // Test stuff here
   })
 
-  it('test 2', function() {
+  it('test 2', function () {
     // Test stuff here
   })
-
 })
 ```
 
@@ -103,7 +99,7 @@ describe('My workflow', () => {
 An important part of tests is being able to share values between them. Below is an example of setting a value inside our
 beforeEach call and then accessing it inside a test.
 
-```
+```typescript
 beforeEach(() => {
   cy.get('button').invoke('text').as('text')
 })

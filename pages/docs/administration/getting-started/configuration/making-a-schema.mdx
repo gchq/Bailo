@@ -22,7 +22,7 @@ application needs in order to run. These fields are hard-coded in various places
 
 A typical object inside the schema will look like this:
 
-```
+```json
 "firstName": {
   "type": "string",
   "title": "First name",
@@ -40,7 +40,7 @@ name of the object (in this case firstName) instead.
 
 Dates can be added like this:
 
-```
+```json
 "date": {
   "type": "string",
   "title": "Date of birth",
@@ -53,7 +53,7 @@ Dates can be added like this:
 When using Bailo you will see that the upload form is made up of a number of pages. Each page is a separate object
 inside the first "properties" property of the schema. For example:
 
-```
+```json
 "properties": {
   "firstPage": {
     "type": "object",
@@ -75,7 +75,7 @@ inside the first "properties" property of the schema. For example:
 Creating sub-sections works identically to how we defined our pages above. If we take the first page of our example
 above, and then amend it so it looks like this:
 
-```
+```json
 "properties": {
   "firstPage": {
     "type": "object",
@@ -115,7 +115,7 @@ them for some additional details.
 To avoid validation errors, Bailo schema dependencies need to be handled slightly differently to the ones provided in
 the RJSF documentation. Here is an example of how we handle dependencies for Bailo schemas:
 
-```
+```json
 "myPage": {
   "title": "Page 1",
   "type": "object",
@@ -194,13 +194,13 @@ minimal schema. Next, where we call `createSchema()` you will need to amend the 
 
 Once this script has been changed, run:
 
-```
+```bash
 npm run script -- addUploadSchema
 ```
 
 Or for deployments:
 
-```
+```bash
 npm run script -- addDeploymentSchema
 ```
 
