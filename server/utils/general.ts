@@ -8,9 +8,10 @@ export function getPropertyFromEnumValue<Enum extends { [key: string]: string | 
 ): string | undefined {
   const entries = Object.entries(t)
 
-  for (const [index, value] of entries) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for (const [_index, value] of entries) {
     if (value === key) {
-      return index
+      return value
     }
   }
 
