@@ -31,6 +31,8 @@ describe('Model favouriting', () => {
   })
 
   it('Is able to favourite and un-favourite a model', function () {
+    cy.intercept('GET', '/api/v1/models?type=favourites&filter=*').as('getFavourites')
+
     cy.visit(this.modelUrl)
 
     cy.log('Select favourite')
@@ -41,6 +43,7 @@ describe('Model favouriting', () => {
 
     cy.get('[data-test=indexPageTabs]').should('contain.text', 'Favourites')
     cy.get('[data-test=favouriteModelsTab]').click({ force: true })
+    cy.wait('@getFavourites')
     cy.contains('[data-test=modelListBox] > :first-child', modelName)
 
     cy.visit(this.modelUrl)
