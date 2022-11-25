@@ -213,7 +213,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             {headerTitle}
             {currentUser ? (
               <>
-                <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
+                <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
                   <UserAvatar username={currentUser.id} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
@@ -288,8 +288,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/upload' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'upload'}>
-                <ListItemIcon data-test='uploadModelLink'>
+              <ListItem button selected={page === 'upload'} data-test='uploadModelLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Upload Model' arrow placement='right'>
                       <FileUploadIcon />
@@ -302,8 +302,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/review' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'review'}>
-                <ListItemIcon data-test='reviewLink'>
+              <ListItem button selected={page === 'review'} data-test='reviewLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
                       <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
@@ -318,8 +318,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Divider />
-            <Link href='/docs/api' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'api'}>
+            <Link href='/docs/api' passHref>
+              <ListItem button selected={page === 'api'} data-test='apiDocsLink'>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='API' arrow placement='right'>
@@ -332,9 +332,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='API' />
               </ListItem>
             </Link>
-            <Link href='/help' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'help'}>
-                <ListItemIcon data-test='supportLink'>
+            <Link href='/help' passHref>
+              <ListItem button selected={page === 'help'} data-test='supportLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Help & Support' arrow placement='right'>
                       <ContactSupportIcon />
