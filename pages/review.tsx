@@ -135,7 +135,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                   <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={{ xs: 0, sm: 2 }}
-                    alignItems={{ xs: 'left', sm: 'center' }}
+                    alignItems={{ xs: 'flex-start', sm: 'center' }}
                     justifyContent='flex-start'
                     sx={{
                       [theme.breakpoints.down('sm')]: {
@@ -151,7 +151,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                         {requestObj.version?.metadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
-                    <div>Version: {requestObj.version?.version}</div>
+                    <Chip color='primary' label={`Version: ${requestObj.version?.version}`} size='small' />
                   </Stack>
                   <Stack direction='row' spacing={2}>
                     <Chip color='primary' label={requestObj.approvalType} size='small' />
