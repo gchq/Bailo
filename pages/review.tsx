@@ -129,32 +129,20 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
       {requests.map((requestObj: any) => (
         <Box sx={{ px: 3 }} key={requestObj._id}>
           <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} md={9}>
+            <Grid item xs={12} md={8} lg={7}>
               {type === 'Upload' && (
                 <>
-                  <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    spacing={{ xs: 0, sm: 2 }}
-                    alignItems={{ xs: 'flex-start', sm: 'center' }}
-                    justifyContent='flex-start'
-                    sx={{
-                      [theme.breakpoints.down('sm')]: {
-                        mb: 1,
-                      },
-                    }}
-                  >
-                    <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                      >
-                        {requestObj.version?.metadata?.highLevelDetails?.name}
-                      </MuiLink>
-                    </Link>
-                    <Chip color='primary' label={`Version: ${requestObj.version?.version}`} size='small' />
-                  </Stack>
+                  <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
+                    <MuiLink
+                      variant='h5'
+                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                    >
+                      {requestObj.version?.metadata?.highLevelDetails?.name}
+                    </MuiLink>
+                  </Link>
                   <Stack direction='row' spacing={2}>
                     <Chip color='primary' label={requestObj.approvalType} size='small' />
+                    <Chip color='primary' label={`Version: ${requestObj.version?.version}`} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
                         {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}
