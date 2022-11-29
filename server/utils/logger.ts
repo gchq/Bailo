@@ -263,7 +263,7 @@ if (config.get('logging.stroom.enabled')) {
   setInterval(() => {
     date = new Date()
     processStroomFiles()
-  }, 1000 * 60 * 60)
+  }, config.get('logging.stroom.interval'))
 
   streams.push({
     level: 'trace',
