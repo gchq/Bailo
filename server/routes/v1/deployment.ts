@@ -3,6 +3,8 @@ import * as Minio from 'minio'
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
+import { getEndpoint } from 'data/api'
+import JSZip from 'jszip'
 import { ApprovalStates } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
@@ -255,5 +257,71 @@ export const fetchRawModelFiles = [
       throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
     }
     stream.pipe(res)
+  },
+]
+
+export const fetchModelFileList = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const { uuid, version, fileType } = req.params
+    const deployment = await findDeploymentByUuid(req.user, uuid)
+
+    if (deployment === null) {
+      throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
+    }
+
+    if (!req.user._id.equals(deployment.owner)) {
+      throw Unauthorised(
+        { deploymentOwner: deployment.owner },
+        `User is not authorised to download this file. Requester: ${req.user._id}, owner: ${deployment.owner}`
+      )
+    }
+
+    if (deployment.managerApproved !== 'Accepted') {
+      throw Unauthorised(
+        { approvalStatus: deployment.managerApproved },
+        'User is not authorised to download this file as it has not been approved.'
+      )
+    }
+
+    if (fileType !== 'code' && fileType !== 'binary') {
+      throw NotFound({ fileType }, 'Unknown file type specified')
+    }
+
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+    const bucketName: string = config.get('minio.uploadBucket')
+    const client = new Minio.Client(config.get('minio'))
+
+    if (versionDocument === null) {
+      throw NotFound({ versionId: version }, `Unable to find version for id ${version}`)
+    }
+
+    let filePath
+
+    if (fileType === 'code') {
+      filePath = versionDocument.files.rawCodePath
+    }
+    if (fileType === 'binary') {
+      filePath = versionDocument.files.rawBinaryPath
+    }
+
+    const stream = await client.getObject(bucketName, filePath)
+    if (!stream) {
+      throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
+    }
+
+    const buffers: Buffer[] = []
+    stream.on('data', (data) => {
+      if (Buffer.isBuffer(data)) buffers.push(data)
+    })
+    stream.on('end', async () => {
+      const zip = JSZip()
+      const zipBuffer = Buffer.concat(buffers)
+      const zipFile = await zip.loadAsync(zipBuffer)
+      const fileNames = Object.keys(zipFile.files)
+      console.log(fileNames)
+      return res.json(fileNames)
+    })
   },
 ]
