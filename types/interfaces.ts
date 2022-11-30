@@ -242,3 +242,22 @@ export enum LogType {
   Request = 'request',
   Misc = 'misc',
 }
+
+export type SchemaQuestion = {
+  title: string
+  description: string
+  type: string
+  minLength?: number
+  maxLength?: number
+  widget?: string
+  readOnly?: boolean
+}
+
+export type SchemaPage = {
+  title: string
+  description: string
+  type: string
+  properties: SchemaQuestion
+  required: string[]
+  additionalProperties: boolean
+}

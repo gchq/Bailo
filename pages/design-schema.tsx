@@ -1,24 +1,22 @@
 import { useGetCurrentUser } from '@/data/user'
-import ComponentPicker from '@/src/SchemaDesign/ComponentPicker'
 import Wrapper from '@/src/Wrapper'
 import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import SchemaDesigner from '@/src/SchemaDesign/SchemaDesigner'
 
 export default function DesignSchema() {
   const { currentUser } = useGetCurrentUser()
 
   return (
     <Wrapper title='Design Schema' page='design'>
-      <Box display='flex' height='calc(100vh - 196px)'>
+      <Box display='flex'>
         {currentUser && currentUser.roles.includes('admin') ? (
           <Box>
             <Stack direction='row' spacing={2}>
               <Box>
-                <ComponentPicker />
+                <SchemaDesigner />
               </Box>
-              <Box>schema</Box>
             </Stack>
           </Box>
         ) : (
