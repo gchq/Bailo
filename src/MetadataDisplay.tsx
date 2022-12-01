@@ -151,7 +151,11 @@ function MetadataDisplay({
       ) : null
     })
   }
-  return <Box sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }}>{printSections()}</Box>
+  return (
+    <Box sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }} data-test='metadataDisplay'>
+      {printSections()}
+    </Box>
+  )
 }
 
 export default MetadataDisplay

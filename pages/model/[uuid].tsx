@@ -236,7 +236,7 @@ function Model() {
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
-          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
           </Alert>
         </Box>
@@ -302,7 +302,11 @@ function Model() {
                 </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(true)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='favouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <FavoriteBorder fontSize='small' />
@@ -312,7 +316,11 @@ function Model() {
                   </MenuItem>
                 )}
                 {modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(false)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(false)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='unfavouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <Favorite fontSize='small' />
@@ -401,9 +409,10 @@ function Model() {
               label='Build Logs'
               value='build'
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' data-test='settingsButton' />
+            <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
