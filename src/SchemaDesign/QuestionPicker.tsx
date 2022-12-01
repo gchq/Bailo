@@ -37,7 +37,7 @@ export default function QuestionPicker({
       additionalQuestions: ['minLength', 'maxLength'],
     },
     {
-      title: 'Boolean',
+      title: 'Check Box',
       type: 'boolean',
       icon: <CheckBoxIcon />,
       additionalQuestions: [],

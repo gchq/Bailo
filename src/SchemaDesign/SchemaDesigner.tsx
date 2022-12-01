@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import { Schema, SchemaQuestion } from '@/types/interfaces'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -8,6 +9,7 @@ import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import React from 'react'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import QuestionPicker from './QuestionPicker'
 
 export default function SchemaDesigner() {
@@ -75,6 +77,27 @@ export default function SchemaDesigner() {
     pageToAmmend.questions.push(data)
   }
 
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+
+    return result
+  }
+
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return
+    }
+    if (result.destination.index === result.source.index) {
+      return
+    }
+    const pageToAmmend = pages.find((page) => page.reference === selectedPage)
+    const updatedQuestions = reorder(pageToAmmend.questions, result.source.index, result.destination.index)
+
+    setPages(pages.map((page) => (page.reference === selectedPage ? { ...page, questions: updatedQuestions } : page)))
+  }
+
   return (
     <Box>
       <Paper
@@ -111,16 +134,34 @@ export default function SchemaDesigner() {
             <Tab key={page.reference} value={page.reference} label={page.title} />
           ))}
         </Tabs>
+
         {pages.map((page) => (
           <Box key={page.reference}>
             {page.reference === selectedPage && (
               <Box sx={{ pt: 2 }}>
-                <Stack spacing={2}>
-                  {page.questions.map((question) => (
-                    <Typography key={question.title}>{question.title}</Typography>
-                  ))}
-                  <Button onClick={handleClickOpen}>Add new question</Button>
-                </Stack>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId='list'>
+                    {(droppableProvided) => (
+                      <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
+                        {page.questions.map((question, index) => (
+                          <Draggable key={question.title} draggableId={question.title} index={index}>
+                            {(draggableProvided) => (
+                              <div
+                                ref={draggableProvided.innerRef}
+                                {...draggableProvided.draggableProps}
+                                {...draggableProvided.dragHandleProps}
+                              >
+                                <Typography key={question.title}>{question.title}</Typography>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {droppableProvided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+                <Button onClick={handleClickOpen}>Add new question</Button>
               </Box>
             )}
           </Box>
