@@ -10,6 +10,7 @@ import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import { ModelDoc } from '../server/models/Model'
 import EmptyBlob from './common/EmptyBlob'
+import DirectoryTreeView from './common/DirectoryTreeView'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const modelFromDeployment: ModelDoc = deployment.model as ModelDoc
@@ -43,6 +44,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   Download binary file
                 </Button>
               </Stack>
+              <DirectoryTreeView uuid={`${deployment.uuid}`} version={`${version.version}`} fileType='code' />
             </Box>
             <Divider orientation='horizontal' />
           </Box>
