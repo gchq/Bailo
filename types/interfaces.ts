@@ -244,9 +244,11 @@ export enum LogType {
 }
 
 export type SchemaQuestion = {
+  reference: string
   title: string
   description: string
   type: string
+  format?: string
   minLength?: number
   maxLength?: number
   widget?: string

@@ -8,19 +8,19 @@ import React from 'react'
 
 export default function SchemaDesignerQuestion({
   onSubmit,
-  questionType,
-  additionalQuestions,
+  question,
   closeQuestionPicker,
 }: {
   onSubmit: (data: SchemaQuestion) => void
-  questionType: string
-  additionalQuestions: string[]
+  question: any // type this
   closeQuestionPicker: () => void
 }) {
   const [formInput, setFormInput] = React.useState<SchemaQuestion>({
     title: '',
     description: '',
-    type: questionType,
+    type: question.type,
+    reference: '',
+    format: question.format || '',
   })
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -48,6 +48,13 @@ export default function SchemaDesignerQuestion({
   return (
     <Box component='form' onSubmit={addQuestion}>
       <Stack spacing={2}>
+        <TextField
+          required
+          label='Question reference'
+          name='reference'
+          value={formInput.reference}
+          onChange={handleChange}
+        />
         <TextField required label='Question text' name='title' value={formInput.title} onChange={handleChange} />
         <TextField
           label='Question description'
@@ -55,7 +62,7 @@ export default function SchemaDesignerQuestion({
           value={formInput.description}
           onChange={handleChange}
         />
-        {additionalQuestions.includes('minLength') && (
+        {question.additionalQuestions.includes('minLength') && (
           <TextField
             label='Minimum length'
             type='number'
@@ -64,7 +71,7 @@ export default function SchemaDesignerQuestion({
             onChange={handleChange}
           />
         )}
-        {additionalQuestions.includes('maxLength') && (
+        {question.additionalQuestions.includes('maxLength') && (
           <TextField
             label='Maximum length'
             type='number'

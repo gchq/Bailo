@@ -10,6 +10,7 @@ import DialogContent from '@mui/material/DialogContent'
 import TextFieldsIcon from '@mui/icons-material/TextFields'
 import Stack from '@mui/material/Stack'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import Icon from '@mui/material/Icon'
 import { SchemaQuestion } from '@/types/interfaces'
 import SchemaDesignerQuestion from './SchemaDesignerQuestion'
@@ -42,6 +43,13 @@ export default function QuestionPicker({
       icon: <CheckBoxIcon />,
       additionalQuestions: [],
     },
+    {
+      title: 'Date',
+      type: 'string',
+      format: 'date',
+      icon: <CalendarMonthIcon />,
+      additionalQuestions: [],
+    },
   ]
 
   return (
@@ -61,12 +69,7 @@ export default function QuestionPicker({
               </Stack>
             </AccordionSummary>
             <AccordionDetails>
-              <SchemaDesignerQuestion
-                questionType={question.type}
-                onSubmit={onSubmit}
-                closeQuestionPicker={handleClose}
-                additionalQuestions={question.additionalQuestions}
-              />
+              <SchemaDesignerQuestion question={question} onSubmit={onSubmit} closeQuestionPicker={handleClose} />
             </AccordionDetails>
           </Accordion>
         ))}
