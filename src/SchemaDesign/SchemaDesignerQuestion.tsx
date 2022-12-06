@@ -48,13 +48,7 @@ export default function SchemaDesignerQuestion({
   return (
     <Box component='form' onSubmit={addQuestion}>
       <Stack spacing={2}>
-        <TextField
-          required
-          label='Question reference'
-          name='reference'
-          value={formInput.reference}
-          onChange={handleChange}
-        />
+        <TextField label='Question reference' name='reference' value={formInput.reference} onChange={handleChange} />
         <TextField required label='Question text' name='title' value={formInput.title} onChange={handleChange} />
         <TextField
           label='Question description'

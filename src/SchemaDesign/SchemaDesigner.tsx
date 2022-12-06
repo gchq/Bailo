@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { Schema, SchemaQuestion, SplitSchema } from '@/types/interfaces'
+import { Schema, SchemaQuestion, SplitSchema, SchemaType, Step } from '@/types/interfaces'
 import { withTheme } from '@rjsf/core'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -13,54 +13,73 @@ import Typography from '@mui/material/Typography'
 import React, { useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { getStepsFromSchema } from '@/utils/formUtils'
-import QuestionPicker from './QuestionPicker'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import Icon from '@mui/material/Icon'
+import AddIcon from '@mui/icons-material/Add'
+import TextFieldsIcon from '@mui/icons-material/TextFields'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContentText from '@mui/material/DialogContentText'
+import _ from 'lodash'
+import Grid from '@mui/material/Grid'
 import { Theme as MaterialUITheme } from '../MuiForms'
+import QuestionPicker from './QuestionPicker'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function SchemaDesigner() {
   const [questionPickerOpen, setQuestionPickerOpen] = React.useState(false)
-  const [pages, setPages] = React.useState<any[]>([])
-  const [pageName, setPageName] = React.useState('')
-  const [pageReference, setPageReference] = React.useState('')
-  const [selectedPage, setSelectedPage] = React.useState('')
+  const [steps, setSteps] = React.useState<any[]>([])
+  const [stepName, setStepName] = React.useState('')
+  const [stepReference, setStepReference] = React.useState('')
+  const [selectedStep, setSelectedStep] = React.useState('')
   const [splitSchema, setSplitSchema] = React.useState<SplitSchema>({ reference: '', steps: [] })
   const [schemaName, setSchemaName] = React.useState('')
   const [showForm, setShowForm] = React.useState(true)
   const [schemaReference, setSchemaReference] = React.useState('')
+  const [schemaUse, setSchemaUse] = React.useState<SchemaType>('UPLOAD')
+  const [newStepDialogOpen, setNewStepDialogOpen] = React.useState(false)
+  const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = React.useState(false)
   const [schemaDetails, setSchemaDetails] = React.useState({
     name: '',
     reference: '',
+    use: '',
   })
 
-  const pageIndex = pages.findIndex((page) => page.reference === selectedPage)
+  const stepIndex = steps.findIndex((step) => step.reference === selectedStep)
 
   useEffect(() => {
-    if (pages) {
-      const userPages = {}
-      pages.forEach((page) => {
-        const pageToAdd = {
-          [page.reference]: {
-            title: page.title,
+    if (steps.length > 0) {
+      const userSteps = {}
+      steps.forEach((step) => {
+        const stepToAdd = {
+          [step.reference]: {
+            title: step.title,
             type: 'object',
             properties: {},
           },
         }
-        if (page.questions && page.questions.length > 0) {
-          page.questions.forEach((question) => {
+        if (step.questions && step.questions.length > 0) {
+          step.questions.forEach((question) => {
             const questionReference = question.reference
             const questionToAdd = {
               [questionReference]: { ...question },
             }
             delete questionToAdd[questionReference].reference
-            pageToAdd[page.reference].properties = { ...pageToAdd[page.reference].properties, ...questionToAdd }
+            stepToAdd[step.reference].properties = { ...stepToAdd[step.reference].properties, ...questionToAdd }
           })
-          Object.assign(userPages, pageToAdd)
+          Object.assign(userSteps, stepToAdd)
         }
       })
       const userSchema: Schema = {
-        name: schemaDetails.name,
-        reference: schemaDetails.reference,
+        name: '',
+        reference: '',
         schema: {
           $schema: 'http://json-schema.org/draft-07/schema#',
           type: 'object',
@@ -76,58 +95,68 @@ export default function SchemaDesigner() {
               title: 'Schema reference',
               type: 'string',
             },
-            ...userPages,
+            ...userSteps,
           },
         },
         use: 'UPLOAD',
       }
       const { reference } = userSchema
-      const steps = getStepsFromSchema(userSchema, {}, [])
-      setSplitSchema({ reference, steps })
+      const schemaSteps: Step[] = getStepsFromSchema(userSchema, {}, [])
+      setSplitSchema({ reference, steps: schemaSteps })
       setShowForm(false)
     }
-  }, [schemaDetails, pages, setSplitSchema])
+  }, [schemaDetails, steps, setSplitSchema])
 
   // This is the only way we can find to force the form to rerender
   useEffect(() => {
     if (!showForm) setShowForm(true)
   }, [showForm])
 
-  const handlePageChange = (_event, newValue) => {
-    setSelectedPage(newValue)
+  const handleStepChange = (_event, newValue) => {
+    setSelectedStep(newValue)
   }
 
   const handleClickOpen = () => {
     setQuestionPickerOpen(true)
   }
 
-  const handleClose = () => {
+  const handleQuestionPickerClose = () => {
     setQuestionPickerOpen(false)
   }
 
-  const addNewPage = (event: React.FormEvent<HTMLInputElement>) => {
+  const addNewStep = (event) => {
     event.preventDefault()
-    if (
-      pages.filter((page) => page.title === pageName).length === 0 &&
-      pages.filter((page) => page.reference === pageReference).length === 0
-    ) {
-      const newPage = {
-        title: pageName,
-        reference: pageReference,
+    setNewStepDialogOpen(false)
+    if (steps.filter((step) => step.title === stepName).length === 0) {
+      const newStep = {
+        title: stepName,
+        reference: stepReference,
         questions: [],
       }
-      setPages((oldPages) => [...oldPages, newPage])
-      setSelectedPage(pageReference)
-      setPageName('')
-      setPageReference('')
+      newStep.reference = stepReference === '' ? _.camelCase(stepName) : _.camelCase(stepReference)
+      setSteps((oldSteps) => [...oldSteps, newStep])
+      setSelectedStep(stepReference === '' ? _.camelCase(stepName) : _.camelCase(stepReference))
+      setStepName('')
+      setStepReference('')
     }
   }
 
   const addQuestion = (data: SchemaQuestion) => {
-    const updatedPages = pages
-    const pageToAmmend = updatedPages.find((page) => page.reference === selectedPage)
-    pageToAmmend.questions.push(data)
-    setPages(updatedPages)
+    const question = data
+    question.reference = data.reference === '' ? _.camelCase(data.title) : _.camelCase(data.reference)
+    const updatedSteps = steps
+    const stepToAmmend = updatedSteps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = stepToAmmend.questions
+    updatedQuestions.push(data)
+    setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
+  }
+
+  const submitSchema = () => {
+    // setSchemaDetails({
+    //   name: schemaName,
+    //   reference: schemaReference,
+    //   use: schemaUse,
+    // })
   }
 
   const reorder = (list, startIndex, endIndex) => {
@@ -145,92 +174,61 @@ export default function SchemaDesigner() {
     if (result.destination.index === result.source.index) {
       return
     }
-    const pageToAmmend = pages.find((page) => page.reference === selectedPage)
-    const updatedQuestions = reorder(pageToAmmend.questions, result.source.index, result.destination.index)
+    const stepToAmmend = steps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = reorder(stepToAmmend.questions, result.source.index, result.destination.index)
 
-    setPages(pages.map((page) => (page.reference === selectedPage ? { ...page, questions: updatedQuestions } : page)))
+    setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
 
-  const updateSchemaName = (event: React.FormEvent<HTMLInputElement>) => {
-    event.preventDefault()
-    setSchemaDetails({
-      name: schemaName,
-      reference: schemaReference,
-    })
+  const getQuestionIcon = (type) => {
+    if (type === 'date') {
+      return <CalendarMonthIcon />
+    }
+    if (type === 'boolean') {
+      return <CheckBoxIcon />
+    }
+    return <TextFieldsIcon />
   }
 
   return (
     <Box>
-      <Stack direction='row' spacing={4}>
-        <Box>
-          <Stack spacing={4}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={12} md={6}>
+          <Box>
+            <Typography sx={{ mb: 2 }} variant='h4'>
+              Configure Schema
+            </Typography>
             <Paper
               sx={{
                 p: 2,
               }}
             >
-              <Box component='form' onSubmit={updateSchemaName}>
-                <Stack direction='row' spacing={1}>
-                  <TextField
-                    required
-                    label='Schema reference'
-                    onChange={(event): void => setSchemaReference(event.target.value)}
-                    value={schemaReference}
-                  />
-                  <TextField
-                    required
-                    label='Schema name'
-                    onChange={(event): void => setSchemaName(event.target.value)}
-                    value={schemaName}
-                  />
-                  <Button type='submit'>Update schema details</Button>
-                </Stack>
-              </Box>
-            </Paper>
-            <Divider flexItem />
-            <Paper
-              sx={{
-                p: 2,
-              }}
-            >
-              <Box component='form' onSubmit={addNewPage}>
-                <Stack direction='row' spacing={1}>
-                  <TextField
-                    required
-                    label='Page reference'
-                    onChange={(event): void => setPageReference(event.target.value)}
-                    value={pageReference}
-                  />
-                  <TextField
-                    required
-                    label='Page name'
-                    onChange={(event): void => setPageName(event.target.value)}
-                    value={pageName}
-                  />
-                  <Button type='submit'>Add new page</Button>
-                </Stack>
-              </Box>
-            </Paper>
-            <Paper
-              sx={{
-                p: 2,
-              }}
-            >
-              <Tabs value={selectedPage} onChange={handlePageChange}>
-                {pages.map((page) => (
-                  <Tab key={page.reference} value={page.reference} label={page.title} />
-                ))}
-              </Tabs>
+              <Stack direction='row' spacing={2}>
+                <Tabs value={selectedStep} onChange={handleStepChange} variant='scrollable' scrollButtons='auto'>
+                  {steps.map((step) => (
+                    <Tab key={step.reference} value={step.reference} label={step.title} />
+                  ))}
+                </Tabs>
+                <Button
+                  color='primary'
+                  variant='text'
+                  startIcon={<AddIcon />}
+                  onClick={() => setNewStepDialogOpen(true)}
+                >
+                  Add step
+                </Button>
+              </Stack>
 
-              {pages.map((page) => (
-                <Box key={page.reference}>
-                  {page.reference === selectedPage && (
+              {steps.map((step) => (
+                <Box key={step.reference}>
+                  {step.reference === selectedStep && (
                     <Box sx={{ pt: 2 }}>
+                      <Typography variant='caption'>Questions can be reordered by drag and drop</Typography>
                       <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId='list'>
                           {(droppableProvided) => (
                             <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
-                              {page.questions.map((question, index) => (
+                              {step.questions.map((question, index) => (
                                 <Draggable key={question.title} draggableId={question.title} index={index}>
                                   {(draggableProvided) => (
                                     <div
@@ -238,7 +236,12 @@ export default function SchemaDesigner() {
                                       {...draggableProvided.draggableProps}
                                       {...draggableProvided.dragHandleProps}
                                     >
-                                      <Typography key={question.title}>{question.title}</Typography>
+                                      <Box sx={{ m: 2 }}>
+                                        <Stack direction='row' spacing={2}>
+                                          <Icon color='primary'>{getQuestionIcon(question.type)}</Icon>
+                                          <Typography key={question.title}>{question.title}</Typography>
+                                        </Stack>
+                                      </Box>
                                     </div>
                                   )}
                                 </Draggable>
@@ -253,29 +256,108 @@ export default function SchemaDesigner() {
                   )}
                 </Box>
               ))}
-              {selectedPage === '' && <Typography>Add a new page to begin designing your schema</Typography>}
+              {selectedStep === '' && <Typography>Add a new step to begin designing your schema</Typography>}
             </Paper>
+          </Box>
+        </Grid>
+        <Grid item xs={12} sm={12} md={6}>
+          <Typography sx={{ mb: 2 }} variant='h4'>
+            Preview
+          </Typography>
+          <Paper
+            sx={{
+              p: 2,
+              width: '100%',
+            }}
+          >
+            {showForm && splitSchema?.steps[stepIndex]?.schema === undefined && (
+              <Typography>Nothing to preview!</Typography>
+            )}
+            {showForm && splitSchema?.steps[stepIndex]?.schema !== undefined && (
+              <SchemaForm
+                schema={splitSchema.steps[stepIndex].schema}
+                formData={splitSchema.steps[stepIndex].state}
+                uiSchema={splitSchema.steps[stepIndex].uiSchema}
+              >
+                {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+                <></>
+              </SchemaForm>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+      <Divider orientation='horizontal' flexItem sx={{ mt: 4, mb: 4 }} />
+      <Box sx={{ textAlign: 'right' }}>
+        <Button variant='contained' onClick={() => setSubmitSchemaDialogOpen(true)} disabled={steps.length === 0}>
+          Submit schema
+        </Button>
+      </Box>
+      <QuestionPicker
+        onSubmit={addQuestion}
+        handleClose={handleQuestionPickerClose}
+        questionPickerOpen={questionPickerOpen}
+      />
+      <Dialog open={newStepDialogOpen} onClose={() => setNewStepDialogOpen(false)}>
+        <DialogTitle>Add new Step</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            The step reference must be unique, if it is left blank it will be generated automatically using the step
+            name. The step name is the title displayed on the form itself.
+          </DialogContentText>
+          <Stack direction='row' spacing={2} sx={{ pt: 2 }}>
+            <TextField
+              label='Step reference'
+              onChange={(event): void => setStepReference(event.target.value)}
+              value={stepReference}
+            />
+            <TextField
+              required
+              label='Step name'
+              onChange={(event): void => setStepName(event.target.value)}
+              value={stepName}
+            />
           </Stack>
-        </Box>
-        <Paper
-          sx={{
-            p: 2,
-            width: '100%',
-          }}
-        >
-          {showForm && splitSchema?.steps[pageIndex]?.schema !== undefined && (
-            <SchemaForm
-              schema={splitSchema.steps[pageIndex].schema}
-              formData={splitSchema.steps[pageIndex].state}
-              uiSchema={splitSchema.steps[pageIndex].uiSchema}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewStepDialogOpen(false)}>Cancel</Button>
+          <Button onClick={addNewStep}>Add Step</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={submitSchemaDialogOpen} onClose={() => setSubmitSchemaDialogOpen(false)}>
+        <DialogTitle>Submit schema</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Submit your schema</DialogContentText>
+          <Stack spacing={1}>
+            <TextField
+              required
+              label='Schema reference'
+              onChange={(event): void => setSchemaReference(event.target.value)}
+              value={schemaReference}
+            />
+            <TextField
+              required
+              label='Schema name'
+              onChange={(event): void => setSchemaName(event.target.value)}
+              value={schemaName}
+            />
+            <InputLabel id='schema-use-label'>Schema Type</InputLabel>
+            <Select
+              labelId='schema-use-label'
+              id='demo-simple-select'
+              value={schemaUse}
+              label='Schema Type'
+              onChange={(event): void => setSchemaUse(event.target.value as SchemaType)}
             >
-              {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-              <></>
-            </SchemaForm>
-          )}
-        </Paper>
-      </Stack>
-      <QuestionPicker onSubmit={addQuestion} handleClose={handleClose} questionPickerOpen={questionPickerOpen} />
+              <MenuItem value='UPLOAD'>Upload</MenuItem>
+              <MenuItem value='DEPLOYMENT'>Deployment</MenuItem>
+            </Select>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubmitSchemaDialogOpen(false)}>Cancel</Button>
+          <Button onClick={submitSchema}>Submit</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

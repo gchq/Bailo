@@ -9,7 +9,7 @@ export default function DesignSchema() {
 
   return (
     <Wrapper title='Design Schema' page='design'>
-      <Box display='flex'>
+      <Box>
         {currentUser && currentUser.roles.includes('admin') ? (
           <Box>
             <SchemaDesigner />

@@ -13,6 +13,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import Icon from '@mui/material/Icon'
 import { SchemaQuestion } from '@/types/interfaces'
+import DialogContentText from '@mui/material/DialogContentText'
 import SchemaDesignerQuestion from './SchemaDesignerQuestion'
 
 export default function QuestionPicker({
@@ -24,7 +25,7 @@ export default function QuestionPicker({
   handleClose: () => void
   questionPickerOpen: boolean
 }) {
-  const [expanded, setExpanded] = React.useState<string>('')
+  const [expanded, setExpanded] = React.useState('')
 
   const handleAccordianChange = (panel: string) => {
     setExpanded(panel)
@@ -56,6 +57,10 @@ export default function QuestionPicker({
     <Dialog onClose={handleClose} open={questionPickerOpen} sx={{ p: 2 }}>
       <DialogTitle>Choose a question type</DialogTitle>
       <DialogContent>
+        <DialogContentText sx={{ mb: 2 }}>
+          The question reference must be unique, if it is left blank it will be generated automatically using the
+          question title. The question title is what is displayed on the form itself.
+        </DialogContentText>
         {questionList.map((question) => (
           <Accordion
             key={question.title}
