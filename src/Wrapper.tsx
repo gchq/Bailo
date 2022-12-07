@@ -9,7 +9,7 @@ import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
-import DesignServices from '@mui/icons-material/DesignServicesTwoTone'
+import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
 import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
@@ -364,18 +364,18 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                     <ListItemText primary='Admin' />
                   </ListItem>
                 </Link>
-                <Link passHref href='/design-schema'>
-                  <ListItem button selected={page === 'design'}>
+                <Link passHref href='/schemas'>
+                  <ListItem button selected={page === 'schemas'}>
                     <ListItemIcon data-test='designSchemaLink'>
                       {!open ? (
-                        <Tooltip arrow title='Design Schema' placement='right'>
-                          <DesignServices />
+                        <Tooltip arrow title='Schemas' placement='right'>
+                          <SchemaIcon />
                         </Tooltip>
                       ) : (
-                        <DesignServices />
+                        <SchemaIcon />
                       )}
                     </ListItemIcon>
-                    <ListItemText primary='Design Schema' />
+                    <ListItemText primary='Schemas' />
                   </ListItem>
                 </Link>
               </>

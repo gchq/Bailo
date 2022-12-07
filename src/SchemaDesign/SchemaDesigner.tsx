@@ -28,6 +28,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContentText from '@mui/material/DialogContentText'
 import _ from 'lodash'
 import Grid from '@mui/material/Grid'
+import Alert from '@mui/material/Alert'
 import { Theme as MaterialUITheme } from '../MuiForms'
 import QuestionPicker from './QuestionPicker'
 
@@ -46,11 +47,7 @@ export default function SchemaDesigner() {
   const [schemaUse, setSchemaUse] = React.useState<SchemaType>('UPLOAD')
   const [newStepDialogOpen, setNewStepDialogOpen] = React.useState(false)
   const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = React.useState(false)
-  const [schemaDetails, setSchemaDetails] = React.useState({
-    name: '',
-    reference: '',
-    use: '',
-  })
+  const [schema, setSchema] = React.useState<Schema | undefined>(undefined)
 
   const stepIndex = steps.findIndex((step) => step.reference === selectedStep)
 
@@ -102,10 +99,11 @@ export default function SchemaDesigner() {
       }
       const { reference } = userSchema
       const schemaSteps: Step[] = getStepsFromSchema(userSchema, {}, [])
+      setSchema(userSchema)
       setSplitSchema({ reference, steps: schemaSteps })
       setShowForm(false)
     }
-  }, [schemaDetails, steps, setSplitSchema])
+  }, [steps, setSplitSchema])
 
   // This is the only way we can find to force the form to rerender
   useEffect(() => {
@@ -152,11 +150,12 @@ export default function SchemaDesigner() {
   }
 
   const submitSchema = () => {
-    // setSchemaDetails({
-    //   name: schemaName,
-    //   reference: schemaReference,
-    //   use: schemaUse,
-    // })
+    const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
+    if (schema) {
+      const userSchema = { ...schema, name: schemaName, reference, use: schemaUse }
+      console.log(userSchema)
+    }
+    // Submit schema
   }
 
   const reorder = (list, startIndex, endIndex) => {
@@ -192,6 +191,9 @@ export default function SchemaDesigner() {
 
   return (
     <Box>
+      <Alert sx={{ mt: 2, mb: 2 }} severity='info'>
+        This page is currently not fully implemented. More advanced schema options will be added in the future.
+      </Alert>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={6}>
           <Box>
@@ -326,10 +328,12 @@ export default function SchemaDesigner() {
       <Dialog open={submitSchemaDialogOpen} onClose={() => setSubmitSchemaDialogOpen(false)}>
         <DialogTitle>Submit schema</DialogTitle>
         <DialogContent>
-          <DialogContentText>Submit your schema</DialogContentText>
+          <DialogContentText>
+            The schema name and reference must be unique, if the reference is left blank it will be generated
+            automatically using the schema name.
+          </DialogContentText>
           <Stack spacing={1}>
             <TextField
-              required
               label='Schema reference'
               onChange={(event): void => setSchemaReference(event.target.value)}
               value={schemaReference}
