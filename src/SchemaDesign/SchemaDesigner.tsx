@@ -29,6 +29,8 @@ import DialogContentText from '@mui/material/DialogContentText'
 import _ from 'lodash'
 import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
+import IconButton from '@mui/material/IconButton'
+import DeleteIcon from '@mui/icons-material/Clear'
 import { Theme as MaterialUITheme } from '../MuiForms'
 import QuestionPicker from './QuestionPicker'
 
@@ -48,6 +50,7 @@ export default function SchemaDesigner() {
   const [newStepDialogOpen, setNewStepDialogOpen] = React.useState(false)
   const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = React.useState(false)
   const [schema, setSchema] = React.useState<Schema | undefined>(undefined)
+  const [stepErrorText, setStepErrorText] = React.useState('')
 
   const stepIndex = steps.findIndex((step) => step.reference === selectedStep)
 
@@ -124,7 +127,7 @@ export default function SchemaDesigner() {
 
   const addNewStep = (event) => {
     event.preventDefault()
-    setNewStepDialogOpen(false)
+    setStepErrorText('')
     if (steps.filter((step) => step.title === stepName).length === 0) {
       const newStep = {
         title: stepName,
@@ -136,6 +139,9 @@ export default function SchemaDesigner() {
       setSelectedStep(stepReference === '' ? _.camelCase(stepName) : _.camelCase(stepReference))
       setStepName('')
       setStepReference('')
+      setNewStepDialogOpen(false)
+    } else {
+      setStepErrorText(`Value ${stepName} already exists`)
     }
   }
 
@@ -146,6 +152,13 @@ export default function SchemaDesigner() {
     const stepToAmmend = updatedSteps.find((step) => step.reference === selectedStep)
     const updatedQuestions = stepToAmmend.questions
     updatedQuestions.push(data)
+    setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
+  }
+
+  const deleteQuestion = (questionReference: string) => {
+    const updatedSteps = steps
+    const stepToAmmend = updatedSteps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = stepToAmmend.questions.filter((question) => question.reference !== questionReference)
     setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
 
@@ -166,7 +179,7 @@ export default function SchemaDesigner() {
     return result
   }
 
-  const onDragEnd = (result) => {
+  const onQuestionDragEnd = (result) => {
     if (!result.destination) {
       return
     }
@@ -179,7 +192,12 @@ export default function SchemaDesigner() {
     setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
 
-  const getQuestionIcon = (type) => {
+  const deleteStep = (step: string) => {
+    const updatedSteps = steps.filter((stepToRemove) => stepToRemove === step)
+    setSteps(updatedSteps)
+  }
+
+  const getQuestionIcon = (type: string) => {
     if (type === 'date') {
       return <CalendarMonthIcon />
     }
@@ -208,9 +226,29 @@ export default function SchemaDesigner() {
               <Stack direction='row' spacing={2}>
                 <Tabs value={selectedStep} onChange={handleStepChange} variant='scrollable' scrollButtons='auto'>
                   {steps.map((step) => (
-                    <Tab key={step.reference} value={step.reference} label={step.title} />
+                    <Tab
+                      key={step.reference}
+                      value={step.reference}
+                      label={
+                        <span>
+                          {step.title}
+                          <IconButton
+                            size='small'
+                            component='span'
+                            sx={{ ml: 1 }}
+                            onClick={() => {
+                              deleteStep(step.reference)
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </span>
+                      }
+                      onClick={() => setSelectedStep(step.reference)}
+                    />
                   ))}
                 </Tabs>
+
                 <Button
                   color='primary'
                   variant='text'
@@ -226,8 +264,8 @@ export default function SchemaDesigner() {
                   {step.reference === selectedStep && (
                     <Box sx={{ pt: 2 }}>
                       <Typography variant='caption'>Questions can be reordered by drag and drop</Typography>
-                      <DragDropContext onDragEnd={onDragEnd}>
-                        <Droppable droppableId='list'>
+                      <DragDropContext onDragEnd={onQuestionDragEnd}>
+                        <Droppable droppableId='questionList'>
                           {(droppableProvided) => (
                             <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
                               {step.questions.map((question, index) => (
@@ -239,9 +277,15 @@ export default function SchemaDesigner() {
                                       {...draggableProvided.dragHandleProps}
                                     >
                                       <Box sx={{ m: 2 }}>
-                                        <Stack direction='row' spacing={2}>
+                                        <Stack direction='row' alignItems='center' spacing={2}>
                                           <Icon color='primary'>{getQuestionIcon(question.type)}</Icon>
                                           <Typography key={question.title}>{question.title}</Typography>
+                                          <IconButton
+                                            onClick={() => deleteQuestion(question.reference)}
+                                            aria-label='delete'
+                                          >
+                                            <DeleteIcon />
+                                          </IconButton>
                                         </Stack>
                                       </Box>
                                     </div>
@@ -301,29 +345,36 @@ export default function SchemaDesigner() {
       />
       <Dialog open={newStepDialogOpen} onClose={() => setNewStepDialogOpen(false)}>
         <DialogTitle>Add new Step</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            The step reference must be unique, if it is left blank it will be generated automatically using the step
-            name. The step name is the title displayed on the form itself.
-          </DialogContentText>
-          <Stack direction='row' spacing={2} sx={{ pt: 2 }}>
-            <TextField
-              label='Step reference'
-              onChange={(event): void => setStepReference(event.target.value)}
-              value={stepReference}
-            />
-            <TextField
-              required
-              label='Step name'
-              onChange={(event): void => setStepName(event.target.value)}
-              value={stepName}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNewStepDialogOpen(false)}>Cancel</Button>
-          <Button onClick={addNewStep}>Add Step</Button>
-        </DialogActions>
+        <Box component='form' onSubmit={addNewStep}>
+          <DialogContent>
+            <DialogContentText>
+              The step name and reference must be unique, if it is left blank it will be generated automatically using
+              the step name. The step name is the title displayed on the form itself.
+            </DialogContentText>
+            <Stack direction='row' spacing={2} sx={{ pt: 2 }}>
+              <TextField
+                label='Step reference'
+                onChange={(event): void => setStepReference(event.target.value)}
+                value={stepReference}
+              />
+              <Stack>
+                <TextField
+                  required
+                  label='Step name'
+                  onChange={(event): void => setStepName(event.target.value)}
+                  value={stepName}
+                />
+                <Typography variant='caption' sx={{ color: '#e35a5a' }}>
+                  {stepErrorText}
+                </Typography>
+              </Stack>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setNewStepDialogOpen(false)}>Cancel</Button>
+            <Button type='submit'>Add Step</Button>
+          </DialogActions>
+        </Box>
       </Dialog>
       <Dialog open={submitSchemaDialogOpen} onClose={() => setSubmitSchemaDialogOpen(false)}>
         <DialogTitle>Submit schema</DialogTitle>
