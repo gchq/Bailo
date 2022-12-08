@@ -285,8 +285,8 @@ const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
   }
 }
 
-const createTree = (files: string[]): DirectoryMetadata => {
-  const tree: DirectoryMetadata = { name: '/', directories: new Map(), files: [] }
+const createTree = (rootName: string, files: string[]): DirectoryMetadata => {
+  const tree: DirectoryMetadata = { name: `${rootName}/`, directories: new Map(), files: [] }
   files.forEach((file) => addToTree(tree, file))
   return tree
 }
@@ -373,7 +373,7 @@ export const fetchModelFileList = [
       const zipBuffer = Buffer.concat(buffers)
       const zipFile = await zip.loadAsync(zipBuffer)
       const fileNames = Object.keys(zipFile.files)
-      const tree = createTree(fileNames)
+      const tree = createTree(fileType, fileNames)
       // tree.directories.forEach((item) => console.log(item))
       return res.json(treeWithArrays(tree))
     })
