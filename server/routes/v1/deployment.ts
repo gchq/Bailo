@@ -261,10 +261,62 @@ export const fetchRawModelFiles = [
   },
 ]
 
+type DirectoryMetadata = {
+  name: string
+  directories: Map<string, DirectoryMetadata>
+  files: string[]
+}
+
+const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
+  if (tree === undefined) {
+    throw new Error('Error: Tree does not exist')
+  }
+  if (path.includes('/')) {
+    const i = path.indexOf('/')
+    const splitPath = [path.slice(0, i), path.slice(i + 1)]
+    if (!tree.directories.has(splitPath[0])) {
+      tree.directories.set(splitPath[0], { name: splitPath[0], directories: new Map(), files: [] })
+    }
+    if (splitPath[1].length > 0) {
+      addToTree(tree.directories.get(splitPath[0]), splitPath[1])
+    }
+  } else {
+    tree.files.push(path)
+  }
+}
+
+const createTree = (files: string[]): DirectoryMetadata => {
+  const tree: DirectoryMetadata = { name: '/', directories: new Map(), files: [] }
+  files.forEach((file) => addToTree(tree, file))
+  return tree
+}
+
+// const treeToJSON = (tree: DirectoryMetadata): JSON => {
+//   let output = ''
+//   output = output.concat('{"name":"', tree.name, '","directories":[')
+//   tree.directories.forEach((item) => {
+//     output = output.concat(treeToJSON(item))
+//   })
+//   output = output.concat('],', JSON.stringify(tree.files), '}')
+//   return output
+// }
+
+export type DirectoryArrayMetadata = {
+  name: string
+  directories: DirectoryArrayMetadata[]
+  files: string[]
+}
+
+const treeWithArrays = (tree: DirectoryMetadata): DirectoryArrayMetadata => {
+  const directories: DirectoryArrayMetadata[] = []
+  tree.directories.forEach((item) => directories.push(treeWithArrays(item)))
+  return { name: tree.name, directories, files: tree.files }
+}
+
 export const fetchModelFileList = [
   ensureUserRole('user'),
   bodyParser.json(),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response<DirectoryArrayMetadata>) => {
     const { uuid, version, fileType } = req.params
     const deployment = await findDeploymentByUuid(req.user, uuid)
 
@@ -327,55 +379,3 @@ export const fetchModelFileList = [
     })
   },
 ]
-
-type DirectoryMetadata = {
-  name: string
-  directories: Map<string, DirectoryMetadata>
-  files: string[]
-}
-
-const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
-  if (tree === undefined) {
-    throw new Error('Error: Tree does not exist')
-  }
-  if (path.includes('/')) {
-    const i = path.indexOf('/')
-    const splitPath = [path.slice(0, i), path.slice(i + 1)]
-    if (!tree.directories.has(splitPath[0])) {
-      tree.directories.set(splitPath[0], { name: splitPath[0], directories: new Map(), files: [] })
-    }
-    if (splitPath[1].length > 0) {
-      addToTree(tree.directories.get(splitPath[0]), splitPath[1])
-    }
-  } else {
-    tree.files.push(path)
-  }
-}
-
-const createTree = (files: string[]): DirectoryMetadata => {
-  const tree: DirectoryMetadata = { name: '/', directories: new Map(), files: [] }
-  files.forEach((file) => addToTree(tree, file))
-  return tree
-}
-
-// const treeToJSON = (tree: DirectoryMetadata): JSON => {
-//   let output = ''
-//   output = output.concat('{"name":"', tree.name, '","directories":[')
-//   tree.directories.forEach((item) => {
-//     output = output.concat(treeToJSON(item))
-//   })
-//   output = output.concat('],', JSON.stringify(tree.files), '}')
-//   return output
-// }
-
-export type DirectoryArrayMetadata = {
-  name: string
-  directories: DirectoryArrayMetadata[]
-  files: string[]
-}
-
-const treeWithArrays = (tree: DirectoryMetadata): DirectoryArrayMetadata => {
-  const directories: DirectoryArrayMetadata[] = []
-  tree.directories.forEach((item) => directories.push(treeWithArrays(item)))
-  return { name: tree.name, directories, files: tree.files }
-}
