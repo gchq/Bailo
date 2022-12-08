@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { useState, useCallback, useEffect } from 'react'
@@ -23,7 +22,6 @@ export default function DirectoryTreeView({
   const [displayTree, setDisplayTree] = useState<boolean>(false)
   const [treeLoaded, setTreeLoaded] = useState<boolean>(false)
   const sendNotification = useNotification()
-  const currentNodeId = 0
 
   const getTreeResponse = useCallback(async () => {
     if (displayTree) {
@@ -32,7 +30,6 @@ export default function DirectoryTreeView({
         const directoryArrayMetadata: DirectoryArrayMetadata = await response.json()
         setTreeResponse(directoryArrayMetadata)
         setTreeLoaded(true)
-        console.log(directoryArrayMetadata)
       } else {
         sendNotification({ variant: 'error', msg: 'Failed to retrieve file structure' })
       }
@@ -49,30 +46,33 @@ export default function DirectoryTreeView({
     setDisplayTree(true)
   }
 
-  function directoryTreeItem(tree: DirectoryArrayMetadata | undefined, currentNodeId: number) {
+  function directoryTreeItem(tree: DirectoryArrayMetadata | undefined, parentId: string) {
+    let id = ''
+    if (tree) {
+      id = `${parentId}${tree.name}`
+    }
     return (
       tree && (
-        <TreeItem nodeId={`${currentNodeId}`} label={`${tree.name}`}>
-          {console.log(`nodeId=${currentNodeId} label=${tree.name}`)}
-          {tree.directories.map((child) => {
-            currentNodeId += 1
-            return directoryTreeItem(child, currentNodeId)
-          })}
+        <TreeItem key={`${id}`} nodeId={`${id}`} label={`${tree.name}`}>
+          {console.log(`nodeId=${id} label=${tree.name}`)}
+          {tree.directories.map((child) => directoryTreeItem(child, id))}
           {tree.files.map((file) => {
-            currentNodeId += 1
-            console.log(`nodeId=${currentNodeId} label=${file}`)
-            return <TreeItem nodeId={`${currentNodeId}`} label={`${file}`} />
+            console.log(`nodeId=${id}${file} label=${file}`)
+            return <TreeItem key={`${id}${file}`} nodeId={`${id}${file}`} label={`${file}`} />
           })}
         </TreeItem>
       )
     )
   }
 
-  currentNodeId = 1
   // eslint-disable-next-line no-nested-ternary
   return treeLoaded ? (
-    <TreeView defaultExpandIcon={<ChevronRightIcon />} defaultCollapseIcon={<ExpandLessIcon />}>
-      {directoryTreeItem(treeResponse, 1)}
+    <TreeView
+      aria-label={`${fileType} file list`}
+      defaultExpandIcon={<ChevronRightIcon />}
+      defaultCollapseIcon={<ExpandLessIcon />}
+    >
+      {directoryTreeItem(treeResponse, '')}
     </TreeView>
   ) : displayTree ? (
     <Chip label='Loading File Tree..' avatar={<AccountTreeIcon />} />

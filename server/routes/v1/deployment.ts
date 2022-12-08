@@ -275,7 +275,7 @@ const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
     const i = path.indexOf('/')
     const splitPath = [path.slice(0, i), path.slice(i + 1)]
     if (!tree.directories.has(splitPath[0])) {
-      tree.directories.set(splitPath[0], { name: splitPath[0], directories: new Map(), files: [] })
+      tree.directories.set(splitPath[0], { name: `${splitPath[0]}/`, directories: new Map(), files: [] })
     }
     if (splitPath[1].length > 0) {
       addToTree(tree.directories.get(splitPath[0]), splitPath[1])
