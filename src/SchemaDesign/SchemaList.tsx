@@ -8,8 +8,6 @@ import Link from '@mui/material/Link'
 import { useGetSchemas } from '../../data/schema'
 
 export default function SchemaList() {
-  // Delete this when back-end implemented
-
   const { schemas: uploadSchemas, isSchemasLoading: isUploadSchemasLoading } = useGetSchemas('UPLOAD')
   const { schemas: deploymentSchemas, isSchemasLoading: isDeploymentSchemasLoading } = useGetSchemas('DEPLOYMENT')
 
