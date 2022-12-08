@@ -101,7 +101,7 @@ function Model() {
   }
 
   const requestDeployment = () => {
-    router.push(`/model/${uuid}/deploy`)
+    if (version) router.push(`/model/${uuid}/deploy?selectedVersion=${version.version}`)
   }
 
   const copyModelCardToClipboard = () => {

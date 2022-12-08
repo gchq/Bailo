@@ -22,7 +22,7 @@ function renderSubmissionTab({ activeStep, setActiveStep, onSubmit }: RenderButt
 
 export default function Deploy() {
   const router = useRouter()
-  const { uuid: modelUuid }: { uuid?: string } = router.query
+  const { uuid: modelUuid, selectedVersion }: { uuid?: string; selectedVersion?: string } = router.query
 
   const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('DEPLOYMENT')
@@ -89,7 +89,7 @@ export default function Deploy() {
     const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
-    data.highLevelDetails.initialVersionRequested = model.currentMetadata.highLevelDetails.modelCardVersion
+    data.highLevelDetails.initialVersionRequested = selectedVersion
     data.schemaRef = currentSchema?.reference
 
     const deploy = await postEndpoint(`/api/v1/deployment`, data)
