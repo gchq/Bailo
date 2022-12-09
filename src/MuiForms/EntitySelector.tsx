@@ -8,14 +8,16 @@ import { EntityKind } from '../../types/interfaces'
 interface Entity {
   kind: string
   id: string
-  data: any
+  data: unknown
 }
+
+type MinimalEntity = Omit<Entity, 'data'>
 
 interface EntitySelectorProps {
   label?: string
   required?: boolean
-  value: Array<Omit<Entity, 'data'>>
-  onChange: (newValue: Array<Omit<Entity, 'data'>>) => void
+  value: Array<Entity>
+  onChange: (newValue: Array<MinimalEntity>) => void
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
@@ -39,8 +41,8 @@ export default function EntitySelector(props: EntitySelectorProps) {
 
   const { onChange, value: currentValue, required, label } = props
 
-  const _onChange = (_event: any, newValue: any) => {
-    onChange(newValue.map((value) => ({ kind: value.kind, id: value.id })))
+  const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: Array<MinimalEntity>) => {
+    onChange(newValues.map((value) => ({ kind: value.kind, id: value.id })))
   }
 
   return (
@@ -54,7 +56,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
         setOpen(false)
       }}
       // we might get a string or an object back
-      isOptionEqualToValue={(option: any, value: any) => option.id === value.id}
+      isOptionEqualToValue={(option: Entity, value: Entity) => option.id === value.id}
       getOptionLabel={(option) => option.id}
       value={currentValue || []}
       onChange={_onChange}
