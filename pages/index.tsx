@@ -69,39 +69,41 @@ export default function ExploreModels() {
       </Paper>
       <Box>
         <Paper sx={{ py: 2, px: 4 }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
             <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
               <Tab label='All Models' value='all' />
               <Tab label='My Models' value='user' />
-              <Tab label='Favourites' value='favourites' />
+              <Tab label='Favourites' value='favourites' data-test='favouriteModelsTab' />
             </Tabs>
           </Box>
-          {models &&
-            models.map((model: Model, index: number) => (
-              <Box key={model.uuid}>
-                <Link href={`/model/${model.uuid}`} passHref>
-                  <MuiLink
-                    variant='h5'
-                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                  >
-                    {model.currentMetadata.highLevelDetails.name}
-                  </MuiLink>
-                </Link>
-                <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                  {model.currentMetadata.highLevelDetails.modelInASentence}
-                </Typography>
-                <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                  {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                    <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                  ))}
-                </Stack>
-                {index !== models.length - 1 && (
-                  <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                )}
-              </Box>
-            ))}
+          <Box data-test='modelListBox'>
+            {models &&
+              models.map((model: Model, index: number) => (
+                <Box key={model.uuid}>
+                  <Link href={`/model/${model.uuid}`} passHref>
+                    <MuiLink
+                      variant='h5'
+                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                    >
+                      {model.currentMetadata.highLevelDetails.name}
+                    </MuiLink>
+                  </Link>
+                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                    {model.currentMetadata.highLevelDetails.modelInASentence}
+                  </Typography>
+                  <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                    {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
+                      <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                    ))}
+                  </Stack>
+                  {index !== models.length - 1 && (
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                  )}
+                </Box>
+              ))}
 
-          {models?.length === 0 && <EmptyBlob text='No models here' />}
+            {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
+          </Box>
         </Paper>
       </Box>
     </Wrapper>

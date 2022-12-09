@@ -9,6 +9,10 @@ export async function fetchEndpoint(url: string, method: string, data?: unknown)
   })
 }
 
+export async function getEndpoint(url: string) {
+  return fetchEndpoint(url, 'GET')
+}
+
 export async function postEndpoint(url: string, data: unknown) {
   return fetchEndpoint(url, 'POST', data)
 }

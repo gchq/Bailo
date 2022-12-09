@@ -25,13 +25,13 @@ def test_upload_and_update_model():
     client.connect(username=username, password=password)
 
     # Upload model
-    with open("bailoclient/resources/minimal_metadata.json") as json_file:
+    with open("../../../../cypress/fixtures/minimal_metadata.json") as json_file:
         metadata = json.load(json_file)
 
     uploaded_model = client.upload_model(
         metadata=metadata,
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../../../cypress/fixtures/minimal_code.zip",
     )
 
     model_uuid = uploaded_model["uuid"]

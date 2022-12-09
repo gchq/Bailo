@@ -4,6 +4,7 @@ import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import { Theme as MaterialUITheme } from '../MuiForms'
 import Nothing from '../MuiForms/Nothing'
+import SeldonVersionSelector from '../MuiForms/SeldonVersionSelector'
 import TextareaWidget from '../MuiForms/TextareaWidget'
 import UserSelector from '../MuiForms/UserSelector'
 import EntitySelector from '../MuiForms/EntitySelector'
@@ -35,6 +36,7 @@ export default function RenderForm({
       widgets={{
         userSelector: UserSelector,
         entitySelector: EntitySelector,
+        seldonVersionSelector: SeldonVersionSelector,
         textArea: TextareaWidget,
         nothing: Nothing,
       }}

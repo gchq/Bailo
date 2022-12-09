@@ -96,6 +96,9 @@ export const testVersion: any = {
       reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
       manager: [{ kind: EntityKind.USER, id: 'manager' }],
     },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
+    },
   },
   files: {
     rawCodePath: '',
@@ -121,6 +124,9 @@ export const testVersion2: any = {
       uploader: [{ kind: EntityKind.USER, id: 'user' }],
       reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
       manager: [{ kind: EntityKind.USER, id: 'manager' }],
+    },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {

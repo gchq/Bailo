@@ -3,6 +3,7 @@ import express from 'express'
 import http from 'http'
 import next from 'next'
 import { createIndexes } from './models/Model'
+import { logCreateIndexes } from './models/Log'
 import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
@@ -32,13 +33,12 @@ import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
 import { getVersion, getVersionAccess, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
-import { connectToMongoose, runMigrations } from './utils/database'
+import { runMigrations, connectToMongoose } from './utils/database'
+import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
-
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
-import { copyDockerImage } from './utils/registry'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -102,6 +102,10 @@ server.get('/api/v1/specification', ...getSpecification)
 
 server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
+server.get('/api/v1/admin/logs', ...getApplicationLogs)
+server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
+server.get('/api/v1/admin/logs/request/:requestId', ...getItemLogs)
+
 server.use('/api', expressErrorHandler)
 
 export async function startServer() {
@@ -119,6 +123,7 @@ export async function startServer() {
 
   // lazily create indexes for full text search
   createIndexes()
+  logCreateIndexes()
 
   // pull builder image
   pullBuilderImage()

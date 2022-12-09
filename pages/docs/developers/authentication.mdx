@@ -1,0 +1,17 @@
+---
+priority: 1400
+---
+
+import DocsWrapper from '@/src/docs/DocsWrapper'
+
+# Authentication
+
+Bailo is intended to be run in multiple different environments, each of which will have their own standard
+authentication and authorisation methods. To enable this, Bailo exposes a class of methods that can be overriden for
+specific uses.
+
+This is done by editing server/external/Authorisation.ts to extend AuthorisationBase and re-implementing the functions
+with your desired authorisation method. The file in `server/utils/AuthorisationBase.ts` contains an existing example of
+this, which uses headers to pass user id and email.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

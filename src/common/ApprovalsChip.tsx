@@ -97,6 +97,7 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
         aria-controls='model-approvals-menu'
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
+        data-test='approvalsChip'
       />
       <Menu id='model-approvals-menu' anchorEl={anchorEl} open={open} onClose={handleClose}>
         <List dense>{requestResponseListItems}</List>
