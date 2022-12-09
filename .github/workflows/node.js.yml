@@ -29,16 +29,9 @@ jobs:
       # Install dependencies
       - run: npm ci
 
-      # Linting
-      - run: npm run check-style
-      - run: npm run lint
-
       # Create certs
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
-
-      # Run unit tests
-      - run: npm run test
 
       # Setup dependencies
       - name: Build the stack
