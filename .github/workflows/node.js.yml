@@ -1,4 +1,4 @@
-name: App Test / Build
+name: App E2E Tests
 
 on:
   push:
