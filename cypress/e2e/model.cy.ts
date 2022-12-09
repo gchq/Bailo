@@ -141,7 +141,7 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              const imageName = `${registryUrl}/user/${modelUuid}:1`
+              const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:1`
 
               cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
               cy.exec(`docker pull ${imageName}`)
