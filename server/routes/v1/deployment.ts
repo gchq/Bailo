@@ -70,7 +70,10 @@ export const postDeployment = [
     // first, we verify the schema
     const schemaIsInvalid = validateSchema(body, schema.schema)
     if (schemaIsInvalid) {
-      throw NotFound({ code: 'invalid_schema', errors: schemaIsInvalid }, 'Rejected due to invalid schema')
+      throw BadReq(
+        { code: 'invalid_schema', errors: schemaIsInvalid, schemaRef: body.schemaRef },
+        `Your deployment does not conform to the schema: '${body.schemaRef}'`
+      )
     }
 
     const model = await findModelByUuid(req.user, body.highLevelDetails.modelID)

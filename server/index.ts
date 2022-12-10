@@ -3,6 +3,7 @@ import express from 'express'
 import http from 'http'
 import next from 'next'
 import { createIndexes } from './models/Model'
+import { logCreateIndexes } from './models/Log'
 import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
@@ -36,10 +37,10 @@ import {
   postResetVersionApprovals,
   putUpdateLastViewed,
 } from './routes/v1/version'
+import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
 import { connectToMongoose } from './utils/database'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
-
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
 
@@ -102,6 +103,10 @@ server.get('/api/v1/specification', ...getSpecification)
 
 server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
+server.get('/api/v1/admin/logs', ...getApplicationLogs)
+server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
+server.get('/api/v1/admin/logs/request/:requestId', ...getItemLogs)
+
 server.use('/api', expressErrorHandler)
 
 export async function startServer() {
@@ -119,6 +124,7 @@ export async function startServer() {
 
   // lazily create indexes for full text search
   createIndexes()
+  logCreateIndexes()
 
   // pull builder image
   pullBuilderImage()

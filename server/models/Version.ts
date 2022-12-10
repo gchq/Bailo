@@ -1,9 +1,9 @@
 import { Document, IndexOptions, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import logger from '../utils/logger'
 import { LogStatement } from './Deployment'
 import { approvalStateOptions, ApprovalStates, DateString } from '../../types/interfaces'
 import { ModelDoc } from './Model'
+import logger from '../utils/logger'
 
 export interface Version {
   model: ModelDoc | Types.ObjectId

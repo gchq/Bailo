@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { useTheme } from '@mui/material/styles'
 import React, { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { useGetCurrentUser } from '../data/user'
@@ -32,7 +31,6 @@ export default function Settings() {
   const [tab, setTab] = useState<number>(0)
 
   const { currentUser, isCurrentUserLoading } = useGetCurrentUser()
-  const theme = useTheme()
 
   const onTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue)
@@ -41,13 +39,7 @@ export default function Settings() {
   return (
     <Wrapper title='Settings' page='settings'>
       <Box sx={{ bgcolor: 'background.paper' }}>
-        <Tabs
-          value={tab}
-          onChange={onTabChange}
-          sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}
-          textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-          indicatorColor='secondary'
-        >
+        <Tabs value={tab} onChange={onTabChange} sx={{ p: 2, borderRight: 1, borderColor: 'divider' }}>
           <Tab label='Profile' {...a11yProps(0)} />
         </Tabs>
         <TabPanel value={tab} index={0}>

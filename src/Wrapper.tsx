@@ -7,9 +7,9 @@ import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import NotificationsIcon from '@mui/icons-material/NotificationsTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
+import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
@@ -31,7 +31,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from './Link'
 import { useGetNumRequests } from '../data/requests'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
@@ -146,7 +146,14 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   const headerTitle =
     typeof title === 'string' ? (
-      <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ mr: '55px', flexGrow: 1 }}>
+      <Typography
+        noWrap
+        component='h1'
+        variant='h6'
+        color='inherit'
+        data-test='headerTitle'
+        sx={{ mr: '55px', flexGrow: 1 }}
+      >
         {title}
       </Typography>
     ) : (
@@ -169,7 +176,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
-        <AppBar sx={{ ...pageTopStyling, top: 'unset', backgroundColor: 'primary' }} position='absolute' open={open}>
+        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -188,31 +195,25 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' passHref>
-                <a>
-                  <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
-                </a>
+              <Link href='/' passHref color='inherit' underline='none'>
+                <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
               </Link>
             </Box>
-            <Typography
-              variant='h6'
-              noWrap
-              component='div'
-              sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex' } }}
-            >
-              Bailo
-            </Typography>
+            <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
+              <Link
+                href='/'
+                passHref
+                color='inherit'
+                underline='none'
+                style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
+              >
+                Bailo
+              </Link>
+            </Box>
             {headerTitle}
-            <Link href='/review' passHref>
-              <IconButton color='inherit'>
-                <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Link>
             {currentUser ? (
               <>
-                <IconButton onClick={handleUserMenuClicked} data-test='showUserMenu'>
+                <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
                   <UserAvatar username={currentUser.id} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
@@ -222,19 +223,16 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                         <DarkModeIcon fontSize='small' />
                       </ListItemIcon>
                       <Switch
+                        size='small'
                         checked={localStorage.getItem('dark_mode_enabled') === 'true'}
                         onChange={toggleDarkMode}
                         inputProps={{ 'aria-label': 'controlled' }}
-                        color='secondary'
                       />
                     </MenuItem>
-                    <Link href='/settings' passHref>
+                    <Link href='/settings' passHref color='inherit' underline='none'>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>
-                          <Settings
-                            fontSize='small'
-                            sx={{ '&:hover': { color: theme.palette.mode === 'dark' ? '#4c4c4c' : '' } }}
-                          />
+                          <Settings fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                       </MenuItem>
@@ -261,7 +259,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
           </Toolbar>
           <StyledList>
-            <Link href='/' passHref>
+            <Link href='/' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
@@ -275,7 +273,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Marketplace' />
               </ListItem>
             </Link>
-            <Link href='/deployments' passHref>
+            <Link href='/deployments' passHref color='inherit' underline='none'>
               <ListItem button selected={page === 'deployments'}>
                 <ListItemIcon>
                   {!open ? (
@@ -289,9 +287,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItem>
             </Link>
-            <Link href='/upload' passHref>
-              <ListItem button selected={page === 'upload'}>
-                <ListItemIcon data-test='uploadModelLink'>
+            <Link href='/upload' passHref color='inherit' underline='none'>
+              <ListItem button selected={page === 'upload'} data-test='uploadModelLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Upload Model' arrow placement='right'>
                       <FileUploadIcon />
@@ -303,12 +301,14 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Upload' />
               </ListItem>
             </Link>
-            <Link href='/review' passHref>
-              <ListItem button selected={page === 'review'}>
-                <ListItemIcon data-test='reviewLink'>
+            <Link href='/review' passHref color='inherit' underline='none'>
+              <ListItem button selected={page === 'review'} data-test='reviewLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <ListAltIcon />
+                      <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
+                        <ListAltIcon />
+                      </Badge>
                     </Tooltip>
                   ) : (
                     <ListAltIcon />
@@ -319,7 +319,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </Link>
             <Divider />
             <Link href='/docs/api' passHref>
-              <ListItem button selected={page === 'api'}>
+              <ListItem button selected={page === 'api'} data-test='apiDocsLink'>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='API' arrow placement='right'>
@@ -333,8 +333,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             <Link href='/help' passHref>
-              <ListItem button selected={page === 'help'}>
-                <ListItemIcon data-test='supportLink'>
+              <ListItem button selected={page === 'help'} data-test='supportLink'>
+                <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Help & Support' arrow placement='right'>
                       <ContactSupportIcon />
@@ -346,6 +346,22 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Support' />
               </ListItem>
             </Link>
+            {currentUser && currentUser.roles.includes('admin') && (
+              <Link passHref href='/admin'>
+                <ListItem button selected={page === 'admin'}>
+                  <ListItemIcon data-test='adminLink'>
+                    {!open ? (
+                      <Tooltip arrow title='Admin' placement='right'>
+                        <AdminIcon />
+                      </Tooltip>
+                    ) : (
+                      <AdminIcon />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText primary='Admin' />
+                </ListItem>
+              </Link>
+            )}
           </StyledList>
           <Divider />
         </Drawer>
@@ -367,7 +383,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
                   {children}
                 </Container>
-                <Copyright sx={{ pb: 2 }} />
+                <Copyright sx={{ mb: 2 }} />
               </>
             )}
           </Box>

@@ -4,17 +4,9 @@ import ModelModel from '../models/Model'
 import RequestModel from '../models/Request'
 import UserModel from '../models/User'
 import VersionModel from '../models/Version'
-import { connectToMongoose, disconnectFromMongoose } from './database'
 import { emptyBucket, ensureBucketExists } from './minio'
 
-const pause = (time) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, time)
-  })
-
 export async function clearStoredData() {
-  await connectToMongoose()
-
   if (config.get('minio.createBuckets')) {
     await ensureBucketExists(config.get('minio.uploadBucket'))
     await ensureBucketExists(config.get('minio.registryBucket'))
@@ -32,8 +24,4 @@ export async function clearStoredData() {
     emptyBucket(config.get('minio.uploadBucket')),
     emptyBucket(config.get('minio.registryBucket')),
   ])
-
-  // small pause to ensure Mongoose has finished
-  await pause(250)
-  await disconnectFromMongoose()
 }

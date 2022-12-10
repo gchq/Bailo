@@ -853,11 +853,14 @@ function generateSpecification() {
               required: true,
               type: 'object',
               default: {
+                schemaRef: '/Minimal/Deployment/v6',
                 highLevelDetails: {
                   endDate: {
                     hasEndDate: false,
                   },
                   name: 'Test Deployment',
+                  modelID: 'test-model-abcde',
+                  initialVersionRequested: 'v1.0',
                 },
                 contacts: {
                   requester: 'user',

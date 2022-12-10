@@ -1,4 +1,4 @@
-name: Build / Test
+name: App Test / Build
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     strategy:
       matrix:
@@ -75,8 +75,8 @@ jobs:
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
-      # Run integration tests
-      - run: HEADLESS=true npm run integration
+      # Run Cypress integration tests
+      - run: npm run cy:run
 
       - name: Dump docker-compose logs
         if: always()

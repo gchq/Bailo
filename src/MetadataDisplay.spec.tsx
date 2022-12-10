@@ -3,8 +3,10 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
+import { ThemeProvider } from '@mui/material/styles'
 import * as schemaService from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
+import { lightTheme } from './theme'
 
 describe('MetadataDisplay', () => {
   it('renders a MetadataDisplay component', async () => {
@@ -38,7 +40,11 @@ describe('MetadataDisplay', () => {
     const mockedSchemaService = jest.spyOn(schemaService, 'useGetSchemas')
     mockedSchemaService.mockReturnValue(mockedSchema)
 
-    render(<MetadataDisplay item={item} tabsDisplaySequentially use='UPLOAD' />)
+    render(
+      <ThemeProvider theme={lightTheme}>
+        <MetadataDisplay item={item} tabsDisplaySequentially use='UPLOAD' />
+      </ThemeProvider>
+    )
 
     await waitFor(async () => {
       expect(await screen.findByText('This is a test answer')).not.toBeUndefined()

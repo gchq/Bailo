@@ -82,6 +82,9 @@ export const testVersion: any = {
       reviewer: 'reviewer',
       manager: 'manager',
     },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
+    },
   },
   files: {
     rawCodePath: '',
@@ -107,6 +110,9 @@ export const testVersion2: any = {
       uploader: 'user',
       reviewer: 'reviewer',
       manager: 'manager',
+    },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {

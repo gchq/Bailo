@@ -25,7 +25,7 @@ using `--set <option>=<value>`.
 We do not host built images of Bailo, thus at the very minimum the configuration should include the location of a Bailo
 image:
 
-```
+```yaml
 ---
 image:
   repository: some.repository.com/bailo
@@ -44,6 +44,10 @@ called `local.yaml` in the `helm/bailo` folder.
 #### Upgrade Bailo
 
 1. `helm upgrade --values ./local.yaml bailo .`
+
+#### Test Bailo infrastructure
+
+1. `helm test bailo`
 
 #### Removing Bailo
 

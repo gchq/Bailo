@@ -22,7 +22,6 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -43,13 +42,14 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
-import { getErrorMessage } from '../../utils/fetcher'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -76,7 +76,6 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
   const [complianceFlow, setComplianceFlow] = useState<Elements>([])
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
@@ -92,6 +91,7 @@ function Model() {
   const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
+  const sendNotification = useNotification()
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
@@ -109,11 +109,7 @@ function Model() {
 
   const copyModelCardToClipboard = () => {
     copy(JSON.stringify(version?.metadata, null, 2))
-    setCopyModelCardSnackbarOpen(true)
-  }
-
-  const handleCopyModelCardSnackbarClose = () => {
-    setCopyModelCardSnackbarOpen(false)
+    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
   }
 
   useEffect(() => {
@@ -229,7 +225,14 @@ function Model() {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
+      mutateVersion()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
   }
 
   const handleDelete = () => {
@@ -255,7 +258,7 @@ function Model() {
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
-          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
           </Alert>
         </Box>
@@ -321,7 +324,11 @@ function Model() {
                 </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(true)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='favouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <FavoriteBorder fontSize='small' />
@@ -331,7 +338,11 @@ function Model() {
                   </MenuItem>
                 )}
                 {modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(false)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(false)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='unfavouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <Favorite fontSize='small' />
@@ -413,22 +424,17 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={group}
-            onChange={handleGroupChange}
-            aria-label='basic tabs example'
-          >
+          <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab
               label='Build Logs'
               value='build'
               disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' data-test='settingsButton' />
+            <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
@@ -473,14 +479,12 @@ function Model() {
                       Contacts:
                     </Typography>
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                      color='primary'
                       avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
                       label={deployment.metadata.contacts.requester}
                     />
                     <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
+                      color='primary'
                       avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
                       label={deployment.metadata.contacts.secondPOC}
                     />
@@ -497,12 +501,7 @@ function Model() {
                         .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
                         .slice(0, deploymentVersionsDisplayLimit)
                         .map((filteredVersion) => (
-                          <Chip
-                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                            key={filteredVersion.version}
-                            label={filteredVersion.version}
-                          />
+                          <Chip color='primary' key={filteredVersion.version} label={filteredVersion.version} />
                         ))}
                     {deployment.versions.length > 3 && (
                       <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
@@ -530,15 +529,6 @@ function Model() {
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy model card to clipboard
               </Button>
-              <Snackbar
-                open={copyModelCardSnackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleCopyModelCardSnackbarClose}
-              >
-                <Alert onClose={handleCopyModelCardSnackbarClose} severity='success' sx={{ width: '100%' }}>
-                  Copied model card to clipboard
-                </Alert>
-              </Snackbar>
             </Box>
 
             <Box sx={{ mb: 4 }} />

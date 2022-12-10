@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from glob import glob
 from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
-from requests.exceptions import JSONDecodeError
+from json import JSONDecodeError
 
 from ..bailoclient.api import AuthorisedAPI
 from ..bailoclient.auth import NullAuthenticator, Pkcs12Authenticator

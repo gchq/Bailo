@@ -22,7 +22,7 @@ export default withBundleAnalyzer(
     swcMinify: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
-      dirs: ['__tests__', 'data', 'lib', 'pages', 'server', 'src', 'types', 'utils'],
+      dirs: ['__tests__', 'cypress', 'data', 'lib', 'pages', 'server', 'src', 'types', 'utils'],
     },
   })
 )
