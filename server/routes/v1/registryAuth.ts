@@ -124,6 +124,7 @@ export type Action = 'push' | 'pull' | 'delete' | '*'
 export interface Access {
   type: string
   name: string
+  class?: string
   actions: Array<Action>
 }
 

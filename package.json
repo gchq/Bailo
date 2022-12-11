@@ -32,7 +32,6 @@
     "@next/bundle-analyzer": "^12.0.8",
     "@next/mdx": "^12.2.3",
     "@rjsf/core": "^4.1.1",
-    "@types/mongoose-delete": "^0.5.9",
     "adm-zip": "^0.5.9",
     "app-root-path": "^3.0.0",
     "axios": "^0.24.0",
