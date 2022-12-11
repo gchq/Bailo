@@ -82,9 +82,17 @@ jobs:
         if: always()
         run: docker-compose logs > logs/stack.log
 
+      - name: Dump app logs
+        if: always()
+        run: docker-compose logs app > logs/app.log
+
       - name: Docker Compose Logs
         if: always()
         run: cat logs/stack.log
+
+      - name: App Logs
+        if: always()
+        run: cat logs/app.log
 
       - uses: actions/upload-artifact@v2
         if: always()
