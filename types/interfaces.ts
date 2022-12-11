@@ -113,10 +113,10 @@ export interface UiConfig {
     logUrl: string
   }
 
-  seldonVersions: Array<SeldonVersion>
+  builderImages: Array<BuilderImage>
 }
 
-export type SeldonVersion = {
+export type BuilderImage = {
   name: string
   image: string
 }

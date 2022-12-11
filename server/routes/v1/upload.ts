@@ -16,8 +16,9 @@ import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
-import { ModelUploadType, SeldonVersion, UploadModes } from '../../../types/interfaces'
+import { ModelUploadType, UploadModes } from '../../../types/interfaces'
 import { getPropertyFromEnumValue } from '../../utils/general'
+import { isValidBuilderImage } from '../../utils/build/build'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
 export interface MulterFiles {
@@ -83,10 +84,9 @@ function checkTarFile(name: string, file: Array<MinioFile>) {
   }
 }
 
-function checkSeldonVersion(seldonVersion: string) {
-  const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
-  if (seldonVersionsFromConfig.filter((version) => version.image === seldonVersion).length === 0) {
-    throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+function checkBuilderImage(builderImage: string) {
+  if (!isValidBuilderImage(builderImage)) {
+    throw BadReq({ builderImage }, `Builder image ${builderImage} not recognised`)
   }
 }
 
@@ -108,7 +108,7 @@ export const postUpload = [
       case ModelUploadType.Zip:
         checkZipFile('binary', files.binary)
         checkZipFile('code', files.code)
-        checkSeldonVersion(metadata.buildOptions.seldonVersion)
+        checkBuilderImage(metadata.buildOptions.builderImage)
         break
       case ModelUploadType.Docker:
         checkTarFile('docker', files.docker)

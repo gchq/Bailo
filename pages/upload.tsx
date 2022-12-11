@@ -78,7 +78,7 @@ function Upload() {
       currentSchema,
       {
         buildOptions: {
-          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+          builderImage: { 'ui:widget': 'builderImageSelector' },
         },
       },
       [],

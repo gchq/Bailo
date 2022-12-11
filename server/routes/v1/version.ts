@@ -1,13 +1,13 @@
 import bodyParser from 'body-parser'
-import config from 'config'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes } from '../../models/Request'
-import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
+import { ApprovalStates, ModelUploadType } from '../../../types/interfaces'
 import { createVersionRequests } from '../../services/request'
 import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
+import { isValidBuilderImage } from '../../utils/build/build'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -54,13 +54,9 @@ export const putVersion = [
     }
 
     if (uploadType === ModelUploadType.Zip) {
-      const { seldonVersion } = metadata.buildOptions
-      const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
-      if (
-        seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length ===
-        0
-      ) {
-        throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+      const { builderImage } = metadata.buildOptions
+      if (!isValidBuilderImage(builderImage)) {
+        throw BadReq({ builderImage }, `Builder image ${builderImage} not recognised`)
       }
     }
 

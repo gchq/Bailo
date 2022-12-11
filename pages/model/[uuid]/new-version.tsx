@@ -60,7 +60,7 @@ function Upload() {
       cSchema,
       {
         buildOptions: {
-          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+          builderImage: { 'ui:widget': 'builderImageSelector' },
         },
       },
       [],

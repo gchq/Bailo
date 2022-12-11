@@ -83,7 +83,7 @@ export const testVersion: any = {
       manager: 'manager',
     },
     buildOptions: {
-      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
+      builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {
@@ -112,7 +112,7 @@ export const testVersion2: any = {
       manager: 'manager',
     },
     buildOptions: {
-      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
+      builderImage: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {

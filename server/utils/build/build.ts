@@ -3,6 +3,13 @@ import config from 'config'
 
 import logger from '../logger'
 import { BuildLogger } from './BuildLogger'
+import { BuilderImage } from '../../../types/interfaces'
+
+export function isValidBuilderImage(image: string) {
+  const versions: Array<BuilderImage> = config.get('uiConfig.builderImages')
+
+  return versions.find((version) => version.image === image) !== undefined
+}
 
 export async function pullBuilderImage() {
   if (config.get('build.environment') === 'openshift') {

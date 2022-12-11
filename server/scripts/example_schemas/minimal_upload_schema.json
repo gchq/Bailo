@@ -109,10 +109,11 @@
           "description": "Select the type of model upload that you want",
           "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
         },
-        "seldonVersion": {
-          "title": "Seldon version",
+        "builderImage": {
+          "title": "Builder image",
           "type": "string",
-          "widget": "seldonVersionSelector"
+          "description": "Select a builder image for your build",
+          "widget": "builderImageSelector"
         }
       },
       "dependencies": {
@@ -124,7 +125,7 @@
                   "enum": ["Model card only", "Prebuilt Docker image"],
                   "readOnly": false
                 },
-                "seldonVersion": {
+                "builderImage": {
                   "readOnly": true
                 }
               },
@@ -137,12 +138,12 @@
                   "enum": ["Code and binaries"],
                   "readOnly": true
                 },
-                "seldonVersion": {
-                  "description": "Select a seldon version for your build.",
+                "builderImage": {
+                  "description": "Select an image to build your model with.",
                   "readOnly": false
                 }
               },
-              "required": ["uploadType", "seldonVersion"],
+              "required": ["uploadType", "builderImage"],
               "additionalProperties": false
             }
           ]

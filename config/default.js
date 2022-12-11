@@ -74,9 +74,9 @@ module.exports = {
     development: {
       logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
     },
-    seldonVersions: [
+    builderImages: [
       {
-        name: 'seldonio - 1.10.0',
+        name: 'Python 3.7 / SeldonIO 1.10.0',
         image: 'seldonio/seldon-core-s2i-python37:1.10.0',
       },
     ],
