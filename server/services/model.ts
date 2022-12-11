@@ -85,7 +85,7 @@ export async function deleteModel(user: UserDoc, modelId: ModelId) {
   await model.delete(user._id)
 }
 
-export async function removeModelVersion(user: UserDoc, version: VersionDoc) {
+export async function removeVersionFromModel(user: UserDoc, version: VersionDoc) {
   // Deletes model if no versions left
   const model = await ModelModel.findById(version.model)
 

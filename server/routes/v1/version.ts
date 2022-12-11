@@ -8,7 +8,7 @@ import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } fr
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
-import { removeModelVersion } from '../../services/model'
+import { removeVersionFromModel } from '../../services/model'
 import { deleteDeploymentsByVersion } from '../../services/deployment'
 
 export const getVersion = [
@@ -180,7 +180,7 @@ export const deleteVersion = [
     await Promise.all([
       deleteRequestsByVersion(user, version),
       deleteDeploymentsByVersion(user, version),
-      removeModelVersion(user, version),
+      removeVersionFromModel(user, version),
     ])
 
     await version.delete(user._id)
