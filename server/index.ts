@@ -44,6 +44,8 @@ import { ensureBucketExists } from './utils/minio'
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
 
+import { createRegistryClient, getImageDigest, deleteImageTag } from './utils/registry'
+
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({
@@ -117,6 +119,20 @@ export async function startServer() {
     ensureBucketExists(config.get('minio.uploadBucket'))
     ensureBucketExists(config.get('minio.registryBucket'))
   }
+
+  const registry = await createRegistryClient()
+  console.log(
+    await getImageDigest(registry, {
+      namespace: 'user',
+      model: 'yolo-v4-tiny-2x44vf',
+      version: 'v1.8',
+    })
+  )
+  // await deleteImageTag(registry, {
+  //   namespace: 'user',
+  //   model: 'yolo-v4-tiny-2x44vf',
+  //   version: 'v1.8',
+  // })
 
   // we don't actually need to wait for mongoose to connect before
   // we start serving connections

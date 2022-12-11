@@ -208,3 +208,21 @@ export async function getRequest({ requestId }: { requestId: string | Types.Obje
 
   return request
 }
+
+export async function deleteRequestsByVersion(user: UserDoc, version: VersionDoc) {
+  return (RequestModel as any).delete(
+    {
+      version: version._id,
+    },
+    user._id
+  )
+}
+
+export async function deleteRequestsByDeployment(user: UserDoc, deployment: DeploymentDoc) {
+  return (RequestModel as any).delete(
+    {
+      deployment: deployment._id,
+    },
+    user._id
+  )
+}

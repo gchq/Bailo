@@ -8,21 +8,18 @@ import { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import logger, { createSerializer, SerializerOptions } from '../utils/logger'
-import { BadReq, Forbidden } from '../utils/result'
+import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
-import { getAccessToken } from '../routes/v1/registryAuth'
-import { getErrorMessage } from '../../utils/fetcher'
+import { deleteImageTag, createRegistryClient } from '../utils/registry'
+import { deleteRequestsByDeployment } from './request'
 
 const auth = new Authorisation()
 
 interface GetDeploymentOptions {
   populate?: boolean
   showLogs?: boolean
+  overrideFilter?: boolean
 }
-
-const httpsAgent = new https.Agent({
-  rejectUnauthorized: !config.get('registry.insecure'),
-})
 
 export function serializedDeploymentFields(): SerializerOptions {
   return {
@@ -47,6 +44,7 @@ export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: G
   if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
   deployment = deployment.populate('model', ['_id', 'uuid']).populate('versions', ['version', 'metadata'])
 
+  if (opts?.overrideFilter) return deployment
   return filterDeployment(user, await deployment)
 }
 
@@ -55,7 +53,17 @@ export async function findDeploymentById(user: UserDoc, id: ModelId, opts?: GetD
   if (opts?.populate) deployment = deployment.populate('model')
   if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
 
+  if (opts?.overrideFilter) return deployment
   return filterDeployment(user, await deployment)
+}
+
+export async function findDeploymentsByVersion(user: UserDoc, version: VersionDoc, opts?: GetDeploymentOptions) {
+  let deployments = DeploymentModel.find({ versions: { $in: [version._id] } })
+  if (opts?.populate) deployments = deployments.populate('model')
+  if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
+
+  if (opts?.overrideFilter) return deployments
+  return filterDeployment(user, await deployments)
 }
 
 export interface DeploymentFilter {
@@ -113,51 +121,31 @@ export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, 
   )
 }
 
-export async function deleteRegistryObjects(model: string, version: string, namespace: string) {
-  const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
-    { type: 'repository', name: `${namespace}/${model}`, actions: ['push', 'pull', 'delete'] },
-  ])
-  const authorisation = `Bearer ${token}`
-  const registry = `https://${config.get('registry.host')}/v2`
+export async function deleteDeploymentsByVersion(user: UserDoc, version: VersionDoc) {
+  const registry = await createRegistryClient()
 
-  const headResponse = await registryFetch(registry, namespace, model, version, authorisation, 'HEAD')
+  const deployments = await findDeploymentsByVersion(user, version)
 
-  if (!headResponse.ok) {
-    const error = `Unable to get registry image: ${await headResponse.text()}`
-    logger.error({ registry, namespace, model, version }, error)
-    throw new Error(error)
-  }
+  // For all deployments
+  await Promise.all(
+    deployments.map(async (deployment) => {
+      // Delete image from registry
+      await deleteImageTag(registry, {
+        model: deployment.metadata.highLevelDetails.modelID,
+        namespace: user.id,
+        version: version.version,
+      })
 
-  const deleteResponse = await registryFetch(
-    registry,
-    namespace,
-    model,
-    headResponse.headers.get('docker-content-digest'),
-    authorisation,
-    'DELETE'
+      // Remove version from deployments
+      await deployment.versions.remove(version._id)
+
+      // Delete requests for deployment
+      await deleteRequestsByDeployment(user, deployment)
+
+      // If there are no versions left, remove the deployment
+      if (deployment.versions.length === 0) {
+        await deployment.delete(user._id)
+      }
+    })
   )
-
-  if (!deleteResponse.ok) {
-    const error = `Unable to delete registry image: ${await headResponse.text()}`
-    logger.error({ registry, namespace, model }, error)
-    throw new Error(error)
-  }
-}
-
-async function registryFetch(
-  registry: string,
-  namespace: string,
-  modelID: string,
-  image: string,
-  authorisation: string,
-  method: string
-) {
-  return fetch(`${registry}/${namespace}/${modelID}/manifests/${image}`, {
-    method,
-    headers: {
-      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
-      Authorization: authorisation,
-    },
-    agent: httpsAgent,
-  } as RequestInit).then((res: any) => res)
 }

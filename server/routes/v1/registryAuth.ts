@@ -6,6 +6,7 @@ import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import isEqual from 'lodash/isEqual'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
+import { ModelId } from '../../../types/interfaces'
 import logger from '../../utils/logger'
 import { Forbidden } from '../../utils/result'
 import { getUserFromAuthHeader } from '../../utils/user'
@@ -118,7 +119,20 @@ export function getRefreshToken(user: any) {
   )
 }
 
-export function getAccessToken(user, access) {
+export type Action = 'push' | 'pull' | 'delete' | '*'
+
+export interface Access {
+  type: string
+  name: string
+  actions: Array<Action>
+}
+
+export interface User {
+  _id: ModelId
+  id: string
+}
+
+export function getAccessToken(user: User, access: Array<Access>) {
   return encodeToken(
     {
       sub: user.id,

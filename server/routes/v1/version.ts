@@ -3,12 +3,13 @@ import config from 'config'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes } from '../../models/Request'
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
-import { createVersionRequests } from '../../services/request'
+import { createVersionRequests, deleteRequestsByVersion } from '../../services/request'
 import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
-import { deleteVersionRequests, deleteDeploymentsByVersion, deleteModelByVersion } from '../../services/modelCleanUp'
+import { removeModelVersion } from '../../services/model'
+import { deleteDeploymentsByVersion } from '../../services/deployment'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -177,9 +178,9 @@ export const deleteVersion = [
     }
 
     await Promise.all([
-      deleteVersionRequests(version, user),
-      deleteDeploymentsByVersion(version, user),
-      deleteModelByVersion(version, user),
+      deleteRequestsByVersion(user, version),
+      deleteDeploymentsByVersion(user, version),
+      removeModelVersion(user, version),
     ])
 
     await version.delete(user._id)

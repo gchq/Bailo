@@ -94,11 +94,7 @@ export async function removeModelVersion(user: UserDoc, version: VersionDoc) {
   }
 
   await model.versions.remove(version._id)
-
-  if (!model.versions.length) {
-    await model.delete()
-    return
+  if (model.versions.length === 0) {
+    await model.delete(user._id)
   }
-
-  await model.save()
 }
