@@ -27,6 +27,72 @@ jobs:
     # Create certs
     - run: sudo chown -R runner:docker certs
     - run: npm run certs
+    
+    # remove route set for openshift
+    - name: remote route config
+      run: sudo rm helm/bailo/templates/route.yaml
+    
+    # Create local.yaml
+    - name: overwrite values.yaml in local.yaml
+      run: |
+        cat << EOT >> helm/bailo/local.yaml
+        ---
+        # Instance Settings
+        config:
+          s2i:
+            image: seldonio/seldon-core-s2i-python37:1.10.0
+          supportEmail: "support@example.com"
+          documentationLink: "https://example.com/support"
+
+          ui:
+            banner:
+              text: "BAILO"
+              colour: '#047a06'
+
+          smtp:
+            host: 'mail'
+            from: 'bailo@example.com'
+
+          schema:
+            script: "dist/server/scripts/exampleSetAllSchemas.js"
+
+        # Bailo
+        image:
+          repository: "image-registry.openshift-image-registry.svc:5000/bailo/bailo"
+          tag: "0.0.11"
+
+        # Used for k8s not openshift
+        ingress:
+          enabled: false
+
+        mongodb:
+          auth:
+            passwords:
+              - MongoDBPassword
+            usernames:
+              - bailo_user
+          image:
+            registry: docker.io
+          host: 'bailo-mongodb.yetToConfirm:31110/bailo'
+
+        minio:
+          image:
+            registry: docker.io
+          persistence:
+            size: 20Gi
+
+        registry:
+          repository: registry
+          certFile: cert.pem
+          keyFile: key.pem
+
+        maildev:
+          enabled: true
+
+        nginxcert:
+          cert: cert.pem
+          key: key.pem
+        EOT
   
     - name: Start minikube
       uses: medyagh/setup-minikube@master
