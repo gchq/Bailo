@@ -13,13 +13,14 @@ export default function DirectoryTreeView({
   uuid,
   version,
   fileType,
+  displayTree,
 }: {
   uuid: string
   version: string
   fileType: string
+  displayTree: boolean
 }) {
   const [treeResponse, setTreeResponse] = useState<DirectoryArrayMetadata>()
-  const [displayTree, setDisplayTree] = useState<boolean>(false)
   const [treeLoaded, setTreeLoaded] = useState<boolean>(false)
   const sendNotification = useNotification()
 
@@ -42,10 +43,6 @@ export default function DirectoryTreeView({
     }
   }, [version, getTreeResponse])
 
-  const handleButtonClick = () => {
-    setDisplayTree(true)
-  }
-
   function directoryTreeItem(tree: DirectoryArrayMetadata | undefined, parentId: string) {
     let id = ''
     if (tree) {
@@ -66,7 +63,7 @@ export default function DirectoryTreeView({
   }
 
   // eslint-disable-next-line no-nested-ternary
-  return treeLoaded ? (
+  return displayTree && treeLoaded ? (
     <TreeView
       aria-label={`${fileType} file list`}
       defaultExpandIcon={<ChevronRightIcon />}
@@ -74,9 +71,7 @@ export default function DirectoryTreeView({
     >
       {directoryTreeItem(treeResponse, '')}
     </TreeView>
-  ) : displayTree ? (
-    <Chip label='Loading File Tree..' avatar={<AccountTreeIcon />} />
   ) : (
-    <Chip label='Show File Tree' onClick={handleButtonClick} avatar={<AccountTreeIcon />} />
+    <Chip label='Loading File Tree..' avatar={<AccountTreeIcon />} />
   )
 }

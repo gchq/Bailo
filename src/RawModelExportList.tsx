@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
 import Button from '@mui/material/Button'
 
+import { useState } from 'react'
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import { ModelDoc } from '../server/models/Model'
@@ -14,6 +15,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const modelFromDeployment: ModelDoc = deployment.model as ModelDoc
   const { model } = useGetModelById(modelFromDeployment._id.toString())
   const { versions } = useGetModelVersions(model?.uuid)
+  const [displayTree, setDisplayTree] = useState<boolean>(false)
 
   return (
     <>
