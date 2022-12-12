@@ -28,6 +28,10 @@ jobs:
     - run: sudo chown -R runner:docker certs
     - run: npm run certs
     
+    # copy cert to helm
+    - name: Copy certs to helm
+      run: sudo cp certs/*.pem helm/bailo/certs/.
+    
     - name: Start minikube
       uses: medyagh/setup-minikube@master
       
