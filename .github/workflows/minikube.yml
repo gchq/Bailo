@@ -12,6 +12,11 @@ jobs:
     name: build and deploy to minikube
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.10.0
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v2
