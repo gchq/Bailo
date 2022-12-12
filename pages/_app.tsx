@@ -6,6 +6,7 @@ import useDocsMenu from '@/utils/hooks/useDocsMenu'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppProps } from 'next/app'
+import Script from 'next/script'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import '../public/css/fonts.css'
@@ -53,6 +54,7 @@ export default function MyApp(props: MyAppProps) {
           </ThemeModeContext.Provider>
         </ThemeProvider>
       )}
+      <Script src='/js/snow.js' />
     </CacheProvider>
   )
 }
