@@ -126,7 +126,7 @@ def test_validate_metadata_raises_error_if_metadata_is_invalid(
     ):
         mock_client._Client__validate_metadata(
             metadata=metadata,
-            minimal_metadata_path="./examples/resources/example_metadata.json",
+            minimal_metadata_path="../../cypress/fixtures/minimal_metadata.json",
         )
 
 
@@ -146,11 +146,11 @@ def test_validate_filepaths_raises_error_if_a_directory_is_uploaded(mock_client)
 
     with pytest.raises(
         InvalidFilePath,
-        match=re.escape("../../__tests__/example_models/minimal_model is a directory"),
+        match=re.escape("../../cypress/fixtures is a directory"),
     ):
 
         mock_client._Client__validate_file_paths(
-            "../../__tests__/example_models/minimal_model",
+            "../../cypress/fixtures",
         )
 
 
@@ -166,8 +166,8 @@ def test_generate_payload_raises_error_if_payload_too_large_and_aws_gateway(
     ):
         mock_client._generate_payload(
             metadata=json.dumps({"schema": "value"}),
-            binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-            code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+            binary_file="../../cypress/fixtures/minimal_binary.zip",
+            code_file="../../cypress/fixtures/minimal_code.zip",
         )
 
 
@@ -175,8 +175,8 @@ def test_add_files_to_payload_adds_code_and_binary_files(mock_client):
     payloads = []
     mock_client._Client__add_files_to_payload(
         payloads=payloads,
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     assert len(payloads) == 2
@@ -238,8 +238,8 @@ def test_update_model_is_called_with_expected_params(
             _schema={"key": "value"},
             currentMetadata={"highLevelDetails": {"modelCardVersion": "2"}},
         ),
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     mock_client.api.post.assert_called_once_with(
@@ -263,8 +263,8 @@ def test_upload_model_is_called_with_expected_params(
 
     mock_client.upload_model(
         metadata={"key": "value"},
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     mock_client.api.post.assert_called_once_with(
