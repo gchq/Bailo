@@ -58,8 +58,8 @@ jobs:
 
         # Bailo
         image:
-          repository: "image-registry.openshift-image-registry.svc:5000/bailo/bailo"
-          tag: "0.0.11"
+          repository: "bailo"
+          tag: "latest"
 
         # Used for k8s not openshift
         ingress:
