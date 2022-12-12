@@ -520,7 +520,7 @@ function Model() {
         )}
 
         {group === 'settings' && (
-          <>
+          <Box data-test='modelSettingsPage'>
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
@@ -561,11 +561,11 @@ function Model() {
                   Delete version
                 </Button>
               </DisabledElementTooltip>
-              <Button variant='contained' color='error' disabled data-test='deleteVersionButton'>
+              <Button variant='contained' color='error' disabled data-test='deleteModelButton'>
                 Delete model
               </Button>
             </Stack>
-          </>
+          </Box>
         )}
       </Paper>
     </Wrapper>
