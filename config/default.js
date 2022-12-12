@@ -112,6 +112,7 @@ module.exports = {
       environment: 'insecure',
       feed: 'bailo',
       system: 'bailo',
+      interval: 1000 * 60 * 5,
     },
   },
 
