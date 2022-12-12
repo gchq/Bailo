@@ -1,10 +1,17 @@
-/* eslint-disable dot-notation */
 import { SchemaQuestion } from '@/types/interfaces'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
-import React from 'react'
+import React, { BaseSyntheticEvent, ReactElement, useState } from 'react'
+
+export type DesignerQuestion = {
+  title: string
+  type: string
+  format?: string
+  icon: ReactElement<any, any>
+  additionalQuestions: string[]
+}
 
 export default function SchemaDesignerQuestion({
   onSubmit,
@@ -12,10 +19,10 @@ export default function SchemaDesignerQuestion({
   closeQuestionPicker,
 }: {
   onSubmit: (data: SchemaQuestion) => void
-  question: any // type this
+  question: DesignerQuestion // type this
   closeQuestionPicker: () => void
 }) {
-  const [formInput, setFormInput] = React.useState<SchemaQuestion>({
+  const [formInput, setFormInput] = useState<SchemaQuestion>({
     title: '',
     description: '',
     type: question.type,
@@ -23,17 +30,16 @@ export default function SchemaDesignerQuestion({
     format: question.format || '',
   })
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    const { value, name }: { value: string | number; name: string } = event.target
-    if (value || (!value && event.target.attributes['required'])) {
+  const handleChange = (event: BaseSyntheticEvent) => {
+    if (event.target.value || (!event.target.value && event.target.attributes.required)) {
       setFormInput({
         ...formInput,
-        [event.target.name]: value,
+        [event.target.name]: event.target.value,
       })
     } else {
       setFormInput((prevData) => {
         const newData = { ...prevData }
-        delete newData[name]
+        delete newData[event.target.name]
         return newData
       })
     }
@@ -61,7 +67,7 @@ export default function SchemaDesignerQuestion({
             label='Minimum length'
             type='number'
             name='minLength'
-            value={formInput.minLength || undefined}
+            value={formInput.minLength || ''}
             onChange={handleChange}
           />
         )}
@@ -70,7 +76,7 @@ export default function SchemaDesignerQuestion({
             label='Maximum length'
             type='number'
             name='maxLength'
-            value={formInput.maxLength || undefined}
+            value={formInput.maxLength || ''}
             onChange={handleChange}
           />
         )}

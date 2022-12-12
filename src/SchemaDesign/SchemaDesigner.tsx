@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import { Schema, SchemaQuestion, SplitSchema, SchemaType, Step } from '@/types/interfaces'
 import { withTheme } from '@rjsf/core'
 import Box from '@mui/material/Box'
@@ -10,8 +9,8 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import React, { useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import React, { useEffect, useState } from 'react'
+import { DragDropContext, Droppable, Draggable, DraggableProvided } from 'react-beautiful-dnd'
 import { getStepsFromSchema } from '@/utils/formUtils'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
@@ -37,20 +36,20 @@ import QuestionPicker from './QuestionPicker'
 const SchemaForm = withTheme(MaterialUITheme)
 
 export default function SchemaDesigner() {
-  const [questionPickerOpen, setQuestionPickerOpen] = React.useState(false)
-  const [steps, setSteps] = React.useState<any[]>([])
-  const [stepName, setStepName] = React.useState('')
-  const [stepReference, setStepReference] = React.useState('')
-  const [selectedStep, setSelectedStep] = React.useState('')
-  const [splitSchema, setSplitSchema] = React.useState<SplitSchema>({ reference: '', steps: [] })
-  const [schemaName, setSchemaName] = React.useState('')
-  const [showForm, setShowForm] = React.useState(true)
-  const [schemaReference, setSchemaReference] = React.useState('')
-  const [schemaUse, setSchemaUse] = React.useState<SchemaType>('UPLOAD')
-  const [newStepDialogOpen, setNewStepDialogOpen] = React.useState(false)
-  const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = React.useState(false)
-  const [schema, setSchema] = React.useState<Schema | undefined>(undefined)
-  const [stepErrorText, setStepErrorText] = React.useState('')
+  const [questionPickerOpen, setQuestionPickerOpen] = useState(false)
+  const [steps, setSteps] = useState<any[]>([])
+  const [stepName, setStepName] = useState('')
+  const [stepReference, setStepReference] = useState('')
+  const [selectedStep, setSelectedStep] = useState('')
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
+  const [schemaName, setSchemaName] = useState('')
+  const [showForm, setShowForm] = useState(true)
+  const [schemaReference, setSchemaReference] = useState('')
+  const [schemaUse, setSchemaUse] = useState<SchemaType>('UPLOAD')
+  const [newStepDialogOpen, setNewStepDialogOpen] = useState(false)
+  const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = useState(false)
+  const [schema, setSchema] = useState<Schema | undefined>(undefined)
+  const [stepErrorText, setStepErrorText] = useState('')
 
   const stepIndex = steps.findIndex((step) => step.reference === selectedStep)
 
@@ -149,16 +148,16 @@ export default function SchemaDesigner() {
     const question = data
     question.reference = data.reference === '' ? _.camelCase(data.title) : _.camelCase(data.reference)
     const updatedSteps = steps
-    const stepToAmmend = updatedSteps.find((step) => step.reference === selectedStep)
-    const updatedQuestions = stepToAmmend.questions
+    const stepToAmend = updatedSteps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = stepToAmend.questions
     updatedQuestions.push(data)
     setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
 
   const deleteQuestion = (questionReference: string) => {
     const updatedSteps = steps
-    const stepToAmmend = updatedSteps.find((step) => step.reference === selectedStep)
-    const updatedQuestions = stepToAmmend.questions.filter((question) => question.reference !== questionReference)
+    const stepToAmend = updatedSteps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = stepToAmend.questions.filter((question) => question.reference !== questionReference)
     setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
 
@@ -166,9 +165,8 @@ export default function SchemaDesigner() {
     const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
     if (schema) {
       const userSchema = { ...schema, name: schemaName, reference, use: schemaUse }
-      console.log(userSchema)
     }
-    // Submit schema
+    // todo - implemented schema submission (BAI-387)
   }
 
   const reorder = (list, startIndex, endIndex) => {
@@ -186,8 +184,8 @@ export default function SchemaDesigner() {
     if (result.destination.index === result.source.index) {
       return
     }
-    const stepToAmmend = steps.find((step) => step.reference === selectedStep)
-    const updatedQuestions = reorder(stepToAmmend.questions, result.source.index, result.destination.index)
+    const stepToAmend = steps.find((step) => step.reference === selectedStep)
+    const updatedQuestions = reorder(stepToAmend.questions, result.source.index, result.destination.index)
 
     setSteps(steps.map((step) => (step.reference === selectedStep ? { ...step, questions: updatedQuestions } : step)))
   }
@@ -270,7 +268,7 @@ export default function SchemaDesigner() {
                             <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
                               {step.questions.map((question, index) => (
                                 <Draggable key={question.title} draggableId={question.title} index={index}>
-                                  {(draggableProvided) => (
+                                  {(draggableProvided: DraggableProvided) => (
                                     <div
                                       ref={draggableProvided.innerRef}
                                       {...draggableProvided.draggableProps}
