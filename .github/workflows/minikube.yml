@@ -29,11 +29,11 @@ jobs:
     - run: npm run certs
     
     # remove route set for openshift
-    - name: remote route config
+    - name: remove route config
       run: sudo rm helm/bailo/templates/route.yaml
     
     # Create local.yaml
-    - name: overwrite values.yaml in local.yaml
+    - name: Create local.yaml
       run: |
         cat << EOT >> helm/bailo/local.yaml
         ---
