@@ -14,10 +14,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Start minikube
       uses: medyagh/setup-minikube@master
-    - name: Try the cluster !
+    - name: List cluster
       run: kubectl get pods -A
     - name: Build image
-      working-directory: Bailo
+      #working-directory: Bailo
       run: |
         export SHELL=/bin/bash
         eval $(minikube -p minikube docker-env)
