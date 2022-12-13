@@ -108,19 +108,16 @@ jobs:
       - name: List Cluster
         run: kubectl get pods -A
 
-      #- name: Build Image
-      #  run: |
-      #    export SHELL=/bin/bash
-      #    eval $(minikube -p minikube docker-env)
-      #    docker build -f ./Dockerfile.prod -t local/bailo .
-      #    echo -n "verifying images:"
-      #    docker imags
-      
       - name: Build Image
-        run: |          
-          minikube image build -t local/bailo Dockerfile.prod
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -f ./Dockerfile.prod -t local/bailo .
           echo -n "verifying images:"
-          docker minikube image ls
+          docker images
+      
+      - name: Load docker image to minikube
+        run: docker save local/bailo | (eval $(minikube docker-env) && docker load)
  
       - name: HELM update depency update
         run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
