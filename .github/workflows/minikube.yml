@@ -63,7 +63,7 @@ jobs:
 
           # Bailo
           image:
-            repository: "bailo"
+            repository: "local/bailo"
             tag: "latest"
 
           # Used for k8s not openshift
@@ -106,14 +106,16 @@ jobs:
         run: kubectl get pods -A
 
       - name: Build image
-        #working-directory: Bailo
         run: |
           export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
-          docker build -f ./Dockerfile.prod -t bailo .
+          docker build -f ./Dockerfile.prod -t local/bailo .
           echo -n "verifying images:"
           docker images
-
+          
+      - name: HELM update depency update
+        run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
+        
 #    - name: Deploy to minikube
 #      run:
 #        kubectl apply -f deploy-to-minikube.yaml
