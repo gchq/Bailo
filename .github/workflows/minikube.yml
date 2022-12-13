@@ -78,7 +78,7 @@ jobs:
                 - bailo_user
             image:
               registry: docker.io
-            host: 'bailo-mongodb.yetToConfirm:31110/bailo'
+            host: 'bailo-mongodb:31110/bailo'
 
           minio:
             image:
@@ -99,23 +99,29 @@ jobs:
             key: key.pem
           EOT
 
+      - name: Set Bailo image pull policy to Never
+        run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' helm/bailo/templates/bailo/bailo.deployment.yaml
+
       - name: Start minikube
         uses: medyagh/setup-minikube@master
 
-      - name: List cluster
+      - name: List Cluster
         run: kubectl get pods -A
 
-      - name: Build image
+      - name: Build Image
         run: |
           export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
           docker build -f ./Dockerfile.prod -t local/bailo .
           echo -n "verifying images:"
           docker images
-          
+
+      - name: Load docker image to minikube
+        run: minikube image load local/bailo
+
       - name: HELM update depency update
         run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
-        
+
 #    - name: Deploy to minikube
 #      run:
 #        kubectl apply -f deploy-to-minikube.yaml
