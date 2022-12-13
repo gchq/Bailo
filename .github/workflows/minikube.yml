@@ -119,13 +119,13 @@ jobs:
           docker build -f ./Dockerfile.prod -t local/bailo .
           echo -n "verifying images:"
           docker images
-      
+
       - name: Load docker image to minikube
         run: |
           export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
           docker save local/bailo | (eval $(minikube docker-env) && docker load)
- 
+
       - name: HELM update dependency update
         run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
 
@@ -134,7 +134,7 @@ jobs:
 
       - name: Sleep for 30 seconds
         run: sleep 90s
-        shell: bash 
+        shell: bash
 
       - name: List Pods and Services
         run: |
