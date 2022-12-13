@@ -133,7 +133,7 @@ jobs:
         run: current_dir=$PWD;cd helm/bailo/;helm install --values ./local.yaml bailo .;cd $current_dir;
 
       - name: Sleep for 30 seconds
-        run: sleep 30s
+        run: sleep 90s
         shell: bash 
 
       - name: List Pods and Services
