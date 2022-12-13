@@ -132,14 +132,15 @@ jobs:
       - name: HELM deploy to minikube
         run: current_dir=$PWD;cd helm/bailo/;helm install --values ./local.yaml bailo .;cd $current_dir;
 
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash 
+
       - name: List Pods and Services
         run: |
-          kubectl get services -o wide
-          kubectl get pods -o wide
+          kubectl get services
+          kubectl get pods
 
-#    - name: Deploy to minikube
-#      run:
-#        kubectl apply -f deploy-to-minikube.yaml
 #    - name: Test service URLs
 #      run: |
 #        minikube service list
