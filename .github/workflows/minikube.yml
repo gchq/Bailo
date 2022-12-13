@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # HELM Config
       - name: Install Helm
         uses: azure/setup-helm@v3
         with:
@@ -93,6 +94,9 @@ jobs:
 
           maildev:
             enabled: true
+            
+          openshift:
+            appPublicRoute: need.to.set.ingress
 
           nginxcert:
             cert: cert.pem
@@ -117,7 +121,10 @@ jobs:
           docker images
       
       - name: Load docker image to minikube
-        run: docker save local/bailo | (eval $(minikube docker-env) && docker load)
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker save local/bailo | (eval $(minikube docker-env) && docker load)
  
       - name: HELM update depency update
         run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
