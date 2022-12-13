@@ -1,4 +1,4 @@
-name: MiniKube
+ame: MiniKube
 
 on:
   push:
@@ -11,108 +11,109 @@ jobs:
     runs-on: ubuntu-latest
     name: build and deploy to minikube
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Install Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: v3.10.0
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.10.0
 
-    - run: mkdir logs
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    # Install dependencies
-    - run: npm ci
+      - run: mkdir logs
 
-    # Create certs
-    - run: sudo chown -R runner:docker certs
-    - run: npm run certs
-    
-    # remove route set for openshift
-    - name: remove route config
-      run: sudo rm helm/bailo/templates/route.yaml
-    
-    # Create local.yaml
-    - name: Create local.yaml
-      run: |
-        cat << EOT >> helm/bailo/local.yaml
-        ---
-        # Instance Settings
-        config:
-          s2i:
-            image: seldonio/seldon-core-s2i-python37:1.10.0
-          supportEmail: "support@example.com"
-          documentationLink: "https://example.com/support"
+      # Install dependencies
+      - run: npm ci
 
-          ui:
-            banner:
-              text: "BAILO"
-              colour: '#047a06'
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
 
-          smtp:
-            host: 'mail'
-            from: 'bailo@example.com'
+      # remove route set for openshift
+      - name: remove route config
+        run: sudo rm helm/bailo/templates/route.yaml
 
-          schema:
-            script: "dist/server/scripts/exampleSetAllSchemas.js"
+      # Create local.yaml
+      - name: Create local.yaml
+        run: |
+          cat << EOT >> helm/bailo/local.yaml
+          ---
+          # Instance Settings
+          config:
+            s2i:
+              image: seldonio/seldon-core-s2i-python37:1.10.0
+            supportEmail: "support@example.com"
+            documentationLink: "https://example.com/support"
 
-        # Bailo
-        image:
-          repository: "bailo"
-          tag: "latest"
+            ui:
+              banner:
+                text: "BAILO"
+                colour: '#047a06'
 
-        # Used for k8s not openshift
-        ingress:
-          enabled: false
+            smtp:
+              host: 'mail'
+              from: 'bailo@example.com'
 
-        mongodb:
-          auth:
-            passwords:
-              - MongoDBPassword
-            usernames:
-              - bailo_user
+            schema:
+              script: "dist/server/scripts/exampleSetAllSchemas.js"
+
+          # Bailo
           image:
-            registry: docker.io
-          host: 'bailo-mongodb.yetToConfirm:31110/bailo'
+            repository: "bailo"
+            tag: "latest"
 
-        minio:
-          image:
-            registry: docker.io
-          persistence:
-            size: 20Gi
+          # Used for k8s not openshift
+          ingress:
+            enabled: false
 
-        registry:
-          repository: registry
-          certFile: cert.pem
-          keyFile: key.pem
+          mongodb:
+            auth:
+              passwords:
+                - MongoDBPassword
+              usernames:
+                - bailo_user
+            image:
+              registry: docker.io
+            host: 'bailo-mongodb.yetToConfirm:31110/bailo'
 
-        maildev:
-          enabled: true
+          minio:
+            image:
+              registry: docker.io
+            persistence:
+              size: 20Gi
 
-        nginxcert:
-          cert: cert.pem
-          key: key.pem
-        EOT
-  
-    - name: Start minikube
-      uses: medyagh/setup-minikube@master
-      
-    - name: List cluster
-      run: kubectl get pods -A
-      
-    - name: Build image
-      #working-directory: Bailo
-      run: |
-        export SHELL=/bin/bash
-        eval $(minikube -p minikube docker-env)
-        docker build -f ./Dockerfile.prod -t bailo .
-        echo -n "verifying images:"
-        docker images        
+          registry:
+            repository: registry
+            certFile: cert.pem
+            keyFile: key.pem
+
+          maildev:
+            enabled: true
+
+          nginxcert:
+            cert: cert.pem
+            key: key.pem
+          EOT
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: List cluster
+        run: kubectl get pods -A
+
+      - name: Build image
+        #working-directory: Bailo
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -f ./Dockerfile.prod -t bailo .
+          echo -n "verifying images:"
+          docker images
+
 #    - name: Deploy to minikube
 #      run:
 #        kubectl apply -f deploy-to-minikube.yaml
