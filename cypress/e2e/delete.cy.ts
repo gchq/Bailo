@@ -2,7 +2,7 @@ import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
 
 let modelUrl = ''
 
-describe('Model with model card only', () => {
+describe('delete version', () => {
   before(() => {
     cy.log('Navigate to Upload page and json tab')
     cy.visit('/upload')
