@@ -1,4 +1,4 @@
-name: App Test / Build
+name: App E2E Tests
 
 on:
   push:
@@ -29,16 +29,9 @@ jobs:
       # Install dependencies
       - run: npm ci
 
-      # Linting
-      - run: npm run check-style
-      - run: npm run lint
-
       # Create certs
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
-
-      # Run unit tests
-      - run: npm run test
 
       # Setup dependencies
       - name: Build the stack
@@ -77,9 +70,6 @@ jobs:
 
       # Run Cypress integration tests
       - run: npm run cy:run
-
-      # Run Selenium integration tests
-      - run: HEADLESS=true npm run integration
 
       - name: Dump docker-compose logs
         if: always()

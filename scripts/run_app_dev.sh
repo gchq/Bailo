@@ -3,7 +3,7 @@
 update-ca-certificates
 
 echo "Running 'npm install'"
-npm install 
+npm install
 
 if [[ -z "${SCHEMA_SETUP_SCRIPT}" ]]; then
   echo "No schemas setup script set; You will have to add schemas after startup"

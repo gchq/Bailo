@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import getAppRoot from 'app-root-path'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
@@ -21,6 +22,7 @@ import { serializedUserFields } from '../services/user'
 import { serializedVersionFields } from '../services/version'
 import { ensurePathExists, getFilesInDir } from './filesystem'
 import { consoleError } from '../../utils/logging'
+import LogModel from '../models/Log'
 
 const appRoot = getAppRoot.toString()
 
@@ -109,6 +111,18 @@ class Writer {
   }
 }
 
+class MongoWriter {
+  async write(data: any) {
+    // sometimes we are unable to write log messages to the database
+    if (data.log === false) {
+      return
+    }
+
+    const log = new LogModel(data)
+    await log.save()
+  }
+}
+
 export interface SerializerOptions {
   mandatory?: Array<string>
   optional?: Array<string>
@@ -146,11 +160,17 @@ export function createSerializer(options: SerializerOptions) {
   }
 }
 
-const streams: Array<bunyan.Stream> = []
+const streams: Array<bunyan.Stream> = [
+  {
+    level: 'trace',
+    type: 'raw',
+    stream: new MongoWriter(),
+  },
+]
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'info',
+    level: 'trace',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
@@ -192,7 +212,7 @@ async function processStroomFiles() {
       await sendLogsToStroom(name)
     } catch (e) {
       // ironically we cannot use our logger here.
-      consoleError('Unable to send logs to ACE', e)
+      consoleError('Unable to send logs to stroom', e)
     }
   }
 }
@@ -238,12 +258,12 @@ if (config.get('logging.stroom.enabled')) {
     },
   })
 
-  // send logs to ACE every hour
+  // send logs to stroom every hour
   processStroomFiles()
   setInterval(() => {
     date = new Date()
     processStroomFiles()
-  }, 1000 * 60 * 60)
+  }, config.get('logging.stroom.interval'))
 
   streams.push({
     level: 'trace',
@@ -279,6 +299,7 @@ const morganLog = morgan<any, any>(
         method: tokens.method(req, res),
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
+        code: 'request',
       },
       tokens.dev(morgan, req, res)
     )

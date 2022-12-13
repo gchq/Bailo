@@ -71,6 +71,9 @@ module.exports = {
       showWarning: true,
       checkboxText: 'By checking here you confirm that the information is correct',
     },
+    development: {
+      logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
+    },
     seldonVersions: [
       {
         name: 'seldonio - 1.10.0',
@@ -109,6 +112,7 @@ module.exports = {
       environment: 'insecure',
       feed: 'bailo',
       system: 'bailo',
+      interval: 1000 * 60 * 5,
     },
   },
 

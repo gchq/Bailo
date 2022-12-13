@@ -148,7 +148,7 @@ class OpenShiftBuildDockerfile extends BuildStep {
     }
 
     const buildLog = await client.apis.build.v1.ns(namespace).builds(buildName).log.get()
-    buildLog.body.split(/\r?\n/).forEach((line: string) => version.log('info', line))
+    buildLog.body.split(/\r?\n/).forEach((line: string) => this.logger.info({}, line))
 
     // TODO clean up
     this.logger.info({}, 'Not yet complete')
