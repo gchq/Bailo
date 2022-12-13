@@ -381,7 +381,7 @@ export default function SchemaDesigner() {
             The schema name and reference must be unique, if the reference is left blank it will be generated
             automatically using the schema name.
           </DialogContentText>
-          <Stack spacing={1}>
+          <Stack spacing={2}>
             <TextField
               label='Schema reference'
               onChange={(event): void => setSchemaReference(event.target.value)}
@@ -393,17 +393,15 @@ export default function SchemaDesigner() {
               onChange={(event): void => setSchemaName(event.target.value)}
               value={schemaName}
             />
-            <InputLabel id='schema-use-label'>Schema Type</InputLabel>
-            <Select
-              labelId='schema-use-label'
-              id='demo-simple-select'
-              value={schemaUse}
+            <TextField
+              select
               label='Schema Type'
+              value={schemaUse}
               onChange={(event): void => setSchemaUse(event.target.value as SchemaType)}
             >
               <MenuItem value='UPLOAD'>Upload</MenuItem>
               <MenuItem value='DEPLOYMENT'>Deployment</MenuItem>
-            </Select>
+            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions>
