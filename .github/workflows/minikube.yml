@@ -1,4 +1,4 @@
-ame: MiniKube
+name: MiniKube
 
 on:
   push:
