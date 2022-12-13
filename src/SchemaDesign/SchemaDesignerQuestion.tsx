@@ -19,7 +19,7 @@ export default function SchemaDesignerQuestion({
   closeQuestionPicker,
 }: {
   onSubmit: (data: SchemaQuestion) => void
-  question: DesignerQuestion // type this
+  question: DesignerQuestion
   closeQuestionPicker: () => void
 }) {
   const [formInput, setFormInput] = useState<SchemaQuestion>({
@@ -66,6 +66,7 @@ export default function SchemaDesignerQuestion({
           <TextField
             label='Minimum length'
             type='number'
+            disabled
             name='minLength'
             value={formInput.minLength || ''}
             onChange={handleChange}
@@ -75,6 +76,7 @@ export default function SchemaDesignerQuestion({
           <TextField
             label='Maximum length'
             type='number'
+            disabled
             name='maxLength'
             value={formInput.maxLength || ''}
             onChange={handleChange}

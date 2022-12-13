@@ -9,8 +9,8 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import React, { useEffect, useState } from 'react'
-import { DragDropContext, Droppable, Draggable, DraggableProvided } from 'react-beautiful-dnd'
+import React, { Fragment, useEffect, useState } from 'react'
+import { DragDropContext, Droppable, Draggable, DraggableProvided, DroppableProvided } from 'react-beautiful-dnd'
 import { getStepsFromSchema } from '@/utils/formUtils'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
@@ -30,6 +30,7 @@ import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
 import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Clear'
+import { useTheme } from '@mui/material/styles'
 import { Theme as MaterialUITheme } from '../MuiForms'
 import QuestionPicker from './QuestionPicker'
 
@@ -52,6 +53,7 @@ export default function SchemaDesigner() {
   const [stepErrorText, setStepErrorText] = useState('')
 
   const stepIndex = steps.findIndex((step) => step.reference === selectedStep)
+  const theme = useTheme()
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -191,8 +193,9 @@ export default function SchemaDesigner() {
   }
 
   const deleteStep = (step: string) => {
-    const updatedSteps = steps.filter((stepToRemove) => stepToRemove === step)
+    const updatedSteps = steps.filter((stepToRemove) => stepToRemove.reference !== step)
     setSteps(updatedSteps)
+    setSelectedStep('')
   }
 
   const getQuestionIcon = (type: string) => {
@@ -206,13 +209,13 @@ export default function SchemaDesigner() {
   }
 
   return (
-    <Box>
-      <Alert sx={{ mt: 2, mb: 2 }} severity='info'>
+    <>
+      <Alert sx={{ my: 2 }} severity='info'>
         This page is currently not fully implemented. More advanced schema options will be added in the future.
       </Alert>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={6}>
-          <Box>
+        <Grid item xs={12} md={6}>
+          <>
             <Typography sx={{ mb: 2 }} variant='h4'>
               Configure Schema
             </Typography>
@@ -258,13 +261,13 @@ export default function SchemaDesigner() {
               </Stack>
 
               {steps.map((step) => (
-                <Box key={step.reference}>
+                <Fragment key={step.reference}>
                   {step.reference === selectedStep && (
                     <Box sx={{ pt: 2 }}>
                       <Typography variant='caption'>Questions can be reordered by drag and drop</Typography>
                       <DragDropContext onDragEnd={onQuestionDragEnd}>
                         <Droppable droppableId='questionList'>
-                          {(droppableProvided) => (
+                          {(droppableProvided: DroppableProvided) => (
                             <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
                               {step.questions.map((question, index) => (
                                 <Draggable key={question.title} draggableId={question.title} index={index}>
@@ -298,13 +301,13 @@ export default function SchemaDesigner() {
                       <Button onClick={handleClickOpen}>Add new question</Button>
                     </Box>
                   )}
-                </Box>
+                </Fragment>
               ))}
               {selectedStep === '' && <Typography>Add a new step to begin designing your schema</Typography>}
             </Paper>
-          </Box>
+          </>
         </Grid>
-        <Grid item xs={12} sm={12} md={6}>
+        <Grid item xs={12} md={6}>
           <Typography sx={{ mb: 2 }} variant='h4'>
             Preview
           </Typography>
@@ -322,15 +325,12 @@ export default function SchemaDesigner() {
                 schema={splitSchema.steps[stepIndex].schema}
                 formData={splitSchema.steps[stepIndex].state}
                 uiSchema={splitSchema.steps[stepIndex].uiSchema}
-              >
-                {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-                <></>
-              </SchemaForm>
+              />
             )}
           </Paper>
         </Grid>
       </Grid>
-      <Divider orientation='horizontal' flexItem sx={{ mt: 4, mb: 4 }} />
+      <Divider orientation='horizontal' flexItem sx={{ my: 4 }} />
       <Box sx={{ textAlign: 'right' }}>
         <Button variant='contained' onClick={() => setSubmitSchemaDialogOpen(true)} disabled={steps.length === 0}>
           Submit schema
@@ -362,7 +362,7 @@ export default function SchemaDesigner() {
                   onChange={(event): void => setStepName(event.target.value)}
                   value={stepName}
                 />
-                <Typography variant='caption' sx={{ color: '#e35a5a' }}>
+                <Typography variant='caption' sx={{ color: theme.palette.error.main }}>
                   {stepErrorText}
                 </Typography>
               </Stack>
@@ -411,6 +411,6 @@ export default function SchemaDesigner() {
           <Button onClick={submitSchema}>Submit</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   )
 }

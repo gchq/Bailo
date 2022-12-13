@@ -254,12 +254,3 @@ export type SchemaQuestion = {
   widget?: string
   readOnly?: boolean
 }
-
-export type SchemaPage = {
-  title: string
-  description: string
-  type: string
-  properties: SchemaQuestion
-  required: string[]
-  additionalProperties: boolean
-}
