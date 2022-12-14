@@ -58,7 +58,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > :last-child', { timeout: 300000 }).should(
+    cy.get('[data-test=terminalLog] > :last-child', { timeout: 350000 }).should(
       'contain',
       'Successfully completed build'
     )

@@ -1051,6 +1051,25 @@ function generateSpecification() {
             },
           },
         },
+        delete: {
+          tags: ['version'],
+          description:
+            "Delete a specific version by it's internal ID. This will also delete any associated requests, and also any model/deployment documents depending on how many versions are left.",
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              description: 'ID of version to delete.',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'ID of the deleted version.',
+              type: 'string',
+            },
+          },
+        },
       },
       '/version/{id}/reset-approvals': {
         post: {

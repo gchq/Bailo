@@ -28,7 +28,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
-import { postEndpoint, putEndpoint } from 'data/api'
+import { postEndpoint, putEndpoint, deleteEndpoint } from 'data/api'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { Types } from 'mongoose'
@@ -42,12 +42,13 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
-import { getErrorMessage } from '@/utils/fetcher'
+import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -86,6 +87,8 @@ function Model() {
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
   const sendNotification = useNotification()
@@ -229,6 +232,25 @@ function Model() {
       mutateVersion()
     } else {
       sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
+  }
+
+  const handleDelete = () => {
+    setDeleteModelErrorMessage('')
+    setDeleteConfirmOpen(true)
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false)
+  }
+
+  const handleDeleteConfirm = async () => {
+    const response = await deleteEndpoint(`/api/v1/version/${version._id}`)
+
+    if (response.ok) {
+      router.push('/')
+    } else {
+      setDeleteModelErrorMessage(await getErrorMessage(response))
     }
   }
 
@@ -498,7 +520,7 @@ function Model() {
         )}
 
         {group === 'settings' && (
-          <>
+          <Box data-test='modelSettingsPage'>
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
@@ -510,14 +532,40 @@ function Model() {
             </Box>
 
             <Box sx={{ mb: 4 }} />
-
+            <ConfirmationDialogue
+              open={deleteConfirmOpen}
+              title='Delete version'
+              onConfirm={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
+              errorMessage={deleteModelErrorMessage}
+            />
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error'>
-              Delete Model
-            </Button>
-          </>
+            <Stack direction='row' spacing={2}>
+              <DisabledElementTooltip
+                conditions={[
+                  currentUser.id !== version?.metadata?.contacts?.uploader
+                    ? 'You do not have permission to delete this version.'
+                    : '',
+                ]}
+                placement='bottom'
+              >
+                <Button
+                  variant='contained'
+                  disabled={currentUser.id !== version?.metadata?.contacts?.uploader}
+                  color='error'
+                  onClick={handleDelete}
+                  data-test='deleteVersionButton'
+                >
+                  Delete version
+                </Button>
+              </DisabledElementTooltip>
+              <Button variant='contained' color='error' disabled data-test='deleteModelButton'>
+                Delete model
+              </Button>
+            </Stack>
+          </Box>
         )}
       </Paper>
     </Wrapper>

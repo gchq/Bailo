@@ -1,4 +1,5 @@
 import { Document, model, Schema, Types } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
 import { UserDoc } from './User'
@@ -54,6 +55,12 @@ const DeploymentSchema = new Schema<Deployment>(
     timestamps: true,
   }
 )
+
+DeploymentSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+})
 
 DeploymentSchema.methods.log = async function log(level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)

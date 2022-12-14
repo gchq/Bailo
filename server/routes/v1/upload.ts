@@ -123,6 +123,7 @@ export const postUpload = [
     let mode: UploadModes
 
     const prop = typeof req.query.mode === 'string' ? getPropertyFromEnumValue(UploadModes, req.query.mode) : undefined
+
     if (!req.query.mode) {
       mode = UploadModes.NewModel
     } else if (prop) {

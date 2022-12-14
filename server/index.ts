@@ -30,13 +30,21 @@ import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
-import { getVersion, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
+import {
+  deleteVersion,
+  getVersion,
+  putVersion,
+  postResetVersionApprovals,
+  putUpdateLastViewed,
+} from './routes/v1/version'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
 import { connectToMongoose } from './utils/database'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
+
+import { createRegistryClient, getImageDigest, deleteImageTag } from './utils/registry'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -72,8 +80,9 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
-server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
-server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
+server.delete('/api/v1/version/:id', ...deleteVersion)
+server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
+server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
@@ -110,6 +119,20 @@ export async function startServer() {
     ensureBucketExists(config.get('minio.uploadBucket'))
     ensureBucketExists(config.get('minio.registryBucket'))
   }
+
+  const registry = await createRegistryClient()
+  console.log(
+    await getImageDigest(registry, {
+      namespace: 'user',
+      model: 'yolo-v4-tiny-2x44vf',
+      version: 'v1.8',
+    })
+  )
+  // await deleteImageTag(registry, {
+  //   namespace: 'user',
+  //   model: 'yolo-v4-tiny-2x44vf',
+  //   version: 'v1.8',
+  // })
 
   // we don't actually need to wait for mongoose to connect before
   // we start serving connections
