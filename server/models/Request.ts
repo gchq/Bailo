@@ -1,4 +1,5 @@
 import { Document, model, Schema, Types } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import { DeploymentDoc } from './Deployment'
 import { Entity, approvalStateOptions, ApprovalStates, EntityKind } from '../../types/interfaces'
 import { VersionDoc } from './Version'
@@ -61,6 +62,8 @@ const RequestSchema = new Schema<Request>(
     timestamps: true,
   }
 )
+
+RequestSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const RequestModel = model<Request>('Request', RequestSchema)
 export default RequestModel

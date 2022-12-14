@@ -1,112 +1,172 @@
+import axios, { AxiosResponse, Method } from 'axios'
 import https from 'https'
 import config from 'config'
-import { getAccessToken } from '../routes/v1/registryAuth'
+import { Access, getAccessToken } from '../routes/v1/registryAuth'
 import logger from './logger'
+
+export enum ContentTypes {
+  APPLICATION_OCTET_STREAM = 'application/octet-stream',
+  APPLICATION_MANIFEST = 'application/vnd.docker.distribution.manifest.v2+json',
+  APPLICATION_LAYER = 'application/vnd.docker.image.rootfs.diff.tar',
+  APPLICATION_CONFIG = 'application/vnd.docker.container.image.v1+json',
+}
+
+interface Registry {
+  address: string
+  agent: https.Agent
+}
 
 interface ImageRef {
   namespace: string
-  image: string
+  model: string
   version: string
 }
 
-const httpsAgent = new https.Agent({
-  rejectUnauthorized: !config.get('registry.insecure'),
-})
-
-export async function makeRegistryRequest({
-  endpoint,
-  authorisation,
-  body,
-  headers = {},
-  metadata = {},
-  method = 'GET',
-  json = true,
-}: {
-  endpoint: string
-  authorisation: string
-  body?: string
-  method?: string
-  headers?: any
-  metadata?: any
-  json?: boolean
-}) {
-  const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
-
-  return fetch(`${registry}${endpoint}`, {
-    ...metadata,
-    method,
-    headers: {
-      ...headers,
-      Authorization: authorisation,
-    },
-    body,
-    agent: httpsAgent,
-  } as RequestInit).then((res: any) => {
-    logger.info(
-      {
-        status: res.status,
-        endpoint,
-      },
-      'Made registry request'
-    )
-
-    if (res.status >= 400) {
-      throw new Error(`Invalid status response: ${res.status}`)
-    }
-
-    if (json) {
-      return res.json()
-    }
-
-    return res
+export async function createRegistryClient(): Promise<Registry> {
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: !config.get('registry.insecure'),
   })
+
+  return {
+    address: `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`,
+    agent: httpsAgent,
+  }
 }
 
-export async function copyDockerImage(from: ImageRef, to: ImageRef, log: (level: string, message: string) => void) {
-  const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
-    { type: 'repository', name: `${from.namespace}/${from.image}`, actions: ['pull'] },
-    { type: 'repository', name: `${to.namespace}/${to.image}`, actions: ['push', 'pull'] },
-  ])
+interface Request {
+  path: string
+  method: Method
+  authorisation: string
+  body: any
+  headers?: Record<string, string>
+}
+
+export async function makeRegistryRequest<T>(registry: Registry, req: Request): Promise<AxiosResponse<T>> {
+  const res = await axios({
+    url: `${registry.address}${req.path}`,
+    method: req.method,
+    httpsAgent: registry.agent,
+    headers: {
+      ...req.headers,
+      Authorization: req.authorisation,
+    },
+    validateStatus: (status) => status < 500,
+  })
+
+  return res
+}
+
+export async function getAdminAuthorisation(scope: Array<Access>): Promise<string> {
+  const token = await getAccessToken({ id: 'admin', _id: 'admin' }, scope)
   const authorisation = `Bearer ${token}`
 
-  const manifest = await makeRegistryRequest({
-    endpoint: `/${from.namespace}/${from.image}/manifests/${from.version}`,
+  return authorisation
+}
+
+export async function getImageDigest(registry: Registry, image: ImageRef): Promise<string | undefined> {
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${image.namespace}/${image.model}`, actions: ['pull'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${image.namespace}/${image.model}/manifests/${image.version}`,
+    method: 'HEAD',
     authorisation,
     headers: {
-      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+      Accept: ContentTypes.APPLICATION_MANIFEST,
+    },
+  })
+
+  if (res.status === 404) {
+    return undefined
+  }
+
+  if (res.status !== 200) {
+    logger.error({ status: res.status, image }, 'Invalid registry request response when getting image digest')
+    throw new Error('Invalid registry request response')
+  }
+
+  const digest = res.headers['docker-content-digest']
+  logger.info({ image, digest }, 'Found image digest')
+
+  return digest
+}
+
+export async function deleteImageTag(registry: Registry, image: ImageRef) {
+  const digest = await getImageDigest(registry, image)
+
+  if (!digest) {
+    logger.info({ image, digest }, 'Invalid image tag, unable to remove')
+    throw new Error('Image not found')
+  }
+
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${image.namespace}/${image.model}`, actions: ['pull', 'delete'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${image.namespace}/${image.model}/manifests/${digest}`,
+    method: 'DELETE',
+    authorisation,
+    headers: {
+      Accept: ContentTypes.APPLICATION_MANIFEST,
+    },
+  })
+
+  if (res.status >= 400) {
+    const error = `Unable to delete registry image: ${await res.data}`
+    logger.error({ image }, error)
+    throw new Error(error)
+  }
+}
+
+export async function copyDockerImage(
+  registry: Registry,
+  from: ImageRef,
+  to: ImageRef,
+  log: (level: string, message: string) => void
+) {
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${from.namespace}/${from.model}`, actions: ['pull'] },
+    { type: 'repository', name: `${to.namespace}/${to.model}`, actions: ['push', 'pull'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${from.namespace}/${from.model}/manifests/${from.version}`,
+    method: 'GET',
+    authorisation,
+    headers: {
+      Accept: ContentTypes.APPLICATION_MANIFEST,
     },
   })
 
   await Promise.all(
-    manifest.layers.map(async (layer: any) => {
-      await makeRegistryRequest({
-        endpoint: `/${to.namespace}/${to.image}/blobs/uploads/?mount=${layer.digest}&from=${from.namespace}/${from.image}`,
-        authorisation,
-        json: false,
+    res.data.manifest.layers.map(async (layer: any) => {
+      await makeRegistryRequest<any>(registry, {
+        path: `/${to.namespace}/${to.model}/blobs/uploads/?mount=${layer.digest}&from=${from.namespace}/${from.model}`,
         method: 'POST',
+        authorisation,
       })
 
       log('info', `Copied layer ${layer.digest}`)
     })
   )
 
-  await makeRegistryRequest({
-    endpoint: `/${to.namespace}/${to.image}/blobs/uploads/?mount=${manifest.config.digest}&from=${from.namespace}/${from.image}`,
+  await makeRegistryRequest(registry, {
+    path: `/${to.namespace}/${to.model}/blobs/uploads/?mount=${res.data.config.digest}&from=${from.namespace}/${from.model}`,
     method: 'POST',
     authorisation,
-    json: false,
   })
 
   log('info', 'Copied manifest to new repository')
 
-  await makeRegistryRequest({
-    endpoint: `/${to.namespace}/${to.image}/manifests/${to.version}`,
+  await makeRegistryRequest(registry, {
+    path: `/${to.namespace}/${to.model}/manifests/${to.version}`,
     method: 'PUT',
     authorisation,
-    body: JSON.stringify(manifest),
-    json: false,
+    body: JSON.stringify(res.data),
     headers: {
-      'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
+      'Content-Type': ContentTypes.APPLICATION_MANIFEST,
     },
   })
 

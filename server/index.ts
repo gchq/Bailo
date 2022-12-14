@@ -32,7 +32,14 @@ import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
-import { getVersion, getVersionAccess, putVersion, resetVersionApprovals, updateLastViewed } from './routes/v1/version'
+import {
+  getVersion,
+  getVersionAccess,
+  deleteVersion,
+  putVersion,
+  postResetVersionApprovals,
+  putUpdateLastViewed,
+} from './routes/v1/version'
 import { runMigrations, connectToMongoose } from './utils/database'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
@@ -76,9 +83,10 @@ server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
-server.post('/api/v1/version/:id/reset-approvals', ...resetVersionApprovals)
-server.put('/api/v1/version/:id/lastViewed/:role', ...updateLastViewed)
 server.get('/api/v1/version/:id/access', ...getVersionAccess)
+server.delete('/api/v1/version/:id', ...deleteVersion)
+server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
+server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
