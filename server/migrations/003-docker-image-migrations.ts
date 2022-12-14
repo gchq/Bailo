@@ -2,7 +2,7 @@ import logger from '../utils/logger'
 import DeploymentModel from '../models/Deployment'
 import ModelModel from '../models/Model'
 import VersionModel from '../models/Version'
-import { copyDockerImage } from '../utils/registry'
+import { copyDockerImage, createRegistryClient } from '../utils/registry'
 
 export async function up() {
   const deployments = await DeploymentModel.find({})
@@ -16,9 +16,11 @@ export async function up() {
         const version = await VersionModel.findById(versionId)
         if (!version) throw new Error('Version not found')
 
+        const registry = await createRegistryClient()
         await copyDockerImage(
-          { namespace: 'internal', image: model.uuid, version: version.version },
-          { namespace: deployment.uuid, image: model.uuid, version: version.version },
+          registry,
+          { namespace: 'internal', model: model.uuid, version: version.version },
+          { namespace: deployment.uuid, model: model.uuid, version: version.version },
           (level: string, message: string) => {
             logger[level](message)
           }

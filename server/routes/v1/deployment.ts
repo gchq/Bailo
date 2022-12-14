@@ -210,12 +210,6 @@ export const fetchRawModelFiles = [
       throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
-
-    if (!versionDocument) {
-      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
-    }
-
     if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
       const owners = deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')
       throw Unauthorised(

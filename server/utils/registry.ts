@@ -37,7 +37,7 @@ interface Request {
   path: string
   method: Method
   authorisation: string
-  body: any
+  body?: Record<string, unknown>
   headers?: Record<string, string>
 }
 
@@ -164,7 +164,7 @@ export async function copyDockerImage(
     path: `/${to.namespace}/${to.model}/manifests/${to.version}`,
     method: 'PUT',
     authorisation,
-    body: JSON.stringify(res.data),
+    body: res.data,
     headers: {
       'Content-Type': ContentTypes.APPLICATION_MANIFEST,
     },

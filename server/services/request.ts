@@ -8,6 +8,7 @@ import { reviewRequest } from '../templates/reviewRequest'
 import { BadReq } from '../utils/result'
 import { sendEmail } from '../utils/smtp'
 import { getUserByInternalId } from './user'
+import { UserDoc } from '../models/User'
 
 export async function createDeploymentRequests({
   version,
