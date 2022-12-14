@@ -142,9 +142,5 @@ jobs:
           kubectl get services
           kubectl get pods
 
-#    - name: Test service URLs
-#      run: |
-#        minikube service list
-#        minikube service example --url
-#        echo "------------------opening the service------------------"
-#        curl $(minikube service example --url)
+      - name: HELM test Bailo
+        run: current_dir=$PWD;cd helm/bailo/;helm test bailo ;cd $current_dir;
