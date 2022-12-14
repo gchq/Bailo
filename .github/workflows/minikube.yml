@@ -35,9 +35,27 @@ jobs:
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
 
-      # remove route set for openshift
+      # Remove route set for openshift
       - name: remove route config
         run: sudo rm helm/bailo/templates/route.yaml
+      
+      # Add bailo NodePort
+      - name: Create NodePort Config
+        run: |
+          cat << EOT >> helm/bailo/templates/nodePort.yaml
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: bailo-node-port
+          spec:
+            type: NodePort
+            ports:
+              - port: {{ .Values.service.port }}
+                targetPort: {{ .Values.service.port }}
+            selector:
+              {{- include "bailo.selectorLabels" . | nindent 4 }}
+          EOT
 
       # Create local.yaml
       - name: Create local.yaml
@@ -133,14 +151,22 @@ jobs:
       - name: HELM deploy to minikube
         run: current_dir=$PWD;cd helm/bailo/;helm install --values ./local.yaml bailo .;cd $current_dir;
 
-      - name: Sleep for 30 seconds
+      - name: Sleep for 90 seconds
         run: sleep 90s
         shell: bash
 
       - name: List Pods and Services
         run: |
+          echo "------------------listing services------------------"
           kubectl get services
+          echo "------------------listing pods----------------------"
           kubectl get pods
 
       - name: HELM test Bailo
         run: current_dir=$PWD;cd helm/bailo/;helm test bailo ;cd $current_dir;
+
+      - name: Test Bailo URL
+        run: |
+          minikube service list
+          echo "----------------curl connect to bailo---------------"
+          curl $(minikube service bailo-node-port --url)
