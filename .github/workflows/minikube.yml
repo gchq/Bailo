@@ -38,7 +38,7 @@ jobs:
       # Remove route set for openshift
       - name: remove route config
         run: sudo rm helm/bailo/templates/route.yaml
-      
+
       # Add bailo NodePort
       - name: Create NodePort Config
         run: |
@@ -51,10 +51,10 @@ jobs:
           spec:
             type: NodePort
             ports:
-              - port: {{ .Values.service.port }}
-                targetPort: {{ .Values.service.port }}
+              - port: {{ .Values.nginxAuth.port }}
+                targetPort: {{ .Values.nginxAuth.port }}
             selector:
-              {{- include "bailo.selectorLabels" . | nindent 4 }}
+               name: {{ .Values.nginxAuth.host }}
           EOT
 
       # Create local.yaml
