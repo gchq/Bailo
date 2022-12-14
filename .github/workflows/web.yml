@@ -95,7 +95,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
