@@ -1,1 +1,150 @@
 ---
+name: MiniKube Heml Deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    name: build and deploy to minikube
+    steps:
+      - uses: actions/checkout@v2
+
+      # HELM Config
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.10.0
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: mkdir logs
+
+      # Install dependencies
+      - run: npm ci
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # remove route set for openshift
+      - name: remove route config
+        run: sudo rm helm/bailo/templates/route.yaml
+
+      # Create local.yaml
+      - name: Create local.yaml
+        run: |
+          cat << EOT >> helm/bailo/local.yaml
+          ---
+          # Instance Settings
+          config:
+            s2i:
+              image: seldonio/seldon-core-s2i-python37:1.10.0
+            supportEmail: "support@example.com"
+            documentationLink: "https://example.com/support"
+
+            ui:
+              banner:
+                text: "BAILO"
+                colour: '#047a06'
+
+            smtp:
+              host: 'mail'
+              from: 'bailo@example.com'
+
+            schema:
+              script: "dist/server/scripts/exampleSetAllSchemas.js"
+
+          # Bailo
+          image:
+            repository: "local/bailo"
+            tag: "latest"
+
+          # Used for k8s not openshift
+          ingress:
+            enabled: false
+
+          mongodb:
+            auth:
+              passwords:
+                - MongoDBPassword
+              usernames:
+                - bailo_user
+            image:
+              registry: docker.io
+            host: 'bailo-mongodb:31110/bailo'
+
+          minio:
+            image:
+              registry: docker.io
+            persistence:
+              size: 20Gi
+
+          registry:
+            repository: registry
+            certFile: cert.pem
+            keyFile: key.pem
+
+          maildev:
+            enabled: true
+            
+          openshift:
+            appPublicRoute: need.to.set.ingress
+
+          nginxcert:
+            cert: cert.pem
+            key: key.pem
+          EOT
+
+      - name: Set Bailo image pull policy to Never
+        run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' helm/bailo/templates/bailo/bailo.deployment.yaml
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: List Cluster
+        run: kubectl get pods -A
+
+      - name: Build Image
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -f ./Dockerfile.prod -t local/bailo .
+          echo -n "verifying images:"
+          docker images
+
+      - name: Load docker image to minikube
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker save local/bailo | (eval $(minikube docker-env) && docker load)
+
+      - name: HELM update dependency update
+        run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
+
+      - name: HELM deploy to minikube
+        run: current_dir=$PWD;cd helm/bailo/;helm install --values ./local.yaml bailo .;cd $current_dir;
+
+      - name: Sleep for 30 seconds
+        run: sleep 90s
+        shell: bash
+
+      - name: List Pods and Services
+        run: |
+          kubectl get services
+          kubectl get pods
+
+#    - name: Test service URLs
+#      run: |
+#        minikube service list
+#        minikube service example --url
+#        echo "------------------opening the service------------------"
+#        curl $(minikube service example --url)
