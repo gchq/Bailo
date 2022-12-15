@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Link from '@mui/material/Link'
 import { useState } from 'react'
-import { SchemaType } from '@/types/interfaces'
+import { SchemaType, SchemaTypes } from '@/types/interfaces'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import { postEndpoint } from '@/data/api'
@@ -25,7 +25,7 @@ export default function SchemaUploadDialog({
   const [schema, setSchema] = useState('')
   const [schemaName, setSchemaName] = useState('')
   const [schemaReference, setSchemaReference] = useState('')
-  const [schemaUse, setSchemaUse] = useState<SchemaType>('UPLOAD')
+  const [schemaUse, setSchemaUse] = useState<SchemaType>(SchemaTypes.UPLOAD)
   const [filename, setFilename] = useState('')
   const [uploadErrorText, setUploadErrorText] = useState('')
 
@@ -58,7 +58,7 @@ export default function SchemaUploadDialog({
             sendNotification({ variant: 'success', msg: 'Schema uploaded' })
             setSchemaName('')
             setSchemaReference('')
-            setSchemaUse('UPLOAD')
+            setSchemaUse(SchemaTypes.UPLOAD)
             setFilename('')
             handleDialogClose()
           } else {
@@ -108,8 +108,8 @@ export default function SchemaUploadDialog({
                 value={schemaUse}
                 onChange={(event): void => setSchemaUse(event.target.value as SchemaType)}
               >
-                <MenuItem value='UPLOAD'>Upload</MenuItem>
-                <MenuItem value='DEPLOYMENT'>Deployment</MenuItem>
+                <MenuItem value={SchemaTypes.UPLOAD}>Upload</MenuItem>
+                <MenuItem value={SchemaTypes.DEPLOYMENT}>Deployment</MenuItem>
               </TextField>
               <Button variant='outlined' component='label'>
                 {filename !== '' ? filename : 'Select schema'}

@@ -54,7 +54,7 @@ export const getSchema = [
   },
 ]
 
-export const postFullSchema = [
+export const postSchema = [
   ensureUserRole('admin'),
   bodyParser.json(),
   async (req: Request, res: Response) => {

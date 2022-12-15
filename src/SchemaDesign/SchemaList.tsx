@@ -10,13 +10,23 @@ import { useGetSchemas } from '../../data/schema'
 import SchemaUploadDialog from './SchemaUploadDialog'
 
 export default function SchemaList() {
-  const { schemas: uploadSchemas, isSchemasLoading: isUploadSchemasLoading } = useGetSchemas('UPLOAD')
-  const { schemas: deploymentSchemas, isSchemasLoading: isDeploymentSchemasLoading } = useGetSchemas('DEPLOYMENT')
+  const {
+    schemas: uploadSchemas,
+    isSchemasLoading: isUploadSchemasLoading,
+    mutateSchemas: mutateUploadSchemas,
+  } = useGetSchemas('UPLOAD')
+  const {
+    schemas: deploymentSchemas,
+    isSchemasLoading: isDeploymentSchemasLoading,
+    mutateSchemas: mutateDeploymentSchemas,
+  } = useGetSchemas('DEPLOYMENT')
   const theme = useTheme()
   const [open, setOpen] = useState(false)
 
   const handleDialogClose = () => {
     setOpen(false)
+    mutateUploadSchemas()
+    mutateDeploymentSchemas()
   }
 
   const uploadStyling: SxProps<Theme> = {

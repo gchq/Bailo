@@ -73,7 +73,12 @@ export interface LogStatement {
   msg: string
 }
 
-export type SchemaType = 'UPLOAD' | 'DEPLOYMENT'
+export enum SchemaTypes {
+  UPLOAD = 'UPLOAD',
+  DEPLOYMENT = 'DEPLOYMENT',
+}
+
+export type SchemaType = SchemaTypes.UPLOAD | SchemaTypes.DEPLOYMENT
 
 export interface Schema {
   name: string

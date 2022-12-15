@@ -1,4 +1,4 @@
-import { Schema, SchemaQuestion, SplitSchema, SchemaType, Step } from '@/types/interfaces'
+import { Schema, SchemaQuestion, SplitSchema, SchemaType, SchemaTypes, Step } from '@/types/interfaces'
 import { withTheme } from '@rjsf/core'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -44,7 +44,7 @@ export default function SchemaDesigner() {
   const [schemaName, setSchemaName] = useState('')
   const [showForm, setShowForm] = useState(true)
   const [schemaReference, setSchemaReference] = useState('')
-  const [schemaUse, setSchemaUse] = useState<SchemaType>('UPLOAD')
+  const [schemaUse, setSchemaUse] = useState<SchemaType>(SchemaTypes.UPLOAD)
   const [newStepDialogOpen, setNewStepDialogOpen] = useState(false)
   const [submitSchemaDialogOpen, setSubmitSchemaDialogOpen] = useState(false)
   const [schema, setSchema] = useState<Schema | undefined>(undefined)
@@ -97,7 +97,7 @@ export default function SchemaDesigner() {
             ...userSteps,
           },
         },
-        use: 'UPLOAD',
+        use: SchemaTypes.UPLOAD,
       }
       const { reference } = userSchema
       const schemaSteps: Step[] = getStepsFromSchema(userSchema, {}, [])
