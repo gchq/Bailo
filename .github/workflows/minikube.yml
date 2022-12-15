@@ -141,8 +141,7 @@ jobs:
       - name: Load docker image to minikube
         run: |
           export SHELL=/bin/bash
-          eval $(minikube -p minikube docker-env)
-          docker save local/bailo | (eval $(minikube docker-env) && docker load)
+          docker save local/bailo | (eval $(minikube -p minikube docker-env) && docker load)
 
       - name: HELM update dependency update
         working-directory: ./helm/bailo
@@ -150,7 +149,7 @@ jobs:
 
       - name: HELM deploy to minikube
         working-directory: ./helm/bailo
-        run: helm install --values ./local.yaml bailo
+        run: helm install --values ./local.yaml bailo .
 
       - name: Sleep for 90 seconds
         run: sleep 90s
