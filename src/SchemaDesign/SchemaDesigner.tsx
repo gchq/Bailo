@@ -12,9 +12,7 @@ import Typography from '@mui/material/Typography'
 import React, { Fragment, useEffect, useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DraggableProvided, DroppableProvided } from 'react-beautiful-dnd'
 import { getStepsFromSchema } from '@/utils/formUtils'
-import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Icon from '@mui/material/Icon'
 import AddIcon from '@mui/icons-material/Add'
 import TextFieldsIcon from '@mui/icons-material/TextFields'
@@ -166,9 +164,10 @@ export default function SchemaDesigner() {
   const submitSchema = () => {
     const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
     if (schema) {
+      // todo - implemented schema submission
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const userSchema = { ...schema, name: schemaName, reference, use: schemaUse }
     }
-    // todo - implemented schema submission (BAI-387)
   }
 
   const reorder = (list, startIndex, endIndex) => {

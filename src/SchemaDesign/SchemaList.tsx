@@ -2,58 +2,95 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
+import { useState } from 'react'
+import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
-import Grid from '@mui/material/Grid'
-import Link from '@mui/material/Link'
+import { Schema } from '@/types/interfaces'
 import { useGetSchemas } from '../../data/schema'
+import SchemaUploadDialog from './SchemaUploadDialog'
 
 export default function SchemaList() {
   const { schemas: uploadSchemas, isSchemasLoading: isUploadSchemasLoading } = useGetSchemas('UPLOAD')
   const { schemas: deploymentSchemas, isSchemasLoading: isDeploymentSchemasLoading } = useGetSchemas('DEPLOYMENT')
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  const handleDialogClose = () => {
+    setOpen(false)
+  }
+
+  const uploadStyling: SxProps<Theme> = {
+    mb: 2,
+    borderLeft: '.3rem solid #283593',
+    p: 2,
+    backgroundColor: theme.palette.container.main,
+  }
+  const deploymentStyling: SxProps<Theme> = {
+    mb: 2,
+    borderLeft: '.3rem solid #de3c30',
+    p: 2,
+    backgroundColor: theme.palette.container.main,
+  }
 
   return (
     <>
       {!isUploadSchemasLoading && !isDeploymentSchemasLoading && (
-        <Grid container spacing={2}>
-          <Grid item sm={12} md={6} sx={{ width: '100%' }}>
-            <Paper sx={{ my: 2, p: 2 }}>
-              <Typography variant='h4'>Schema List</Typography>
-              <Box sx={{ my: 2 }}>
-                <Typography variant='h6'>Upload Schemas</Typography>
-                {uploadSchemas &&
-                  uploadSchemas.map((schema) => <Typography key={schema.reference}>{schema.name}</Typography>)}
-              </Box>
-              <Box sx={{ my: 2 }}>
-                <Typography variant='h6'>Deployment Schemas</Typography>
-                {deploymentSchemas &&
-                  deploymentSchemas.map((schema) => <Typography key={schema.reference}>{schema.name}</Typography>)}
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item sm={12} md={6} sx={{ width: '100%' }}>
-            <Paper sx={{ my: 2, p: 2 }}>
-              <Stack spacing={2} alignItems='center' sx={{ textAlign: 'center' }}>
-                <Typography>Have an existing schema? Upload it directly below!</Typography>
-                <Typography variant='caption'>
-                  For more information on creating a schema yourself, please see
-                  <Link
-                    sx={{ pl: 0.5 }}
-                    target='_blank'
-                    href='/docs/administration/getting-started/configuration/making-a-schema'
-                  >
-                    the documentation
-                  </Link>
-                  .
-                </Typography>
-                <Button sx={{ maxWidth: '250px' }} variant='contained'>
-                  Upload Schema
-                </Button>
-              </Stack>
-            </Paper>
-          </Grid>
-        </Grid>
+        <>
+          <Box sx={{ textAlign: 'right' }}>
+            <Button variant='contained' onClick={() => setOpen(true)}>
+              Upload a new schema
+            </Button>
+          </Box>
+
+          <Paper sx={{ my: 2, p: 2 }}>
+            <Typography variant='h4'>Schema List</Typography>
+            <Box sx={{ my: 2 }}>
+              <Typography variant='h6'>Upload Schemas</Typography>
+              {uploadSchemas &&
+                uploadSchemas.map((uploadSchema) => (
+                  <Box sx={{ mt: 2 }} key={uploadSchema.reference}>
+                    <SchemaListItem schema={uploadSchema} styling={uploadStyling} />
+                  </Box>
+                ))}
+            </Box>
+            <Box sx={{ my: 2 }}>
+              <Typography variant='h6'>Deployment Schemas</Typography>
+              {deploymentSchemas &&
+                deploymentSchemas.map((deploymentSchema) => (
+                  <Box sx={{ mt: 2 }} key={deploymentSchema.reference}>
+                    <SchemaListItem schema={deploymentSchema} styling={deploymentStyling} />
+                  </Box>
+                ))}
+            </Box>
+          </Paper>
+          <SchemaUploadDialog open={open} handleDialogClose={handleDialogClose} />
+        </>
       )}
       {(isUploadSchemasLoading || isDeploymentSchemasLoading) && <Typography>Loading...</Typography>}
     </>
+  )
+}
+
+function SchemaListItem({ schema, styling }: { schema: Schema; styling: SxProps<Theme> }) {
+  const theme = useTheme()
+  return (
+    <Box sx={{ px: 3 }} key={schema.reference}>
+      <Stack direction='row' spacing={1} sx={styling} justifyContent='space-between'>
+        <Typography
+          variant='h5'
+          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+        >
+          {schema.name}
+        </Typography>
+        <Box>
+          <Button disabled color='secondary' variant='outlined' sx={{ mr: 1 }}>
+            Edit
+          </Button>
+          <Button disabled variant='contained'>
+            Disable
+          </Button>
+        </Box>
+      </Stack>
+    </Box>
   )
 }

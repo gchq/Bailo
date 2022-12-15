@@ -39,7 +39,7 @@ export default function Schemas() {
         <>
           <Tabs value={group} onChange={handleGroupChange} aria-label='Schema design page tabs'>
             <Tab label='Schemas' value={TabOptions.SCHEMAS} />
-            <Tab label='Designer' value={TabOptions.DESIGNER} />
+            <Tab disabled label='Designer (BETA)' value={TabOptions.DESIGNER} />
           </Tabs>
           {group === TabOptions.SCHEMAS && <SchemaList />}
           {group === TabOptions.DESIGNER && <SchemaDesigner />}
