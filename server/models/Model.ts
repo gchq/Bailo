@@ -1,4 +1,5 @@
 import { Document, model, Schema, Types } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
@@ -33,6 +34,8 @@ const ModelSchema = new Schema<Model>(
     timestamps: true,
   }
 )
+
+ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const ModelModel = model<Model>('Model', ModelSchema)
 

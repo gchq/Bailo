@@ -3,11 +3,13 @@ import config from 'config'
 import { Request, Response } from 'express'
 import RequestModel, { ApprovalTypes } from '../../models/Request'
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
-import { createVersionRequests } from '../../services/request'
+import { createVersionRequests, deleteRequestsByVersion } from '../../services/request'
 import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { getUserById } from '../../services/user'
+import { removeVersionFromModel } from '../../services/model'
+import { deleteDeploymentsByVersion } from '../../services/deployment'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -100,7 +102,7 @@ export const putVersion = [
   },
 ]
 
-export const resetVersionApprovals = [
+export const postResetVersionApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -122,7 +124,7 @@ export const resetVersionApprovals = [
   },
 ]
 
-export const updateLastViewed = [
+export const putUpdateLastViewed = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id, role } = req.params
@@ -156,5 +158,33 @@ export const updateLastViewed = [
       )
     }
     return res.json({ version: id, role })
+  },
+]
+
+export const deleteVersion = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { user } = req
+
+    const version = await findVersionById(user, id)
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
+    }
+
+    if (req.user.id !== version.metadata.contacts.uploader) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    await Promise.all([
+      deleteRequestsByVersion(user, version),
+      deleteDeploymentsByVersion(user, version),
+      removeVersionFromModel(user, version),
+    ])
+
+    await version.delete(user._id)
+
+    return res.json({ id })
   },
 ]

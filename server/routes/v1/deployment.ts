@@ -205,6 +205,12 @@ export const fetchRawModelFiles = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+
+    if (!versionDocument) {
+      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
+    }
+
     if (!req.user._id.equals(deployment.owner)) {
       throw Unauthorised(
         { deploymentOwner: deployment.owner },
@@ -223,13 +229,8 @@ export const fetchRawModelFiles = [
       throw NotFound({ fileType }, 'Unknown file type specified')
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
-
-    if (versionDocument === null) {
-      throw NotFound({ versionId: version }, `Unable to find version for id ${version}`)
-    }
 
     let filePath
 
@@ -240,10 +241,8 @@ export const fetchRawModelFiles = [
       filePath = versionDocument.files.rawBinaryPath
     }
 
-    // Stat object to get size so browser can determine progress
     const { size } = await client.statObject(bucketName, filePath)
 
-    // res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
     res.set('Content-disposition', `attachment; filename=${fileType}.zip`)
     res.set('Content-Type', 'application/zip')
     res.set('Cache-Control', 'private, max-age=604800, immutable')
