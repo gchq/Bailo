@@ -43,7 +43,7 @@ jobs:
           apiVersion: v1
           kind: Service
           metadata:
-            name: bailo-node-port
+            name: node-port
           spec:
             type: NodePort
             ports:
@@ -171,4 +171,4 @@ jobs:
         run: |
           minikube service list
           echo "----------------curl connect to bailo---------------"
-          curl $(minikube service bailo-node-port --url)
+          curl $(minikube service node-port --url)
