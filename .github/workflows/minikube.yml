@@ -141,7 +141,8 @@ jobs:
       - name: Load docker image to minikube
         run: |
           export SHELL=/bin/bash
-          docker save local/bailo | (eval $(minikube -p minikube docker-env) && docker load)
+          eval $(minikube -p minikube docker-env)
+          docker save local/bailo | (eval $(minikube docker-env) && docker load)
 
       - name: HELM update dependency update
         working-directory: ./helm/bailo
