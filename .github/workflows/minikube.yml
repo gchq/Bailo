@@ -35,10 +35,6 @@ jobs:
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
 
-      # Remove route set for openshift
-      - name: remove route config
-        run: sudo rm helm/bailo/templates/route.yaml
-
       # Add bailo NodePort
       - name: Create NodePort Config
         run: |
@@ -90,6 +86,9 @@ jobs:
           ingress:
             enabled: false
 
+          route:
+            enabled: false
+
           mongodb:
             auth:
               passwords:
@@ -115,7 +114,7 @@ jobs:
             enabled: true
             
           openshift:
-            appPublicRoute: need.to.set.ingress
+            appPublicRoute: not.required.for.this.test
 
           nginxcert:
             cert: cert.pem
@@ -146,10 +145,12 @@ jobs:
           docker save local/bailo | (eval $(minikube docker-env) && docker load)
 
       - name: HELM update dependency update
-        run: current_dir=$PWD;cd helm/bailo/;helm dependency update;cd $current_dir;
+        working-directory: ./helm/bailo
+        run: helm dependency update
 
       - name: HELM deploy to minikube
-        run: current_dir=$PWD;cd helm/bailo/;helm install --values ./local.yaml bailo .;cd $current_dir;
+        working-directory: ./helm/bailo
+        run: helm install --values ./local.yaml bailo
 
       - name: Sleep for 90 seconds
         run: sleep 90s
@@ -163,7 +164,8 @@ jobs:
           kubectl get pods
 
       - name: HELM test Bailo
-        run: current_dir=$PWD;cd helm/bailo/;helm test bailo ;cd $current_dir;
+        working-directory: ./helm/bailo
+        run: helm test bailo
 
       - name: Test Bailo URL
         run: |

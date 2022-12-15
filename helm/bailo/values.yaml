@@ -35,10 +35,10 @@ securityContext:
   # runAsUser: 1002380001
 
 # Networking
-# Ingress is implemented as routes in OpenShift. See appPublicRoute below. 
 service:
   type: ClusterIP
   port: 3000
+
 ingress:
   enabled: "false" # set to false for OpenShift
   className: "nginx"
@@ -54,6 +54,9 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+route:
+  enabled: "false" # set it true for OpenShift
 
 
 resources:

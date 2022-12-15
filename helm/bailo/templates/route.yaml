@@ -1,3 +1,5 @@
+{{- if .Values.route.enabled }}
+---
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
@@ -17,3 +19,4 @@ spec:
     termination: {{ .Values.openshift.termination }}
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
+{{- end }}
