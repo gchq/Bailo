@@ -4,18 +4,37 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
 import Button from '@mui/material/Button'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/router'
 import { useGetModelById, useGetModelVersions } from '../data/model'
 import { Deployment } from '../types/interfaces'
 import { ModelDoc } from '../server/models/Model'
 import EmptyBlob from './common/EmptyBlob'
 import DirectoryTreeView from './common/DirectoryTreeView'
+import SplitButton from './common/SplitButton'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {
+  const router = useRouter()
   const modelFromDeployment: ModelDoc = deployment.model as ModelDoc
   const { model } = useGetModelById(modelFromDeployment._id.toString())
   const { versions } = useGetModelVersions(model?.uuid)
   const [displayTree, setDisplayTree] = useState<boolean>(false)
+  const [codeMenuItems, setCodeMenuItems] = useState<string[]>(['Show Code File Tree'])
+
+  const handleCodeMenuItemClicked = (item: string) => {
+    if (item === 'Show Code File Tree') {
+      setDisplayTree(!displayTree)
+      setCodeMenuItems(['Hide Code File Tree'])
+    }
+    if (item === 'Hide Code File Tree') {
+      setDisplayTree(!displayTree)
+      setCodeMenuItems(['Show Code File Tree'])
+    }
+  }
+
+  const handleCodeButtonClicked = (version: string) => {
+    router.push(`/api/v1/deployment/${deployment.uuid}/version/${version}/raw/code`)
+  }
 
   return (
     <>
@@ -35,6 +54,14 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                 >
                   Download code file
                 </Button>
+                <SplitButton
+                  title='Download code file'
+                  options={codeMenuItems}
+                  onButtonClick={() => {
+                    handleCodeButtonClicked(`${version.version}`)
+                  }}
+                  onMenuItemClick={handleCodeMenuItemClicked}
+                />
                 <Button
                   variant='contained'
                   href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/binary`}
@@ -44,7 +71,12 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   Download binary file
                 </Button>
               </Stack>
-              <DirectoryTreeView uuid={`${deployment.uuid}`} version={`${version.version}`} fileType='code' />
+              <DirectoryTreeView
+                uuid={`${deployment.uuid}`}
+                version={`${version.version}`}
+                fileType='code'
+                displayTree={displayTree}
+              />
             </Box>
             <Divider orientation='horizontal' />
           </Box>

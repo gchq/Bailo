@@ -2,8 +2,6 @@ import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { useState, useCallback, useEffect } from 'react'
 import { DirectoryArrayMetadata } from 'server/routes/v1/deployment'
-import Chip from '@mui/material/Chip'
-import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import useNotification from './Snackbar'
@@ -21,16 +19,17 @@ export default function DirectoryTreeView({
   displayTree: boolean
 }) {
   const [treeResponse, setTreeResponse] = useState<DirectoryArrayMetadata>()
-  const [treeLoaded, setTreeLoaded] = useState<boolean>(false)
+  const [treeLoading, setTreeLoading] = useState(false)
   const sendNotification = useNotification()
 
   const getTreeResponse = useCallback(async () => {
     if (displayTree) {
+      setTreeLoading(true)
       const response = await getEndpoint(`/api/v1/deployment/${uuid}/version/${version}/list/${fileType}`)
       if (response.status === 200) {
         const directoryArrayMetadata: DirectoryArrayMetadata = await response.json()
         setTreeResponse(directoryArrayMetadata)
-        setTreeLoaded(true)
+        setTreeLoading(false)
       } else {
         sendNotification({ variant: 'error', msg: 'Failed to retrieve file structure' })
       }
@@ -51,19 +50,24 @@ export default function DirectoryTreeView({
     return (
       tree && (
         <TreeItem key={`${id}`} nodeId={`${id}`} label={`${tree.name}`}>
-          {console.log(`nodeId=${id} label=${tree.name}`)}
           {tree.directories.map((child) => directoryTreeItem(child, id))}
-          {tree.files.map((file) => {
-            console.log(`nodeId=${id}${file} label=${file}`)
-            return <TreeItem key={`${id}${file}`} nodeId={`${id}${file}`} label={`${file}`} />
-          })}
+          {tree.files.map((file) => (
+            <TreeItem key={`${id}${file}`} nodeId={`${id}${file}`} label={`${file}`} />
+          ))}
         </TreeItem>
       )
     )
   }
 
-  // eslint-disable-next-line no-nested-ternary
-  return displayTree && treeLoaded ? (
+  if (!displayTree) {
+    return null
+  }
+
+  if (treeLoading) {
+    return <div>Loading file tree...</div>
+  }
+
+  return (
     <TreeView
       aria-label={`${fileType} file list`}
       defaultExpandIcon={<ChevronRightIcon />}
@@ -71,7 +75,5 @@ export default function DirectoryTreeView({
     >
       {directoryTreeItem(treeResponse, '')}
     </TreeView>
-  ) : (
-    <Chip label='Loading File Tree..' avatar={<AccountTreeIcon />} />
   )
 }
