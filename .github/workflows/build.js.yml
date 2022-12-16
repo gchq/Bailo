@@ -30,6 +30,10 @@ jobs:
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
 
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build production image
         uses: docker/build-push-action@v3
         with:
