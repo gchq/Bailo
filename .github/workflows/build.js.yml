@@ -29,6 +29,7 @@ jobs:
           context: .
           file: Dockerfile.prod
           tags: bailo:latest
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
