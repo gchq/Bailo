@@ -3,24 +3,31 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-import BackupIcon from '@mui/icons-material/Backup'
 import imageLoader from '@/components/imageLoader'
 import bailoLogo from '../public/bailo-logo.png'
+import marketplaceImage from '../public/marketplace.png'
 import Image from 'next/image'
 import localFont from '@next/font/local'
 import Link from '@/components/Link'
-import { useRef } from 'react'
-import NavBar from '@/components/NavBar'
+import { createRef, useRef } from 'react'
 import Tooltip from '@mui/material/Tooltip'
-import MenuItem from '@mui/material/MenuItem'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
+import Divider from '@mui/material/Divider'
+import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 
 const myFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
 
 export default function Home() {
-  const ref = useRef(null)
+  const ref = createRef<HTMLDivElement>()
+
+  const scrollToContent = () => {
+    console.log(ref)
+    if (ref.current) {
+      ref.current.scrollIntoView()
+    }
+  }
   return (
     <>
       <Box
@@ -33,7 +40,7 @@ export default function Home() {
           <Link href='https://github.com/gchq/bailo'>
             <Tooltip title='Open GitHub'>
               <IconButton sx={{ p: 0 }}>
-                <GitHubIcon sx={{ color: 'white', fontSize: 40 }} />
+                <GitHubIcon color='secondary' sx={{ fontSize: 40 }} />
               </IconButton>
             </Tooltip>
           </Link>
@@ -59,7 +66,13 @@ export default function Home() {
             </Typography>
           </Stack>
           <Stack direction='row' justifyContent='center' spacing={2} sx={{ p: 4 }}>
-            <Button sx={{ minWidth: '200px', color: 'white' }} color='secondary' size='large' variant='contained'>
+            <Button
+              onClick={scrollToContent}
+              sx={{ minWidth: '200px', color: 'white' }}
+              color='secondary'
+              size='large'
+              variant='contained'
+            >
               Read more
             </Button>
             <Link href='/docs'>
@@ -71,20 +84,38 @@ export default function Home() {
         </Stack>
       </Box>
       <Box id='arrow-down' />
-      <Box sx={{ maxWidth: 800, m: 'auto', mt: 10 }} ref={ref}>
-        <Grid container spacing={4}>
-          <Grid item sm={6} sx={{ height: '500px' }}>
-            <BackupIcon />
-            <Typography>Upload</Typography>
+      <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
+        <Grid container alignItems='center' spacing={4}>
+          <Grid item lg={6}>
+            <Box sx={{ px: 10, py: 4, textAlign: 'center', height: '100%' }}>
+              <Stack
+                spacing={4}
+                justifyContent='center'
+                alignItems='center'
+                divider={
+                  <Divider flexItem>
+                    <StarPurple500Icon color='secondary' />
+                  </Divider>
+                }
+              >
+                <Typography variant='h6'>
+                  Provides a centralised repository of ML models, where possible with models in standard formats
+                </Typography>
+                <Typography variant='h6'>
+                  Enables users to find existing ML models, encouraging re-use of best practice and avoiding duplication
+                  of work
+                </Typography>
+                <Typography variant='h6'>
+                  Ensures any deployed models are fully compliant, and that compliance rules are applied consistently
+                  from a single service
+                </Typography>
+              </Stack>
+            </Box>
           </Grid>
-          <Grid item sm={6} sx={{ height: '500px' }}>
-            2
-          </Grid>
-          <Grid item sm={6} sx={{ height: '500px' }}>
-            3
-          </Grid>
-          <Grid item sm={6} sx={{ height: '500px' }}>
-            4
+          <Grid item lg={6}>
+            <Box sx={{ px: 10, py: 4 }}>
+              <img id='marketplace-image' alt='Image Alt' src={marketplaceImage.src} style={{ width: '100%' }} />
+            </Box>
           </Grid>
         </Grid>
       </Box>
