@@ -25,13 +25,9 @@ jobs:
           context: .
           file: Dockerfile.prod
           tags: bailo:latest
-          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=/tmp/bailo.tar
-
-      - name: Inspect Bailo image
-        run: docker image inspect bailo:latest
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
