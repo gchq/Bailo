@@ -11,8 +11,8 @@ import { findSchemaByRef } from '../../services/schema'
 import { findVersionByName } from '../../services/version'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
+import { parseEntityList, isUserInEntityList } from '../../utils/entity'
 import { validateSchema } from '../../utils/validateSchema'
-import { getUserById } from '../../services/user'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -34,7 +34,7 @@ export const getDeployment = [
   },
 ]
 
-export const getCurrentUserDeployments = [
+export const getUserDeployments = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -64,7 +64,6 @@ export const postDeployment = [
       )
     }
 
-    body.user = req.user.id
     body.timeStamp = new Date().toISOString()
 
     // first, we verify the schema
@@ -106,11 +105,10 @@ export const postDeployment = [
 
     const versionArray = [version._id]
 
-    const requesterId = body.contacts.requester
-    const requester = await getUserById(requesterId)
+    const owner = await parseEntityList(body.contacts.owner)
 
-    if (!requester) {
-      throw NotFound({ code: 'requester_not_found' }, `Unable to find requester with name '${requesterId}'`)
+    if (!owner.valid) {
+      throw NotFound({ code: 'requester_not_found' }, `Invalid requester: ${owner.reason}`)
     }
 
     const deployment = await createDeployment(req.user, {
@@ -121,7 +119,7 @@ export const postDeployment = [
       model: model._id,
       metadata: body,
 
-      owner: requester._id,
+      owner: body.contacts.owner,
     })
 
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
@@ -163,7 +161,8 @@ export const resetDeploymentApprovals = [
     if (!deployment) {
       throw BadReq({ code: 'deployment_not_found', uuid }, `Unable to find requested deployment: '${uuid}'`)
     }
-    if (user?.id !== deployment.metadata.contacts.requester) {
+
+    if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
       throw Forbidden(
         { code: 'not_allowed_to_reset_approvals' },
         'You cannot reset the approvals for a deployment you do not own.'
@@ -205,10 +204,17 @@ export const fetchRawModelFiles = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
-    if (!req.user._id.equals(deployment.owner)) {
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+
+    if (!versionDocument) {
+      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
+    }
+
+    if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
+      const owners = deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')
       throw Unauthorised(
-        { deploymentOwner: deployment.owner },
-        `User is not authorised to download this file. Requester: ${req.user._id}, owner: ${deployment.owner}`
+        { deploymentOwner: deployment.metadata.contacts.owner },
+        `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`
       )
     }
 
@@ -223,13 +229,8 @@ export const fetchRawModelFiles = [
       throw NotFound({ fileType }, 'Unknown file type specified')
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
-
-    if (versionDocument === null) {
-      throw NotFound({ versionId: version }, `Unable to find version for id ${version}`)
-    }
 
     let filePath
 
@@ -240,10 +241,8 @@ export const fetchRawModelFiles = [
       filePath = versionDocument.files.rawBinaryPath
     }
 
-    // Stat object to get size so browser can determine progress
     const { size } = await client.statObject(bucketName, filePath)
 
-    // res.set('Content-Disposition', contentDisposition(fileType, { type: 'inline' }))
     res.set('Content-disposition', `attachment; filename=${fileType}.zip`)
     res.set('Content-Type', 'application/zip')
     res.set('Cache-Control', 'private, max-age=604800, immutable')
@@ -255,5 +254,25 @@ export const fetchRawModelFiles = [
       throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
     }
     stream.pipe(res)
+  },
+]
+
+export const getDeploymentAccess = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { user } = req
+    const { uuid } = req.params
+
+    const deployment = await findDeploymentByUuid(req.user, uuid)
+
+    if (deployment === null) {
+      throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
+    }
+
+    const owner = await isUserInEntityList(user, deployment.metadata.contacts.owner)
+
+    return res.json({
+      owner,
+    })
   },
 ]

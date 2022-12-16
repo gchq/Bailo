@@ -6,8 +6,9 @@ export function getPropertyFromEnumValue<Enum extends { [key: string]: string | 
   t: Enum,
   key: string
 ): string | undefined {
-  const entries = Object.values(t)
-  for (const value of entries) {
+  const values = Object.values(t)
+
+  for (const value of values) {
     if (value === key) {
       return value
     }
