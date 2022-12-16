@@ -7,13 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build_image:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
-    strategy:
-      matrix:
-        node-version: [16.x]
 
     steps:
       # Clone repository
@@ -35,3 +31,26 @@ jobs:
 
       - name: Inspect Bailo image
         run: docker image inspect bailo:latest
+
+  unit_testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Install dependencies
+      - run: npm ci
+
+      # Run unit tests
+      - run: npm run test
