@@ -30,8 +30,13 @@ jobs:
       - run: sudo chown -R runner:docker certs
       - run: npm run certs
 
-      # Build Dockerfile
-      - name: 'Build Dockerfile'
-        run: |
-          docker build -f ./Dockerfile.prod -t local/bailo .
-          docker images
+      - name: Build production image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          tags: 'bailo:latest'
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: List images
+        run: docker images
