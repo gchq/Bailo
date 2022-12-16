@@ -22,11 +22,9 @@ function DeploymentOverview({ deployment }: DeploymentOverviewProps) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Owner</Typography>
-            <Typography variant='body1'>{deployment.metadata.contacts.requester}</Typography>
-          </Box>
-          <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Point of Contact</Typography>
-            <Typography variant='body1'>{deployment.metadata.contacts.secondPOC}</Typography>
+            <Typography variant='body1'>
+              {deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')}
+            </Typography>
           </Box>
         </Box>
       </Grid>

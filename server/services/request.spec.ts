@@ -1,14 +1,14 @@
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
 import RequestModel, { RequestTypes } from '../models/Request'
+import UserModel from '../models/User'
 import { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
 import * as emailService from '../utils/smtp'
 import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
 import * as userService from './user'
-import { findAndUpdateUser } from './user'
 
 const managerId = new ObjectId()
 const modelId = new ObjectId()
@@ -25,7 +25,6 @@ const testModel: any = {
       name: 'model1',
     },
   },
-  owner: userId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -38,8 +37,9 @@ const versionData: any = {
       name: 'model1',
     },
     contacts: {
-      uploader: userId,
-      manager: managerId,
+      uploader: [{ kind: EntityKind.USER, id: 'user1' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'user1' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager1' }],
     },
   },
   built: false,
@@ -64,10 +64,9 @@ const deploymentData: any = {
       name: 'deployment1',
     },
     contacts: {
-      requester: userId,
+      owner: [{ kind: EntityKind.USER, id: 'user1' }],
     },
   },
-  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -75,9 +74,16 @@ const deploymentData: any = {
 const deployment = deploymentData as DeploymentDoc
 
 const testUser: any = {
-  _id: managerId,
-  userId: 'user1',
+  _id: userId,
+  id: 'user1',
   email: 'user1@email.com',
+  data: { some: 'value' },
+}
+
+const testManager: any = {
+  _id: managerId,
+  id: 'manager1',
+  email: 'manager1@email.com',
   data: { some: 'value' },
 }
 
@@ -86,7 +92,7 @@ const testRequest = {
   _id: requestId,
   approvalType: 'Manager',
   request: 'Upload',
-  user: userId,
+  approvers: [{ kind: EntityKind.USER, id: 'user1' }],
   version: null,
   __v: 0,
   createdAt: new Date(),
@@ -95,7 +101,8 @@ const testRequest = {
 
 describe('test request service', () => {
   beforeEach(async () => {
-    await findAndUpdateUser(testUser)
+    await UserModel.create(testUser)
+    await UserModel.create(testManager)
     await ModelModel.create(testModel)
     await RequestModel.create(testRequest)
   })

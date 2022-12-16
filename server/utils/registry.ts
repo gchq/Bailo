@@ -1,6 +1,6 @@
+import axios, { AxiosResponse, Method } from 'axios'
 import https from 'https'
 import config from 'config'
-import axios, { AxiosResponse, Method } from 'axios'
 import { Access, getAccessToken } from '../routes/v1/registryAuth'
 import logger from './logger'
 
@@ -37,6 +37,7 @@ interface Request {
   path: string
   method: Method
   authorisation: string
+  body?: Record<string, unknown>
   headers?: Record<string, string>
 }
 
@@ -117,4 +118,57 @@ export async function deleteImageTag(registry: Registry, image: ImageRef) {
     logger.error({ image }, error)
     throw new Error(error)
   }
+}
+
+export async function copyDockerImage(
+  registry: Registry,
+  from: ImageRef,
+  to: ImageRef,
+  log: (level: string, message: string) => void
+) {
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${from.namespace}/${from.model}`, actions: ['pull'] },
+    { type: 'repository', name: `${to.namespace}/${to.model}`, actions: ['push', 'pull'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${from.namespace}/${from.model}/manifests/${from.version}`,
+    method: 'GET',
+    authorisation,
+    headers: {
+      Accept: ContentTypes.APPLICATION_MANIFEST,
+    },
+  })
+
+  await Promise.all(
+    res.data.manifest.layers.map(async (layer: any) => {
+      await makeRegistryRequest<any>(registry, {
+        path: `/${to.namespace}/${to.model}/blobs/uploads/?mount=${layer.digest}&from=${from.namespace}/${from.model}`,
+        method: 'POST',
+        authorisation,
+      })
+
+      log('info', `Copied layer ${layer.digest}`)
+    })
+  )
+
+  await makeRegistryRequest(registry, {
+    path: `/${to.namespace}/${to.model}/blobs/uploads/?mount=${res.data.config.digest}&from=${from.namespace}/${from.model}`,
+    method: 'POST',
+    authorisation,
+  })
+
+  log('info', 'Copied manifest to new repository')
+
+  await makeRegistryRequest(registry, {
+    path: `/${to.namespace}/${to.model}/manifests/${to.version}`,
+    method: 'PUT',
+    authorisation,
+    body: res.data,
+    headers: {
+      'Content-Type': ContentTypes.APPLICATION_MANIFEST,
+    },
+  })
+
+  log('info', 'Finalised new manifest')
 }
