@@ -16,8 +16,18 @@ import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
+import styled from 'styled-components'
 
 const myFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
+
+const StyledImg = styled.img`
+  border-radius: 10px;
+  box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s ease;
+  &:hover {
+    box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+  }
+`
 
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
@@ -25,7 +35,7 @@ export default function Home() {
   const scrollToContent = () => {
     console.log(ref)
     if (ref.current) {
-      ref.current.scrollIntoView()
+      ref.current.scrollIntoView({ behavior: 'smooth' })
     }
   }
   return (
@@ -33,10 +43,12 @@ export default function Home() {
       <Box
         sx={{
           backgroundColor: '#f8e6dc',
+          background: 'linear-gradient(#3a545c, #473cff)',
+          backgroundSize: '400% 400%',
+          height: '100vh',
         }}
-        id='home-welcome-container'
       >
-        <Container sx={{ ml: 12, p: 4, position: 'absolute', float: 'right' }}>
+        <Container sx={{ ml: 12, p: 4, position: 'absolute' }}>
           <Link href='https://github.com/gchq/bailo'>
             <Tooltip title='Open GitHub'>
               <IconButton sx={{ p: 0 }}>
@@ -83,7 +95,16 @@ export default function Home() {
           </Stack>
         </Stack>
       </Box>
-      <Box id='arrow-down' />
+      <Box
+        sx={{
+          width: 0,
+          height: 0,
+          borderLeft: '50px solid transparent',
+          borderRight: '50px solid transparent',
+          margin: 'auto',
+          borderTop: '50px solid #3d4e83',
+        }}
+      />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
         <Grid container alignItems='center' spacing={4}>
           <Grid item lg={6}>
@@ -114,7 +135,7 @@ export default function Home() {
           </Grid>
           <Grid item lg={6}>
             <Box sx={{ px: 10, py: 4 }}>
-              <img id='marketplace-image' alt='Image Alt' src={marketplaceImage.src} style={{ width: '100%' }} />
+              <StyledImg alt='Image Alt' src={marketplaceImage.src} style={{ width: '100%' }} />
             </Box>
           </Grid>
         </Grid>

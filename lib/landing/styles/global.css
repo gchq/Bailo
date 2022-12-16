@@ -1,33 +1,3 @@
 body {
   background-color: #f4f4f4;
 }
-
-html {
-  scroll-behavior: smooth;
-}
-
-#home-welcome-container {
-  /*background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #928de2);*/
-  background: linear-gradient(#3a545c, #473cff);
-  background-size: 400% 400%;
-  height: 100vh;
-}
-
-#arrow-down {
-  width: 0;
-  height: 0;
-  border-left: 50px solid transparent;
-  border-right: 50px solid transparent;
-  margin: auto;
-  border-top: 50px solid #3d4e83;
-}
-
-#marketplace-image {
-  border-radius: 10px;
-  box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.4s ease;
-}
-
-#marketplace-image:hover {
-  box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
-}
