@@ -53,7 +53,7 @@
           "type": "string"
         },
         "initialVersionRequested": {
-          "title": "The current version of the model",
+          "title": "Minimum deployed version",
           "type": "string",
           "widget": "modelVersionSelector"
         },
