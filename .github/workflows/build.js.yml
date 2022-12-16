@@ -144,6 +144,9 @@ jobs:
 
       - run: docker-compose up --force-recreate --build -d
 
+      # Install dependencies
+      - run: npm ci
+
       # wait for app to start
       - run: |
           chmod +x ./server/scripts/waitForIt.sh
