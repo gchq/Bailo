@@ -21,7 +21,7 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json ./
-RUN npm ci --production
+RUN npm ci --omit=dev
 
 # Production image, copy all the files and run next
 FROM node:16-alpine3.15 as runner
