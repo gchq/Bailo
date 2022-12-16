@@ -28,9 +28,16 @@ jobs:
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/bailo.tar
 
       - name: Inspect Bailo image
         run: docker image inspect bailo:latest
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bailo
+          path: /tmp/bailo.tar
 
   unit_testing:
     runs-on: ubuntu-latest
@@ -54,3 +61,111 @@ jobs:
 
       # Run unit tests
       - run: npm run test
+
+  style:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Install dependencies
+      - run: npm ci
+
+      # Run style checks
+      - run: npm run check-style
+      - run: npm run lint
+
+  end_to_end:
+    needs: build_image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Get Bailo Docker image
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/bailo.tar
+          docker image ls -a
+
+      # Create logs directory
+      - run: mkdir logs
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Configure application
+      - name: Configure Bailo
+        run: |
+          cat <<EOT >> config/local.js
+          module.exports = {
+            minio: {
+              accessKey: 'minioadmin',
+              secretKey: 'minioadmin',
+            },
+
+            smtp: {
+              auth: {
+                user: 'mailuser',
+                pass: 'mailpass',
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+            },
+
+            logging: {
+              file: {
+                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
+              },
+            },
+          }
+          EOT
+
+      - run: docker-compose up --force-recreate --build -d
+
+      # wait for app to start
+      - run: |
+          chmod +x ./server/scripts/waitForIt.sh
+          ./server/scripts/waitForIt.sh localhost:8080 -t 10
+
+      # Run Cypress integration tests
+      - run: npm run cy:run
+
+      - name: Dump docker-compose logs
+        if: always()
+        run: docker-compose logs > logs/stack.log
+
+      - name: Docker Compose Logs
+        if: always()
+        run: cat logs/stack.log
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: logs
