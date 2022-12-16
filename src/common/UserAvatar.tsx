@@ -2,13 +2,14 @@ import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
 import { useEffect, useState } from 'react'
+import { Entity } from '../../types/interfaces'
 
 export default function UserAvatar({
-  username,
+  entity,
   size,
   luminosity,
 }: {
-  username: string
+  entity: Entity
   size?: UserAvatarSizes
   luminosity?: Luminosity
 }) {
@@ -17,7 +18,7 @@ export default function UserAvatar({
   const [fontColour, setFontColour] = useState<string>()
 
   const color = randomColor({
-    seed: username,
+    seed: entity.id,
     luminosity: luminosity || 'light',
     format: 'hex',
   })
@@ -55,7 +56,7 @@ export default function UserAvatar({
         fontSize,
       }}
     >
-      <Typography>{username.charAt(0).toUpperCase()}</Typography>
+      <Typography>{entity.id.charAt(0).toUpperCase()}</Typography>
     </Avatar>
   )
 }

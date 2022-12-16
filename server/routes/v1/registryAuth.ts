@@ -6,8 +6,11 @@ import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import isEqual from 'lodash/isEqual'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
+import { isUserInEntityList } from '../../utils/entity'
+import { ModelId } from '../../../types/interfaces'
 import logger from '../../utils/logger'
 import { Forbidden } from '../../utils/result'
+import { findDeploymentByUuid } from '../../services/deployment'
 import { getUserFromAuthHeader } from '../../utils/user'
 
 let adminToken: string | undefined
@@ -118,7 +121,21 @@ export function getRefreshToken(user: any) {
   )
 }
 
-export function getAccessToken(user, access) {
+export type Action = 'push' | 'pull' | 'delete' | '*'
+
+export interface Access {
+  type: string
+  name: string
+  class?: string
+  actions: Array<Action>
+}
+
+export interface User {
+  _id: ModelId
+  id: string
+}
+
+export function getAccessToken(user: User, access: Array<Access>) {
   return encodeToken(
     {
       sub: user.id,
@@ -142,14 +159,22 @@ function generateAccess(scope: any) {
   }
 }
 
-function checkAccess(access, user) {
+async function checkAccess(access, user) {
   if (access.type !== 'repository') {
     // not a repository request
     return false
   }
 
-  if (!access.name.startsWith(`${user.id}/`)) {
-    // not users deployment area
+  const deploymentUuid = access.name.split('/')[0]
+  const deployment = await findDeploymentByUuid(user, deploymentUuid)
+
+  if (!deployment) {
+    // no deployment found
+    return false
+  }
+
+  if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
+    // user not in access list
     return false
   }
 
@@ -219,7 +244,7 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
-      if (!admin && !checkAccess(access, user)) {
+      if (!admin && !(await checkAccess(access, user))) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }
     }

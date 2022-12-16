@@ -1,6 +1,6 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
 global.TextEncoder = TextEncoder
@@ -18,13 +18,27 @@ export const uploadData: any = {
     modelID: 'test-model',
   },
   contacts: {
-    requester: 'user',
+    uploader: [{ kind: EntityKind.USER, id: 'user' }],
+    reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+    manager: [{ kind: EntityKind.USER, id: 'manager' }],
+  },
+}
+
+export const deploymentData: any = {
+  schemaRef: 'test-schema3',
+  highLevelDetails: {
+    initialVersionRequested: 1,
+    name: 'test-deployment',
+    modelID: 'test-model',
+  },
+  contacts: {
+    owner: [{ kind: EntityKind.USER, id: 'user' }],
   },
 }
 
 export const testUser: any = {
   id: 'user',
-  email: 'test',
+  email: 'test@example.com',
 }
 export const userDoc = new UserModel(testUser)
 
@@ -78,9 +92,9 @@ export const testVersion: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
     },
     buildOptions: {
       seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
@@ -107,9 +121,9 @@ export const testVersion2: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
     },
     buildOptions: {
       seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
@@ -134,7 +148,6 @@ export const testModel: any = {
   schemaRef: 'test-schema',
   uuid: modelUuid,
   currentMetadata: uploadData,
-  owner: userDoc,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -144,7 +157,6 @@ export const testModel2: any = {
   schemaRef: 'test-schema',
   uuid: 'model-test2',
   currentMetadata: uploadData,
-  owner: userDoc,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -155,8 +167,7 @@ export const testDeployment: any = {
   schemaRef: 'test-schema3',
   uuid: deploymentUuid,
   model: modelId,
-  metadata: uploadData,
-  owner: new ObjectId(),
+  metadata: deploymentData,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -169,10 +180,9 @@ export const testDeployment2: any = {
   model: modelId,
   metadata: {
     contacts: {
-      requester: requesterId,
+      owner: [{ kind: EntityKind.USER, id: 'user' }],
     },
   },
-  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }

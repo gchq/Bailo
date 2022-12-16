@@ -26,7 +26,6 @@ const testModel: any = {
   schemaRef: 'test-schema',
   uuid: 'model-test',
   currentMetadata: {},
-  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }

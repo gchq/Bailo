@@ -6,6 +6,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import ModelOverview from './ModelOverview'
 import { lightTheme } from './theme'
+import { EntityKind } from '../types/interfaces'
 
 describe('ModelOverview', () => {
   const version: any = {
@@ -16,9 +17,9 @@ describe('ModelOverview', () => {
         tags: ['tag1'],
       },
       contacts: {
-        uploader: 'user1',
-        reviewer: 'user2',
-        manager: 'user3',
+        uploader: [{ kind: EntityKind.USER, id: 'user1' }],
+        reviewer: [{ kind: EntityKind.USER, id: 'user2' }],
+        manager: [{ kind: EntityKind.USER, id: 'user3' }],
       },
     },
   }

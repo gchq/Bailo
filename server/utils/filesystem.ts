@@ -1,13 +1,10 @@
-import { dirname } from 'path'
 import fs, { constants } from 'fs'
 import { access, mkdir, readdir } from 'fs/promises'
 
 export function ensurePathExists(path: string, sync = false) {
-  const folder = dirname(path)
-
   if (sync) {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true })
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true })
     }
     return
   }
