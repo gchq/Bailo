@@ -534,16 +534,12 @@ function Model() {
             </Typography>
             <Stack direction='row' spacing={2}>
               <DisabledElementTooltip
-                conditions={[
-                  currentUser.id !== version?.metadata?.contacts?.uploader
-                    ? 'You do not have permission to delete this version.'
-                    : '',
-                ]}
+                conditions={[!isPotentialUploader ? 'You do not have permission to delete this version.' : '']}
                 placement='bottom'
               >
                 <Button
                   variant='contained'
-                  disabled={currentUser.id !== version?.metadata?.contacts?.uploader}
+                  disabled={!isPotentialUploader}
                   color='error'
                   onClick={handleDelete}
                   data-test='deleteVersionButton'
