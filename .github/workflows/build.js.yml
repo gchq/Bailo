@@ -1,0 +1,37 @@
+name: Build Bailo Image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      # Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Build Dockerfile
+      - name: 'Build Dockerfile'
+        run: |
+          docker build -f ./Dockerfile.prod -t local/bailo .
+          docker images
