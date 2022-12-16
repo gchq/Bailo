@@ -10,6 +10,12 @@ import Image from 'next/image'
 import localFont from '@next/font/local'
 import Link from '@/components/Link'
 import { useRef } from 'react'
+import NavBar from '@/components/NavBar'
+import Tooltip from '@mui/material/Tooltip'
+import MenuItem from '@mui/material/MenuItem'
+import GitHubIcon from '@mui/icons-material/GitHub'
+import IconButton from '@mui/material/IconButton'
+import Container from '@mui/material/Container'
 
 const myFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
 
@@ -19,16 +25,30 @@ export default function Home() {
     <>
       <Box
         sx={{
-          height: '100vh',
           backgroundColor: '#f8e6dc',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          textAlign: 'center',
         }}
         id='home-welcome-container'
       >
-        <Stack alignItems='center' spacing={1}>
+        <Container sx={{ ml: 12, p: 4, position: 'absolute', float: 'right' }}>
+          <Link href='https://github.com/gchq/bailo'>
+            <Tooltip title='Open GitHub'>
+              <IconButton sx={{ p: 0 }}>
+                <GitHubIcon sx={{ color: 'white', fontSize: 40 }} />
+              </IconButton>
+            </Tooltip>
+          </Link>
+        </Container>
+        <Stack
+          sx={{
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            textAlign: 'center',
+          }}
+          alignItems='center'
+          spacing={1}
+        >
           <Stack justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 2 }}>
             <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={300} />
             <Typography className={myFont.className} variant='h1' sx={{ color: 'white' }}>
