@@ -1,12 +1,14 @@
 import { castArray } from 'lodash'
 import { Types } from 'mongoose'
-import { Model } from '../../types/interfaces'
+import { Model, ModelId } from '../../types/interfaces'
 import ModelModel from '../models/Model'
 import { UserDoc } from '../models/User'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { SerializerOptions } from '../utils/logger'
-import { Forbidden } from '../utils/result'
+import { Forbidden, NotFound } from '../utils/result'
+import { VersionDoc } from '../models/Version'
+import { getEntitiesForUser } from '../utils/entity'
 
 const auth = new Authorisation()
 
@@ -55,7 +57,11 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
   if (type === 'favourites') {
     query._id = { $in: user.favourites }
   } else if (type === 'user') {
-    query.owner = user._id
+    const userEntities = await getEntitiesForUser(user)
+
+    query.$or = userEntities.map((userEntity) => ({
+      'currentMetadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+    }))
   }
 
   const models = await ModelModel.find(query).sort({ updatedAt: -1 })
@@ -72,4 +78,28 @@ export async function createModel(user: UserDoc, data: Model) {
   await model.save()
 
   return model
+}
+
+export async function deleteModel(user: UserDoc, modelId: ModelId) {
+  const model = await ModelModel.findById(modelId)
+
+  if (!model) {
+    throw NotFound({ modelId }, 'Unable to find model to remove.')
+  }
+
+  await model.delete(user._id)
+}
+
+export async function removeVersionFromModel(user: UserDoc, version: VersionDoc) {
+  // Deletes model if no versions left
+  const model = await ModelModel.findById(version.model)
+
+  if (!model) {
+    throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
+  }
+
+  await model.versions.remove(version._id)
+  if (model.versions.length === 0) {
+    await model.delete(user._id)
+  }
 }

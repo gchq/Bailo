@@ -18,7 +18,7 @@ import {
   testModel,
   testUser,
   testVersion,
-  uploadData,
+  deploymentData,
 } from '../../utils/test/testModels'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 import * as validateSchemaUtil from '../../utils/validateSchema'
@@ -69,7 +69,8 @@ describe('test deployment routes', () => {
     mockValidation.mockReturnValue(null)
     const requestMock = jest.spyOn(requestService, 'createDeploymentRequests')
     requestMock.mockReturnValue(managerRequest)
-    const res = await authenticatedPostRequest('/api/v1/deployment').send(uploadData)
+    const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
+
     validateTestRequest(res)
     expect(Object.keys(res.body)[0]).toBe('uuid')
   })

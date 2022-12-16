@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
+import { isUserInEntityList } from '../../utils/entity'
 import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
-import { BadReq, NotFound } from '../../utils/result'
+import { BadReq, NotFound, NotImplemented } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
 export const getModels = [
@@ -161,5 +162,38 @@ export const getModelVersion = [
       'User finding specific version for model'
     )
     return res.json(version)
+  },
+]
+
+export const getModelAccess = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { user } = req
+    const { uuid } = req.params
+
+    const model = await findModelByUuid(req.user, uuid)
+
+    if (!model) {
+      throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
+    }
+
+    const [uploader, reviewer, manager] = await Promise.all([
+      isUserInEntityList(user, model.currentMetadata.contacts.uploader),
+      isUserInEntityList(user, model.currentMetadata.contacts.reviewer),
+      isUserInEntityList(user, model.currentMetadata.contacts.manager),
+    ])
+
+    return res.json({
+      uploader,
+      reviewer,
+      manager,
+    })
+  },
+]
+
+export const deleteModel = [
+  ensureUserRole('user'),
+  async (_req: Request, _res: Response) => {
+    throw NotImplemented({}, 'This API call is temporarily unavailable')
   },
 ]

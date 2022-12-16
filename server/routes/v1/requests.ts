@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 import { Types } from 'mongoose'
 import { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates } from '../../../types/interfaces'
-import { ModelDoc } from '../../models/Model'
 import { RequestTypes } from '../../models/Request'
 import { VersionDoc } from '../../models/Version'
 import { findDeploymentById } from '../../services/deployment'
@@ -15,6 +14,7 @@ import { getDeploymentQueue } from '../../utils/queues'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { sendEmail } from '../../utils/smtp'
 import { ensureUserRole, hasRole } from '../../utils/user'
+import { isUserInEntityList } from '../../utils/entity'
 
 export const getRequests = [
   ensureUserRole('user'),
@@ -76,9 +76,9 @@ export const postRequestResponse = [
 
     const request = await getRequest({ requestId: id })
 
-    if (!req.user._id.equals(request.user) && !hasRole(['admin'], req.user)) {
+    if (!(await isUserInEntityList(req.user, request.approvers)) && !hasRole(['admin'], req.user)) {
       throw Unauthorised(
-        { code: 'unauthorised_to_approve', requestId: id, userId: req.user._id, requestUser: request.user },
+        { code: 'unauthorised_to_approve', requestId: id, userId: req.user._id, requestApprovers: request.approvers },
         'You do not have permissions to approve this'
       )
     }
@@ -114,7 +114,7 @@ export const postRequestResponse = [
         )
       }
 
-      userId = (version.model as ModelDoc).owner
+      userId = req.user._id
       requestType = RequestTypes.Upload
       document = version
 
@@ -130,7 +130,7 @@ export const postRequestResponse = [
         )
       }
 
-      userId = (deployment.model as ModelDoc).owner
+      userId = req.user._id
       requestType = RequestTypes.Deployment
       document = deployment
 
