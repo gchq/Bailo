@@ -2,7 +2,6 @@ import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
-import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
 
@@ -25,8 +24,6 @@ export interface Deployment {
   logs: Types.Array<LogStatement>
   built: boolean
 
-  owner: Types.ObjectId | UserDoc
-
   createdAt: Date
   updatedAt: Date
 
@@ -48,8 +45,6 @@ const DeploymentSchema = new Schema<Deployment>(
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },
-
-    owner: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   },
   {
     timestamps: true,

@@ -6,7 +6,6 @@
     "name": "Test Deployment"
   },
   "contacts": {
-    "requester": "user",
-    "secondPOC": "user"
+    "owner": [{ "kind": "user", "id": "user" }]
   }
 }

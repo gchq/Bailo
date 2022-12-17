@@ -49,16 +49,22 @@ function ModelOverview(props: any) {
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Uploader</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.uploader}</Typography>
+            <Typography variant='h6'>Uploaders</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.uploader.map((uploader) => uploader.id).join(', ')}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Reviewer</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.reviewer}</Typography>
+            <Typography variant='h6'>Reviewers</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.reviewer.map((reviewer) => reviewer.id).join(', ')}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Manager</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.manager}</Typography>
+            <Typography variant='h6'>Managers</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.manager.map((manager) => manager.id).join(', ')}
+            </Typography>
           </Box>
         </Box>
       </Grid>

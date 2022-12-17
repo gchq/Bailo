@@ -28,8 +28,8 @@ describe('Model with code and binary files', () => {
     })
 
     cy.log('Selecting code and binary files')
-    cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip')
-    cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip')
+    cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
+    cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip', { force: true })
 
     cy.log('Inputting deployment metadata')
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
@@ -141,7 +141,7 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              const imageName = `${registryUrl}/user/${modelUuid}:1`
+              const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:1`
 
               cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
               cy.exec(`docker pull ${imageName}`)

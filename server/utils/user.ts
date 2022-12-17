@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import Authorisation from '../external/Authorisation'
 import { UserDoc } from '../models/User'
 import { getAdminToken } from '../routes/v1/registryAuth'
-import { findUserCached, getUserById } from '../services/user'
+import { findUserCached, getUserById, findAndUpdateUser } from '../services/user'
 import { Forbidden, Unauthorised } from './result'
 
 const auth = new Authorisation()
@@ -65,9 +65,9 @@ export async function getUser(req: Request, _res: Response, next: NextFunction) 
   const userInfo = await auth.getUserFromReq(req)
 
   // no user found
-  if (!userInfo.userId) return next()
+  if (userInfo.userId === undefined) return next()
 
-  const user = await findUserCached(userInfo)
+  const user = process.env.NODE_ENV !== 'test' ? await findUserCached(userInfo) : await findAndUpdateUser(userInfo)
   req.user = user
 
   return next()
