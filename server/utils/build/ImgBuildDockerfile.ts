@@ -64,7 +64,7 @@ class ImgBuildDockerfile extends BuildStep {
     // push image
     this.logger.info({ tag }, 'Pushing image to docker')
 
-    setRegistryLogin(config.get('registry.host'), 'admin', await getAdminToken())
+    await setRegistryLogin(config.get('registry.host'), 'admin', await getAdminToken())
     this.logger.info({}, 'Successfully logged into docker')
 
     await logCommand(`img push ${tag}`, this.logger)
