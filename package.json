@@ -3,21 +3,33 @@
   "version": "0.3.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
     "build_next": "next build",
     "build_server": "tsc --project tsconfig.server.json",
-    "start": "cross-env NODE_ENV=production node dist/server/index.js",
-    "lint": "next lint",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360",
-    "style": "prettier --write .",
     "check-style": "prettier --check .",
-    "test": "jest --bail",
-    "integration": "jest --bail --config jest.config.integration.ts",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
+    "dev": "nodemon",
     "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts",
-    "script": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tsconfig.server.json node --trace-warnings -r ts-node/register -r tsconfig-paths/register server/scripts/runScript.ts"
+    "integration": "jest --bail --config jest.config.integration.ts",
+    "lint": "next lint",
+    "script": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tsconfig.server.json node --trace-warnings -r ts-node/register -r tsconfig-paths/register server/scripts/runScript.ts",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "style": "prettier --write .",
+    "test": "jest --bail"
+  },
+  "prettier": {
+    "jsxSingleQuote": true,
+    "printWidth": 120,
+    "proseWrap": "always",
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false
+  },
+  "eslintConfig": {
+    "extends": "next/core-web-vitals"
   },
   "dependencies": {
     "@emotion/server": "^11.4.0",
@@ -68,8 +80,6 @@
     "yargs": "^17.3.1"
   },
   "devDependencies": {
-    "react-dom": "^17.0.2",
-    "json-schema": "^0.4.0",
     "@babel/preset-env": "^7.18.2",
     "@babel/preset-react": "^7.17.12",
     "@emotion/cache": "^11.7.1",
@@ -82,7 +92,6 @@
     "@mui/system": "^5.10.2",
     "@next/bundle-analyzer": "^12.0.8",
     "@rjsf/core": "^4.1.1",
-    "randomcolor": "^0.6.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "13.5.0",
@@ -126,11 +135,14 @@
     "eslint-plugin-react-hooks": "^4.5.0",
     "eslint-plugin-testing-library": "5.0.3",
     "jest": "^27.5.1",
+    "json-schema": "^0.4.0",
     "mdx-mermaid": "1.2.3",
     "mongodb-memory-server": "^8.5.2",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "qs": "^6.10.3",
+    "randomcolor": "^0.6.2",
+    "react-dom": "^17.0.2",
     "react-flow-renderer": "^9.7.3",
     "rehype-highlight": "^5.0.2",
     "remark-frontmatter": "^4.0.1",
@@ -140,17 +152,5 @@
     "swr": "^1.1.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.4"
-  },
-  "prettier": {
-    "tabWidth": 2,
-    "useTabs": false,
-    "printWidth": 120,
-    "semi": false,
-    "singleQuote": true,
-    "jsxSingleQuote": true,
-    "proseWrap": "always"
-  },
-  "eslintConfig": {
-    "extends": "next/core-web-vitals"
   }
 }
