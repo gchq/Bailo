@@ -42,6 +42,9 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
     && addgroup nextjs certs \
     && chgrp certs /etc/ssl/certs \
     && chmod 775 /etc/ssl/certs \
+    && mkdir -p /usr/local/share/ca-certificates \
+    && chgrp certs /usr/local/share/ca-certificates \
+    && chmod 775 /usr/local/share/ca-certificates \
     && echo nextjs:100000:65536 | tee /etc/subuid | tee /etc/subgid
 
 COPY --from=prod_deps --chown=nextjs:0 /app/node_modules ./node_modules
