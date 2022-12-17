@@ -12,7 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build && rm -rf .next/cache
 
 # Production node_modules
 FROM node:16-alpine3.15 as prod_deps
@@ -29,7 +29,7 @@ FROM node:16-alpine3.15 as runner
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 WORKDIR /app
-RUN apk add --no-cache libc6-compat img docker
+RUN apk add --no-cache libc6-compat img
 
 ENV NODE_ENV production
 ARG user_id=1001
@@ -42,23 +42,21 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
     && addgroup nextjs certs \
     && chgrp certs /etc/ssl/certs \
     && chmod 775 /etc/ssl/certs \
-    && chgrp certs /usr/local/share/ca-certificates \
-    && chmod 775 /usr/local/share/ca-certificates \
     && echo nextjs:100000:65536 | tee /etc/subuid | tee /etc/subgid
+
+COPY --from=prod_deps --chown=nextjs:0 /app/node_modules ./node_modules
+COPY --chown=nextjs:0 ./scripts/run_app_prod.sh ./scripts/run_app_prod.sh
 
 COPY --from=builder --chown=nextjs:0 /app/dist ./dist
 COPY --from=builder --chown=nextjs:0 /app/lib/p-mongo-queue ./dist/lib/p-mongo-queue
 COPY --from=builder --chown=nextjs:0 /app/config ./config
 COPY --from=builder --chown=nextjs:0 /app/public ./public
 COPY --from=builder --chown=nextjs:0 /app/.next ./.next
-COPY --from=prod_deps --chown=nextjs:0 /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:0 /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:0 /app/pages ./pages
 COPY --from=builder --chown=nextjs:0 /s2i /s2i
 
-COPY --chown=nextjs:0 ./scripts/run_app_prod.sh ./scripts/run_app_prod.sh
-
-RUN chmod -R g=u /app
+RUN chmod -R g=u dist config public .next pages
 
 USER $user_id
 ENV USER nextjs

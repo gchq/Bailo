@@ -1,5 +1,5 @@
 import { consoleLog } from '@/utils/logging'
-import { getAccessToken } from '../routes/v1/registryAuth'
+import { getAccessToken, getAdminToken } from '../routes/v1/registryAuth'
 
 async function main() {
   const model = 'nginx'
@@ -9,6 +9,9 @@ async function main() {
   ])
 
   consoleLog(token)
+
+  const admin = await getAdminToken()
+  console.log(admin)
 }
 
 main()
