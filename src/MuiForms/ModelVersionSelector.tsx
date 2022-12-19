@@ -12,7 +12,7 @@ export default function ModelVersionSelector({
 }: WidgetProps): ReactElement {
   const sendNotification = useNotification()
   const router = useRouter()
-  const { uuid: modelUuid, selectedVersion }: { uuid?: string; selectedVersion?: string } = router.query
+  const { uuid: modelUuid }: { uuid?: string; selectedVersion?: string } = router.query
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(modelUuid)
 
   useEffect(() => {
@@ -21,9 +21,8 @@ export default function ModelVersionSelector({
 
   const value = useMemo(() => {
     if (currentValue) return currentValue
-    if (selectedVersion) return selectedVersion
     return ''
-  }, [currentValue, selectedVersion])
+  }, [currentValue])
 
   const options = useMemo(() => {
     if (isVersionsLoading || isVersionsError || !versions) return currentOptions
