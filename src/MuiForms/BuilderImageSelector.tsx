@@ -14,7 +14,7 @@ export default function BuilderImageSelector(props: WidgetProps): any {
     const { options, value } = props
     options.enumOptions = uiConfig.builderImages.map((version) => ({ value: version.image, label: version.name }))
 
-    setSelectProps({ ...props, value: value || options.enumOptions[0].value })
+    setSelectProps({ ...props, value })
   }, [uiConfig, props])
 
   const { options } = selectProps
