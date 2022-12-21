@@ -29,7 +29,7 @@ FROM node:16-alpine3.15 as runner
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 WORKDIR /app
-RUN apk add --no-cache libc6-compat img
+RUN apk add --no-cache libc6-compat img docker
 
 ENV NODE_ENV production
 ARG user_id=1001
