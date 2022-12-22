@@ -8,7 +8,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.service.ports.mongodb }}
       targetPort: http
       protocol: TCP
       name: http

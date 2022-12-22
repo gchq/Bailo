@@ -10,7 +10,7 @@ data:
     module.exports = {
       minio: {
         endPoint: '{{ include "bailo.minio.host" .}}',
-        port: {{ .Values.minio.service.ports.api }},
+        port: {{ .Values.minio.service.ports.mongodbs.api }},
         useSSL: {{ .Values.minio.useSSL }},
         region: '',
         uploadBucket: '{{ .Values.minio.uploadBucket }}',
