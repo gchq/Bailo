@@ -67,9 +67,9 @@ services:
 
   app:
     image: bailo:latest
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     #network_mode: "host"
     volumes:
       # cert location assumed by registryAuth.ts
