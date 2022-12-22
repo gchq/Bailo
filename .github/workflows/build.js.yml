@@ -110,7 +110,7 @@ jobs:
 
       - name: Load docker image to minikube
         run: |
-          minikube -p minikube docker-env
+          eval $(minikube -p minikube docker-env)
           docker load -i /tmp/bailo.tar
 
       # Create certs
@@ -172,7 +172,7 @@ jobs:
                 - bailo_user
             image:
               registry: docker.io
-            host: 'bailo-mongodb:31110/bailo'
+            host: 'bailo-mongodb:27017/bailo'
           minio:
             image:
               registry: docker.io
