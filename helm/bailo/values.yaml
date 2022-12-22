@@ -91,7 +91,8 @@ mongodb:
     passwords: [ ] # required for ConfigMap bailo-config
     databases: [ bailo ] # defined database for Mongo
   service:
-    port: 27017
+    ports:
+      mongodb: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
     size: 10Gi
