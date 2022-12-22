@@ -18,7 +18,7 @@ import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import styled from 'styled-components'
 
-const myFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
+const nunitoSansFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
 
 const StyledImg = styled.img`
   border-radius: 10px;
@@ -33,7 +33,6 @@ export default function Home() {
   const ref = createRef<HTMLDivElement>()
 
   const scrollToContent = () => {
-    console.log(ref)
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' })
     }
@@ -70,7 +69,7 @@ export default function Home() {
         >
           <Stack justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 2 }}>
             <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={300} />
-            <Typography className={myFont.className} variant='h1' sx={{ color: 'white' }}>
+            <Typography className={nunitoSansFont.className} variant='h1' sx={{ color: 'white' }}>
               Bailo
             </Typography>
             <Typography variant='h5' sx={{ color: 'white' }}>
