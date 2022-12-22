@@ -157,7 +157,7 @@ jobs:
               script: "dist/server/scripts/exampleSetAllSchemas.js"
           # Bailo
           image:
-            repository: "local/bailo"
+            repository: "bailo"
             tag: "latest"
           # Used for k8s not openshift
           ingress:
@@ -213,6 +213,7 @@ jobs:
           kubectl get services
           echo "------------------listing pods----------------------"
           kubectl get pods
+
       - name: HELM test Bailo
         working-directory: ./helm/bailo
         run: helm test bailo

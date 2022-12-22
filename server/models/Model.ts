@@ -1,6 +1,5 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import { UserDoc } from './User'
 import { VersionDoc } from './Version'
 
 export interface Model {
