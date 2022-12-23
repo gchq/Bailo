@@ -2,24 +2,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "bailo.fullname" . }}-nginx
-  labels:
-    {{- include "bailo.labels" . | nindent 4 }}
+  name: {{ .Values.nginxAuth.host }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "bailo.selectorLabels" . | nindent 6}}
-      name: {{ include "bailo.fullname" . }}-nginx
+      name: {{ .Values.nginxAuth.host }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "bailo.selectorLabels" . | nindent 8 }}
-        name: {{ include "bailo.fullname" . }}-nginx
+        name: {{ .Values.nginxAuth.host }}
     spec:
       containers:
       - name: {{ .Values.nginxAuth.host }}

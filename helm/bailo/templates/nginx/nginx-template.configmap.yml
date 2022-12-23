@@ -14,6 +14,10 @@ data:
     events { worker_connections 1024; }
 
     http {
+        upstream host_service {
+           server bailo:3000;
+        }
+
         sendfile on;
 
         map $http_x_userid $req_userid {
@@ -60,14 +64,14 @@ data:
                 chunked_transfer_encoding on;
 
                 # the real magic is here where we forward requests to the address that the Node.js server is running on
-                proxy_pass http://{{ include "bailo.fullname" . }}:3000;
+                proxy_pass http://host_service;
             }
 
             location /v2 {
                 proxy_hide_header WWW-Authenticate;
                 add_header WWW-Authenticate $new_www_authenticate always;
 
-                proxy_pass         https://{{ include "bailo.fullname" . }}-registry:5000;
+                proxy_pass         https://registry:5000;
                 proxy_redirect     off;
                 proxy_set_header   Host $host;
                 proxy_set_header   X-Real-IP $remote_addr;

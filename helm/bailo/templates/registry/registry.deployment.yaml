@@ -2,24 +2,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "bailo.fullname" . }}-registry
-  labels:
-    {{- include "bailo.labels" . | nindent 4 }}
+  name: {{ .Values.registry.host }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "bailo.selectorLabels" . | nindent 6}}
-      name: {{ include "bailo.fullname" . }}-registry
+      name: {{ .Values.registry.host }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "bailo.selectorLabels" . | nindent 8 }}
-        name: {{ include "bailo.fullname" . }}-registry
+        name: {{ .Values.registry.host }}
     spec:
       containers:
       - name: {{ .Values.registry.host }}
