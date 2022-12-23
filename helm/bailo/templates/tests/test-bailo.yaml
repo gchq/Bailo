@@ -8,11 +8,11 @@ metadata:
 data:
   testconn.sh: |-
     nc -vz bailo {{ .Values.service.port }}
-    nc -vz mail {{ .Values.config.smtp.port }}
+    nc -vz bailo-mail {{ .Values.config.smtp.port }}
     nc -vz bailo-minio {{ .Values.minio.service.ports.api }}
     nc -vz bailo-mongodb {{ .Values.mongodb.service.ports.mongodb }}
-    nc -vz nginxauth {{ .Values.nginxAuth.port }}
-    nc -vz registry {{ .Values.registry.port }}
+    nc -vz bailo-nginx {{ .Values.nginxAuth.port }}
+    nc -vz bailo-registry {{ .Values.registry.port }}
 
 ---
 apiVersion: v1
