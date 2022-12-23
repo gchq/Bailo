@@ -9,6 +9,8 @@ metadata:
     {{- include "bailo.labels" . | nindent 4 }}
 data:
   testconn.sh: |-
+    set -x
+    
     echo "Checking Bailo"
     nc -vz bailo {{ .Values.service.port }}
     echo "Checking Mail"
