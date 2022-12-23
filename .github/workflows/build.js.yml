@@ -227,6 +227,12 @@ jobs:
         if: always()
         run: kubectl logs bailo
 
+      # Install dependencies
+      - run: npm ci
+
+      # Run Cypress integration tests
+      - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
+
   end_to_end:
     needs: build_image
     runs-on: ubuntu-latest
