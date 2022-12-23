@@ -138,7 +138,7 @@ registry:
   repository: registry
   tag: 2
   enabled: true
-  host: "registry" # service name
+  host: "bailo-registry" # service name
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
@@ -150,7 +150,7 @@ registry:
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
   tag: latest
-  host: "bailo-nginx-auth-proxy" # service name
+  host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
   #certFile: "tls.crt"

@@ -3,16 +3,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: maildev
+  name: {{ include "bailo.fullname" . }}-maildev
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: maildev
+      {{- include "bailo.selectorLabels" . | nindent 6}}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        name: maildev
+        {{- include "bailo.selectorLabels" . | nindent 8 }}
     spec:
       containers:
       - name: maildev
