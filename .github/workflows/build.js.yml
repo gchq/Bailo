@@ -207,12 +207,11 @@ jobs:
         run: sleep 90s
         shell: bash
 
-      - name: List Pods and Services
-        run: |
-          echo "------------------listing services------------------"
-          kubectl get services
-          echo "------------------listing pods----------------------"
-          kubectl get pods
+      - name: List Pods
+        run: kubectl get pods
+
+      - name: List Services
+        run: kubectl get services
 
       - name: HELM test Bailo
         working-directory: ./helm/bailo
@@ -223,6 +222,10 @@ jobs:
           minikube service list
           echo "----------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
+
+      - name: Print appliation logs
+        if: always()
+        run: kubectl logs bailo
 
   end_to_end:
     needs: build_image
