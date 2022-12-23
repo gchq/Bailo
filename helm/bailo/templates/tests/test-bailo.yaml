@@ -10,7 +10,7 @@ data:
     nc -vz bailo {{ .Values.service.port }}
     nc -vz mail {{ .Values.config.smtp.port }}
     nc -vz bailo-minio {{ .Values.minio.service.ports.api }}
-    nc -vz bailo-mongodb {{ .Values.mongodb.service.port }}
+    nc -vz bailo-mongodb {{ .Values.mongodb.service.ports.mongodb }}
     nc -vz nginxauth {{ .Values.nginxAuth.port }}
     nc -vz registry {{ .Values.registry.port }}
 
