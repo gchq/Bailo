@@ -223,15 +223,15 @@ jobs:
           echo "----------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
 
-      - name: Print appliation logs
-        if: always()
-        run: kubectl logs bailo
-
       # Install dependencies
       - run: npm ci
 
       # Run Cypress integration tests
       - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
+
+      - name: Print appliation logs
+        if: always()
+        run: kubectl logs -l app.kubernetes.io/instance=bailo
 
   end_to_end:
     needs: build_image
