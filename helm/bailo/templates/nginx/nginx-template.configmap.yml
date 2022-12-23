@@ -14,10 +14,6 @@ data:
     events { worker_connections 1024; }
 
     http {
-        upstream host_service {
-           server {{ include "bailo.fullname" . }}:3000;
-        }
-
         sendfile on;
 
         map $http_x_userid $req_userid {
@@ -64,7 +60,7 @@ data:
                 chunked_transfer_encoding on;
 
                 # the real magic is here where we forward requests to the address that the Node.js server is running on
-                proxy_pass http://host_service;
+                proxy_pass http://{{ include "bailo.fullname" . }}:3000;
             }
 
             location /v2 {

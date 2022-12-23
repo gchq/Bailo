@@ -11,6 +11,7 @@ spec:
   selector:
     matchLabels:
       {{- include "bailo.selectorLabels" . | nindent 6}}
+      name: maildev
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,6 +20,7 @@ spec:
       {{- end }}
       labels:
         {{- include "bailo.selectorLabels" . | nindent 8 }}
+        name: maildev
     spec:
       containers:
       - name: maildev

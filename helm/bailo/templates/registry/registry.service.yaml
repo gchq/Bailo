@@ -5,6 +5,7 @@ metadata:
   name: {{ include "bailo.fullname" . }}-registry
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
+    name: {{ include "bailo.fullname" . }}-registry
 spec:
   ports:
     - port: {{ .Values.registry.port }}
@@ -12,4 +13,4 @@ spec:
       protocol: TCP
       name: tcp
   selector:
-    name: {{ .Values.registry.host }}
+    name: {{ include "bailo.fullname" . }}-registry

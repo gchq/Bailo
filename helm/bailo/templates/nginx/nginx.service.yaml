@@ -6,10 +6,9 @@ metadata:
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
 spec:
-  ports:
-    - port: {{ .Values.nginxAuth.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    name: {{ .Values.nginxAuth.host }}
+    name: {{ include "bailo.fullname" . }}-nginx
+  ports:
+    - protocol: TCP
+      port: {{ .Values.nginxAuth.port }}
+      targetPort: http
