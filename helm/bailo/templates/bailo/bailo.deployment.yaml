@@ -57,7 +57,7 @@ spec:
               value: {{ .Values.config.schema.script }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.ports.mongodb }}
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:

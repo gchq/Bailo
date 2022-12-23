@@ -16,7 +16,7 @@ data:
       cache:
         blobdescriptor: inmemory
       s3:
-        regionendpoint: {{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.mongodbs.api }}
+        regionendpoint: {{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
         bucket: {{ .Values.minio.registryBucket }}
         secure: {{ .Values.minio.useSSL }}
         region: ignored-for-minio
