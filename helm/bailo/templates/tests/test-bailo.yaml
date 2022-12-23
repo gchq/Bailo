@@ -18,7 +18,7 @@ data:
     echo "Checking Minio"
     nc -vz bailo-minio {{ .Values.minio.service.ports.api }}
     echo "Checking Mongo"
-    nc -vz bailo-mongodb {{ .Values.mongodb.service.ports.mongodb }}
+    nc -vz bailo-mongodb {{ .Values.mongodb.service.port }}
     echo "Checking Nginx"
     nc -vz bailo-nginx {{ .Values.nginxAuth.port }}
     echo "Checking Registry"
