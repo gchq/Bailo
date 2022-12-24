@@ -155,6 +155,8 @@ jobs:
               from: 'bailo@example.com'
             schema:
               script: "dist/server/scripts/exampleSetAllSchemas.js"
+            build:
+              environment: img
           # Bailo
           image:
             repository: "bailo"
