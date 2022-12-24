@@ -4,30 +4,21 @@ import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import imageLoader from '@/components/imageLoader'
-import bailoLogo from '../public/bailo-logo.png'
-import marketplaceImage from '../public/marketplace.png'
 import Image from 'next/image'
 import localFont from '@next/font/local'
 import Link from '@/components/Link'
-import { createRef, useRef } from 'react'
+import { createRef } from 'react'
 import Tooltip from '@mui/material/Tooltip'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
-import styled from 'styled-components'
+import Slideshow from '../components/Slideshow'
+
+import bailoLogo from '../public/bailo-logo.png'
 
 const nunitoSansFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
-
-const StyledImg = styled.img`
-  border-radius: 10px;
-  box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.4s ease;
-  &:hover {
-    box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
-  }
-`
 
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
@@ -134,7 +125,7 @@ export default function Home() {
           </Grid>
           <Grid item lg={6}>
             <Box sx={{ px: 10, py: 4 }}>
-              <StyledImg alt='Image Alt' src={marketplaceImage.src} style={{ width: '100%' }} />
+              <Slideshow />
             </Box>
           </Grid>
         </Grid>

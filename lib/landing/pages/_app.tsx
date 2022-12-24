@@ -10,6 +10,9 @@ import '../public/css/table.css'
 import createEmotionCache from '../components/createEmotionCache'
 import '../styles/global.css'
 
+import 'swiper/css'
+import 'swiper/css/navigation'
+
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
