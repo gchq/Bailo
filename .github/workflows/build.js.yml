@@ -243,7 +243,7 @@ jobs:
 
       - name: Print appliation logs
         if: always()
-        run: kubectl logs -l app.kubernetes.io/instance=bailo
+        run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
 
   end_to_end:
     needs: build_image
