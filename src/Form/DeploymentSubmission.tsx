@@ -1,7 +1,6 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -19,7 +18,7 @@ function DeploymentSubmission({
   activeStep: number
   setActiveStep: Dispatch<SetStateAction<number>>
 }) {
-  const [warningCheckboxVal, setWarningCheckboxVal] = useState<boolean>(false)
+  const [warningCheckboxVal, setWarningCheckboxVal] = useState(false)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const handleCheckboxChange = (e) => {
@@ -35,14 +34,8 @@ function DeploymentSubmission({
       <Grid container justifyContent='center'>
         {uiConfig.deploymentWarning.showWarning && (
           <Alert sx={{ width: '100%' }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-            <AlertTitle sx={{ m: 0 }}>
-              <Checkbox
-                sx={{ p: '0px !important', mr: 1 }}
-                checked={warningCheckboxVal}
-                onChange={handleCheckboxChange}
-              />
-              {uiConfig.deploymentWarning.checkboxText}
-            </AlertTitle>
+            <Checkbox size='small' checked={warningCheckboxVal} onChange={handleCheckboxChange} sx={{ p: 0, mr: 1 }} />
+            {uiConfig.deploymentWarning.checkboxText}
           </Alert>
         )}
         <Stack direction='row' spacing={2} sx={{ mt: 5, mb: 5 }}>
