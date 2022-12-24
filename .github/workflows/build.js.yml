@@ -229,6 +229,18 @@ jobs:
       # Run Cypress integration tests
       - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
 
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
       - name: Print appliation logs
         if: always()
         run: kubectl logs -l app.kubernetes.io/instance=bailo
@@ -307,8 +319,19 @@ jobs:
           chmod +x ./server/scripts/waitForIt.sh
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
-      # Run Cypress integration tests
-      - run: npm run cy:run
+      - uses: cypress-io/github-action@v5
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
 
       - name: Dump docker-compose logs
         if: always()
