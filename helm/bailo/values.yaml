@@ -77,6 +77,9 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
+route:
+  enabled: false
+  
 # Mongo Dependencies
 mongodb:
   enabled: true
@@ -91,8 +94,7 @@ mongodb:
     passwords: [ ] # required for ConfigMap bailo-config
     databases: [ bailo ] # defined database for Mongo
   service:
-    ports:
-      mongodb: 27017
+    port: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
     size: 10Gi
@@ -193,8 +195,7 @@ config:
     environment: openshift # or img
 
   schema:
-    script: 'schema-setup-script.sh'
-
+    script: "dist/server/scripts/exampleSetAllSchemas.js"
 
 # nginx.deployment registry.deployment
 nginxcert:
