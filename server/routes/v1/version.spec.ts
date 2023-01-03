@@ -13,7 +13,7 @@ import {
 
 describe('test version routes', () => {
   beforeEach(async () => {
-    const createdUser = await UserModel.create(testUser)
+    await UserModel.create(testUser)
     await UserModel.create(testManager)
     await UserModel.create(testReviewer)
 
