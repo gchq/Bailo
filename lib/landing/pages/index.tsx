@@ -123,7 +123,7 @@ export default function Home() {
               </Stack>
             </Box>
           </Grid>
-          <Grid item lg={6}>
+          <Grid item lg={6} sx={{ width: '100%' }}>
             <Box sx={{ px: 10, py: 4 }}>
               <Slideshow />
             </Box>

@@ -22,10 +22,6 @@ const StyledSwiper = styled(Swiper)`
   }
 `
 
-const SlideImage = styled(Image)`
-  height: inherit !important;
-`
-
 const slides = [
   { image: marketplaceImage, text: '', alt: 'Bailo shows a collection of models in a marketplace' },
   { image: modelImage, text: '', alt: 'Bailo displays a configurable set of information for a model' },
@@ -36,10 +32,36 @@ const slides = [
 export default function Slideshow() {
   return (
     <>
-      <StyledSwiper navigation={true} modules={[Navigation]}>
+      <StyledSwiper
+        navigation={true}
+        modules={[Navigation]}
+        breakpoints={{
+          320: {
+            slidesPerView: 1,
+            spaceBetween: 20,
+          },
+          640: {
+            slidesPerView: 1,
+            spaceBetween: 20,
+          },
+          768: {
+            slidesPerView: 1,
+            spaceBetween: 40,
+          },
+          1024: {
+            slidesPerView: 1,
+            spaceBetween: 50,
+          },
+        }}
+      >
         {slides.map((slide) => (
           <SwiperSlide key={slide.alt}>
-            <SlideImage loader={imageLoader} src={slide.image} alt={slide.alt} style={{ width: '100%' }} />
+            <Image
+              loader={imageLoader}
+              src={slide.image}
+              alt={slide.alt}
+              style={{ width: 'inherit', height: 'inherit' }}
+            />
           </SwiperSlide>
         ))}
       </StyledSwiper>
