@@ -1,4 +1,5 @@
 import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -77,14 +78,15 @@ export default function FormUpload({
       />
       {uiConfig?.uploadWarning?.showWarning && (
         <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-          <Checkbox
-            size='small'
-            checked={warningCheckboxVal}
-            onChange={handleCheckboxChange}
-            sx={{ p: 0, mr: 1 }}
-            data-test='warningCheckbox'
-          />
-          {uiConfig.uploadWarning.checkboxText}
+          <AlertTitle sx={{ m: 0 }}>
+            <Checkbox
+              sx={{ p: '0px !important', mr: 1 }}
+              checked={warningCheckboxVal}
+              onChange={handleCheckboxChange}
+              data-test='warningCheckbox'
+            />
+            {uiConfig.uploadWarning.checkboxText}
+          </AlertTitle>
         </Alert>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>

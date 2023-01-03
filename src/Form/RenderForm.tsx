@@ -1,14 +1,13 @@
 import { withTheme } from '@rjsf/core'
 import { Dispatch, SetStateAction } from 'react'
-import ModelVersionSelector from '@/src/MuiForms/ModelVersionSelector'
-import EntitySelector from '@/src/MuiForms/EntitySelector'
-import UserSelector from '@/src/MuiForms/UserSelector'
-import SeldonVersionSelector from '@/src/MuiForms/SeldonVersionSelector'
-import TextareaWidget from '@/src/MuiForms/TextareaWidget'
-import Nothing from '@/src/MuiForms/Nothing'
-import { Theme as MaterialUITheme } from '../MuiForms'
-import { setStepState } from '../../utils/formUtils'
 import { SplitSchema, Step } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
+import { Theme as MaterialUITheme } from '../MuiForms'
+import Nothing from '../MuiForms/Nothing'
+import SeldonVersionSelector from '../MuiForms/SeldonVersionSelector'
+import TextareaWidget from '../MuiForms/TextareaWidget'
+import UserSelector from '../MuiForms/UserSelector'
+import EntitySelector from '../MuiForms/EntitySelector'
 
 const SchemaForm = withTheme(MaterialUITheme)
 
@@ -38,7 +37,6 @@ export default function RenderForm({
         userSelector: UserSelector,
         entitySelector: EntitySelector,
         seldonVersionSelector: SeldonVersionSelector,
-        modelVersionSelector: ModelVersionSelector,
         textArea: TextareaWidget,
         nothing: Nothing,
       }}

@@ -40,7 +40,10 @@ export default function Deploy() {
     if (!currentSchema) return
 
     const { reference } = currentSchema
-    const newSteps = getStepsFromSchema(currentSchema, {}, ['properties.highLevelDetails.properties.modelID'])
+    const newSteps = getStepsFromSchema(currentSchema, {}, [
+      'properties.highLevelDetails.properties.modelID',
+      'properties.highLevelDetails.properties.initialVersionRequested',
+    ])
 
     newSteps.push(
       createStep({
@@ -86,6 +89,7 @@ export default function Deploy() {
     const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
+    data.highLevelDetails.initialVersionRequested = model.currentMetadata.highLevelDetails.modelCardVersion
     data.schemaRef = currentSchema?.reference
 
     const deploy = await postEndpoint(`/api/v1/deployment`, data)
