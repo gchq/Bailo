@@ -1,43 +1,58 @@
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { SeldonVersion } from '@/types/interfaces'
 import MenuItem from '@mui/material/MenuItem'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import * as React from 'react'
+import { TextField } from '@mui/material'
 import { useGetUiConfig } from '../../data/uiConfig'
 
-export default function SeldonVersionSelector({
-  onChange,
-  value: currentValue,
-  required,
-  label,
-  readonly,
-}: {
-  onChange: (value: string) => void
+type SeldonVersionSelectorProps = {
+  label: string
   value: string
   required: boolean
-  label: string
   readonly: boolean
-}) {
+  onChange: (value: string) => void
+}
+
+export default function SeldonVersionSelector({
+  label,
+  value,
+  required,
+  readonly,
+  onChange,
+}: SeldonVersionSelectorProps) {
   const { uiConfig } = useGetUiConfig()
+  const [seldonVersions, setSeldonVersions] = useState<Array<SeldonVersion>>([])
 
-  const [seldonVersions, setSeldonVersions] = React.useState<Array<SeldonVersion>>([])
-
-  React.useEffect(() => {
-    if (uiConfig !== undefined) {
-      setSeldonVersions(uiConfig.seldonVersions)
-    }
+  useEffect(() => {
+    if (uiConfig) setSeldonVersions(uiConfig.seldonVersions)
   }, [uiConfig])
 
-  const handleChange = (event: SelectChangeEvent<unknown>) => {
-    onChange(event.target.value as string)
-  }
-
-  return readonly ? null : (
-    <Select value={currentValue || ''} label={label + (required ? ' *' : '')} onChange={handleChange}>
-      {seldonVersions.map((version: SeldonVersion) => (
+  const options = useMemo(
+    () =>
+      seldonVersions.map((version: SeldonVersion) => (
         <MenuItem key={`item-${version.name}`} value={version.image}>
           {version.name}
         </MenuItem>
-      ))}
-    </Select>
+      )),
+    [seldonVersions]
+  )
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value)
+  }
+
+  if (readonly) {
+    return null
+  }
+
+  return (
+    <TextField
+      select
+      label={`${label}${required ? ' *' : ''}`}
+      value={value || ''}
+      onChange={handleChange}
+      id='seldon-version-select'
+    >
+      {options}
+    </TextField>
   )
 }
