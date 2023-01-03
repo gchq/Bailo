@@ -4,7 +4,7 @@
     "name": "Minimal Model for Testing",
     "modelInASentence": "This \"model\" reverses its input.",
     "modelOverview": "This \"model\" reverses its input. It is a tiny model for testing Bailo functionality.",
-    "modelCardVersion": "1"
+    "modelCardVersion": "v1.0"
   },
   "contacts": {
     "uploader": [{ "kind": "user", "id": "user" }],
