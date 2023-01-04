@@ -1,5 +1,6 @@
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Navigation } from 'swiper'
+import { Autoplay, Pagination, Navigation } from 'swiper'
+import 'swiper/css/pagination'
 import Image from 'next/image'
 
 import imageLoader from '@/components/imageLoader'
@@ -27,8 +28,16 @@ export default function Slideshow() {
   return (
     <>
       <StyledSwiper
+        modules={[Autoplay, Pagination, Navigation]}
+        pagination={{
+          clickable: true,
+        }}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: true,
+        }}
         navigation={true}
-        modules={[Navigation]}
+        loop={true}
         breakpoints={{
           320: {
             slidesPerView: 1,
