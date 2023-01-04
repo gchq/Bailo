@@ -1,12 +1,39 @@
 /* eslint-disable no-param-reassign */
 import config from 'config'
+import { writeFile, readFile } from 'fs/promises'
+import { homedir } from 'os'
+import { join } from 'path'
+import { set } from 'lodash'
 
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
 import { ModelDoc } from '../../models/Model'
-import { logCommand, runCommand } from './build'
+import { logCommand } from './build'
 import { getAdminToken } from '../../routes/v1/registryAuth'
+import { checkFileExists, ensurePathExists } from '../filesystem'
+
+async function setRegistryLogin(registry: string, username: string, password: string) {
+  const folder = join(homedir(), '.docker')
+  await ensurePathExists(folder)
+
+  const file = join(folder, 'config.json')
+
+  let base
+  if (await checkFileExists(file)) {
+    base = JSON.parse(await readFile(file, { encoding: 'utf-8' }))
+  } else {
+    base = {
+      auths: {},
+    }
+  }
+
+  set(base, `auths.${registry}`, {
+    auth: Buffer.from(`${username}:${password}`).toString('base64'),
+  })
+
+  await writeFile(file, JSON.stringify(base, null, 2))
+}
 
 class ImgBuildDockerfile extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {
@@ -37,15 +64,7 @@ class ImgBuildDockerfile extends BuildStep {
     // push image
     this.logger.info({ tag }, 'Pushing image to docker')
 
-    // using docker instead of img login because img reads from ~/.docker/config and
-    // does not fully populate authorization headers (clientId and account) in authorization
-    // requests like docker does. docker login doesn't require docker to be running in host
-    await runCommand(
-      `docker login ${config.get('registry.host')} -u admin -p ${await getAdminToken()}`,
-      this.logger.logger.info.bind(this.logger.logger),
-      this.logger.logger.error.bind(this.logger.logger),
-      { hide: true }
-    )
+    await setRegistryLogin(config.get('registry.host'), 'admin', await getAdminToken())
     this.logger.info({}, 'Successfully logged into docker')
 
     await logCommand(`img push ${tag}`, this.logger)

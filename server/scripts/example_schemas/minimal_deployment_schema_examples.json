@@ -5,7 +5,8 @@
       "endDate": {
         "hasEndDate": true,
         "date": "2022-11-16"
-      }
+      },
+      "initialVersionRequested": "v1.0"
     },
     "contacts": {
       "owner": [{ "kind": "user", "id": "user" }]
