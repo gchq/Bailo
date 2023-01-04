@@ -35,10 +35,10 @@ export default function Home() {
           backgroundColor: '#f8e6dc',
           background: 'linear-gradient(#3a545c, #473cff)',
           backgroundSize: '400% 400%',
-          height: '100vh',
+          minHeight: '100vh',
         }}
       >
-        <Container sx={{ ml: 12, p: 4, position: 'absolute' }}>
+        <Container sx={{ p: 4, position: 'absolute' }}>
           <Link href='https://github.com/gchq/bailo'>
             <Tooltip title='Open GitHub'>
               <IconButton sx={{ p: 0 }}>
@@ -49,11 +49,12 @@ export default function Home() {
         </Container>
         <Stack
           sx={{
-            height: '100vh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             textAlign: 'center',
+            pt: 2,
+            minHeight: '100vh',
           }}
           alignItems='center'
           spacing={1}
@@ -67,7 +68,7 @@ export default function Home() {
               Making it easy to compliantly manage the machine learning lifecycle
             </Typography>
           </Stack>
-          <Stack direction='row' justifyContent='center' spacing={2} sx={{ p: 4 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ p: 4 }}>
             <Button
               onClick={scrollToContent}
               sx={{ minWidth: '200px', color: 'white' }}
@@ -124,7 +125,7 @@ export default function Home() {
             </Box>
           </Grid>
           <Grid item lg={6} sx={{ width: '100%' }}>
-            <Box sx={{ px: 10, py: 4 }}>
+            <Box sx={{ px: 3 }}>
               <Slideshow />
             </Box>
           </Grid>

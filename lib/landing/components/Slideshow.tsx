@@ -12,14 +12,8 @@ import modelImage from '../public/images/bailo-model.png'
 import deploymentImage from '../public/images/bailo-deployment.png'
 
 const StyledSwiper = styled(Swiper)`
-  transform: perspective(1500px) rotateY(-15deg);
   border-radius: 1rem;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
-  transition: transform 1s ease 0s;
-
-  &:hover {
-    transform: perspective(3000px) rotateY(-5deg);
-  }
 `
 
 const slides = [
