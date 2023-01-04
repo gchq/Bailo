@@ -45,6 +45,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'jsx-a11y/anchor-is-valid': 'off',
     'no-await-in-loop': 'off',
+    'no-continue': 'off',
     'no-restricted-exports': 'off',
     'no-restricted-syntax': 'off',
     'no-underscore-dangle': 'off',

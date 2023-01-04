@@ -10,6 +10,19 @@
         "Model will be used as part of capability development.",
         "Model will be part of an operational system."
       ]
+    },
+    "entity": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "Type of entity (user, group)."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for entity."
+        }
+      }
     }
   },
   "type": "object",
@@ -24,11 +37,6 @@
     "schemaRef": {
       "title": "Schema reference",
       "type": "string"
-    },
-    "user": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 100
     },
     "highLevelDetails": {
       "title": "Details",
@@ -45,8 +53,9 @@
           "type": "string"
         },
         "initialVersionRequested": {
-          "title": "The current version of the model",
-          "type": "string"
+          "title": "Minimum deployed version",
+          "type": "string",
+          "widget": "modelVersionSelector"
         },
         "endDate": {
           "title": "End Date",
@@ -104,22 +113,15 @@
       "title": "Deployment Contacts",
       "type": "object",
       "properties": {
-        "requester": {
-          "title": "Who is the owner of the deployment",
-          "description": "The person who will be contacted if there is a problem with the model, or if the SRO wants to discuss the model",
-          "type": "string",
-          "minLength": 1,
-          "widget": "userSelector"
-        },
-        "secondPOC": {
-          "title": "Secondary Contact",
-          "description": "A second person who can be contacted if the deployment owner is unavailable",
-          "type": "string",
-          "minLength": 1,
-          "widget": "userSelector"
+        "owner": {
+          "title": "Deployment Owners",
+          "description": "At least two users must own a deployment, in case the model owner needs to contact them.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/entity" },
+          "widget": "entitySelector"
         }
       },
-      "required": ["requester", "secondPOC"],
+      "required": ["owner"],
       "additionalProperties": false
     }
   },

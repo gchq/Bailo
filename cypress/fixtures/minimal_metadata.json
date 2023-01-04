@@ -4,12 +4,12 @@
     "name": "Minimal Model for Testing",
     "modelInASentence": "This \"model\" reverses its input.",
     "modelOverview": "This \"model\" reverses its input. It is a tiny model for testing Bailo functionality.",
-    "modelCardVersion": "1"
+    "modelCardVersion": "v1.0"
   },
   "contacts": {
-    "uploader": "user",
-    "reviewer": "user",
-    "manager": "user"
+    "uploader": [{ "kind": "user", "id": "user" }],
+    "reviewer": [{ "kind": "user", "id": "user" }],
+    "manager": [{ "kind": "user", "id": "user" }]
   },
   "buildOptions": {
     "uploadType": "Code and binaries",

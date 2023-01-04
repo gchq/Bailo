@@ -1,7 +1,7 @@
 import { readdir, readFile, stat } from 'fs/promises'
 import matter from 'gray-matter'
 import { parse, join } from 'path'
-import { DocFileOrHeading, DocsMenuContent } from '../types/interfaces'
+import { DocFileOrHeading, DocHeading, DocsMenuContent } from '../types/interfaces'
 
 type DocsFrontMatter = {
   priority?: number
@@ -95,7 +95,15 @@ const generateDocsMenuContent = async (): Promise<DocsMenuContent> => {
   const basePath = join(process.cwd(), 'pages', 'docs')
   const { docsMenuContent } = await extractFrontMatterFromDir(basePath)
 
-  return docsMenuContent
+  const title: DocFileOrHeading = {
+    title: 'Docs',
+    slug: '',
+    hasIndex: true,
+    priority: -1,
+    children: [],
+  }
+
+  return [title, ...docsMenuContent]
 }
 
 export default generateDocsMenuContent

@@ -3,10 +3,10 @@
     "endDate": {
       "hasEndDate": false
     },
-    "name": "Test Deployment"
+    "name": "Test Deployment",
+    "initialVersionRequested": "v1.0"
   },
   "contacts": {
-    "requester": "user",
-    "secondPOC": "user"
+    "owner": [{ "kind": "user", "id": "user" }]
   }
 }

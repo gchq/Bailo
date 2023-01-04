@@ -176,6 +176,11 @@ if (process.env.NODE_ENV !== 'production') {
       basepath: join(__dirname, '..'),
     }),
   })
+} else {
+  streams.push({
+    level: 'trace',
+    stream: process.stdout,
+  })
 }
 
 if (config.get('logging.file.enabled')) {

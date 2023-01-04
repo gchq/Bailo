@@ -66,7 +66,7 @@ services:
       MAILDEV_INCOMING_PASS: mailpass
 
   app:
-    #image: app_with_img:latest
+    image: bailo:latest
     build:
       context: .
       dockerfile: Dockerfile.prod

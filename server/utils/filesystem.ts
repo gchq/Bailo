@@ -12,6 +12,12 @@ export function ensurePathExists(path: string, sync = false) {
   access(path, constants.F_OK).catch(() => mkdir(path))
 }
 
+export function checkFileExists(file) {
+  return access(file, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
+}
+
 export async function getFilesInDir(path: string) {
   return (
     await readdir(path, {

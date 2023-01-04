@@ -28,8 +28,8 @@ describe('Model with code and binary files', () => {
     })
 
     cy.log('Selecting code and binary files')
-    cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip')
-    cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip')
+    cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
+    cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip', { force: true })
 
     cy.log('Inputting deployment metadata')
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
@@ -141,18 +141,20 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              const imageName = `${registryUrl}/user/${modelUuid}:1`
+              cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+                const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
 
-              cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
-              cy.exec(`docker pull ${imageName}`)
-              cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
-              cy.wait(5000)
-              cy.request('POST', `${containerUrl}/predict`, {
-                jsonData: { data: ['should be returned backwards'] },
-              }).then((response) => {
-                expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
+                cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
+                cy.exec(`docker pull ${imageName}`)
+                cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
+                cy.wait(5000)
+                cy.request('POST', `${containerUrl}/predict`, {
+                  jsonData: { data: ['should be returned backwards'] },
+                }).then((response) => {
+                  expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
+                })
+                cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`)
               })
-              cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`)
             })
         })
     })

@@ -8,10 +8,11 @@ import processDeployments from './processors/processDeployments'
 import processUploads from './processors/processUploads'
 import {
   fetchRawModelFiles,
-  getCurrentUserDeployments,
+  getUserDeployments,
   getDeployment,
   postDeployment,
   resetDeploymentApprovals,
+  getDeploymentAccess,
 } from './routes/v1/deployment'
 import getDocsMenuContent from './routes/v1/docs'
 import {
@@ -22,6 +23,7 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
+  getModelAccess,
 } from './routes/v1/model'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
@@ -31,20 +33,19 @@ import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
 import {
-  deleteVersion,
   getVersion,
+  getVersionAccess,
+  deleteVersion,
   putVersion,
   postResetVersionApprovals,
   putUpdateLastViewed,
 } from './routes/v1/version'
+import { runMigrations, connectToMongoose } from './utils/database'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
-import { connectToMongoose } from './utils/database'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger'
 import { ensureBucketExists } from './utils/minio'
 import { getUser } from './utils/user'
 import { pullBuilderImage } from './utils/build/build'
-
-import { createRegistryClient, getImageDigest, deleteImageTag } from './utils/registry'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -71,15 +72,18 @@ server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
 server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
 server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
 server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
+server.get('/api/v1/model/:uuid/access', ...getModelAccess)
 
 server.post('/api/v1/deployment', ...postDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
-server.get('/api/v1/deployment/user/:id', ...getCurrentUserDeployments)
+server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
+server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.put('/api/v1/version/:id', ...putVersion)
+server.get('/api/v1/version/:id/access', ...getVersionAccess)
 server.delete('/api/v1/version/:id', ...deleteVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
 server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
@@ -90,6 +94,7 @@ server.get('/api/v1/schema/:ref', ...getSchema)
 server.post('/api/v1/schema', ...postSchema)
 
 server.get('/api/v1/config', ...getUiConfig)
+
 server.get('/api/v1/users', ...getUsers)
 server.get('/api/v1/user', ...getLoggedInUser)
 server.post('/api/v1/user/token', ...postRegenerateToken)
@@ -121,23 +126,9 @@ export async function startServer() {
     ensureBucketExists(config.get('minio.registryBucket'))
   }
 
-  const registry = await createRegistryClient()
-  console.log(
-    await getImageDigest(registry, {
-      namespace: 'user',
-      model: 'yolo-v4-tiny-2x44vf',
-      version: 'v1.8',
-    })
-  )
-  // await deleteImageTag(registry, {
-  //   namespace: 'user',
-  //   model: 'yolo-v4-tiny-2x44vf',
-  //   version: 'v1.8',
-  // })
-
-  // we don't actually need to wait for mongoose to connect before
-  // we start serving connections
-  connectToMongoose()
+  // connect to mongoose and run migrations
+  await connectToMongoose()
+  await runMigrations()
 
   // lazily create indexes for full text search
   createIndexes()

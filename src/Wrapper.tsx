@@ -40,6 +40,7 @@ import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
 import Copyright from './Copyright'
 import ThemeModeContext from './contexts/themeModeContext'
+import { EntityKind } from '../types/interfaces'
 
 const drawerWidth = 240
 
@@ -215,7 +216,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                  <UserAvatar username={currentUser.id} size='chip' />
+                  <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.id }} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>

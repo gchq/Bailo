@@ -181,7 +181,7 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
+  const deploymentTag = `${uiConfig?.registry.host}/${deployment.uuid}/${tag}`
 
   const requestApprovalReset = async () => {
     const response = await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {})
@@ -262,7 +262,7 @@ export default function Deployment() {
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
-              approvals={[{ reviewer: deployment.metadata.contacts.manager, status: deployment.managerApproved }]}
+              approvals={[{ reviewers: deployment.metadata.contacts.owner, status: deployment.managerApproved }]}
             />
             <Divider orientation='vertical' flexItem />
             <Button
@@ -283,7 +283,7 @@ export default function Deployment() {
               <DisabledElementTooltip
                 conditions={[
                   deployment?.managerApproved === 'No Response'
-                    ? 'Deployment needs to be approved before it can have its approvals reset.'
+                    ? 'Deployment needs to have been responded to before it can have its approvals reset.'
                     : '',
                 ]}
               >
@@ -373,7 +373,7 @@ export default function Deployment() {
                 </Link>
                 page) {theme.palette.mode}
               </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
+              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />
 
               <p style={{ margin: 0 }}># Pull model</p>

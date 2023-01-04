@@ -1,15 +1,15 @@
 import { castArray } from 'lodash'
-import https from 'https'
-import config from 'config'
 import { ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
-import logger, { createSerializer, SerializerOptions } from '../utils/logger'
+import { createSerializer, SerializerOptions } from '../utils/logger'
 import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
+import { getUserByInternalId } from './user'
+import { getEntitiesForUser } from '../utils/entity'
 import { deleteImageTag, createRegistryClient } from '../utils/registry'
 import { deleteRequestsByDeployment } from './request'
 
@@ -74,7 +74,19 @@ export interface DeploymentFilter {
 export async function findDeployments(user: UserDoc, { owner, model }: DeploymentFilter, opts?: GetDeploymentOptions) {
   const query: any = {}
 
-  if (owner) query.owner = owner
+  if (owner) {
+    const ownerUser = await getUserByInternalId(owner)
+
+    if (!ownerUser) {
+      throw new Error(`Finding deployments for user that does not exist: ${owner}`)
+    }
+
+    const userEntities = await getEntitiesForUser(user)
+
+    query.$or = userEntities.map((userEntity) => ({
+      'metadata.contacts.owner': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+    }))
+  }
   if (model) query.model = model
 
   let models = DeploymentModel.find(query).sort({ updatedAt: -1 })

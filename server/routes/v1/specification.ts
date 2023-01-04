@@ -114,7 +114,7 @@ function getModelDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'owner', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',
@@ -149,8 +149,6 @@ function getModelDefinition(populated: boolean) {
           timeStamp: '2022-07-03T20:52:59.176Z',
         },
       },
-
-      owner: getUserDefinition(false),
 
       createdAt: {
         type: 'string',
@@ -367,7 +365,7 @@ function getDeploymentDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'owner', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',
@@ -432,9 +430,6 @@ function getDeploymentDefinition(populated: boolean) {
       built: {
         type: 'boolean',
       },
-
-      owner: getUserDefinition(false),
-
       createdAt: {
         type: 'string',
         format: 'date-time',

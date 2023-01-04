@@ -16,6 +16,11 @@ import ArrowForward from '@mui/icons-material/ArrowForward'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import Copyright from './Copyright'
 
+const StyledLink = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  color: theme.palette.common.black,
+}))
+
 const drawerWidth = 240
 const paddingIncrement = 2
 
@@ -43,7 +48,7 @@ export default function DocsMenu({ menu, children }: { menu: DocsMenuContent; ch
     paddingBottom: 0,
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
-        // color: theme.palette.secondary.main,
+        color: theme.palette.secondary.main,
       },
     },
   })
@@ -59,11 +64,11 @@ export default function DocsMenu({ menu, children }: { menu: DocsMenuContent; ch
         return (
           <React.Fragment key={doc.slug}>
             {doc.hasIndex ? (
-              <Link passHref href={`/docs/${doc.slug}`}>
+              <StyledLink passHref href={`/docs/${doc.slug}`}>
                 <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
                   {headingText}
                 </ListItemButton>
-              </Link>
+              </StyledLink>
             ) : (
               <ListItem dense sx={{ pl: paddingLeft }}>
                 {headingText}
@@ -74,11 +79,11 @@ export default function DocsMenu({ menu, children }: { menu: DocsMenuContent; ch
         )
       }
       return (
-        <Link passHref href={`/docs/${doc.slug}`} key={doc.slug}>
+        <StyledLink passHref href={`/docs/${doc.slug}`} key={doc.slug}>
           <ListItemButton dense selected={pathname === `/docs/${doc.slug}`} sx={{ pl: paddingLeft }}>
             <ListItemText primary={doc.title} />
           </ListItemButton>
-        </Link>
+        </StyledLink>
       )
     },
     [pathname]
@@ -130,7 +135,7 @@ export default function DocsMenu({ menu, children }: { menu: DocsMenuContent; ch
             >
               {children}
             </Container>
-            <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 'auto' }}>
+            <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 4 }}>
               <Divider flexItem />
               {flattenedPages.length > 0 && (
                 <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>

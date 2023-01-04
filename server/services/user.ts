@@ -33,7 +33,7 @@ export async function findUsers() {
 }
 
 interface FindAndUpdateUserArgs {
-  userId: string
+  userId?: string
   email?: string
   data?: any
   roles: Array<string>
