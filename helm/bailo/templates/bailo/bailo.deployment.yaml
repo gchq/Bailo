@@ -34,7 +34,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           #image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: MINIO_ACCESS_KEY
               valueFrom:
