@@ -141,18 +141,20 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:1`
+              cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+                const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
 
-              cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
-              cy.exec(`docker pull ${imageName}`)
-              cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
-              cy.wait(5000)
-              cy.request('POST', `${containerUrl}/predict`, {
-                jsonData: { data: ['should be returned backwards'] },
-              }).then((response) => {
-                expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
+                cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
+                cy.exec(`docker pull ${imageName}`)
+                cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
+                cy.wait(5000)
+                cy.request('POST', `${containerUrl}/predict`, {
+                  jsonData: { data: ['should be returned backwards'] },
+                }).then((response) => {
+                  expect(response.body.data.ndarray[0]).to.eq('sdrawkcab denruter eb dluohs')
+                })
+                cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`)
               })
-              cy.exec(`cypress/scripts/stopContainer.sh "${imageName}"`)
             })
         })
     })

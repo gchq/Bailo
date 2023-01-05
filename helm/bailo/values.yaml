@@ -39,6 +39,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 3000
+
 ingress:
   enabled: "false" # set to false for OpenShift
   className: "nginx"
@@ -55,6 +56,8 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+route:
+  enabled: false
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -74,6 +77,9 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
+route:
+  enabled: false
+  
 # Mongo Dependencies
 mongodb:
   enabled: true
@@ -88,7 +94,7 @@ mongodb:
     passwords: [ ] # required for ConfigMap bailo-config
     databases: [ bailo ] # defined database for Mongo
   service:
-    port: 31110 #default 27017./config/default.js:21 host: 'localhost:8080'
+    port: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
     size: 10Gi
@@ -134,7 +140,7 @@ registry:
   repository: registry
   tag: 2
   enabled: true
-  host: "registry" # service name
+  host: "bailo-registry" # service name
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
@@ -146,7 +152,7 @@ registry:
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
   tag: latest
-  host: "bailo-nginx-auth-proxy" # service name
+  host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
   #certFile: "tls.crt"
@@ -189,8 +195,7 @@ config:
     environment: openshift # or img
 
   schema:
-    script: 'schema-setup-script.sh'
-
+    script: "dist/server/scripts/exampleSetAllSchemas.js"
 
 # nginx.deployment registry.deployment
 nginxcert:

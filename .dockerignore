@@ -19,3 +19,4 @@ certs
 
 # Ignore .git folders
 .git
+.github
