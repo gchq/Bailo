@@ -323,10 +323,17 @@ export const fetchModelFileList = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
-    if (!req.user._id.equals(deployment.owner)) {
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+
+    if (!versionDocument) {
+      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
+    }
+
+    if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
+      const owners = deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')
       throw Unauthorised(
-        { deploymentOwner: deployment.owner },
-        `User is not authorised to download this file. Requester: ${req.user._id}, owner: ${deployment.owner}`
+        { deploymentOwner: deployment.metadata.contacts.owner },
+        `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`
       )
     }
 
@@ -341,7 +348,6 @@ export const fetchModelFileList = [
       throw NotFound({ fileType }, 'Unknown file type specified')
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 
