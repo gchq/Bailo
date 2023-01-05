@@ -30,6 +30,7 @@ import Switch from '@mui/material/Switch'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import Head from 'next/head'
 import Image from 'next/image'
 import Link from './Link'
 import { useGetNumRequests } from '../data/requests'
@@ -173,6 +174,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   return (
     <ThemeProvider theme={theme}>
+      <Head>
+        <title>{title} :: Bailo</title>
+      </Head>
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
