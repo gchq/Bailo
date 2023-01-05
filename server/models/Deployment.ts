@@ -23,6 +23,7 @@ export interface Deployment {
 
   logs: Types.Array<LogStatement>
   built: boolean
+  ungoverned: boolean
 
   createdAt: Date
   updatedAt: Date
@@ -45,6 +46,7 @@ const DeploymentSchema = new Schema<Deployment>(
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },
+    ungoverned: { type: Boolean, default: false },
   },
   {
     timestamps: true,

@@ -3,6 +3,7 @@ import * as Minio from 'minio'
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
+import { getDeploymentQueue } from '../../utils/queues'
 import { ApprovalStates } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
@@ -144,6 +145,98 @@ export const postDeployment = [
       { code: 'created_deployment', deploymentId: deployment._id, request: managerRequest._id, uuid },
       'Successfully created deployment'
     )
+
+    res.json({
+      uuid,
+    })
+  },
+]
+
+export const postUngovernedDeployment = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    req.log.info({ code: 'requesting_deployment' }, 'User requesting deployment')
+    const { body } = req
+
+    body.timeStamp = new Date().toISOString()
+
+    const model = await findModelByUuid(req.user, body.modelUuid)
+
+    if (!model) {
+      throw NotFound(
+        { code: 'model_not_found', modelId: body.modelUuid },
+        `Unable to find model with name: '${body.modelUuid}'`
+      )
+    }
+
+    const name = body.name
+      .toLowerCase()
+      .replace(/[^a-z 0-9]/g, '')
+      .replace(/ /g, '-')
+
+    const uuid = `${name}-${nanoid()}`
+
+    const version = await findVersionByName(req.user, model._id, body.initialVersionRequested)
+    if (!version) {
+      throw NotFound(
+        {
+          code: 'version_not_found',
+          modelId: body.modelID,
+          version: body.initialVersionRequested,
+        },
+        `Unable to find version with name: '${body.initialVersionRequested}'`
+      )
+    }
+
+    const versionArray = [version._id]
+
+    const owner = {
+      kind: 'user',
+      id: req.user.id,
+    }
+
+    const deployment = await createDeployment(req.user, {
+      schemaRef: 'n/a',
+      uuid,
+
+      versions: versionArray,
+      model: model._id,
+      metadata: {
+        highLevelDetails: {
+          name: body.name,
+          modelID: model.uuid,
+          initialVersionRequested: body.initialVersionRequested,
+        },
+        contacts: {
+          owner: [owner],
+        },
+      },
+
+      owner,
+    })
+
+    deployment.managerApproved = ApprovalStates.Accepted
+    deployment.ungoverned = true
+
+    req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
+    await deployment.save()
+
+    req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
+
+    req.log.info(
+      { code: 'created_ungoverned_deployment', deploymentId: deployment._id, uuid },
+      'Successfully created deployment'
+    )
+
+    const userId = req.user._id
+    req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
+    await (
+      await getDeploymentQueue()
+    ).add({
+      deploymentId: deployment._id,
+      userId,
+    })
 
     res.json({
       uuid,

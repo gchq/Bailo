@@ -225,6 +225,24 @@ export default function Deployment() {
                 </Alert>
               </Box>
             )}
+            {deployment.ungoverned && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
+                      color: '#fff',
+                    },
+                  }}
+                >
+                  This deployment is ungoverned
+                </Alert>
+              </Box>
+            )}
             {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
               <Box>
                 <Alert
