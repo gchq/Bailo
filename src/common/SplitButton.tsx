@@ -23,7 +23,7 @@ export default function SplitButton({
   const [open, setOpen] = React.useState(false)
   const anchorRef = React.useRef<HTMLDivElement>(null)
 
-  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+  const handleMenuItemClick = (_event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
     onMenuItemClick(options[index])
     setOpen(false)
   }
