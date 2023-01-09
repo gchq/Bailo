@@ -45,7 +45,6 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
   const getRequestResponses = useCallback((approval: Approval, index: number) => {
     let Icon
     let secondaryText = ''
-    console.log(approval.reviewers)
     const primaryText = approval.reviewers.map((reviewer) => reviewer.id).join(', ')
 
     if (approval.status === ApprovalStates.Accepted) {

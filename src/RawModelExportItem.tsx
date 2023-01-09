@@ -9,18 +9,18 @@ import { useRouter } from 'next/router'
 import DirectoryTreeView from './common/DirectoryTreeView'
 import SplitButton from './common/SplitButton'
 
-function RawModelExportItem({ deploymentUuid, version }: { deploymentUuid: string; version: any }) {
+function RawModelExportItem({ deploymentUuid, version }: { deploymentUuid: string; version: string }) {
   const router = useRouter()
-  const [displayTree, setDisplayTree] = useState<boolean>(false)
-  const [codeMenuItems, setCodeMenuItems] = useState<string[]>(['Show Code File Tree'])
+  const [displayTree, setDisplayTree] = useState(false)
+  const [codeMenuItems, setCodeMenuItems] = useState(['Show Code File Tree'])
 
   const handleCodeMenuItemClicked = (item: string) => {
     if (item === 'Show Code File Tree') {
-      setDisplayTree(!displayTree)
+      setDisplayTree(true)
       setCodeMenuItems(['Hide Code File Tree'])
     }
     if (item === 'Hide Code File Tree') {
-      setDisplayTree(!displayTree)
+      setDisplayTree(true)
       setCodeMenuItems(['Show Code File Tree'])
     }
   }

@@ -290,16 +290,6 @@ const createTree = (rootName: string, files: string[]): DirectoryMetadata => {
   return tree
 }
 
-// const treeToJSON = (tree: DirectoryMetadata): JSON => {
-//   let output = ''
-//   output = output.concat('{"name":"', tree.name, '","directories":[')
-//   tree.directories.forEach((item) => {
-//     output = output.concat(treeToJSON(item))
-//   })
-//   output = output.concat('],', JSON.stringify(tree.files), '}')
-//   return output
-// }
-
 export type DirectoryArrayMetadata = {
   name: string
   directories: DirectoryArrayMetadata[]
@@ -379,7 +369,6 @@ export const fetchModelFileList = [
       const zipFile = await zip.loadAsync(zipBuffer)
       const fileNames = Object.keys(zipFile.files)
       const tree = createTree(fileType, fileNames)
-      // tree.directories.forEach((item) => console.log(item))
       return res.json(treeWithArrays(tree))
     })
   },
