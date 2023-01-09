@@ -7,21 +7,40 @@ import Button from '@mui/material/Button'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import DirectoryTreeView from './common/DirectoryTreeView'
-import SplitButton from './common/SplitButton'
+import SplitButton, { menuItemData } from './common/SplitButton'
+import { ModelUploadType } from '../types/interfaces'
+import DisabledElementTooltip from './common/DisabledElementTooltip'
 
-function RawModelExportItem({ deploymentUuid, version }: { deploymentUuid: string; version: string }) {
+function RawModelExportItem({
+  deploymentUuid,
+  version,
+  uploadType,
+}: {
+  deploymentUuid: string
+  version: string
+  uploadType: string
+}) {
   const router = useRouter()
   const [displayTree, setDisplayTree] = useState(false)
-  const [codeMenuItems, setCodeMenuItems] = useState(['Show Code File Tree'])
+
+  let defaultMenuItems: [{ label: string; disabledReason: string | undefined }]
+  let primaryButtonDisabledReason: string | undefined = 'No files to download'
+  if (uploadType === ModelUploadType.Zip || uploadType === undefined) {
+    defaultMenuItems = [menuItemData('Show Code File Tree', undefined)]
+    primaryButtonDisabledReason = undefined
+  } else {
+    defaultMenuItems = [menuItemData('No Code File Tree', `No files to show`)]
+  }
+  const [codeMenuItems, setCodeMenuItems] = useState(defaultMenuItems)
 
   const handleCodeMenuItemClicked = (item: string) => {
     if (item === 'Show Code File Tree') {
       setDisplayTree(true)
-      setCodeMenuItems(['Hide Code File Tree'])
+      setCodeMenuItems([menuItemData('Hide Code File Tree', undefined)])
     }
     if (item === 'Hide Code File Tree') {
       setDisplayTree(true)
-      setCodeMenuItems(['Show Code File Tree'])
+      setCodeMenuItems([menuItemData('Show Code File Tree', undefined)])
     }
   }
 
@@ -38,20 +57,26 @@ function RawModelExportItem({ deploymentUuid, version }: { deploymentUuid: strin
         <Stack spacing={2} direction='row' sx={{ p: 1 }}>
           <SplitButton
             title='Download code file'
+            primaryDisabled={primaryButtonDisabledReason}
             options={codeMenuItems}
             onButtonClick={() => {
               handleCodeButtonClicked()
             }}
             onMenuItemClick={handleCodeMenuItemClicked}
           />
-          <Button
-            variant='contained'
-            href={`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/binary`}
-            target='_blank'
-            data-test='downloadBinaryFile'
+          <DisabledElementTooltip
+            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
           >
-            Download binary file
-          </Button>
+            <Button
+              variant='contained'
+              href={`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/binary`}
+              target='_blank'
+              data-test='downloadBinaryFile'
+              disabled={!(primaryButtonDisabledReason === undefined)}
+            >
+              Download binary file
+            </Button>
+          </DisabledElementTooltip>
         </Stack>
         <DirectoryTreeView
           uuid={`${deploymentUuid}`}

@@ -13,7 +13,12 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
     <>
       {versions &&
         versions.map((version: any) => (
-          <RawModelExportItem deploymentUuid={`${deployment.uuid}`} version={version.version} key={version.version} />
+          <RawModelExportItem
+            deploymentUuid={`${deployment.uuid}`}
+            version={version.version}
+            uploadType={version.metadata.buildOptions.uploadType}
+            key={version.version}
+          />
         ))}
       {versions && versions.length === 0 && <EmptyBlob text='No exportable versions' />}
     </>

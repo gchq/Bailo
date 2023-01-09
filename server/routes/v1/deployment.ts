@@ -327,7 +327,7 @@ export const fetchModelFileList = [
       )
     }
 
-    if (deployment.managerApproved !== 'Accepted') {
+    if (deployment.managerApproved !== ApprovalStates.Accepted) {
       throw Unauthorised(
         { approvalStatus: deployment.managerApproved },
         'User is not authorised to download this file as it has not been approved.'

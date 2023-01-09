@@ -8,15 +8,18 @@ import Paper from '@mui/material/Paper'
 import Popper from '@mui/material/Popper'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
+import DisabledElementTooltip from './DisabledElementTooltip'
 
 export default function SplitButton({
   title,
+  primaryDisabled,
   options,
   onButtonClick,
   onMenuItemClick,
 }: {
   title: string
-  options: string[]
+  primaryDisabled: string | undefined
+  options: { label: string; disabledReason: string | undefined }[]
   onButtonClick: () => void
   onMenuItemClick: (item: string) => void
 }) {
@@ -24,7 +27,7 @@ export default function SplitButton({
   const anchorRef = React.useRef<HTMLDivElement>(null)
 
   const handleMenuItemClick = (_event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-    onMenuItemClick(options[index])
+    onMenuItemClick(options[index].label)
     setOpen(false)
   }
 
@@ -43,7 +46,11 @@ export default function SplitButton({
   return (
     <>
       <ButtonGroup variant='contained' ref={anchorRef} aria-label='split button'>
-        <Button onClick={onButtonClick}>{title}</Button>
+        <DisabledElementTooltip conditions={[primaryDisabled === undefined ? '' : primaryDisabled]}>
+          <Button onClick={onButtonClick} disabled={!(primaryDisabled === undefined)}>
+            {title}
+          </Button>
+        </DisabledElementTooltip>
         <Button
           size='small'
           aria-controls={open ? 'split-button-menu' : undefined}
@@ -76,9 +83,18 @@ export default function SplitButton({
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList id='split-button-menu' autoFocusItem>
                   {options.map((option, index) => (
-                    <MenuItem key={option} onClick={(event) => handleMenuItemClick(event, index)}>
-                      {option}
-                    </MenuItem>
+                    <DisabledElementTooltip
+                      key={option.label}
+                      conditions={[option.disabledReason === undefined ? '' : option.disabledReason]}
+                    >
+                      <MenuItem
+                        key={option.label}
+                        onClick={(event) => handleMenuItemClick(event, index)}
+                        disabled={!(option.disabledReason === undefined)}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    </DisabledElementTooltip>
                   ))}
                 </MenuList>
               </ClickAwayListener>
@@ -88,4 +104,11 @@ export default function SplitButton({
       </Popper>
     </>
   )
+}
+
+export function menuItemData(
+  itemLabel: string,
+  itemDisabledReason: string | undefined
+): { label: string; disabledReason: string | undefined } {
+  return { label: itemLabel, disabledReason: itemDisabledReason }
 }
