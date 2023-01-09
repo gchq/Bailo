@@ -197,7 +197,7 @@ export const postUngovernedDeployment = [
     }
 
     const deployment = await createDeployment(req.user, {
-      schemaRef: 'n/a',
+      schemaRef: null,
       uuid,
 
       versions: versionArray,

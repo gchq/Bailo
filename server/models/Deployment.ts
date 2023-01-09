@@ -12,7 +12,7 @@ export interface LogStatement {
 }
 
 export interface Deployment {
-  schemaRef: string
+  schemaRef: string | null
   uuid: string
 
   model: Types.ObjectId | ModelDoc
@@ -35,7 +35,7 @@ export type DeploymentDoc = Deployment & Document<any, any, Deployment>
 
 const DeploymentSchema = new Schema<Deployment>(
   {
-    schemaRef: { type: String, required: true },
+    schemaRef: { type: String },
     uuid: { type: String, required: true, index: true, unique: true },
 
     model: { type: Schema.Types.ObjectId, ref: 'Model' },

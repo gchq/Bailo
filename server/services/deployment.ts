@@ -101,7 +101,7 @@ export async function markDeploymentBuilt(_id: ModelId) {
 }
 
 interface CreateDeployment {
-  schemaRef: string
+  schemaRef: string | null
   uuid: string
 
   versions: Array<VersionDoc>

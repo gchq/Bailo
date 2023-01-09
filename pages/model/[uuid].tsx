@@ -45,7 +45,6 @@ import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
 import TextField from '@mui/material/TextField'
 import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
@@ -276,6 +275,7 @@ function Model() {
         responseError = `${response.statusText}: ${(await response.json()).message}`
       } catch (e) {
         setErrorMessage('No response from server')
+        return
       }
 
       setErrorMessage(responseError)
@@ -363,7 +363,7 @@ function Model() {
                     <ListItemIcon>
                       <UploadIcon fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Request Ungoverned deployment</ListItemText>
+                    <ListItemText>Request ungoverned deployment</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
                 <Divider />
@@ -608,7 +608,7 @@ function Model() {
                 label='Deployment name'
                 variant='outlined'
                 value={ungovernedDeploymentName}
-                onChange={(event): void => setUngovernedDeploymentName(event.target.value)}
+                onChange={(event) => setUngovernedDeploymentName(event.target.value)}
               />
               <Button
                 disabled={ungovernedDeploymentName === ''}
