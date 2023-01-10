@@ -1,8 +1,9 @@
+{{- if .Values.aws.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-port
+  name: {{ .Values.ingress.service.name }}
 spec:
   type: NodePort
   ports:
@@ -10,3 +11,4 @@ spec:
       targetPort: {{ .Values.nginxAuth.port }}
   selector:
     name: {{ .Values.nginxAuth.host }}
+{{- end }}
