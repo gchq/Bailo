@@ -64,7 +64,7 @@ export default function DirectoryTreeView({
   }
 
   if (treeLoading) {
-    return <div>Loading file tree...</div>
+    return <div>Loading files...</div>
   }
 
   return (

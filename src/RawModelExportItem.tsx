@@ -1,13 +1,13 @@
-import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
 import Button from '@mui/material/Button'
-
 import { useState } from 'react'
-import { useRouter } from 'next/router'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import Dialog from '@mui/material/Dialog'
+import { Divider } from '@mui/material'
 import DirectoryTreeView from './common/DirectoryTreeView'
-import SplitButton, { menuItemData } from './common/SplitButton'
 import { ModelUploadType } from '../types/interfaces'
 import DisabledElementTooltip from './common/DisabledElementTooltip'
 
@@ -20,32 +20,15 @@ function RawModelExportItem({
   version: string
   uploadType: string
 }) {
-  const router = useRouter()
   const [displayTree, setDisplayTree] = useState(false)
 
-  let defaultMenuItems: [{ label: string; disabledReason: string | undefined }]
   let primaryButtonDisabledReason: string | undefined = 'No files to download'
   if (uploadType === ModelUploadType.Zip || uploadType === undefined) {
-    defaultMenuItems = [menuItemData('Show Code File Tree', undefined)]
     primaryButtonDisabledReason = undefined
-  } else {
-    defaultMenuItems = [menuItemData('No Code File Tree', `No files to show`)]
-  }
-  const [codeMenuItems, setCodeMenuItems] = useState(defaultMenuItems)
-
-  const handleCodeMenuItemClicked = (item: string) => {
-    if (item === 'Show Code File Tree') {
-      setDisplayTree(true)
-      setCodeMenuItems([menuItemData('Hide Code File Tree', undefined)])
-    }
-    if (item === 'Hide Code File Tree') {
-      setDisplayTree(true)
-      setCodeMenuItems([menuItemData('Show Code File Tree', undefined)])
-    }
   }
 
-  const handleCodeButtonClicked = () => {
-    router.push(`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/code`)
+  const hideTree = () => {
+    setDisplayTree(false)
   }
 
   return (
@@ -55,15 +38,19 @@ function RawModelExportItem({
           <Typography variant='h4'>Version: {version}</Typography>
         </Box>
         <Stack spacing={2} direction='row' sx={{ p: 1 }}>
-          <SplitButton
-            title='Download code file'
-            primaryDisabled={primaryButtonDisabledReason}
-            options={codeMenuItems}
-            onButtonClick={() => {
-              handleCodeButtonClicked()
-            }}
-            onMenuItemClick={handleCodeMenuItemClicked}
-          />
+          <DisabledElementTooltip
+            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
+          >
+            <Button
+              variant='contained'
+              href={`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/code`}
+              target='_blank'
+              data-test='downloadCodeFile'
+              disabled={!(primaryButtonDisabledReason === undefined)}
+            >
+              Download code files
+            </Button>
+          </DisabledElementTooltip>
           <DisabledElementTooltip
             conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
           >
@@ -77,15 +64,31 @@ function RawModelExportItem({
               Download binary file
             </Button>
           </DisabledElementTooltip>
+          <Divider flexItem orientation='vertical' />
+          <DisabledElementTooltip
+            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
+          >
+            <Button
+              variant='outlined'
+              disabled={!(primaryButtonDisabledReason === undefined)}
+              onClick={() => setDisplayTree(true)}
+            >
+              Display files
+            </Button>
+          </DisabledElementTooltip>
         </Stack>
-        <DirectoryTreeView
-          uuid={`${deploymentUuid}`}
-          version={`${version}`}
-          fileType='code'
-          displayTree={displayTree}
-        />
       </Box>
-      <Divider orientation='horizontal' />
+      <Dialog open={displayTree} onClose={hideTree}>
+        <DialogTitle>Showing files for {deploymentUuid}</DialogTitle>
+        <DialogContent sx={{ maxHeight: '500px', overflowX: 'auto', py: 2 }}>
+          <DirectoryTreeView
+            uuid={`${deploymentUuid}`}
+            version={`${version}`}
+            fileType='code'
+            displayTree={displayTree}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }
