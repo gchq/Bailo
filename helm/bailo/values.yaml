@@ -174,7 +174,6 @@ config:
   s2i:
     image: seldonio/seldon-core-s2i-python37:1.10.0
   supportEmail: "support@example.com"
-  documentationLink: "https://example.com/support"
 
   ui:
     banner:
