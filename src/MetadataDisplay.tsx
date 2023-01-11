@@ -31,9 +31,7 @@ function MetadataDisplay({
     const currentSchema = schemas.filter(({ reference }) => reference === item.schemaRef)[0].schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) =>
-        !propertiesToIgnore.includes(sectionName) &&
-        (currentSchema.properties[sectionName].displayModelCard === undefined ||
-          currentSchema.properties[sectionName].displayModelCard)
+        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false
     )
 
     setSchema(currentSchema)
