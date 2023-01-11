@@ -3,6 +3,7 @@ import Document, { Html, Head, Main, NextScript } from 'next/document'
 import createEmotionServer from '@emotion/server/create-instance'
 import theme, { roboto } from '../components/theme'
 import createEmotionCache from '../components/createEmotionCache'
+import nextConfig from '../next.config.mjs'
 
 export default class MyDocument extends Document {
   render() {
@@ -11,7 +12,7 @@ export default class MyDocument extends Document {
         <Head>
           {/* PWA primary color */}
           <meta name='theme-color' content={theme.palette.primary.main} />
-          <link rel='shortcut icon' href='/favicon.png' />
+          <link rel='shortcut icon' href={`${nextConfig.basePath ? nextConfig.basePath : ''}/favicon.png`} />
           <meta name='emotion-insertion-point' content='' />
           {(this.props as any).emotionStyleTags}
         </Head>

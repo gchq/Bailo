@@ -84,6 +84,8 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} run generate
       - name: Build and export
         run: ${{ steps.detect-package-manager.outputs.manager }} run export
+        env:
+          BASE_PATH: '/Bailo'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:

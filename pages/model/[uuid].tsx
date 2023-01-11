@@ -70,7 +70,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 function Model() {
   const router = useRouter()
   const theme = useTheme()
-  const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
+  const { uuid, tab, version: versionParameter }: { uuid?: string; tab?: TabOptions; version?: string } = router.query
 
   const deploymentVersionsDisplayLimit = 5
 
@@ -105,14 +105,28 @@ function Model() {
   // It defaults to true, until it hears false from the network access check.
   const isPotentialUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
 
+  const addQueryParameter = (key: string, value: string) => {
+    const routerParameters = router.query
+    routerParameters[key] = value
+    let path = `/model/${uuid}?`
+    Object.keys(routerParameters).forEach((routerParameter: string) => {
+      if (routerParameter !== 'uuid') {
+        path += `${routerParameter}=${routerParameters[routerParameter]}&`
+      }
+    })
+    path = path.substring(0, path.length - 1)
+    router.push(path)
+  }
+
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
+    addQueryParameter('version', event.target.value)
   }
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
     mutateVersion()
-    router.push(`/model/${uuid}?tab=${newValue}`)
+    addQueryParameter('tab', newValue)
   }
 
   const requestDeployment = () => {
@@ -179,6 +193,12 @@ function Model() {
       setGroup(tab)
     }
   }, [tab])
+
+  useEffect(() => {
+    if (versionParameter !== undefined) {
+      setSelectedVersion(versionParameter)
+    }
+  }, [versionParameter])
 
   useEffect(() => {
     if (!currentUser || !version?.model) return
