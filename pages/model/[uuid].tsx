@@ -619,7 +619,7 @@ function Model() {
                 Request
               </Button>
             </Stack>
-            <Typography sx={{ color: 'red' }} variant='caption'>
+            <Typography sx={{ color: theme.palette.error.main }} variant='caption'>
               {errorMessage}
             </Typography>
           </Stack>

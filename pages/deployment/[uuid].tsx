@@ -214,11 +214,6 @@ export default function Deployment() {
                   sx={{
                     width: 'fit-content',
                     m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
-                      color: '#fff',
-                    },
                   }}
                 >
                   This model version was uploaded as just a model card
@@ -226,22 +221,15 @@ export default function Deployment() {
               </Box>
             )}
             {deployment.ungoverned && (
-              <Box>
-                <Alert
-                  severity='info'
-                  sx={{
-                    width: 'fit-content',
-                    m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
-                      color: '#fff',
-                    },
-                  }}
-                >
-                  This deployment is ungoverned
-                </Alert>
-              </Box>
+              <Alert
+                severity='info'
+                sx={{
+                  width: 'fit-content',
+                  m: 'auto',
+                }}
+              >
+                This deployment is ungoverned
+              </Alert>
             )}
             {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
               <Box>
@@ -250,11 +238,6 @@ export default function Deployment() {
                   sx={{
                     width: 'fit-content',
                     m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
-                      color: '#fff',
-                    },
                   }}
                 >
                   This model was not built by Bailo and may not follow the standard format.
