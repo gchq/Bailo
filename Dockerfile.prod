@@ -1,5 +1,5 @@
 # Rebuild the source code only when needed
-FROM node:16-alpine3.15 AS builder
+FROM node:19-alpine3.15 AS builder
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build && rm -rf .next/cache
 
 # Production node_modules
-FROM node:16-alpine3.15 as prod_deps
+FROM node:19-alpine3.15 as prod_deps
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat
@@ -24,7 +24,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 # Production image, copy all the files and run next
-FROM node:16-alpine3.15 as runner
+FROM node:19-alpine3.15 as runner
 
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
