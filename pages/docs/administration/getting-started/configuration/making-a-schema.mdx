@@ -106,6 +106,24 @@ above, and then amend it so it looks like this:
 }
 ```
 
+#### Hiding sections from the model card
+
+Sections will display on the model card page by default, but in the case whereby a section needs to be hidden from the
+model card, then add the following property:
+
+```json
+"myPage": {
+  "title": "Page 1",
+  "type": "object",
+  "properties": {
+    ...
+  },
+  "displayModelCard": false,
+}
+```
+
+Note: This will only hide it from the model page, the data will still persist in the version metadata.
+
 ### Dependencies
 
 A dependency is useful when the answer to one question might warrant some additional information; for example, a boolean
