@@ -86,7 +86,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mdx-js/loader": "^2.1.2",
-    "@mui/icons-material": "^5.10.2",
+    "@mui/icons-material": "^5.11.0",
     "@mui/lab": "^5.0.0-alpha.80",
     "@mui/material": "^5.10.2",
     "@mui/system": "^5.10.2",
