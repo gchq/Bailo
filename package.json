@@ -148,7 +148,7 @@
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
     "supertest": "^6.2.3",
-    "swagger-ui-react": "^4.12.0",
+    "swagger-ui-react": "^4.15.5",
     "swr": "^1.1.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.4"
