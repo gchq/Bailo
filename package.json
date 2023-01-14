@@ -76,7 +76,7 @@
     "tar": "^6.1.13",
     "ts-node": "^10.9.1",
     "unzipper": "^0.10.11",
-    "uuid": "^8.3.2",
+    "uuid": "^9.0.0",
     "yargs": "^17.6.2"
   },
   "devDependencies": {
@@ -111,7 +111,7 @@
     "@types/shelljs": "^0.8.11",
     "@types/swagger-ui-react": "^4.11.0",
     "@types/unzipper": "^0.10.5",
-    "@types/uuid": "^8.3.4",
+    "@types/uuid": "^9.0.0",
     "@types/yargs": "^17.0.19",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
