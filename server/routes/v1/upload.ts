@@ -155,7 +155,6 @@ export const postUpload = [
 
         versions: [],
         currentMetadata: metadata,
-        parent: undefined,
       })
     }
 

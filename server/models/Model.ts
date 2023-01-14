@@ -6,7 +6,6 @@ export interface Model {
   schemaRef: string
   uuid: string
 
-  parent: ModelDoc
   versions: Types.Array<VersionDoc | Types.ObjectId>
   currentMetadata: any
 
@@ -21,7 +20,6 @@ const ModelSchema = new Schema<Model>(
     schemaRef: { type: String, required: true },
     uuid: { type: String, required: true, index: true, unique: true },
 
-    parent: { type: Schema.Types.ObjectId, ref: 'Model' },
     versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     currentMetadata: { type: Schema.Types.Mixed },
   },
