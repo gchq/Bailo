@@ -32,7 +32,7 @@
     "extends": "next/core-web-vitals"
   },
   "dependencies": {
-    "@emotion/server": "^11.4.0",
+    "@emotion/server": "^11.10.0",
     "@next/mdx": "^12.2.3",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
