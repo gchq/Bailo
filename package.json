@@ -90,7 +90,7 @@
     "@mui/lab": "^5.0.0-alpha.115",
     "@mui/material": "^5.11.4",
     "@mui/system": "^5.10.2",
-    "@next/bundle-analyzer": "^12.0.8",
+    "@next/bundle-analyzer": "^13.1.2",
     "@rjsf/core": "^4.2.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.5",
