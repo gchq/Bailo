@@ -82,7 +82,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.18.2",
     "@babel/preset-react": "^7.17.12",
-    "@emotion/cache": "^11.7.1",
+    "@emotion/cache": "^11.10.5",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mdx-js/loader": "^2.1.2",
