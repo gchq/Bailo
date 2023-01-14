@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: 'daily'
     # Allow up to 10 open pull requests for node dependencies
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 100
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
