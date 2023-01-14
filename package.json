@@ -57,7 +57,7 @@
     "memoizee": "^0.4.15",
     "minio": "^7.0.25",
     "mjml": "^4.11.0",
-    "mongodb": "^4.5.0",
+    "mongodb": "^4.13.0",
     "mongoose": "^5.13.14",
     "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
