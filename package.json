@@ -121,7 +121,7 @@
     "copy-to-clipboard": "^3.3.3",
     "cypress": "^10.10.0",
     "dagre": "^0.8.5",
-    "eslint": "^8.6.0",
+    "eslint": "^8.31.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-next": "13.1.2",
     "eslint-config-prettier": "^8.6.0",
