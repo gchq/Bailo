@@ -321,6 +321,8 @@ jobs:
           ./server/scripts/waitForIt.sh localhost:8080 -t 10
 
       - uses: cypress-io/github-action@v5
+        with:
+          install: false
 
       - uses: actions/upload-artifact@v3
         if: failure()
