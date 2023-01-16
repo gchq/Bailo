@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import Dialog from '@mui/material/Dialog'
 import { Divider } from '@mui/material'
-import DirectoryTreeView from './common/DirectoryTreeView'
+import DirectoryTreeView from './DirectoryTreeView'
 import { ModelUploadType } from '../types/interfaces'
 import DisabledElementTooltip from './common/DisabledElementTooltip'
 
@@ -81,12 +81,7 @@ function RawModelExportItem({
       <Dialog open={displayTree} onClose={hideTree}>
         <DialogTitle>Showing files for {deploymentUuid}</DialogTitle>
         <DialogContent sx={{ maxHeight: '500px', overflowX: 'auto', py: 2 }}>
-          <DirectoryTreeView
-            uuid={`${deploymentUuid}`}
-            version={`${version}`}
-            fileType='code'
-            displayTree={displayTree}
-          />
+          <DirectoryTreeView uuid={deploymentUuid} version={version} displayTree={displayTree} />
         </DialogContent>
       </Dialog>
     </Box>

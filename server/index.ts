@@ -80,7 +80,7 @@ server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
-server.get('/api/v1/deployment/:uuid/version/:version/list/:fileType', ...fetchModelFileList)
+server.get('/api/v1/deployment/:uuid/version/:version/file-list', ...fetchModelFileList)
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
 
 server.get('/api/v1/version/:id', ...getVersion)

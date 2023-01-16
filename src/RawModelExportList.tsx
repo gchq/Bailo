@@ -15,19 +15,18 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
     <>
       {versions &&
         versions.map((version: any, index: number) => (
-          <>
+          <Box key={version.version}>
             <RawModelExportItem
               deploymentUuid={`${deployment.uuid}`}
               version={version.version}
               uploadType={version.metadata.buildOptions.uploadType}
-              key={version.version}
             />
             {index < versions.length - 1 && (
               <Box sx={{ px: 1 }}>
                 <Divider orientation='horizontal' />
               </Box>
             )}
-          </>
+          </Box>
         ))}
       {versions && versions.length === 0 && <EmptyBlob text='No exportable versions' />}
     </>

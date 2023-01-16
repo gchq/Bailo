@@ -4,8 +4,14 @@ import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
 import JSZip from 'jszip'
-import { ApprovalStates } from '../../../types/interfaces'
-import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
+import { ApprovalStates, DirectoryArrayMetadata } from '../../../types/interfaces'
+import {
+  createDeployment,
+  createTree,
+  findDeploymentByUuid,
+  findDeployments,
+  // treeWithArrays,
+} from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
 import { createDeploymentRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
@@ -258,56 +264,14 @@ export const fetchRawModelFiles = [
   },
 ]
 
-type DirectoryMetadata = {
-  name: string
-  directories: Map<string, DirectoryMetadata>
-  files: string[]
-}
-
-const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
-  if (tree === undefined) {
-    throw new Error('Error: Tree does not exist')
-  }
-  if (path.includes('/')) {
-    const i = path.indexOf('/')
-    const splitPath = [path.slice(0, i), path.slice(i + 1)]
-    if (!tree.directories.has(splitPath[0])) {
-      tree.directories.set(splitPath[0], { name: `${splitPath[0]}/`, directories: new Map(), files: [] })
-    }
-    if (splitPath[1].length > 0) {
-      addToTree(tree.directories.get(splitPath[0]), splitPath[1])
-    }
-  } else {
-    tree.files.push(path)
-  }
-}
-
-const createTree = (rootName: string, files: string[]): DirectoryMetadata => {
-  const tree: DirectoryMetadata = { name: `${rootName}/`, directories: new Map(), files: [] }
-  files.forEach((file) => addToTree(tree, file))
-  return tree
-}
-
-export type DirectoryArrayMetadata = {
-  name: string
-  directories: DirectoryArrayMetadata[]
-  files: string[]
-}
-
-const treeWithArrays = (tree: DirectoryMetadata): DirectoryArrayMetadata => {
-  const directories: DirectoryArrayMetadata[] = []
-  tree.directories.forEach((item) => directories.push(treeWithArrays(item)))
-  return { name: tree.name, directories, files: tree.files }
-}
-
 export const fetchModelFileList = [
   ensureUserRole('user'),
   bodyParser.json(),
-  async (req: Request, res: Response<DirectoryArrayMetadata>) => {
-    const { uuid, version, fileType } = req.params
+  async (req: Request, res: Response) => {
+    const { uuid, version } = req.params
     const deployment = await findDeploymentByUuid(req.user, uuid)
 
-    if (deployment === null) {
+    if (!deployment) {
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
@@ -332,10 +296,6 @@ export const fetchModelFileList = [
       )
     }
 
-    if (fileType !== 'code' && fileType !== 'binary') {
-      throw NotFound({ fileType }, 'Unknown file type specified')
-    }
-
     const bucketName: string = config.get('minio.uploadBucket')
     const client = new Minio.Client(config.get('minio'))
 
@@ -343,15 +303,11 @@ export const fetchModelFileList = [
       throw NotFound({ versionId: version }, `Unable to find version for id ${version}`)
     }
 
-    let filePath
+    const filePath = versionDocument.files.rawCodePath
 
-    if (fileType === 'code') {
-      filePath = versionDocument.files.rawCodePath
+    if (!filePath) {
+      throw NotFound({ versionId: versionDocument._id }, `Unable to find file path for version: ${versionDocument._id}`)
     }
-    if (fileType === 'binary') {
-      filePath = versionDocument.files.rawBinaryPath
-    }
-
     const stream = await client.getObject(bucketName, filePath)
     if (!stream) {
       throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
@@ -362,12 +318,9 @@ export const fetchModelFileList = [
       if (Buffer.isBuffer(data)) buffers.push(data)
     })
     stream.on('end', async () => {
-      const zip = JSZip()
-      const zipBuffer = Buffer.concat(buffers)
-      const zipFile = await zip.loadAsync(zipBuffer)
-      const fileNames = Object.keys(zipFile.files)
-      const tree = createTree(fileType, fileNames)
-      return res.json(treeWithArrays(tree))
+      const zipFile = await JSZip().loadAsync(Buffer.concat(buffers))
+      return res.json(createTree(Object.keys(zipFile.files)))
+      // return res.json(treeWithArrays(createTree('code', Object.keys(zipFile.files))))
     })
   },
 ]
