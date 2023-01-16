@@ -259,9 +259,3 @@ export type DirectoryMetadata = {
   name: string
   children: DirectoryMetadata[]
 }
-
-export type DirectoryArrayMetadata = {
-  name: string
-  children: DirectoryArrayMetadata[]
-  files: string[]
-}

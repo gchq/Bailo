@@ -1,5 +1,5 @@
 import { castArray } from 'lodash'
-import { DirectoryArrayMetadata, DirectoryMetadata, ModelId } from '../../types/interfaces'
+import { ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
@@ -162,43 +162,19 @@ export async function deleteDeploymentsByVersion(user: UserDoc, version: Version
   )
 }
 
-// export const addToTree = (tree: DirectoryMetadata | undefined, path: string): void => {
-//   if (!tree) {
-//     throw new Error('Unable to create file list')
-//   }
-//   if (path.includes('/')) {
-//     const index = path.indexOf('/')
-//     const splitPath = [path.slice(0, index), path.slice(index + 1)]
-//     if (!tree.directories.has(splitPath[0])) {
-//       tree.directories.set(splitPath[0], { name: `${splitPath[0]}/`, directories: new Map(), files: [] })
-//     }
-//     if (splitPath[1].length > 0) {
-//       addToTree(tree.directories.get(splitPath[0]), splitPath[1])
-//     }
-//   } else {
-//     tree.files.push(path)
-//   }
-// }
-
-// export const createTree = (rootName: string, files: string[]): DirectoryMetadata => {
-//   const tree: DirectoryMetadata = { name: `${rootName}/`, directories: new Map(), files: [] }
-//   files.forEach((file) => addToTree(tree, file))
-//   return tree
-// }
-
 export const createTree = (files: string[]) => {
   let result = []
   if (files) {
-    result = files.reduce((r, p) => {
-      const names = p.split('/')
+    result = files.reduce((accumulator, path) => {
+      const names = path.split('/')
       if (names) {
-        names.reduce((q: any, name) => {
-          let temp: any = q.find((o: any) => o.name === name)
-          if (!temp) q.push((temp = { name, children: [] }))
+        names.reduce((nestedAccumulator: any, name) => {
+          let temp: any = nestedAccumulator.find((item: any) => item.name === name)
+          if (!temp) nestedAccumulator.push((temp = { name, children: [] }))
           return temp.children
-        }, r)
+        }, accumulator)
       }
-      return r
+      return accumulator
     }, [])
   }
   return {
@@ -206,9 +182,3 @@ export const createTree = (files: string[]) => {
     children: [...result],
   }
 }
-
-// export const treeWithArrays = (tree: DirectoryMetadata): DirectoryArrayMetadata => {
-//   const directories: DirectoryArrayMetadata[] = []
-//   tree.directories.forEach((item) => directories.push(treeWithArrays(item)))
-//   return { name: tree.name, directories, files: tree.files }
-// }

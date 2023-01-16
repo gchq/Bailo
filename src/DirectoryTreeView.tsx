@@ -1,9 +1,10 @@
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { useState, useCallback, useEffect } from 'react'
-import { DirectoryArrayMetadata, DirectoryMetadata } from 'types/interfaces'
+import { DirectoryMetadata } from 'types/interfaces'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { Typography } from '@mui/material'
 import useNotification from './common/Snackbar'
 import { getEndpoint } from '../data/api'
 
@@ -40,35 +41,26 @@ export default function DirectoryTreeView({
     }
   }, [version, getTreeResponse])
 
-  function directoryTreeItem(tree: DirectoryMetadata | undefined, parentId: string) {
-    let id = ''
-    if (tree) {
-      id = `${parentId}${tree.name}`
-    }
-    return (
-      tree && (
-        <TreeItem key={id} nodeId={id} label={`${tree.name}`}>
-          {tree.children !== undefined && tree.children.map((child) => directoryTreeItem(child, id))}
-          {tree.children !== undefined &&
-            tree.children.map((file) => (
-              <TreeItem key={`${id}${file.name}`} nodeId={`${id}${file}`} label={file.name} />
-            ))}
-        </TreeItem>
-      )
-    )
-  }
-
-  if (!displayTree) {
-    return null
-  }
-
   if (treeLoading) {
-    return <div>Loading files...</div>
+    return <Typography>Fetching code files...</Typography>
   }
 
   return (
     <TreeView defaultExpandIcon={<ChevronRightIcon />} defaultCollapseIcon={<ExpandLessIcon />}>
-      {directoryTreeItem(treeResponse, '')}
+      {treeResponse && TreeRender(treeResponse)}
     </TreeView>
   )
+}
+
+// todo create unique keys so directories with same name don't break!!
+function TreeRender(data: DirectoryMetadata) {
+  const { name, children } = data
+  if (Array.isArray(children)) {
+    return (
+      <TreeItem key={name} nodeId={name} label={name}>
+        {children.map((node, _idx) => TreeRender(node))}
+      </TreeItem>
+    )
+  }
+  return <TreeItem key={name} nodeId={name} label={name} />
 }

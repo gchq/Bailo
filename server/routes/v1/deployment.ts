@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
 import JSZip from 'jszip'
-import { ApprovalStates, DirectoryArrayMetadata } from '../../../types/interfaces'
+import { ApprovalStates } from '../../../types/interfaces'
 import {
   createDeployment,
   createTree,
@@ -320,7 +320,6 @@ export const fetchModelFileList = [
     stream.on('end', async () => {
       const zipFile = await JSZip().loadAsync(Buffer.concat(buffers))
       return res.json(createTree(Object.keys(zipFile.files)))
-      // return res.json(treeWithArrays(createTree('code', Object.keys(zipFile.files))))
     })
   },
 ]
