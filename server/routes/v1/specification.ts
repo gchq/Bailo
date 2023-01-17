@@ -1112,6 +1112,39 @@ function generateSpecification() {
             },
           },
         },
+        post: {
+          tags: ['schema'],
+          description: 'Upload a new schema',
+          parameters: [
+            {
+              name: 'schema',
+              in: 'body',
+              description: 'Schema metadata',
+              required: true,
+              type: 'object',
+              default: {
+                name: '',
+                reference: '',
+                schema: {},
+                use: 'UPLOAD',
+              },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The name of the submitted schema.',
+              schema: {
+                type: 'string',
+              },
+            },
+            '409': {
+              description: 'Duplicated name or reference.',
+              schema: {
+                type: 'string',
+              },
+            },
+          },
+        },
       },
       '/schemas/default': {
         get: {
