@@ -57,7 +57,7 @@ function TreeRender(data: FileOrDirectoryMetadata) {
   if (Array.isArray(children)) {
     return (
       <TreeItem key={id} nodeId={id} label={name}>
-        {children.map((treeNode, _idx) => TreeRender(treeNode))}
+        {children.map((treeNode) => TreeRender(treeNode))}
       </TreeItem>
     )
   }
