@@ -256,6 +256,7 @@ export enum LogType {
 }
 
 export type DirectoryMetadata = {
+  id: string
   name: string
   children: DirectoryMetadata[]
 }

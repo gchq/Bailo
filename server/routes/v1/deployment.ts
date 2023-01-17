@@ -5,13 +5,7 @@ import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
 import JSZip from 'jszip'
 import { ApprovalStates } from '../../../types/interfaces'
-import {
-  createDeployment,
-  createTree,
-  findDeploymentByUuid,
-  findDeployments,
-  // treeWithArrays,
-} from '../../services/deployment'
+import { createDeployment, createTree, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
 import { createDeploymentRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'

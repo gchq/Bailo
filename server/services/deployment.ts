@@ -1,5 +1,5 @@
 import { castArray } from 'lodash'
-import { ModelId } from '../../types/interfaces'
+import { DirectoryMetadata, ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
@@ -168,16 +168,19 @@ export const createTree = (files: string[]) => {
     result = files.reduce((accumulator, path) => {
       const names = path.split('/')
       if (names) {
-        names.reduce((nestedAccumulator: any, name) => {
-          let temp: any = nestedAccumulator.find((item: any) => item.name === name)
-          if (!temp) nestedAccumulator.push((temp = { name, children: [] }))
-          return temp.children
+        names.reduce((nestedAccumulator: DirectoryMetadata[], name, index) => {
+          let directoryMetadata: DirectoryMetadata | undefined = nestedAccumulator.find(
+            (item: any) => item.name === name
+          )
+          if (!directoryMetadata) nestedAccumulator.push((directoryMetadata = { name, children: [], id: name + index }))
+          return directoryMetadata.children
         }, accumulator)
       }
       return accumulator
     }, [])
   }
   return {
+    id: 'bailotreecodefilesroot',
     name: 'Code files',
     children: [...result],
   }

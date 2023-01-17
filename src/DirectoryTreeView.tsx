@@ -52,15 +52,14 @@ export default function DirectoryTreeView({
   )
 }
 
-// todo create unique keys so directories with same name don't break!!
 function TreeRender(data: DirectoryMetadata) {
-  const { name, children } = data
+  const { name, children, id } = data
   if (Array.isArray(children)) {
     return (
-      <TreeItem key={name} nodeId={name} label={name}>
-        {children.map((node, _idx) => TreeRender(node))}
+      <TreeItem key={id} nodeId={id} label={name}>
+        {children.map((treeNode, _idx) => TreeRender(treeNode))}
       </TreeItem>
     )
   }
-  return <TreeItem key={name} nodeId={name} label={name} />
+  return <TreeItem key={id} nodeId={id} label={name} />
 }
