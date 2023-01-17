@@ -20,11 +20,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
-concurrency:
-  group: 'pages'
-  cancel-in-progress: true
-
 jobs:
   # Build job
   build:
@@ -84,6 +79,8 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} run generate
       - name: Build and export
         run: ${{ steps.detect-package-manager.outputs.manager }} run export
+        env:
+          BASE_PATH: '/Bailo'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
@@ -91,6 +88,11 @@ jobs:
 
   # Deployment job
   deploy:
+    # Allow one concurrent deployment
+    concurrency:
+      group: 'pages'
+      cancel-in-progress: true
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

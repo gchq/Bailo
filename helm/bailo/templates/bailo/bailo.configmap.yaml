@@ -53,9 +53,6 @@ data:
           supportHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Support',
           contactHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Contact',
         },
-        help: {
-          documentationUrl: '{{ .Values.config.documentationLink }}',
-        },
         registry: {
           host: '{{ .Values.openshift.appPublicRoute }}',
         },

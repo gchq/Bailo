@@ -207,24 +207,25 @@ export default function Deployment() {
             >
               Back to model
             </Button>
-            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-              <Box>
-                <Alert
-                  severity='info'
-                  sx={{
-                    width: 'fit-content',
-                    m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
+            {hasUploadType &&
+              initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+                <Box>
+                  <Alert
+                    severity='info'
+                    sx={{
+                      width: 'fit-content',
+                      m: 'auto',
+                      backgroundColor: '#0288d1',
                       color: '#fff',
-                    },
-                  }}
-                >
-                  This model version was uploaded as just a model card
-                </Alert>
-              </Box>
-            )}
+                      '& .MuiAlert-icon': {
+                        color: '#fff',
+                      },
+                    }}
+                  >
+                    This model version was uploaded as just a model card
+                  </Alert>
+                </Box>
+              )}
             {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
               <Box>
                 <Alert
@@ -371,7 +372,7 @@ export default function Deployment() {
                 <Link href='/settings' passHref>
                   <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                 </Link>
-                page) {theme.palette.mode}
+                page)
               </p>
               <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
               <br />
@@ -381,15 +382,14 @@ export default function Deployment() {
               <br />
 
               <p style={{ margin: 0 }}># Run Docker image</p>
-              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
+              <CodeLine line={`docker run -p 9000 ${deploymentTag}`} />
               <br />
 
               <p style={{ margin: 0 }}># Check that the Docker container is running</p>
               <CodeLine line='docker ps' />
               <br />
 
-              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
+              <p style={{ margin: 0 }}># The model is accessible at localhost:9000</p>
             </Box>
           </DialogContentText>
         </DialogContent>

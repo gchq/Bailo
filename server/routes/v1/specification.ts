@@ -124,8 +124,6 @@ function getModelDefinition(populated: boolean) {
         type: 'string',
         example: 'fasttext-language-identification-30v93x',
       },
-
-      parent: getModelDefinition(false),
       versions: {
         type: 'array',
         items: getVersionDefinition(false),

@@ -31,6 +31,7 @@ import Switch from '@mui/material/Switch'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import Head from 'next/head'
 import Image from 'next/image'
 import Link from './Link'
 import { useGetNumRequests } from '../data/requests'
@@ -174,6 +175,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   return (
     <ThemeProvider theme={theme}>
+      <Head>
+        <title>{title} :: Bailo</title>
+      </Head>
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
@@ -198,7 +202,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' passHref color='inherit' underline='none'>
-                <Image src='/Bailo-logo-reverse.png' alt='Logo' width={55} height={55} priority />
+                <Image src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>

@@ -21,7 +21,6 @@ export async function parseEntity(
         kind: entity.kind,
         entity: user,
       }
-      break
     }
     default:
       return {

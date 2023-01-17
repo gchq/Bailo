@@ -59,7 +59,6 @@ export interface Model {
   schemaRef: string
   uuid: string
 
-  parent: Types.ObjectId | undefined
   versions: Array<Types.ObjectId>
 
   currentMetadata: ModelMetadata
