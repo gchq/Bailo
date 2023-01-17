@@ -1,4 +1,5 @@
 import { castArray } from 'lodash'
+import { v4 as uuidv4 } from 'uuid'
 import { FileOrDirectoryMetadata, ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
@@ -168,10 +169,11 @@ export const createTree = (files: string[]) => {
     fileList = files.reduce((accumulator, path) => {
       const names = path.split('/')
       if (names) {
-        names.reduce((nestedAccumulator: FileOrDirectoryMetadata[], name, index) => {
-          let directoryMetadata = nestedAccumulator.find((item: any) => item.name === name)
-          if (!directoryMetadata) nestedAccumulator.push((directoryMetadata = { name, children: [], id: name + index }))
-          return directoryMetadata.children
+        names.reduce((nestedAccumulator: FileOrDirectoryMetadata[], name) => {
+          let fileOrDirectoryMetadata = nestedAccumulator.find((item: any) => item.name === name)
+          if (!fileOrDirectoryMetadata)
+            nestedAccumulator.push((fileOrDirectoryMetadata = { name, children: [], id: name + uuidv4() }))
+          return fileOrDirectoryMetadata.children
         }, accumulator)
       }
       return accumulator

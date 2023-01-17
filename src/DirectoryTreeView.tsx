@@ -26,8 +26,8 @@ export default function DirectoryTreeView({
       setTreeLoading(true)
       const response = await getEndpoint(`/api/v1/deployment/${uuid}/version/${version}/file-list`)
       if (response.status === 200) {
-        const directoryMetadata: FileOrDirectoryMetadata = await response.json()
-        setFileList(directoryMetadata)
+        const fileOrDirectoryMetadata: FileOrDirectoryMetadata = await response.json()
+        setFileList(fileOrDirectoryMetadata)
         setTreeLoading(false)
       } else {
         sendNotification({ variant: 'error', msg: 'Failed to retrieve file structure' })
