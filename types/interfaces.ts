@@ -59,7 +59,6 @@ export interface Model {
   schemaRef: string
   uuid: string
 
-  parent: Types.ObjectId | undefined
   versions: Array<Types.ObjectId>
 
   currentMetadata: ModelMetadata
@@ -71,7 +70,12 @@ export interface LogStatement {
   msg: string
 }
 
-export type SchemaType = 'UPLOAD' | 'DEPLOYMENT'
+export enum SchemaTypes {
+  UPLOAD = 'UPLOAD',
+  DEPLOYMENT = 'DEPLOYMENT',
+}
+
+export type SchemaType = SchemaTypes.UPLOAD | SchemaTypes.DEPLOYMENT
 
 export interface Schema {
   name: string
@@ -255,8 +259,20 @@ export enum LogType {
   Misc = 'misc',
 }
 
-export type DirectoryMetadata = {
+export type FileOrDirectoryMetadata = {
   id: string
   name: string
-  children: DirectoryMetadata[]
+  children: FileOrDirectoryMetadata[]
+}
+
+export type SchemaQuestion = {
+  reference: string
+  title: string
+  description: string
+  type: string
+  format?: string
+  minLength?: number
+  maxLength?: number
+  widget?: string
+  readOnly?: boolean
 }

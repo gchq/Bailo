@@ -1,5 +1,5 @@
 import { castArray } from 'lodash'
-import { DirectoryMetadata, ModelId } from '../../types/interfaces'
+import { FileOrDirectoryMetadata, ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
@@ -163,15 +163,13 @@ export async function deleteDeploymentsByVersion(user: UserDoc, version: Version
 }
 
 export const createTree = (files: string[]) => {
-  let result = []
+  let fileList = []
   if (files) {
-    result = files.reduce((accumulator, path) => {
+    fileList = files.reduce((accumulator, path) => {
       const names = path.split('/')
       if (names) {
-        names.reduce((nestedAccumulator: DirectoryMetadata[], name, index) => {
-          let directoryMetadata: DirectoryMetadata | undefined = nestedAccumulator.find(
-            (item: any) => item.name === name
-          )
+        names.reduce((nestedAccumulator: FileOrDirectoryMetadata[], name, index) => {
+          let directoryMetadata = nestedAccumulator.find((item: any) => item.name === name)
           if (!directoryMetadata) nestedAccumulator.push((directoryMetadata = { name, children: [], id: name + index }))
           return directoryMetadata.children
         }, accumulator)
@@ -182,6 +180,6 @@ export const createTree = (files: string[]) => {
   return {
     id: 'bailotreecodefilesroot',
     name: 'Code files',
-    children: [...result],
+    children: fileList,
   }
 }

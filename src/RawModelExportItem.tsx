@@ -18,13 +18,13 @@ function RawModelExportItem({
 }: {
   deploymentUuid: string
   version: string
-  uploadType: string
+  uploadType?: ModelUploadType
 }) {
   const [displayTree, setDisplayTree] = useState(false)
 
-  let primaryButtonDisabledReason: string | undefined = 'No files to download'
+  let primaryButtonDisabledReason = 'No files to download'
   if (uploadType === ModelUploadType.Zip || uploadType === undefined) {
-    primaryButtonDisabledReason = undefined
+    primaryButtonDisabledReason = ''
   }
 
   const hideTree = () => {
@@ -32,47 +32,37 @@ function RawModelExportItem({
   }
 
   return (
-    <Box key={version}>
+    <>
       <Box sx={{ p: 1 }}>
         <Box sx={{ p: 2 }}>
           <Typography variant='h4'>Version: {version}</Typography>
         </Box>
         <Stack spacing={2} direction='row' sx={{ p: 1 }}>
-          <DisabledElementTooltip
-            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
-          >
+          <DisabledElementTooltip conditions={[primaryButtonDisabledReason]}>
             <Button
               variant='contained'
               href={`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/code`}
               target='_blank'
               data-test='downloadCodeFile'
-              disabled={!(primaryButtonDisabledReason === undefined)}
+              disabled={!!primaryButtonDisabledReason}
             >
               Download code files
             </Button>
           </DisabledElementTooltip>
-          <DisabledElementTooltip
-            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
-          >
+          <DisabledElementTooltip conditions={[primaryButtonDisabledReason]}>
             <Button
               variant='contained'
               href={`/api/v1/deployment/${deploymentUuid}/version/${version}/raw/binary`}
               target='_blank'
               data-test='downloadBinaryFile'
-              disabled={!(primaryButtonDisabledReason === undefined)}
+              disabled={!!primaryButtonDisabledReason}
             >
               Download binary file
             </Button>
           </DisabledElementTooltip>
           <Divider flexItem orientation='vertical' />
-          <DisabledElementTooltip
-            conditions={[primaryButtonDisabledReason === undefined ? '' : primaryButtonDisabledReason]}
-          >
-            <Button
-              variant='outlined'
-              disabled={!(primaryButtonDisabledReason === undefined)}
-              onClick={() => setDisplayTree(true)}
-            >
+          <DisabledElementTooltip conditions={[primaryButtonDisabledReason]}>
+            <Button variant='outlined' disabled={!!primaryButtonDisabledReason} onClick={() => setDisplayTree(true)}>
               Display files
             </Button>
           </DisabledElementTooltip>
@@ -80,11 +70,11 @@ function RawModelExportItem({
       </Box>
       <Dialog open={displayTree} onClose={hideTree}>
         <DialogTitle>Showing files for {deploymentUuid}</DialogTitle>
-        <DialogContent sx={{ maxHeight: '500px', overflowX: 'auto', py: 2 }}>
+        <DialogContent sx={{ overflowX: 'auto', py: 2 }}>
           <DirectoryTreeView uuid={deploymentUuid} version={version} displayTree={displayTree} />
         </DialogContent>
       </Dialog>
-    </Box>
+    </>
   )
 }
 

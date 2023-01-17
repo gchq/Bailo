@@ -124,8 +124,6 @@ function getModelDefinition(populated: boolean) {
         type: 'string',
         example: 'fasttext-language-identification-30v93x',
       },
-
-      parent: getModelDefinition(false),
       versions: {
         type: 'array',
         items: getVersionDefinition(false),
@@ -1110,6 +1108,39 @@ function generateSpecification() {
                 items: {
                   $ref: '#/definitions/Schema',
                 },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ['schema'],
+          description: 'Upload a new schema',
+          parameters: [
+            {
+              name: 'schema',
+              in: 'body',
+              description: 'Schema metadata',
+              required: true,
+              type: 'object',
+              default: {
+                name: '',
+                reference: '',
+                schema: {},
+                use: 'UPLOAD',
+              },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The name of the submitted schema.',
+              schema: {
+                type: 'string',
+              },
+            },
+            '409': {
+              description: 'Duplicated name or reference.',
+              schema: {
+                type: 'string',
               },
             },
           },

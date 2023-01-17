@@ -1,7 +1,7 @@
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { useState, useCallback, useEffect } from 'react'
-import { DirectoryMetadata } from 'types/interfaces'
+import { FileOrDirectoryMetadata } from 'types/interfaces'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { Typography } from '@mui/material'
@@ -17,17 +17,17 @@ export default function DirectoryTreeView({
   version: string
   displayTree: boolean
 }) {
-  const [treeResponse, setTreeResponse] = useState<DirectoryMetadata>()
+  const [fileList, setFileList] = useState<FileOrDirectoryMetadata>()
   const [treeLoading, setTreeLoading] = useState(false)
   const sendNotification = useNotification()
 
-  const getTreeResponse = useCallback(async () => {
+  const getFileList = useCallback(async () => {
     if (displayTree) {
       setTreeLoading(true)
       const response = await getEndpoint(`/api/v1/deployment/${uuid}/version/${version}/file-list`)
       if (response.status === 200) {
-        const directoryArrayMetadata: DirectoryMetadata = await response.json()
-        setTreeResponse(directoryArrayMetadata)
+        const directoryMetadata: FileOrDirectoryMetadata = await response.json()
+        setFileList(directoryMetadata)
         setTreeLoading(false)
       } else {
         sendNotification({ variant: 'error', msg: 'Failed to retrieve file structure' })
@@ -37,22 +37,22 @@ export default function DirectoryTreeView({
 
   useEffect(() => {
     if (version) {
-      getTreeResponse()
+      getFileList()
     }
-  }, [version, getTreeResponse])
+  }, [version, getFileList])
 
-  if (treeLoading) {
+  if (treeLoading || !fileList) {
     return <Typography>Fetching code files...</Typography>
   }
 
   return (
     <TreeView defaultExpandIcon={<ChevronRightIcon />} defaultCollapseIcon={<ExpandLessIcon />}>
-      {treeResponse && TreeRender(treeResponse)}
+      {TreeRender(fileList)}
     </TreeView>
   )
 }
 
-function TreeRender(data: DirectoryMetadata) {
+function TreeRender(data: FileOrDirectoryMetadata) {
   const { name, children, id } = data
   if (Array.isArray(children)) {
     return (
