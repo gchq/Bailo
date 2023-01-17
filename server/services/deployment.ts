@@ -1,5 +1,5 @@
 import { castArray } from 'lodash'
-import { ModelId } from '../../types/interfaces'
+import { ApprovalStates, ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
@@ -107,6 +107,9 @@ interface CreateDeployment {
   versions: Array<VersionDoc>
   model: ModelId
   metadata: any
+
+  managerApproved?: ApprovalStates
+  ungoverned?: boolean
 
   owner: ModelId
 }

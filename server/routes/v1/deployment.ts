@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
 import { getDeploymentQueue } from '../../utils/queues'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
 import { createDeploymentRequests } from '../../services/request'
@@ -192,7 +192,7 @@ export const postUngovernedDeployment = [
     const versionArray = [version._id]
 
     const owner = {
-      kind: 'user',
+      kind: EntityKind.USER,
       id: req.user.id,
     }
 
@@ -212,12 +212,10 @@ export const postUngovernedDeployment = [
           owner: [owner],
         },
       },
-
+      managerApproved: ApprovalStates.Accepted,
+      ungoverned: true,
       owner,
     })
-
-    deployment.managerApproved = ApprovalStates.Accepted
-    deployment.ungoverned = true
 
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
     await deployment.save()
