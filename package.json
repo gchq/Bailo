@@ -90,7 +90,7 @@
     "@mui/icons-material": "^5.11.0",
     "@mui/lab": "^5.0.0-alpha.115",
     "@mui/material": "^5.11.4",
-    "@mui/system": "^5.11.4",
+    "@mui/system": "^5.11.5",
     "@next/bundle-analyzer": "^13.1.2",
     "@rjsf/core": "^4.2.3",
     "@testing-library/jest-dom": "^5.16.5",
