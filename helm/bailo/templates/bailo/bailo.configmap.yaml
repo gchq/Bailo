@@ -17,6 +17,11 @@ data:
         registryBucket: '{{ .Values.minio.registryBucket }}',
         createBuckets: {{ .Values.minio.createBuckets }},
       },
+      app: {
+        protocol: '{{ .Values.config.app.protocol }}',
+        host: '{{ .Values.config.app.host }}',
+        port: {{ .Values.config.app.port }},
+      },
       smtp: {
         host: '{{ .Values.config.smtp.host }}',
         port: {{ .Values.config.smtp.port }},
@@ -35,7 +40,16 @@ data:
         port: '{{ .Values.registry.port }}',
         insecure: {{ .Values.registry.insecure }},
       },
-
+      logging: {
+        stroom: {
+          enabled: {{ .Values.stroom.enabled }},
+          url: '{{ .Values.stroom.url }}',
+          feed: '{{ .Values.stroom.feed }}',
+          environment: '{{ .Values.stroom.environment }}',
+          insecure: {{ .Values.stroom.insecure }},
+          interval: {{ .Values.stroom.interval }},
+        },
+      },
       s2i: {
         builderImage: '{{ .Values.config.s2i.image }}',
       },
@@ -52,6 +66,9 @@ data:
           label: 'Bailo Support Team',
           supportHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Support',
           contactHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Contact',
+        },
+        help: {
+          documentationUrl: '{{ .Values.config.documentationLink }}',
         },
         registry: {
           host: '{{ .Values.openshift.appPublicRoute }}',
