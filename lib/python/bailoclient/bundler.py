@@ -20,6 +20,10 @@ from .utils.enums import ModelFlavours
 
 
 class Bundler:
+
+    bundler_functions = {}
+    model_py_templates = {}
+
     def bundle_model(
         self,
         output_path: str,
@@ -140,188 +144,30 @@ class Bundler:
         code_path = os.path.join(tmpdir.name, "code")
         binary_path = os.path.join(tmpdir.name, "binary")
 
-        if model_flavour == ModelFlavours.H2O.value:
-            mlflow.h2o.save_model(
-                model,
-                path=code_path,
+        # if model_flavour == ModelFlavours.PYTORCH.value:
+        # print("calling this code path")
+
+        if model_flavour == "MLeap" and not model_py:
+            raise TemplateNotAvailable(
+                "There is no model template available for MLeap models"
+            )
+
+        try:
+            self.bundler_functions[model_flavour](
+                model=model,
+                path=output_path,
                 code_paths=additional_files,
                 pip_requirements=model_requirements,
             )
 
+            ## TODO update to get the template from the template registry
             if not model_py:
                 model_py = files(templates).joinpath("h2o.py")
 
-        elif model_flavour == ModelFlavours.KERAS.value:
-            mlflow.keras.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("keras.py")
-
-        elif model_flavour == ModelFlavours.MLEAP.value:
-            if not model_py:
-                raise TemplateNotAvailable(
-                    "There is no model template available for MLeap models"
-                )
-
-            mlflow.mleap.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-        elif model_flavour == ModelFlavours.PYTORCH.value:
-            mlflow.pytorch.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("pytorch.py")
-
-        elif model_flavour == ModelFlavours.SKLEARN.value:
-            mlflow.sklearn.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("sklearn.py")
-
-        elif model_flavour == ModelFlavours.SPARK.value:
-            mlflow.spark.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("spark.py")
-
-        elif model_flavour == ModelFlavours.TENSORFLOW.value:
-            mlflow.tensorflow.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("tensorflow.py")
-
-        elif model_flavour == ModelFlavours.ONNX.value:
-            mlflow.onnx.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("onnx.py")
-
-        elif model_flavour == ModelFlavours.GLUON.value:
-            mlflow.gluon.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("gluon.py")
-
-        elif model_flavour == ModelFlavours.XGBOOST.value:
-            mlflow.xgboost.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("xgboost.py")
-
-        elif model_flavour == ModelFlavours.LIGHTGBM.value:
-            mlflow.lightgbm.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("lightgbm.py")
-
-        elif model_flavour == ModelFlavours.CATBOOST.value:
-            mlflow.catboost.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("catboost.py")
-
-        elif model_flavour == ModelFlavours.SPACY.value:
-            mlflow.spacy.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("spacy.py")
-
-        elif model_flavour == ModelFlavours.FASTAI.value:
-            mlflow.fastai.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("fastai.py")
-
-        elif model_flavour == ModelFlavours.STATSMODELS.value:
-            mlflow.statsmodels.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("statsmodels.py")
-
-        elif model_flavour == ModelFlavours.PROPHET.value:
-            mlflow.prophet.save_model(
-                model,
-                path=code_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = files(templates).joinpath("prophet.py")
-
-        else:
+        except KeyError:
             raise ModelFlavourNotRecognised(
                 "Model flavour not recognised. Check MLflow docs for list of supported flavours"
-            )
+            ) from None
 
         # copy model.py into tmpdir containing model files
         subprocess.run(["cp", "-r", model_py, f"{code_path}/model.py"])
