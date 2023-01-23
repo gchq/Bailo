@@ -1,5 +1,6 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
+import { ApprovalCategory, ApprovalTypes } from 'server/models/Approval'
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
@@ -57,7 +58,7 @@ export const testReviewer: any = {
   email: 'test4',
 }
 
-export const managerRequest: any = {
+export const managerApproval: any = {
   _id: 'managerId',
 }
 
@@ -187,11 +188,11 @@ export const testDeployment2: any = {
   updatedAt: new Date(),
 }
 
-export const testRequest: any = {
-  status: 'No Response',
-  approvalType: 'Manager',
-  request: 'Upload',
-  version: null,
+export const testApproval: any = {
+  status: ApprovalStates.NoResponse,
+  approvalType: ApprovalTypes.Manager,
+  approvalCategory: ApprovalCategory.Upload,
+  version: undefined,
   __v: 0,
   createdAt: new Date(),
   updatedAt: new Date(),

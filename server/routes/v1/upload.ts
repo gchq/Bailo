@@ -7,7 +7,7 @@ import { moveFile } from '../../utils/minio'
 import { createFileRef } from '../../utils/multer'
 import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
-import { createVersionRequests } from '../../services/request'
+import { createVersionApprovals } from '../../services/approval'
 import { findSchemaByRef } from '../../services/schema'
 import { createVersion, markVersionBuilt } from '../../services/version'
 import MinioStore from '../../utils/MinioStore'
@@ -194,12 +194,12 @@ export const postUpload = [
 
     req.log.info({ code: 'created_model', model }, 'Created model document')
 
-    const [managerRequest, reviewerRequest] = await createVersionRequests({
+    const [managerApproval, reviewerApproval] = await createVersionApprovals({
       version: await version.populate('model').execPopulate(),
     })
     req.log.info(
-      { code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
-      'Successfully created requests for reviews'
+      { code: 'created_review_approvals', managerId: managerApproval._id, reviewApproval: reviewerApproval._id },
+      'Successfully created approvals for review'
     )
 
     switch (uploadType) {

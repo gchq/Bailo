@@ -11,7 +11,7 @@ import { serializedModelFields } from './model'
 import { getUserByInternalId } from './user'
 import { getEntitiesForUser } from '../utils/entity'
 import { deleteImageTag, createRegistryClient } from '../utils/registry'
-import { deleteRequestsByDeployment } from './request'
+import { deleteApprovalsByDeployment } from './approval'
 
 const auth = new Authorisation()
 
@@ -151,8 +151,8 @@ export async function deleteDeploymentsByVersion(user: UserDoc, version: Version
       // Remove version from deployments
       await deployment.versions.remove(version._id)
 
-      // Delete requests for deployment
-      await deleteRequestsByDeployment(user, deployment)
+      // Delete approvals for deployment
+      await deleteApprovalsByDeployment(user, deployment)
 
       // If there are no versions left, remove the deployment
       if (deployment.versions.length === 0) {

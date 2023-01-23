@@ -12,7 +12,7 @@ import MiscLogDetails, { miscIgnoreList } from '@/src/LogTree/MiscLogDetails'
 import Link from '@/src/Link'
 import getLogLevelLabel from '@/utils/getLogLevelLabel'
 import { timeDifference } from '@/utils/dateUtils'
-import BuildOrRequestLogDetails from '@/src/LogTree/BuildOrRequestLogDetails'
+import BuildOrApprovalLogDetails from '@/src/LogTree/BuildOrApprovalLogDetails'
 import { LogFilters } from '@/src/FilterMenu/FilterMenu'
 import { useTheme, darken } from '@mui/material/styles'
 import { useGetAppLogs } from '../../data/admin'
@@ -47,8 +47,8 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
     () => (type === LogType.Build && typeof log.buildId === 'string' ? log.buildId : undefined),
     [log.buildId, type]
   )
-  const requestId = useMemo(
-    () => (type === LogType.Request && typeof log.id === 'string' ? log.id : undefined),
+  const approvalId = useMemo(
+    () => (type === LogType.Approval && typeof log.id === 'string' ? log.id : undefined),
     [log.id, type]
   )
 
@@ -56,7 +56,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
     ...query,
     disabled: !shouldFetch,
     buildId,
-    requestId,
+    approvalId,
   }).logs
 
   const toggleExpanded = useCallback(() => {
@@ -69,15 +69,15 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
 
   const expansion = useMemo(() => {
     if (isExpanded && shouldFetch && childLogs) {
-      if (type === LogType.Build || type === LogType.Request) {
+      if (type === LogType.Build || type === LogType.Approval) {
         return (
-          <BuildOrRequestLogDetails
+          <BuildOrApprovalLogDetails
             query={query}
             uiConfig={uiConfig}
             log={log}
             childLogs={childLogs.logs}
             indent={indent + 1}
-            filterCode={type === LogType.Build ? 'starting_model_build' : 'request'}
+            filterCode={type === LogType.Build ? 'starting_model_build' : 'approval'}
           />
         )
       }
@@ -92,7 +92,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
   }, [childLogs, indent, isExpanded, log, query, shouldFetch, type, uiConfig])
 
   const message = useMemo(() => {
-    if (type === LogType.Request) {
+    if (type === LogType.Approval) {
       return `${log.method} ${(log.url as string).split('?')[0]} ${log['response-time']}ms`
     }
     return log.msg
@@ -139,7 +139,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
       if (status < 600) {
         return <Chip sx={{ height: '20px' }} label={`${status}`} color='error' size='small' variant='filled' />
       }
-    } else if (log.code === 'request') {
+    } else if (log.code === 'approval') {
       return <Chip sx={{ height: '20px' }} label='fail' color='warning' size='small' variant='outlined' />
     } else {
       const logLevelLabel = getLogLevelLabel(log.level)

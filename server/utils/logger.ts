@@ -304,7 +304,7 @@ const morganLog = morgan<any, any>(
         method: tokens.method(req, res),
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
-        code: 'request',
+        code: 'approval',
       },
       tokens.dev(morgan, req, res)
     )

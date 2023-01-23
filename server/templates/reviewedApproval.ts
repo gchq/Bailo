@@ -3,19 +3,19 @@ import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
-import { RequestTypes } from '../models/Request'
+import { ApprovalCategory } from '../models/Approval'
 import { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
-export interface ReviewedRequestContext {
+export interface ReviewedApprovalContext {
   document: VersionDoc | DeploymentDoc
   choice: string
-  requestType: RequestTypes
+  approvalCategory: ApprovalCategory
   reviewingUser: string
 }
 
-export function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
+export function html({ document, approvalCategory, choice, reviewingUser }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
@@ -25,7 +25,7 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${approvalCategory.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -37,8 +37,8 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
         }</mj-text>
       </mj-column>
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Request Type</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${requestType}</mj-text>
+        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approvalCategory}</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Response</strong></mj-text>
@@ -47,14 +47,14 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="100%">
-        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${requestType}</mj-button>
+        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${approvalCategory}</mj-button>
       </mj-column>
     </mj-section>
   `)
   ).html
 }
 
-export function text({ document, requestType, choice }: ReviewedRequestContext) {
+export function text({ document, approvalCategory, choice }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
@@ -63,14 +63,14 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
   return dedent(`
     '${model.currentMetadata.highLevelDetails.name}' has been reviewed
 
-    Request Type: '${requestType}'
+    Approval Category: '${approvalCategory}'
     Response: '${choice}'
 
-    Open ${requestType}: ${requestUrl}
+    Open ${approvalCategory}: ${requestUrl}
   `)
 }
 
-export function subject({ document }: ReviewedRequestContext) {
+export function subject({ document }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
 
   return dedent(`
@@ -78,7 +78,7 @@ export function subject({ document }: ReviewedRequestContext) {
   `)
 }
 
-export function reviewedRequest(context: ReviewedRequestContext) {
+export function reviewedApproval(context: ReviewedApprovalContext) {
   return {
     html: html(context),
     text: text(context),

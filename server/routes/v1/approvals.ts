@@ -3,29 +3,29 @@ import { Request, Response } from 'express'
 import { Types } from 'mongoose'
 import { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates } from '../../../types/interfaces'
-import { RequestTypes } from '../../models/Request'
+import { ApprovalCategory } from '../../models/Approval'
 import { VersionDoc } from '../../models/Version'
 import { findDeploymentById } from '../../services/deployment'
-import { getRequest, readNumRequests, readRequests } from '../../services/request'
+import { getApproval, readNumApprovals, readApprovals } from '../../services/approval'
 import { getUserByInternalId } from '../../services/user'
 import { findVersionById } from '../../services/version'
-import { reviewedRequest } from '../../templates/reviewedRequest'
+import { reviewedApproval } from '../../templates/reviewedApproval'
 import { getDeploymentQueue } from '../../utils/queues'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { sendEmail } from '../../utils/smtp'
 import { ensureUserRole, hasRole } from '../../utils/user'
 import { isUserInEntityList } from '../../utils/entity'
 
-export const getRequests = [
+export const getApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const type = req.query.type as string
+    const approvalCategory = req.query.approvalCategory as string
     const filter = req.query.filter as string
 
-    if (!['Upload', 'Deployment'].includes(type)) {
+    if (!['Upload', 'Deployment'].includes(approvalCategory)) {
       return res.error(400, [
-        { code: 'invalid_object_type', received: type },
-        `Expected 'Upload' / 'Deployment', received '${type}'`,
+        { code: 'invalid_object_type', received: approvalCategory },
+        `Expected 'Upload' / 'Deployment', received '${approvalCategory}'`,
       ])
     }
 
@@ -37,75 +37,80 @@ export const getRequests = [
         ])
       }
     } else {
-      req.log.info('Getting requests for user')
+      req.log.info('Getting approvals for user')
     }
 
-    const requests = await readRequests({
-      type: type as RequestTypes,
+    const approvals = await readApprovals({
+      approvalCategory: approvalCategory as ApprovalCategory,
       filter: filter === 'all' ? undefined : req.user._id,
       archived: filter === 'archived',
     })
 
-    req.log.info({ code: 'fetching_requests', requests }, 'User fetching requests')
+    req.log.info({ code: 'fetching_approvals', approvals }, 'User fetching approvals')
     return res.json({
-      requests,
+      approvals,
     })
   },
 ]
 
-export const getNumRequests = [
+export const getNumApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const requests = await readNumRequests({
+    const approvals = await readNumApprovals({
       userId: req.user._id,
     })
 
-    req.log.info({ code: 'fetching_request_count', requestCount: requests }, 'Fetching the number of requests')
+    req.log.info({ code: 'fetching_approval_count', approvalCount: approvals }, 'Fetching the number of approvals')
     return res.json({
-      count: requests,
+      count: approvals,
     })
   },
 ]
 
-export const postRequestResponse = [
+export const postApprovalResponse = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
     const { id } = req.params
     const choice = req.body.choice as string
 
-    const request = await getRequest({ requestId: id })
+    const approval = await getApproval({ approvalId: id })
 
-    if (!(await isUserInEntityList(req.user, request.approvers)) && !hasRole(['admin'], req.user)) {
+    if (!(await isUserInEntityList(req.user, approval.approvers)) && !hasRole(['admin'], req.user)) {
       throw Unauthorised(
-        { code: 'unauthorised_to_approve', requestId: id, userId: req.user._id, requestApprovers: request.approvers },
+        {
+          code: 'unauthorised_to_approve',
+          approvalId: id,
+          userId: req.user._id,
+          approvalApprovers: approval.approvers,
+        },
         'You do not have permissions to approve this'
       )
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
       throw BadReq(
-        { code: 'invalid_request_choice', choice, requestId: id },
-        `Received invalid request choice, received '${choice}'`
+        { code: 'invalid_approval_choice', choice, approvalId: id },
+        `Received invalid approval choice, received '${choice}'`
       )
     }
 
-    request.status = choice as ApprovalStates
-    await request.save()
+    approval.status = choice as ApprovalStates
+    await approval.save()
 
     let field
-    if (request.approvalType === 'Manager') {
+    if (approval.approvalType === 'Manager') {
       field = 'managerApproved'
     } else {
       field = 'reviewerApproved'
     }
 
     let userId: Types.ObjectId
-    let requestType: RequestTypes
+    let approvalCategory: ApprovalCategory
     let document: VersionDoc | DeploymentDoc
 
-    if (request.version) {
-      const versionDoc = request.version as VersionDoc
+    if (approval.version) {
+      const versionDoc = approval.version as VersionDoc
       const version = await findVersionById(req.user, versionDoc._id, { populate: true })
       if (!version) {
         throw BadReq(
@@ -115,13 +120,13 @@ export const postRequestResponse = [
       }
 
       userId = req.user._id
-      requestType = RequestTypes.Upload
+      approvalCategory = ApprovalCategory.Upload
       document = version
 
       version[field] = choice
       await version.save()
-    } else if (request.deployment) {
-      const deploymentDoc = request.deployment as DeploymentDoc
+    } else if (approval.deployment) {
+      const deploymentDoc = approval.deployment as DeploymentDoc
       const deployment = await findDeploymentById(req.user, deploymentDoc._id, { populate: true })
       if (!deployment) {
         throw BadReq(
@@ -131,7 +136,7 @@ export const postRequestResponse = [
       }
 
       userId = req.user._id
-      requestType = RequestTypes.Deployment
+      approvalCategory = ApprovalCategory.Deployment
       document = deployment
 
       deployment[field] = choice
@@ -149,7 +154,7 @@ export const postRequestResponse = [
         })
       }
     } else {
-      throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')
+      throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
     }
 
     const reviewingUser = req.user.id
@@ -157,16 +162,16 @@ export const postRequestResponse = [
     if (user?.email) {
       await sendEmail({
         to: user.email,
-        ...reviewedRequest({
+        ...reviewedApproval({
           document,
           choice,
-          requestType,
+          approvalCategory,
           reviewingUser,
         }),
       })
     }
 
-    req.log.info({ code: 'approval_response_set', requestId: id, choice }, 'Successfully set approval response')
+    req.log.info({ code: 'approval_response_set', approvalId: id, choice }, 'Successfully set approval response')
 
     res.json({
       message: 'Finished setting approval response',

@@ -207,25 +207,24 @@ export default function Deployment() {
             >
               Back to model
             </Button>
-            {hasUploadType &&
-              initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-                <Box>
-                  <Alert
-                    severity='info'
-                    sx={{
-                      width: 'fit-content',
-                      m: 'auto',
-                      backgroundColor: '#0288d1',
+            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+              <Box>
+                <Alert
+                  severity='info'
+                  sx={{
+                    width: 'fit-content',
+                    m: 'auto',
+                    backgroundColor: '#0288d1',
+                    color: '#fff',
+                    '& .MuiAlert-icon': {
                       color: '#fff',
-                      '& .MuiAlert-icon': {
-                        color: '#fff',
-                      },
-                    }}
-                  >
-                    This model version was uploaded as just a model card
-                  </Alert>
-                </Box>
-              )}
+                    },
+                  }}
+                >
+                  This model version was uploaded as a model card only
+                </Alert>
+              </Box>
+            )}
             {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
               <Box>
                 <Alert

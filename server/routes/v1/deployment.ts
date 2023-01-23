@@ -6,7 +6,7 @@ import { customAlphabet } from 'nanoid'
 import { ApprovalStates } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
-import { createDeploymentRequests } from '../../services/request'
+import { createDeploymentApprovals } from '../../services/approval'
 import { findSchemaByRef } from '../../services/schema'
 import { findVersionByName } from '../../services/version'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
@@ -136,12 +136,12 @@ export const postDeployment = [
 
     req.log.info({ code: 'requesting_model_version', modelId: model._id, version }, 'Requesting model version')
 
-    const managerRequest = await createDeploymentRequests({
+    const managerApproval = await createDeploymentApprovals({
       version,
       deployment: await deployment.populate('model').execPopulate(),
     })
     req.log.info(
-      { code: 'created_deployment', deploymentId: deployment._id, request: managerRequest._id, uuid },
+      { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
       'Successfully created deployment'
     )
 
@@ -187,7 +187,7 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
+    await createDeploymentApprovals({ version, deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
   },

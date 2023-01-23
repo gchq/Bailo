@@ -1,16 +1,16 @@
 import { Types } from 'mongoose'
 import { getEntitiesForUser, getUserListFromEntityList, parseEntityList } from '../utils/entity'
-import { ApprovalStates, Request, Entity } from '../../types/interfaces'
+import { ApprovalStates, Approval, Entity } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
-import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
+import ApprovalModel, { ApprovalTypes, ApprovalCategory } from '../models/Approval'
 import { VersionDoc } from '../models/Version'
-import { reviewRequest } from '../templates/reviewRequest'
+import { reviewApproval } from '../templates/reviewApproval'
 import { BadReq } from '../utils/result'
 import { sendEmail } from '../utils/smtp'
 import { getUserByInternalId } from './user'
 import { UserDoc } from '../models/User'
 
-export async function createDeploymentRequests({
+export async function createDeploymentApprovals({
   version,
   deployment,
 }: {
@@ -23,14 +23,14 @@ export async function createDeploymentRequests({
     throw BadReq({ managers: version.metadata.contacts.manager }, `Invalid manager: ${managers.reason}`)
   }
 
-  return createDeploymentRequest({
+  return createDeploymentApproval({
     approvers: version.metadata.contacts.manager,
     deployment,
     approvalType: ApprovalTypes.Manager,
   })
 }
 
-export async function createVersionRequests({ version }: { version: VersionDoc }) {
+export async function createVersionApprovals({ version }: { version: VersionDoc }) {
   const [managers, reviewers] = await Promise.all([
     parseEntityList(version.metadata.contacts.manager),
     parseEntityList(version.metadata.contacts.reviewer),
@@ -44,22 +44,22 @@ export async function createVersionRequests({ version }: { version: VersionDoc }
     throw BadReq({ reviewers: version.metadata.contacts.reviewer }, `Invalid reviewer: '${reviewers.reason}'`)
   }
 
-  const managerRequest = createVersionRequest({
+  const managerApproval = createVersionApproval({
     approvers: version.metadata.contacts.manager,
     version,
     approvalType: ApprovalTypes.Manager,
   })
 
-  const reviewerRequest = createVersionRequest({
+  const reviewerApproval = createVersionApproval({
     approvers: version.metadata.contacts.reviewer,
     version,
     approvalType: ApprovalTypes.Reviewer,
   })
 
-  return Promise.all([managerRequest, reviewerRequest])
+  return Promise.all([managerApproval, reviewerApproval])
 }
 
-async function createDeploymentRequest({
+async function createDeploymentApproval({
   approvers,
   approvalType,
   deployment,
@@ -67,18 +67,18 @@ async function createDeploymentRequest({
   approvers: Array<Entity>
   approvalType: ApprovalTypes
   deployment: DeploymentDoc
-}): Promise<Request> {
-  return createRequest({
+}): Promise<Approval> {
+  return createApproval({
     documentType: 'deployment',
     document: deployment,
     approvers,
 
     approvalType,
-    requestType: RequestTypes.Deployment,
+    approvalCategory: ApprovalCategory.Deployment,
   })
 }
 
-async function createVersionRequest({
+async function createVersionApproval({
   approvers,
   approvalType,
   version,
@@ -86,43 +86,42 @@ async function createVersionRequest({
   approvers: Array<Entity>
   approvalType: ApprovalTypes
   version: VersionDoc
-}): Promise<Request> {
-  return createRequest({
+}): Promise<Approval> {
+  return createApproval({
     documentType: 'version',
     document: version,
     approvers,
 
     approvalType,
-    requestType: RequestTypes.Upload,
+    approvalCategory: ApprovalCategory.Upload,
   })
 }
 
-export type RequestDocumentType = 'version' | 'deployment'
-async function createRequest({
+export type ApprovalDocumentType = 'version' | 'deployment'
+async function createApproval({
   documentType,
   document,
   approvers,
   approvalType,
-  requestType,
+  approvalCategory,
 }: {
-  documentType: RequestDocumentType
+  documentType: ApprovalDocumentType
   document: VersionDoc | DeploymentDoc
   approvers: Array<Entity>
 
   approvalType: ApprovalTypes
-  requestType: RequestTypes
+  approvalCategory: ApprovalCategory
 }) {
   const doc = {
     [documentType]: document._id,
     approvers,
 
     approvalType,
-    request: requestType,
+    approvalCategory,
   }
 
-  // If a request already exists, we don't want to create a
-  // duplicate request
-  const { value: request, lastErrorObject } = (await RequestModel.findOneAndUpdate(
+  // If an approval already exists, we don't want to create a duplicate approval
+  const { value: approval, lastErrorObject } = (await ApprovalModel.findOneAndUpdate(
     doc,
     {
       [documentType]: document._id,
@@ -140,31 +139,31 @@ async function createRequest({
 
     for (const user of users) {
       if (user.email) {
-        // we created a new request, send out a notification.
+        // we created a new approval, send out a notification.
         await sendEmail({
           to: user.email,
-          ...reviewRequest({
+          ...reviewApproval({
             document,
-            requestType,
+            approvalCategory,
           }),
         })
       }
     }
   }
 
-  return request
+  return approval
 }
 
-export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
+export async function readNumApprovals({ userId }: { userId: Types.ObjectId }) {
   const user = await getUserByInternalId(userId)
 
   if (!user) {
-    throw new Error(`Finding requests for user that does not exist: ${userId}`)
+    throw new Error(`Finding approvals for user that does not exist: ${userId}`)
   }
 
   const userEntities = await getEntitiesForUser(user)
 
-  return RequestModel.countDocuments({
+  return ApprovalModel.countDocuments({
     status: 'No Response',
     $or: userEntities.map((userEntity) => ({
       approvers: { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
@@ -172,26 +171,26 @@ export async function readNumRequests({ userId }: { userId: Types.ObjectId }) {
   })
 }
 
-export type RequestFilter = Types.ObjectId | undefined
-export async function readRequests({
-  type,
+export type ApprovalFilter = Types.ObjectId | undefined
+export async function readApprovals({
+  approvalCategory,
   filter,
   archived,
 }: {
-  type: RequestTypes
-  filter: RequestFilter
+  approvalCategory: ApprovalCategory
+  filter: ApprovalFilter
   archived: boolean
 }) {
   const query: any = {
     status: 'No Response',
-    request: type,
+    approvalCategory,
   }
 
   if (filter) {
     const user = await getUserByInternalId(filter)
 
     if (!user) {
-      throw new Error(`Finding requests for user that does not exist: ${filter}`)
+      throw new Error(`Finding approvals for user that does not exist: ${filter}`)
     }
 
     const userEntities = await getEntitiesForUser(user)
@@ -205,7 +204,7 @@ export async function readRequests({
     query.status = { $ne: 'No Response' }
   }
 
-  return RequestModel.find(query)
+  return ApprovalModel.find(query)
     .populate({
       path: 'version',
       populate: { path: 'model' },
@@ -217,18 +216,18 @@ export async function readRequests({
     .sort({ updatedAt: -1 })
 }
 
-export async function getRequest({ requestId }: { requestId: string | Types.ObjectId }) {
-  const request = await RequestModel.findById(requestId)
+export async function getApproval({ approvalId }: { approvalId: string | Types.ObjectId }) {
+  const approval = await ApprovalModel.findById(approvalId)
 
-  if (!request) {
-    throw BadReq({ requestId }, `Unable to find request '${requestId}'`)
+  if (!approval) {
+    throw BadReq({ approvalId }, `Unable to find approval '${approvalId}'`)
   }
 
-  return request
+  return approval
 }
 
-export async function deleteRequestsByVersion(user: UserDoc, version: VersionDoc) {
-  return (RequestModel as any).delete(
+export async function deleteApprovalsByVersion(user: UserDoc, version: VersionDoc) {
+  return (ApprovalModel as any).delete(
     {
       version: version._id,
     },
@@ -236,8 +235,8 @@ export async function deleteRequestsByVersion(user: UserDoc, version: VersionDoc
   )
 }
 
-export async function deleteRequestsByDeployment(user: UserDoc, deployment: DeploymentDoc) {
-  return (RequestModel as any).delete(
+export async function deleteApprovalsByDeployment(user: UserDoc, deployment: DeploymentDoc) {
+  return (ApprovalModel as any).delete(
     {
       deployment: deployment._id,
     },
