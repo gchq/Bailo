@@ -19,7 +19,7 @@ describe('test approvals routes', () => {
     const approvalArray: any = []
     approvalArray.push(testApproval)
     mock.mockReturnValue(approvalArray)
-    const res = await authenticatedGetRequest('/api/v1/approvals?type=Upload')
+    const res = await authenticatedGetRequest('/api/v1/approvals?approvalCategory=Upload')
     validateTestRequest(res)
     expect(res.body.approvals.length).toBe(1)
   })
