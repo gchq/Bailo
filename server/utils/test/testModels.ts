@@ -1,6 +1,6 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalCategory, ApprovalTypes } from 'server/models/Approval'
+import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
