@@ -27,7 +27,7 @@ import {
 } from './routes/v1/model'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
 import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals'
-import { getDefaultSchema, getSchema, getSchemas } from './routes/v1/schema'
+import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
 import { postUpload } from './routes/v1/upload'
@@ -91,6 +91,7 @@ server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
 server.get('/api/v1/schemas', ...getSchemas)
 server.get('/api/v1/schema/default', ...getDefaultSchema)
 server.get('/api/v1/schema/:ref', ...getSchema)
+server.post('/api/v1/schema', ...postSchema)
 
 server.get('/api/v1/config', ...getUiConfig)
 

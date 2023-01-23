@@ -1,6 +1,7 @@
+import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { findSchemaByRef, findSchemasByUse } from '../../services/schema'
-import { NotFound } from '../../utils/result'
+import { createSchema, findSchemaByName, findSchemaByRef, findSchemasByUse } from '../../services/schema'
+import { BadReq, Conflict, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
 export const getSchemas = [
@@ -50,5 +51,26 @@ export const getSchema = [
 
     req.log.info({ code: 'fetching_schema_by_reference', schema }, 'User fetching schema using specified reference')
     return res.json(schema)
+  },
+]
+
+export const postSchema = [
+  ensureUserRole('admin'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    const schema = req.body
+    if (!schema) {
+      throw BadReq({ code: 'missing_schema_data' }, 'Missing schema data for upload')
+    }
+    const existingSchemaByRef = await findSchemaByRef(schema.reference)
+    if (existingSchemaByRef) {
+      throw Conflict({ code: 'duplicate_schema_by_reference' }, 'Duplicate schema reference')
+    }
+    const existingSchemaByName = await findSchemaByName(schema.name)
+    if (existingSchemaByName) {
+      throw Conflict({ code: 'duplicate_schema_by_name' }, 'Duplicate schema name')
+    }
+    await createSchema(schema, true)
+    return res.json(schema.name)
   },
 ]
