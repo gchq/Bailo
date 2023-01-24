@@ -30,8 +30,6 @@ export async function getAdminToken() {
   return adminToken
 }
 
-getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
-
 async function getPrivateKey() {
   return readFile('./certs/key.pem', { encoding: 'utf-8' })
 }

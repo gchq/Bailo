@@ -25,7 +25,7 @@ import {
   getModelVersions,
   getModelAccess,
 } from './routes/v1/model'
-import { getDockerRegistryAuth } from './routes/v1/registryAuth'
+import { getAdminToken, getDockerRegistryAuth } from './routes/v1/registryAuth'
 import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
 import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
@@ -39,6 +39,8 @@ import {
   putVersion,
   postResetVersionApprovals,
   putUpdateLastViewed,
+  getVersionFileList,
+  getVersionFile,
 } from './routes/v1/version'
 import { runMigrations, connectToMongoose } from './utils/database'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
@@ -82,6 +84,8 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
 
 server.get('/api/v1/version/:id', ...getVersion)
+server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)
+server.get('/api/v1/version/:id/contents/:file', ...getVersionFile)
 server.put('/api/v1/version/:id', ...putVersion)
 server.get('/api/v1/version/:id/access', ...getVersionAccess)
 server.delete('/api/v1/version/:id', ...deleteVersion)
@@ -138,6 +142,8 @@ export async function startServer() {
   pullBuilderImage()
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
+
+  getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
   // handle next requests
   server.use((req, res) => handle(req, res))

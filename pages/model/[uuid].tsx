@@ -43,6 +43,7 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import CodeExplorer from 'src/model/CodeExplorer'
 import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
@@ -54,10 +55,10 @@ import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
+  return ['overview', 'compliance', 'build', 'deployments', 'code', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
@@ -446,6 +447,11 @@ function Model() {
               data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
+            <Tab
+              label='Explore Code'
+              value='code'
+              disabled={hasUploadType && version.metadata.buildOptions.uploadType !== ModelUploadType.Zip}
+            />
             <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
         </Box>
@@ -528,6 +534,8 @@ function Model() {
             ))}
           </>
         )}
+
+        {group === 'code' && <CodeExplorer id={version._id} addQueryParameter={addQueryParameter} />}
 
         {group === 'settings' && (
           <Box data-test='modelSettingsPage'>

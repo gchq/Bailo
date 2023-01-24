@@ -270,3 +270,12 @@ export type SchemaQuestion = {
   widget?: string
   readOnly?: boolean
 }
+
+export interface MinimalEntry {
+  compressedSize: number
+  generalPurposeBitFlag: number
+  compressionMethod: number
+  relativeOffsetOfLocalHeader: number
+  uncompressedSize: number
+  fileName: string
+}
