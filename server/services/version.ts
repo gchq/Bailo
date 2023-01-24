@@ -135,7 +135,7 @@ export async function findVersionFileList(version: VersionDoc) {
 
   const path = version.files.rawCodePath
   if (!path) {
-    throw NotFound({ code: 'version_code_not_found', versionId: id }, 'Unable to find version zip file')
+    throw NotFound({ code: 'version_code_not_found', versionId: version._id }, 'Unable to find version zip file')
   }
 
   const fileRef: FileRef = {
