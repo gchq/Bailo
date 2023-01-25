@@ -89,7 +89,7 @@
     "@mdx-js/loader": "^2.2.1",
     "@mui/icons-material": "^5.11.0",
     "@mui/lab": "^5.0.0-alpha.117",
-    "@mui/material": "^5.11.4",
+    "@mui/material": "^5.11.6",
     "@mui/system": "^5.11.4",
     "@next/bundle-analyzer": "^13.1.2",
     "@rjsf/core": "^4.2.3",
