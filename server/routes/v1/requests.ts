@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import ModelModel from 'server/models/Model'
+import ModelModel from '../../models/Model'
 import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates } from '../../../types/interfaces'
 import { RequestTypes } from '../../models/Request'
