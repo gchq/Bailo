@@ -12,7 +12,6 @@
     "cy:run": "cypress run",
     "dev": "nodemon",
     "dev2": "TS_NODE_PROJECT=tsconfig.server.json ts-node-dev --ignore-watch '^(?!server)' --watch server --respawn --rs server/index.ts",
-    "integration": "jest --bail --config jest.config.integration.ts",
     "lint": "next lint",
     "script": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tsconfig.server.json node --trace-warnings -r ts-node/register -r tsconfig-paths/register server/scripts/runScript.ts",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
