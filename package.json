@@ -79,7 +79,8 @@
     "ts-node": "^10.9.1",
     "unzipper": "^0.10.11",
     "uuid": "^9.0.0",
-    "yargs": "^17.6.2"
+    "yargs": "^17.6.2",
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
