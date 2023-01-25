@@ -13,7 +13,6 @@ export const modelUuid = 'test-model'
 export const uploadData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
-    initialVersionRequested: 1,
     name: 'test-deployment',
     modelID: 'test-model',
   },
@@ -27,7 +26,6 @@ export const uploadData: any = {
 export const deploymentData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
-    initialVersionRequested: 1,
     name: 'test-deployment',
     modelID: 'test-model',
   },

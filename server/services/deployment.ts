@@ -1,8 +1,12 @@
 import { castArray } from 'lodash'
+import https from 'https'
+import config from 'config'
+import { deleteImageTag } from '../utils/registry'
 import { ModelId } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
+import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
 import { createSerializer, SerializerOptions } from '../utils/logger'
@@ -10,8 +14,6 @@ import { Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 import { getUserByInternalId } from './user'
 import { getEntitiesForUser } from '../utils/entity'
-import { deleteImageTag, createRegistryClient } from '../utils/registry'
-import { deleteRequestsByDeployment } from './request'
 
 const auth = new Authorisation()
 
@@ -20,6 +22,10 @@ interface GetDeploymentOptions {
   showLogs?: boolean
   overrideFilter?: boolean
 }
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: !config.get('registry.insecure'),
+})
 
 export function serializedDeploymentFields(): SerializerOptions {
   return {
@@ -104,7 +110,6 @@ interface CreateDeployment {
   schemaRef: string
   uuid: string
 
-  versions: Array<VersionDoc>
   model: ModelId
   metadata: any
 
@@ -123,41 +128,19 @@ export async function createDeployment(user: UserDoc, data: CreateDeployment) {
   return deployment
 }
 
-export async function updateDeploymentVersions(user: UserDoc, modelId: ModelId, version: VersionDoc) {
-  const deployments = await findDeployments(user, { model: modelId })
-  await Promise.all(
-    deployments.map((deployment) => {
-      deployment.versions.push(version)
-      return deployment.save()
-    })
-  )
-}
+export async function removeModelDeploymentsFromRegistry(model: ModelDoc, deployment: DeploymentDoc) {
+  const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
 
-export async function deleteDeploymentsByVersion(user: UserDoc, version: VersionDoc) {
-  const registry = await createRegistryClient()
+  const { versions } = model
 
-  const deployments = await findDeploymentsByVersion(user, version)
-
-  // For all deployments
-  await Promise.all(
-    deployments.map(async (deployment) => {
-      // Delete image from registry
-      await deleteImageTag(registry, {
-        model: deployment.metadata.highLevelDetails.modelID,
-        namespace: user.id,
-        version: version.version,
-      })
-
-      // Remove version from deployments
-      await deployment.versions.remove(version._id)
-
-      // Delete requests for deployment
-      await deleteRequestsByDeployment(user, deployment)
-
-      // If there are no versions left, remove the deployment
-      if (deployment.versions.length === 0) {
-        await deployment.delete(user._id)
-      }
-    })
-  )
+  versions.forEach(async (version) => {
+    const versionDoc = await VersionModel.findById(version)
+    if (!versionDoc) {
+      return
+    }
+    deleteImageTag(
+      { address: registry, agent: httpsAgent },
+      { namespace: deployment.uuid, model: model.uuid, version: versionDoc.version }
+    )
+  })
 }
