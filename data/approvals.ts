@@ -5,12 +5,12 @@ import { fetcher } from '../utils/fetcher'
 
 export type ApprovalCategory = 'Upload' | 'Deployment'
 export type ReviewFilterType = 'user' | 'archived'
-export function useListApprovals(category: ApprovalCategory, filter: ReviewFilterType) {
+export function useListApprovals(approvalCategory: ApprovalCategory, filter: ReviewFilterType) {
   const { data, error, mutate } = useSWR<{
     approvals: Array<Approval>
   }>(
     `/api/v1/approvals?${qs.stringify({
-      category,
+      approvalCategory,
       filter,
     })}`,
     fetcher
