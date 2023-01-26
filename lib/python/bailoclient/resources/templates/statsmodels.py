@@ -13,7 +13,7 @@ class _StatsmodelsModelWrapper:
             if dataframe.shape[0] != 1 or not (
                 "start" in dataframe.columns and "end" in dataframe.columns
             ):
-                raise MlflowException(
+                raise Exception(
                     "prediction dataframes for a TimeSeriesModel must have exactly one row"
                     + " and include columns called start and end"
                 )

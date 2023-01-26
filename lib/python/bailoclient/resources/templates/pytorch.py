@@ -9,6 +9,8 @@ class _PyTorchWrapper:
 
     def predict(self, data, device="cpu"):
         import torch
+        import pandas as pd
+        import numpy as np
 
         if isinstance(data, pd.DataFrame):
             inp_data = data.values.astype(np.float32)

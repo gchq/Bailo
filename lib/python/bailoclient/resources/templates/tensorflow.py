@@ -18,18 +18,20 @@ class _TF2Wrapper:
 
     def predict(self, data):
         import tensorflow
+        import pandas as pd
+        import numpy as np
 
         feed_dict = {}
         if isinstance(data, dict):
             feed_dict = {k: tensorflow.constant(v) for k, v in data.items()}
-        elif isinstance(data, pandas.DataFrame):
+        elif isinstance(data, pd.DataFrame):
             for df_col_name in list(data):
                 # If there are multiple columns with the same name, selecting the shared name
                 # from the DataFrame will result in another DataFrame containing the columns
                 # with the shared name. TensorFlow cannot make eager tensors out of pandas
                 # DataFrames, so we convert the DataFrame to a numpy array here.
                 val = data[df_col_name]
-                if isinstance(val, pandas.DataFrame):
+                if isinstance(val, pd.DataFrame):
                     val = val.values
                 else:
                     val = np.array(val.to_list())
@@ -54,4 +56,4 @@ class _TF2Wrapper:
         if isinstance(data, dict):
             return pred_dict
         else:
-            return pandas.DataFrame.from_dict(data=pred_dict)
+            return pd.DataFrame.from_dict(data=pred_dict)

@@ -7,4 +7,5 @@ class _H2OModelWrapper:
 
         predicted = self.h2o_model.predict(h2o.H2OFrame(dataframe)).as_data_frame()
         predicted.index = dataframe.index
+
         return predicted

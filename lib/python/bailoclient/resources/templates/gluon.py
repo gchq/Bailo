@@ -12,18 +12,25 @@ class _GluonModelWrapper:
                  as either a numpy.ndarray or a plain list for hybrid models.
         """
         import mxnet as mx
+        import pandas as pd
 
         if isinstance(data, pd.DataFrame):
             ndarray = mx.nd.array(data.values)
             preds = self.gluon_model(ndarray)
+
             if isinstance(preds, mx.ndarray.ndarray.NDArray):
                 preds = preds.asnumpy()
+
             return pd.DataFrame(preds)
+
         elif isinstance(data, np.ndarray):
             ndarray = mx.nd.array(data)
             preds = self.gluon_model(ndarray)
+
             if isinstance(preds, mx.ndarray.ndarray.NDArray):
                 preds = preds.asnumpy()
+
             return preds
+
         else:
             raise TypeError("Input data should be pandas.DataFrame or numpy.ndarray")
