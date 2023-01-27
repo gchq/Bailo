@@ -71,3 +71,7 @@ class TemplateNotAvailable(Exception):
 
 class DirectoryNotFound(Exception):
     """Unable to find directory"""
+
+
+class ModelMethodNotAvailable(Exception):
+    """Model bundler/loader function hasn't been implemented for the model type"""

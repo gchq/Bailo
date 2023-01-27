@@ -304,9 +304,17 @@ class Bailo(Client):
             additional_files,
         )
 
-    ## TODO infer the model flavour?
     def load_model(self, model_path: str, model_flavour: str):
-        return self.loader.model_loaders[model_flavour](model_path)
+        """Load a model
+
+        Args:
+            model_path (str): Path to the actual model file (e.g. './model.pth')
+            model_flavour (str): Flavour of the model (e.g. 'torch')
+
+        Returns:
+            Model: The loaded model
+        """
+        return self.loader.load_model(model_path, model_flavour)
 
     def generate_requirements_file(self, module_path: str, output_dir: str):
         """Generate requirements.txt file based on imports within a Notebook, Python file,

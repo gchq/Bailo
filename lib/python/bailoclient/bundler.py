@@ -16,7 +16,7 @@ from bailoclient.utils.exceptions import (
     DirectoryNotFound,
 )
 
-from .utils.enums import ModelFlavours
+from .utils.enums import ModelFlavour
 
 
 class Bundler:
@@ -144,9 +144,6 @@ class Bundler:
         code_path = os.path.join(tmpdir.name, "code")
         binary_path = os.path.join(tmpdir.name, "binary")
 
-        # if model_flavour == ModelFlavours.PYTORCH.value:
-        # print("calling this code path")
-
         if model_flavour == "MLeap" and not model_py:
             raise TemplateNotAvailable(
                 "There is no model template available for MLeap models"
@@ -160,9 +157,8 @@ class Bundler:
                 pip_requirements=model_requirements,
             )
 
-            ## TODO update to get the template from the template registry
             if not model_py:
-                model_py = files(templates).joinpath("h2o.py")
+                model_py = self.model_py_templates[model_flavour]
 
         except KeyError:
             raise ModelFlavourNotRecognised(
@@ -180,72 +176,6 @@ class Bundler:
         self.zip_files(code_path, f"{output_path}/code.zip")
 
         tmpdir.cleanup()
-
-    def __identify_model_template(self, model_flavour: str):
-        """Get path to model template based on the model flavour provided.
-
-        Args:
-            model_flavour (str): Model flavour
-
-        Raises:
-            TemplateNotAvailable: MLeap models do not have an available template
-            ModelFlavourNotRecognised: The provided model flavour was not recognised
-
-        Returns:
-            str: File path to model.py template
-        """
-        if model_flavour == ModelFlavours.H2O.value:
-            return files(templates).joinpath("h2o.py")
-
-        elif model_flavour == ModelFlavours.KERAS.value:
-            return files(templates).joinpath("keras.py")
-
-        elif model_flavour == ModelFlavours.MLEAP.value:
-            raise Exception("no template available for MLeap models")
-
-        elif model_flavour == ModelFlavours.PYTORCH.value:
-            return files(templates).joinpath("pytorch.py")
-
-        elif model_flavour == ModelFlavours.SKLEARN.value:
-            return files(templates).joinpath("sklearn.py")
-
-        elif model_flavour == ModelFlavours.SPARK.value:
-            return files(templates).joinpath("spark.py")
-
-        elif model_flavour == ModelFlavours.TENSORFLOW.value:
-            return files(templates).joinpath("tensorflow.py")
-
-        elif model_flavour == ModelFlavours.ONNX.value:
-            return files(templates).joinpath("onnx.py")
-
-        elif model_flavour == ModelFlavours.GLUON.value:
-            return files(templates).joinpath("gluon.py")
-
-        elif model_flavour == ModelFlavours.XGBOOST.value:
-            return files(templates).joinpath("xgboost.py")
-
-        elif model_flavour == ModelFlavours.LIGHTGBM.value:
-            return files(templates).joinpath("lightgbm.py")
-
-        elif model_flavour == ModelFlavours.CATBOOST.value:
-            return files(templates).joinpath("catboost.py")
-
-        elif model_flavour == ModelFlavours.SPACY.value:
-            return files(templates).joinpath("spacy.py")
-
-        elif model_flavour == ModelFlavours.FASTAI.value:
-            return files(templates).joinpath("fastai.py")
-
-        elif model_flavour == ModelFlavours.STATSMODELS.value:
-            return files(templates).joinpath("statsmodels.py")
-
-        elif model_flavour == ModelFlavours.PROPHET.value:
-            return files(templates).joinpath("prophet.py")
-
-        else:
-            raise ModelFlavourNotRecognised(
-                "Model flavour not recognised. Check MLflow docs for list of supported flavours"
-            )
 
     def __contains_required_code_files(self, code_dir: str):
         """Check that a directory of model code contains requirements.txt and model.py files

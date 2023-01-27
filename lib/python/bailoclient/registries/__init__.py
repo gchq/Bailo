@@ -1,3 +1,3 @@
-from .bundlers import bundler
-from .loaders import loader
-from .templates import template
+from .bundler_registry import bundler
+from .loader_registry import loader
+from .template_registry import template

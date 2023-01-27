@@ -1,11 +1,19 @@
-from enum import Enum
+from enum import Enum, EnumMeta
 
 
-class ModelFlavours(Enum):
+class ModelFlavoursMeta(EnumMeta):
+    def __contains__(cls, item):
+        return isinstance(item, cls) or item in [
+            v.value for v in cls.__members__.values()
+        ]
+
+
+class ModelFlavour(Enum, metaclass=ModelFlavoursMeta):
+
     H2O = "h2o"
     KERAS = "keras"
     MLEAP = "mleap"
-    PYTORCH = "pytorch"
+    PYTORCH = "torch"
     SKLEARN = "sklearn"
     SPARK = "spark"
     TENSORFLOW = "tensorflow"
