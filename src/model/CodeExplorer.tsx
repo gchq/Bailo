@@ -1,7 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box'
 import TreeView from '@mui/lab/TreeView'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -65,29 +64,27 @@ export default function CodeExplorer({
   )
 
   return (
-    <Box>
-      <Grid container spacing={2} sx={{ maxHeight: '100%' }}>
-        <Grid item xs={12} md={3} sx={{ scroll: 'auto' }}>
-          <TreeView
-            aria-label='code navigator'
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
-            defaultExpanded={['code/']}
-            sx={{ flexGrow: 1, overflowY: 'auto' }}
-          >
-            {renderTree(tree)}
-          </TreeView>
-        </Grid>
-        <Grid item xs={12} md={9} sx={{ scroll: 'auto' }}>
-          <Editor
-            height='80vh'
-            path={path}
-            value={file}
-            theme={theme.palette.mode === 'dark' ? 'vs-dark' : 'light'}
-            options={{ fontSize: theme.typography.fontSize }}
-          />
-        </Grid>
+    <Grid container spacing={2} sx={{ maxHeight: '700px' }}>
+      <Grid item xs={12} md={3} sx={{ maxHeight: 'inherit' }}>
+        <TreeView
+          aria-label='code navigator'
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          defaultExpanded={['code/']}
+          sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 'inherit' }}
+        >
+          {renderTree(tree)}
+        </TreeView>
       </Grid>
-    </Box>
+      <Grid item xs={12} md={9} sx={{ scroll: 'auto' }}>
+        <Editor
+          height='700px'
+          path={path}
+          value={file}
+          theme={theme.palette.mode === 'dark' ? 'vs-dark' : 'light'}
+          options={{ fontSize: theme.typography.fontSize }}
+        />
+      </Grid>
+    </Grid>
   )
 }
