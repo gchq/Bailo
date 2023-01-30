@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { VersionDoc } from 'server/models/Version'
 import { isUserInEntityList } from '../../utils/entity'
 import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
@@ -177,10 +178,12 @@ export const getModelAccess = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
+    const latestVersion = model.latestVersion as VersionDoc
+
     const [uploader, reviewer, manager] = await Promise.all([
-      isUserInEntityList(user, model.currentMetadata.contacts.uploader),
-      isUserInEntityList(user, model.currentMetadata.contacts.reviewer),
-      isUserInEntityList(user, model.currentMetadata.contacts.manager),
+      isUserInEntityList(user, latestVersion.metadata.contacts.uploader),
+      isUserInEntityList(user, latestVersion.metadata.contacts.reviewer),
+      isUserInEntityList(user, latestVersion.metadata.contacts.manager),
     ])
 
     return res.json({

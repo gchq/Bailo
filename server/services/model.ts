@@ -14,7 +14,7 @@ const auth = new Authorisation()
 
 export function serializedModelFields(): SerializerOptions {
   return {
-    mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'],
+    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
   }
 }
 
@@ -27,12 +27,18 @@ export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
 }
 
 export async function findModelByUuid(user: UserDoc, uuid: string) {
-  const model = await ModelModel.findOne({ uuid })
+  let model = await ModelModel.findOne({ uuid })
+  if (model) {
+    model = model.populate('latestVersion', 'metadata')
+  }
   return filterModel(user, model)
 }
 
 export async function findModelById(user: UserDoc, id: string | Types.ObjectId) {
-  const model = await ModelModel.findById(id)
+  let model = await ModelModel.findById(id)
+  if (model) {
+    model = model.populate('latestVersion', 'metadata')
+  }
   return filterModel(user, model)
 }
 
@@ -60,11 +66,11 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
     const userEntities = await getEntitiesForUser(user)
 
     query.$or = userEntities.map((userEntity) => ({
-      'currentMetadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+      'latestVersion.metadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
     }))
   }
 
-  const models = await ModelModel.find(query).sort({ updatedAt: -1 })
+  const models = await ModelModel.find(query).sort({ updatedAt: -1 }).populate('latestVersion', 'metadata')
   return filterModel(user, models)
 }
 

@@ -14,22 +14,20 @@ const managerId = new ObjectId()
 const modelId = new ObjectId()
 const userId = new ObjectId()
 const requestId = new ObjectId()
+const versionId = new ObjectId()
 
 const testModel: any = {
   _id: modelId,
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: {
-    highLevelDetails: {
-      name: 'model1',
-    },
-  },
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
 const versionData: any = {
+  _id: versionId,
   model: testModel,
   version: '1',
   metadata: {

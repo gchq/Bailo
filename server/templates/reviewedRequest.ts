@@ -17,6 +17,7 @@ export interface ReviewedRequestContext {
 
 export function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -33,7 +34,7 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          model.currentMetadata.highLevelDetails.name
+          latestVersion.metadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -56,12 +57,13 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
 
 export function text({ document, requestType, choice }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
-    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
 
     Request Type: '${requestType}'
     Response: '${choice}'
@@ -72,9 +74,10 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
 
 export function subject({ document }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   return dedent(`
-    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
   `)
 }
 

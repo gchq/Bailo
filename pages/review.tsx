@@ -172,7 +172,7 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                     Requesting deployment of{' '}
                     <Link href={`/model/${requestObj.deployment?.model?.uuid}`} passHref>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
-                        {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
+                        {requestObj.deployment?.model?.latestVersion?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
                   </Typography>

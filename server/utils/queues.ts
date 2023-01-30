@@ -11,6 +11,7 @@ import { connectToMongoose } from './database'
 import { sendEmail } from './smtp'
 import { getUserListFromEntityList } from './entity'
 import logger from './logger'
+import { VersionDoc } from '../models/Version'
 
 let uploadQueue: PMongoQueue | undefined
 let deploymentQueue: PMongoQueue | undefined
@@ -93,13 +94,14 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
   }
 
   const model = version.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   await markVersionState(owner, msg.payload.versionId, state)
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const userList = await getUserListFromEntityList(model.currentMetadata.contacts.uploader)
+  const userList = await getUserListFromEntityList(latestVersion.metadata.contacts.uploader)
 
   if (userList.length > 20) {
     // refusing to send more than 20 emails.
@@ -115,14 +117,14 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
     await sendEmail({
       to: user.email,
       ...simpleEmail({
-        text: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        text: `Your model build for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
         columns: [
-          { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
+          { header: 'Model Name', value: latestVersion.metadata.highLevelDetails.name },
           { header: 'Build Type', value: 'Model' },
           { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
         ],
         buttons: [{ text: 'Build Logs', href: `${base}/model/${model.uuid}` }],
-        subject: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        subject: `Your model build for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
       }),
     })
   }
@@ -142,6 +144,7 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
   const model = deployment.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   const userList = await getUserListFromEntityList(deployment.metadata.contacts.owner)
 
@@ -159,14 +162,14 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
     await sendEmail({
       to: user.email,
       ...simpleEmail({
-        text: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        text: `Your deployment for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
         columns: [
-          { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
+          { header: 'Model Name', value: latestVersion.metadata.highLevelDetails.name },
           { header: 'Build Type', value: 'Deployment' },
           { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
         ],
         buttons: [{ text: 'Build Logs', href: `${base}/deployment/${deployment.uuid}` }],
-        subject: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        subject: `Your deployment for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
       }),
     })
   }

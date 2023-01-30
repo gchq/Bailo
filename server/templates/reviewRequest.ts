@@ -15,6 +15,7 @@ export interface ReviewRequestContext {
 
 export function html({ document, requestType }: ReviewRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -33,7 +34,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          model.currentMetadata.highLevelDetails.name
+          latestVersion.metadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -61,6 +62,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
 
 export function text({ document, requestType }: ReviewRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
@@ -68,7 +70,7 @@ export function text({ document, requestType }: ReviewRequestContext) {
   const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
-    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo.
+    You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo.
 
     RequestType: '${requestType}'
     Uploader: '${uploader ?? requester}'
@@ -80,9 +82,10 @@ export function text({ document, requestType }: ReviewRequestContext) {
 
 export function subject({ document }: ReviewRequestContext) {
   const model = document.model as ModelDoc
+  const latestVersion = model.latestVersion as VersionDoc
 
   return dedent(`
-    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo
+    You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo
   `)
 }
 

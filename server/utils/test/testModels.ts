@@ -9,6 +9,7 @@ export const deploymentUuid = 'test-deployment'
 export const requesterId = new ObjectId()
 export const modelId = new ObjectId()
 export const modelUuid = 'test-model'
+export const versionId = new ObjectId()
 
 export const uploadData: any = {
   schemaRef: 'test-schema3',
@@ -85,6 +86,7 @@ export const uploadSchema2: any = {
 }
 
 export const testVersion: any = {
+  _id: versionId,
   model: modelId,
   version: '1',
   metadata: {
@@ -147,7 +149,7 @@ export const testModel: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: modelUuid,
-  currentMetadata: uploadData,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -156,7 +158,7 @@ export const testModel2: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test2',
-  currentMetadata: uploadData,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }

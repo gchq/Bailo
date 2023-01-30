@@ -61,7 +61,7 @@ export interface Model {
 
   versions: Array<Types.ObjectId>
 
-  currentMetadata: ModelMetadata
+  latestVersion: ModelMetadata | Types.ObjectId
 }
 
 export interface LogStatement {

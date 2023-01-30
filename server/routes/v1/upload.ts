@@ -154,7 +154,7 @@ export const postUpload = [
         uuid: `${name}-${nanoid()}`,
 
         versions: [],
-        currentMetadata: metadata,
+        latestVersion: metadata,
       })
     }
 
@@ -182,7 +182,7 @@ export const postUpload = [
     req.log.info({ code: 'created_model_version', version }, 'Created model version')
 
     model.versions.push(version._id)
-    model.currentMetadata = metadata
+    model.latestVersion = version._id
 
     // Find all existing deployments for this model and update their versions array
     await updateDeploymentVersions(req.user, model._id, version)

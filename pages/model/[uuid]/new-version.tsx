@@ -64,7 +64,7 @@ function Upload() {
         },
       },
       [],
-      cModel.currentMetadata
+      cModel.latestVersion
     )
 
     steps.push(
