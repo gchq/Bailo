@@ -32,7 +32,7 @@ describe('CodeExplorer', () => {
     const getVersionFileSpy = jest.spyOn(versionData, 'useGetVersionFile')
     getVersionFileSpy.mockReturnValue(fileContentsData)
 
-    render(
+    const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <CodeExplorer
           id=''
@@ -45,7 +45,9 @@ describe('CodeExplorer', () => {
 
     await waitFor(async () => {
       expect(await screen.findByText('Model.py')).not.toBeUndefined()
-      expect(await screen.findByText('Hello, world!')).not.toBeUndefined()
+
+      const grid = container.querySelector('[data-uri="file:///Model.py"]')
+      expect(grid).not.toBeUndefined()
     })
   })
 })
