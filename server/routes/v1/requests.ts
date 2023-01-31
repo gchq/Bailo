@@ -157,12 +157,12 @@ export const postRequestResponse = [
     if (user?.email) {
       await sendEmail({
         to: user.email,
-        ...reviewedRequest({
+        ...(await reviewedRequest({
           document,
           choice,
           requestType,
           reviewingUser,
-        }),
+        })),
       })
     }
 

@@ -10,10 +10,10 @@ export async function up() {
 
   logger.info({ count: models.length }, 'Processing models')
   for (const model of models) {
-    delete model.currentMetada
     const latestVersion = model.versions.reduce((a: VersionDoc, b: VersionDoc) => (a.ceatedAt > b.createdAt ? a : b))
     model.latestVersion = latestVersion._id
     model.markModified('latestVersion')
+    model.set('currentMetadata', undefined, { strict: false })
     await model.save()
   }
 }

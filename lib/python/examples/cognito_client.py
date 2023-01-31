@@ -71,8 +71,6 @@ model_card.highLevelDetails.
 """
 ## Update a single field
 now = datetime.datetime.now()
-model_card.currentMetadata.name = f"Called from update_model on {now}"
-model_card.currentMetadata.modelInASentence = "This is the updated model description"
 
 ## Validate the model card
 result = model_card.validate()

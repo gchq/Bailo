@@ -146,7 +146,7 @@ export const postUpload = [
 
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
-      model = await findModelByUuid(req.user, modelUuid)
+      model = await findModelByUuid(req.user, modelUuid, { populate: true })
     } else {
       // Save a new model, and add the uploaded version to its array
       model = await createModel(req.user, {

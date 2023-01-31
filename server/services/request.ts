@@ -143,10 +143,10 @@ async function createRequest({
         // we created a new request, send out a notification.
         await sendEmail({
           to: user.email,
-          ...reviewRequest({
+          ...(await reviewRequest({
             document,
             requestType,
-          }),
+          })),
         })
       }
     }

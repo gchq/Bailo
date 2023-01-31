@@ -2,6 +2,7 @@ import Logger from 'bunyan'
 import { Date, Types } from 'mongoose'
 import { Dispatch, SetStateAction } from 'react'
 import { UserDoc } from '../server/models/User'
+import { VersionDoc } from '../server/models/Version'
 
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
 export type { RequestDoc as Request } from '../server/models/Request'
@@ -61,7 +62,7 @@ export interface Model {
 
   versions: Array<Types.ObjectId>
 
-  latestVersion: ModelMetadata | Types.ObjectId
+  latestVersion: VersionDoc | Types.ObjectId
 }
 
 export interface LogStatement {

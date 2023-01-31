@@ -1,10 +1,11 @@
 import config from 'config'
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
+import { NotFound } from '../utils/result'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { RequestTypes } from '../models/Request'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
@@ -15,9 +16,13 @@ export interface ReviewedRequestContext {
   reviewingUser: string
 }
 
-export function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
+export async function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
-  const latestVersion = model.latestVersion as VersionDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -55,9 +60,14 @@ export function html({ document, requestType, choice, reviewingUser }: ReviewedR
   ).html
 }
 
-export function text({ document, requestType, choice }: ReviewedRequestContext) {
+export async function text({ document, requestType, choice }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
-  const latestVersion = model.latestVersion as VersionDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
+
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -72,19 +82,23 @@ export function text({ document, requestType, choice }: ReviewedRequestContext) 
   `)
 }
 
-export function subject({ document }: ReviewedRequestContext) {
+export async function subject({ document }: ReviewedRequestContext) {
   const model = document.model as ModelDoc
-  const latestVersion = model.latestVersion as VersionDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
 
   return dedent(`
     '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
   `)
 }
 
-export function reviewedRequest(context: ReviewedRequestContext) {
+export async function reviewedRequest(context: ReviewedRequestContext) {
   return {
-    html: html(context),
-    text: text(context),
-    subject: subject(context),
+    html: await html(context),
+    text: await text(context),
+    subject: await subject(context),
   }
 }

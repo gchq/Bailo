@@ -24,7 +24,7 @@ export const getModels = [
       throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await findModels(req.user, { filter: filter as string, type })
+    const models = await findModels(req.user, { filter: filter as string, type }, { populate: true })
 
     req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
 
@@ -39,7 +39,7 @@ export const getModelByUuid = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -118,7 +118,7 @@ export const getModelVersions = [
     const { logs } = req.query
     const showLogs = logs === 'true'
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)

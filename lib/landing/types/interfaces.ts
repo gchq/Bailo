@@ -1,6 +1,7 @@
 import Logger from 'bunyan'
 import { Date, Types } from 'mongoose'
 import { Dispatch, SetStateAction } from 'react'
+import { VersionDoc } from '../../../server/models/Version'
 import { UserDoc } from '../server/models/User'
 
 export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
@@ -62,7 +63,7 @@ export interface Model {
   parent: Types.ObjectId | undefined
   versions: Array<Types.ObjectId>
 
-  currentMetadata: ModelMetadata
+  latestVersion: Types.ObjectId | VersionDoc
 
   owner: Types.ObjectId
 }
