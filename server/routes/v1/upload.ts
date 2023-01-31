@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
+import { ObjectId } from 'mongodb'
 import { moveFile } from '../../utils/minio'
 import { createFileRef } from '../../utils/multer'
 import { updateDeploymentVersions } from '../../services/deployment'
@@ -154,7 +155,8 @@ export const postUpload = [
         uuid: `${name}-${nanoid()}`,
 
         versions: [],
-        latestVersion: metadata,
+        // Temporarily set a new ObjectId to satisfy the type, then override below
+        latestVersion: new ObjectId(),
       })
     }
 
