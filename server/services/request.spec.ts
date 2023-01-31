@@ -4,7 +4,7 @@ import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
 import RequestModel, { RequestTypes } from '../models/Request'
 import UserModel from '../models/User'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
 import * as emailService from '../utils/smtp'
 import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
@@ -103,6 +103,7 @@ describe('test request service', () => {
     await UserModel.create(testManager)
     await ModelModel.create(testModel)
     await RequestModel.create(testRequest)
+    await VersionModel.create(versionData)
   })
 
   test('that we can create a deployment request object', async () => {
