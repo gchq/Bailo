@@ -26,13 +26,12 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
 import { Elements } from 'react-flow-renderer'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import { useGetModelVersions } from '@/data/model'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { ModelUploadType } from '@/types/interfaces'
-import { VersionDoc } from '../../server/models/Version'
 import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -113,6 +112,22 @@ export default function Deployment() {
   const theme = useTheme()
   const sendNotification = useNotification()
 
+  const versionOptions = useMemo(() => {
+    if (!versions) return []
+
+    return versions
+      .filter(
+        (version) =>
+          version.metadata.buildOptions.uploadType === ModelUploadType.Docker ||
+          version.metadata.buildOptions.uploadType === ModelUploadType.Zip
+      )
+      .map((version) => (
+        <MenuItem value={version.version} key={`version-${version.version}`}>
+          {version.version}
+        </MenuItem>
+      ))
+  }, [versions])
+
   useEffect(() => {
     if (deployment && uiConfig) {
       const { modelID } = deployment.metadata.highLevelDetails
@@ -156,7 +171,7 @@ export default function Deployment() {
   }
 
   const onSelectedTagChange = (event: SelectChangeEvent) => {
-    setSelectedImageTag(event.target.value as string)
+    setSelectedImageTag(event.target.value)
   }
 
   const copyDeploymentCardToClipboard = () => {
@@ -302,17 +317,7 @@ export default function Deployment() {
             <Stack justifyContent='flex-start' alignItems='center' direction='row' spacing={2} sx={{ m: 2 }}>
               <Typography>Select a version</Typography>
               <Select value={selectedImageTag} label='Selected version' onChange={onSelectedTagChange}>
-                {versions
-                  .filter(
-                    (version: VersionDoc) =>
-                      version.metadata.buildOptions.uploadType === ModelUploadType.Docker ||
-                      version.metadata.buildOptions.uploadType === ModelUploadType.Zip
-                  )
-                  .map((version: VersionDoc) => (
-                    <MenuItem value={version.version} key={`version-${version.version}`}>
-                      {version.version}
-                    </MenuItem>
-                  ))}
+                {versionOptions}
               </Select>
             </Stack>
             <DialogContentText sx={{ p: 2 }}>
