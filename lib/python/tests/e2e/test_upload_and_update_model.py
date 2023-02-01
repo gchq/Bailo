@@ -8,7 +8,6 @@ os.environ["BAILO_URL"] = "http://localhost:8080/api/v1"
 
 
 def test_upload_and_update_model():
-
     load_dotenv()
 
     ### Configure client based on local secrets
