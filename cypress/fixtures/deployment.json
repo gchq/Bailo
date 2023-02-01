@@ -3,8 +3,7 @@
     "endDate": {
       "hasEndDate": false
     },
-    "name": "Test Deployment",
-    "initialVersionRequested": "v1.0"
+    "name": "Test Deployment"
   },
   "contacts": {
     "owner": [{ "kind": "user", "id": "user" }]

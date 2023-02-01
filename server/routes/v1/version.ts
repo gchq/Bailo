@@ -9,7 +9,6 @@ import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
 import { removeVersionFromModel } from '../../services/model'
-import { deleteDeploymentsByVersion } from '../../services/deployment'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -191,11 +190,7 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    await Promise.all([
-      deleteApprovalsByVersion(user, version),
-      deleteDeploymentsByVersion(user, version),
-      removeVersionFromModel(user, version),
-    ])
+    await Promise.all([deleteApprovalsByVersion(user, version), removeVersionFromModel(user, version)])
 
     await version.delete(user._id)
 

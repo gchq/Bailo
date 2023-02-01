@@ -10,21 +10,15 @@ import { sendEmail } from '../utils/smtp'
 import { getUserByInternalId } from './user'
 import { UserDoc } from '../models/User'
 
-export async function createDeploymentApprovals({
-  version,
-  deployment,
-}: {
-  version: VersionDoc
-  deployment: DeploymentDoc
-}) {
-  const managers = await parseEntityList(version.metadata.contacts.manager)
+export async function createDeploymentApprovals({ deployment }: { deployment: DeploymentDoc }) {
+  const managers = await parseEntityList(deployment.metadata.contacts.owner)
 
   if (!managers.valid) {
-    throw BadReq({ managers: version.metadata.contacts.manager }, `Invalid manager: ${managers.reason}`)
+    throw BadReq({ managers: deployment.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
   }
 
   return createDeploymentApproval({
-    approvers: version.metadata.contacts.manager,
+    approvers: deployment.metadata.contacts.owner,
     deployment,
     approvalType: ApprovalTypes.Manager,
   })
