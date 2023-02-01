@@ -1,9 +1,9 @@
 dependencies:
 - name: minio
-  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-  version: 10.0.4
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.10.26
 - name: mongodb
-  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-  version: 10.31.5
-digest: sha256:4581a09c682a6c2ff750cab993e75dd85240f0e1f55c2bad586e38f540718b26
-generated: "2022-12-23T19:27:49.969950223Z"
+  repository: https://charts.bitnami.com/bitnami
+  version: 13.6.3
+digest: sha256:64c276f9a8b65cebb8cc62c3d6969559f6c432137dcd912dafe056d4265849e8
+generated: "2023-01-19T15:48:16.670072018Z"

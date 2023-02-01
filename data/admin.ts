@@ -41,7 +41,7 @@ export function useGetAppLogs({
   if (approvalId) group = `/approval/${approvalId}`
 
   const { data, error, mutate } = useSWR<{ logs: Array<LogEntry> }>(
-    disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query)}`,
+    disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query, { indices: false })}`,
     fetcher
   )
 
