@@ -4,8 +4,8 @@ import { Approval } from '../types/interfaces'
 import { fetcher } from '../utils/fetcher'
 
 export type ApprovalCategory = 'Upload' | 'Deployment'
-export type ReviewFilterType = 'user' | 'archived'
-export function useListApprovals(approvalCategory: ApprovalCategory, filter: ReviewFilterType) {
+export type ApprovalFilterType = 'user' | 'archived'
+export function useListApprovals(approvalCategory: ApprovalCategory, filter: ApprovalFilterType) {
   const { data, error, mutate } = useSWR<{
     approvals: Array<Approval>
   }>(

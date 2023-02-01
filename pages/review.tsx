@@ -19,15 +19,15 @@ import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
-import { ApprovalCategory, ReviewFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
+import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Approval } from '../types/interfaces'
 
 export default function Review() {
-  const [value, setValue] = useState<ReviewFilterType>('user')
+  const [value, setValue] = useState<ApprovalFilterType>('user')
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: ApprovalFilterType) => {
     setValue(newValue)
   }
 
@@ -37,9 +37,8 @@ export default function Review() {
         <Tab value='user' label='Approvals' />
         <Tab value='archived' label='Archived' />
       </Tabs>
-
-      <ApprovalList category='Upload' type={value} />
-      <ApprovalList category='Deployment' type={value} />
+      <ApprovalList category='Upload' filter={value} />
+      <ApprovalList category='Deployment' filter={value} />
     </Wrapper>
   )
 }
@@ -52,7 +51,7 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({ category, type }: { category: ApprovalCategory; type: ReviewFilterType }) {
+function ApprovalList({ category, filter }: { category: ApprovalCategory; filter: ApprovalFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
   const [approval, setApproval] = useState<Approval | undefined>(undefined)
@@ -61,7 +60,7 @@ function ApprovalList({ category, type }: { category: ApprovalCategory; type: Re
 
   const theme = useTheme()
 
-  const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, type)
+  const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
   const { mutateNumApprovals } = useGetNumApprovals()
 
   const managerStyling = {
