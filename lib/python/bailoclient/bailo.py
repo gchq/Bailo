@@ -37,7 +37,6 @@ class Bailo(Client):
         cognito_username: str = None,
         cognito_pwd: str = None,
     ):
-
         # if no config provided, try and load dotenv file
         if not any(
             [

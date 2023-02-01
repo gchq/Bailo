@@ -52,11 +52,6 @@
           "title": "The id of the model you wish to deploy",
           "type": "string"
         },
-        "initialVersionRequested": {
-          "title": "Minimum deployed version",
-          "type": "string",
-          "widget": "modelVersionSelector"
-        },
         "endDate": {
           "title": "End Date",
           "type": "object",
@@ -105,7 +100,7 @@
           "additionalProperties": false
         }
       },
-      "required": ["name", "initialVersionRequested", "endDate"],
+      "required": ["name", "endDate"],
       "additionalProperties": false
     },
 
