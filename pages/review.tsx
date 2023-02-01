@@ -234,7 +234,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
         </DialogActions>
       </Dialog>
       {approvals.length === 0 && (
-        <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approvals`} />
+        <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
       )}
     </Paper>
   )
