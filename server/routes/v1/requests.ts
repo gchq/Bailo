@@ -1,12 +1,13 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import { DeploymentDoc } from '../../models/Deployment'
+import ModelModel from '../../models/Model'
+import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates } from '../../../types/interfaces'
 import { RequestTypes } from '../../models/Request'
 import { VersionDoc } from '../../models/Version'
-import { findDeploymentById } from '../../services/deployment'
-import { getRequest, readNumRequests, readRequests } from '../../services/request'
+import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment'
+import { getRequest, readNumRequests, readRequests, requestDeploymentsForModelVersions } from '../../services/request'
 import { getUserByInternalId } from '../../services/user'
 import { findVersionById } from '../../services/version'
 import { reviewedRequest } from '../../templates/reviewedRequest'
@@ -120,6 +121,21 @@ export const postRequestResponse = [
 
       version[field] = choice
       await version.save()
+
+      if (version.managerApproved && version.reviewerApproved) {
+        const deployments = await DeploymentModel.find({ model: version.model })
+        deployments.forEach(async (deployment) => {
+          if (deployment.managerApproved) {
+            await (
+              await getDeploymentQueue()
+            ).add({
+              deploymentId: deployment._id,
+              userId,
+              version: version.version,
+            })
+          }
+        })
+      }
     } else if (request.deployment) {
       const deploymentDoc = request.deployment as DeploymentDoc
       const deployment = await findDeploymentById(req.user, deploymentDoc._id, { populate: true })
@@ -138,15 +154,14 @@ export const postRequestResponse = [
 
       await deployment.save()
 
-      if (choice === 'Accepted') {
-        // run deployment
-        req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
-        await (
-          await getDeploymentQueue()
-        ).add({
-          deploymentId: deployment._id,
-          userId,
-        })
+      if (choice === ApprovalStates.Accepted) {
+        requestDeploymentsForModelVersions(deploymentDoc, userId)
+      } else if (choice === ApprovalStates.Declined) {
+        const model = await ModelModel.findById(deployment.model)
+        if (!model) {
+          throw BadReq({ code: 'bad_request_type', deployment }, 'Unable to find model for deployment')
+        }
+        removeModelDeploymentsFromRegistry(model, deployment)
       }
     } else {
       throw BadReq({ code: 'bad_request_type', requestId: request._id }, 'Unable to determine request type')

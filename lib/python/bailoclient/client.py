@@ -76,7 +76,6 @@ class Client:
         authenticator: AuthenticationInterface = CognitoSRPAuthenticator,
         api: AuthorisedAPI = None,
     ):
-
         if isinstance(config, os.PathLike):
             self.config = load_config(config)
         elif isinstance(config, BailoConfig):

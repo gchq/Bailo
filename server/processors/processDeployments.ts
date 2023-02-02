@@ -17,7 +17,7 @@ export default async function processDeployments() {
     try {
       const startTime = new Date()
 
-      const { deploymentId, userId } = msg.payload
+      const { deploymentId, userId, version } = msg.payload
 
       const user = await getUserByInternalId(userId)
 
@@ -35,10 +35,10 @@ export default async function processDeployments() {
 
       const dlog = logger.child({ deploymentId: deployment._id })
 
-      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
+      const { modelID } = deployment.metadata.highLevelDetails
 
       const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
-      const tag = `${modelID}:${initialVersionRequested}`
+      const tag = `${modelID}:${version}`
       const externalImage = `${config.get('registry.host')}/${deployment.uuid}/${tag}`
 
       deployment.log('info', `Retagging image.  Current: internal/${tag}`)
@@ -50,8 +50,8 @@ export default async function processDeployments() {
       ])
       const authorisation = `Bearer ${token}`
 
-      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
-      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
+      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${version}`)
+      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${version}`, {
         headers: {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
@@ -83,7 +83,7 @@ export default async function processDeployments() {
             throw new Error(`Invalid status response: ${res.status}`)
           }
 
-          deployment.log('info', `Copied layer ${layer.digest}`)
+          deployment.log('info', `Copied layer ${layer.digest} for version ${version}`)
         })
       )
 
@@ -104,18 +104,15 @@ export default async function processDeployments() {
 
       deployment.log('info', `Copied manifest to new repository`)
 
-      const manifestPutRes = await fetch(
-        `${registry}/${deployment.uuid}/${modelID}/manifests/${initialVersionRequested}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(manifest),
-          headers: {
-            Authorization: authorisation,
-            'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
-          },
-          agent: httpsAgent,
-        } as RequestInit
-      )
+      const manifestPutRes = await fetch(`${registry}/${deployment.uuid}/${modelID}/manifests/${version}`, {
+        method: 'PUT',
+        body: JSON.stringify(manifest),
+        headers: {
+          Authorization: authorisation,
+          'Content-Type': 'application/vnd.docker.distribution.manifest.v2+json',
+        },
+        agent: httpsAgent,
+      } as RequestInit)
 
       if (manifestPutRes.status >= 400) {
         throw new Error(`Invalid status response in manifest put: ${manifestPutRes.status}`)

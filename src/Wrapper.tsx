@@ -9,6 +9,7 @@ import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
+import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
 import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
@@ -265,7 +266,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           </Toolbar>
           <StyledList>
             <Link href='/' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
+              <ListItem button selected={page === 'marketplace'}>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Marketplace' arrow placement='right'>
@@ -352,20 +353,37 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </ListItem>
             </Link>
             {currentUser && currentUser.roles.includes('admin') && (
-              <Link passHref href='/admin'>
-                <ListItem button selected={page === 'admin'}>
-                  <ListItemIcon data-test='adminLink'>
-                    {!open ? (
-                      <Tooltip arrow title='Admin' placement='right'>
+              <>
+                <Divider />
+                <Link passHref href='/admin'>
+                  <ListItem button selected={page === 'admin'}>
+                    <ListItemIcon data-test='adminLink'>
+                      {!open ? (
+                        <Tooltip arrow title='Admin' placement='right'>
+                          <AdminIcon />
+                        </Tooltip>
+                      ) : (
                         <AdminIcon />
-                      </Tooltip>
-                    ) : (
-                      <AdminIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary='Admin' />
-                </ListItem>
-              </Link>
+                      )}
+                    </ListItemIcon>
+                    <ListItemText primary='Admin' />
+                  </ListItem>
+                </Link>
+                <Link passHref href='/schemas'>
+                  <ListItem button selected={page === 'schemas'}>
+                    <ListItemIcon data-test='designSchemaLink'>
+                      {!open ? (
+                        <Tooltip arrow title='Schemas' placement='right'>
+                          <SchemaIcon />
+                        </Tooltip>
+                      ) : (
+                        <SchemaIcon />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText primary='Schemas' />
+                  </ListItem>
+                </Link>
+              </>
             )}
           </StyledList>
           <Divider />

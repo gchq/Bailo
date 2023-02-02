@@ -3,17 +3,16 @@ import * as Minio from 'minio'
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
-import { getDeploymentQueue } from '../../utils/queues'
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
-import { createDeploymentRequests } from '../../services/request'
+import { createDeploymentRequests, requestDeploymentsForModelVersions } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
-import { findVersionByName } from '../../services/version'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { parseEntityList, isUserInEntityList } from '../../utils/entity'
 import { validateSchema } from '../../utils/validateSchema'
+import { findVersionByName } from '../../services/version'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -92,20 +91,6 @@ export const postDeployment = [
 
     const uuid = `${name}-${nanoid()}`
 
-    const version = await findVersionByName(req.user, model._id, body.highLevelDetails.initialVersionRequested)
-    if (!version) {
-      throw NotFound(
-        {
-          code: 'version_not_found',
-          modelId: body.highLevelDetails.modelID,
-          version: body.highLevelDetails.initialVersionRequested,
-        },
-        `Unable to find version with name: '${body.highLevelDetails.initialVersionRequested}'`
-      )
-    }
-
-    const versionArray = [version._id]
-
     const owner = await parseEntityList(body.contacts.owner)
 
     if (!owner.valid) {
@@ -116,7 +101,6 @@ export const postDeployment = [
       schemaRef: body.schemaRef,
       uuid,
 
-      versions: versionArray,
       model: model._id,
       metadata: body,
 
@@ -128,17 +112,7 @@ export const postDeployment = [
 
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
-    if (!version) {
-      throw NotFound(
-        { code: 'version_not_found', version: body.highLevelDetails.initialVersionRequested },
-        `Unable to find version: '${body.highLevelDetails.initialVersionRequested}'`
-      )
-    }
-
-    req.log.info({ code: 'requesting_model_version', modelId: model._id, version }, 'Requesting model version')
-
     const managerRequest = await createDeploymentRequests({
-      version,
       deployment: await deployment.populate('model').execPopulate(),
     })
     req.log.info(
@@ -177,20 +151,6 @@ export const postUngovernedDeployment = [
 
     const uuid = `${name}-${nanoid()}`
 
-    const version = await findVersionByName(req.user, model._id, body.initialVersionRequested)
-    if (!version) {
-      throw NotFound(
-        {
-          code: 'version_not_found',
-          modelId: body.modelID,
-          version: body.initialVersionRequested,
-        },
-        `Unable to find version with name: '${body.initialVersionRequested}'`
-      )
-    }
-
-    const versionArray = [version._id]
-
     const owner = {
       kind: EntityKind.USER,
       id: req.user.id,
@@ -200,13 +160,11 @@ export const postUngovernedDeployment = [
       schemaRef: null,
       uuid,
 
-      versions: versionArray,
       model: model._id,
       metadata: {
         highLevelDetails: {
           name: body.name,
           modelID: model.uuid,
-          initialVersionRequested: body.initialVersionRequested,
         },
         contacts: {
           owner: [owner],
@@ -229,12 +187,7 @@ export const postUngovernedDeployment = [
 
     const userId = req.user._id
     req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
-    await (
-      await getDeploymentQueue()
-    ).add({
-      deploymentId: deployment._id,
-      userId,
-    })
+    requestDeploymentsForModelVersions(deployment, userId)
 
     res.json({
       uuid,
@@ -260,25 +213,10 @@ export const resetDeploymentApprovals = [
       )
     }
 
-    const version = await findVersionByName(
-      user,
-      deployment.model,
-      deployment.metadata.highLevelDetails.initialVersionRequested
-    )
-    if (!version) {
-      throw BadReq(
-        {
-          code: 'deployment_version_not_found',
-          deploymentId: deployment._id,
-          version: deployment.metadata.highLevelDetails.initialVersionRequested,
-        },
-        `Unable to find version for requested deployment: '${uuid}'`
-      )
-    }
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentRequests({ version, deployment: await deployment.populate('model').execPopulate() })
+    await createDeploymentRequests({ deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
   },
@@ -295,18 +233,18 @@ export const fetchRawModelFiles = [
       throw NotFound({ deploymentUuid: uuid }, `Unable to find deployment for uuid ${uuid}`)
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
-
-    if (!versionDocument) {
-      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
-    }
-
     if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
       const owners = deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')
       throw Unauthorised(
         { deploymentOwner: deployment.metadata.contacts.owner },
         `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`
       )
+    }
+
+    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+
+    if (!versionDocument) {
+      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
     }
 
     if (deployment.managerApproved !== 'Accepted') {

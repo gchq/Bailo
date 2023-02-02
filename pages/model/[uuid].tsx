@@ -72,8 +72,6 @@ function Model() {
   const theme = useTheme()
   const { uuid, tab, version: versionParameter }: { uuid?: string; tab?: TabOptions; version?: string } = router.query
 
-  const deploymentVersionsDisplayLimit = 5
-
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -544,28 +542,6 @@ function Model() {
                         label={owner.id}
                       />
                     ))}
-                  </Stack>
-                </Box>
-
-                <Box sx={{ mb: 1 }}>
-                  <Stack direction='row'>
-                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
-                      Associated versions:
-                    </Typography>
-                    {deployment.versions.length > 0 &&
-                      versions
-                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
-                        .slice(0, deploymentVersionsDisplayLimit)
-                        .map((filteredVersion) => (
-                          <Chip color='primary' key={filteredVersion.version} label={filteredVersion.version} />
-                        ))}
-                    {deployment.versions.length > 3 && (
-                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
-                        versions.filter((deploymentVersionForLimit) =>
-                          deployment.versions.includes(deploymentVersionForLimit._id)
-                        ).length - deploymentVersionsDisplayLimit
-                      } more`}</Typography>
-                    )}
                   </Stack>
                 </Box>
 

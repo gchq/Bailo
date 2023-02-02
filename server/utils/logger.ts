@@ -117,6 +117,7 @@ class MongoWriter {
     if (data.log === false) {
       return
     }
+    return
 
     const log = new LogModel(data)
     await log.save()

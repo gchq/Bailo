@@ -1,30 +1,26 @@
 import { Types } from 'mongoose'
+import ModelModel from '../models/Model'
+import { getDeploymentQueue } from '../utils/queues'
 import { getEntitiesForUser, getUserListFromEntityList, parseEntityList } from '../utils/entity'
 import { ApprovalStates, Request, Entity } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
 import RequestModel, { ApprovalTypes, RequestTypes } from '../models/Request'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import { reviewRequest } from '../templates/reviewRequest'
 import { BadReq } from '../utils/result'
 import { sendEmail } from '../utils/smtp'
 import { getUserByInternalId } from './user'
 import { UserDoc } from '../models/User'
 
-export async function createDeploymentRequests({
-  version,
-  deployment,
-}: {
-  version: VersionDoc
-  deployment: DeploymentDoc
-}) {
-  const managers = await parseEntityList(version.metadata.contacts.manager)
+export async function createDeploymentRequests({ deployment }: { deployment: DeploymentDoc }) {
+  const managers = await parseEntityList(deployment.metadata.contacts.owner)
 
   if (!managers.valid) {
-    throw BadReq({ managers: version.metadata.contacts.manager }, `Invalid manager: ${managers.reason}`)
+    throw BadReq({ managers: deployment.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
   }
 
   return createDeploymentRequest({
-    approvers: version.metadata.contacts.manager,
+    approvers: deployment.metadata.contacts.owner,
     deployment,
     approvalType: ApprovalTypes.Manager,
   })
@@ -243,4 +239,34 @@ export async function deleteRequestsByDeployment(user: UserDoc, deployment: Depl
     },
     user._id
   )
+}
+
+export async function requestDeploymentsForModelVersions(deployment: DeploymentDoc, userId: Types.ObjectId) {
+  const model = await ModelModel.findById(deployment.model)
+  if (!model) {
+    throw BadReq({ code: 'model_not_found', deployment }, `Could not find parent model for deployment'${deployment}'`)
+  }
+  const { versions } = model
+  if (!versions) {
+    throw BadReq(
+      { code: 'versions_not_found', deployment },
+      `Could not find versions for deployment'${deployment._id}'`
+    )
+  }
+  versions.forEach(async (versionId) => {
+    const versionDoc = await VersionModel.findById(versionId)
+    if (!versionDoc) {
+      throw BadReq(
+        { code: 'versions_not_found', deployment },
+        `Could not find version for deployment'${deployment._id}'`
+      )
+    }
+    await (
+      await getDeploymentQueue()
+    ).add({
+      deploymentId: deployment._id,
+      userId,
+      version: versionDoc.version,
+    })
+  })
 }

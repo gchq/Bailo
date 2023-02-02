@@ -388,7 +388,6 @@ function getDeploymentDefinition(populated: boolean) {
               date: '2022-11-16',
             },
             modelID: 'fasttext-language-identification-rjjic1',
-            initialVersionRequested: 'v1.099',
           },
           contacts: {
             requester: 'user',
@@ -853,7 +852,6 @@ function generateSpecification() {
                   },
                   name: 'Test Deployment',
                   modelID: 'test-model-abcde',
-                  initialVersionRequested: 'v1.0',
                 },
                 contacts: {
                   requester: 'user',
@@ -1108,6 +1106,39 @@ function generateSpecification() {
                 items: {
                   $ref: '#/definitions/Schema',
                 },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ['schema'],
+          description: 'Upload a new schema',
+          parameters: [
+            {
+              name: 'schema',
+              in: 'body',
+              description: 'Schema metadata',
+              required: true,
+              type: 'object',
+              default: {
+                name: '',
+                reference: '',
+                schema: {},
+                use: 'UPLOAD',
+              },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The name of the submitted schema.',
+              schema: {
+                type: 'string',
+              },
+            },
+            '409': {
+              description: 'Duplicated name or reference.',
+              schema: {
+                type: 'string',
               },
             },
           },
