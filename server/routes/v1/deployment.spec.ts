@@ -6,13 +6,13 @@ import SchemaModel from '../../models/Schema'
 import UserModel from '../../models/User'
 import VersionModel from '../../models/Version'
 import * as deploymentService from '../../services/deployment'
-import * as requestService from '../../services/request'
+import * as approvalService from '../../services/approval'
 import * as versionService from '../../services/version'
 import '../../utils/mockMongo'
 import {
   deploymentSchema,
   deploymentUuid,
-  managerRequest,
+  managerApproval,
   testDeployment,
   testManager,
   testModel,
@@ -57,8 +57,8 @@ describe('test deployment routes', () => {
   test('reset approvals for deployment with a given uuid', async () => {
     const versionMock = jest.spyOn(versionService, 'findVersionByName')
     versionMock.mockReturnValue(versionDoc)
-    const requestMock = jest.spyOn(requestService, 'createDeploymentRequests')
-    requestMock.mockImplementation()
+    const approvalMock = jest.spyOn(approvalService, 'createDeploymentApprovals')
+    approvalMock.mockImplementation()
     const res = await authenticatedPostRequest(`/api/v1/deployment/${deploymentUuid}/reset-approvals`)
     validateTestRequest(res)
     expect(res.body.uuid).toBe(deploymentUuid)
@@ -67,8 +67,8 @@ describe('test deployment routes', () => {
   test('that we can request a deployment', async () => {
     const mockValidation = jest.spyOn(validateSchemaUtil, 'validateSchema')
     mockValidation.mockReturnValue(null)
-    const requestMock = jest.spyOn(requestService, 'createDeploymentRequests')
-    requestMock.mockReturnValue(managerRequest)
+    const approvalMock = jest.spyOn(approvalService, 'createDeploymentApprovals')
+    approvalMock.mockReturnValue(managerApproval)
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
 
     validateTestRequest(res)

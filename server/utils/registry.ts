@@ -141,7 +141,7 @@ export async function copyDockerImage(
   })
 
   await Promise.all(
-    res.data.manifest.layers.map(async (layer: any) => {
+    res.data.layers.map(async (layer: any) => {
       await makeRegistryRequest<any>(registry, {
         path: `/${to.namespace}/${to.model}/blobs/uploads/?mount=${layer.digest}&from=${from.namespace}/${from.model}`,
         method: 'POST',

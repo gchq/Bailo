@@ -5,18 +5,18 @@ import qs from 'qs'
 import { Readable } from 'stream'
 
 type Response = 'Accepted' | 'Declined'
-class Request {
-  request: any
+class Approval {
+  approval: any
 
   api: API
 
-  constructor(api: API, request: any) {
-    this.request = request
+  constructor(api: API, approval: any) {
+    this.approval = approval
     this.api = api
   }
 
   respond(response: Response) {
-    return this.api.apiPost(`/request/${this.request._id}/respond`, {
+    return this.api.apiPost(`/approval/${this.approval._id}/respond`, {
       choice: response,
     })
   }
@@ -103,8 +103,8 @@ class Model {
 type ModelsType = 'favourites' | 'user' | 'all'
 type SchemaUse = 'UPLOAD' | 'DEPLOYMENT'
 
-type RequestUse = 'Upload' | 'Deployment'
-type RequestFilter = 'all' | 'user'
+type ApprovalCategory = 'Upload' | 'Deployment'
+type ApprovalFilter = 'all' | 'user'
 
 interface File {
   stream: any
@@ -212,19 +212,19 @@ export default class API {
     return new User(this, user)
   }
 
-  async getRequests(type: RequestUse, filter?: RequestFilter): Promise<Array<Request>> {
-    const { requests } = await this.apiGet(
-      `/requests?${qs.stringify({
-        type,
+  async getApprovals(approvalCategory: ApprovalCategory, filter?: ApprovalFilter): Promise<Array<Approval>> {
+    const { approvals } = await this.apiGet(
+      `/approvals?${qs.stringify({
+        approvalCategory,
         filter,
       })}`
     )
 
-    return requests.map((request) => new Request(this, request))
+    return approvals.map((approval) => new Approval(this, approval))
   }
 
-  async getRequestCount() {
-    const { count } = await this.apiGet(`/requests/count`)
+  async getApprovalCount() {
+    const { count } = await this.apiGet(`/approvals/count`)
 
     return count
   }
