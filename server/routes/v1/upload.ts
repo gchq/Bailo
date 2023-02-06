@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { ObjectId } from 'mongodb'
 import { moveFile } from '../../utils/minio'
 import { createFileRef } from '../../utils/multer'
-import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
 import { createVersionRequests } from '../../services/request'
 import { findSchemaByRef } from '../../services/schema'
@@ -185,9 +184,6 @@ export const postUpload = [
 
     model.versions.push(version._id)
     model.latestVersion = version._id
-
-    // Find all existing deployments for this model and update their versions array
-    await updateDeploymentVersions(req.user, model._id, version)
 
     await model.save()
 

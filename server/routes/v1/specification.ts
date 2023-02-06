@@ -388,7 +388,6 @@ function getDeploymentDefinition(populated: boolean) {
               date: '2022-11-16',
             },
             modelID: 'fasttext-language-identification-rjjic1',
-            initialVersionRequested: 'v1.099',
           },
           contacts: {
             requester: 'user',
@@ -853,7 +852,6 @@ function generateSpecification() {
                   },
                   name: 'Test Deployment',
                   modelID: 'test-model-abcde',
-                  initialVersionRequested: 'v1.0',
                 },
                 contacts: {
                   requester: 'user',
