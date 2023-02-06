@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-
 import { VersionDoc } from 'server/models/Version'
 import logger from '../utils/logger'
 import ModelModel from '../models/Model'
