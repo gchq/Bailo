@@ -110,12 +110,12 @@ export const getItemLogs = [
       buildId = req.params.buildId
     }
 
-    let requestId
-    if (req.params.requestId) {
-      requestId = req.params.requestId
+    let approvalId
+    if (req.params.approvalId) {
+      approvalId = req.params.approvalId
     }
 
-    const logs = await getLogs({ after, before, level, search, isRegex, buildId, requestId })
+    const logs = await getLogs({ after, before, level, search, isRegex, buildId, approvalId })
 
     res.json({
       logs: await logs.toArray(),

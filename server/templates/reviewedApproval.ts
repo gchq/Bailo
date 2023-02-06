@@ -4,19 +4,19 @@ import mjml2html from 'mjml'
 import { NotFound } from '../utils/result'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
-import { RequestTypes } from '../models/Request'
+import { ApprovalCategory } from '../models/Approval'
 import VersionModel, { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
-export interface ReviewedRequestContext {
+export interface ReviewedApprovalContext {
   document: VersionDoc | DeploymentDoc
   choice: string
-  requestType: RequestTypes
+  approvalCategory: ApprovalCategory
   reviewingUser: string
 }
 
-export async function html({ document, requestType, choice, reviewingUser }: ReviewedRequestContext) {
+export async function html({ document, approvalCategory, choice, reviewingUser }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
   const latestVersion = await VersionModel.findById(model.latestVersion)
 
@@ -31,7 +31,7 @@ export async function html({ document, requestType, choice, reviewingUser }: Rev
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${requestType.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">Your ${approvalCategory.toLowerCase()} request has been reviewed by ${reviewingUser}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -43,8 +43,8 @@ export async function html({ document, requestType, choice, reviewingUser }: Rev
         }</mj-text>
       </mj-column>
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Request Type</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${requestType}</mj-text>
+        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approvalCategory}</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Response</strong></mj-text>
@@ -53,14 +53,14 @@ export async function html({ document, requestType, choice, reviewingUser }: Rev
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="100%">
-        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${requestType}</mj-button>
+        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${approvalCategory}</mj-button>
       </mj-column>
     </mj-section>
   `)
   ).html
 }
 
-export async function text({ document, requestType, choice }: ReviewedRequestContext) {
+export async function text({ document, approvalCategory, choice }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
   const latestVersion = await VersionModel.findById(model.latestVersion)
 
@@ -75,14 +75,14 @@ export async function text({ document, requestType, choice }: ReviewedRequestCon
   return dedent(`
     '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
 
-    Request Type: '${requestType}'
+    Approval Category: '${approvalCategory}'
     Response: '${choice}'
 
-    Open ${requestType}: ${requestUrl}
+    Open ${approvalCategory}: ${requestUrl}
   `)
 }
 
-export async function subject({ document }: ReviewedRequestContext) {
+export async function subject({ document }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
   const latestVersion = await VersionModel.findById(model.latestVersion)
 
@@ -95,7 +95,7 @@ export async function subject({ document }: ReviewedRequestContext) {
   `)
 }
 
-export async function reviewedRequest(context: ReviewedRequestContext) {
+export async function reviewedApproval(context: ReviewedApprovalContext) {
   return {
     html: await html(context),
     text: await text(context),

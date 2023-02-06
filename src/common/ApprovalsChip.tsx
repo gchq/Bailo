@@ -42,7 +42,7 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
     return '#4c8a4c'
   }, [numApprovals, totalApprovals, theme])
 
-  const getRequestResponses = useCallback((approval: Approval, index: number) => {
+  const getApprovalResponses = useCallback((approval: Approval, index: number) => {
     let Icon
     let secondaryText = ''
     const primaryText = approval.reviewers.map((reviewer) => reviewer.id).join(', ')
@@ -68,9 +68,9 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
     )
   }, [])
 
-  const requestResponseListItems = useMemo(
-    () => approvals.map((approval, index) => getRequestResponses(approval, index)),
-    [approvals, getRequestResponses]
+  const approvalResponseListItems = useMemo(
+    () => approvals.map((approval, index) => getApprovalResponses(approval, index)),
+    [approvals, getApprovalResponses]
   )
 
   const handleApprovalsClicked = (event: MouseEvent<HTMLDivElement>) => {
@@ -100,7 +100,7 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
         data-test='approvalsChip'
       />
       <Menu id='model-approvals-menu' anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <List dense>{requestResponseListItems}</List>
+        <List dense>{approvalResponseListItems}</List>
       </Menu>
     </Stack>
   )

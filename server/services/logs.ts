@@ -7,8 +7,8 @@ export function getLogType(type: string): LogType | undefined {
   switch (type) {
     case 'build':
       return LogType.Build
-    case 'request':
-      return LogType.Request
+    case 'approval':
+      return LogType.Approval
     case 'misc':
       return LogType.Misc
     default:
@@ -25,8 +25,8 @@ function transformTypeToMongoQuery(types: Array<LogType>) {
       case LogType.Build:
         typeFilter.push({ code: 'starting_model_build' })
         break
-      case LogType.Request:
-        typeFilter.push({ code: 'request' })
+      case LogType.Approval:
+        typeFilter.push({ code: 'approval' })
         break
       case LogType.Misc:
         typeFilter.push({
@@ -55,9 +55,9 @@ export interface GetLogsArgs {
   search?: string
   isRegex: boolean
   buildId?: string
-  requestId?: string
+  approvalId?: string
 }
-export async function getLogs({ after, before, level, types, search, isRegex, buildId, requestId }: GetLogsArgs) {
+export async function getLogs({ after, before, level, types, search, isRegex, buildId, approvalId }: GetLogsArgs) {
   await connectToMongoose()
 
   const { db } = mongoose.connection
@@ -76,9 +76,9 @@ export async function getLogs({ after, before, level, types, search, isRegex, bu
     }
   }
 
-  if (requestId) {
+  if (approvalId) {
     typeFilter = {
-      id: requestId,
+      id: approvalId,
     }
   }
 

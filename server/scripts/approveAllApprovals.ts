@@ -1,11 +1,11 @@
 import Bailo from '../../lib/node'
 import logger from '../utils/logger'
 
-async function approveAllRequests() {
+async function approveAllApprovals() {
   const api = new Bailo('http://localhost:8080/api/v1')
 
-  const deployments = await api.getRequests('Deployment')
-  const uploads = await api.getRequests('Upload')
+  const deployments = await api.getApprovals('Deployment')
+  const uploads = await api.getApprovals('Upload')
 
   for (const deployment of deployments) {
     const response = await deployment.respond('Accepted')
@@ -17,8 +17,8 @@ async function approveAllRequests() {
     logger.info(response, 'Responded to upload')
   }
 
-  const numRequests = uploads.length + deployments.length
-  logger.info({ numRequests }, `Approved all requests`)
+  const numApprovals = uploads.length + deployments.length
+  logger.info({ numApprovals }, `Approved all approvals`)
 }
 
-approveAllRequests()
+approveAllApprovals()

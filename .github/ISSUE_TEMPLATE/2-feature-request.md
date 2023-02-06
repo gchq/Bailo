@@ -15,7 +15,7 @@ Please describe the problem you are trying to solve
 
 ## Describe the solution you'd like
 
-Please describe the desired behavior
+Please describe the desired behaviour
 
 ## Describe alternatives you've considered
 
