@@ -3,17 +3,17 @@ import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
-import { RequestTypes } from '../models/Request'
+import { ApprovalCategory } from '../models/Approval'
 import { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
-export interface ReviewRequestContext {
+export interface ReviewApprovalContext {
   document: VersionDoc | DeploymentDoc
-  requestType: RequestTypes
+  approvalCategory: ApprovalCategory
 }
 
-export function html({ document, requestType }: ReviewRequestContext) {
+export function html({ document, approvalCategory }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
 
   const { requester, uploader } = document.metadata.contacts
@@ -25,7 +25,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
     wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${requestType.toLowerCase()}.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${approvalCategory.toLowerCase()}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -37,8 +37,8 @@ export function html({ document, requestType }: ReviewRequestContext) {
         }</mj-text>
       </mj-column>
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Request Type</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${requestType}</mj-text>
+        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approvalCategory}</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
@@ -49,7 +49,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
-        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${requestType}</mj-button>
+        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${requestUrl}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${approvalCategory}</mj-button>
       </mj-column>
       <mj-column width="50%">
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${base}/review" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="12px">See Reviews</mj-button>
@@ -59,7 +59,7 @@ export function html({ document, requestType }: ReviewRequestContext) {
   ).html
 }
 
-export function text({ document, requestType }: ReviewRequestContext) {
+export function text({ document, approvalCategory }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
 
   const { requester, uploader } = document.metadata.contacts
@@ -70,15 +70,15 @@ export function text({ document, requestType }: ReviewRequestContext) {
   return dedent(`
     You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo.
 
-    RequestType: '${requestType}'
+    Approval Category: '${approvalCategory}'
     Uploader: '${uploader ?? requester}'
 
-    Open ${requestType}: ${requestUrl}
+    Open ${approvalCategory}: ${requestUrl}
     See Reviews: ${base}/review
   `)
 }
 
-export function subject({ document }: ReviewRequestContext) {
+export function subject({ document }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
 
   return dedent(`
@@ -86,7 +86,7 @@ export function subject({ document }: ReviewRequestContext) {
   `)
 }
 
-export function reviewRequest(context: ReviewRequestContext) {
+export function reviewApproval(context: ReviewApprovalContext) {
   return {
     html: html(context),
     text: text(context),

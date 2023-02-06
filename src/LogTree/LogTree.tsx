@@ -9,8 +9,8 @@ function getLogType(log: LogEntry): LogType {
   switch (log.code) {
     case 'starting_model_build':
       return LogType.Build
-    case 'request':
-      return LogType.Request
+    case 'approval':
+      return LogType.Approval
     default:
       return LogType.Misc
   }
@@ -25,7 +25,7 @@ export default function LogTree({ query }: LogTreeProps): ReactElement {
 
   const { logs } = useGetAppLogs({
     ...query,
-    filter: ['request', 'build', 'misc'],
+    filter: ['approval', 'build', 'misc'],
   })
 
   if (!logs || !uiConfig) {

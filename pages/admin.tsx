@@ -16,7 +16,7 @@ export default function Admin(): ReactElement {
   const [logFilters, setLogFilters] = useState<LogFilters>({
     level: LogLevel.TRACE,
     buildId: '',
-    requestId: '',
+    approvalId: '',
     search: '',
     isRegex: false,
   })

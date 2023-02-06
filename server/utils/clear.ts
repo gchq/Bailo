@@ -1,7 +1,7 @@
 import config from 'config'
 import DeploymentModel from '../models/Deployment'
 import ModelModel from '../models/Model'
-import RequestModel from '../models/Request'
+import ApprovalModel from '../models/Approval'
 import UserModel from '../models/User'
 import VersionModel from '../models/Version'
 import MigrationModel from '../models/Migration'
@@ -16,7 +16,7 @@ export async function clearStoredData() {
   await Promise.all([
     // delete all files from mongo
     DeploymentModel.deleteMany({}),
-    RequestModel.deleteMany({}),
+    ApprovalModel.deleteMany({}),
     ModelModel.deleteMany({}),
     UserModel.deleteMany({}),
     VersionModel.deleteMany({}),

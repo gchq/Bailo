@@ -34,7 +34,7 @@ import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from './Link'
-import { useGetNumRequests } from '../data/requests'
+import { useGetNumApprovals } from '../data/approvals'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
 import Banner from './Banner'
@@ -109,7 +109,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
   const { toggleDarkMode } = useContext(ThemeModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  const { numRequests, isNumRequestsLoading } = useGetNumRequests()
+  const { numApprovals, isNumApprovalsLoading } = useGetNumApprovals()
   const { currentUser } = useGetCurrentUser()
 
   const [pageTopStyling, setPageTopStyling] = useState({})
@@ -312,7 +312,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <Badge badgeContent={isNumRequestsLoading ? 0 : numRequests} color='secondary'>
+                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
                         <ListAltIcon />
                       </Badge>
                     </Tooltip>

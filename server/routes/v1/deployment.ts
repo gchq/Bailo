@@ -6,7 +6,7 @@ import { customAlphabet } from 'nanoid'
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment'
 import { findModelByUuid } from '../../services/model'
-import { createDeploymentRequests, requestDeploymentsForModelVersions } from '../../services/request'
+import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval'
 import { findSchemaByRef } from '../../services/schema'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
@@ -112,11 +112,11 @@ export const postDeployment = [
 
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
-    const managerRequest = await createDeploymentRequests({
+    const managerApproval = await createDeploymentApprovals({
       deployment: await deployment.populate('model').execPopulate(),
     })
     req.log.info(
-      { code: 'created_deployment', deploymentId: deployment._id, request: managerRequest._id, uuid },
+      { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
       'Successfully created deployment'
     )
 
@@ -216,7 +216,7 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentRequests({ deployment: await deployment.populate('model').execPopulate() })
+    await createDeploymentApprovals({ deployment: await deployment.populate('model').execPopulate() })
 
     return res.json(deployment)
   },

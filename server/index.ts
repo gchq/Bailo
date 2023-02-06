@@ -27,7 +27,7 @@ import {
   getModelAccess,
 } from './routes/v1/model'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import { getNumRequests, getRequests, postRequestResponse } from './routes/v1/requests'
+import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals'
 import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
 import { getUiConfig } from './routes/v1/uiConfig'
@@ -103,9 +103,9 @@ server.post('/api/v1/user/token', ...postRegenerateToken)
 server.post('/api/v1/user/favourite/:id', ...favouriteModel)
 server.post('/api/v1/user/unfavourite/:id', ...unfavouriteModel)
 
-server.get('/api/v1/requests', ...getRequests)
-server.get('/api/v1/requests/count', ...getNumRequests)
-server.post('/api/v1/request/:id/respond', ...postRequestResponse)
+server.get('/api/v1/approvals', ...getApprovals)
+server.get('/api/v1/approvals/count', ...getNumApprovals)
+server.post('/api/v1/approval/:id/respond', ...postApprovalResponse)
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
@@ -115,7 +115,7 @@ server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
-server.get('/api/v1/admin/logs/request/:requestId', ...getItemLogs)
+server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
 server.use('/api', expressErrorHandler)
 
