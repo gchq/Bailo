@@ -117,7 +117,7 @@ describe('test approval service', () => {
     getUserMock.mockReturnValue(testUser)
     const emailMock = jest.spyOn(emailService, 'sendEmail')
     emailMock.mockImplementation()
-    const approval = await createDeploymentApprovals({ version, deployment })
+    const approval = await createDeploymentApprovals({ deployment })
     expect(approval).not.toBe(undefined)
     expect(approval.approvalType).toBe('Manager')
     expect(approval.approvalCategory).toBe('Deployment')
