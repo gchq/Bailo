@@ -196,7 +196,7 @@ export const postApprovalResponse = [
         if (!model) {
           throw BadReq({ code: 'bad_request_type', deployment }, 'Unable to find model for deployment')
         }
-        removeModelDeploymentsFromRegistry(model, deployment)
+        await removeModelDeploymentsFromRegistry(model, deployment)
       }
     } else {
       throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
