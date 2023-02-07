@@ -31,7 +31,7 @@ describe('Model with code and binary files', () => {
     cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
     cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip', { force: true })
 
-    cy.log('Inputting deployment metadata')
+    cy.log('Inputting model metadata')
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
@@ -57,7 +57,9 @@ describe('Model with code and binary files', () => {
     cy.get('body').type('{esc}')
 
     cy.log('Checking model has been built')
+    cy.screenshot('before build log')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
+    cy.screenshot('after build log')
     cy.get('[data-test=terminalLog] > :last-child', { timeout: 400000 }).should(
       'contain',
       'Successfully completed build'
