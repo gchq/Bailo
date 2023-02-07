@@ -4,7 +4,7 @@ import { UserDoc } from '../models/User'
 import VersionModel, { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
-import { createSerializer, SerializerOptions } from '../utils/logger'
+import { createSerializer, SerializerOptions } from '../utils/serializers'
 import { BadReq, Forbidden } from '../utils/result'
 import { serializedModelFields } from './model'
 
