@@ -69,6 +69,8 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
 
+    cy.wait(10000)
+
     cy.log('Approving model')
     cy.get(`[data-test=approveButtonManager${modelUuid}]`).click({ force: true })
     cy.get('[data-test=confirmButton]').click()
