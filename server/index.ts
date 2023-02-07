@@ -11,6 +11,7 @@ import {
   getUserDeployments,
   getDeployment,
   postDeployment,
+  postUngovernedDeployment,
   resetDeploymentApprovals,
   getDeploymentAccess,
 } from './routes/v1/deployment'
@@ -75,6 +76,7 @@ server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
 server.get('/api/v1/model/:uuid/access', ...getModelAccess)
 
 server.post('/api/v1/deployment', ...postDeployment)
+server.post('/api/v1/deployment/ungoverned', ...postUngovernedDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)

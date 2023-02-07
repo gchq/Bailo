@@ -2,16 +2,15 @@ import { castArray } from 'lodash'
 import https from 'https'
 import config from 'config'
 import { deleteImageTag } from '../utils/registry'
-import { ModelId } from '../../types/interfaces'
+import { ModelId, ApprovalStates } from '../../types/interfaces'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
 import VersionModel, { VersionDoc } from '../models/Version'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
-import { createSerializer, SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 import { Forbidden } from '../utils/result'
-import { serializedModelFields } from './model'
 import { getUserByInternalId } from './user'
 import { getEntitiesForUser } from '../utils/entity'
 
@@ -31,7 +30,7 @@ export function serializedDeploymentFields(): SerializerOptions {
   return {
     mandatory: ['_id', 'uuid', 'name'],
     optional: [],
-    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
+    serializable: [],
   }
 }
 
@@ -107,11 +106,14 @@ export async function markDeploymentBuilt(_id: ModelId) {
 }
 
 interface CreateDeployment {
-  schemaRef: string
+  schemaRef: string | null
   uuid: string
 
   model: ModelId
   metadata: any
+
+  managerApproved?: ApprovalStates
+  ungoverned?: boolean
 
   owner: ModelId
 }

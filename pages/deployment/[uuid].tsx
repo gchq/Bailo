@@ -32,6 +32,8 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import { useGetModelVersions } from '@/data/model'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { ModelUploadType } from '@/types/interfaces'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
 import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -314,12 +316,14 @@ export default function Deployment() {
         <DialogTitle sx={{ backgroundColor: theme.palette.container.main }}>Pull from Docker</DialogTitle>
         {versions && (
           <DialogContent>
-            <Stack justifyContent='flex-start' alignItems='center' direction='row' spacing={2} sx={{ m: 2 }}>
-              <Typography>Select a version</Typography>
-              <Select value={selectedImageTag} label='Selected version' onChange={onSelectedTagChange}>
-                {versionOptions}
-              </Select>
-            </Stack>
+            <Box sx={{ p: 2 }}>
+              <FormControl sx={{ minWidth: 180 }}>
+                <InputLabel>Select a version</InputLabel>
+                <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
+                  {versionOptions}
+                </Select>
+              </FormControl>
+            </Box>
             <DialogContentText sx={{ p: 2 }}>
               {selectedImageTag && (
                 <Box>

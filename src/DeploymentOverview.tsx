@@ -29,7 +29,17 @@ function DeploymentOverview({ deployment }: DeploymentOverviewProps) {
         </Box>
       </Grid>
       <Grid item xs={12} sm={8}>
-        <MetadataDisplay item={deployment.metadata} tabsDisplaySequentially use='DEPLOYMENT' />
+        {!deployment.ungoverned && (
+          <MetadataDisplay item={deployment.metadata} tabsDisplaySequentially use='DEPLOYMENT' />
+        )}
+        {deployment.ungoverned && (
+          <Box
+            sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }}
+            data-test='metadataDisplay'
+          >
+            This is an ungoverned deployment and does not contain any additional metadata.
+          </Box>
+        )}
       </Grid>
     </Grid>
   )
