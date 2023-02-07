@@ -1,13 +1,13 @@
 from subprocess import CalledProcessError, SubprocessError
 import tempfile
-from bailoclient.model_handlers.bundler import Bundler
+from bailoclient.model_handlers.model_bundler import Bundler
 from bailoclient.utils.exceptions import DirectoryNotFound
-from .resources import requirements
 import pytest
 import os
 from importlib_resources import files
 from unittest.mock import patch
 import subprocess
+from tests.resources import requirements
 
 
 @pytest.fixture
@@ -36,7 +36,10 @@ def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmp
     assert os.path.exists(expected_output)
 
 
-@patch("bailoclient.bundler.Bundler._Bundler__get_output_dir", return_value="data/")
+@patch(
+    "bailoclient.model_handlers.model_bundler.Bundler._Bundler__get_output_dir",
+    return_value="data/",
+)
 def test_zip_directory_creates_zipfile_at_the_output_directory(
     mock_output_dir, bundler, tmpdir
 ):
@@ -109,7 +112,10 @@ def test_generate_requirements_file_raises_error_if_output_directory_does_not_al
         bundler.generate_requirements_file(python_file, output_path)
 
 
-@patch("bailoclient.bundler.subprocess.run", side_effect=SubprocessError)
+@patch(
+    "bailoclient.model_handlers.model_bundler.subprocess.run",
+    side_effect=SubprocessError,
+)
 def test_generate_requirements_file_raises_error_if_subprocess_unexpectedly_fails(
     mock_subprocess_run, bundler, tmpdir
 ):

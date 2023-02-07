@@ -18,8 +18,7 @@ from bailoclient.utils.exceptions import (
 from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator, NullAuthenticator
 from .client import Client
 from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
-from .model_handlers.bundler import Bundler
-from .model_handlers.loader import Loader
+from .model_handlers import Bundler, Loader
 
 logger = logging.getLogger(__name__)
 

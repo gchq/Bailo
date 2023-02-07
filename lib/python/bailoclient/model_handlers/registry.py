@@ -1,6 +1,6 @@
 from bailoclient.utils.enums import ModelFlavour
-from ..model_handlers.bundler import Bundler
-from ..model_handlers.loader import Loader
+from .model_bundler import Bundler
+from .model_loader import Loader
 
 
 def bundler(flavour: ModelFlavour):
@@ -17,6 +17,8 @@ def bundler(flavour: ModelFlavour):
             func (Callable): Function to register
         """
         Bundler.bundler_functions[flavour.value] = func
+
+        return func
 
     return register_bundler
 
@@ -36,6 +38,8 @@ def loader(flavour: ModelFlavour):
         """
         Loader.model_loaders[flavour.value] = func
 
+        return func
+
     return register_loader
 
 
@@ -53,5 +57,7 @@ def template(flavour: ModelFlavour):
             func (Callable): Function to register (function should return template path)
         """
         Bundler.model_py_templates[flavour.value] = func()
+
+        return func()
 
     return register_template
