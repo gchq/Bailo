@@ -147,12 +147,12 @@ export const postApprovalResponse = [
         })
       }
     } else if (approval.deployment) {
-      const deploymentDoc = approval.deployment as DeploymentDoc
-      const deployment = await findDeploymentById(req.user, deploymentDoc._id, { populate: true })
+      const deploymentId = approval.deployment
+      const deployment = await findDeploymentById(req.user, deploymentId, { populate: true })
       if (!deployment) {
         throw BadReq(
-          { code: 'deployment_not_found', deployment: deploymentDoc },
-          `Received invalid deployment '${deploymentDoc._id}'`
+          { code: 'deployment_not_found', deployment: deploymentId },
+          `Received invalid deployment '${deploymentId}'`
         )
       }
 
@@ -164,13 +164,13 @@ export const postApprovalResponse = [
       await deployment.save()
 
       if (choice === ApprovalStates.Accepted) {
-        await requestDeploymentsForModelVersions(req.user, deploymentDoc)
+        await requestDeploymentsForModelVersions(req.user, deployment)
       } else if (choice === ApprovalStates.Declined) {
         const model = await ModelModel.findById(deployment.model)
         if (!model) {
           throw BadReq({ code: 'bad_request_type', deployment }, 'Unable to find model for deployment')
         }
-        removeModelDeploymentsFromRegistry(model, deployment)
+        await removeModelDeploymentsFromRegistry(model, deployment)
       }
     } else {
       throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
