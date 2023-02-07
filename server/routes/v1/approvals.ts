@@ -5,7 +5,7 @@ import ModelModel from '../../models/Model'
 import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates } from '../../../types/interfaces'
 import { ApprovalCategory } from '../../models/Approval'
-import VersionModel, { VersionDoc } from '../../models/Version'
+import { VersionDoc } from '../../models/Version'
 import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment'
 import {
   getApproval,
@@ -156,7 +156,6 @@ export const postApprovalResponse = [
         )
       }
 
-      userId = req.user._id
       approvalCategory = ApprovalCategory.Deployment
       document = deployment
 
@@ -165,7 +164,7 @@ export const postApprovalResponse = [
       await deployment.save()
 
       if (choice === ApprovalStates.Accepted) {
-        requestDeploymentsForModelVersions(deploymentDoc, userId)
+        await requestDeploymentsForModelVersions(req.user, deploymentDoc)
       } else if (choice === ApprovalStates.Declined) {
         const model = await ModelModel.findById(deployment.model)
         if (!model) {
@@ -178,7 +177,7 @@ export const postApprovalResponse = [
     }
 
     const reviewingUser = req.user.id
-    const user = await getUserByInternalId(userId)
+    const user = await getUserByInternalId(req.user._id)
     if (user?.email) {
       await sendEmail({
         to: user.email,

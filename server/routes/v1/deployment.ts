@@ -175,19 +175,13 @@ export const postUngovernedDeployment = [
       owner,
     })
 
-    req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
-    await deployment.save()
-
-    req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
-
     req.log.info(
       { code: 'created_ungoverned_deployment', deploymentId: deployment._id, uuid },
       'Successfully created deployment'
     )
 
-    const userId = req.user._id
     req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
-    requestDeploymentsForModelVersions(deployment, userId)
+    await requestDeploymentsForModelVersions(req.user, deployment)
 
     res.json({
       uuid,

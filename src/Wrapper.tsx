@@ -266,7 +266,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           </Toolbar>
           <StyledList>
             <Link href='/' passHref color='inherit' underline='none'>
-              <ListItem button selected={page === 'marketplace'}>
+              <ListItem button selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Marketplace' arrow placement='right'>
