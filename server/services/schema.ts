@@ -1,5 +1,5 @@
 import SchemaModel, { Schema } from '../models/Schema'
-import { SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 
 export function serializedSchemaFields(): SerializerOptions {
   return {

@@ -2,7 +2,7 @@ import memoize from 'memoizee'
 import { Types } from 'mongoose'
 import { ModelId } from '../../types/interfaces'
 import UserModel from '../models/User'
-import { SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 
 interface GetUserOptions {
   includeToken?: boolean
