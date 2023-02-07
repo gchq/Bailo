@@ -1,6 +1,6 @@
 from subprocess import CalledProcessError, SubprocessError
 import tempfile
-from bailoclient.bundler import Bundler
+from bailoclient.model_handlers.bundler import Bundler
 from bailoclient.utils.exceptions import DirectoryNotFound
 from .resources import requirements
 import pytest

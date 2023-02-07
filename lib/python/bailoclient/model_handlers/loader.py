@@ -37,6 +37,6 @@ class Loader:
         except KeyError:
             raise ModelMethodNotAvailable(
                 "Model loader has not yet been implemented for this model type"
-            )
+            ) from None
 
         return loader_func(model_path)
