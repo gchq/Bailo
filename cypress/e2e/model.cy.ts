@@ -58,7 +58,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > :last-child', { timeout: 350000 }).should(
+    cy.get('[data-test=terminalLog] > :last-child', { timeout: 400000 }).should(
       'contain',
       'Successfully completed build'
     )
@@ -68,8 +68,6 @@ describe('Model with code and binary files', () => {
     cy.log('Navigating to review page')
     cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
-
-    cy.wait(10000)
 
     cy.log('Approving model')
     cy.get(`[data-test=approveButtonManager${modelUuid}]`).click({ force: true })

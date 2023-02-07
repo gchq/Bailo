@@ -24,25 +24,6 @@ import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import { Approval } from '../types/interfaces'
 
-export default function Review() {
-  const [value, setValue] = useState<ApprovalFilterType>('user')
-
-  const handleChange = (_event: React.SyntheticEvent, newValue: ApprovalFilterType) => {
-    setValue(newValue)
-  }
-
-  return (
-    <Wrapper title='Reviews' page='review'>
-      <Tabs value={value} onChange={handleChange}>
-        <Tab value='user' label='Approvals' />
-        <Tab value='archived' label='Archived' />
-      </Tabs>
-      <ApprovalList category='Upload' filter={value} />
-      <ApprovalList category='Deployment' filter={value} />
-    </Wrapper>
-  )
-}
-
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (
     <Paper sx={{ mt: 2, mb: 2 }}>
@@ -237,5 +218,24 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
         <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
       )}
     </Paper>
+  )
+}
+
+export default function Review() {
+  const [value, setValue] = useState<ApprovalFilterType>('user')
+
+  const handleChange = (_event: React.SyntheticEvent, newValue: ApprovalFilterType) => {
+    setValue(newValue)
+  }
+
+  return (
+    <Wrapper title='Reviews' page='review'>
+      <Tabs value={value} onChange={handleChange}>
+        <Tab value='user' label='Approvals' />
+        <Tab value='archived' label='Archived' />
+      </Tabs>
+      <ApprovalList category='Upload' filter={value} />
+      <ApprovalList category='Deployment' filter={value} />
+    </Wrapper>
   )
 }
