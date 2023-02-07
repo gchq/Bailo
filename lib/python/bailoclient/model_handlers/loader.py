@@ -6,6 +6,8 @@ from bailoclient.utils.exceptions import (
 
 
 class Loader:
+    """Class for handling model loader functions"""
+
     model_loaders = {}
 
     def load_model(self, model_path: str, model_flavour: str):

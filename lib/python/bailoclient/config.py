@@ -11,7 +11,7 @@ from pydantic import BaseSettings, HttpUrl
 class APIConfig(BaseSettings):
     """Configuration for the Bailo API"""
 
-    url: HttpUrl
+    url: str
     ca_verify: Union[bool, str]
 
 

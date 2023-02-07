@@ -1,25 +1,21 @@
 import tempfile
 import subprocess
 import os
-
-from importlib_resources import files
 from pathlib import Path
-from bailoclient.resources import templates
-
 from glob import glob
 from zipfile import ZipFile
 from typing import List
 
+from ..utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
     ModelFlavourNotRecognised,
     TemplateNotAvailable,
     DirectoryNotFound,
 )
 
-from .utils.enums import ModelFlavour
-
 
 class Bundler:
+    """Class for handling model bundling"""
 
     bundler_functions = {}
     model_py_templates = {}
@@ -144,7 +140,7 @@ class Bundler:
         code_path = os.path.join(tmpdir.name, "code")
         binary_path = os.path.join(tmpdir.name, "binary")
 
-        if model_flavour == "MLeap" and not model_py:
+        if model_flavour == "mleap" and not model_py:
             raise TemplateNotAvailable(
                 "There is no model template available for MLeap models"
             )
@@ -319,13 +315,30 @@ class Bundler:
             ) from None
 
     def create_dir(self, output_dir: str):
+        """Run subprocess to create output directory
+
+        Args:
+            output_dir (str): Path of the output directory
+
+        Raises:
+            subprocess.SubprocessError: Unable to create the directory
+        """
         try:
             subprocess.run(["mkdir", "-p", output_dir])
 
         except (subprocess.SubprocessError, ValueError):
             raise subprocess.SubprocessError("Unable to create directory") from None
 
+    ## TODO check type - str or path?
     def format_directory_path(self, dir_path):
+        """Format directory path to end with '/'
+
+        Args:
+            dir_path (str): Directory path
+
+        Returns:
+            str: Directory path
+        """
         if not dir_path.endswith("/"):
             return dir_path + os.path.sep
 

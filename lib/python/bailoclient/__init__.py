@@ -1,5 +1,5 @@
 """Bailo Client"""
-from .model_bundlers import *
+from .model_handlers.model_functions import *
 from .bindings import create_cognito_client, create_pki_client
 from .bailo import Bailo
 import logging

@@ -15,11 +15,11 @@ from bailoclient.utils.exceptions import (
     UnableToCreateBailoClient,
 )
 
-from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
+from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator, NullAuthenticator
 from .client import Client
 from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
-from .bundler import Bundler
-from .loader import Loader
+from .model_handlers.bundler import Bundler
+from .model_handlers.loader import Loader
 
 logger = logging.getLogger(__name__)
 
@@ -43,66 +43,66 @@ class Bailo(Client):
         self.bundler = Bundler()
         self.loader = Loader()
 
-    #     # if no config provided, try and load dotenv file
-    #     if not any(
-    #         [
-    #             bailo_url,
-    #             pki_p12,
-    #             pki_ca,
-    #             cognito_user_pool_id,
-    #             cognito_client_id,
-    #             cognito_client_secret,
-    #             cognito_region,
-    #             cognito_username,
-    #             cognito_pwd,
-    #         ]
-    #     ):
-    #         env_loaded = load_dotenv()
+        # if no config provided, try and load dotenv file
+        if not any(
+            [
+                bailo_url,
+                pki_p12,
+                pki_ca,
+                cognito_user_pool_id,
+                cognito_client_id,
+                cognito_client_secret,
+                cognito_region,
+                cognito_username,
+                cognito_pwd,
+            ]
+        ):
+            env_loaded = load_dotenv()
 
-    #         if not env_loaded:
-    #             raise MissingDotEnvFile(
-    #                 "Unable to find a .env file in the project directory"
-    #             )
+            if not env_loaded:
+                raise MissingDotEnvFile(
+                    "Unable to find a .env file in the project directory"
+                )
 
-    #         config, auth, *creds = self.__create_client_from_env()
+            config, auth, *creds = self.__create_client_from_env()
 
-    #     # create pki client from input
-    #     if pki_p12 and pki_ca and bailo_url:
-    #         config, auth = self.pki_client(pki_p12, pki_ca, bailo_url)
+        # create pki client from input
+        if pki_p12 and pki_ca and bailo_url:
+            config, auth = self.pki_client(pki_p12, pki_ca, bailo_url)
 
-    #     # create cognito client from input
-    #     if (
-    #         cognito_user_pool_id
-    #         and cognito_client_id
-    #         and cognito_client_secret
-    #         and cognito_region
-    #         and cognito_username
-    #         and cognito_pwd
-    #         and bailo_url
-    #     ):
-    #         config, auth = self.cognito_client(
-    #             cognito_user_pool_id,
-    #             cognito_client_id,
-    #             cognito_client_secret,
-    #             cognito_region,
-    #             bailo_url,
-    #         )
-    #         creds = cognito_username, cognito_pwd
+        # create cognito client from input
+        if (
+            cognito_user_pool_id
+            and cognito_client_id
+            and cognito_client_secret
+            and cognito_region
+            and cognito_username
+            and cognito_pwd
+            and bailo_url
+        ):
+            config, auth = self.cognito_client(
+                cognito_user_pool_id,
+                cognito_client_id,
+                cognito_client_secret,
+                cognito_region,
+                bailo_url,
+            )
+            creds = cognito_username, cognito_pwd
 
-    #     try:
-    #         super().__init__(config, auth)
+        try:
+            super().__init__(config, auth)
 
-    #     except NameError as err:
-    #         raise UnableToCreateBailoClient(
-    #             """Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"""
-    #         ) from err
+        except NameError as err:
+            raise UnableToCreateBailoClient(
+                """Ensure you have provided all the required Cognito or PKI parameters and a valid BAILO URL"""
+            ) from err
 
-    #     try:
-    #         username, password = creds
-    #         self.connect(username=username, password=password)
+        try:
+            username, password = creds
+            self.connect(username=username, password=password)
 
-    #     except ValueError:
-    #         self.connect()
+        except ValueError:
+            self.connect()
 
     def __create_client_from_env(self):
         """Create a Client from configuration saved in a .env file
@@ -271,9 +271,9 @@ class Bailo(Client):
             Model bundling will be done using Mlflow, which you will need to have installed
             in your environment.
 
-            To bundle a pre-saved model, you will need to provide the model_binary as a minimum.
-            If you are not providing model_code you will need to provide a model_flavour so that
-            the appropriate model template can be bundled with your model.
+            To bundle a pre-saved model, you will need to provide the model_binary and either the
+            model_code or model_flavour as a minimum. If you are not providing model_code, the
+            model_flavour is used to get the appropriate model template to bundle with your model.
 
         Args:
             output_path (str): Path to output code.zip and binary.zip files to
@@ -305,7 +305,9 @@ class Bailo(Client):
         )
 
     def load_model(self, model_path: str, model_flavour: str):
-        """Load a model
+        """Load a model into memory. You must provide the path to the model file
+        and the library that the model was developed with (the model flavour) so
+        that the appropriate loader function can be used.
 
         Args:
             model_path (str): Path to the actual model file (e.g. './model.pth')
