@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React from 'react'
 import ReactFlow, { ConnectionLineType, Node, Edge, Position } from 'reactflow'
 import dagre from 'dagre'
@@ -24,6 +23,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
   dagre.layout(dagreGraph)
 
   nodes.forEach((node) => {
+    /* eslint-disable no-param-reassign */
     const nodeWithPosition = dagreGraph.node(node.id)
     node.targetPosition = (isHorizontal ? 'left' : 'top') as Position
     node.sourcePosition = (isHorizontal ? 'right' : 'bottom') as Position
@@ -36,6 +36,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
     }
 
     return node
+    /* eslint-enable no-param-reassign */
   })
 
   return { nodes, edges }
@@ -57,7 +58,7 @@ function ComplianceFlow({ initialEdges, initialNodes }: any) {
         zoomOnScroll={false}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
-        // Bailo is an open source / non-commercial project, so will disable attribution:
+        // Bailo is an open source / non-commercial, so will disable attribution:
         // https://reactflow.dev/docs/guides/remove-attribution/
         proOptions={{ hideAttribution: true }}
       />
