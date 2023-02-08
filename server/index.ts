@@ -1,11 +1,13 @@
+import { nanoid } from 'nanoid'
 import config from 'config'
 import express from 'express'
 import http from 'http'
 import next from 'next'
-import { createIndexes } from './models/Model'
-import { logCreateIndexes } from './models/Log'
-import processDeployments from './processors/processDeployments'
-import processUploads from './processors/processUploads'
+import { fileURLToPath } from 'url'
+import { createIndexes } from './models/Model.js'
+import { logCreateIndexes } from './models/Log.js'
+import processDeployments from './processors/processDeployments.js'
+import processUploads from './processors/processUploads.js'
 import {
   fetchRawModelFiles,
   getUserDeployments,
@@ -13,8 +15,8 @@ import {
   postDeployment,
   resetDeploymentApprovals,
   getDeploymentAccess,
-} from './routes/v1/deployment'
-import getDocsMenuContent from './routes/v1/docs'
+} from './routes/v1/deployment.js'
+import getDocsMenuContent from './routes/v1/docs.js'
 import {
   getModelById,
   getModelByUuid,
@@ -24,14 +26,14 @@ import {
   getModelVersion,
   getModelVersions,
   getModelAccess,
-} from './routes/v1/model'
-import { getDockerRegistryAuth } from './routes/v1/registryAuth'
-import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals'
-import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema'
-import { getSpecification } from './routes/v1/specification'
-import { getUiConfig } from './routes/v1/uiConfig'
-import { postUpload } from './routes/v1/upload'
-import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users'
+} from './routes/v1/model.js'
+import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
+import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals.js'
+import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema.js'
+import { getSpecification } from './routes/v1/specification.js'
+import { getUiConfig } from './routes/v1/uiConfig.js'
+import { postUpload } from './routes/v1/upload.js'
+import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users.js'
 import {
   getVersion,
   getVersionAccess,
@@ -39,13 +41,13 @@ import {
   putVersion,
   postResetVersionApprovals,
   putUpdateLastViewed,
-} from './routes/v1/version'
-import { runMigrations, connectToMongoose } from './utils/database'
-import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger'
-import { ensureBucketExists } from './utils/minio'
-import { getUser } from './utils/user'
-import { pullBuilderImage } from './utils/build/build'
+} from './routes/v1/version.js'
+import { runMigrations, connectToMongoose } from './utils/database.js'
+import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
+import { ensureBucketExists } from './utils/minio.js'
+import { getUser } from './utils/user.js'
+import { pullBuilderImage } from './utils/build/build.js'
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
@@ -146,6 +148,9 @@ export async function startServer() {
   logger.info({ port }, `Listening on port ${port}`)
 }
 
-if (require.main === module) {
-  startServer()
+if (import.meta.url.startsWith('file:')) {
+  const modulePath = fileURLToPath(import.meta.url)
+  if (process.argv[1] === modulePath) {
+    startServer()
+  }
 }

@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { join } from 'path'
-import { rm } from 'shelljs'
+import shelljs from 'shelljs'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
-import { getClient } from '../minio'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+import { getClient } from '../minio.js'
+
+const { rm } = shelljs
 
 class GetRawFiles extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>, props: any) {

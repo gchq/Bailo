@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { Document, model, Schema, Types } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
-import { ModelDoc } from './Model'
+import { ModelDoc } from './Model.js'
 
 export interface User {
   id: string

@@ -1,20 +1,20 @@
 import { ObjectId } from 'mongodb'
-import { ApprovalStates, EntityKind } from '../../types/interfaces'
-import { DeploymentDoc } from '../models/Deployment'
-import ModelModel from '../models/Model'
-import ApprovalModel, { ApprovalCategory } from '../models/Approval'
-import UserModel from '../models/User'
-import { VersionDoc } from '../models/Version'
+import { ApprovalStates, EntityKind } from '../../types/interfaces.js'
+import { DeploymentDoc } from '../models/Deployment.js'
+import ModelModel from '../models/Model.js'
+import ApprovalModel, { ApprovalCategory } from '../models/Approval.js'
+import UserModel from '../models/User.js'
+import { VersionDoc } from '../models/Version.js'
 import '../utils/mockMongo'
-import * as emailService from '../utils/smtp'
+import * as emailService from '../utils/smtp.js'
 import {
   createDeploymentApprovals,
   createVersionApprovals,
   getApproval,
   readNumApprovals,
   readApprovals,
-} from './approval'
-import * as userService from './user'
+} from './approval.js'
+import * as userService from './user.js'
 
 const managerId = new ObjectId()
 const modelId = new ObjectId()

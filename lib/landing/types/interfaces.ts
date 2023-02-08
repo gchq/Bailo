@@ -1,12 +1,12 @@
 import Logger from 'bunyan'
 import { Date, Types } from 'mongoose'
 import { Dispatch, SetStateAction } from 'react'
-import { UserDoc } from '../server/models/User'
+import { UserDoc } from '../server/models/User.js'
 
-export type { DeploymentDoc as Deployment } from '../server/models/Deployment'
-export type { ApprovalDoc as Approval } from '../server/models/Approval'
-export type { UserDoc as User } from '../server/models/User'
-export type { VersionDoc as Version } from '../server/models/Version'
+export type { DeploymentDoc as Deployment } from '../server/models/Deployment.js'
+export type { ApprovalDoc as Approval } from '../server/models/Approval.js'
+export type { UserDoc as User } from '../server/models/User.js'
+export type { VersionDoc as Version } from '../server/models/Version.js'
 
 declare global {
   namespace Express {

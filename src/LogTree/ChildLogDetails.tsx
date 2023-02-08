@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback, useMemo, useState } from 'react'
-import { omit } from 'lodash'
+import { omit } from 'lodash-es'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CircleIcon from '@mui/icons-material/Circle'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -15,8 +15,8 @@ import { timeDifference } from '@/utils/dateUtils'
 import BuildOrApprovalLogDetails from '@/src/LogTree/BuildOrApprovalLogDetails'
 import { LogFilters } from '@/src/FilterMenu/FilterMenu'
 import { useTheme, darken } from '@mui/material/styles'
-import { useGetAppLogs } from '../../data/admin'
-import { LogEntry, LogLevel, LogType, UiConfig } from '../../types/interfaces'
+import { useGetAppLogs } from '../../data/admin.js'
+import { LogEntry, LogLevel, LogType, UiConfig } from '../../types/interfaces.js'
 
 const getLogLevelColour = (level: number): ChipProps['color'] => {
   if (level <= LogLevel.INFO) {

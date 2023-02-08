@@ -3,10 +3,12 @@ import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'
 import { join } from 'path'
-import Bailo from '../../lib/node'
-import logger from '../utils/logger'
+import { fileURLToPath } from 'url'
+import Bailo from '../../lib/node.js'
+import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {
+  const __dirname = fileURLToPath(new URL('.', import.meta.url))
   const api = new Bailo('http://localhost:8080/api/v1')
 
   const defaultSchema = await api.getDefaultSchema('UPLOAD')

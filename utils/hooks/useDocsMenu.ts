@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import axios, { AxiosResponse } from 'axios'
-import { DocsMenuContent } from '../../types/interfaces'
+import { DocsMenuContent } from '../../types/interfaces.js'
 
 export type DocsMenuHook = {
   docsMenuContent: DocsMenuContent

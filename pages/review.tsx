@@ -18,11 +18,11 @@ import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
-import { postEndpoint } from '../data/api'
-import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
-import EmptyBlob from '../src/common/EmptyBlob'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { Approval } from '../types/interfaces'
+import { postEndpoint } from '../data/api.js'
+import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals.js'
+import EmptyBlob from '../src/common/EmptyBlob.js'
+import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper.js'
+import { Approval } from '../types/interfaces.js'
 
 export default function Review() {
   const [value, setValue] = useState<ApprovalFilterType>('user')

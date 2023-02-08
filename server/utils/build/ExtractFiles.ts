@@ -1,12 +1,14 @@
 /* eslint-disable no-param-reassign */
 import { dirname, join } from 'path'
-import { rm } from 'shelljs'
+import shelljs from 'shelljs'
 import unzip from 'unzipper'
 import { readdir } from 'fs/promises'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+
+const { rm } = shelljs
 
 async function unzipFile(zipPath: string) {
   const outputDir = dirname(zipPath)

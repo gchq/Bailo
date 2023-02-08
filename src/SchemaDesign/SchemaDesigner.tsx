@@ -23,14 +23,14 @@ import DialogContent from '@mui/material/DialogContent'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContentText from '@mui/material/DialogContentText'
-import _ from 'lodash'
+import _ from 'lodash-es'
 import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
 import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Clear'
 import { useTheme } from '@mui/material/styles'
-import { Theme as MaterialUITheme } from '../MuiForms'
-import QuestionPicker from './QuestionPicker'
+import { Theme as MaterialUITheme } from '../MuiForms.js'
+import QuestionPicker from './QuestionPicker.js'
 
 const SchemaForm = withTheme(MaterialUITheme)
 

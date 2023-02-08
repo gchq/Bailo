@@ -1,9 +1,9 @@
 import { join } from 'path'
 import getAppRoot from 'app-root-path'
-import { extractFrontMatterFromDir } from '../services/docs'
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
-import { DocFileOrHeading, DocHeading, DocsMenuContent } from '../../types/interfaces'
-import { consoleLog } from '../../utils/logging'
+import { extractFrontMatterFromDir } from '../services/docs.js'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { DocFileOrHeading, DocHeading, DocsMenuContent } from '../../types/interfaces.js'
+import { consoleLog } from '../../utils/logging.js'
 
 function isDocHeading(item: DocFileOrHeading): item is DocHeading {
   return 'children' in item

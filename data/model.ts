@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
-import { Deployment, Model, Schema, Version } from '../types/interfaces'
-import { fetcher } from '../utils/fetcher'
+import { Deployment, Model, Schema, Version } from '../types/interfaces.js'
+import { fetcher } from '../utils/fetcher.js'
 
 export type ListModelType = 'favourites' | 'user' | 'all'
 export function useListModels(type: ListModelType, filter?: string) {

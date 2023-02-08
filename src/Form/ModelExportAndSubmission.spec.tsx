@@ -3,9 +3,9 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import * as uiConfig from '../../data/uiConfig'
-import ModelExportAndSubmission from './ModelExportAndSubmission'
-import { doNothing } from '../../utils/testUtils'
+import * as uiConfig from '../../data/uiConfig.js'
+import ModelExportAndSubmission from './ModelExportAndSubmission.js'
+import { doNothing } from '../../utils/testUtils.js'
 
 describe('ModelExportAndSubmission', () => {
   it('renders a ModelExportAndSubmission component', async () => {

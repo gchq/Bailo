@@ -2,12 +2,12 @@ import { ObjectId } from 'mongodb'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
 import { v4 as uuidv4 } from 'uuid'
-import { server } from '../../index'
-import ModelModel from '../../models/Model'
-import UserModel from '../../models/User'
-import * as userService from '../../services/user'
+import { server } from '../../index.js'
+import ModelModel from '../../models/Model.js'
+import UserModel from '../../models/User.js'
+import * as userService from '../../services/user.js'
 import '../../utils/mockMongo'
-import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 const request = supertest(server)
 

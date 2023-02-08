@@ -6,10 +6,10 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
 import Button from '@mui/material/Button'
 
-import { useGetModelById, useGetModelVersions } from '../data/model'
-import { Deployment } from '../types/interfaces'
-import { ModelDoc } from '../server/models/Model'
-import EmptyBlob from './common/EmptyBlob'
+import { useGetModelById, useGetModelVersions } from '../data/model.js'
+import { Deployment } from '../types/interfaces.js'
+import { ModelDoc } from '../server/models/Model.js'
+import EmptyBlob from './common/EmptyBlob.js'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {
   const modelFromDeployment: ModelDoc = deployment.model as ModelDoc

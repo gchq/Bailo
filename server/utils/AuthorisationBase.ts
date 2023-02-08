@@ -1,8 +1,8 @@
 import { Request } from 'express'
-import { Model } from '../../types/interfaces'
-import { DeploymentDoc } from '../models/Deployment'
-import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import { Model } from '../../types/interfaces.js'
+import { DeploymentDoc } from '../models/Deployment.js'
+import { UserDoc } from '../models/User.js'
+import { VersionDoc } from '../models/Version.js'
 
 export default class AuthorisationBase {
   async getUserFromReq(req: Request) {

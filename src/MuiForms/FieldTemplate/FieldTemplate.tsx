@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { FieldTemplateProps } from '@rjsf/core'
 import React from 'react'
-import WrapIfAdditional from './WrapIfAdditional'
+import WrapIfAdditional from './WrapIfAdditional.js'
 
 function FieldTemplate({
   id,

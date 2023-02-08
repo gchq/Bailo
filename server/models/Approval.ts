@@ -1,8 +1,8 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import { DeploymentDoc } from './Deployment'
-import { Entity, approvalStateOptions, ApprovalStates, EntityKind } from '../../types/interfaces'
-import { VersionDoc } from './Version'
+import { DeploymentDoc } from './Deployment.js'
+import { Entity, approvalStateOptions, ApprovalStates, EntityKind } from '../../types/interfaces.js'
+import { VersionDoc } from './Version.js'
 
 export const approvalTypeOptions = ['Manager', 'Reviewer']
 

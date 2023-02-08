@@ -1,5 +1,5 @@
 import Logger from 'bunyan'
-import { VersionDoc } from '../../models/Version'
+import { VersionDoc } from '../../models/Version.js'
 
 export class BuildLogger {
   version: VersionDoc

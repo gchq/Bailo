@@ -7,22 +7,22 @@ import config from 'config'
 import devnull from 'dev-null'
 import { NextFunction, Request, Response } from 'express'
 import fsPromise from 'fs/promises'
-import { castArray, get, pick, set } from 'lodash'
-import omit from 'lodash/omit'
+import { castArray, get, pick, set, omit } from 'lodash-es'
 import { WritableStream } from 'node:stream/web'
 import morgan from 'morgan'
 import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
-import { StatusError } from '../../types/interfaces'
-import { serializedDeploymentFields } from '../services/deployment'
-import { serializedModelFields } from '../services/model'
-import { serializedSchemaFields } from '../services/schema'
-import { serializedUserFields } from '../services/user'
-import { serializedVersionFields } from '../services/version'
-import { ensurePathExists, getFilesInDir } from './filesystem'
-import { consoleError } from '../../utils/logging'
-import LogModel from '../models/Log'
+import { fileURLToPath } from 'url'
+import { StatusError } from '../../types/interfaces.js'
+import { serializedDeploymentFields } from '../services/deployment.js'
+import { serializedModelFields } from '../services/model.js'
+import { serializedSchemaFields } from '../services/schema.js'
+import { serializedUserFields } from '../services/user.js'
+import { serializedVersionFields } from '../services/version.js'
+import { ensurePathExists, getFilesInDir } from './filesystem.js'
+import { consoleError } from '../../utils/logging.js'
+import LogModel from '../models/Log.js'
 
 const appRoot = getAppRoot.toString()
 
@@ -170,6 +170,8 @@ const streams: Array<bunyan.Stream> = [
 ]
 
 if (process.env.NODE_ENV !== 'production') {
+  const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
   streams.push({
     level: 'trace',
     type: 'raw',

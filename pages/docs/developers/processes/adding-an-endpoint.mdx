@@ -44,7 +44,7 @@ export const echoRequest = [
 2. Add the route to the router to `server/index.ts`:
 
 ```typescript
-import { getEcho } from './routes/v1/admin'
+import { getEcho } from './routes/v1/admin.js'
 
 server.get('/api/v1/echo', ...getEcho)
 ```
@@ -65,7 +65,7 @@ describe('test echo route', () => {
 
 ```typescript
 import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
+import { fetcher } from '../utils/fetcher.js'
 
 export function useEcho(message: string) {
   const { data, error, mutate } = useSWR<{ message: string }>(`/api/v1/echo?message=${message}`, fetcher)

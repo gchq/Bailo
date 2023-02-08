@@ -1,4 +1,4 @@
-import logger from '../utils/logger'
+import logger from '../utils/logger.js'
 
 export async function up() {
   logger.info('Initial migrations handled by mongoose')

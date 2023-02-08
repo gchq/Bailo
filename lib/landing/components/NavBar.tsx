@@ -11,11 +11,11 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
 import GitHubIcon from '@mui/icons-material/GitHub'
-import Link from './Link'
+import Link from './Link.js'
 import Image from 'next/legacy/image'
 import imageLoader from '@/components/imageLoader'
 
-import bailoLogo from '../public/Bailo-logo-reverse.png'
+import bailoLogo from '../public/Bailo-logo-reverse.png.js'
 
 const pages = [
   { name: 'Home', path: '/' },

@@ -1,7 +1,7 @@
-import ModelModel from '../models/Model'
-import VersionModel from '../models/Version'
+import ModelModel from '../models/Model.js'
+import VersionModel from '../models/Version.js'
 import '../utils/mockMongo'
-import { testModel, testModel2, testVersion, userDoc } from '../utils/test/testModels'
+import { testModel, testModel2, testVersion, userDoc } from '../utils/test/testModels.js'
 import {
   createModel,
   findModelById,
@@ -10,7 +10,7 @@ import {
   isValidFilter,
   isValidType,
   serializedModelFields,
-} from './model'
+} from './model.js'
 
 let modelId
 

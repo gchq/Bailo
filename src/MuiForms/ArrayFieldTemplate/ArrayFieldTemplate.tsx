@@ -3,8 +3,8 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { ArrayFieldTemplateProps, IdSchema, utils } from '@rjsf/core'
 import React from 'react'
-import AddButton from '../AddButton/AddButton'
-import IconButton from '../IconButton/IconButton'
+import AddButton from '../AddButton/AddButton.js'
+import IconButton from '../IconButton/IconButton.js'
 
 const { isMultiSelect, getDefaultRegistry } = utils
 

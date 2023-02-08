@@ -2,7 +2,7 @@ import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
 import { useEffect, useState } from 'react'
-import { Entity } from '../../types/interfaces'
+import { Entity } from '../../types/interfaces.js'
 
 export default function UserAvatar({
   entity,

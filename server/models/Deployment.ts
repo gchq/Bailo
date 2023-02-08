@@ -1,8 +1,8 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import logger from '../utils/logger'
-import { ModelDoc } from './Model'
-import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
+import logger from '../utils/logger.js'
+import { ModelDoc } from './Model.js'
+import { ApprovalStates, approvalStateOptions } from '../../types/interfaces.js'
 
 export interface LogStatement {
   timestamp: Date

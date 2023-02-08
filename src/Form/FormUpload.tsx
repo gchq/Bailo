@@ -4,9 +4,9 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import TextField from '@mui/material/TextField'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { useGetUiConfig } from '../../data/uiConfig'
-import { SplitSchema } from '../../types/interfaces'
-import { getStepsData, setStepsData } from '../../utils/formUtils'
+import { useGetUiConfig } from '../../data/uiConfig.js'
+import { SplitSchema } from '../../types/interfaces.js'
+import { getStepsData, setStepsData } from '../../utils/formUtils.js'
 
 export default function FormUpload({
   splitSchema,

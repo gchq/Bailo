@@ -1,5 +1,5 @@
 import Card from '@mui/material/Card'
-import { useGetUiConfig } from '../data/uiConfig'
+import { useGetUiConfig } from '../data/uiConfig.js'
 
 function Banner() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()

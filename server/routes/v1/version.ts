@@ -1,14 +1,14 @@
 import bodyParser from 'body-parser'
 import config from 'config'
 import { Request, Response } from 'express'
-import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
-import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
-import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
-import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
-import { BadReq, Forbidden, NotFound } from '../../utils/result'
-import { ensureUserRole } from '../../utils/user'
-import { isUserInEntityList, parseEntityList } from '../../utils/entity'
-import { removeVersionFromModel } from '../../services/model'
+import ApprovalModel, { ApprovalTypes } from '../../models/Approval.js'
+import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces.js'
+import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval.js'
+import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
+import { ensureUserRole } from '../../utils/user.js'
+import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
+import { removeVersionFromModel } from '../../services/model.js'
 
 export const getVersion = [
   ensureUserRole('user'),

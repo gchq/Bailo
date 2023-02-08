@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { SeldonVersion } from '@/types/interfaces'
 import MenuItem from '@mui/material/MenuItem'
 import { TextField } from '@mui/material'
-import { useGetUiConfig } from '../../data/uiConfig'
+import { useGetUiConfig } from '../../data/uiConfig.js'
 
 type SeldonVersionSelectorProps = {
   label: string

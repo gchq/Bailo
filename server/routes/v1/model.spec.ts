@@ -1,10 +1,10 @@
-import _ from 'lodash'
+import _ from 'lodash-es'
 import mongoose from 'mongoose'
-import DeploymentModel from '../../models/Deployment'
-import ModelModel from '../../models/Model'
-import SchemaModel from '../../models/Schema'
-import UserModel from '../../models/User'
-import VersionModel from '../../models/Version'
+import DeploymentModel from '../../models/Deployment.js'
+import ModelModel from '../../models/Model.js'
+import SchemaModel from '../../models/Schema.js'
+import UserModel from '../../models/User.js'
+import VersionModel from '../../models/Version.js'
 import '../../utils/mockMongo'
 import {
   modelId,
@@ -14,8 +14,8 @@ import {
   testUser,
   testVersion,
   uploadSchema,
-} from '../../utils/test/testModels'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+} from '../../utils/test/testModels.js'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 describe('test model routes', () => {
   beforeEach(async () => {

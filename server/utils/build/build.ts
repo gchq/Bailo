@@ -1,8 +1,10 @@
-import { exec } from 'shelljs'
+import shelljs from 'shelljs'
 import config from 'config'
 
-import logger from '../logger'
-import { BuildLogger } from './BuildLogger'
+import logger from '../logger.js'
+import { BuildLogger } from './BuildLogger.js'
+
+const { exec } = shelljs
 
 export async function pullBuilderImage() {
   if (config.get('build.environment') === 'openshift') {

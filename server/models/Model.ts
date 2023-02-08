@@ -1,6 +1,6 @@
 import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import { VersionDoc } from './Version'
+import { VersionDoc } from './Version.js'
 
 export interface Model {
   schemaRef: string

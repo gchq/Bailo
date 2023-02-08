@@ -1,2 +1,2 @@
-export * from './ObjectFieldTemplate'
-export { default } from './ObjectFieldTemplate'
+export * from './ObjectFieldTemplate.js'
+export { default } from './ObjectFieldTemplate.js'

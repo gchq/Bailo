@@ -1,6 +1,6 @@
 import { Theme } from '@mui/material/styles'
 import { ChangeEvent, useCallback, useState } from 'react'
-import { darkTheme, lightTheme } from '../../src/theme'
+import { darkTheme, lightTheme } from '../../src/theme.js'
 
 export type ThemeModeHook = {
   theme: Theme

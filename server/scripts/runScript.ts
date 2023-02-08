@@ -1,6 +1,8 @@
-import { exec } from 'shelljs'
+import shelljs from 'shelljs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
+const { exec } = shelljs
 
 // This file allows you to run scripts as:
 //   npm run script -- uploadExampleModel

@@ -1,6 +1,6 @@
-import UserModel from '../models/User'
-import { testUser } from './test/testModels'
-import { getUserFromAuthHeader } from './user'
+import UserModel from '../models/User.js'
+import { testUser } from './test/testModels.js'
+import { getUserFromAuthHeader } from './user.js'
 import './mockMongo'
 
 describe('user utils', () => {

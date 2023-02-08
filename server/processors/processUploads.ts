@@ -1,21 +1,21 @@
 import config from 'config'
 
 // eslint-disable-next-line import/no-relative-packages
-import { QueueMessage } from '../../lib/p-mongo-queue'
-import { findVersionById, markVersionBuilt } from '../services/version'
-import logger from '../utils/logger'
-import { getUserByInternalId } from '../services/user'
+import { QueueMessage } from '../../lib/p-mongo-queue.js'
+import { findVersionById, markVersionBuilt } from '../services/version.js'
+import logger from '../utils/logger.js'
+import { getUserByInternalId } from '../services/user.js'
 
-import { BuildHandler, BuildTasks } from '../utils/build/BuildHandler'
-import createWorkingDirectory from '../utils/build/CreateWorkingDirectory'
-import getRawFiles from '../utils/build/GetRawFiles'
-import extractFiles from '../utils/build/ExtractFiles'
-import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile'
-import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile'
-import openshiftBuildDockerfile from '../utils/build/OpenShiftBuildDockerfile'
-import pushDockerTar from '../utils/build/PushDockerTar'
-import { getUploadQueue } from '../utils/queues'
-import { ModelUploadType } from '../../types/interfaces'
+import { BuildHandler, BuildTasks } from '../utils/build/BuildHandler.js'
+import createWorkingDirectory from '../utils/build/CreateWorkingDirectory.js'
+import getRawFiles from '../utils/build/GetRawFiles.js'
+import extractFiles from '../utils/build/ExtractFiles.js'
+import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile.js'
+import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile.js'
+import openshiftBuildDockerfile from '../utils/build/OpenShiftBuildDockerfile.js'
+import pushDockerTar from '../utils/build/PushDockerTar.js'
+import { getUploadQueue } from '../utils/queues.js'
+import { ModelUploadType } from '../../types/interfaces.js'
 
 export default async function processUploads() {
   ;(await getUploadQueue()).process(async (msg: QueueMessage) => {

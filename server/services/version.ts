@@ -1,12 +1,12 @@
-import { castArray } from 'lodash'
-import { DateString, ModelId } from '../../types/interfaces'
-import { UserDoc } from '../models/User'
-import VersionModel, { VersionDoc } from '../models/Version'
-import Authorisation from '../external/Authorisation'
-import { asyncFilter } from '../utils/general'
-import { createSerializer, SerializerOptions } from '../utils/logger'
-import { BadReq, Forbidden } from '../utils/result'
-import { serializedModelFields } from './model'
+import { castArray } from 'lodash-es'
+import { DateString, ModelId } from '../../types/interfaces.js'
+import { UserDoc } from '../models/User.js'
+import VersionModel, { VersionDoc } from '../models/Version.js'
+import Authorisation from '../external/Authorisation.js'
+import { asyncFilter } from '../utils/general.js'
+import { createSerializer, SerializerOptions } from '../utils/logger.js'
+import { BadReq, Forbidden } from '../utils/result.js'
+import { serializedModelFields } from './model.js'
 
 const auth = new Authorisation()
 

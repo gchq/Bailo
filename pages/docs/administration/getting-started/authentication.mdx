@@ -31,7 +31,7 @@ from `server/utils/AuthorisationBase.ts`. E.g.
 
 ```javascript
 // server/external/Authorisation.ts
-import AuthorisationBase from '../utils/AuthorisationBase'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
 import { Request } from 'express'
 
 class Authorisation extends AuthorisationBase {
@@ -72,9 +72,9 @@ An example authorisation implemention:
 
 ```javascript
 // server/external/Authorisation.ts
-import AuthorisationBase from '../utils/AuthorisationBase'
-import { UserDoc } from '../models/User'
-import { VersionDoc } from '../models/Version'
+import AuthorisationBase from '../utils/AuthorisationBase.js'
+import { UserDoc } from '../models/User.js'
+import { VersionDoc } from '../models/Version.js'
 
 class Authorisation extends AuthorisationBase {
   async getUserFromReq(_req: Request) {

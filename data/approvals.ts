@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
-import { Approval } from '../types/interfaces'
-import { fetcher } from '../utils/fetcher'
+import { Approval } from '../types/interfaces.js'
+import { fetcher } from '../utils/fetcher.js'
 
 export type ApprovalCategory = 'Upload' | 'Deployment'
 export type ApprovalFilterType = 'user' | 'archived'

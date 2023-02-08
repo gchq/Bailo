@@ -2,10 +2,10 @@ import indentString from 'indent-string'
 import prettyMs from 'pretty-ms'
 import { v4 as uuidv4 } from 'uuid'
 
-import { VersionDoc } from '../../models/Version'
-import logger from '../logger'
-import { BuildLogger } from './BuildLogger'
-import { BuildStep, Files } from './BuildStep'
+import { VersionDoc } from '../../models/Version.js'
+import logger from '../logger.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildStep, Files } from './BuildStep.js'
 
 type BuildConstructor = (logger: BuildLogger, props?: any) => BuildStep
 export type BuildTasks = { construct: BuildConstructor; props?: any }[]

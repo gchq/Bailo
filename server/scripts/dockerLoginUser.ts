@@ -1,5 +1,5 @@
 /* eslint-disable import/newline-after-import */
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 ;(async () => {
   await connectToMongoose()
 

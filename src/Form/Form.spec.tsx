@@ -3,8 +3,8 @@
  */
 
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
-import Form from './Form'
-import { doNothing } from '../../utils/testUtils'
+import Form from './Form.js'
+import { doNothing } from '../../utils/testUtils.js'
 
 describe('Form', () => {
   const splitSchema: any = {

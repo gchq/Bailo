@@ -1,4 +1,6 @@
-import { exec } from 'shelljs'
+import shelljs from 'shelljs'
+
+const { exec } = shelljs
 
 type RunCommandOptions = {
   silentErrors?: boolean

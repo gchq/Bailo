@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import '../../utils/mockMongo'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 describe('test UI config routes', () => {
   test('that we can fetch the correct UI config', async () => {

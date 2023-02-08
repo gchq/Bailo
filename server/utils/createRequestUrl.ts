@@ -1,6 +1,6 @@
-import { DeploymentDoc } from '../models/Deployment'
-import { ModelDoc } from '../models/Model'
-import { VersionDoc } from '../models/Version'
+import { DeploymentDoc } from '../models/Deployment.js'
+import { ModelDoc } from '../models/Model.js'
+import { VersionDoc } from '../models/Version.js'
 
 const createRequestUrl = (model: ModelDoc, document: VersionDoc | DeploymentDoc, base: string): string => {
   if (model.uuid) {

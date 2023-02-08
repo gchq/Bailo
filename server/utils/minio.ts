@@ -1,6 +1,6 @@
 import config from 'config'
 import * as Minio from 'minio'
-import logger from './logger'
+import logger from './logger.js'
 
 export function getClient(): Minio.Client {
   return new Minio.Client(config.get('minio'))

@@ -14,9 +14,9 @@ import Checkbox from '@mui/material/Checkbox'
 import { SelectChangeEvent } from '@mui/material/Select'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import isLogLevel, { isLogLevelString } from '@/utils/type-guards/isLogLevel'
-import LogLevelSelect from './LogLevelSelect'
-import { LogLevel } from '../../types/interfaces'
-import getLogLevelLabel from '../../utils/getLogLevelLabel'
+import LogLevelSelect from './LogLevelSelect.js'
+import { LogLevel } from '../../types/interfaces.js'
+import getLogLevelLabel from '../../utils/getLogLevelLabel.js'
 
 export type LogFilters = {
   level: LogLevel

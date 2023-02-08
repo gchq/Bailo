@@ -41,5 +41,9 @@
     "**/testUtils.ts",
     "lib/landing"
   ],
+  "ts-node": {
+    "esm": true,
+    "swc": true
+  },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
 }

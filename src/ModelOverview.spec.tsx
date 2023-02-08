@@ -4,9 +4,9 @@
 
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import ModelOverview from './ModelOverview'
-import { lightTheme } from './theme'
-import { EntityKind } from '../types/interfaces'
+import ModelOverview from './ModelOverview.js'
+import { lightTheme } from './theme.js'
+import { EntityKind } from '../types/interfaces.js'
 
 describe('ModelOverview', () => {
   const version: any = {

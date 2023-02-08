@@ -1,4 +1,4 @@
-import UserModel from '../models/User'
+import UserModel from '../models/User.js'
 import '../utils/mockMongo'
 import {
   findAndUpdateUser,
@@ -7,7 +7,7 @@ import {
   getUserById,
   getUserByInternalId,
   serializedUserFields,
-} from './user'
+} from './user.js'
 
 const testUser = {
   userId: 'user',

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose'
-import SchemaModel from '../../models/Schema'
+import SchemaModel from '../../models/Schema.js'
 import '../../utils/mockMongo'
-import { uploadSchema } from '../../utils/test/testModels'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { uploadSchema } from '../../utils/test/testModels.js'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 describe('test schema routes', () => {
   beforeEach(async () => {

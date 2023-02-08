@@ -1,4 +1,4 @@
-import MigrationModel from '../models/Migration'
+import MigrationModel from '../models/Migration.js'
 
 export async function doesMigrationExist(name: string) {
   const migration = await MigrationModel.findOne({

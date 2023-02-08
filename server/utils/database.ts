@@ -3,15 +3,8 @@ import getAppRoot from 'app-root-path'
 import { join } from 'path'
 import { readdir } from 'fs/promises'
 import mongoose from 'mongoose'
-import logger from './logger'
-import { doesMigrationExist, markMigrationComplete } from '../services/migration'
-
-type ConnectionOptions = {
-  useFindAndModify: boolean
-  useNewUrlParser: boolean
-  useUnifiedTopology: boolean
-  useCreateIndex: boolean
-}
+import logger from './logger.js'
+import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
 
 export async function connectToMongoose() {
   // is it already connected
@@ -20,7 +13,7 @@ export async function connectToMongoose() {
   }
 
   try {
-    await mongoose.connect(await config.get('mongo.uri'), config.get<ConnectionOptions>('mongo.connectionOptions'))
+    await mongoose.connect(await config.get('mongo.uri'))
 
     logger.info('Connected to Mongoose')
   } catch (error) {

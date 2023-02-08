@@ -6,9 +6,9 @@ import Stack from '@mui/material/Stack'
 import { LogLevel } from '@/types/interfaces'
 import { useGetCurrentUser } from '@/data/user'
 import { Typography } from '@mui/material'
-import Wrapper from '../src/Wrapper'
-import FilterMenu, { LogFilters } from '../src/FilterMenu/FilterMenu'
-import LogTree from '../src/LogTree/LogTree'
+import Wrapper from '../src/Wrapper.js'
+import FilterMenu, { LogFilters } from '../src/FilterMenu/FilterMenu.js'
+import LogTree from '../src/LogTree/LogTree.js'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()

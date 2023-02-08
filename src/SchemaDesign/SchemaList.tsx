@@ -6,8 +6,8 @@ import { useState } from 'react'
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
 import { Schema } from '@/types/interfaces'
-import { useGetSchemas } from '../../data/schema'
-import SchemaUploadDialog from './SchemaUploadDialog'
+import { useGetSchemas } from '../../data/schema.js'
+import SchemaUploadDialog from './SchemaUploadDialog.js'
 
 export default function SchemaList() {
   const {

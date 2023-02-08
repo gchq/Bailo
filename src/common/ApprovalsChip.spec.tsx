@@ -4,9 +4,9 @@
 
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { ApprovalStates, EntityKind } from '../../types/interfaces'
-import { lightTheme } from '../theme'
-import ApprovalsChip from './ApprovalsChip'
+import { ApprovalStates, EntityKind } from '../../types/interfaces.js'
+import { lightTheme } from '../theme.js'
+import ApprovalsChip from './ApprovalsChip.js'
 
 describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/2 approvals', async () => {

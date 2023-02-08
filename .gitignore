@@ -22,7 +22,7 @@ yarn-error.log*
 dist/
 
 # local config
-config/local.js
+config/local.cjs
 
 # certs
 certs/cert.pem

@@ -1,16 +1,16 @@
 import config from 'config'
 import mongoose from 'mongoose'
 // eslint-disable-next-line import/no-relative-packages
-import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { ModelDoc } from '../models/Model'
-import { findDeploymentById } from '../services/deployment'
-import { getUserByInternalId } from '../services/user'
-import { findVersionById, markVersionState } from '../services/version'
-import { simpleEmail } from '../templates/simpleEmail'
-import { connectToMongoose } from './database'
-import { sendEmail } from './smtp'
-import { getUserListFromEntityList } from './entity'
-import logger from './logger'
+import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue.js'
+import { ModelDoc } from '../models/Model.js'
+import { findDeploymentById } from '../services/deployment.js'
+import { getUserByInternalId } from '../services/user.js'
+import { findVersionById, markVersionState } from '../services/version.js'
+import { simpleEmail } from '../templates/simpleEmail.js'
+import { connectToMongoose } from './database.js'
+import { sendEmail } from './smtp.js'
+import { getUserListFromEntityList } from './entity.js'
+import logger from './logger.js'
 
 let uploadQueue: PMongoQueue | undefined
 let deploymentQueue: PMongoQueue | undefined

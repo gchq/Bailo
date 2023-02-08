@@ -1,2 +1,2 @@
-export * from './DateTimeWidget'
-export { default } from './DateTimeWidget'
+export * from './DateTimeWidget.js'
+export { default } from './DateTimeWidget.js'

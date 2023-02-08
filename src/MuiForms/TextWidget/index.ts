@@ -1,2 +1,2 @@
-export * from './TextWidget'
-export { default } from './TextWidget'
+export * from './TextWidget.js'
+export { default } from './TextWidget.js'

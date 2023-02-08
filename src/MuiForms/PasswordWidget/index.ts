@@ -1,2 +1,2 @@
-export * from './PasswordWidget'
-export { default } from './PasswordWidget'
+export * from './PasswordWidget.js'
+export { default } from './PasswordWidget.js'

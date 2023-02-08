@@ -3,8 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import * as uiConfig from '../data/uiConfig'
-import Banner from './Banner'
+import * as uiConfig from '../data/uiConfig.js'
+import Banner from './Banner.js'
 
 describe('Banner', () => {
   it('renders a Banner component', async () => {

@@ -1,5 +1,5 @@
 import Alert from '@mui/material/Alert'
-import Wrapper from '../Wrapper'
+import Wrapper from '../Wrapper.js'
 
 export default function ErrorWrapper({ message }: { message?: string }) {
   return (

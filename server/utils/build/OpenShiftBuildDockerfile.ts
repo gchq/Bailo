@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
 import config from 'config'
-import { OpenshiftClient } from 'openshift-rest-client'
+import OpenshiftClient from 'openshift-rest-client'
 import AdmZip from 'adm-zip'
 import { createReadStream } from 'fs'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
-import { ModelDoc } from '../../models/Model'
-import { getAdminToken } from '../../routes/v1/registryAuth'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+import { ModelDoc } from '../../models/Model.js'
+import { getAdminToken } from '../../routes/v1/registryAuth.js'
 
 class OpenShiftBuildDockerfile extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {

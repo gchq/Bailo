@@ -12,12 +12,12 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useState } from 'react'
-import { ListModelType, useListModels } from '../data/model'
-import EmptyBlob from '../src/common/EmptyBlob'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import Wrapper from '../src/Wrapper'
-import { Model } from '../types/interfaces'
-import useDebounce from '../utils/hooks/useDebounce'
+import { ListModelType, useListModels } from '../data/model.js'
+import EmptyBlob from '../src/common/EmptyBlob.js'
+import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper.js'
+import Wrapper from '../src/Wrapper.js'
+import { Model } from '../types/interfaces.js'
+import useDebounce from '../utils/hooks/useDebounce.js'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')

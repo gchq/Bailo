@@ -1,4 +1,4 @@
-import createEmotionCache from './createEmotionCache'
+import createEmotionCache from './createEmotionCache.js'
 
 describe('createEmotionCache', () => {
   it('rcreateEmotionCache', async () => {

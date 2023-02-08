@@ -8,7 +8,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useGetUiConfig } from '../../data/uiConfig'
+import { useGetUiConfig } from '../../data/uiConfig.js'
 
 function ModelEditSubmission({
   onSubmit,

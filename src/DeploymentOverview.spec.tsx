@@ -4,10 +4,10 @@
 
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { DeploymentDoc } from '../server/models/Deployment'
-import DeploymentOverview from './DeploymentOverview'
-import { lightTheme } from './theme'
-import { EntityKind } from '../types/interfaces'
+import { DeploymentDoc } from '../server/models/Deployment.js'
+import DeploymentOverview from './DeploymentOverview.js'
+import { lightTheme } from './theme.js'
+import { EntityKind } from '../types/interfaces.js'
 
 describe('DeploymentOverview', () => {
   const deployment = {

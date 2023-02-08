@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
-import ApprovalModel from '../../models/Approval'
-import * as approvalService from '../../services/approval'
-import { findAndUpdateUser } from '../../services/user'
+import ApprovalModel from '../../models/Approval.js'
+import * as approvalService from '../../services/approval.js'
+import { findAndUpdateUser } from '../../services/user.js'
 import '../../utils/mockMongo'
-import { testApproval, testUser } from '../../utils/test/testModels'
-import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils'
+import { testApproval, testUser } from '../../utils/test/testModels.js'
+import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 describe('test approvals routes', () => {
   beforeAll(async () => {

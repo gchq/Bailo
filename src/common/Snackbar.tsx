@@ -1,6 +1,6 @@
 // To USE:
 // import (change relative path):
-// import useNotification from '../../src/common/Snackbar'
+// import useNotification from '../../src/common/Snackbar.js'
 // Use once in file:
 // const sendNotification = useNotification()
 // Use for each notification to send:

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
-import { isUserInEntityList } from '../../utils/entity'
-import { findDeployments } from '../../services/deployment'
-import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
-import { findSchemaByRef } from '../../services/schema'
-import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
-import { BadReq, NotFound, NotImplemented } from '../../utils/result'
-import { ensureUserRole } from '../../utils/user'
+import { isUserInEntityList } from '../../utils/entity.js'
+import { findDeployments } from '../../services/deployment.js'
+import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model.js'
+import { findSchemaByRef } from '../../services/schema.js'
+import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
+import { BadReq, NotFound, NotImplemented } from '../../utils/result.js'
+import { ensureUserRole } from '../../utils/user.js'
 
 export const getModels = [
   ensureUserRole('user'),

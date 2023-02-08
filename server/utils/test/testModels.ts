@@ -1,8 +1,8 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
-import { ApprovalStates, EntityKind } from '../../../types/interfaces'
-import UserModel from '../../models/User'
+import { ApprovalCategory, ApprovalTypes } from '../../models/Approval.js'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces.js'
+import UserModel from '../../models/User.js'
 
 global.TextEncoder = TextEncoder
 

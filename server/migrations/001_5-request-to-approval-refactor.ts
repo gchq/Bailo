@@ -1,6 +1,6 @@
 import config from 'config'
 import { MongoClient, Collection, Document, ObjectId } from 'mongodb'
-import logger from '../utils/logger'
+import logger from '../utils/logger.js'
 
 const batchSize = 100
 

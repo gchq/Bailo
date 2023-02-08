@@ -1,5 +1,5 @@
-import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
-import getUuidFromUrl from '../utils/getUuidFromUrl'
+import convertNameToUrlFormat from '../utils/convertNameToUrlFormat.js'
+import getUuidFromUrl from '../utils/getUuidFromUrl.js'
 
 const BASE_URL = Cypress.config('baseUrl')
 

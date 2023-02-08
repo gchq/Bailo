@@ -1,2 +1,2 @@
-export * from './CheckboxesWidget'
-export { default } from './CheckboxesWidget'
+export * from './CheckboxesWidget.js'
+export { default } from './CheckboxesWidget.js'

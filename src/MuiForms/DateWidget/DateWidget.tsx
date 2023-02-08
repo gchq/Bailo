@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextWidgetProps } from '../TextWidget'
+import { TextWidgetProps } from '../TextWidget.js'
 
 function DateWidget(props: TextWidgetProps) {
   const { registry } = props

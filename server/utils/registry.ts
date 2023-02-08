@@ -1,8 +1,8 @@
 import axios, { AxiosResponse, Method } from 'axios'
 import https from 'https'
 import config from 'config'
-import { Access, getAccessToken } from '../routes/v1/registryAuth'
-import logger from './logger'
+import { Access, getAccessToken } from '../routes/v1/registryAuth.js'
+import logger from './logger.js'
 
 export enum ContentTypes {
   APPLICATION_OCTET_STREAM = 'application/octet-stream',

@@ -3,15 +3,15 @@ import config from 'config'
 import { writeFile, readFile } from 'fs/promises'
 import { homedir } from 'os'
 import { join } from 'path'
-import { set } from 'lodash'
+import { set } from 'lodash-es'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
-import { ModelDoc } from '../../models/Model'
-import { logCommand } from './build'
-import { getAdminToken } from '../../routes/v1/registryAuth'
-import { checkFileExists, ensurePathExists } from '../filesystem'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+import { ModelDoc } from '../../models/Model.js'
+import { logCommand } from './build.js'
+import { getAdminToken } from '../../routes/v1/registryAuth.js'
+import { checkFileExists, ensurePathExists } from '../filesystem.js'
 
 async function setRegistryLogin(registry: string, username: string, password: string) {
   const folder = join(homedir(), '.docker')

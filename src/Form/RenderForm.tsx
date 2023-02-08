@@ -6,9 +6,9 @@ import UserSelector from '@/src/MuiForms/UserSelector'
 import SeldonVersionSelector from '@/src/MuiForms/SeldonVersionSelector'
 import TextareaWidget from '@/src/MuiForms/TextareaWidget'
 import Nothing from '@/src/MuiForms/Nothing'
-import { Theme as MaterialUITheme } from '../MuiForms'
-import { setStepState } from '../../utils/formUtils'
-import { SplitSchema, Step } from '../../types/interfaces'
+import { Theme as MaterialUITheme } from '../MuiForms.js'
+import { setStepState } from '../../utils/formUtils.js'
+import { SplitSchema, Step } from '../../types/interfaces.js'
 
 const SchemaForm = withTheme(MaterialUITheme)
 

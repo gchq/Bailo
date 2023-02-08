@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import QueryString from 'qs'
-import { LogType } from '../../../types/interfaces'
-import { getLogs, getLogType } from '../../services/logs'
-import { BadReq } from '../../utils/result'
-import { ensureUserRole } from '../../utils/user'
+import { LogType } from '../../../types/interfaces.js'
+import { getLogs, getLogType } from '../../services/logs.js'
+import { BadReq } from '../../utils/result.js'
+import { ensureUserRole } from '../../utils/user.js'
 
 function parseDateQuery(
   queryDate: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,

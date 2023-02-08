@@ -2,11 +2,13 @@
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { v4 as uuidv4 } from 'uuid'
-import { mkdir, rm } from 'shelljs'
+import shelljs from 'shelljs'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+
+const { mkdir, rm } = shelljs
 
 class CreateWorkingDirectory extends BuildStep {
   constructor(logger: BuildLogger, opts: Partial<BuildOpts>) {

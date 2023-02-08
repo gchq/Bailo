@@ -14,9 +14,9 @@ import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
-import Slideshow from '../components/Slideshow'
+import Slideshow from '../components/Slideshow.js'
 
-import bailoLogo from '../public/bailo-logo.png'
+import bailoLogo from '../public/bailo-logo.png.js'
 
 const nunitoSansFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
 

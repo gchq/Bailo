@@ -11,7 +11,7 @@ import { postEndpoint } from '@/data/api'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import useNotification from '../common/Snackbar'
+import useNotification from '../common/Snackbar.js'
 
 export default function SchemaUploadDialog({
   open,

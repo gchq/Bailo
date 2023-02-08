@@ -3,8 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import FileInput from './FileInput'
-import { doNothing } from '../../utils/testUtils'
+import FileInput from './FileInput.js'
+import { doNothing } from '../../utils/testUtils.js'
 
 describe('FileInput', () => {
   it('renders an FileInput component', async () => {

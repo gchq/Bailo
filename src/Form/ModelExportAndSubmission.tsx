@@ -16,10 +16,10 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useGetUiConfig } from '../../data/uiConfig'
-import ModelOverview from '../ModelOverview'
-import { SplitSchema } from '../../types/interfaces'
-import { consoleWarn } from '../../utils/logging'
+import { useGetUiConfig } from '../../data/uiConfig.js'
+import ModelOverview from '../ModelOverview.js'
+import { SplitSchema } from '../../types/interfaces.js'
+import { consoleWarn } from '../../utils/logging.js'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')

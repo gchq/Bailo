@@ -1,4 +1,4 @@
-import { merge } from 'lodash'
+import { merge } from 'lodash-es'
 
 export function createUiSchema(schema: any, customSchema: any) {
   const baseUiSchema = createBaseSchema(schema)

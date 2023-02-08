@@ -1,8 +1,8 @@
-import logger from '../utils/logger'
-import DeploymentModel from '../models/Deployment'
-import ModelModel from '../models/Model'
-import VersionModel from '../models/Version'
-import { copyDockerImage, createRegistryClient } from '../utils/registry'
+import logger from '../utils/logger.js'
+import DeploymentModel from '../models/Deployment.js'
+import ModelModel from '../models/Model.js'
+import VersionModel from '../models/Version.js'
+import { copyDockerImage, createRegistryClient } from '../utils/registry.js'
 
 export async function up() {
   const deployments = await DeploymentModel.find({})

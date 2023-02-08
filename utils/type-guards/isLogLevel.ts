@@ -1,4 +1,4 @@
-import { LogLevel } from '../../types/interfaces'
+import { LogLevel } from '../../types/interfaces.js'
 
 type LogLevelString = `${LogLevel}`
 

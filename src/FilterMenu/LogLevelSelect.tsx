@@ -3,7 +3,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import { LogLevel, LogLevelLabel } from '../../types/interfaces'
+import { LogLevel, LogLevelLabel } from '../../types/interfaces.js'
 
 type LogLevelSelectProps = {
   value: LogLevel

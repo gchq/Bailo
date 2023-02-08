@@ -1,7 +1,7 @@
 import { readdir, readFile, stat } from 'fs/promises'
 import matter from 'gray-matter'
 import { parse } from 'path'
-import { DocFileOrHeading, DocsMenuContent } from '../../types/interfaces'
+import { DocFileOrHeading, DocsMenuContent } from '../../types/interfaces.js'
 
 type DocsFrontMatter = {
   priority?: number

@@ -1,6 +1,6 @@
 import useSWRImmutable from 'swr/immutable'
-import { UiConfig } from '../types/interfaces'
-import { fetcher } from '../utils/fetcher'
+import { UiConfig } from '../types/interfaces.js'
+import { fetcher } from '../utils/fetcher.js'
 
 export function useGetUiConfig() {
   const { data, error, mutate } = useSWRImmutable<UiConfig>('/api/v1/config', fetcher)

@@ -14,7 +14,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import Icon from '@mui/material/Icon'
 import { SchemaQuestion } from '@/types/interfaces'
 import DialogContentText from '@mui/material/DialogContentText'
-import SchemaDesignerQuestion, { DesignerQuestion } from './SchemaDesignerQuestion'
+import SchemaDesignerQuestion, { DesignerQuestion } from './SchemaDesignerQuestion.js'
 
 const questionList: DesignerQuestion[] = [
   {

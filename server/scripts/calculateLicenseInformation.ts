@@ -1,7 +1,9 @@
-import { exec } from 'shelljs'
-import packageLock from '../../package-lock.json'
-import packageInfo from '../../package.json'
-import { consoleLog } from '../../utils/logging'
+import shelljs from 'shelljs'
+import packageLock from '../../package-lock.json.js'
+import packageInfo from '../../package.json.js'
+import { consoleLog } from '../../utils/logging.js'
+
+const { exec } = shelljs
 
 // This script requires 'license-checker'
 //   npm i -g license-checker

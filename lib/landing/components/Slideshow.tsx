@@ -7,10 +7,10 @@ import imageLoader from '@/components/imageLoader'
 
 import styled from 'styled-components'
 
-import marketplaceImage from '../public/images/bailo-marketplace.png'
-import apiImage from '../public/images/bailo-api.png'
-import modelImage from '../public/images/bailo-model.png'
-import deploymentImage from '../public/images/bailo-deployment.png'
+import marketplaceImage from '../public/images/bailo-marketplace.png.js'
+import apiImage from '../public/images/bailo-api.png.js'
+import modelImage from '../public/images/bailo-model.png.js'
+import deploymentImage from '../public/images/bailo-deployment.png.js'
 
 const StyledSwiper = styled(Swiper)`
   border-radius: 1rem;

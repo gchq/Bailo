@@ -1,8 +1,8 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { createSchema, findSchemaByName, findSchemaByRef, findSchemasByUse } from '../../services/schema'
-import { BadReq, Conflict, NotFound } from '../../utils/result'
-import { ensureUserRole } from '../../utils/user'
+import { createSchema, findSchemaByName, findSchemaByRef, findSchemasByUse } from '../../services/schema.js'
+import { BadReq, Conflict, NotFound } from '../../utils/result.js'
+import { ensureUserRole } from '../../utils/user.js'
 
 export const getSchemas = [
   ensureUserRole('user'),

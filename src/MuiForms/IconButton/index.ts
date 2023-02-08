@@ -1,2 +1,2 @@
-export * from './IconButton'
-export { default } from './IconButton'
+export * from './IconButton.js'
+export { default } from './IconButton.js'

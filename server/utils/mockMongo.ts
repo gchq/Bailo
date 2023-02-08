@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 let mongod: MongoMemoryServer
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create()
-  await mongoose.connect(mongod.getUri(), config.get('mongo.connectionOptions'))
+  await mongoose.connect(mongod.getUri())
 })
 
 beforeEach(() => {

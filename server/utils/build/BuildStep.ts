@@ -1,6 +1,6 @@
-import { VersionDoc } from '../../models/Version'
-import { FileRef } from './build'
-import { BuildLogger } from './BuildLogger'
+import { VersionDoc } from '../../models/Version.js'
+import { FileRef } from './build.js'
+import { BuildLogger } from './BuildLogger.js'
 
 export type Files = {
   [name: string]: FileRef

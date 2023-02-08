@@ -3,8 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import UserAvatar from './UserAvatar'
-import { EntityKind } from '../../types/interfaces'
+import UserAvatar from './UserAvatar.js'
+import { EntityKind } from '../../types/interfaces.js'
 
 describe('UserAvatar', () => {
   it('renders an UserAvatar component', async () => {

@@ -1,4 +1,4 @@
-import { LogLevel, LogLevelLabel } from '../types/interfaces'
+import { LogLevel, LogLevelLabel } from '../types/interfaces.js'
 
 const getLogLevelLabel = (level: LogLevel): LogLevelLabel => {
   const label: LogLevelLabel | undefined = LogLevelLabel[LogLevel[level]]

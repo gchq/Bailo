@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { rm, mkdir } from 'shelljs'
+import shelljs from 'shelljs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
@@ -7,10 +7,12 @@ import { writeFile } from 'fs/promises'
 import dedent from 'dedent-js'
 import config from 'config'
 
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
-import { logCommand } from './build'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+import { logCommand } from './build.js'
+
+const { rm, mkdir } = shelljs
 
 interface GetSeldonDockerfileProps {
   seldonDockerfile: string

@@ -1,4 +1,4 @@
-import DefaultErrorWrapper from './ErrorWrapper'
+import DefaultErrorWrapper from './ErrorWrapper.js'
 
 export default function MultipleErrorWrapper(generic: string, errors: any, ErrorWrapper: any = DefaultErrorWrapper) {
   for (const key of Object.keys(errors)) {

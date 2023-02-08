@@ -4,7 +4,7 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import { ExtendedSelectDisplayProps } from '@/src/types'
-import { Schema } from '../../types/interfaces'
+import { Schema } from '../../types/interfaces.js'
 
 export default function SchemaSelector({
   currentSchema,

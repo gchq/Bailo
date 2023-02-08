@@ -5,7 +5,7 @@ import Remove from '@mui/icons-material/Remove'
 import Button from '@mui/material/Button'
 import { IconButtonProps as MuiIconButtonProps } from '@mui/material/IconButton'
 import React from 'react'
-import { omit } from 'lodash'
+import { omit } from 'lodash-es'
 
 const mappings: any = {
   remove: Remove,

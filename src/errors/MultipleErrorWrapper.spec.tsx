@@ -3,8 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import MultipleErrorWrapper from './MultipleErrorWrapper'
-import { mockNextUseRouter } from '../../utils/testUtils'
+import MultipleErrorWrapper from './MultipleErrorWrapper.js'
+import { mockNextUseRouter } from '../../utils/testUtils.js'
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}

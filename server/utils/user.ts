@@ -1,10 +1,10 @@
 import { timingSafeEqual } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
-import Authorisation from '../external/Authorisation'
-import { UserDoc } from '../models/User'
-import { getAdminToken } from '../routes/v1/registryAuth'
-import { findUserCached, getUserById, findAndUpdateUser } from '../services/user'
-import { Forbidden, Unauthorised } from './result'
+import Authorisation from '../external/Authorisation.js'
+import { UserDoc } from '../models/User.js'
+import { getAdminToken } from '../routes/v1/registryAuth.js'
+import { findUserCached, getUserById, findAndUpdateUser } from '../services/user.js'
+import { Forbidden, Unauthorised } from './result.js'
 
 const auth = new Authorisation()
 

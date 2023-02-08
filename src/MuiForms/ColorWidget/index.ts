@@ -1,2 +1,2 @@
-export * from './ColorWidget'
-export { default } from './ColorWidget'
+export * from './ColorWidget.js'
+export { default } from './ColorWidget.js'

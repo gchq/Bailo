@@ -1,13 +1,13 @@
-import VersionModel from '../models/Version'
+import VersionModel from '../models/Version.js'
 import '../utils/mockMongo'
-import { testVersion, testVersion2, userDoc } from '../utils/test/testModels'
+import { testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
 import {
   createVersion,
   findModelVersions,
   findVersionById,
   findVersionByName,
   serializedVersionFields,
-} from './version'
+} from './version.js'
 
 let versionDoc
 

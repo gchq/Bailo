@@ -1,12 +1,12 @@
 import config from 'config'
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
-import { DeploymentDoc } from '../models/Deployment'
-import { ModelDoc } from '../models/Model'
-import { ApprovalCategory } from '../models/Approval'
-import { VersionDoc } from '../models/Version'
-import createRequestUrl from '../utils/createRequestUrl'
-import { wrapper } from './partials'
+import { DeploymentDoc } from '../models/Deployment.js'
+import { ModelDoc } from '../models/Model.js'
+import { ApprovalCategory } from '../models/Approval.js'
+import { VersionDoc } from '../models/Version.js'
+import createRequestUrl from '../utils/createRequestUrl.js'
+import { wrapper } from './partials.js'
 
 export interface ReviewApprovalContext {
   document: VersionDoc | DeploymentDoc

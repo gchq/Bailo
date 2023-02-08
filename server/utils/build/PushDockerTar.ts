@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { rm } from 'shelljs'
+import shelljs from 'shelljs'
 import tar from 'tar'
 import { readFile, stat } from 'fs/promises'
 import fs from 'fs'
@@ -9,12 +9,14 @@ import defaultAxios, { AxiosInstance } from 'axios'
 import { createHash } from 'crypto'
 import https from 'https'
 
-import { ContentTypes } from '../registry'
-import { VersionDoc } from '../../models/Version'
-import { BuildOpts, BuildStep, Files } from './BuildStep'
-import { BuildLogger } from './BuildLogger'
-import { getAccessToken } from '../../routes/v1/registryAuth'
-import { ModelDoc } from '../../models/Model'
+import { ContentTypes } from '../registry.js'
+import { VersionDoc } from '../../models/Version.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
+import { BuildLogger } from './BuildLogger.js'
+import { getAccessToken } from '../../routes/v1/registryAuth.js'
+import { ModelDoc } from '../../models/Model.js'
+
+const { rm } = shelljs
 
 const CHUNK_SIZE = 8 * 1024 * 1024
 

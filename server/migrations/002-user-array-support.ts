@@ -1,10 +1,10 @@
-import logger from '../utils/logger'
-import DeploymentModel from '../models/Deployment'
-import ModelModel from '../models/Model'
-import ApprovalModel from '../models/Approval'
-import VersionModel from '../models/Version'
-import UserModel from '../models/User'
-import { EntityKind } from '../../types/interfaces'
+import logger from '../utils/logger.js'
+import DeploymentModel from '../models/Deployment.js'
+import ModelModel from '../models/Model.js'
+import ApprovalModel from '../models/Approval.js'
+import VersionModel from '../models/Version.js'
+import UserModel from '../models/User.js'
+import { EntityKind } from '../../types/interfaces.js'
 
 export async function up() {
   const deployments = await DeploymentModel.find({})

@@ -1,6 +1,6 @@
 import config from 'config'
 import { Request, Response } from 'express'
-import { ensureUserRole } from '../../utils/user'
+import { ensureUserRole } from '../../utils/user.js'
 
 function getMongoID() {
   const timestamp = Math.floor(new Date().getTime() / 1000).toString(16)

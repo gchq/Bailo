@@ -5,7 +5,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
-import { DocFileOrHeading, DocHeading, DocsMenuContent } from '../types/interfaces'
+import { DocFileOrHeading, DocHeading, DocsMenuContent } from '../types/interfaces.js'
 import { styled, useTheme } from '@mui/material/styles'
 import Container from '@mui/material/Container'
 import Link from 'next/link'
@@ -14,7 +14,7 @@ import Stack from '@mui/system/Stack'
 import Button from '@mui/material/Button'
 import ArrowForward from '@mui/icons-material/ArrowForward'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import Copyright from './Copyright'
+import Copyright from './Copyright.js'
 
 const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',

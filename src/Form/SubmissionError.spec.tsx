@@ -3,7 +3,7 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import SubmissionError from './SubmissionError'
+import SubmissionError from './SubmissionError.js'
 
 describe('SubmissionError', () => {
   it('renders a SubmissionError component', async () => {

@@ -13,7 +13,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 
-import { ApprovalStates, Entity } from '../../types/interfaces'
+import { ApprovalStates, Entity } from '../../types/interfaces.js'
 
 type Approval = {
   reviewers: Array<Entity>

@@ -1,2 +1,2 @@
-export * from './UpDownWidget'
-export { default } from './UpDownWidget'
+export * from './UpDownWidget.js'
+export { default } from './UpDownWidget.js'

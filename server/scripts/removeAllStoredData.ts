@@ -1,6 +1,6 @@
 /* eslint-disable import/newline-after-import */
-import { clearStoredData } from '../utils/clear'
-import { connectToMongoose, disconnectFromMongoose } from '../utils/database'
+import { clearStoredData } from '../utils/clear.js'
+import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 ;(async () => {
   await connectToMongoose()
 

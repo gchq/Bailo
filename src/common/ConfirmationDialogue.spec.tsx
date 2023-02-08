@@ -3,8 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import { doNothing } from '../../utils/testUtils'
-import ConfirmationDialogue from './ConfirmationDialogue'
+import { doNothing } from '../../utils/testUtils.js'
+import ConfirmationDialogue from './ConfirmationDialogue.js'
 
 describe('ConfirmationDialogue', () => {
   const testTitle = 'Test dialogue title'

@@ -2,8 +2,8 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import MetadataDisplay from './MetadataDisplay'
-import { DeploymentDoc } from '../server/models/Deployment'
+import MetadataDisplay from './MetadataDisplay.js'
+import { DeploymentDoc } from '../server/models/Deployment.js'
 
 type DeploymentOverviewProps = {
   deployment: DeploymentDoc

@@ -1,5 +1,5 @@
 import supertest from 'supertest'
-import { server } from '../../index'
+import { server } from '../../index.js'
 
 export function authenticatedGetRequest(path: string) {
   const request = supertest(server)

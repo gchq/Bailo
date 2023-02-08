@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { ensureUserRole } from '../../utils/user'
-import generateDocsMenuContent from '../../services/docs'
+import { ensureUserRole } from '../../utils/user.js'
+import generateDocsMenuContent from '../../services/docs.js'
 
 const getDocsMenuContent = [
   ensureUserRole('user'),
