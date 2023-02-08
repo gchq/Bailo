@@ -27,7 +27,6 @@ import Link from 'next/link'
 import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
-import { Elements } from 'react-flow-renderer'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import { useGetModelVersions } from '@/data/model'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -97,7 +96,7 @@ export default function Deployment() {
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const [group, setGroup] = useState<TabOptions>('overview')
-  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>([])
   const [open, setOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [imageName, setImageName] = useState('')
@@ -290,7 +289,9 @@ export default function Deployment() {
 
           {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
-          {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+          {group === 'compliance' && (
+            <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
+          )}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
 

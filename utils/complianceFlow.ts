@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { XYPosition } from 'react-flow-renderer'
+import { XYPosition } from 'reactflow'
 import { Deployment, Version } from 'types/interfaces'
 
 function approvalColour(state: string) {
@@ -33,52 +33,56 @@ export default function createComplianceFlow(version: Version) {
       ? success
       : undefined
 
-  return [
-    {
-      id: 'upload',
-      type: 'input',
-      data: { label: 'Model Uploaded' },
-      position,
-      style: { background: success },
-    },
-    {
-      id: 'metadata_validated',
-      data: { label: 'Metadata Validated' },
-      position,
-      style: { background: success },
-    },
-    {
-      id: 'image_built',
-      data: { label: 'Image Built' },
-      position,
-      style: { background: imageBuiltStyle },
-    },
-    {
-      id: 'manager_checks',
-      data: { label: 'Checks by Manager' },
-      position,
-      style: { background: managerApprovedStyle },
-    },
-    {
-      id: 'reviewer_checks',
-      data: { label: 'Checks by Reviewer' },
-      position,
-      style: { background: reviewerApprovedStyle },
-    },
-    {
-      id: 'model_available',
-      type: 'output',
-      data: { label: 'Model Available' },
-      position,
-      style: { background: availableStyle },
-    },
-    { id: '1', source: 'upload', target: 'metadata_validated', type: 'smoothstep' },
-    { id: '999', source: 'metadata_validated', target: 'image_built', type: 'smoothstep' },
-    { id: '2', source: 'image_built', target: 'manager_checks', type: 'smoothstep' },
-    { id: '3', source: 'image_built', target: 'reviewer_checks', type: 'smoothstep' },
-    { id: '4', source: 'manager_checks', target: 'model_available', type: 'smoothstep' },
-    { id: '5', source: 'reviewer_checks', target: 'model_available', type: 'smoothstep' },
-  ]
+  return {
+    nodes: [
+      {
+        id: 'upload',
+        type: 'input',
+        data: { label: 'Model Uploaded' },
+        position,
+        style: { background: success },
+      },
+      {
+        id: 'metadata_validated',
+        data: { label: 'Metadata Validated' },
+        position,
+        style: { background: success },
+      },
+      {
+        id: 'image_built',
+        data: { label: 'Image Built' },
+        position,
+        style: { background: imageBuiltStyle },
+      },
+      {
+        id: 'manager_checks',
+        data: { label: 'Checks by Manager' },
+        position,
+        style: { background: managerApprovedStyle },
+      },
+      {
+        id: 'reviewer_checks',
+        data: { label: 'Checks by Reviewer' },
+        position,
+        style: { background: reviewerApprovedStyle },
+      },
+      {
+        id: 'model_available',
+        type: 'output',
+        data: { label: 'Model Available' },
+        position,
+        style: { background: availableStyle },
+      },
+    ],
+    edges: [
+      { id: '1', source: 'upload', target: 'metadata_validated', type: 'smoothstep' },
+      { id: '999', source: 'metadata_validated', target: 'image_built', type: 'smoothstep' },
+      { id: '2', source: 'image_built', target: 'manager_checks', type: 'smoothstep' },
+      { id: '3', source: 'image_built', target: 'reviewer_checks', type: 'smoothstep' },
+      { id: '4', source: 'manager_checks', target: 'model_available', type: 'smoothstep' },
+      { id: '5', source: 'reviewer_checks', target: 'model_available', type: 'smoothstep' },
+    ],
+  }
 }
 
 export function createDeploymentComplianceFlow(deployment: Deployment) {
@@ -96,42 +100,46 @@ export function createDeploymentComplianceFlow(deployment: Deployment) {
 
   const availableStyle = deployment.managerApproved === 'Accepted' ? success : undefined
 
-  return [
-    {
-      id: 'deployment',
-      type: 'input',
-      data: { label: 'Deployment Created' },
-      position,
-      style: { background: success },
-    },
-    {
-      id: 'metadata_validated',
-      data: { label: 'Metadata Validated' },
-      position,
-      style: { background: success },
-    },
-    {
-      id: 'deployment_built',
-      data: { label: 'Deployment Built' },
-      position,
-      style: { background: imageBuiltStyle },
-    },
-    {
-      id: 'manager_checks',
-      data: { label: 'Checks by Manager' },
-      position,
-      style: { background: managerApprovedStyle },
-    },
-    {
-      id: 'deployment_available',
-      type: 'output',
-      data: { label: 'Deployment Available' },
-      position,
-      style: { background: availableStyle },
-    },
-    { id: '1', source: 'deployment', target: 'metadata_validated', type: 'smoothstep' },
-    { id: '999', source: 'metadata_validated', target: 'manager_checks', type: 'smoothstep' },
-    { id: '2', source: 'manager_checks', target: 'deployment_built', type: 'smoothstep' },
-    { id: '4', source: 'deployment_built', target: 'deployment_available', type: 'smoothstep' },
-  ]
+  return {
+    nodes: [
+      {
+        id: 'deployment',
+        type: 'input',
+        data: { label: 'Deployment Created' },
+        position,
+        style: { background: success },
+      },
+      {
+        id: 'metadata_validated',
+        data: { label: 'Metadata Validated' },
+        position,
+        style: { background: success },
+      },
+      {
+        id: 'deployment_built',
+        data: { label: 'Deployment Built' },
+        position,
+        style: { background: imageBuiltStyle },
+      },
+      {
+        id: 'manager_checks',
+        data: { label: 'Checks by Manager' },
+        position,
+        style: { background: managerApprovedStyle },
+      },
+      {
+        id: 'deployment_available',
+        type: 'output',
+        data: { label: 'Deployment Available' },
+        position,
+        style: { background: availableStyle },
+      },
+    ],
+    edges: [
+      { id: '1', source: 'deployment', target: 'metadata_validated', type: 'smoothstep' },
+      { id: '999', source: 'metadata_validated', target: 'manager_checks', type: 'smoothstep' },
+      { id: '2', source: 'manager_checks', target: 'deployment_built', type: 'smoothstep' },
+      { id: '4', source: 'deployment_built', target: 'deployment_available', type: 'smoothstep' },
+    ],
+  }
 }
