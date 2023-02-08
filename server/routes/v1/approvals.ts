@@ -5,9 +5,14 @@ import ModelModel from '../../models/Model.js'
 import DeploymentModel, { DeploymentDoc } from '../../models/Deployment.js'
 import { ApprovalStates } from '../../../types/interfaces.js'
 import { ApprovalCategory } from '../../models/Approval.js'
-import VersionModel, { VersionDoc } from '../../models/Version.js'
+import { VersionDoc } from '../../models/Version.js'
 import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment.js'
-import { getApproval, readNumApprovals, readApprovals } from '../../services/approval.js'
+import {
+  getApproval,
+  readNumApprovals,
+  readApprovals,
+  requestDeploymentsForModelVersions,
+} from '../../services/approval.js'
 import { getUserByInternalId } from '../../services/user.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
@@ -142,16 +147,15 @@ export const postApprovalResponse = [
         })
       }
     } else if (approval.deployment) {
-      const deploymentDoc = approval.deployment as DeploymentDoc
-      const deployment = await findDeploymentById(req.user, deploymentDoc._id, { populate: true })
+      const deploymentId = approval.deployment
+      const deployment = await findDeploymentById(req.user, deploymentId, { populate: true })
       if (!deployment) {
         throw BadReq(
-          { code: 'deployment_not_found', deployment: deploymentDoc },
-          `Received invalid deployment '${deploymentDoc._id}'`
+          { code: 'deployment_not_found', deployment: deploymentId },
+          `Received invalid deployment '${deploymentId}'`
         )
       }
 
-      userId = req.user._id
       approvalCategory = ApprovalCategory.Deployment
       document = deployment
 
@@ -160,50 +164,20 @@ export const postApprovalResponse = [
       await deployment.save()
 
       if (choice === ApprovalStates.Accepted) {
-        const model = await ModelModel.findById(deployment.model)
-        if (!model) {
-          throw BadReq(
-            { code: 'model_not_found', deployment: deploymentDoc },
-            `Could not find parent model for deployment'${deploymentDoc._id}'`
-          )
-        }
-        const { versions } = model
-        req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
-        if (!versions) {
-          throw BadReq(
-            { code: 'versions_not_found', deployment: deploymentDoc },
-            `Could not find versions for deployment'${deploymentDoc._id}'`
-          )
-        }
-        versions.forEach(async (versionId) => {
-          const versionDoc = await VersionModel.findById(versionId)
-          if (!versionDoc) {
-            throw BadReq(
-              { code: 'versions_not_found', deployment: deploymentDoc },
-              `Could not find version for deployment'${deploymentDoc._id}'`
-            )
-          }
-          await (
-            await getDeploymentQueue()
-          ).add({
-            deploymentId: deployment._id,
-            userId,
-            version: versionDoc.version,
-          })
-        })
+        await requestDeploymentsForModelVersions(req.user, deployment)
       } else if (choice === ApprovalStates.Declined) {
         const model = await ModelModel.findById(deployment.model)
         if (!model) {
           throw BadReq({ code: 'bad_request_type', deployment }, 'Unable to find model for deployment')
         }
-        removeModelDeploymentsFromRegistry(model, deployment)
+        await removeModelDeploymentsFromRegistry(model, deployment)
       }
     } else {
       throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
     }
 
     const reviewingUser = req.user.id
-    const user = await getUserByInternalId(userId)
+    const user = await getUserByInternalId(req.user._id)
     if (user?.email) {
       await sendEmail({
         to: user.email,

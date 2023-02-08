@@ -41,6 +41,9 @@ export const darkTheme = createTheme({
     error: {
       main: red.A200,
     },
+    info: {
+      main: '#0288d1',
+    },
     warning: {
       main: yellow.A700,
     },

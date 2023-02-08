@@ -3,10 +3,10 @@ import * as Minio from 'minio'
 import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { customAlphabet } from 'nanoid'
-import { ApprovalStates } from '../../../types/interfaces.js'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces.js'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
-import { createDeploymentApprovals } from '../../services/approval.js'
+import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
@@ -119,6 +119,69 @@ export const postDeployment = [
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
       'Successfully created deployment'
     )
+
+    res.json({
+      uuid,
+    })
+  },
+]
+
+export const postUngovernedDeployment = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    req.log.info({ code: 'requesting_deployment' }, 'User requesting deployment')
+    const { body } = req
+
+    body.timeStamp = new Date().toISOString()
+
+    const model = await findModelByUuid(req.user, body.modelUuid)
+
+    if (!model) {
+      throw NotFound(
+        { code: 'model_not_found', modelId: body.modelUuid },
+        `Unable to find model with name: '${body.modelUuid}'`
+      )
+    }
+
+    const name = body.name
+      .toLowerCase()
+      .replace(/[^a-z 0-9]/g, '')
+      .replace(/ /g, '-')
+
+    const uuid = `${name}-${nanoid()}`
+
+    const owner = {
+      kind: EntityKind.USER,
+      id: req.user.id,
+    }
+
+    const deployment = await createDeployment(req.user, {
+      schemaRef: null,
+      uuid,
+
+      model: model._id,
+      metadata: {
+        highLevelDetails: {
+          name: body.name,
+          modelID: model.uuid,
+        },
+        contacts: {
+          owner: [owner],
+        },
+      },
+      managerApproved: ApprovalStates.Accepted,
+      ungoverned: true,
+      owner,
+    })
+
+    req.log.info(
+      { code: 'created_ungoverned_deployment', deploymentId: deployment._id, uuid },
+      'Successfully created deployment'
+    )
+
+    req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
+    await requestDeploymentsForModelVersions(req.user, deployment)
 
     res.json({
       uuid,

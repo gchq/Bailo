@@ -23,6 +23,7 @@ import { serializedVersionFields } from '../services/version.js'
 import { ensurePathExists, getFilesInDir } from './filesystem.js'
 import { consoleError } from '../../utils/logging.js'
 import LogModel from '../models/Log.js'
+import serializers from './serializers.js'
 
 const appRoot = getAppRoot.toString()
 
@@ -117,47 +118,11 @@ class MongoWriter {
     if (data.log === false) {
       return
     }
+
     return
 
     const log = new LogModel(data)
     await log.save()
-  }
-}
-
-export interface SerializerOptions {
-  mandatory?: Array<string>
-  optional?: Array<string>
-  serializable?: Array<any>
-}
-
-export function createSerializer(options: SerializerOptions) {
-  const mandatory = options.mandatory || []
-  const optional = options.optional || []
-  const serializable = options.serializable || []
-
-  return function serializer(unserialized: any) {
-    if (!unserialized) {
-      return unserialized
-    }
-
-    const asArray = castArray(unserialized)
-
-    if (!asArray.every((item) => mandatory.every((value) => get(item, value) !== undefined))) {
-      return unserialized
-    }
-
-    const serialized = asArray.map((item) => {
-      const segments = pick(item, mandatory.concat(optional))
-      const remotes = {}
-
-      serializable.forEach(({ type, field }) => {
-        set(remotes, field, type(get(item, field)))
-      })
-
-      return { ...segments, ...remotes }
-    })
-
-    return Array.isArray(unserialized) ? serialized : serialized[0]
   }
 }
 
@@ -285,18 +250,7 @@ const log = bunyan.createLogger({
   level: 'trace',
   src: process.env.NODE_ENV !== 'production',
   streams: streams.length ? streams : undefined,
-  serializers: {
-    version: createSerializer(serializedVersionFields()),
-    versions: createSerializer(serializedVersionFields()),
-    model: createSerializer(serializedModelFields()),
-    models: createSerializer(serializedModelFields()),
-    deployment: createSerializer(serializedDeploymentFields()),
-    deployments: createSerializer(serializedDeploymentFields()),
-    schema: createSerializer(serializedSchemaFields()),
-    schemas: createSerializer(serializedSchemaFields()),
-    user: createSerializer(serializedUserFields()),
-    users: createSerializer(serializedUserFields()),
-  },
+  serializers,
 })
 
 const morganLog = morgan<any, any>(

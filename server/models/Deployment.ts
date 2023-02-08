@@ -11,7 +11,7 @@ export interface LogStatement {
 }
 
 export interface Deployment {
-  schemaRef: string
+  schemaRef: string | null
   uuid: string
 
   model: Types.ObjectId | ModelDoc
@@ -21,6 +21,7 @@ export interface Deployment {
 
   logs: Types.Array<LogStatement>
   built: boolean
+  ungoverned: boolean
 
   createdAt: Date
   updatedAt: Date
@@ -32,7 +33,7 @@ export type DeploymentDoc = Deployment & Document<any, any, Deployment>
 
 const DeploymentSchema = new Schema<Deployment>(
   {
-    schemaRef: { type: String, required: true },
+    schemaRef: { type: String },
     uuid: { type: String, required: true, index: true, unique: true },
 
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
@@ -42,6 +43,7 @@ const DeploymentSchema = new Schema<Deployment>(
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },
+    ungoverned: { type: Boolean, default: false },
   },
   {
     timestamps: true,

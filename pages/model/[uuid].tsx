@@ -43,6 +43,9 @@ import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import TextField from '@mui/material/TextField'
 import { getErrorMessage } from '../../utils/fetcher.js'
 import ApprovalsChip from '../../src/common/ApprovalsChip.js'
 import EmptyBlob from '../../src/common/EmptyBlob.js'
@@ -81,14 +84,17 @@ function Model() {
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
+  const [ungovernedDialogOpen, setUngovernedDialogOpen] = useState(false)
+  const [ungovernedDeploymentName, setUngovernedDeploymentName] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
   const { versionAccess } = useGetVersionAccess(version?._id)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
   const sendNotification = useNotification()
@@ -270,6 +276,34 @@ function Model() {
     }
   }
 
+  const handleUngovernedDialogClose = () => {
+    setUngovernedDialogOpen(false)
+  }
+
+  const requestUngovernedDeployment = async () => {
+    setErrorMessage('')
+    const response = await postEndpoint(`/api/v1/deployment/ungoverned`, {
+      name: ungovernedDeploymentName,
+      modelUuid: uuid,
+      initialVersionRequested: version.version,
+    })
+    if (response.status >= 400) {
+      let responseError = response.statusText
+      try {
+        responseError = `${response.statusText}: ${(await response.json()).message}`
+      } catch (e) {
+        setErrorMessage('No response from server')
+        return
+      }
+
+      setErrorMessage(responseError)
+      return
+    }
+
+    const { uuid: responseUuid } = await response.json()
+    router.push(`/deployment/${responseUuid}`)
+  }
+
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
       {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
@@ -336,6 +370,18 @@ function Model() {
                       <UploadIcon fontSize='small' />
                     </ListItemIcon>
                     <ListItemText>Request deployment</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
+                <DisabledElementTooltip conditions={[!version.built ? 'Version needs to build.' : '']}>
+                  <MenuItem
+                    onClick={() => setUngovernedDialogOpen(true)}
+                    disabled={!version.built}
+                    data-test='submitUngovernedDeployment'
+                  >
+                    <ListItemIcon>
+                      <UploadIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Request ungoverned deployment</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
                 <Divider />
@@ -550,6 +596,31 @@ function Model() {
           </Box>
         )}
       </Paper>
+      <Dialog open={ungovernedDialogOpen} onClose={handleUngovernedDialogClose}>
+        <DialogContent>
+          <Stack spacing={1}>
+            <Stack direction='row' spacing={2}>
+              <TextField
+                label='Deployment name'
+                variant='outlined'
+                value={ungovernedDeploymentName}
+                onChange={(event) => setUngovernedDeploymentName(event.target.value)}
+              />
+              <Button
+                disabled={ungovernedDeploymentName === ''}
+                variant='contained'
+                onClick={requestUngovernedDeployment}
+                autoFocus
+              >
+                Request
+              </Button>
+            </Stack>
+            <Typography sx={{ color: theme.palette.error.main }} variant='caption'>
+              {errorMessage}
+            </Typography>
+          </Stack>
+        </DialogContent>
+      </Dialog>
     </Wrapper>
   )
 }

@@ -1,4 +1,5 @@
 import { Types } from 'mongoose'
+import { getDeploymentQueue } from '../utils/queues.js'
 import { getEntitiesForUser, getUserListFromEntityList, parseEntityList } from '../utils/entity.js'
 import { ApprovalStates, Approval, Entity } from '../../types/interfaces.js'
 import { DeploymentDoc } from '../models/Deployment.js'
@@ -9,6 +10,8 @@ import { BadReq } from '../utils/result.js'
 import { sendEmail } from '../utils/smtp.js'
 import { getUserByInternalId } from './user.js'
 import { UserDoc } from '../models/User.js'
+import { findVersionById } from './version.js'
+import { findModelById } from './model.js'
 
 export async function createDeploymentApprovals({ deployment }: { deployment: DeploymentDoc }) {
   const managers = await parseEntityList(deployment.metadata.contacts.owner)
@@ -236,4 +239,34 @@ export async function deleteApprovalsByDeployment(user: UserDoc, deployment: Dep
     },
     user._id
   )
+}
+
+export async function requestDeploymentsForModelVersions(user: UserDoc, deployment: DeploymentDoc) {
+  const model = await findModelById(user, deployment.model)
+  if (!model) {
+    throw BadReq({ code: 'model_not_found', deployment }, `Could not find parent model for deployment '${deployment}'`)
+  }
+  const { versions } = model
+  if (!versions) {
+    throw BadReq(
+      { code: 'versions_not_found', deployment },
+      `Could not find versions for deployment '${deployment.uuid}'`
+    )
+  }
+  versions.forEach(async (versionId) => {
+    const versionDoc = await findVersionById(user, versionId)
+    if (!versionDoc) {
+      throw BadReq(
+        { code: 'versions_not_found', deployment },
+        `Could not find version for deployment '${deployment.uuid}'`
+      )
+    }
+    await (
+      await getDeploymentQueue()
+    ).add({
+      deploymentId: deployment._id,
+      userId: user._id,
+      version: versionDoc.version,
+    })
+  })
 }
