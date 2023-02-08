@@ -33,6 +33,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { ModelUploadType } from '@/types/interfaces'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
+import { Node, Edge } from 'reactflow'
 import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -96,7 +97,7 @@ export default function Deployment() {
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const [group, setGroup] = useState<TabOptions>('overview')
-  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>([])
+  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>({ edges: [], nodes: [] })
   const [open, setOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const [imageName, setImageName] = useState('')
