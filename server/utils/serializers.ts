@@ -1,4 +1,4 @@
-import { castArray, get, pick, set } from 'lodash'
+import { castArray, get, pick, set } from 'lodash-es'
 
 import { serializedDeploymentFields } from '../services/deployment.js'
 import { serializedModelFields } from '../services/model.js'
