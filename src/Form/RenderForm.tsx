@@ -6,7 +6,7 @@ import UserSelector from '@/src/MuiForms/UserSelector'
 import SeldonVersionSelector from '@/src/MuiForms/SeldonVersionSelector'
 import TextareaWidget from '@/src/MuiForms/TextareaWidget'
 import Nothing from '@/src/MuiForms/Nothing'
-import { Theme as MaterialUITheme } from '../MuiForms.js'
+import { Theme as MaterialUITheme } from '../MuiForms/index.js'
 import { setStepState } from '../../utils/formUtils.js'
 import { SplitSchema, Step } from '../../types/interfaces.js'
 

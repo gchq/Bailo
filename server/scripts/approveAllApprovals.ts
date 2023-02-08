@@ -1,4 +1,4 @@
-import Bailo from '../../lib/node.js'
+import Bailo from '../../lib/node'
 import logger from '../utils/logger.js'
 
 async function approveAllApprovals() {

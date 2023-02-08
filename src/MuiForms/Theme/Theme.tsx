@@ -2,12 +2,12 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { utils } from '@rjsf/core'
 import React from 'react'
-import ArrayFieldTemplate from '../ArrayFieldTemplate.js'
-import ErrorList from '../ErrorList.js'
-import Fields from '../Fields.js'
-import FieldTemplate from '../FieldTemplate.js'
-import ObjectFieldTemplate from '../ObjectFieldTemplate.js'
-import Widgets from '../Widgets.js'
+import ArrayFieldTemplate from '../ArrayFieldTemplate/index.js'
+import ErrorList from '../ErrorList/index.js'
+import Fields from '../Fields/index.js'
+import FieldTemplate from '../FieldTemplate/index.js'
+import ObjectFieldTemplate from '../ObjectFieldTemplate/index.js'
+import Widgets from '../Widgets/index.js'
 
 const { getDefaultRegistry } = utils
 

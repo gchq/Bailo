@@ -29,7 +29,7 @@ import Alert from '@mui/material/Alert'
 import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Clear'
 import { useTheme } from '@mui/material/styles'
-import { Theme as MaterialUITheme } from '../MuiForms.js'
+import { Theme as MaterialUITheme } from '../MuiForms/index.js'
 import QuestionPicker from './QuestionPicker.js'
 
 const SchemaForm = withTheme(MaterialUITheme)

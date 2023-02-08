@@ -1,6 +1,6 @@
 import shelljs from 'shelljs'
-import packageLock from '../../package-lock.json.js'
-import packageInfo from '../../package.json.js'
+import packageLock from '../../package-lock.json'
+import packageInfo from '../../package.json'
 import { consoleLog } from '../../utils/logging.js'
 
 const { exec } = shelljs

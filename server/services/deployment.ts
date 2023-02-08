@@ -11,7 +11,6 @@ import Authorisation from '../external/Authorisation.js'
 import { asyncFilter } from '../utils/general.js'
 import { SerializerOptions } from '../utils/serializers.js'
 import { Forbidden } from '../utils/result.js'
-import { serializedModelFields } from './model.js'
 import { getUserByInternalId } from './user.js'
 import { getEntitiesForUser } from '../utils/entity.js'
 

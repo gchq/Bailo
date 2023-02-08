@@ -1,6 +1,6 @@
 import { utils } from '@rjsf/core'
 import React from 'react'
-import { TextWidgetProps } from '../TextWidget.js'
+import { TextWidgetProps } from '../TextWidget/index.js'
 
 const { localToUTC, utcToLocal } = utils
 

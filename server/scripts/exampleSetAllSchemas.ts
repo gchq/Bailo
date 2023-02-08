@@ -1,8 +1,8 @@
 /* eslint-disable import/newline-after-import */
 import { createSchema } from '../services/schema.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import deploySchema from './example_schemas/minimal_deployment_schema.json.js'
-import modelSchema from './example_schemas/minimal_upload_schema.json.js'
+import deploySchema from './example_schemas/minimal_deployment_schema.json'
+import modelSchema from './example_schemas/minimal_upload_schema.json'
 ;(async () => {
   await connectToMongoose()
 

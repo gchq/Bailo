@@ -1,6 +1,6 @@
 import { FormProps, withTheme } from '@rjsf/core'
 import { FunctionComponent } from 'react'
-import Theme from '../Theme.js'
+import Theme from '../Theme/index.js'
 
 const MuiForm: React.ComponentClass<FormProps<any>> | FunctionComponent<FormProps<any>> = withTheme(Theme)
 
