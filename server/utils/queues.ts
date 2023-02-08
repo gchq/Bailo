@@ -101,6 +101,8 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
+  console.log(latestVersion)
+
   const userList = await getUserListFromEntityList(latestVersion.metadata.contacts.uploader)
 
   if (userList.length > 20) {
