@@ -143,7 +143,6 @@ describe('Model with code and binary files', () => {
             .then((dockerPassword) => {
               cy.fixture('minimal_metadata.json').then((modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
-
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
                 cy.exec(`docker pull ${imageName}`)
                 cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)

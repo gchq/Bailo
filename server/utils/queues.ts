@@ -3,7 +3,6 @@ import mongoose from 'mongoose'
 import { findModelById } from '../services/model'
 // eslint-disable-next-line import/no-relative-packages
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { ModelDoc } from '../models/Model'
 import { findDeploymentById } from '../services/deployment'
 import { getUserByInternalId } from '../services/user'
 import { findVersionById, markVersionState } from '../services/version'
@@ -12,7 +11,6 @@ import { connectToMongoose } from './database'
 import { sendEmail } from './smtp'
 import { getUserListFromEntityList } from './entity'
 import logger from './logger'
-import { VersionDoc } from '../models/Version'
 
 let uploadQueue: PMongoQueue | undefined
 let deploymentQueue: PMongoQueue | undefined
@@ -146,8 +144,16 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
-  const model = deployment.model as ModelDoc
-  const latestVersion = model.latestVersion as VersionDoc
+
+  const model = await findModelById(owner, deployment.model)
+  if (!model) {
+    throw new Error(`Unable to find model '${deployment.model}'`)
+  }
+
+  const latestVersion = await findVersionById(owner, model.latestVersion, { populate: true })
+  if (!latestVersion) {
+    throw new Error(`Unable to find version '${model.latestVersion}'`)
+  }
 
   const userList = await getUserListFromEntityList(deployment.metadata.contacts.owner)
 
