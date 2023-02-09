@@ -68,7 +68,7 @@
     "open": "^8.4.0",
     "openshift-rest-client": "^7.1.1",
     "pako": "^2.1.0",
-    "pretty-ms": "^7.0.1",
+    "pretty-ms": "^8.0.0",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.1",
     "reactflow": "^11.5.5",
