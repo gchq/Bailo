@@ -1,10 +1,11 @@
 import config from 'config'
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
+import { NotFound } from '../utils/result'
 import { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { ApprovalCategory } from '../models/Approval'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
 
@@ -15,8 +16,13 @@ export interface ReviewedApprovalContext {
   reviewingUser: string
 }
 
-export function html({ document, approvalCategory, choice, reviewingUser }: ReviewedApprovalContext) {
+export async function html({ document, approvalCategory, choice, reviewingUser }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -33,7 +39,7 @@ export function html({ document, approvalCategory, choice, reviewingUser }: Revi
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          model.currentMetadata.highLevelDetails.name
+          latestVersion.metadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -54,14 +60,20 @@ export function html({ document, approvalCategory, choice, reviewingUser }: Revi
   ).html
 }
 
-export function text({ document, approvalCategory, choice }: ReviewedApprovalContext) {
+export async function text({ document, approvalCategory, choice }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
+
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
-    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
 
     Approval Category: '${approvalCategory}'
     Response: '${choice}'
@@ -70,18 +82,23 @@ export function text({ document, approvalCategory, choice }: ReviewedApprovalCon
   `)
 }
 
-export function subject({ document }: ReviewedApprovalContext) {
+export async function subject({ document }: ReviewedApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
 
   return dedent(`
-    '${model.currentMetadata.highLevelDetails.name}' has been reviewed
+    '${latestVersion.metadata.highLevelDetails.name}' has been reviewed
   `)
 }
 
-export function reviewedApproval(context: ReviewedApprovalContext) {
+export async function reviewedApproval(context: ReviewedApprovalContext) {
   return {
-    html: html(context),
-    text: text(context),
-    subject: subject(context),
+    html: await html(context),
+    text: await text(context),
+    subject: await subject(context),
   }
 }

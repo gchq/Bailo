@@ -139,10 +139,10 @@ async function createApproval({
         // we created a new approval, send out a notification.
         await sendEmail({
           to: user.email,
-          ...reviewApproval({
+          ...(await reviewApproval({
             document,
             approvalCategory,
-          }),
+          })),
         })
       }
     }
