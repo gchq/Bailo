@@ -13,6 +13,7 @@ import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/terminal.css'
 import '../public/css/highlight.css'
+import 'reactflow/dist/style.css'
 import { SnackbarProvider } from 'notistack'
 import createEmotionCache from '../src/createEmotionCache'
 
