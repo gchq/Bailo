@@ -1,80 +1,67 @@
+import React from 'react'
+import ReactFlow, { ConnectionLineType, Node, Edge, Position } from 'reactflow'
 import dagre from 'dagre'
-import React, { useState } from 'react'
-import ReactFlow, {
-  addEdge,
-  Connection,
-  Controls,
-  Edge,
-  Elements,
-  isNode,
-  NodeExtent,
-  Position,
-  ReactFlowProvider,
-  removeElements,
-} from 'react-flow-renderer'
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
 
-const nodeExtent: NodeExtent = [
-  [0, 0],
-  [1000, 1000],
-]
+const nodeWidth = 172
+const nodeHeight = 36
 
-function ComplianceFlow({ initialElements }: { initialElements: Elements }) {
-  const [elements, setElements] = useState<Elements>(initialElements)
-  const onConnect = (params: Connection | Edge) => setElements((els) => addEdge(params, els))
-  const onElementsRemove = (elementsToRemove: Elements) => setElements((els) => removeElements(elementsToRemove, els))
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+  const isHorizontal = direction === 'LR'
+  dagreGraph.setGraph({ rankdir: direction })
 
-  const onLayout = (reactFlowInstance: any, direction: string) => {
-    const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction })
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
+  })
 
-    elements.forEach((el) => {
-      if (isNode(el)) {
-        dagreGraph.setNode(el.id, { width: 150, height: 50 })
-      } else {
-        dagreGraph.setEdge(el.source, el.target)
-      }
-    })
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target)
+  })
 
-    dagre.layout(dagreGraph)
+  dagre.layout(dagreGraph)
 
-    const layoutedElements = elements.map((el) => {
-      const updatedEl: any = { ...el }
+  nodes.forEach((node) => {
+    /* eslint-disable no-param-reassign */
+    const nodeWithPosition = dagreGraph.node(node.id)
+    node.targetPosition = (isHorizontal ? 'left' : 'top') as Position
+    node.sourcePosition = (isHorizontal ? 'right' : 'bottom') as Position
 
-      if (isNode(el)) {
-        const nodeWithPosition = dagreGraph.node(el.id)
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
+    }
 
-        updatedEl.targetPosition = isHorizontal ? Position.Left : Position.Top
-        updatedEl.sourcePosition = isHorizontal ? Position.Right : Position.Bottom
-        updatedEl.position = { x: nodeWithPosition.x + Math.random() / 1000, y: nodeWithPosition.y }
-      }
+    return node
+    /* eslint-enable no-param-reassign */
+  })
 
-      return updatedEl
-    })
+  return { nodes, edges }
+}
 
-    setElements(layoutedElements)
-
-    setInterval(() => reactFlowInstance.fitView({ padding: 0.2 }), 1)
-  }
+function ComplianceFlow({ initialEdges, initialNodes }: any) {
+  const { nodes, edges } = getLayoutedElements(initialNodes, initialEdges)
 
   return (
     <div className='layoutflow' style={{ width: '100%', height: '70vh' }}>
-      <ReactFlowProvider>
-        <ReactFlow
-          elementsSelectable={false}
-          nodesConnectable={false}
-          nodesDraggable={false}
-          elements={elements}
-          onConnect={onConnect}
-          onElementsRemove={onElementsRemove}
-          nodeExtent={nodeExtent}
-          onLoad={(reactFlowInstance: any) => onLayout(reactFlowInstance, 'TB')}
-        >
-          <Controls />
-        </ReactFlow>
-      </ReactFlowProvider>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        elementsSelectable={false}
+        panOnDrag={false}
+        panOnScroll={false}
+        nodesConnectable={false}
+        nodesDraggable={false}
+        zoomOnScroll={false}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+        // Bailo is an open source / non-commercial, so will disable attribution:
+        // https://reactflow.dev/docs/guides/remove-attribution/
+        proOptions={{ hideAttribution: true }}
+      />
     </div>
   )
 }
