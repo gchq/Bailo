@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
+import { ObjectId } from 'mongodb'
 import { moveFile } from '../../utils/minio'
 import { createFileRef } from '../../utils/multer'
 import { createModel, findModelByUuid } from '../../services/model'
@@ -145,7 +146,7 @@ export const postUpload = [
 
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
-      model = await findModelByUuid(req.user, modelUuid)
+      model = await findModelByUuid(req.user, modelUuid, { populate: true })
     } else {
       // Save a new model, and add the uploaded version to its array
       model = await createModel(req.user, {
@@ -153,7 +154,8 @@ export const postUpload = [
         uuid: `${name}-${nanoid()}`,
 
         versions: [],
-        currentMetadata: metadata,
+        // Temporarily set a new ObjectId to satisfy the type, then override below
+        latestVersion: new ObjectId(),
       })
     }
 
@@ -181,7 +183,7 @@ export const postUpload = [
     req.log.info({ code: 'created_model_version', version }, 'Created model version')
 
     model.versions.push(version._id)
-    model.currentMetadata = metadata
+    model.latestVersion = version._id
 
     await model.save()
 

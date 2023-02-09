@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { VersionDoc } from 'server/models/Version'
 import { isUserInEntityList } from '../../utils/entity'
 import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
@@ -23,7 +24,7 @@ export const getModels = [
       throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await findModels(req.user, { filter: filter as string, type })
+    const models = await findModels(req.user, { filter: filter as string, type }, { populate: true })
 
     req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
 
@@ -38,7 +39,7 @@ export const getModelByUuid = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -117,7 +118,7 @@ export const getModelVersions = [
     const { logs } = req.query
     const showLogs = logs === 'true'
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -177,10 +178,12 @@ export const getModelAccess = [
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
     }
 
+    const latestVersion = model.latestVersion as VersionDoc
+
     const [uploader, reviewer, manager] = await Promise.all([
-      isUserInEntityList(user, model.currentMetadata.contacts.uploader),
-      isUserInEntityList(user, model.currentMetadata.contacts.reviewer),
-      isUserInEntityList(user, model.currentMetadata.contacts.manager),
+      isUserInEntityList(user, latestVersion.metadata.contacts.uploader),
+      isUserInEntityList(user, latestVersion.metadata.contacts.reviewer),
+      isUserInEntityList(user, latestVersion.metadata.contacts.manager),
     ])
 
     return res.json({

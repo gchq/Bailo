@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useState } from 'react'
+import { VersionDoc } from '../server/models/Version'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
@@ -78,29 +79,32 @@ export default function ExploreModels() {
           </Box>
           <Box data-test='modelListBox'>
             {models &&
-              models.map((model: Model, index: number) => (
-                <Box key={model.uuid}>
-                  <Link href={`/model/${model.uuid}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                    >
-                      {model.currentMetadata.highLevelDetails.name}
-                    </MuiLink>
-                  </Link>
-                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                    {model.currentMetadata.highLevelDetails.modelInASentence}
-                  </Typography>
-                  <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                    {model.currentMetadata.highLevelDetails.tags.map((tag: string) => (
-                      <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                    ))}
-                  </Stack>
-                  {index !== models.length - 1 && (
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                  )}
-                </Box>
-              ))}
+              models.map((model: Model, index: number) => {
+                const latestVersion = model.latestVersion as VersionDoc
+                return (
+                  <Box key={model.uuid}>
+                    <Link href={`/model/${model.uuid}`} passHref>
+                      <MuiLink
+                        variant='h5'
+                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                      >
+                        {latestVersion.metadata.highLevelDetails.name}
+                      </MuiLink>
+                    </Link>
+                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                      {latestVersion.metadata.highLevelDetails.modelInASentence}
+                    </Typography>
+                    <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                      {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
+                        <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                      ))}
+                    </Stack>
+                    {index !== models.length - 1 && (
+                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                    )}
+                  </Box>
+                )
+              })}
 
             {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
           </Box>
