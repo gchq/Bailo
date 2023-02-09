@@ -1,8 +1,8 @@
 import config from 'config'
 import mongoose from 'mongoose'
+import { findModelById } from '../services/model'
 // eslint-disable-next-line import/no-relative-packages
 import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue'
-import { ModelDoc } from '../models/Model'
 import { findDeploymentById } from '../services/deployment'
 import { getUserByInternalId } from '../services/user'
 import { findVersionById, markVersionState } from '../services/version'
@@ -92,14 +92,17 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
     throw new Error(`Unable to find version '${msg.payload.versionId}'`)
   }
 
-  const model = version.model as ModelDoc
+  const model = await findModelById(owner, version.model)
+  if (!model) {
+    throw new Error(`Unable to find model '${version.model}'`)
+  }
 
   await markVersionState(owner, msg.payload.versionId, state)
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
-  const userList = await getUserListFromEntityList(model.currentMetadata.contacts.uploader)
+  const userList = await getUserListFromEntityList(version.metadata.contacts.uploader)
 
   if (userList.length > 20) {
     // refusing to send more than 20 emails.
@@ -115,14 +118,14 @@ async function setUploadState(msg: QueueMessage, state: string, _e?: any) {
     await sendEmail({
       to: user.email,
       ...simpleEmail({
-        text: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        text: `Your model build for '${version.metadata.highLevelDetails.name}' has ${message}`,
         columns: [
-          { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
+          { header: 'Model Name', value: version.metadata.highLevelDetails.name },
           { header: 'Build Type', value: 'Model' },
           { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
         ],
         buttons: [{ text: 'Build Logs', href: `${base}/model/${model.uuid}` }],
-        subject: `Your model build for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        subject: `Your model build for '${version.metadata.highLevelDetails.name}' has ${message}`,
       }),
     })
   }
@@ -141,7 +144,16 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
 
   const message = state === 'retrying' ? 'failed but is retrying' : state
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
-  const model = deployment.model as ModelDoc
+
+  const model = await findModelById(owner, deployment.model)
+  if (!model) {
+    throw new Error(`Unable to find model '${deployment.model}'`)
+  }
+
+  const latestVersion = await findVersionById(owner, model.latestVersion, { populate: true })
+  if (!latestVersion) {
+    throw new Error(`Unable to find version '${model.latestVersion}'`)
+  }
 
   const userList = await getUserListFromEntityList(deployment.metadata.contacts.owner)
 
@@ -159,14 +171,14 @@ async function sendDeploymentEmail(msg: QueueMessage, state: string, _e?: any) {
     await sendEmail({
       to: user.email,
       ...simpleEmail({
-        text: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        text: `Your deployment for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
         columns: [
-          { header: 'Model Name', value: model.currentMetadata.highLevelDetails.name },
+          { header: 'Model Name', value: latestVersion.metadata.highLevelDetails.name },
           { header: 'Build Type', value: 'Deployment' },
           { header: 'Status', value: state.charAt(0).toUpperCase() + state.slice(1) },
         ],
         buttons: [{ text: 'Build Logs', href: `${base}/deployment/${deployment.uuid}` }],
-        subject: `Your deployment for '${model.currentMetadata.highLevelDetails.name}' has ${message}`,
+        subject: `Your deployment for '${latestVersion.metadata.highLevelDetails.name}' has ${message}`,
       }),
     })
   }

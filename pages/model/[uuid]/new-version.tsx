@@ -2,6 +2,7 @@ import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { VersionDoc } from 'server/models/Version'
 import { useGetModel, useGetModelVersions } from '../../../data/model'
 import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
@@ -56,6 +57,7 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
+    const latestVersion = cModel.latestVersion as VersionDoc
     const steps = getStepsFromSchema(
       cSchema,
       {
@@ -64,7 +66,7 @@ function Upload() {
         },
       },
       [],
-      cModel.currentMetadata
+      latestVersion.metadata
     )
 
     steps.push(

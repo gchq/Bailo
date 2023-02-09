@@ -4,7 +4,7 @@ import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
 import ApprovalModel, { ApprovalCategory } from '../models/Approval'
 import UserModel from '../models/User'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
 import * as emailService from '../utils/smtp'
 import {
@@ -20,22 +20,20 @@ const managerId = new ObjectId()
 const modelId = new ObjectId()
 const userId = new ObjectId()
 const approvalId = new ObjectId()
+const versionId = new ObjectId()
 
 const testModel: any = {
   _id: modelId,
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: {
-    highLevelDetails: {
-      name: 'model1',
-    },
-  },
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
 const versionData: any = {
+  _id: versionId,
   model: testModel,
   version: '1',
   metadata: {
@@ -111,6 +109,7 @@ describe('test approval service', () => {
     await UserModel.create(testManager)
     await ModelModel.create(testModel)
     await ApprovalModel.create(testApproval)
+    await VersionModel.create(versionData)
   })
 
   test('that we can create a deployment approval object', async () => {

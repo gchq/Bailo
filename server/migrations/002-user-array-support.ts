@@ -36,20 +36,27 @@ export async function up() {
 
   logger.info({ count: models.length }, 'Processing models')
   for (const model of models) {
-    if (
-      Array.isArray(model.currentMetadata.contacts.uploader) ||
-      Array.isArray(model.currentMetadata.contacts.reviewer) ||
-      Array.isArray(model.currentMetadata.contacts.manager)
-    ) {
-      continue
+    const latestVersion = await VersionModel.findById(model.latestVersion)
+    if (latestVersion) {
+      if (
+        Array.isArray(latestVersion.metadata.contacts.uploader) ||
+        Array.isArray(latestVersion.metadata.contacts.reviewer) ||
+        Array.isArray(latestVersion.metadata.contacts.manager)
+      ) {
+        continue
+      }
+
+      latestVersion.metadata.contacts.uploader = [
+        { kind: EntityKind.USER, id: latestVersion.metadata.contacts.uploader },
+      ]
+      latestVersion.metadata.contacts.reviewer = [
+        { kind: EntityKind.USER, id: latestVersion.metadata.contacts.reviewer },
+      ]
+      latestVersion.metadata.contacts.manager = [{ kind: EntityKind.USER, id: latestVersion.metadata.contacts.manager }]
+
+      model.markModified('latestVersion')
+      await model.save()
     }
-
-    model.currentMetadata.contacts.uploader = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.uploader }]
-    model.currentMetadata.contacts.reviewer = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.reviewer }]
-    model.currentMetadata.contacts.manager = [{ kind: EntityKind.USER, id: model.currentMetadata.contacts.manager }]
-
-    model.markModified('currentMetadata')
-    await model.save()
   }
 
   const approvals = await ApprovalModel.find({})

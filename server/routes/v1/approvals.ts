@@ -181,12 +181,12 @@ export const postApprovalResponse = [
     if (user?.email) {
       await sendEmail({
         to: user.email,
-        ...reviewedApproval({
+        ...(await reviewedApproval({
           document,
           choice,
           approvalCategory,
           reviewingUser,
-        }),
+        })),
       })
     }
 
