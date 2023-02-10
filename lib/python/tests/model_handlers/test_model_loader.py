@@ -5,7 +5,7 @@ from bailoclient.model_handlers.model_loader import Loader
 from bailoclient.utils.enums import ModelFlavoursMeta
 from bailoclient.utils.exceptions import (
     ModelMethodNotAvailable,
-    ModelFlavourNotRecognised,
+    ModelFlavourNotFound,
 )
 
 
@@ -48,7 +48,7 @@ def test_load_model_raises_error_if_the_flavour_does_not_exit():
     model_loader = Loader()
     model_path = "path/to/model"
 
-    with pytest.raises(ModelFlavourNotRecognised):
+    with pytest.raises(ModelFlavourNotFound):
         loaded_model = model_loader.load_model(
             model_path=model_path, model_flavour="flavour"
         )

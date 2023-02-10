@@ -61,8 +61,8 @@ class ModelFileExportNotAllowed(Exception):
     """Exporting model files not allowed for this model"""
 
 
-class ModelFlavourNotRecognised(Exception):
-    """MLflow model flavour not recognised"""
+class ModelFlavourNotFound(Exception):
+    """MLflow model flavour not found"""
 
 
 class TemplateNotAvailable(Exception):
@@ -75,3 +75,7 @@ class DirectoryNotFound(Exception):
 
 class ModelMethodNotAvailable(Exception):
     """Model bundler/loader function hasn't been implemented for the model type"""
+
+
+class MissingFilesError(Exception):
+    """Some of the files required for bundling the ML model are missing"""

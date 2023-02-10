@@ -1,6 +1,6 @@
 from bailoclient.utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
-    ModelFlavourNotRecognised,
+    ModelFlavourNotFound,
     ModelMethodNotAvailable,
 )
 
@@ -27,7 +27,7 @@ class Loader:
         """
 
         if model_flavour not in ModelFlavour:
-            raise ModelFlavourNotRecognised(
+            raise ModelFlavourNotFound(
                 f"The model flavour {model_flavour} was not found. It may be an unsupported model type."
             )
 

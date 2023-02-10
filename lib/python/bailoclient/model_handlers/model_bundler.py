@@ -8,9 +8,10 @@ from typing import List
 
 from ..utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
-    ModelFlavourNotRecognised,
+    ModelFlavourNotFound,
     TemplateNotAvailable,
     DirectoryNotFound,
+    MissingFilesError,
 )
 
 
@@ -55,7 +56,7 @@ class Bundler:
                                                 requirements.txt. Defaults to None.
             model_flavour (str, optional): Name of the flavour of model. Supported flavours are
                                             those provided by MLflow. Defaults to None.
-            additional_files (list[str], optional): List of file paths of additional dependencies
+            additional_files (list[str], optional): List or tuple of file paths of additional dependencies
                                                     or directories of dependencies for the model.
                                                     Defaults to None.
         """
@@ -65,17 +66,14 @@ class Bundler:
 
         output_path = self.format_directory_path(output_path)
 
-        if additional_files and not isinstance(additional_files, list):
+        if additional_files and not isinstance(additional_files, (tuple, list)):
             raise TypeError("Expected additional_files to be a list of file paths")
 
-        ## For Mlflow bundling
-        if model and not model_flavour:
-            raise Exception("Must provide model flavour for Mlflow bundling")
-
-        model_flavour = model_flavour.lower()
+        if model_flavour:
+            model_flavour = model_flavour.lower()
 
         if model:
-            return self.do_mlflow_bundling(
+            return self._bundle_with_mlflow(
                 model,
                 output_path,
                 model_flavour,
@@ -84,28 +82,47 @@ class Bundler:
                 model_py,
             )
 
-        ## For normal bundling
+        return self._bundle_model_files(
+            output_path,
+            model_binary,
+            model_py,
+            model_requirements,
+            model_flavour,
+            additional_files,
+        )
+
+    def _bundle_model_files(
+        self,
+        output_path: str,
+        model_binary: str,
+        model_py: str,
+        model_requirements: str,
+        model_flavour: str,
+        additional_files: List[str],
+    ):
         if not model_binary:
-            raise Exception("Must provide model binary or model object and flavour")
+            raise MissingFilesError(
+                "Must provide model binary or model object and flavour"
+            )
 
         if not model_requirements:
-            raise Exception(
+            raise MissingFilesError(
                 "Provide either path to requirements.txt or your python file/notebook/module to generate requirements.txt"
             )
 
-        if not model_py and not model_flavour:
-            raise Exception(
-                "If no model code provided you must provide a model flavour"
+        if not model_py and model_flavour not in ModelFlavour:
+            raise ModelFlavourNotFound(
+                "A valid model flavour must be provided to generate the model.py file"
             )
 
         if not model_py:
-            model_py = self.__identify_model_template(model_flavour)
+            model_py = self.model_py_templates[model_flavour]
 
         return self.zip_model_files(
             model_py, model_requirements, additional_files, model_binary, output_path
         )
 
-    def do_mlflow_bundling(
+    def _bundle_with_mlflow(
         self,
         model,
         output_path: str,
@@ -133,6 +150,11 @@ class Bundler:
             ModelFlavourNotRecognised: The provided model flavour was not recognised
         """
 
+        if model and model_flavour not in ModelFlavour:
+            raise ModelFlavourNotFound(
+                "A valid model flavour must be provided for MLflow bundling"
+            )
+
         import mlflow
 
         tmpdir = tempfile.TemporaryDirectory()
@@ -157,7 +179,7 @@ class Bundler:
                 model_py = self.model_py_templates[model_flavour]
 
         except KeyError:
-            raise ModelFlavourNotRecognised(
+            raise ModelFlavourNotFound(
                 "Model flavour not recognised. Check MLflow docs for list of supported flavours"
             ) from None
 
