@@ -64,6 +64,9 @@ export interface ModelMetadata {
 
   buildOptions?: {
     uploadType: ModelUploadType
+    seldonVersion: string
+
+    [x: string]: any
   }
 
   // allow other properties

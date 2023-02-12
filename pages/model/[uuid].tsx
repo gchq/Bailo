@@ -306,7 +306,7 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
-      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+      {hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
           <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
@@ -486,7 +486,7 @@ function Model() {
             <Tab
               label='Build Logs'
               value='build'
-              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              disabled={hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard}
               data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
