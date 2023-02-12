@@ -8,13 +8,15 @@ import { ApprovalCategory } from '../models/Approval'
 import VersionModel, { VersionDoc } from '../models/Version'
 import createRequestUrl from '../utils/createRequestUrl'
 import { wrapper } from './partials'
+import { UserDoc } from '../models/User'
 
 export interface ReviewApprovalContext {
   document: VersionDoc | DeploymentDoc
+  user: UserDoc
   approvalCategory: ApprovalCategory
 }
 
-export async function html({ document, approvalCategory }: ReviewApprovalContext) {
+export async function html({ document, approvalCategory, user }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
   const latestVersion = await VersionModel.findById(model.latestVersion)
 
@@ -45,6 +47,12 @@ export async function html({ document, approvalCategory }: ReviewApprovalContext
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approvalCategory}</mj-text>
       </mj-column>
+      <mj-column>
+        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
+          user.id
+        }</mj-text>
+      </mj-column>
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
@@ -58,7 +66,7 @@ export async function html({ document, approvalCategory }: ReviewApprovalContext
   ).html
 }
 
-export async function text({ document, approvalCategory }: ReviewApprovalContext) {
+export async function text({ document, approvalCategory, user }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
   const latestVersion = await VersionModel.findById(model.latestVersion)
 
@@ -72,8 +80,9 @@ export async function text({ document, approvalCategory }: ReviewApprovalContext
 
   return dedent(`
     You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo.
-    
+
     Approval Category: '${approvalCategory}'
+    Uploader: '${user.id}'
 
     Open ${approvalCategory}: ${requestUrl}
     See Reviews: ${base}/review
