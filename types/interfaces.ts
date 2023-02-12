@@ -29,6 +29,20 @@ export interface StatusError extends Error {
   code: number
 }
 
+export interface DeploymentMetadata {
+  highLevelDetails: {
+    name: string
+
+    [x: string]: unknown
+  }
+
+  contacts: {
+    owner: Array<Entity>
+
+    [x: string]: unknown
+  }
+}
+
 export interface ModelMetadata {
   highLevelDetails: {
     tags: Array<string>
@@ -41,9 +55,9 @@ export interface ModelMetadata {
   }
 
   contacts: {
-    uploader: string
-    reviewer: string
-    manager: string
+    uploader: Array<Entity>
+    reviewer: Array<Entity>
+    manager: Array<Entity>
 
     [x: string]: any
   }
