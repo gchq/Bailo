@@ -40,6 +40,7 @@ import {
   putVersion,
   postResetVersionApprovals,
   putUpdateLastViewed,
+  postRebuildModel,
 } from './routes/v1/version'
 import { runMigrations, connectToMongoose } from './utils/database'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin'
@@ -88,6 +89,7 @@ server.put('/api/v1/version/:id', ...putVersion)
 server.get('/api/v1/version/:id/access', ...getVersionAccess)
 server.delete('/api/v1/version/:id', ...deleteVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
+server.post('/api/v1/version/:id/rebuild', ...postRebuildModel)
 server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
