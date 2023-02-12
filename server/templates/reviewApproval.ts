@@ -22,7 +22,6 @@ export async function html({ document, approvalCategory }: ReviewApprovalContext
     throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
   }
 
-  const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -46,12 +45,6 @@ export async function html({ document, approvalCategory }: ReviewApprovalContext
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approvalCategory}</mj-text>
       </mj-column>
-      <mj-column>
-        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          uploader ?? requester
-        }</mj-text>
-      </mj-column>
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
@@ -73,16 +66,14 @@ export async function text({ document, approvalCategory }: ReviewApprovalContext
     throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
   }
 
-  const { requester, uploader } = document.metadata.contacts
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
     You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo.
-
+    
     Approval Category: '${approvalCategory}'
-    Uploader: '${uploader ?? requester}'
 
     Open ${approvalCategory}: ${requestUrl}
     See Reviews: ${base}/review
