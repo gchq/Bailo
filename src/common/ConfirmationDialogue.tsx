@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Typography from '@mui/material/Typography'
 import DialogContent from '@mui/material/DialogContent'
 import Alert from '@mui/material/Alert'
+import React from 'react'
 
 type ConfirmationDialogProps = {
   open: boolean

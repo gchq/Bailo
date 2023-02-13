@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher.js'
+import { fetcher } from '../utils/fetcher'
 
 interface VersionAccess {
   uploader: boolean

@@ -1,2 +1,2 @@
-export * from './ErrorList.js'
-export { default } from './ErrorList.js'
+export * from './ErrorList'
+export { default } from './ErrorList'

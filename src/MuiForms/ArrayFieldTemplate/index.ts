@@ -1,2 +1,2 @@
-export * from './ArrayFieldTemplate.js'
-export { default } from './ArrayFieldTemplate.js'
+export * from './ArrayFieldTemplate'
+export { default } from './ArrayFieldTemplate'

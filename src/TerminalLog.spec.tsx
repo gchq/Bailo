@@ -3,7 +3,8 @@
  */
 
 import { render, waitFor } from '@testing-library/react'
-import TerminalLog from './TerminalLog.js'
+import React from 'react'
+import TerminalLog from './TerminalLog'
 
 describe('TerminalLog', () => {
   const logs = ['test line 1', 'test line 2', 'test line 3']

@@ -2,9 +2,9 @@ import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React, { useState } from 'react'
-import Wrapper from 'src/Wrapper'
-import { useGetCurrentUser } from '../data/user.js'
-import SettingsProfileTab from '../src/settings/SettingsProfileTab.js'
+import Wrapper from '../src/Wrapper'
+import { useGetCurrentUser } from '../data/user'
+import SettingsProfileTab from '../src/settings/SettingsProfileTab'
 
 function TabPanel({ children, value, index, ...rest }) {
   return (

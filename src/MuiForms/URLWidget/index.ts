@@ -1,2 +1,2 @@
-export * from './URLWidget.js'
-export { default } from './URLWidget.js'
+export * from './URLWidget'
+export { default } from './URLWidget'

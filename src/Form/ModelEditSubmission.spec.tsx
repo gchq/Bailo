@@ -3,9 +3,10 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import * as uiConfig from '../../data/uiConfig.js'
-import ModelEditSubmission from './ModelEditSubmission.js'
-import { doNothing } from '../../utils/testUtils.js'
+import React from 'react'
+import * as uiConfig from '../../data/uiConfig'
+import ModelEditSubmission from './ModelEditSubmission'
+import { doNothing } from '../../utils/testUtils'
 
 describe('ModelEditSubmission', () => {
   it('renders an ModelEditSubmission component', async () => {

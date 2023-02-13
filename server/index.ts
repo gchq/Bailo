@@ -149,9 +149,20 @@ export async function startServer() {
   logger.info({ port }, `Listening on port ${port}`)
 }
 
-if (import.meta.url.startsWith('file:')) {
-  const modulePath = fileURLToPath(import.meta.url)
-  if (process.argv[1] === modulePath) {
+const isError = (value: unknown): value is Error => !!((value as Error).name && (value as Error).message)
+
+try {
+  if (import.meta.url.startsWith('file:')) {
+    const modulePath = fileURLToPath(import.meta.url)
+    if (process.argv[1] === modulePath) {
+      startServer()
+    }
+  }
+} catch (e) {
+  if (isError(e) && e.message !== "Cannot read properties of undefined (reading 'startsWith')") {
+    throw e
+  }
+  if (require.main === module) {
     startServer()
   }
 }

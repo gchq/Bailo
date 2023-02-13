@@ -1,9 +1,9 @@
 import React, { ReactElement, useEffect, useMemo } from 'react'
 import { WidgetProps } from '@rjsf/core'
 import { useRouter } from 'next/router'
-import SelectWidget from '@/src/MuiForms/SelectWidget'
-import { useGetModelVersions } from '@/data/model'
-import useNotification from '@/src/common/Snackbar'
+import SelectWidget from './SelectWidget'
+import { useGetModelVersions } from '../../data/model'
+import useNotification from '../common/Snackbar'
 
 export default function ModelVersionSelector({
   value: currentValue,

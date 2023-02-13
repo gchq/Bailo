@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import qs from 'qs'
-import { fetcher } from 'utils/fetcher'
-import { LogEntry } from '../types/interfaces.js'
+import { fetcher } from '../utils/fetcher'
+import { LogEntry } from '../types/interfaces'
 
 interface GetAppLogsArgs {
   after?: Date

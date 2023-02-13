@@ -12,9 +12,9 @@ import Stack from '@mui/material/Stack'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import Icon from '@mui/material/Icon'
-import { SchemaQuestion } from '@/types/interfaces'
 import DialogContentText from '@mui/material/DialogContentText'
-import SchemaDesignerQuestion, { DesignerQuestion } from './SchemaDesignerQuestion.js'
+import { SchemaQuestion } from '../../types/interfaces'
+import SchemaDesignerQuestion, { DesignerQuestion } from './SchemaDesignerQuestion'
 
 const questionList: DesignerQuestion[] = [
   {

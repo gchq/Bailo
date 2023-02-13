@@ -1,6 +1,6 @@
-import { formatDateString } from './dateUtils.js'
-import isObject from './type-guards/isObject.js'
-import { consoleError } from './logging.js'
+import { formatDateString } from './dateUtils'
+import isObject from './type-guards/isObject'
+import { consoleError } from './logging'
 
 const PROP_NOT_FOUND = 'Property not Found'
 const PROP_NOT_HANDLED_TYPE = 'Property not a Handled Type: '

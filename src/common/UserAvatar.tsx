@@ -1,8 +1,8 @@
 import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
-import { useEffect, useState } from 'react'
-import { Entity } from '../../types/interfaces.js'
+import React, { useEffect, useState } from 'react'
+import { Entity } from '../../types/interfaces'
 
 export default function UserAvatar({
   entity,

@@ -1,4 +1,5 @@
 import { castArray } from 'lodash-es'
+import { ModelDoc } from 'server/models/Model.js'
 import { DateString, ModelId } from '../../types/interfaces.js'
 import { UserDoc } from '../models/User.js'
 import VersionModel, { VersionDoc } from '../models/Version.js'
@@ -41,7 +42,12 @@ export async function findVersionById(user: UserDoc, id: ModelId, opts?: GetVers
   return filterVersion(user, await version)
 }
 
-export async function findVersionByName(user: UserDoc, model: ModelId, name: string, opts?: GetVersionOptions) {
+export async function findVersionByName(
+  user: UserDoc,
+  model: ModelId | ModelDoc,
+  name: string,
+  opts?: GetVersionOptions
+) {
   let version = VersionModel.findOne({ model, version: name })
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })

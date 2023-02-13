@@ -2,12 +2,12 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Box from '@mui/material/Box'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Stack from '@mui/material/Stack'
-import { Schema } from '@/types/interfaces'
-import { useGetSchemas } from '../../data/schema.js'
-import SchemaUploadDialog from './SchemaUploadDialog.js'
+import { Schema } from '../../types/interfaces'
+import { useGetSchemas } from '../../data/schema'
+import SchemaUploadDialog from './SchemaUploadDialog'
 
 export default function SchemaList() {
   const {

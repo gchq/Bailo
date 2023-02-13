@@ -9,9 +9,10 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
-import Wrapper from 'src/Wrapper'
-import { useGetUiConfig } from '../data/uiConfig.js'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper.js'
+import React from 'react'
+import Wrapper from '../src/Wrapper'
+import { useGetUiConfig } from '../data/uiConfig'
+import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()

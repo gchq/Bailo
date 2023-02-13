@@ -1,6 +1,6 @@
 import useSWR from 'swr'
-import { User } from '../types/interfaces.js'
-import { fetcher } from '../utils/fetcher.js'
+import { User } from '../types/interfaces'
+import { fetcher } from '../utils/fetcher'
 
 export function useListUsers() {
   const { data, error, mutate } = useSWR<{

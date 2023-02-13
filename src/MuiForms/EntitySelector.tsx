@@ -2,8 +2,8 @@ import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
-import { useListUsers } from '../../data/user.js'
-import { EntityKind } from '../../types/interfaces.js'
+import { useListUsers } from '../../data/user'
+import { EntityKind } from '../../types/interfaces'
 
 interface Entity {
   kind: string

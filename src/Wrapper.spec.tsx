@@ -4,9 +4,10 @@
 
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { mockNextUseRouter } from '../utils/testUtils.js'
-import { lightTheme } from './theme.js'
-import Wrapper from './Wrapper.js'
+import React from 'react'
+import { mockNextUseRouter } from '../utils/testUtils'
+import { lightTheme } from './theme'
+import Wrapper from './Wrapper'
 
 describe('Wrapper', () => {
   it('renders a Wrapper component', async () => {

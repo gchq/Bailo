@@ -1,2 +1,2 @@
-export * from './AddButton.js'
-export { default } from './AddButton.js'
+export * from './AddButton'
+export { default } from './AddButton'

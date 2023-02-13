@@ -103,8 +103,6 @@ export const postDeployment = [
 
       model: model._id,
       metadata: body,
-
-      owner: body.contacts.owner,
     })
 
     req.log.info({ code: 'saving_deployment', deployment }, 'Saving deployment model')
@@ -113,7 +111,7 @@ export const postDeployment = [
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
     const managerApproval = await createDeploymentApprovals({
-      deployment: await deployment.populate('model').execPopulate(),
+      deployment: await deployment.populate('model'),
     })
     req.log.info(
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
@@ -172,7 +170,6 @@ export const postUngovernedDeployment = [
       },
       managerApproved: ApprovalStates.Accepted,
       ungoverned: true,
-      owner,
     })
 
     req.log.info(
@@ -210,7 +207,7 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentApprovals({ deployment: await deployment.populate('model').execPopulate() })
+    await createDeploymentApprovals({ deployment: await deployment.populate('model') })
 
     return res.json(deployment)
   },

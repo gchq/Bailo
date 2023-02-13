@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { SnackbarProvider } from 'notistack'
 import Box from '@mui/material/Box'
 import React from 'react'
-import useNotification from './Snackbar.js'
+import useNotification from './Snackbar'
 
 describe('Snackbar', () => {
   function TestComponent() {

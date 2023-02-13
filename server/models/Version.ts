@@ -44,8 +44,8 @@ const VersionSchema = new Schema<Version>(
     files: { type: Schema.Types.Mixed, required: true, default: {} },
 
     built: { type: Boolean, default: false },
-    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
-    reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: ApprovalStates.NoResponse },
+    reviewerApproved: { type: String, required: true, enum: approvalStateOptions, default: ApprovalStates.NoResponse },
     managerLastViewed: { type: Schema.Types.Mixed },
     reviewerLastViewed: { type: Schema.Types.Mixed },
 
@@ -54,6 +54,7 @@ const VersionSchema = new Schema<Version>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
   }
 )
 

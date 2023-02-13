@@ -1,2 +1,2 @@
-export * from './TextareaWidget.js'
-export { default } from './TextareaWidget.js'
+export * from './TextareaWidget'
+export { default } from './TextareaWidget'

@@ -2,7 +2,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
-import { useListUsers } from '../../data/user.js'
+import { useListUsers } from '../../data/user'
 
 export default function UserSelector(props: any) {
   const { users, isUsersLoading } = useListUsers()

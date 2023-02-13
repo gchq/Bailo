@@ -4,9 +4,9 @@ import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import React, { ChangeEvent, useMemo } from 'react'
-import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces.js'
-import { setStepState } from '../../utils/formUtils.js'
-import FileInput from '../common/FileInput.js'
+import { RenderInterface, Step, ModelUploadType } from '../../types/interfaces'
+import { setStepState } from '../../utils/formUtils'
+import FileInput from '../common/FileInput'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step

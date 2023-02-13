@@ -1,8 +1,8 @@
 import React, { ReactElement, useMemo } from 'react'
-import { LogFilters } from '@/src/FilterMenu/FilterMenu'
-import { LogEntry, LogType, UiConfig } from '../../types/interfaces.js'
-import ChildLogDetails from './ChildLogDetails.js'
-import MiscLogDetails from './MiscLogDetails.js'
+import { LogFilters } from '../FilterMenu/FilterMenu'
+import { LogEntry, LogType, UiConfig } from '../../types/interfaces'
+import ChildLogDetails from './ChildLogDetails'
+import MiscLogDetails from './MiscLogDetails'
 
 type BuildOrApprovalLogDetailsProps = {
   uiConfig: UiConfig

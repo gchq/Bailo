@@ -1,9 +1,9 @@
-import { SchemaQuestion } from '@/types/interfaces'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import React, { BaseSyntheticEvent, ReactElement, useState } from 'react'
+import { SchemaQuestion } from '../../types/interfaces'
 
 export type DesignerQuestion = {
   title: string

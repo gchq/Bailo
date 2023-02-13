@@ -1,2 +1,2 @@
-export * from './Fields.js'
-export { default } from './Fields.js'
+export * from './Fields'
+export { default } from './Fields'

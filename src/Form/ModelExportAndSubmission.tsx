@@ -16,10 +16,10 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useGetUiConfig } from '../../data/uiConfig.js'
-import ModelOverview from '../ModelOverview.js'
-import { SplitSchema } from '../../types/interfaces.js'
-import { consoleWarn } from '../../utils/logging.js'
+import { useGetUiConfig } from '../../data/uiConfig'
+import ModelOverview from '../ModelOverview'
+import { SplitSchema } from '../../types/interfaces'
+import { consoleWarn } from '../../utils/logging'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')
@@ -57,18 +57,12 @@ function ModelExportAndSubmission({
   const getGlobalCss = () => {
     const css: Array<string> = []
 
-    for (const sheet of document.styleSheets as unknown as Array<CSSStyleSheet>) {
+    for (const sheet of document.styleSheets) {
       try {
-        const rules = 'cssRules' in sheet ? sheet.cssRules : sheet.rules
-        if (rules) {
+        if (sheet.cssRules) {
           css.push(`\n/* Stylesheet : ${sheet.href || '[inline styles]'} */`)
-          for (const rule of rules as any) {
-            if ('cssText' in rule) {
-              css.push(rule.cssText)
-            } else {
-              const styleRule = rule as CSSStyleRule
-              css.push(`${styleRule.selectorText} {\n${styleRule.style.cssText}\n}\n`)
-            }
+          for (const rule of sheet.cssRules) {
+            css.push(rule.cssText)
           }
         }
       } catch (e) {

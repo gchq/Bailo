@@ -1,2 +1,2 @@
-export * from './RadioWidget.js'
-export { default } from './RadioWidget.js'
+export * from './RadioWidget'
+export { default } from './RadioWidget'

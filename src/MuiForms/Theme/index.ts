@@ -1,2 +1,2 @@
-export * from './Theme.js'
-export { default } from './Theme.js'
+export * from './Theme'
+export { default } from './Theme'

@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function TerminalLog({ logs, title }: { logs: any; title: any }) {
   return (
     <div className='react-terminal-wrapper' data-terminal-name={title}>

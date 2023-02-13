@@ -3,7 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import LoadingBar from './LoadingBar.js'
+import React from 'react'
+import LoadingBar from './LoadingBar'
 
 describe('LoadingBar', () => {
   it('renders an LoadingBar component', async () => {

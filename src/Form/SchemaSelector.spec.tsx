@@ -3,7 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import SchemaSelector from './SchemaSelector.js'
+import React from 'react'
+import SchemaSelector from './SchemaSelector'
 
 describe('SchemaSelector', () => {
   const schema: any = {

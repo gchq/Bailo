@@ -39,7 +39,7 @@ const DeploymentSchema = new Schema<Deployment>(
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
     metadata: { type: Schema.Types.Mixed },
 
-    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    managerApproved: { type: String, required: true, enum: approvalStateOptions, default: ApprovalStates.NoResponse },
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },

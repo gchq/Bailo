@@ -1,2 +1,2 @@
-export * from './Widgets.js'
-export { default } from './Widgets.js'
+export * from './Widgets'
+export { default } from './Widgets'

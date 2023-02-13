@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
+import React from 'react'
 
 export default function LoadingBar({
   showLoadingBar,

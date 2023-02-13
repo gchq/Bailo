@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
-import { Schema } from '../types/interfaces.js'
-import { fetcher } from '../utils/fetcher.js'
+import { Schema } from '../types/interfaces'
+import { fetcher } from '../utils/fetcher'
 
 export function useGetDefaultSchema(use = 'UPLOAD') {
   const { data, error, mutate } = useSWR<Schema>(

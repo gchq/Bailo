@@ -3,7 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import CommonTabs from './CommonTabs.js'
+import React from 'react'
+import CommonTabs from './CommonTabs'
 
 describe('CommonTabs', () => {
   const tabs = [

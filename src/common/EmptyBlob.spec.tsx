@@ -3,7 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import EmptyBlob from './EmptyBlob.js'
+import React from 'react'
+import EmptyBlob from './EmptyBlob'
 
 describe('EmptyBlob', () => {
   it('renders an EmptyBlob component with the text of string', async () => {

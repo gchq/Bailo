@@ -3,9 +3,9 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import React, { useEffect, useState } from 'react'
-import { useGetSchemas } from '../data/schema.js'
-import { printProperty } from '../utils/propertyUtils.js'
-import CommonTabs from './common/CommonTabs.js'
+import { useGetSchemas } from '../data/schema'
+import { printProperty } from '../utils/propertyUtils'
+import CommonTabs from './common/CommonTabs'
 
 function MetadataDisplay({
   item,

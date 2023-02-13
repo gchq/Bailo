@@ -3,9 +3,10 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import * as uiConfig from '../../data/uiConfig.js'
-import DeploymentSubmission from './DeploymentSubmission.js'
-import { doNothing } from '../../utils/testUtils.js'
+import React from 'react'
+import * as uiConfig from '../../data/uiConfig'
+import DeploymentSubmission from './DeploymentSubmission'
+import { doNothing } from '../../utils/testUtils'
 
 describe('DeploymentSubmission', () => {
   it('renders an DeploymentSubmission component', async () => {

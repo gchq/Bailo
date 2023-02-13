@@ -1,6 +1,6 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { XYPosition } from 'react-flow-renderer'
-import { Deployment, Version } from 'types/interfaces'
+import { Deployment, Version } from '../types/interfaces'
 
 function approvalColour(state: string) {
   if (state === 'No Response') return yellow['200']

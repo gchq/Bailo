@@ -3,7 +3,8 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react'
-import Copyright from './Copyright.js'
+import React from 'react'
+import Copyright from './Copyright'
 
 describe('Copyright', () => {
   it('renders a Copyright component', async () => {

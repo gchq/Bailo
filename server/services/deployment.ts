@@ -47,7 +47,7 @@ export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise
 export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findOne({ uuid })
   if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
-  deployment = deployment.populate('model', ['_id', 'uuid']).populate('versions', ['version', 'metadata'])
+  deployment = deployment.populate('model', ['_id', 'uuid'])
 
   if (opts?.overrideFilter) return deployment
   return filterDeployment(user, await deployment)
@@ -114,8 +114,6 @@ interface CreateDeployment {
 
   managerApproved?: ApprovalStates
   ungoverned?: boolean
-
-  owner: ModelId
 }
 
 export async function createDeployment(user: UserDoc, data: CreateDeployment) {

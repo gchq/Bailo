@@ -1,7 +1,6 @@
-import type { Config } from '@jest/types'
-import nextJest from 'next/jest'
+const nextJest = require('next/jest')
 
-const esModules = ['nanoid']
+const esModules = ['nanoid', 'lodash-es']
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
@@ -9,7 +8,7 @@ const createJestConfig = nextJest({
 })
 
 // Add any custom config to be passed to Jest
-const customJestConfig: Config.InitialOptions = {
+const customJestConfig = {
   moduleNameMapper: {
     '^@/data/(.*)$': '<rootDir>/data/$1',
     '^@/src/(.*)$': '<rootDir>/src/$1',
@@ -18,6 +17,13 @@ const customJestConfig: Config.InitialOptions = {
   },
   testPathIgnorePatterns: ['__tests__/__utils__', 'config'],
   bail: true,
+
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
+  },
+  resolver: 'jest-ts-webcompat-resolver',
+
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
 
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
 

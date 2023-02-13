@@ -4,8 +4,9 @@
 
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { lightTheme } from '../theme.js'
-import SettingsProfileTab from './SettingsProfileTab.js'
+import React from 'react'
+import { lightTheme } from '../theme'
+import SettingsProfileTab from './SettingsProfileTab'
 
 describe('SettingsProfileTab', () => {
   const user = {

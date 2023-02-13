@@ -1,10 +1,10 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { SplitSchema } from '../../types/interfaces.js'
-import FormDesigner from './FormDesigner.js'
-import FormUpload from './FormUpload.js'
+import React, { Dispatch, SetStateAction, useState } from 'react'
+import { SplitSchema } from '../../types/interfaces'
+import FormDesigner from './FormDesigner'
+import FormUpload from './FormUpload'
 
 export default function Form({
   splitSchema,

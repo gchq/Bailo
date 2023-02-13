@@ -130,13 +130,18 @@ const streams: Array<bunyan.Stream> = [
 ]
 
 if (process.env.NODE_ENV !== 'production') {
-  const __dirname = fileURLToPath(new URL('.', import.meta.url))
+  let currentDirectory
+  try {
+    currentDirectory = __dirname
+  } catch (e) {
+    currentDirectory = fileURLToPath(new URL('.', import.meta.url))
+  }
 
   streams.push({
     level: 'trace',
     type: 'raw',
     stream: new Writer({
-      basepath: join(__dirname, '..'),
+      basepath: join(currentDirectory, '..'),
     }),
   })
 } else {

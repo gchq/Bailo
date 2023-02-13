@@ -2,10 +2,10 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-import { Dispatch, SetStateAction } from 'react'
-import useNotification from '../common/Snackbar.js'
-import { SplitSchema, Step } from '../../types/interfaces.js'
-import { setStepValidate, validateForm } from '../../utils/formUtils.js'
+import React, { Dispatch, SetStateAction } from 'react'
+import useNotification from '../common/Snackbar'
+import { SplitSchema, Step } from '../../types/interfaces'
+import { setStepValidate, validateForm } from '../../utils/formUtils'
 
 export interface RenderButtonsInterface {
   step: Step

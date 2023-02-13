@@ -1,2 +1,2 @@
-export * from './EmailWidget.js'
-export { default } from './EmailWidget.js'
+export * from './EmailWidget'
+export { default } from './EmailWidget'

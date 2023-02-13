@@ -1,2 +1,2 @@
-export * from './SelectWidget.js'
-export { default } from './SelectWidget.js'
+export * from './SelectWidget'
+export { default } from './SelectWidget'

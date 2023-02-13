@@ -1,5 +1,6 @@
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
+import React from 'react'
 
 export default function Copyright(props: Record<string, unknown>) {
   return (

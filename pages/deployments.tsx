@@ -16,12 +16,12 @@ import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import Link from 'next/link'
 import React, { ChangeEvent } from 'react'
-import { useGetUserDeployments } from '../data/deployment.js'
-import { useGetModelById } from '../data/model.js'
-import { useGetCurrentUser } from '../data/user.js'
-import EmptyBlob from '../src/common/EmptyBlob.js'
-import Wrapper from '../src/Wrapper.js'
-import { Deployment } from '../types/interfaces.js'
+import { useGetUserDeployments } from '../data/deployment'
+import { useGetModelById } from '../data/model'
+import { useGetCurrentUser } from '../data/user'
+import EmptyBlob from '../src/common/EmptyBlob'
+import Wrapper from '../src/Wrapper'
+import { Deployment } from '../types/interfaces'
 
 function ModelNameFromKey({ modelId }: { modelId: string }) {
   const { model, isModelError } = useGetModelById(modelId)
