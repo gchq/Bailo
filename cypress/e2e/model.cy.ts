@@ -64,7 +64,7 @@ describe('Model with code and binary files', () => {
     )
   })
 
-  it('Can review, deploy and test a model', function () {
+  it('Can review, deploy and test a model', () => {
     cy.log('Navigating to review page')
     cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
@@ -77,7 +77,7 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=confirmButton]').click()
 
     cy.log('Navigating to model page')
-    cy.visit(this.modelUrl)
+    cy.visit(`/model/${modelUuid}`)
 
     cy.log('Checking model has been approved')
     cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 2/2')
@@ -124,7 +124,7 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=confirmButton]').click()
 
           cy.log('Navigating to deployment page')
-          cy.visit(this.deploymentUrl)
+          cy.visit(`/deployment/${deploymentUuid}`)
 
           cy.log('Checking deployment has been approved')
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
