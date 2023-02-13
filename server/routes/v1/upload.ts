@@ -194,6 +194,7 @@ export const postUpload = [
 
     const [managerApproval, reviewerApproval] = await createVersionApprovals({
       version: await version.populate('model').execPopulate(),
+      user: req.user,
     })
     req.log.info(
       { code: 'created_review_approvals', managerId: managerApproval._id, reviewApproval: reviewerApproval._id },
