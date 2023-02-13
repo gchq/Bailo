@@ -6,6 +6,5 @@ export default defineConfig({
     baseUrl: `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`,
     video: false,
     defaultCommandTimeout: 10000,
-    testIsolation: false,
   },
 })
