@@ -117,18 +117,21 @@ export const postResetVersionApprovals = [
     const { user } = req
     const version = await findVersionById(req.user, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
     }
 
     if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
-      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
     }
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
     await createVersionApprovals({ version })
 
-    req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
+    req.log.info({ code: 'version_approvals_reset', version: version._id }, 'User reset version approvals')
     return res.json(version)
   },
 ]
@@ -140,19 +143,22 @@ export const postRebuildModel = [
     const { user } = req
     const version = await findVersionById(req.user, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
     }
 
     if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
-      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
     }
 
     if (version.metadata.buildOptions.uploadType !== ModelUploadType.Zip) {
-      throw BadReq({}, 'Unable to rebuild a model that was not uploaded as a binary file')
+      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
     }
 
     if (version.state.build.state === 'retrying') {
-      throw BadReq({}, 'This model is already being rebuilt automatically.')
+      throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
     }
 
     const binaryRef = {
@@ -185,7 +191,7 @@ export const postRebuildModel = [
     await version.save()
 
     const message = 'Successfully created build job in upload queue'
-    req.log.info({ code: 'created_upload_job', jobId }, message)
+    req.log.info({ code: 'created_upload_job', jobId, version: version._id }, message)
     return res.json({
       message,
     })
