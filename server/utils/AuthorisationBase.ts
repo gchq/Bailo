@@ -1,4 +1,5 @@
 import { Request } from 'express'
+import { ModelDoc } from '../models/Model.js'
 import { Model } from '../../types/interfaces.js'
 import { DeploymentDoc } from '../models/Deployment.js'
 import { UserDoc } from '../models/User.js'
@@ -19,7 +20,7 @@ export default class AuthorisationBase {
     }
   }
 
-  async canUserSeeModel(_user: UserDoc, _model: Model) {
+  async canUserSeeModel(_user: UserDoc, _model: Model | ModelDoc) {
     return true
   }
 

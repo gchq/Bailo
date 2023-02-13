@@ -60,7 +60,7 @@
     "memoizee": "^0.4.15",
     "minio": "^7.0.32",
     "mjml": "^4.13.0",
-    "mongodb": "^4.13.0",
+    "mongodb": "^5.0.1",
     "mongoose": "^6.9.1",
     "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
@@ -75,6 +75,7 @@
     "pretty-ms": "^7.0.1",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.1",
+    "reactflow": "^11.5.5",
     "sharp": "^0.31.3",
     "shelljs": "^0.8.5",
     "tar": "^6.1.13",
@@ -122,10 +123,9 @@
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "babel-jest": "^29.3.1",
-    "babel-plugin-module-resolver": "^4.1.0",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.3",
-    "cypress": "^10.10.0",
+    "cypress": "^12.5.1",
     "dagre": "^0.8.5",
     "eslint": "^8.32.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -149,7 +149,6 @@
     "qs": "^6.11.0",
     "randomcolor": "^0.6.2",
     "react-dom": "^17.0.2",
-    "react-flow-renderer": "^9.7.3",
     "rehype-highlight": "^6.0.0",
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
@@ -157,6 +156,6 @@
     "swagger-ui-react": "^4.15.5",
     "swr": "^2.0.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.9.5"
   }
 }

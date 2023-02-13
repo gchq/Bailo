@@ -112,6 +112,7 @@ export const postDeployment = [
 
     const managerApproval = await createDeploymentApprovals({
       deployment: await deployment.populate('model'),
+      user: req.user,
     })
     req.log.info(
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
@@ -207,7 +208,7 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentApprovals({ deployment: await deployment.populate('model') })
+    await createDeploymentApprovals({ deployment: await deployment.populate('model'), user: req.user })
 
     return res.json(deployment)
   },

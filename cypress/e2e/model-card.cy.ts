@@ -64,6 +64,7 @@ describe('Model with model card only', () => {
   })
 
   it('Can upload a new version of an existing model version', () => {
+    cy.visit(modelUrl)
     cy.log('Select new version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
     cy.get('[data-test=newVersionButton]').click({ force: true })

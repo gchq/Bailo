@@ -13,7 +13,7 @@ import { UserDoc } from '../models/User.js'
 import { findVersionById } from './version.js'
 import { findModelById } from './model.js'
 
-export async function createDeploymentApprovals({ deployment }: { deployment: DeploymentDoc }) {
+export async function createDeploymentApprovals({ deployment, user }: { deployment: DeploymentDoc; user: UserDoc }) {
   const managers = await parseEntityList(deployment.metadata.contacts.owner)
 
   if (!managers.valid) {
@@ -24,10 +24,11 @@ export async function createDeploymentApprovals({ deployment }: { deployment: De
     approvers: deployment.metadata.contacts.owner,
     deployment,
     approvalType: ApprovalTypes.Manager,
+    user,
   })
 }
 
-export async function createVersionApprovals({ version }: { version: VersionDoc }) {
+export async function createVersionApprovals({ version, user }: { version: VersionDoc; user: UserDoc }) {
   const [managers, reviewers] = await Promise.all([
     parseEntityList(version.metadata.contacts.manager),
     parseEntityList(version.metadata.contacts.reviewer),
@@ -45,12 +46,14 @@ export async function createVersionApprovals({ version }: { version: VersionDoc 
     approvers: version.metadata.contacts.manager,
     version,
     approvalType: ApprovalTypes.Manager,
+    user,
   })
 
   const reviewerApproval = createVersionApproval({
     approvers: version.metadata.contacts.reviewer,
     version,
     approvalType: ApprovalTypes.Reviewer,
+    user,
   })
 
   return Promise.all([managerApproval, reviewerApproval])
@@ -60,15 +63,18 @@ async function createDeploymentApproval({
   approvers,
   approvalType,
   deployment,
+  user,
 }: {
   approvers: Array<Entity>
   approvalType: ApprovalTypes
   deployment: DeploymentDoc
+  user: UserDoc
 }): Promise<Approval> {
   return createApproval({
     documentType: 'deployment',
     document: deployment,
     approvers,
+    user,
 
     approvalType,
     approvalCategory: ApprovalCategory.Deployment,
@@ -79,15 +85,18 @@ async function createVersionApproval({
   approvers,
   approvalType,
   version,
+  user,
 }: {
   approvers: Array<Entity>
   approvalType: ApprovalTypes
   version: VersionDoc
+  user: UserDoc
 }): Promise<Approval> {
   return createApproval({
     documentType: 'version',
     document: version,
     approvers,
+    user,
 
     approvalType,
     approvalCategory: ApprovalCategory.Upload,
@@ -101,6 +110,7 @@ async function createApproval({
   approvers,
   approvalType,
   approvalCategory,
+  user,
 }: {
   documentType: ApprovalDocumentType
   document: VersionDoc | DeploymentDoc
@@ -108,6 +118,7 @@ async function createApproval({
 
   approvalType: ApprovalTypes
   approvalCategory: ApprovalCategory
+  user: UserDoc
 }) {
   const doc = {
     [documentType]: document._id,
@@ -132,17 +143,18 @@ async function createApproval({
   )) as unknown as any
 
   if (!lastErrorObject?.updatedExisting) {
-    const users = await getUserListFromEntityList(approvers)
+    const recipients = await getUserListFromEntityList(approvers)
 
-    for (const user of users) {
-      if (user.email) {
+    for (const recipient of recipients) {
+      if (recipient.email) {
         // we created a new approval, send out a notification.
         await sendEmail({
-          to: user.email,
-          ...reviewApproval({
+          to: recipient.email,
+          ...(await reviewApproval({
             document,
             approvalCategory,
-          }),
+            user,
+          })),
         })
       }
     }

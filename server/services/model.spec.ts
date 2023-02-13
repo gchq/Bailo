@@ -25,7 +25,12 @@ describe('test version service', () => {
   test('that the serializer returns the correct properties', () => {
     // Need to improve this by testing an actual log entry to see if it has just the properties below
     const properties = serializedModelFields()
-    expect(properties.mandatory).toStrictEqual(['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'])
+    expect(properties.mandatory).toStrictEqual([
+      '_id',
+      'uuid',
+      'latestVersion.metadata.highLevelDetails.name',
+      'schemaRef',
+    ])
   })
 
   test('fetch model by uuid', async () => {

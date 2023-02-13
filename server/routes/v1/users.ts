@@ -52,7 +52,7 @@ export const favouriteModel = [
     }
 
     const user = await getUserById(req.user.id)
-    const model = await findModelById(req.user, modelId)
+    const model = await findModelById(req.user, modelId, { populate: true })
 
     if (!user) {
       throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
@@ -88,7 +88,7 @@ export const unfavouriteModel = [
       throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
-    const model = await findModelById(req.user, modelId)
+    const model = await findModelById(req.user, modelId, { populate: true })
 
     if (!user.favourites.includes(modelId)) {
       // model not favourited

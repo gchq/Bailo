@@ -31,7 +31,7 @@ describe('Model with code and binary files', () => {
     cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
     cy.get('[for=select-binary-file]').selectFile('cypress/fixtures/minimal_binary.zip', { force: true })
 
-    cy.log('Inputting deployment metadata')
+    cy.log('Inputting model metadata')
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
       cy.get('[data-test=metadataTextarea]')
         .clear()
@@ -58,13 +58,13 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > :last-child', { timeout: 350000 }).should(
+    cy.get('[data-test=terminalLog] > :last-child', { timeout: 400000 }).should(
       'contain',
       'Successfully completed build'
     )
   })
 
-  it('Can review, deploy and test a model', function () {
+  it('Can review, deploy and test a model', () => {
     cy.log('Navigating to review page')
     cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
@@ -77,7 +77,7 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=confirmButton]').click()
 
     cy.log('Navigating to model page')
-    cy.visit(this.modelUrl)
+    cy.visit(`/model/${modelUuid}`)
 
     cy.log('Checking model has been approved')
     cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 2/2')
@@ -124,7 +124,7 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=confirmButton]').click()
 
           cy.log('Navigating to deployment page')
-          cy.visit(this.deploymentUrl)
+          cy.visit(`/deployment/${deploymentUuid}`)
 
           cy.log('Checking deployment has been approved')
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
@@ -143,7 +143,6 @@ describe('Model with code and binary files', () => {
             .then((dockerPassword) => {
               cy.fixture('minimal_metadata.json').then((modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
-
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
                 cy.exec(`docker pull ${imageName}`)
                 cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)

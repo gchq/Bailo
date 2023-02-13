@@ -114,7 +114,7 @@ function getModelDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'latestVersion', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',
@@ -128,7 +128,7 @@ function getModelDefinition(populated: boolean) {
         type: 'array',
         items: getVersionDefinition(false),
       },
-      currentMetadata: {
+      latestVersion: {
         example: {
           highLevelDetails: {
             tags: ['facebook', 'fasttext', 'NLP', 'language', 'language_identification', 'multilingual'],
@@ -363,7 +363,7 @@ function getDeploymentDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'latestVersion', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',

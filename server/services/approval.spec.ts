@@ -1,10 +1,10 @@
-import { ObjectId } from 'mongodb'
+import { Types } from 'mongoose'
 import { ApprovalStates, EntityKind } from '../../types/interfaces.js'
 import { DeploymentDoc } from '../models/Deployment.js'
 import ModelModel from '../models/Model.js'
 import ApprovalModel, { ApprovalCategory } from '../models/Approval.js'
 import UserModel from '../models/User.js'
-import { VersionDoc } from '../models/Version.js'
+import VersionModel, { VersionDoc } from '../models/Version.js'
 import '../utils/mockMongo'
 import * as emailService from '../utils/smtp.js'
 import {
@@ -16,26 +16,24 @@ import {
 } from './approval.js'
 import * as userService from './user.js'
 
-const managerId = new ObjectId()
-const modelId = new ObjectId()
-const userId = new ObjectId()
-const approvalId = new ObjectId()
+const managerId = new Types.ObjectId()
+const modelId = new Types.ObjectId()
+const userId = new Types.ObjectId()
+const approvalId = new Types.ObjectId()
+const versionId = new Types.ObjectId()
 
 const testModel: any = {
   _id: modelId,
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: {
-    highLevelDetails: {
-      name: 'model1',
-    },
-  },
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
 const versionData: any = {
+  _id: versionId,
   model: testModel,
   version: '1',
   metadata: {
@@ -111,6 +109,7 @@ describe('test approval service', () => {
     await UserModel.create(testManager)
     await ModelModel.create(testModel)
     await ApprovalModel.create(testApproval)
+    await VersionModel.create(versionData)
   })
 
   test('that we can create a deployment approval object', async () => {
@@ -118,7 +117,7 @@ describe('test approval service', () => {
     getUserMock.mockReturnValue(testUser)
     const emailMock = jest.spyOn(emailService, 'sendEmail')
     emailMock.mockImplementation()
-    const approval = await createDeploymentApprovals({ deployment })
+    const approval = await createDeploymentApprovals({ deployment, user: testUser })
     expect(approval).not.toBe(undefined)
     expect(approval.approvalType).toBe('Manager')
     expect(approval.approvalCategory).toBe('Deployment')
@@ -129,7 +128,7 @@ describe('test approval service', () => {
     getUserMock.mockReturnValue(testUser)
     const emailMock = jest.spyOn(emailService, 'sendEmail')
     emailMock.mockImplementation()
-    const approvals = await createVersionApprovals({ version })
+    const approvals = await createVersionApprovals({ version, user: testUser })
     expect(approvals).not.toBe(undefined)
     expect(approvals.length).toBe(2)
     expect(approvals[0].approvalCategory).toBe('Upload')

@@ -226,11 +226,7 @@ def test_update_model_is_called_with_expected_params(
     mock_client.api.post = Mock(return_value={"uuid": model_uuid})
 
     mock_client.update_model(
-        model_card=Model(
-            uuid=model_uuid,
-            _schema={"key": "value"},
-            currentMetadata={"highLevelDetails": {"modelCardVersion": "2"}},
-        ),
+        metadata={"highLevelDetails": {"modelCardVersion": "2"}},
         binary_file="../../cypress/fixtures/minimal_binary.zip",
         code_file="../../cypress/fixtures/minimal_code.zip",
     )

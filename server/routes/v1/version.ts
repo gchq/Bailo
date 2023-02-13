@@ -98,7 +98,7 @@ export const putVersion = [
       ],
     })
 
-    await createVersionApprovals({ version })
+    await createVersionApprovals({ version, user: req.user })
 
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
@@ -125,7 +125,7 @@ export const postResetVersionApprovals = [
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
-    await createVersionApprovals({ version })
+    await createVersionApprovals({ version, user: req.user })
 
     req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
     return res.json(version)

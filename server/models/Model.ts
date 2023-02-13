@@ -7,7 +7,7 @@ export interface Model {
   uuid: string
 
   versions: Types.Array<VersionDoc | Types.ObjectId>
-  currentMetadata: any
+  latestVersion: VersionDoc | Types.ObjectId
 
   createdAt: Date
   updatedAt: Date
@@ -21,7 +21,7 @@ const ModelSchema = new Schema<Model>(
     uuid: { type: String, required: true, index: true, unique: true },
 
     versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
-    currentMetadata: { type: Schema.Types.Mixed },
+    latestVersion: { type: Schema.Types.ObjectId, ref: 'Version' },
   },
   {
     timestamps: true,

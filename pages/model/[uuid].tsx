@@ -33,19 +33,19 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Elements } from 'react-flow-renderer'
+import { Node, Edge } from 'reactflow'
+import createComplianceFlow from 'utils/complianceFlow'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import TextField from '@mui/material/TextField'
+import Wrapper from '../../src/Wrapper'
+import TerminalLog from '../../src/TerminalLog'
+import ModelOverview from '../../src/ModelOverview'
+import UserAvatar from '../../src/common/UserAvatar'
 import { postEndpoint, putEndpoint, deleteEndpoint } from '../../data/api'
 import { useGetVersionAccess } from '../../data/version'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from '../../data/model'
 import { useGetCurrentUser } from '../../data/user'
-import UserAvatar from '../../src/common/UserAvatar'
-import ModelOverview from '../../src/ModelOverview'
-import TerminalLog from '../../src/TerminalLog'
-import Wrapper from '../../src/Wrapper'
-import createComplianceFlow from '../../utils/complianceFlow'
 import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
@@ -78,7 +78,7 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>({ edges: [], nodes: [] })
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
@@ -511,7 +511,9 @@ function Model() {
           </>
         )}
 
-        {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+        {group === 'compliance' && (
+          <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
+        )}
 
         {group === 'build' && <TerminalLog logs={version.logs} title='Model Build Logs' />}
 

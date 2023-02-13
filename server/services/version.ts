@@ -33,7 +33,7 @@ export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T>
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findVersionById(user: UserDoc, id: ModelId, opts?: GetVersionOptions) {
+export async function findVersionById(user: UserDoc, id: ModelId | VersionDoc, opts?: GetVersionOptions) {
   let version = VersionModel.findById(id)
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })

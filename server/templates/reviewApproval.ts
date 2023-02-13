@@ -4,19 +4,26 @@ import mjml2html from 'mjml'
 import { DeploymentDoc } from '../models/Deployment.js'
 import { ModelDoc } from '../models/Model.js'
 import { ApprovalCategory } from '../models/Approval.js'
-import { VersionDoc } from '../models/Version.js'
+import VersionModel, { VersionDoc } from '../models/Version.js'
 import createRequestUrl from '../utils/createRequestUrl.js'
 import { wrapper } from './partials.js'
+import { UserDoc } from '../models/User.js'
+import { NotFound } from '../utils/result.js'
 
 export interface ReviewApprovalContext {
   document: VersionDoc | DeploymentDoc
+  user: UserDoc
   approvalCategory: ApprovalCategory
 }
 
-export function html({ document, approvalCategory }: ReviewApprovalContext) {
+export async function html({ document, approvalCategory, user }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
 
-  const { requester, uploader } = document.metadata.contacts
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
+
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
@@ -33,7 +40,7 @@ export function html({ document, approvalCategory }: ReviewApprovalContext) {
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Model Name</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          model.currentMetadata.highLevelDetails.name
+          latestVersion.metadata.highLevelDetails.name
         }</mj-text>
       </mj-column>
       <mj-column>
@@ -43,7 +50,7 @@ export function html({ document, approvalCategory }: ReviewApprovalContext) {
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          uploader ?? requester
+          user.id
         }</mj-text>
       </mj-column>
     </mj-section>
@@ -59,37 +66,46 @@ export function html({ document, approvalCategory }: ReviewApprovalContext) {
   ).html
 }
 
-export function text({ document, approvalCategory }: ReviewApprovalContext) {
+export async function text({ document, approvalCategory, user }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
 
-  const { requester, uploader } = document.metadata.contacts
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
+
   const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
 
   const requestUrl = createRequestUrl(model, document, base)
 
   return dedent(`
-    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo.
+    You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo.
 
     Approval Category: '${approvalCategory}'
-    Uploader: '${uploader ?? requester}'
+    Uploader: '${user.id}'
 
     Open ${approvalCategory}: ${requestUrl}
     See Reviews: ${base}/review
   `)
 }
 
-export function subject({ document }: ReviewApprovalContext) {
+export async function subject({ document }: ReviewApprovalContext) {
   const model = document.model as ModelDoc
+  const latestVersion = await VersionModel.findById(model.latestVersion)
+
+  if (!latestVersion) {
+    throw NotFound({ model }, `Cannot find version for id ${model.latestVersion}`)
+  }
 
   return dedent(`
-    You have been requested to review '${model.currentMetadata.highLevelDetails.name}' on Bailo
+    You have been requested to review '${latestVersion.metadata.highLevelDetails.name}' on Bailo
   `)
 }
 
-export function reviewApproval(context: ReviewApprovalContext) {
+export async function reviewApproval(context: ReviewApprovalContext) {
   return {
-    html: html(context),
-    text: text(context),
-    subject: subject(context),
+    html: await html(context),
+    text: await text(context),
+    subject: await subject(context),
   }
 }
