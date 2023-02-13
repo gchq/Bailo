@@ -41,7 +41,7 @@ export async function runMigrations() {
   files.sort()
 
   for (const file of files) {
-    if (!file.endsWith('.js') || !file.endsWith('.ts')) {
+    if (!file.endsWith('.js') && !file.endsWith('.ts')) {
       continue
     }
 

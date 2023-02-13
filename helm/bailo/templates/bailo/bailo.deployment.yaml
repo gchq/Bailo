@@ -85,6 +85,8 @@ spec:
             - name: certs
               mountPath: /usr/local/share/ca-certificates/bailo.pem
               subPath: cert.pem
+            - name: stroom
+              mountPath: /app/logs
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -117,4 +119,6 @@ spec:
         - name: temp
           emptyDir: {}
         - name: cache
+          emptyDir: {}
+        - name: stroom
           emptyDir: {}

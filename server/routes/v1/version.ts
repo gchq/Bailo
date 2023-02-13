@@ -2,22 +2,21 @@ import bodyParser from 'body-parser'
 import config from 'config'
 import { basename } from 'path'
 import { Request, Response } from 'express'
-import RequestModel, { ApprovalTypes } from '../../models/Request'
+import { getFileStream, getClient } from '../../utils/minio'
+import { MinioRandomAccessReader } from '../../utils/zip'
+import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
-import { createVersionRequests, deleteRequestsByVersion } from '../../services/request'
+import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
 import {
   findVersionById,
+  findVersionFileList,
   updateManagerLastViewed,
   updateReviewerLastViewed,
-  findVersionFileList,
 } from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
 import { removeVersionFromModel } from '../../services/model'
-import { deleteDeploymentsByVersion } from '../../services/deployment'
-import { getFileStream, MinioRandomAccessReader } from '../../utils/zip'
-import { getClient } from '../../utils/minio'
 import { FileRef } from '../../utils/build/build'
 
 export const getVersion = [
@@ -158,9 +157,9 @@ export const putVersion = [
       throw BadReq({ reviewers: version.metadata.contacts.reviewer }, `Invalid reviewer: '${reviewers.reason}'`)
     }
 
-    await RequestModel.deleteMany({
+    await ApprovalModel.deleteMany({
       version: version._id,
-      request: 'Upload',
+      approvalCategory: 'Upload',
       $or: [
         {
           approvalType: ApprovalTypes.Manager,
@@ -176,7 +175,7 @@ export const putVersion = [
       ],
     })
 
-    await createVersionRequests({ version })
+    await createVersionApprovals({ version })
 
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
@@ -203,7 +202,7 @@ export const postResetVersionApprovals = [
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
-    await createVersionRequests({ version })
+    await createVersionApprovals({ version })
 
     req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
     return res.json(version)
@@ -268,11 +267,7 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    await Promise.all([
-      deleteRequestsByVersion(user, version),
-      deleteDeploymentsByVersion(user, version),
-      removeVersionFromModel(user, version),
-    ])
+    await Promise.all([deleteApprovalsByVersion(user, version), removeVersionFromModel(user, version)])
 
     await version.delete(user._id)
 

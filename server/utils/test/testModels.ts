@@ -1,5 +1,6 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
+import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
@@ -9,11 +10,11 @@ export const deploymentUuid = 'test-deployment'
 export const requesterId = new ObjectId()
 export const modelId = new ObjectId()
 export const modelUuid = 'test-model'
+export const versionId = new ObjectId()
 
 export const uploadData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
-    initialVersionRequested: 1,
     name: 'test-deployment',
     modelID: 'test-model',
   },
@@ -27,7 +28,6 @@ export const uploadData: any = {
 export const deploymentData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
-    initialVersionRequested: 1,
     name: 'test-deployment',
     modelID: 'test-model',
   },
@@ -57,7 +57,7 @@ export const testReviewer: any = {
   email: 'test4',
 }
 
-export const managerRequest: any = {
+export const managerApproval: any = {
   _id: 'managerId',
 }
 
@@ -85,6 +85,7 @@ export const uploadSchema2: any = {
 }
 
 export const testVersion: any = {
+  _id: versionId,
   model: modelId,
   version: '1',
   metadata: {
@@ -147,7 +148,7 @@ export const testModel: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: modelUuid,
-  currentMetadata: uploadData,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -156,7 +157,7 @@ export const testModel2: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test2',
-  currentMetadata: uploadData,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -187,11 +188,11 @@ export const testDeployment2: any = {
   updatedAt: new Date(),
 }
 
-export const testRequest: any = {
-  status: 'No Response',
-  approvalType: 'Manager',
-  request: 'Upload',
-  version: null,
+export const testApproval: any = {
+  status: ApprovalStates.NoResponse,
+  approvalType: ApprovalTypes.Manager,
+  approvalCategory: ApprovalCategory.Upload,
+  version: undefined,
   __v: 0,
   createdAt: new Date(),
   updatedAt: new Date(),

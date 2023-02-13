@@ -19,30 +19,10 @@ import Link from 'next/link'
 import { useState } from 'react'
 import Wrapper from 'src/Wrapper'
 import { postEndpoint } from '../data/api'
-import { RequestType, ReviewFilterType, useGetNumRequests, useListRequests } from '../data/requests'
+import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { Request } from '../types/interfaces'
-
-export default function Review() {
-  const [value, setValue] = useState<ReviewFilterType>('user')
-
-  const handleChange = (_event: React.SyntheticEvent, newValue: ReviewFilterType) => {
-    setValue(newValue)
-  }
-
-  return (
-    <Wrapper title='Reviews' page='review'>
-      <Tabs value={value} onChange={handleChange}>
-        <Tab value='user' label='Approvals' />
-        <Tab value='archived' label='Archived' />
-      </Tabs>
-
-      <ApprovalList type='Upload' category={value} />
-      <ApprovalList type='Deployment' category={value} />
-    </Wrapper>
-  )
-}
+import { Approval } from '../types/interfaces'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (
@@ -52,17 +32,17 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({ type, category }: { type: RequestType; category: ReviewFilterType }) {
+function ApprovalList({ category, filter }: { category: ApprovalCategory; filter: ApprovalFilterType }) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
-  const [request, setRequest] = useState<Request | undefined>(undefined)
+  const [approval, setApproval] = useState<Approval | undefined>(undefined)
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
 
   const theme = useTheme()
 
-  const { requests, isRequestsLoading, isRequestsError, mutateRequests } = useListRequests(type, category)
-  const { mutateNumRequests } = useGetNumRequests()
+  const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
+  const { mutateNumApprovals } = useGetNumApprovals()
 
   const managerStyling = {
     mb: 2,
@@ -86,71 +66,72 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/request/${request?._id}/respond`, { choice }).then((res) => res.json())
+    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
 
-    mutateRequests()
-    mutateNumRequests()
+    mutateApprovals()
+    mutateNumApprovals()
     setOpen(false)
   }
 
   const error = MultipleErrorWrapper(
     `Unable to load approval page`,
     {
-      isRequestsError,
+      isApprovalsError,
     },
     ErrorWrapper
   )
   if (error) return error
 
-  const changeState = (changeStateChoice: string, changeStateRequest: Request) => {
+  const changeState = (changeStateChoice: string, changeStateApproval: Approval) => {
     setOpen(true)
-    setRequest(changeStateRequest)
+    setApproval(changeStateApproval)
     setChoice(changeStateChoice)
     if (changeStateChoice === 'Accepted') {
-      setApprovalModalTitle(`Approve ${type}`)
-      setApprovalModalText(`I can confirm that the ${type.toLowerCase()} meets all necessary requirements.`)
+      setApprovalModalTitle(`Approve ${category}`)
+      setApprovalModalText(`I can confirm that the ${category.toLowerCase()} meets all necessary requirements.`)
     } else {
-      setApprovalModalTitle(`Reject ${type}`)
-      setApprovalModalText(`The ${type.toLowerCase()} does not meet the necessary requirements for approval.`)
+      setApprovalModalTitle(`Reject ${category}`)
+      setApprovalModalText(`The ${category.toLowerCase()} does not meet the necessary requirements for approval.`)
     }
   }
 
-  const getUploadType = (requestType: string) => (requestType === 'Upload' ? 'models' : 'deployments')
+  const getUploadCategory = (approvalCategory: ApprovalCategory) =>
+    approvalCategory === 'Upload' ? 'models' : 'deployments'
 
-  if (isRequestsLoading || !requests) {
+  if (isApprovalsLoading || !approvals) {
     return <Paper sx={{ mt: 2, mb: 2 }} />
   }
 
   return (
     <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
       <Typography sx={{ p: 3 }} variant='h4'>
-        {type === 'Upload' ? 'Models' : 'Deployments'}
+        {category === 'Upload' ? 'Models' : 'Deployments'}
       </Typography>
-      {requests.map((requestObj: any) => (
-        <Box sx={{ px: 3 }} key={requestObj._id}>
-          <Grid container spacing={1} sx={requestObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+      {approvals.map((approvalObj: any) => (
+        <Box sx={{ px: 3 }} key={approvalObj._id}>
+          <Grid container spacing={1} sx={approvalObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
             <Grid item xs={12} md={6} lg={7}>
-              {type === 'Upload' && (
+              {category === 'Upload' && (
                 <>
-                  <Link href={`/model/${requestObj.version?.model?.uuid}`} passHref>
+                  <Link href={`/model/${approvalObj.version?.model?.uuid}`} passHref>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
                     >
-                      {requestObj.version?.metadata?.highLevelDetails?.name}
+                      {approvalObj.version?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Stack direction='row' spacing={2}>
-                    <Chip color='primary' label={requestObj.approvalType} size='small' />
-                    <Chip color='primary' label={`Version: ${requestObj.version?.version}`} size='small' />
+                    <Chip color='primary' label={approvalObj.approvalType} size='small' />
+                    <Chip color='primary' label={`Version: ${approvalObj.version?.version}`} size='small' />
                     <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                       <Typography variant='body1'>
-                        {requestObj.version?.metadata?.highLevelDetails?.modelInASentence}
+                        {approvalObj.version?.metadata?.highLevelDetails?.modelInASentence}
                       </Typography>
                     </Box>
                   </Stack>
-                  {requestObj.version === undefined ||
-                    (requestObj.version === null && (
+                  {approvalObj.version === undefined ||
+                    (approvalObj.version === null && (
                       <Alert sx={{ mt: 2 }} severity='warning'>
                         This model appears to have data missing - check with the uploader to make sure it was uploaded
                         correctly
@@ -158,26 +139,26 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                     ))}
                 </>
               )}
-              {type === 'Deployment' && (
+              {category === 'Deployment' && (
                 <>
-                  <Link href={`/deployment/${requestObj.deployment?.uuid}`} passHref>
+                  <Link href={`/deployment/${approvalObj.deployment?.uuid}`} passHref>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
                     >
-                      {requestObj.deployment?.metadata?.highLevelDetails?.name}
+                      {approvalObj.deployment?.metadata?.highLevelDetails?.name}
                     </MuiLink>
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
-                    <Link href={`/model/${requestObj.deployment?.model?.uuid}`} passHref>
+                    <Link href={`/model/${approvalObj.deployment?.model?.uuid}`} passHref>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
-                        {requestObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
+                        {approvalObj.deployment?.model?.currentMetadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
                   </Typography>
-                  {requestObj.deployment === undefined ||
-                    (requestObj.deployment === null && (
+                  {approvalObj.deployment === undefined ||
+                    (approvalObj.deployment === null && (
                       <Alert sx={{ mt: 2 }} severity='warning'>
                         This deployment appears to have data missing - check with the requester to make sure it was
                         requested correctly
@@ -188,8 +169,8 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
             </Grid>
             <Grid item xs={12} md sx={{ display: 'flex' }}>
               <Box ml='auto' my='auto'>
-                {requestObj.status !== 'No Response' && (
-                  <Chip label={requestObj.status} color={requestObj.status === 'Accepted' ? 'success' : 'error'} />
+                {approvalObj.status !== 'No Response' && (
+                  <Chip label={approvalObj.status} color={approvalObj.status === 'Accepted' ? 'success' : 'error'} />
                 )}
               </Box>
             </Grid>
@@ -198,19 +179,19 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
                 <Button
                   color='secondary'
                   variant='outlined'
-                  onClick={() => changeState('Declined', requestObj)}
+                  onClick={() => changeState('Declined', approvalObj)}
                   sx={{ mr: 1 }}
-                  disabled={requestObj.status === 'Declined'}
+                  disabled={approvalObj.status === 'Declined'}
                 >
                   Reject
                 </Button>
                 <Button
                   variant='contained'
-                  onClick={() => changeState('Accepted', requestObj)}
-                  data-test={`approveButton${requestObj.approvalType}${
-                    type === 'Upload' ? requestObj.version?.model?.uuid : requestObj.deployment?.uuid
+                  onClick={() => changeState('Accepted', approvalObj)}
+                  data-test={`approveButton${approvalObj.approvalType}${
+                    category === 'Upload' ? approvalObj.version?.model?.uuid : approvalObj.deployment?.uuid
                   }`}
-                  disabled={requestObj.status === 'Accepted'}
+                  disabled={approvalObj.status === 'Accepted'}
                 >
                   Approve
                 </Button>
@@ -233,7 +214,28 @@ function ApprovalList({ type, category }: { type: RequestType; category: ReviewF
           </Button>
         </DialogActions>
       </Dialog>
-      {requests.length === 0 && <EmptyBlob text={`All done! No ${getUploadType(type)} are waiting for approvals`} />}
+      {approvals.length === 0 && (
+        <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
+      )}
     </Paper>
+  )
+}
+
+export default function Review() {
+  const [value, setValue] = useState<ApprovalFilterType>('user')
+
+  const handleChange = (_event: React.SyntheticEvent, newValue: ApprovalFilterType) => {
+    setValue(newValue)
+  }
+
+  return (
+    <Wrapper title='Reviews' page='review'>
+      <Tabs value={value} onChange={handleChange}>
+        <Tab value='user' label='Approvals' />
+        <Tab value='archived' label='Archived' />
+      </Tabs>
+      <ApprovalList category='Upload' filter={value} />
+      <ApprovalList category='Deployment' filter={value} />
+    </Wrapper>
   )
 }

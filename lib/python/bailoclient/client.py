@@ -76,7 +76,6 @@ class Client:
         authenticator: AuthenticationInterface = CognitoSRPAuthenticator,
         api: AuthorisedAPI = None,
     ):
-
         if isinstance(config, os.PathLike):
             self.config = load_config(config)
         elif isinstance(config, BailoConfig):
@@ -489,10 +488,9 @@ class Client:
     @handle_reconnect
     def update_model(
         self,
-        model_card: Model,
+        metadata: dict,
         binary_file: str,
         code_file: str,
-        model_version: str = None,
     ):
         """Update an existing model based on its UUID.
 
@@ -508,16 +506,17 @@ class Client:
             str: UUID of the updated model
         """
 
+        metadata_json = json.dumps(metadata)
+
         self._validate_uploads(
-            model_card=model_card, binary_file=binary_file, code_file=code_file
+            binary_file=binary_file,
+            code_file=code_file,
+            metadata=metadata,
+            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
         )
 
         if not model_version:
             model_version = self._increment_model_version(model_card["uuid"])
-
-        metadata = model_card["currentMetadata"]
-        metadata.highLevelDetails.modelCardVersion = model_version
-        metadata = metadata.toJSON()
 
         payload = self._generate_payload(metadata, binary_file, code_file)
 

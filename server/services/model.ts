@@ -5,16 +5,20 @@ import ModelModel from '../models/Model'
 import { UserDoc } from '../models/User'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
-import { SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 import { Forbidden, NotFound } from '../utils/result'
 import { VersionDoc } from '../models/Version'
 import { getEntitiesForUser } from '../utils/entity'
 
 const auth = new Authorisation()
 
+interface GetModelOptions {
+  populate?: boolean
+}
+
 export function serializedModelFields(): SerializerOptions {
   return {
-    mandatory: ['_id', 'uuid', 'currentMetadata.highLevelDetails.name', 'schemaRef'],
+    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
   }
 }
 
@@ -26,14 +30,16 @@ export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
   return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
 }
 
-export async function findModelByUuid(user: UserDoc, uuid: string) {
-  const model = await ModelModel.findOne({ uuid })
-  return filterModel(user, model)
+export async function findModelByUuid(user: UserDoc, uuid: string, opts?: GetModelOptions) {
+  let model = ModelModel.findOne({ uuid })
+  if (opts?.populate) model = model.populate('latestVersion', 'metadata')
+  return filterModel(user, await model)
 }
 
-export async function findModelById(user: UserDoc, id: string | Types.ObjectId) {
-  const model = await ModelModel.findById(id)
-  return filterModel(user, model)
+export async function findModelById(user: UserDoc, id: string | Types.ObjectId, opts?: GetModelOptions) {
+  let model = ModelModel.findById(id)
+  if (opts?.populate) model = model.populate('latestVersion', 'metadata')
+  return filterModel(user, await model)
 }
 
 export interface ModelFilter {
@@ -49,7 +55,7 @@ export function isValidFilter(filter: unknown): filter is string {
   return typeof filter === 'string'
 }
 
-export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
+export async function findModels(user: UserDoc, { filter, type }: ModelFilter, opts?: GetModelOptions) {
   const query: any = {}
 
   if (filter) query.$text = { $search: filter as string }
@@ -60,12 +66,13 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
     const userEntities = await getEntitiesForUser(user)
 
     query.$or = userEntities.map((userEntity) => ({
-      'currentMetadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
+      'latestVersion.metadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
     }))
   }
 
-  const models = await ModelModel.find(query).sort({ updatedAt: -1 })
-  return filterModel(user, models)
+  let models = ModelModel.find(query).sort({ updatedAt: -1 })
+  if (opts?.populate) models = models.populate('latestVersion', 'metadata')
+  return filterModel(user, await models)
 }
 
 export async function createModel(user: UserDoc, data: Model) {

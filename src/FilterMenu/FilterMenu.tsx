@@ -21,7 +21,7 @@ import getLogLevelLabel from '../../utils/getLogLevelLabel'
 export type LogFilters = {
   level: LogLevel
   buildId: string
-  requestId: string
+  approvalId: string
   search: string
   isRegex: boolean
 }
@@ -34,7 +34,7 @@ export default function FilterMenu({ currentFilters, onGetLogs }: FilterMenuProp
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [level, setLevel] = useState<LogLevel>(LogLevel.TRACE)
   const [buildId, setBuildId] = useState('')
-  const [requestId, setRequestId] = useState('')
+  const [approvalId, setApprovalId] = useState('')
   const [search, setSearch] = useState('')
   const [isRegex, setIsRegex] = useState(false)
 
@@ -46,7 +46,7 @@ export default function FilterMenu({ currentFilters, onGetLogs }: FilterMenuProp
     if (resetFilters) {
       setLevel(currentFilters.level)
       setBuildId(currentFilters.buildId)
-      setRequestId(currentFilters.requestId)
+      setApprovalId(currentFilters.approvalId)
       setSearch(currentFilters.search)
       setIsRegex(currentFilters.isRegex)
     }
@@ -60,14 +60,14 @@ export default function FilterMenu({ currentFilters, onGetLogs }: FilterMenuProp
 
   const handleGetLogs = () => {
     handleClose()
-    onGetLogs({ level, buildId, requestId, search, isRegex })
+    onGetLogs({ level, buildId, approvalId, search, isRegex })
   }
 
   return (
     <>
       <Chip label={`Log level: ${getLogLevelLabel(level)}`} color='primary' sx={{ mr: 1 }} />
       {buildId && <Chip label={`Build ID: ${buildId}`} color='primary' sx={{ mr: 1 }} />}
-      {requestId && <Chip label={`Request ID: ${requestId}`} color='primary' sx={{ mr: 1 }} />}
+      {approvalId && <Chip label={`Approval ID: ${approvalId}`} color='primary' sx={{ mr: 1 }} />}
       {search && (
         <Chip
           label={`Search: ${search}`}
@@ -110,23 +110,25 @@ export default function FilterMenu({ currentFilters, onGetLogs }: FilterMenuProp
           <Divider sx={{ mt: 1, mb: 2 }} />
           <Box sx={{ mx: 1 }}>
             <LogLevelSelect value={level} onChange={handleLogLevelChange} />
-            <Tooltip title={requestId ? 'Unable to provide a Build ID, a Request ID has already been provided.' : ''}>
+            <Tooltip
+              title={approvalId ? 'Unable to provide a Build ID, an Approval ID has already been provided.' : ''}
+            >
               <TextField
                 label='Build ID'
                 value={buildId}
                 size='small'
-                disabled={!!requestId}
+                disabled={!!approvalId}
                 onChange={(event): void => setBuildId(event.target.value)}
                 sx={{ minWidth: '300px', mb: 1 }}
               />
             </Tooltip>
-            <Tooltip title={buildId ? 'Unable to provide a Request ID, a Build ID has already been provided.' : ''}>
+            <Tooltip title={buildId ? 'Unable to provide an Approval ID, a Build ID has already been provided.' : ''}>
               <TextField
-                label='Request ID'
-                value={requestId}
+                label='Approval ID'
+                value={approvalId}
                 size='small'
                 disabled={!!buildId}
-                onChange={(event): void => setRequestId(event.target.value)}
+                onChange={(event): void => setApprovalId(event.target.value)}
                 sx={{ minWidth: '300px', mb: 1 }}
               />
             </Tooltip>

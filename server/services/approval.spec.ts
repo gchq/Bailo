@@ -2,34 +2,38 @@ import { ObjectId } from 'mongodb'
 import { ApprovalStates, EntityKind } from '../../types/interfaces'
 import { DeploymentDoc } from '../models/Deployment'
 import ModelModel from '../models/Model'
-import RequestModel, { RequestTypes } from '../models/Request'
+import ApprovalModel, { ApprovalCategory } from '../models/Approval'
 import UserModel from '../models/User'
-import { VersionDoc } from '../models/Version'
+import VersionModel, { VersionDoc } from '../models/Version'
 import '../utils/mockMongo'
 import * as emailService from '../utils/smtp'
-import { createDeploymentRequests, createVersionRequests, getRequest, readNumRequests, readRequests } from './request'
+import {
+  createDeploymentApprovals,
+  createVersionApprovals,
+  getApproval,
+  readNumApprovals,
+  readApprovals,
+} from './approval'
 import * as userService from './user'
 
 const managerId = new ObjectId()
 const modelId = new ObjectId()
 const userId = new ObjectId()
-const requestId = new ObjectId()
+const approvalId = new ObjectId()
+const versionId = new ObjectId()
 
 const testModel: any = {
   _id: modelId,
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: {
-    highLevelDetails: {
-      name: 'model1',
-    },
-  },
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
 const versionData: any = {
+  _id: versionId,
   model: testModel,
   version: '1',
   metadata: {
@@ -87,11 +91,11 @@ const testManager: any = {
   data: { some: 'value' },
 }
 
-const testRequest = {
+const testApproval = {
   status: 'No Response',
-  _id: requestId,
+  _id: approvalId,
   approvalType: 'Manager',
-  request: 'Upload',
+  approvalCategory: 'Upload',
   approvers: [{ kind: EntityKind.USER, id: 'user1' }],
   version: null,
   __v: 0,
@@ -99,51 +103,56 @@ const testRequest = {
   updatedAt: new Date(),
 }
 
-describe('test request service', () => {
+describe('test approval service', () => {
   beforeEach(async () => {
     await UserModel.create(testUser)
     await UserModel.create(testManager)
     await ModelModel.create(testModel)
-    await RequestModel.create(testRequest)
+    await ApprovalModel.create(testApproval)
+    await VersionModel.create(versionData)
   })
 
-  test('that we can create a deployment request object', async () => {
+  test('that we can create a deployment approval object', async () => {
     const getUserMock = jest.spyOn(userService, 'getUserById')
     getUserMock.mockReturnValue(testUser)
     const emailMock = jest.spyOn(emailService, 'sendEmail')
     emailMock.mockImplementation()
-    const request = await createDeploymentRequests({ version, deployment })
-    expect(request).not.toBe(undefined)
-    expect(request.approvalType).toBe('Manager')
-    expect(request.request).toBe('Deployment')
+    const approval = await createDeploymentApprovals({ deployment })
+    expect(approval).not.toBe(undefined)
+    expect(approval.approvalType).toBe('Manager')
+    expect(approval.approvalCategory).toBe('Deployment')
   })
 
-  test('that we can create a version request object', async () => {
+  test('that we can create a version approval object', async () => {
     const getUserMock = jest.spyOn(userService, 'getUserById')
     getUserMock.mockReturnValue(testUser)
     const emailMock = jest.spyOn(emailService, 'sendEmail')
     emailMock.mockImplementation()
-    const requests = await createVersionRequests({ version })
-    expect(requests).not.toBe(undefined)
-    expect(requests.length).toBe(2)
-    expect(requests[0].request).toBe('Upload')
+    const approvals = await createVersionApprovals({ version })
+    expect(approvals).not.toBe(undefined)
+    expect(approvals.length).toBe(2)
+    expect(approvals[0].approvalCategory).toBe('Upload')
   })
 
-  test('that we can read the number of requests has', async () => {
-    const requests = await readNumRequests({ userId })
-    expect(requests).toBe(1)
+  test('that we can read the number of approvals has', async () => {
+    const approvals = await readNumApprovals({ userId })
+    expect(approvals).toBe(1)
   })
 
-  test('that we can read the requests', async () => {
-    const requests = await readRequests({ type: RequestTypes.Upload, filter: undefined, archived: false })
-    expect(requests).not.toBe(undefined)
-    expect(requests.length).toBe(1)
-    expect(requests[0].request).toBe('Upload')
+  test('that we can read the approvals', async () => {
+    const approvals = await readApprovals({
+      approvalCategory: ApprovalCategory.Upload,
+      filter: undefined,
+      archived: false,
+    })
+    expect(approvals).not.toBe(undefined)
+    expect(approvals.length).toBe(1)
+    expect(approvals[0].approvalCategory).toBe('Upload')
   })
 
-  test('we can fetch an individual request by its ID', async () => {
-    const request = await getRequest({ requestId })
-    expect(request).not.toBe(undefined)
-    expect(request.request).toBe('Upload')
+  test('we can fetch an individual approval by its ID', async () => {
+    const approval = await getApproval({ approvalId })
+    expect(approval).not.toBe(undefined)
+    expect(approval.approvalCategory).toBe('Upload')
   })
 })

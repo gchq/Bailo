@@ -11,14 +11,14 @@ export enum ApprovalTypes {
   Reviewer = 'Reviewer',
 }
 
-export const requestTypeOptions = ['Upload', 'Deployment']
+export const approvalCategoryOptions = ['Upload', 'Deployment']
 
-export enum RequestTypes {
+export enum ApprovalCategory {
   Upload = 'Upload',
   Deployment = 'Deployment',
 }
 
-export interface Request {
+export interface Approval {
   version: Types.ObjectId | VersionDoc | undefined
   deployment: Types.ObjectId | DeploymentDoc | undefined
 
@@ -26,15 +26,15 @@ export interface Request {
   status: ApprovalStates
 
   approvalType: ApprovalTypes
-  request: RequestTypes
+  approvalCategory: ApprovalCategory
 
   createdAt: Date
   updatedAt: Date
 }
 
-export type RequestDoc = Request & Document<any, any, Request>
+export type ApprovalDoc = Approval & Document<any, any, Approval>
 
-const RequestSchema = new Schema<Request>(
+const ApprovalSchema = new Schema<Approval>(
   {
     // ONE OF THESE TWO
     version: { type: Schema.Types.ObjectId, ref: 'Version' },
@@ -56,14 +56,14 @@ const RequestSchema = new Schema<Request>(
     status: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     approvalType: { type: String, enum: approvalTypeOptions },
-    request: { type: String, enum: requestTypeOptions },
+    approvalCategory: { type: String, enum: approvalCategoryOptions },
   },
   {
     timestamps: true,
   }
 )
 
-RequestSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+ApprovalSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
-const RequestModel = model<Request>('Request', RequestSchema)
-export default RequestModel
+const ApprovalModel = model<Approval>('Approval', ApprovalSchema)
+export default ApprovalModel

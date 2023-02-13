@@ -22,13 +22,15 @@ import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import Wrapper from '../src/Wrapper'
 import { Deployment } from '../types/interfaces'
+import { VersionDoc } from '../server/models/Version'
 
 function ModelNameFromKey({ modelId }: { modelId: string }) {
   const { model, isModelError } = useGetModelById(modelId)
+  const latestVersion = model?.latestVersion as VersionDoc
   if (isModelError) {
     return <Typography>Error getting model name</Typography>
   }
-  return <Typography variant='h5'>{model?.currentMetadata?.highLevelDetails?.name ?? 'Loading...'}</Typography>
+  return <Typography variant='h5'>{latestVersion?.metadata.highLevelDetails?.name ?? 'Loading...'}</Typography>
 }
 
 interface GroupedDeployments {

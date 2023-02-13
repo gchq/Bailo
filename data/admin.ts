@@ -11,7 +11,7 @@ interface GetAppLogsArgs {
   search?: string
   isRegex?: boolean
   buildId?: string
-  requestId?: string
+  approvalId?: string
   disabled?: boolean
 }
 
@@ -23,7 +23,7 @@ export function useGetAppLogs({
   search,
   isRegex,
   buildId,
-  requestId,
+  approvalId,
   disabled,
 }: GetAppLogsArgs) {
   const query: Record<string, unknown> = {
@@ -38,10 +38,10 @@ export function useGetAppLogs({
 
   let group = ''
   if (buildId) group = `/build/${buildId}`
-  if (requestId) group = `/request/${requestId}`
+  if (approvalId) group = `/approval/${approvalId}`
 
   const { data, error, mutate } = useSWR<{ logs: Array<LogEntry> }>(
-    disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query)}`,
+    disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query, { indices: false })}`,
     fetcher
   )
 

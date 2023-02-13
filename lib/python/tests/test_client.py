@@ -35,7 +35,6 @@ def mock_client():
 
 @patch("bailoclient.client.Client.get_model_schema")
 def test_get_model_schema(mock_get_model_schema, mock_client):
-
     mock_get_model_schema.return_value = {"response": "this is a thing"}
 
     model_uuid = "xyz"
@@ -49,7 +48,6 @@ def test_get_model_schema(mock_get_model_schema, mock_client):
 def test_get_user_by_name_returns_user_object_with_matching_name(
     mock_get_users, mock_client
 ):
-
     mock_get_users.return_value = [User({"id": "user"})]
 
     user = mock_client.get_user_by_name("user")
@@ -61,7 +59,6 @@ def test_get_user_by_name_returns_user_object_with_matching_name(
 def test_get_user_by_name_returns_None_if_no_matching_users(
     mock_get_users, mock_client
 ):
-
     mock_get_users.return_value = [User({"id": "user"})]
 
     user = mock_client.get_user_by_name("test")
@@ -96,7 +93,6 @@ def test_get_model_card_gets_model_if_no_version_provided(mock_model, mock_clien
 def test_validate_model_card_raises_error_if_model_card_is_invalid(
     mock_validate, mock_client
 ):
-
     validation_errors = [ValidationError("field", "message")]
     mock_validate.return_value = ValidationResult(validation_errors)
 
@@ -148,7 +144,6 @@ def test_validate_filepaths_raises_error_if_a_directory_is_uploaded(mock_client)
         InvalidFilePath,
         match=re.escape("../../cypress/fixtures is a directory"),
     ):
-
         mock_client._Client__validate_file_paths(
             "../../cypress/fixtures",
         )
@@ -187,7 +182,6 @@ def test_add_files_to_payload_adds_code_and_binary_files(mock_client):
 
 
 def test_post_model_raises_error_if_invalid_mode_given(mock_client):
-
     with pytest.raises(
         ValueError,
         match=re.escape("Invalid mode - must be either newVersion or newModel"),
@@ -223,7 +217,6 @@ def test_increment_model_version_raises_error_if_unable_to_increase_version_by_o
 def test_update_model_is_called_with_expected_params(
     mock_increment_version, mock_generate_payload, mock_client
 ):
-
     payload = Mock({"payload": "data"}, content_type="content")
     mode = "newVersion"
     model_uuid = "model"
@@ -233,11 +226,7 @@ def test_update_model_is_called_with_expected_params(
     mock_client.api.post = Mock(return_value={"uuid": model_uuid})
 
     mock_client.update_model(
-        model_card=Model(
-            uuid=model_uuid,
-            _schema={"key": "value"},
-            currentMetadata={"highLevelDetails": {"modelCardVersion": "2"}},
-        ),
+        metadata={"highLevelDetails": {"modelCardVersion": "2"}},
         binary_file="../../cypress/fixtures/minimal_binary.zip",
         code_file="../../cypress/fixtures/minimal_code.zip",
     )
@@ -254,7 +243,6 @@ def test_update_model_is_called_with_expected_params(
 def test_upload_model_is_called_with_expected_params(
     mock_validate_uploads, mock_generate_payload, mock_client
 ):
-
     payload = Mock({"payload": "data"}, content_type="content")
     model_uuid = "model"
 

@@ -57,18 +57,12 @@ function ModelExportAndSubmission({
   const getGlobalCss = () => {
     const css: Array<string> = []
 
-    for (const sheet of document.styleSheets as unknown as Array<CSSStyleSheet>) {
+    for (const sheet of document.styleSheets) {
       try {
-        const rules = 'cssRules' in sheet ? sheet.cssRules : sheet.rules
-        if (rules) {
+        if (sheet.cssRules) {
           css.push(`\n/* Stylesheet : ${sheet.href || '[inline styles]'} */`)
-          for (const rule of rules as any) {
-            if ('cssText' in rule) {
-              css.push(rule.cssText)
-            } else {
-              const styleRule = rule as CSSStyleRule
-              css.push(`${styleRule.selectorText} {\n${styleRule.style.cssText}\n}\n`)
-            }
+          for (const rule of sheet.cssRules) {
+            css.push(rule.cssText)
           }
         }
       } catch (e) {

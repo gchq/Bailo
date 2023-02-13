@@ -12,7 +12,7 @@ export async function up() {
       const model = await ModelModel.findById(deployment.model)
       if (!model) throw new Error('Model not found')
 
-      for (const versionId of deployment.versions) {
+      for (const versionId of model.versions) {
         const version = await VersionModel.findById(versionId)
         if (!version) throw new Error('Version not found')
 
