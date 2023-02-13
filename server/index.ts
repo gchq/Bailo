@@ -26,7 +26,7 @@ import {
   getModelVersions,
   getModelAccess,
 } from './routes/v1/model'
-import { getDockerRegistryAuth } from './routes/v1/registryAuth'
+import { getAdminToken, getDockerRegistryAuth } from './routes/v1/registryAuth'
 import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals'
 import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema'
 import { getSpecification } from './routes/v1/specification'
