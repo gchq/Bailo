@@ -1,4 +1,3 @@
-import { castArray } from 'lodash-es'
 import { Types } from 'mongoose'
 import { Model, ModelId } from '../../types/interfaces.js'
 import ModelModel, { ModelDoc } from '../models/Model.js'
@@ -22,12 +21,20 @@ export function serializedModelFields(): SerializerOptions {
   }
 }
 
-export async function filterModel<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const models = castArray(unfiltered)
+export async function filterModelArray(user: UserDoc, unfiltered: Array<ModelDoc>) {
+  return asyncFilter(unfiltered, (model: ModelDoc) => auth.canUserSeeModel(user, model))
+}
 
-  const filtered = await asyncFilter(models, (model: Model) => auth.canUserSeeModel(user, model))
+export async function filterModel(user: UserDoc, unfiltered: ModelDoc | null) {
+  if (!unfiltered) {
+    return null
+  }
 
-  return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
+  if (!(await auth.canUserSeeModel(user, unfiltered))) {
+    return null
+  }
+
+  return unfiltered
 }
 
 export async function findModelByUuid(user: UserDoc, uuid: string, opts?: GetModelOptions) {
@@ -72,7 +79,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
 
   let models = ModelModel.find(query).sort({ updatedAt: -1 })
   if (opts?.populate) models = models.populate('latestVersion', 'metadata')
-  return filterModel(user, await models)
+  return filterModelArray(user, await models)
 }
 
 export async function createModel(user: UserDoc, data: Model) {

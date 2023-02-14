@@ -1,4 +1,3 @@
-import { castArray } from 'lodash-es'
 import https from 'https'
 import config from 'config'
 import { deleteImageTag } from '../utils/registry.js'
@@ -34,14 +33,20 @@ export function serializedDeploymentFields(): SerializerOptions {
   }
 }
 
-export async function filterDeployment<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const deployments = castArray(unfiltered)
+export async function filterDeploymentArray(user: UserDoc, unfiltered: Array<DeploymentDoc>) {
+  return asyncFilter(unfiltered, (deployment: DeploymentDoc) => auth.canUserSeeDeployment(user, deployment))
+}
 
-  const filtered = await asyncFilter(deployments, (deployment: DeploymentDoc) =>
-    auth.canUserSeeDeployment(user, deployment)
-  )
+export async function filterDeployment(user: UserDoc, unfiltered: DeploymentDoc | null) {
+  if (!unfiltered) {
+    return null
+  }
 
-  return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
+  if (!(await auth.canUserSeeDeployment(user, unfiltered))) {
+    return null
+  }
+
+  return unfiltered
 }
 
 export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
@@ -68,7 +73,7 @@ export async function findDeploymentsByVersion(user: UserDoc, version: VersionDo
   if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
 
   if (opts?.overrideFilter) return deployments
-  return filterDeployment(user, await deployments)
+  return filterDeploymentArray(user, await deployments)
 }
 
 export interface DeploymentFilter {
@@ -94,11 +99,11 @@ export async function findDeployments(user: UserDoc, { owner, model }: Deploymen
   }
   if (model) query.model = model
 
-  let models = DeploymentModel.find(query).sort({ updatedAt: -1 })
+  let deployments = DeploymentModel.find(query).sort({ updatedAt: -1 })
 
-  if (!opts?.showLogs) models = models.select({ logs: 0 })
+  if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
 
-  return filterDeployment(user, models)
+  return filterDeploymentArray(user, await deployments)
 }
 
 export async function markDeploymentBuilt(_id: ModelId) {

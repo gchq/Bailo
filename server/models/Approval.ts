@@ -53,7 +53,7 @@ const ApprovalSchema = new Schema<Approval>(
         },
       },
     ],
-    status: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
+    status: { type: String, required: true, enum: approvalStateOptions, default: ApprovalStates.NoResponse },
 
     approvalType: { type: String, enum: approvalTypeOptions },
     approvalCategory: { type: String, enum: approvalCategoryOptions },
