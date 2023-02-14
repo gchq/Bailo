@@ -152,8 +152,12 @@ export async function startServer() {
 const isError = (value: unknown): value is Error => !!((value as Error).name && (value as Error).message)
 
 try {
-  if (import.meta.url.startsWith('file:')) {
-    const modulePath = fileURLToPath(import.meta.url)
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const { url } = import.meta
+
+  if (url.startsWith('file:')) {
+    const modulePath = fileURLToPath(url)
     if (process.argv[1] === modulePath) {
       startServer()
     }

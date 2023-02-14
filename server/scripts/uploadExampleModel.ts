@@ -8,6 +8,8 @@ import Bailo from '../../lib/node'
 import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const __dirname = fileURLToPath(new URL('.', import.meta.url))
   const api = new Bailo('http://localhost:8080/api/v1')
 
