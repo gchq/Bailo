@@ -16,7 +16,7 @@ import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../components/Slideshow.js'
 
-import bailoLogo from '../public/bailo-logo.png.js'
+import bailoLogo from '../public/bailo-logo.png'
 
 const nunitoSansFont = localFont({ src: '../public/fonts/NunitoSans-Black.ttf' })
 

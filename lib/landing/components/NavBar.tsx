@@ -15,7 +15,7 @@ import Link from './Link.js'
 import Image from 'next/legacy/image'
 import imageLoader from '@/components/imageLoader'
 
-import bailoLogo from '../public/Bailo-logo-reverse.png.js'
+import bailoLogo from '../public/Bailo-logo-reverse.png'
 
 const pages = [
   { name: 'Home', path: '/' },
