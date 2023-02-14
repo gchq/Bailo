@@ -2,7 +2,7 @@ import config from 'config'
 import getAppRoot from 'app-root-path'
 import { join } from 'path'
 import { readdir } from 'fs/promises'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import logger from './logger.js'
 import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
 
@@ -52,4 +52,8 @@ export async function runMigrations() {
   }
 
   logger.info('Finished running all migrations')
+}
+
+export function isObjectId(value: unknown): value is Types.ObjectId {
+  return value instanceof Types.ObjectId
 }

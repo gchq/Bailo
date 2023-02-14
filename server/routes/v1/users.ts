@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
+import { isObjectId } from '../../utils/database.js'
 import { findModelById } from '../../services/model.js'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user.js'
 import { BadReq, NotFound } from '../../utils/result.js'
@@ -58,7 +59,7 @@ export const favouriteModel = [
       throw BadReq({ code: 'invalid_user' }, `User does not exist '${req.user.id}'`)
     }
 
-    if (user.favourites.includes(modelId)) {
+    if (user.favourites.some((favourite) => isObjectId(favourite) && favourite.toString() === modelId)) {
       // model already favourited
       return res.json(user)
     }
@@ -90,7 +91,7 @@ export const unfavouriteModel = [
 
     const model = await findModelById(req.user, modelId, { populate: true })
 
-    if (!user.favourites.includes(modelId)) {
+    if (!user.favourites.some((favourite) => isObjectId(favourite) && favourite.toString() === modelId)) {
       // model not favourited
       return res.json(user)
     }

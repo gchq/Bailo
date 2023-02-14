@@ -58,7 +58,7 @@ export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: G
   return filterDeployment(user, await deployment)
 }
 
-export async function findDeploymentById(user: UserDoc, id: ModelId, opts?: GetDeploymentOptions) {
+export async function findDeploymentById(user: UserDoc, id: ModelId | DeploymentDoc, opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findById(id)
   if (opts?.populate) deployment = deployment.populate('model')
   if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
