@@ -1,4 +1,3 @@
-import { castArray } from 'lodash-es'
 import { ModelDoc } from 'server/models/Model.js'
 import { DateString, ModelId } from '../../types/interfaces.js'
 import { UserDoc } from '../models/User.js'
@@ -25,12 +24,20 @@ export function serializedVersionFields(): SerializerOptions {
   }
 }
 
-export async function filterVersion<T>(user: UserDoc, unfiltered: T): Promise<T> {
-  const versions = castArray(unfiltered)
+export async function filterVersionArray(user: UserDoc, unfiltered: Array<VersionDoc>) {
+  return asyncFilter(unfiltered, (version: VersionDoc) => auth.canUserSeeVersion(user, version))
+}
 
-  const filtered = await asyncFilter(versions, (version: VersionDoc) => auth.canUserSeeVersion(user, version))
+export async function filterVersion(user: UserDoc, unfiltered: VersionDoc | null) {
+  if (!unfiltered) {
+    return null
+  }
 
-  return Array.isArray(unfiltered) ? (filtered as unknown as T) : filtered[0]
+  if (!(await auth.canUserSeeVersion(user, unfiltered))) {
+    return null
+  }
+
+  return unfiltered
 }
 
 export async function findVersionById(user: UserDoc, id: ModelId | VersionDoc, opts?: GetVersionOptions) {
@@ -62,7 +69,7 @@ export async function findModelVersions(user: UserDoc, model: ModelId, opts?: Ge
   if (!opts?.showLogs) versions = versions.select({ logs: 0 })
   if (opts?.populate) versions = versions.populate('model')
 
-  return filterVersion(user, await versions)
+  return filterVersionArray(user, await versions)
 }
 
 export async function markVersionBuilt(_id: ModelId) {
