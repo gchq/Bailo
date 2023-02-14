@@ -1,4 +1,3 @@
-import Editor from '@monaco-editor/react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
 import TreeView from '@mui/lab/TreeView'
@@ -8,6 +7,10 @@ import Grid from '@mui/material/Grid'
 import TreeItem from '@mui/lab/TreeItem'
 import { useGetVersionFile, useGetVersionFileList } from '@/data/version'
 import { filesArrayToTree, RenderTree } from '@/utils/tree'
+import dynamic from 'next/dynamic'
+import '@uiw/react-textarea-code-editor/dist.css'
+
+const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false })
 
 export default function CodeExplorer({
   id,
@@ -64,7 +67,7 @@ export default function CodeExplorer({
   )
 
   return (
-    <Grid container spacing={2} sx={{ maxHeight: '700px' }}>
+    <Grid container spacing={2}>
       <Grid item xs={12} md={3} sx={{ maxHeight: 'inherit' }}>
         <TreeView
           aria-label='code navigator'
@@ -76,13 +79,17 @@ export default function CodeExplorer({
           {renderTree(tree)}
         </TreeView>
       </Grid>
-      <Grid item xs={12} md={9} sx={{ scroll: 'auto' }}>
-        <Editor
-          height='700px'
-          path={path}
+      <Grid item xs={12} md={9} sx={{ scroll: 'auto', height: '100%' }}>
+        <CodeEditor
           value={file}
-          theme={theme.palette.mode === 'dark' ? 'vs-dark' : 'light'}
-          options={{ fontSize: theme.typography.fontSize }}
+          language={path ? path.split('.').at(-1) : 'py'}
+          padding={15}
+          data-color-mode={theme.palette.mode === 'dark' ? 'dark' : 'light'}
+          style={{
+            fontSize: theme.typography.fontSize,
+            backgroundColor: 'inherit',
+            fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+          }}
         />
       </Grid>
     </Grid>
