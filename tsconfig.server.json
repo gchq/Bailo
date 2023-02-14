@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "Node16",
     "outDir": "dist",
-    "target": "es2017",
+    "target": "ES2016",
+    "moduleResolution": "node16",
     "isolatedModules": false,
     "noEmit": false
   },
