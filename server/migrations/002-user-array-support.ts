@@ -21,8 +21,8 @@ export async function up() {
     }
 
     deployment.metadata.contacts.owner = [
-      { kind: EntityKind.USER, id: deployment.metadata.contacts.requester },
-      { kind: EntityKind.USER, id: deployment.metadata.contacts.secondPOC },
+      { kind: EntityKind.USER, id: deployment.metadata.contacts.requester as string },
+      { kind: EntityKind.USER, id: deployment.metadata.contacts.secondPOC as string },
     ]
 
     delete deployment.metadata.contacts.requester
