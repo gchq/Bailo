@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import ReplayIcon from '@mui/icons-material/Replay'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -103,6 +104,17 @@ function Model() {
   // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
   // It defaults to true, until it hears false from the network access check.
   const isPotentialUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
+
+  const onRebuildModelClick = useCallback(async () => {
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/rebuild`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Requested model rebuild' })
+      mutateVersion()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
+  }, [sendNotification, version, mutateVersion])
 
   const addQueryParameter = (key: string, value: string) => {
     const routerParameters = router.query
@@ -307,7 +319,7 @@ function Model() {
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
-      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+      {hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
           <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
@@ -487,14 +499,14 @@ function Model() {
             <Tab
               label='Build Logs'
               value='build'
-              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              disabled={hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard}
               data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
             <Tab
               label='Explore Code'
               value='code'
-              disabled={hasUploadType && version.metadata.buildOptions.uploadType !== ModelUploadType.Zip}
+              disabled={hasUploadType && version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip}
             />
             <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
@@ -521,7 +533,25 @@ function Model() {
           <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
         )}
 
-        {group === 'build' && <TerminalLog logs={version.logs} title='Model Build Logs' />}
+        {group === 'build' && (
+          <>
+            <Grid container justifyContent='flex-end' sx={{ pb: 2 }}>
+              <DisabledElementTooltip
+                conditions={[version.state?.build?.state === 'retrying' ? 'Model is already retrying.' : '']}
+              >
+                <Button
+                  disabled={version.state?.build?.state === 'retrying'}
+                  onClick={onRebuildModelClick}
+                  variant='outlined'
+                  startIcon={<ReplayIcon />}
+                >
+                  Rebuild Model
+                </Button>
+              </DisabledElementTooltip>
+            </Grid>
+            <TerminalLog logs={version.logs} title='Model Build Logs' />
+          </>
+        )}
 
         {group === 'deployments' && (
           <>

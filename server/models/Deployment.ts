@@ -2,7 +2,7 @@ import { Document, model, Schema, Types } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
-import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
+import { ApprovalStates, approvalStateOptions, DeploymentMetadata } from '../../types/interfaces'
 
 export interface LogStatement {
   timestamp: Date
@@ -15,7 +15,7 @@ export interface Deployment {
   uuid: string
 
   model: Types.ObjectId | ModelDoc
-  metadata: any
+  metadata: DeploymentMetadata
 
   managerApproved: ApprovalStates
 

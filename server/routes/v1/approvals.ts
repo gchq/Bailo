@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { Types } from 'mongoose'
 import ModelModel from '../../models/Model'
 import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalStates, Entity } from '../../../types/interfaces'
 import { ApprovalCategory } from '../../models/Approval'
 import { VersionDoc } from '../../models/Version'
 import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment'
@@ -20,7 +20,7 @@ import { getDeploymentQueue } from '../../utils/queues'
 import { BadReq, Unauthorised } from '../../utils/result'
 import { sendEmail } from '../../utils/smtp'
 import { ensureUserRole, hasRole } from '../../utils/user'
-import { isUserInEntityList } from '../../utils/entity'
+import { isUserInEntityList, getUserListFromEntityList } from '../../utils/entity'
 
 export const getApprovals = [
   ensureUserRole('user'),
@@ -111,7 +111,7 @@ export const postApprovalResponse = [
       field = 'reviewerApproved'
     }
 
-    let userId: Types.ObjectId
+    let entities: Array<Entity>
     let approvalCategory: ApprovalCategory
     let document: VersionDoc | DeploymentDoc
 
@@ -125,7 +125,7 @@ export const postApprovalResponse = [
         )
       }
 
-      userId = req.user._id
+      entities = version.metadata.contacts.uploader
       approvalCategory = ApprovalCategory.Upload
       document = version
 
@@ -140,7 +140,7 @@ export const postApprovalResponse = [
               await getDeploymentQueue()
             ).add({
               deploymentId: deployment._id,
-              userId,
+              userId: req.user.id,
               version: version.version,
             })
           }
@@ -156,6 +156,7 @@ export const postApprovalResponse = [
         )
       }
 
+      entities = deployment.metadata.contacts.owner
       approvalCategory = ApprovalCategory.Deployment
       document = deployment
 
@@ -177,8 +178,18 @@ export const postApprovalResponse = [
     }
 
     const reviewingUser = req.user.id
-    const user = await getUserByInternalId(req.user._id)
-    if (user?.email) {
+    const userList = await getUserListFromEntityList(entities)
+
+    if (userList.length > 20) {
+      // refusing to send more than 20 emails.
+      req.log.warn({ count: userList.length, approval: approval._id }, 'Refusing to send too many emails')
+      return
+    }
+
+    for (const user of userList) {
+      if (!user.email) {
+        continue
+      }
       await sendEmail({
         to: user.email,
         ...(await reviewedApproval({

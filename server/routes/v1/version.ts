@@ -18,6 +18,7 @@ import { ensureUserRole } from '../../utils/user'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
 import { removeVersionFromModel } from '../../services/model'
 import { FileRef } from '../../utils/build/build'
+import { getUploadQueue } from '../../utils/queues'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -193,19 +194,84 @@ export const postResetVersionApprovals = [
     const { user } = req
     const version = await findVersionById(req.user, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
     }
 
     if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
-      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
     }
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
     await createVersionApprovals({ version, user: req.user })
 
-    req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
+    req.log.info({ code: 'version_approvals_reset', version: version._id }, 'User reset version approvals')
     return res.json(version)
+  },
+]
+
+export const postRebuildModel = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { user } = req
+    const version = await findVersionById(req.user, id, { populate: true })
+    if (!version) {
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
+    }
+
+    if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
+    }
+
+    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
+      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
+    }
+
+    if (version.state.build.state === 'retrying') {
+      throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
+    }
+
+    const binaryRef = {
+      name: 'binary.zip',
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawBinaryPath,
+    }
+
+    const codeRef = {
+      name: 'code.zip',
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawCodePath,
+    }
+
+    const jobId = await (
+      await getUploadQueue()
+    ).add({
+      versionId: version._id,
+      userId: req.user._id,
+      binary: binaryRef,
+      code: codeRef,
+      uploadType: ModelUploadType.Zip,
+    })
+
+    version.state.build = {
+      ...(version.state.build || {}),
+      state: 'retrying',
+    }
+    version.markModified('state')
+    await version.save()
+
+    const message = 'Successfully created build job in upload queue'
+    req.log.info({ code: 'created_upload_job', jobId, version: version._id }, message)
+    return res.json({
+      message,
+    })
   },
 ]
 

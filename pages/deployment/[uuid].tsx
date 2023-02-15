@@ -120,8 +120,8 @@ export default function Deployment() {
     return versions
       .filter(
         (version) =>
-          version.metadata.buildOptions.uploadType === ModelUploadType.Docker ||
-          version.metadata.buildOptions.uploadType === ModelUploadType.Zip
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Docker ||
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Zip
       )
       .map((version) => (
         <MenuItem value={version.version} key={`version-${version.version}`}>
