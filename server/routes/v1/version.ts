@@ -1,14 +1,23 @@
 import bodyParser from 'body-parser'
 import config from 'config'
+import { basename } from 'path'
 import { Request, Response } from 'express'
+import { getClient } from '../../utils/minio'
+import { MinioRandomAccessReader, getFileStream } from '../../utils/zip'
 import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
 import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
-import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
+import {
+  findVersionById,
+  findVersionFileList,
+  updateManagerLastViewed,
+  updateReviewerLastViewed,
+} from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
 import { removeVersionFromModel } from '../../services/model'
+import { FileRef } from '../../utils/build/build'
 import { getUploadQueue } from '../../utils/queues'
 
 export const getVersion = [
@@ -26,6 +35,74 @@ export const getVersion = [
 
     req.log.info({ code: 'fetching_version', version }, 'User fetching version')
     return res.json(version)
+  },
+]
+
+export const getVersionFileList = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id, file } = req.params
+
+    if (file !== 'code') {
+      throw BadReq({ file }, 'Only code listing is supported.')
+    }
+
+    const version = await findVersionById(req.user, id, { showFiles: true })
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version')
+    }
+
+    const fileList = await findVersionFileList(version)
+
+    return res.json({
+      fileList,
+    })
+  },
+]
+
+export const getVersionFile = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id, file } = req.params
+    const { path } = req.query
+
+    if (typeof path !== 'string') {
+      throw BadReq({ path }, 'Path should be of type string.')
+    }
+
+    if (file !== 'code') {
+      throw BadReq({ file }, 'Only code listing is supported.')
+    }
+
+    const version = await findVersionById(req.user, id, { showFiles: true })
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version')
+    }
+
+    if (!version.files.rawCodePath) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version code path')
+    }
+
+    const fileList = await findVersionFileList(version)
+    const entry = fileList.find((item) => item.fileName === path)
+
+    if (!entry) {
+      throw NotFound({ code: 'version_not_found', versionId: id, path }, 'Unable to find version file')
+    }
+
+    const fileRef: FileRef = {
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawCodePath,
+      name: basename(path),
+    }
+
+    const minio = getClient()
+    const reader = new MinioRandomAccessReader(minio, fileRef)
+    const stream = await getFileStream(reader, entry)
+
+    stream.pipe(res)
   },
 ]
 
@@ -153,7 +230,7 @@ export const postRebuildModel = [
       )
     }
 
-    if (version.metadata.buildOptions.uploadType !== ModelUploadType.Zip) {
+    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
       throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
     }
 

@@ -33,6 +33,7 @@
   "dependencies": {
     "@emotion/server": "^11.10.0",
     "@next/mdx": "^13.1.2",
+    "@uiw/react-textarea-code-editor": "^2.1.1",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
     "axios": "^0.24.0",
@@ -47,7 +48,7 @@
     "dev-null": "^0.1.1",
     "express": "^5.0.0-alpha.8",
     "form-data-encoder": "^1.7.1",
-    "formdata-node": "^5.0.0",
+    "formdata-node": "^4.3.2",
     "gray-matter": "^4.0.3",
     "indent-string": "^4.0.0",
     "jsonschema": "^1.4.1",
@@ -63,6 +64,7 @@
     "multer": "^1.4.4",
     "nanoid": "^3.1.31",
     "next": "~12.1.6",
+    "next-remove-imports": "^1.0.8",
     "nodemailer": "^6.9.0",
     "notistack": "^2.0.8",
     "open": "^8.4.0",
@@ -78,7 +80,8 @@
     "ts-node": "^10.9.1",
     "unzipper": "^0.10.11",
     "uuid": "^9.0.0",
-    "yargs": "^17.6.2"
+    "yargs": "^17.6.2",
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
