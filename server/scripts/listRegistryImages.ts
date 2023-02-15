@@ -1,7 +1,7 @@
 /* eslint-disable import/newline-after-import */
 import config from 'config'
 import https from 'https'
-import { default as axios } from 'axios'
+import axios from 'axios'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import logger from '../utils/logger.js'
