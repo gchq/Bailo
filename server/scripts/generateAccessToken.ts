@@ -1,4 +1,4 @@
-import { consoleLog } from '@/utils/logging'
+import { consoleLog } from '../../utils/logging'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 
 async function main() {
