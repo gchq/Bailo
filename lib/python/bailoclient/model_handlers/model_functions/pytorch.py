@@ -22,6 +22,9 @@ def pytorch_bundler(model, path: str, code_paths: List[str], pip_requirements: s
         model, path=path, code_paths=code_paths, pip_requirements=pip_requirements
     )
 
+    ## TODO update so returning the mlflow files that we actually want
+    return os.path.join(path, "data", "model.pth"), path
+
 
 @loader(flavour=ModelFlavour.PYTORCH)
 def pytorch_loader(model_path: str):

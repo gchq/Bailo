@@ -160,18 +160,15 @@ class Bundler:
 
         tmpdir = tempfile.TemporaryDirectory()
 
-        ## TODO update this to return the model path and optionally additional mlflow files (conda reqs, mlflow file for importing etc)
-        self._bundle_model(
+        model_binary, optional_files = self._bundle_model(
             model, tmpdir.name, model_flavour, additional_files, model_requirements
         )
-
-        # TODO then remove this
-        model_binary = glob(f"{tmpdir.name}/data/model*")[0]
 
         self.zip_model_files(
             model_py,
             model_requirements,
             additional_files,
+            optional_files,
             model_binary,
             output_path,
         )
@@ -203,7 +200,7 @@ class Bundler:
                 f"Bundler function does not exist for {model_flavour}"
             ) from None
 
-        bundler_function(
+        return bundler_function(
             model=model,
             path=output_path,
             code_paths=additional_files,
@@ -229,6 +226,7 @@ class Bundler:
         model_code: str,
         model_requirements: str,
         additional_files: str,
+        optional_files: str,
         model_binary: str,
         output_path: str,
     ):
@@ -239,6 +237,8 @@ class Bundler:
             model_code (str): Path to model.py file
             model_requirements (str): Path of requirements.txt file
             additional_files (List[str]): List of paths of any additional required files
+            optional_files (List[str]): List of optional files which have been output from
+                                        automatic model bundling (e.g. MLflow file, conda requirements)
             model_binary (str): Path of model binary
             output_path (str): Path to create the code.zip and binary.zip files
         """
@@ -248,6 +248,9 @@ class Bundler:
         model_code = os.path.abspath(model_code)
         model_requirements = os.path.abspath(model_requirements)
         additional_files = [os.path.abspath(file) for file in additional_files]
+        optional_files = [os.path.abspath(file) for file in optional_files]
+
+        ## TODO actually add the optional files
 
         with tempfile.TemporaryDirectory() as tmpdir_name:
             code_path = os.path.join(tmpdir_name, "model", "code")

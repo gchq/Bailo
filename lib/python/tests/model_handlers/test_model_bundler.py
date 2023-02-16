@@ -21,13 +21,9 @@ def bundler():
     return Bundler()
 
 
-@patch(
-    "bailoclient.model_handlers.model_bundler.Bundler.format_directory_path",
-    return_value="./",
-)
 @patch("bailoclient.model_handlers.model_bundler.Bundler._bundle_model_files")
 def test_bundle_model_raises_type_error_if_additional_files_is_not_tuple_or_list(
-    mock_bundle_files, mock_format_dir, bundler
+    mock_bundle_files, bundler
 ):
     with pytest.raises(TypeError):
         bundler.bundle_model(output_path=".", additional_files="str")
@@ -36,20 +32,17 @@ def test_bundle_model_raises_type_error_if_additional_files_is_not_tuple_or_list
     bundler.bundle_model(output_path=".", additional_files=["file/path"])
 
 
-@patch(
-    "bailoclient.model_handlers.model_bundler.Bundler.format_directory_path",
-    return_value="./",
-)
+@patch("bailoclient.model_handlers.model_bundler.os.path.abspath", return_value="")
 @patch("bailoclient.model_handlers.model_bundler.Bundler._bundle_model_files")
 def test_bundle_model_converts_flavour_to_lower_case(
-    mock_bundle_files, mock_format_dir, bundler
+    mock_bundle_files, mock_abspath, bundler
 ):
     bundler.bundle_model(output_path=".", model_flavour="FLAVOUR")
 
-    mock_bundle_files.assert_called_with("./", None, None, None, "flavour", None)
+    mock_bundle_files.assert_called_with("", None, None, None, "flavour", None)
 
 
-@patch("bailoclient.model_handlers.model_bundler.Bundler._bundle_with_mlflow")
+@patch("bailoclient.model_handlers.model_bundler.Bundler._save_and_bundle_model_files")
 def test_bundle_model_does_mlflow_bundling_if_actual_model_file_provided(
     mock_mlflow_bundling,
     bundler,
@@ -154,25 +147,29 @@ def test_do_model_bundling_identifies_model_template_if_no_model_py(
     )
 
 
-## TODO this mock isn't working
-def test_mlflow_bundling_raises_exception_model_flavour_not_found(bundler):
-    ModelFlavoursMeta.__contains__ = Mock(return_value=True)
+def test_save_and_bundle_raises_exception_model_flavour_not_found(bundler):
+    ModelFlavoursMeta.__contains__ = Mock(return_value=False)
 
     with pytest.raises(ModelFlavourNotFound):
-        bundler._bundle_with_mlflow(
+        bundler._save_and_bundle_model_files(
             model="", output_path="./", model_flavour="invalid_flavour"
         )
 
 
-def test_mflow_bundling(bundler):
-    # print(ModelFlavour)
-    # print("torch" in ModelFlavour)
-    # print("flavour" in ModelFlavour)
+@patch("bailoclient.model_handlers.model_bundler.Bundler._get_model_template")
+@patch("bailoclient.model_handlers.model_bundler.Bundler._bundle_model")
+@patch("bailoclient.model_handlers.model_bundler.Bundler.zip_model_files")
+def test_save_and_bundle_gets_model_py_from_template_if_user_does_not_provide(
+    mock_zip_files, mock_bundle_model, mock_get_template, bundler
+):
     ModelFlavoursMeta.__contains__ = Mock(return_value=True)
-    # print("flavour" in ModelFlavour)
+    mock_bundle_model.return_value = ("model/path", "mlflow/files/path")
 
-    bundler._bundle_with_mlflow(model="", output_path="./", model_flavour="flavour")
-    assert 1 == 2
+    bundler._save_and_bundle_model_files(
+        model="", output_path="./", model_flavour="flavour"
+    )
+
+    mock_get_template.assert_called_once_with("flavour")
 
 
 def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmpdir):
@@ -258,16 +255,6 @@ def test_generate_requirements_file_creates_requirements_file_at_filepath(
     assert "requests" in content
 
 
-def test_generate_requirements_file_raises_error_if_output_directory_does_not_already_exist(
-    bundler, tmpdir
-):
-    python_file = files(requirements).joinpath("file.py")
-    output_path = os.path.join(tmpdir, "output/requirements.txt")
-
-    with pytest.raises(DirectoryNotFound):
-        bundler.generate_requirements_file(python_file, output_path)
-
-
 @patch(
     "bailoclient.model_handlers.model_bundler.subprocess.run",
     side_effect=subprocess.SubprocessError,
@@ -277,33 +264,3 @@ def test_generate_requirements_file_raises_error_if_subprocess_unexpectedly_fail
 ):
     with pytest.raises(subprocess.SubprocessError):
         bundler.generate_requirements_file("module/path", tmpdir)
-
-
-def test_create_dir_makes_new_directory_from_dir_path(bundler, tmpdir):
-    output_dir = os.path.join(tmpdir, "test")
-
-    bundler.create_dir(output_dir=output_dir)
-
-    assert os.path.exists(os.path.join(tmpdir, "test"))
-
-
-def test_create_dir_errors_if_directory_not_valid(bundler, tmpdir):
-    test_name = "\0"
-    output_dir = os.path.join(tmpdir, test_name)
-
-    with pytest.raises(subprocess.SubprocessError):
-        bundler.create_dir(output_dir=output_dir)
-
-
-def test_format_directory_path_adds_trailing_slash_if_not_present(bundler):
-    dir_path = "test/path"
-    new_dir_path = bundler.format_directory_path(dir_path)
-
-    assert new_dir_path == dir_path + os.path.sep
-
-
-def test_format_directory_path_does_nothing_if_trailing_slash_present(bundler):
-    dir_path = "test/path/"
-    new_dir_path = bundler.format_directory_path(dir_path)
-
-    assert new_dir_path == dir_path
