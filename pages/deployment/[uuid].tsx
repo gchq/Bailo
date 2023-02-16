@@ -49,7 +49,6 @@ import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import { getErrorMessage } from '../../utils/fetcher'
 import useNotification from '../../src/common/Snackbar'
-import { version } from 'yargs'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -205,13 +204,6 @@ export default function Deployment() {
       mutateDeployment()
     } else {
       sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
-    }
-  }
-
-  const findLatestVersion = () => {
-    const latestVersion = versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0]
-    if (latestVersion) {
-      return latestVersion.version
     }
   }
 
