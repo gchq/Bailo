@@ -1,12 +1,16 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { Types } from 'mongoose'
-import ModelModel from '../../models/Model'
+import ModelModel, { ModelDoc } from '../../models/Model'
 import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates, Entity } from '../../../types/interfaces'
 import { ApprovalCategory } from '../../models/Approval'
 import { VersionDoc } from '../../models/Version'
-import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment'
+import {
+  findDeploymentById,
+  findDeploymentsByModel,
+  removeModelDeploymentsFromRegistry,
+} from '../../services/deployment'
 import {
   getApproval,
   readNumApprovals,
@@ -132,15 +136,15 @@ export const postApprovalResponse = [
       version[field] = choice
       await version.save()
 
-      if (version.managerApproved && version.reviewerApproved) {
-        const deployments = await DeploymentModel.find({ model: version.model })
+      if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
+        const deployments = await findDeploymentsByModel(req.user, version.model as ModelDoc)
         deployments.forEach(async (deployment) => {
-          if (deployment.managerApproved) {
+          if (deployment.managerApproved === ApprovalStates.Accepted) {
             await (
               await getDeploymentQueue()
             ).add({
               deploymentId: deployment._id,
-              userId: req.user.id,
+              userId: req.user._id,
               version: version.version,
             })
           }

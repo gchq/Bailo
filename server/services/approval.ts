@@ -273,12 +273,17 @@ export async function requestDeploymentsForModelVersions(user: UserDoc, deployme
         `Could not find version for deployment '${deployment.uuid}'`
       )
     }
-    await (
-      await getDeploymentQueue()
-    ).add({
-      deploymentId: deployment._id,
-      userId: user._id,
-      version: versionDoc.version,
-    })
+    if (
+      versionDoc.managerApproved === ApprovalStates.Accepted &&
+      versionDoc.reviewerApproved === ApprovalStates.Accepted
+    ) {
+      await (
+        await getDeploymentQueue()
+      ).add({
+        deploymentId: deployment._id,
+        userId: user._id,
+        version: versionDoc.version,
+      })
+    }
   })
 }
