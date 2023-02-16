@@ -3,7 +3,10 @@ from enum import Enum, EnumMeta
 
 class ModelFlavoursMeta(EnumMeta):
     def __contains__(cls, item):
-        return isinstance(item, cls) or item.lower() in [
+        if not item:
+            return False
+
+        return isinstance(item, cls) or item in [
             v.value for v in cls.__members__.values()
         ]
 

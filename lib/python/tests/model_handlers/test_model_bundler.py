@@ -13,7 +13,7 @@ from bailoclient.utils.exceptions import (
     ModelFlavourNotFound,
     MissingFilesError,
 )
-from bailoclient.utils.enums import ModelFlavoursMeta
+from bailoclient.utils.enums import ModelFlavoursMeta, ModelFlavour
 
 
 @pytest.fixture
@@ -152,6 +152,27 @@ def test_do_model_bundling_identifies_model_template_if_no_model_py(
     mock_zip_files.assert_called_once_with(
         mock_template, model_requirements, None, model_binary, output_path
     )
+
+
+## TODO this mock isn't working
+def test_mlflow_bundling_raises_exception_model_flavour_not_found(bundler):
+    ModelFlavoursMeta.__contains__ = Mock(return_value=True)
+
+    with pytest.raises(ModelFlavourNotFound):
+        bundler._bundle_with_mlflow(
+            model="", output_path="./", model_flavour="invalid_flavour"
+        )
+
+
+def test_mflow_bundling(bundler):
+    # print(ModelFlavour)
+    # print("torch" in ModelFlavour)
+    # print("flavour" in ModelFlavour)
+    ModelFlavoursMeta.__contains__ = Mock(return_value=True)
+    # print("flavour" in ModelFlavour)
+
+    bundler._bundle_with_mlflow(model="", output_path="./", model_flavour="flavour")
+    assert 1 == 2
 
 
 def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmpdir):

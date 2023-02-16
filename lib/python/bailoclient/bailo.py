@@ -317,19 +317,23 @@ class Bailo(Client):
         """
         return self.loader.load_model(model_path, model_flavour)
 
-    def generate_requirements_file(self, module_path: str, output_dir: str):
+    def generate_requirements_file(self, module_path: str, output_path: str):
         """Generate requirements.txt file based on imports within a Notebook, Python file,
             or Python project. Output_dir must be a directory.
 
         Args:
             module_path (str): Path to the Python file used to generate requirements.txt
-            output_dir (str): Output path in format output/path/
+            output_path (str): Output path in format output/path/
         """
 
-        if output_dir.endswith("requirements.txt"):
-            output_dir = os.path.split(output_dir)[0]
+        output_path = os.path.normpath(output_path)
+
+        if not output_path.endswith("requirements.txt"):
+            output_path = os.path.join(output_path, "requirements.txt")
+
+        output_dir = os.path.dirname(output_path)
 
         if not os.path.exists(output_dir):
-            self.bundler.create_dir(output_dir)
+            os.makedirs(output_dir, exist_ok=True)
 
-        self.bundler.generate_requirements_file(module_path, output_dir)
+        self.bundler.generate_requirements_file(module_path, output_path)

@@ -5,13 +5,15 @@ from pathlib import Path
 from glob import glob
 from zipfile import ZipFile
 from typing import List
+from shutil import copyfile
 
 from ..utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
     ModelFlavourNotFound,
-    TemplateNotAvailable,
+    ModelTemplateNotAvailable,
     DirectoryNotFound,
     MissingFilesError,
+    ModelMethodNotAvailable,
 )
 
 
@@ -62,9 +64,9 @@ class Bundler:
         """
 
         if not os.path.exists(output_path):
-            self.create_dir(output_path)
+            Path(output_path).mkdir(parents=True)
 
-        output_path = self.format_directory_path(output_path)
+        output_path = os.path.abspath(output_path)
 
         if additional_files and not isinstance(additional_files, (tuple, list)):
             raise TypeError("Expected additional_files to be a list of file paths")
@@ -73,7 +75,7 @@ class Bundler:
             model_flavour = model_flavour.lower()
 
         if model:
-            return self._bundle_with_mlflow(
+            return self._save_and_bundle_model_files(
                 model,
                 output_path,
                 model_flavour,
@@ -116,13 +118,13 @@ class Bundler:
             )
 
         if not model_py:
-            model_py = self.model_py_templates[model_flavour]
+            model_py = self._get_model_template(model_flavour)
 
         return self.zip_model_files(
             model_py, model_requirements, additional_files, model_binary, output_path
         )
 
-    def _bundle_with_mlflow(
+    def _save_and_bundle_model_files(
         self,
         model,
         output_path: str,
@@ -150,50 +152,63 @@ class Bundler:
             ModelFlavourNotRecognised: The provided model flavour was not recognised
         """
 
-        if model and model_flavour not in ModelFlavour:
-            raise ModelFlavourNotFound(
-                "A valid model flavour must be provided for MLflow bundling"
-            )
+        if model_flavour not in ModelFlavour:
+            raise ModelFlavourNotFound("Invalid model flavour")
 
-        import mlflow
+        if not model_py:
+            model_py = self._get_model_template(model_flavour)
 
         tmpdir = tempfile.TemporaryDirectory()
 
-        code_path = os.path.join(tmpdir.name, "code")
-        binary_path = os.path.join(tmpdir.name, "binary")
+        ## TODO update this to return the model path and optionally additional mlflow files (conda reqs, mlflow file for importing etc)
+        self._bundle_model(
+            model, tmpdir.name, model_flavour, additional_files, model_requirements
+        )
 
-        if model_flavour == "mleap" and not model_py:
-            raise TemplateNotAvailable(
-                "There is no model template available for MLeap models"
-            )
+        # TODO then remove this
+        model_binary = glob(f"{tmpdir.name}/data/model*")[0]
 
-        try:
-            self.bundler_functions[model_flavour](
-                model=model,
-                path=output_path,
-                code_paths=additional_files,
-                pip_requirements=model_requirements,
-            )
-
-            if not model_py:
-                model_py = self.model_py_templates[model_flavour]
-
-        except KeyError:
-            raise ModelFlavourNotFound(
-                "Model flavour not recognised. Check MLflow docs for list of supported flavours"
-            ) from None
-
-        # copy model.py into tmpdir containing model files
-        subprocess.run(["cp", "-r", model_py, f"{code_path}/model.py"])
-
-        # move binary file into new folder in tmpdir
-        subprocess.run(["mv", glob(f"{code_path}/data/model*")[0], binary_path])
-
-        # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip")
-        self.zip_files(code_path, f"{output_path}/code.zip")
+        self.zip_model_files(
+            model_py,
+            model_requirements,
+            additional_files,
+            model_binary,
+            output_path,
+        )
 
         tmpdir.cleanup()
+
+    def _get_model_template(self, model_flavour: str):
+        try:
+            return self.model_py_templates[model_flavour]
+
+        except:
+            raise ModelTemplateNotAvailable(
+                f"There is no model template available for {model_flavour}"
+            )
+
+    def _bundle_model(
+        self,
+        model,
+        output_path: str,
+        model_flavour: str,
+        additional_files: List[str] = None,
+        model_requirements: str = None,
+    ):
+        try:
+            bundler_function = self.bundler_functions[model_flavour]
+
+        except KeyError:
+            raise ModelMethodNotAvailable(
+                f"Bundler function does not exist for {model_flavour}"
+            ) from None
+
+        bundler_function(
+            model=model,
+            path=output_path,
+            code_paths=additional_files,
+            pip_requirements=model_requirements,
+        )
 
     def __contains_required_code_files(self, code_dir: str):
         """Check that a directory of model code contains requirements.txt and model.py files
@@ -227,31 +242,83 @@ class Bundler:
             model_binary (str): Path of model binary
             output_path (str): Path to create the code.zip and binary.zip files
         """
-        tmpdir = tempfile.TemporaryDirectory()
 
-        code_path = os.path.join(tmpdir.name, "code")
-        binary_path = os.path.join(tmpdir.name, "binary")
+        # standardise all the paths
+        model_binary = os.path.abspath(model_binary)
+        model_code = os.path.abspath(model_code)
+        model_requirements = os.path.abspath(model_requirements)
+        additional_files = [os.path.abspath(file) for file in additional_files]
 
-        # move model files
-        if model_requirements != "requirements.txt":
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            code_path = os.path.join(tmpdir_name, "model", "code")
+            Path(code_path).mkdir(parents=True)
+
+            self._copy_or_generate_requirements(
+                model_requirements, model_code, code_path
+            )
+
+            if additional_files:
+                self._copy_additional_files(
+                    additional_files, model_binary, tempfile.gettempdir(), code_path
+                )
+
+            copyfile(model_code, os.path.join(code_path, "model.py"))
+            copyfile(
+                model_binary,
+                os.path.join(tmpdir_name, "model", os.path.basename(model_binary)),
+            )
+
+            # create zips
+            self.zip_files(model_binary, f"{output_path}/binary.zip")
+            self.zip_files(code_path, f"{output_path}/code.zip")
+
+    def _copy_or_generate_requirements(self, model_requirements, model_code, code_path):
+        if not model_requirements:
             self.generate_requirements_file(
-                model_requirements, f"{code_path}/requirements.txt"
+                model_code, os.path.join(code_path, "requirements.txt")
+            )
+
+        elif not model_requirements.endswith("requirements.txt"):
+            self.generate_requirements_file(
+                model_requirements, os.path.join(code_path, "requirements.txt")
             )
 
         else:
-            subprocess.run(["cp", "-r", model_requirements, code_path])
+            copyfile(model_requirements, os.path.join(code_path, "requirements.txt"))
 
+    def _copy_additional_files(
+        self, additional_files, model_binary, temp_dir, code_path
+    ):
+        if os.path.commonpath([model_binary, temp_dir]) == temp_dir:
+            self.__copy_additional_files_from_tempdir(
+                additional_files, os.path.join(code_path, "additional_files")
+            )
+
+        else:
+            self.__copy_additional_files_from_local(
+                additional_files,
+                code_path,
+                os.path.dirname(os.path.normpath(model_binary)),
+            )
+
+    def __copy_additional_files_from_tempdir(self, additional_files, output_path):
+        Path(output_path).mkdir(parents=True)
         for file_path in additional_files:
-            subprocess.run(["cp", "-r", file_path, code_path])
+            copyfile(file_path, os.path.join(output_path, os.path.basename(file_path)))
 
-        subprocess.run(["cp", "-r", model_code, code_path])
-        subprocess.run(["cp", "-r", model_binary, binary_path])
+    def __copy_additional_files_from_local(
+        self, additional_files, output_path, model_parent_path
+    ):
+        for file_path in additional_files:
+            output_file_path = os.path.join(
+                output_path, os.path.relpath(file_path, model_parent_path)
+            )
+            os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-        # create zips
-        self.zip_files(binary_path, f"{output_path}/binary.zip")
-        self.zip_files(code_path, f"{output_path}/code.zip")
-
-        tmpdir.cleanup()
+            copyfile(
+                file_path,
+                output_file_path,
+            )
 
     def zip_files(self, file_path: str, zip_path: str):
         """Create zip file at the specified zip path from a file or folder path
@@ -320,11 +387,6 @@ class Bundler:
         Raises:
             Exception: Unable to create requirements.txt from specified file at specified location
         """
-
-        output_dir, _ = os.path.split(output_path)
-        if not os.path.exists(output_dir):
-            raise DirectoryNotFound("Output directory could not be found")
-
         try:
             subprocess.run(
                 ["pipreqsnb", module_path, "--savepath", output_path],
@@ -335,33 +397,3 @@ class Bundler:
             raise subprocess.CalledProcessError(
                 "Unable to create requirements file at the specified location"
             ) from None
-
-    def create_dir(self, output_dir: str):
-        """Run subprocess to create output directory
-
-        Args:
-            output_dir (str): Path of the output directory
-
-        Raises:
-            subprocess.SubprocessError: Unable to create the directory
-        """
-        try:
-            subprocess.run(["mkdir", "-p", output_dir])
-
-        except (subprocess.SubprocessError, ValueError):
-            raise subprocess.SubprocessError("Unable to create directory") from None
-
-    ## TODO check type - str or path?
-    def format_directory_path(self, dir_path):
-        """Format directory path to end with '/'
-
-        Args:
-            dir_path (str): Directory path
-
-        Returns:
-            str: Directory path
-        """
-        if not dir_path.endswith("/"):
-            return dir_path + os.path.sep
-
-        return dir_path

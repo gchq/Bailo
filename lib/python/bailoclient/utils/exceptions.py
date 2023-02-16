@@ -65,7 +65,7 @@ class ModelFlavourNotFound(Exception):
     """MLflow model flavour not found"""
 
 
-class TemplateNotAvailable(Exception):
+class ModelTemplateNotAvailable(Exception):
     """No model.py template code available"""
 
 
