@@ -1,8 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { Types } from 'mongoose'
 import ModelModel, { ModelDoc } from '../../models/Model'
-import DeploymentModel, { DeploymentDoc } from '../../models/Deployment'
+import { DeploymentDoc } from '../../models/Deployment'
 import { ApprovalStates, Entity } from '../../../types/interfaces'
 import { ApprovalCategory } from '../../models/Approval'
 import { VersionDoc } from '../../models/Version'
@@ -17,7 +16,6 @@ import {
   readApprovals,
   requestDeploymentsForModelVersions,
 } from '../../services/approval'
-import { getUserByInternalId } from '../../services/user'
 import { findVersionById } from '../../services/version'
 import { reviewedApproval } from '../../templates/reviewedApproval'
 import { getDeploymentQueue } from '../../utils/queues'
