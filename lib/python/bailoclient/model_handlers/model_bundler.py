@@ -30,6 +30,7 @@ class Bundler:
         model_binary: str = None,
         model_py: str = None,
         model_requirements: str = None,
+        requirements_files_path: str = None,
         model_flavour: str = None,
         additional_files: List[str] = None,
     ):
@@ -66,8 +67,6 @@ class Bundler:
         if not os.path.exists(output_path):
             Path(output_path).mkdir(parents=True)
 
-        output_path = os.path.abspath(output_path)
-
         if additional_files and not isinstance(additional_files, (tuple, list)):
             raise TypeError("Expected additional_files to be a list of file paths")
 
@@ -81,6 +80,7 @@ class Bundler:
                 model_flavour,
                 additional_files,
                 model_requirements,
+                requirements_files_path,
                 model_py,
             )
 
@@ -89,6 +89,7 @@ class Bundler:
             model_binary,
             model_py,
             model_requirements,
+            requirements_files_path,
             model_flavour,
             additional_files,
         )
@@ -99,6 +100,7 @@ class Bundler:
         model_binary: str,
         model_py: str,
         model_requirements: str,
+        requirements_files_path: str,
         model_flavour: str,
         additional_files: List[str],
     ):
@@ -120,8 +122,13 @@ class Bundler:
         if not model_py:
             model_py = self._get_model_template(model_flavour)
 
-        return self.zip_model_files(
-            model_py, model_requirements, additional_files, model_binary, output_path
+        return self._transfer_and_bundle_model_files(
+            model_code=model_py,
+            model_requirements=model_requirements,
+            requirements_files_path=requirements_files_path,
+            additional_files=additional_files,
+            model_binary=model_binary,
+            output_path=output_path,
         )
 
     def _save_and_bundle_model_files(
@@ -131,6 +138,7 @@ class Bundler:
         model_flavour: str,
         additional_files: List[str] = None,
         model_requirements: str = None,
+        requirements_files_path: str = None,
         model_py: str = None,
     ):
         """Bundle model files via MLflow. Accepts models in 'flavors' that are supported
@@ -161,21 +169,33 @@ class Bundler:
         tmpdir = tempfile.TemporaryDirectory()
 
         model_binary, optional_files = self._bundle_model(
-            model, tmpdir.name, model_flavour, additional_files, model_requirements
+            model, tmpdir.name, model_flavour, additional_files
         )
 
-        self.zip_model_files(
-            model_py,
-            model_requirements,
-            additional_files,
-            optional_files,
-            model_binary,
-            output_path,
+        self._transfer_and_bundle_model_files(
+            model_code=model_py,
+            model_requirements=model_requirements,
+            requirements_files_path=requirements_files_path,
+            additional_files=additional_files,
+            model_binary=model_binary,
+            output_path=output_path,
+            optional_files=optional_files,
         )
 
         tmpdir.cleanup()
 
     def _get_model_template(self, model_flavour: str):
+        """Get the model.py template file by model flavour
+
+        Args:
+            model_flavour (str): Model flavour
+
+        Raises:
+            ModelTemplateNotAvailable: No model template available for model_flavour
+
+        Returns:
+            str: file path to model.py template file for the model flavour
+        """
         try:
             return self.model_py_templates[model_flavour]
 
@@ -190,8 +210,23 @@ class Bundler:
         output_path: str,
         model_flavour: str,
         additional_files: List[str] = None,
-        model_requirements: str = None,
     ):
+        """Save model via model bundler
+
+        Args:
+            model (Model object): The model object to save
+            output_path (str): Path to save the model to (should be a temp location)
+            model_flavour (str): Model flavour to identify corresponding bundler
+            additional_files (List[str], optional): Additional files required with the model.
+                                                    Defaults to None.
+
+        Raises:
+            ModelMethodNotAvailable: There is no bundler function associated with the given
+                                        model flavour
+
+        Returns:
+            Tuple(str, List[str]): Saved model filepath, list of any additional filepaths
+        """
         try:
             bundler_function = self.bundler_functions[model_flavour]
 
@@ -200,35 +235,25 @@ class Bundler:
                 f"Bundler function does not exist for {model_flavour}"
             ) from None
 
-        return bundler_function(
+        model_code, optional_files = bundler_function(
             model=model,
-            path=output_path,
+            output_path=output_path,
             code_paths=additional_files,
-            pip_requirements=model_requirements,
         )
 
-    def __contains_required_code_files(self, code_dir: str):
-        """Check that a directory of model code contains requirements.txt and model.py files
-
-        Args:
-            code_dir (str): Path of code directory
-
-        Returns:
-            boolean: True if required files found
-        """
-        code_files = [
-            file.lower() for _, _, files in os.walk(code_dir) for file in files
+        return os.path.normpath(model_code), [
+            os.path.normpath(file) for file in optional_files
         ]
-        return "requirements.txt" in code_files and "model.py" in code_files
 
-    def zip_model_files(
+    def _transfer_and_bundle_model_files(
         self,
         model_code: str,
         model_requirements: str,
+        requirements_files_path: str,
         additional_files: str,
-        optional_files: str,
         model_binary: str,
         output_path: str,
+        optional_files: str = None,
     ):
         """Create code.zip and binary.zip of provoded model files at output path.
             Copies all files to a tempdir in the format expected by BAILO.
@@ -243,75 +268,142 @@ class Bundler:
             output_path (str): Path to create the code.zip and binary.zip files
         """
 
-        # standardise all the paths
-        model_binary = os.path.abspath(model_binary)
-        model_code = os.path.abspath(model_code)
-        model_requirements = os.path.abspath(model_requirements)
-        additional_files = [os.path.abspath(file) for file in additional_files]
-        optional_files = [os.path.abspath(file) for file in optional_files]
-
-        ## TODO actually add the optional files
-
         with tempfile.TemporaryDirectory() as tmpdir_name:
             code_path = os.path.join(tmpdir_name, "model", "code")
             Path(code_path).mkdir(parents=True)
 
+            self._copy_model_py(model_code, code_path)
+
             self._copy_or_generate_requirements(
-                model_requirements, model_code, code_path
+                model_requirements, requirements_files_path, model_code, code_path
             )
+
+            if optional_files:
+                self._copy_optional_files(optional_files, code_path)
 
             if additional_files:
                 self._copy_additional_files(
                     additional_files, model_binary, tempfile.gettempdir(), code_path
                 )
 
-            copyfile(model_code, os.path.join(code_path, "model.py"))
-            copyfile(
-                model_binary,
-                os.path.join(tmpdir_name, "model", os.path.basename(model_binary)),
-            )
-
             # create zips
-            self.zip_files(model_binary, f"{output_path}/binary.zip")
-            self.zip_files(code_path, f"{output_path}/code.zip")
+            self.zip_files(model_binary, os.path.join(output_path, "binary.zip"))
+            self.zip_files(code_path, os.path.join(output_path, "code.zip"))
 
-    def _copy_or_generate_requirements(self, model_requirements, model_code, code_path):
-        if not model_requirements:
-            self.generate_requirements_file(
-                model_code, os.path.join(code_path, "requirements.txt")
-            )
+    def _copy_model_py(self, model_code: str, code_path: str):
+        """Copy model.py file over to the code folder
 
-        elif not model_requirements.endswith("requirements.txt"):
+        Args:
+            model_code (str): Path to model.py code file
+            code_path (str): Path to code folder
+        """
+        copyfile(model_code, os.path.join(code_path, "model.py"))
+
+    def _copy_or_generate_requirements(
+        self, model_requirements, requirements_files_path, model_code, output_path
+    ):
+        """If model_requirements is provided, copy the file to the output code_path.
+        Otherwise, if requirements_files_path is given, generate the requirements from
+        this file. If no paths are provided, use the model.py file to generate requirements
+
+        Args:
+            model_requirements (str): Path to requirements.txt
+            requirements_files_path (str): Path to files from which to generate requirements.txt
+            model_code (str): Path to model.py file
+            output_path (str): Output path for model files
+        """
+        if model_requirements:
+            copyfile(model_requirements, os.path.join(output_path, "requirements.txt"))
+
+        elif requirements_files_path:
             self.generate_requirements_file(
-                model_requirements, os.path.join(code_path, "requirements.txt")
+                requirements_files_path, os.path.join(output_path, "requirements.txt")
             )
 
         else:
-            copyfile(model_requirements, os.path.join(code_path, "requirements.txt"))
+            self.generate_requirements_file(
+                model_code, os.path.join(output_path, "requirements.txt")
+            )
+
+    def _copy_optional_files(self, optional_files: List[str], output_path: str):
+        """Copy optional files from bundler module output. These filepaths are
+        expected to be in the format tmp/tmpxyz/actual/path as they will be created
+        into a temp folder when the bundler is run. This is used to get the
+        assumed relative path in the new directory.
+
+        Args:
+            optional_files (List[str]): List of optional files to copy
+            output_path (str): Output path for model files
+        """
+        for file_path in optional_files:
+            # remove /tmp/tmpxyz/ from path
+            relative_filepath = Path(*Path(file_path).parts[3:])
+
+            os.makedirs(
+                os.path.dirname(os.path.join(output_path, relative_filepath)),
+                exist_ok=True,
+            )
+
+            copyfile(file_path, os.path.join(output_path, relative_filepath))
 
     def _copy_additional_files(
-        self, additional_files, model_binary, temp_dir, code_path
+        self,
+        additional_files: List[str],
+        model_binary: str,
+        temp_dir: str,
+        output_path: str,
     ):
+        """Copy additional files based on their location. Finds commonpath between
+        tmpdir and model binary to establish whether additional files are local
+        or in a temp directory
+
+        Args:
+            additional_files (List[str]): List of additional file paths
+            model_binary (str): Model binary file path
+            temp_dir (str): Temp directory file path
+            output_path (str): Output path for model code files
+        """
         if os.path.commonpath([model_binary, temp_dir]) == temp_dir:
             self.__copy_additional_files_from_tempdir(
-                additional_files, os.path.join(code_path, "additional_files")
+                additional_files, os.path.join(output_path, "additional_files")
             )
 
         else:
             self.__copy_additional_files_from_local(
                 additional_files,
-                code_path,
+                output_path,
                 os.path.dirname(os.path.normpath(model_binary)),
             )
 
-    def __copy_additional_files_from_tempdir(self, additional_files, output_path):
+    def __copy_additional_files_from_tempdir(
+        self, additional_files: List[str], output_path: str
+    ):
+        """Copy additional files from temp directory to output path. Creates output directory
+        for additional files in the output path.
+
+        Args:
+            additional_files (List[str]): List of additional file paths
+            output_path (str): Output path for model files
+        """
         Path(output_path).mkdir(parents=True)
+
         for file_path in additional_files:
             copyfile(file_path, os.path.join(output_path, os.path.basename(file_path)))
 
     def __copy_additional_files_from_local(
-        self, additional_files, output_path, model_parent_path
+        self, additional_files: List[str], output_path: str, model_parent_path: str
     ):
+        """Copy additional files from the local file system to the output path. Creates
+        output directories in the output location to match the file structure of the additional
+        files relative to the parent directory
+
+        Args:
+            additional_files (List[str]): List of additional file paths
+            output_path (str): Output path for model files
+            model_parent_path (str): Parent path of the additional files to be
+                            stripped from the additional files path when copied
+        """
+
         for file_path in additional_files:
             output_file_path = os.path.join(
                 output_path, os.path.relpath(file_path, model_parent_path)
@@ -343,41 +435,42 @@ class Bundler:
             file_path (str): Path to file to zip
             zip_path (str): Output path for zip
         """
-        file_name = os.path.split(file_path)[1]
+        file_name = os.path.basename(file_path)
 
         with ZipFile(zip_path, "w") as zf:
             zf.write(file_path, arcname=file_name)
 
-    def __zip_directory(self, file_path: str, zip_path: str):
+    def __zip_directory(self, dir_path: str, zip_path: str):
         """Zip a directory of files into new zip created at the zip_path
 
         Args:
-            file_path (str): Path to code or binary folder
+            dir_path (str): Path to code or binary folder
             zip_path (str): Output path for zip
         """
         with ZipFile(zip_path, "w") as zf:
-            for dir_path, _, files in os.walk(file_path):
-                output_dir = self.__get_output_dir(dir_path, file_path)
+            for sub_file_path, _, files in os.walk(dir_path):
+                output_dir = self.__get_output_dir(dir_path, sub_file_path)
 
                 for file in files:
                     zf.write(
-                        filename=f"{dir_path}/{file}", arcname=f"{output_dir}{file}"
+                        filename=os.path.join(sub_file_path, file),
+                        arcname=os.path.join(output_dir, file),
                     )
 
-    def __get_output_dir(self, file_path: str, dir_path: str):
+    def __get_output_dir(self, dir_path: str, sub_dir_path: str):
         """Remove top level folder to get the output dir required for the zip files
 
         Args:
-            file_path (str): Path to code or binary folder
-            dir_path (str): Directory path within code or binary folder
+            dir_path (str): Path to code or binary directory
+            sub_dir_path (str): Directory path within dir_path (i.e. within code or binary folder)
 
         Returns:
             str: Output directory with top level folder removed
         """
-        if dir_path == file_path:
+        if dir_path == sub_dir_path:
             return ""
 
-        return os.path.join(Path(file_path).relative_to(dir_path)) + os.path.sep
+        return os.path.join(Path(sub_dir_path).relative_to(dir_path)) + os.path.sep
 
     def generate_requirements_file(self, module_path: str, output_path: str):
         """Generate requirements.txt file based on imports within a Notebook,

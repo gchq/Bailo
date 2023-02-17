@@ -260,6 +260,7 @@ class Bailo(Client):
         model_binary: str = None,
         model_py: str = None,
         model_requirements: str = None,
+        requirements_files_path: str = None,
         model_flavour: str = None,
         additional_files: List[str] = None,
     ):
@@ -293,14 +294,32 @@ class Bailo(Client):
                                                     Defaults to None.
         """
 
+        output_path = os.path.abspath(output_path)
+
+        if model_binary:
+            model_binary = os.path.abspath(model_binary)
+
+        if model_py:
+            model_py = os.path.abspath(model_py)
+
+        if model_requirements:
+            model_requirements = os.path.abspath(model_requirements)
+
+        if requirements_files_path:
+            requirements_files_path = os.path.abspath(requirements_files_path)
+
+        if additional_files:
+            additional_files = [os.path.abspath(file) for file in additional_files]
+
         self.bundler.bundle_model(
-            output_path,
-            model,
-            model_binary,
-            model_py,
-            model_requirements,
-            model_flavour,
-            additional_files,
+            output_path=output_path,
+            model=model,
+            model_binary=model_binary,
+            model_py=model_py,
+            model_requirements=model_requirements,
+            requirements_files_path=requirements_files_path,
+            model_flavour=model_flavour,
+            additional_files=additional_files,
         )
 
     def load_model(self, model_path: str, model_flavour: str):
