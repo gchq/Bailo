@@ -2,16 +2,17 @@ import tempfile
 import subprocess
 import os
 from pathlib import Path
-from glob import glob
 from zipfile import ZipFile
 from typing import List
+from pkg_resources import resource_filename
 from shutil import copyfile
+from distutils.dir_util import copy_tree
+
 
 from ..utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
     ModelFlavourNotFound,
     ModelTemplateNotAvailable,
-    DirectoryNotFound,
     MissingFilesError,
     ModelMethodNotAvailable,
 )
@@ -57,6 +58,9 @@ class Bundler:
             model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
                                                 module or notebook from which to generate the
                                                 requirements.txt. Defaults to None.
+            requirements_files_path (str, optional): File path to file/folder of files from
+                                                      which to generate requirements file.
+                                                      Defaults to None.
             model_flavour (str, optional): Name of the flavour of model. Supported flavours are
                                             those provided by MLflow. Defaults to None.
             additional_files (list[str], optional): List or tuple of file paths of additional dependencies
@@ -74,25 +78,26 @@ class Bundler:
             model_flavour = model_flavour.lower()
 
         if model:
-            return self._save_and_bundle_model_files(
-                model,
-                output_path,
-                model_flavour,
-                additional_files,
-                model_requirements,
-                requirements_files_path,
-                model_py,
+            self._save_and_bundle_model_files(
+                output_path=output_path,
+                model=model,
+                model_py=model_py,
+                model_requirements=model_requirements,
+                requirements_files_path=requirements_files_path,
+                model_flavour=model_flavour,
+                additional_files=additional_files,
             )
 
-        return self._bundle_model_files(
-            output_path=output_path,
-            model_binary=model_binary,
-            model_code=model_py,
-            model_requirements=model_requirements,
-            requirements_files_path=requirements_files_path,
-            model_flavour=model_flavour,
-            additional_files=additional_files,
-        )
+        else:
+            self._bundle_model_files(
+                output_path=output_path,
+                model_binary=model_binary,
+                model_py=model_py,
+                model_requirements=model_requirements,
+                requirements_files_path=requirements_files_path,
+                model_flavour=model_flavour,
+                additional_files=additional_files,
+            )
 
     def _bundle_model_files(
         self,
@@ -104,14 +109,37 @@ class Bundler:
         model_flavour: str,
         additional_files: List[str],
     ):
+        """Bundle model files into the appropriate file structure where the model binary
+        has been provided by the user
+
+        Args:
+            output_path (str): Output path to save model files to
+            model_binary (str): Path to the model binary file
+            model_py (str, optional): Path to model.py file. Will use the template for the
+                                        model flavour if not provided. Defaults to None.
+            model_requirements (str, optional): Model requirements.txt file. Will be generated
+                                                by MLflow if not provided. Defaults to None.
+            requirements_files_path (str, optional): File path to file/folder of files from
+                                                      which to generate requirements file.
+                                                      Defaults to None.
+            model_flavour (str): Model flavour. Must be supported by MLflow
+            additional_files (List[str], optional): List of additional files to include as
+                                                    dependencies. Defaults to None.
+
+        Raises:
+            MissingFilesError: Missing model binary files
+            MissingFilesError: Missing requirements or requirements files path
+            ModelFlavourNotFound: Model template has not been provided and the model flavour is not valid
+        """
         if not model_binary:
             raise MissingFilesError(
                 "Must provide model binary or model object and flavour"
             )
 
-        if not model_requirements:
+        if not model_requirements and not requirements_files_path:
             raise MissingFilesError(
-                "Provide either path to requirements.txt or your python file/notebook/module to generate requirements.txt"
+                """Provide either model_requirements (requirements.txt file) or requirements_files_path (your python file/notebook/module)
+                 from which to generate requirements.txt"""
             )
 
         if not model_py and model_flavour not in ModelFlavour:
@@ -122,41 +150,43 @@ class Bundler:
         if not model_py:
             model_py = self._get_model_template(model_flavour)
 
-        return self._transfer_and_bundle_model_files(
-            model_code=model_py,
+        self._transfer_and_bundle_model_files(
+            output_path=output_path,
+            model_binary=model_binary,
+            model_py=model_py,
+            additional_files=additional_files,
             model_requirements=model_requirements,
             requirements_files_path=requirements_files_path,
-            additional_files=additional_files,
-            model_binary=model_binary,
-            output_path=output_path,
         )
 
     def _save_and_bundle_model_files(
         self,
-        model,
         output_path: str,
-        model_flavour: str,
+        model,
+        model_py: str = None,
+        model_flavour: str = None,
         additional_files: List[str] = None,
         model_requirements: str = None,
         requirements_files_path: str = None,
-        model_py: str = None,
     ):
         """Bundle model files via MLflow. Accepts models in 'flavors' that are supported
             by MLflow.
 
         Args:
-            model (any): Model object in a format supported by MLflow
             output_path (str): Output path to save model files to
-            model_flavour (str): Model flavour. Must be supported by MLflow
-            additional_files (List[str], optional): List of additional files to include as
-                                                    dependencies. Defaults to None.
-            model_requirements (str, optional): Model requirements.txt file. Will be generated
-                                                by MLflow if not provided. Defaults to None.
+            model (any): Model object in a format supported by MLflow
             model_py (str, optional): Path to model.py file. Will use the template for the
                                         model flavour if not provided. Defaults to None.
+            model_flavour (str, optional): Model flavour. Must be supported by MLflow. Defaults to None.
+            model_requirements (str, optional): Model requirements.txt file. Will be generated
+                                                by MLflow if not provided. Defaults to None.
+            requirements_files_path (str, optional): File path to file/folder of files from
+                                                      which to generate requirements file.
+                                                      Defaults to None.
+            additional_files (List[str], optional): List of additional files to include as
+                                                    dependencies. Defaults to None.
 
         Raises:
-            TemplateNotAvailable: MLeap models do not have an available template
             ModelFlavourNotRecognised: The provided model flavour was not recognised
         """
 
@@ -169,19 +199,21 @@ class Bundler:
         tmpdir = tempfile.TemporaryDirectory()
 
         model_binary, optional_files = self._bundle_model(
-            model, tmpdir.name, model_flavour, additional_files
+            output_path=tmpdir.name,
+            model=model,
+            model_flavour=model_flavour,
+            additional_files=additional_files,
         )
 
         self._transfer_and_bundle_model_files(
-            model_code=model_py,
+            output_path=output_path,
+            model_binary=model_binary,
+            additional_files=additional_files,
             model_requirements=model_requirements,
             requirements_files_path=requirements_files_path,
-            additional_files=additional_files,
-            model_binary=model_binary,
-            output_path=output_path,
+            model_py=model_py,
             optional_files=optional_files,
         )
-
         tmpdir.cleanup()
 
     def _get_model_template(self, model_flavour: str):
@@ -206,16 +238,16 @@ class Bundler:
 
     def _bundle_model(
         self,
-        model,
         output_path: str,
+        model,
         model_flavour: str,
         additional_files: List[str] = None,
     ):
         """Save model via model bundler
 
         Args:
-            model (Model object): The model object to save
             output_path (str): Path to save the model to (should be a temp location)
+            model (Model object): The model object to save
             model_flavour (str): Model flavour to identify corresponding bundler
             additional_files (List[str], optional): Additional files required with the model.
                                                     Defaults to None.
@@ -247,35 +279,38 @@ class Bundler:
 
     def _transfer_and_bundle_model_files(
         self,
-        model_code: str,
+        output_path: str,
+        model_binary: str,
+        model_py: str,
         model_requirements: str,
         requirements_files_path: str,
         additional_files: str,
-        model_binary: str,
-        output_path: str,
         optional_files: str = None,
     ):
         """Create code.zip and binary.zip of provoded model files at output path.
             Copies all files to a tempdir in the format expected by BAILO.
 
         Args:
-            model_code (str): Path to model.py file
+            output_path (str): Path to create the code.zip and binary.zip files
+            model_binary (str): Path of model binary
+            model_py (str): Path to model.py file
             model_requirements (str): Path of requirements.txt file
+            requirements_files_path (str, optional): File path to file/folder of files from
+                                                      which to generate requirements file.
+                                                      Defaults to None.
             additional_files (List[str]): List of paths of any additional required files
             optional_files (List[str]): List of optional files which have been output from
                                         automatic model bundling (e.g. MLflow file, conda requirements)
-            model_binary (str): Path of model binary
-            output_path (str): Path to create the code.zip and binary.zip files
         """
 
         with tempfile.TemporaryDirectory() as tmpdir_name:
             code_path = os.path.join(tmpdir_name, "model", "code")
             Path(code_path).mkdir(parents=True)
 
-            self._copy_model_py(model_code, code_path)
+            self._copy_model_py(model_py, code_path)
 
             self._copy_or_generate_requirements(
-                model_requirements, requirements_files_path, model_code, code_path
+                model_requirements, requirements_files_path, model_py, code_path
             )
 
             if optional_files:
@@ -285,6 +320,8 @@ class Bundler:
                 self._copy_additional_files(
                     additional_files, model_binary, tempfile.gettempdir(), code_path
                 )
+
+            self._copy_base_model(os.path.join(code_path, "basemodel"))
 
             # create zips
             self.zip_files(model_binary, os.path.join(output_path, "binary.zip"))
@@ -298,6 +335,23 @@ class Bundler:
             code_path (str): Path to code folder
         """
         copyfile(model_code, os.path.join(code_path, "model.py"))
+
+    def _copy_base_model(self, base_model_output_path: str):
+        """Copy the base model files (abstract base model class and __init__.py to
+        basemodel folder in code directory)
+
+        Args:
+            base_model_output_path (str): Path to move the basemodel folder to
+        """
+        Path(base_model_output_path).mkdir()
+
+        copy_tree(
+            resource_filename(
+                "bailoclient",
+                "resources/templates/basemodel",
+            ),
+            base_model_output_path,
+        )
 
     def _copy_or_generate_requirements(
         self, model_requirements, requirements_files_path, model_code, output_path
@@ -404,6 +458,7 @@ class Bundler:
                             stripped from the additional files path when copied
         """
 
+        ## TODO update to copy tree
         for file_path in additional_files:
             output_file_path = os.path.join(
                 output_path, os.path.relpath(file_path, model_parent_path)

@@ -4,7 +4,6 @@ from .gluon import gluon_bundler, gluon_loader, gluon_template
 from .h2o import h2o_bundler, h2o_loader, h2o_template
 from .keras import keras_bundler, keras_loader, keras_template
 from .lightgbm import lightgbm_bundler, lightgbm_loader, lightgbm_template
-from .mleap import mleap_bundler, mleap_loader, mleap_template
 from .onnx import onnx_bundler, onnx_loader, onnx_template
 from .prophet import prophet_bundler, prophet_loader, prophet_template
 from .pytorch import pytorch_bundler, pytorch_loader, pytorch_template

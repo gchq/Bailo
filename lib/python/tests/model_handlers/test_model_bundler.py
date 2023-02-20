@@ -39,7 +39,7 @@ def test_bundle_model_converts_flavour_to_lower_case(mock_bundle_files, bundler)
     mock_bundle_files.assert_called_once_with(
         output_path=".",
         model_binary=None,
-        model_code=None,
+        model_py=None,
         model_requirements=None,
         requirements_files_path=None,
         model_flavour="flavour",
@@ -86,7 +86,7 @@ def test_bundle_model_bundles_files_if_no_actual_model_file_provided(
         ("binary", None),
     ],
 )
-def test_do_model_bundling_raises_missing_file_error_if_binary_or_requirements_path_missing(
+def test_bundle_model_files_raises_missing_file_error_if_binary_or_requirements_path_missing(
     binary_path, requirements_path, bundler
 ):
     with pytest.raises(MissingFilesError):
@@ -101,7 +101,7 @@ def test_do_model_bundling_raises_missing_file_error_if_binary_or_requirements_p
         )
 
 
-def test_do_model_bundling_raises_exception_if_no_model_py_provided_and_invalid_or_missing_flavour(
+def test_bundle_model_files_raises_exception_if_no_model_py_provided_and_invalid_or_missing_flavour(
     bundler,
 ):
     model_binary, model_requirements, model_flavour = (
@@ -128,7 +128,7 @@ def test_do_model_bundling_raises_exception_if_no_model_py_provided_and_invalid_
 @patch(
     "bailoclient.model_handlers.model_bundler.Bundler._transfer_and_bundle_model_files"
 )
-def test_do_model_bundling_identifies_model_template_if_no_model_py(
+def test_bundle_model_files_identifies_model_template_if_no_model_py(
     mock_zip_files, bundler
 ):
     model_binary, model_requirements, model_flavour = (
@@ -153,12 +153,12 @@ def test_do_model_bundling_identifies_model_template_if_no_model_py(
         )
 
     mock_zip_files.assert_called_once_with(
-        model_code=mock_template,
+        output_path=output_path,
+        model_binary=model_binary,
+        model_py=mock_template,
         model_requirements=model_requirements,
         requirements_files_path=None,
         additional_files=None,
-        model_binary=model_binary,
-        output_path=output_path,
     )
 
 
@@ -183,7 +183,7 @@ def test_save_and_bundle_gets_model_py_from_template_if_user_does_not_provide(
     mock_bundle_model.return_value = ("model/path", "mlflow/files/path")
 
     bundler._save_and_bundle_model_files(
-        model="", output_path="./", model_flavour="flavour"
+        output_path="./", model="", model_flavour="flavour"
     )
 
     mock_get_template.assert_called_once_with("flavour")
@@ -227,11 +227,11 @@ def test_bundle_model_calls_expected_bundler_function(bundler):
 
     with patch.dict(bundler.bundler_functions, {"flavour": mock_bundler_function}):
         model, additional_files = bundler._bundle_model(
-            "model", "output/path", "flavour"
+            output_path="output/path", model="model", model_flavour="flavour"
         )
 
     mock_bundler_function.assert_called_once_with(
-        model="model", output_path="output/path", code_paths=None
+        output_path="output/path", model="model", code_paths=None
     )
 
 
@@ -273,11 +273,13 @@ def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmp
 )
 @patch("bailoclient.model_handlers.model_bundler.Bundler._copy_optional_files")
 @patch("bailoclient.model_handlers.model_bundler.Bundler._copy_additional_files")
+@patch("bailoclient.model_handlers.model_bundler.Bundler._copy_base_model")
 @patch("bailoclient.model_handlers.model_bundler.Bundler.zip_files")
 @patch("bailoclient.model_handlers.model_bundler.tempfile.TemporaryDirectory")
 def test_transfer_and_bundle_model_files_zips_code_and_binary_folders(
     mock_tmpdir,
     mock_zip_files,
+    mock_copy_basemodel,
     mock_copy_additional,
     mock_copy_optional,
     mock_copy_reqs,
@@ -292,13 +294,13 @@ def test_transfer_and_bundle_model_files_zips_code_and_binary_folders(
     output_path = "path/to/output/to"
 
     bundler._transfer_and_bundle_model_files(
-        model_code="model.py",
-        model_requirements="requirements.txt",
-        requirements_files_path="",
-        additional_files=[],
         model_binary=model_binary,
         output_path=output_path,
+        additional_files=[],
+        model_requirements="requirements.txt",
+        requirements_files_path="",
         optional_files=[],
+        model_py="model.py",
     )
 
     mock_zip_files.assert_has_calls(
@@ -325,6 +327,25 @@ def test_copy_model_py_copies_file(bundler, tmpdir):
     bundler._copy_model_py(model_code, code_path)
 
     assert os.path.exists(os.path.join(code_path, "model.py"))
+
+
+from pkg_resources import resource_filename
+
+
+def test_copy_base_model_copies_basemodel_directory(bundler, tmpdir):
+    output_path = os.path.join(tmpdir, "basemodel")
+
+    # directory does not yet exist
+    assert not os.path.exists(output_path)
+
+    bundler._copy_base_model(output_path)
+
+    # directory created
+    assert os.path.exists(output_path)
+
+    # expected files copied
+    assert os.path.exists(os.path.join(output_path, "__init__.py"))
+    assert os.path.exists(os.path.join(output_path, "basemodel.py"))
 
 
 @patch("bailoclient.model_handlers.model_bundler.Bundler.generate_requirements_file")
