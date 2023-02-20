@@ -85,13 +85,13 @@ class Bundler:
             )
 
         return self._bundle_model_files(
-            output_path,
-            model_binary,
-            model_py,
-            model_requirements,
-            requirements_files_path,
-            model_flavour,
-            additional_files,
+            output_path=output_path,
+            model_binary=model_binary,
+            model_code=model_py,
+            model_requirements=model_requirements,
+            requirements_files_path=requirements_files_path,
+            model_flavour=model_flavour,
+            additional_files=additional_files,
         )
 
     def _bundle_model_files(

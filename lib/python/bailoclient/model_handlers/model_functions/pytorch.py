@@ -14,7 +14,6 @@ def pytorch_bundler(model, output_path: str, code_paths: List[str]):
         model (Pytorch model): The Pytorch model
         output_path (str): Path to export the model to
         code_paths (List[str]): List of additional code paths
-        pip_requirements (str): Path to requirements.txt file
 
     Returns:
         Tuple(str, List[str]): Path to saved model binary, paths to additional MLflow files to
