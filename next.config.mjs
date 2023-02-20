@@ -6,6 +6,8 @@ import remarkMermaid from 'mdx-mermaid'
 import rehypeHighlight from 'rehype-highlight'
 import removeImports from 'next-remove-imports'
 
+const withRemoveImports = removeImports()
+
 const withBundleAnalyzer = nextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
@@ -18,7 +20,7 @@ const withMDX = nextMDX({
   },
 })
 
-export default removeImports(
+export default withRemoveImports(
   withBundleAnalyzer(
     withMDX({
       swcMinify: true,
