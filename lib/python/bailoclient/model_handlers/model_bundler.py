@@ -38,31 +38,22 @@ class Bundler:
         """Bundle model files into the required structure for the code.zip and binary.zip
             for uploading to BAILO.
 
-            To save and bundle a model object, provide the model object and the model_flavour.
-            Model bundling will be done using Mlflow, which you will need to have installed
-            in your environment.
+            Calls model bundler if model parameter provided to save the model.
 
-            To bundle a pre-saved model, you will need to provide the model_binary as a minimum.
-            If you are not providing model_code you will need to provide a model_flavour so that
-            the appropriate model template can be bundled with your model.
+            Files are zipped into the expected formats.
 
         Args:
             output_path (str): Output path for code and binary zips
-            model (any, optional): Model object to save via Mlflow. Must be one of
-                                    the formats supported by Mlflow.
-                                    See https://www.mlflow.org/docs/latest/models.html#built-in-model-flavors
-                                    Defaults to None.
+            model (any, optional): Model object to save. Must be a bundler available.
             model_binary (str, optional): Path to model binary. Can be a file or directory. Defaults to None.
-            model_py (str, optional): Path to model.py file. If not provided, you must provide
-                                        a model flavour. Defaults to None.
+            model_py (str, optional): Path to model.py file. Must have model_flavour if not provided. Defaults to None.
             model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
                                                 module or notebook from which to generate the
                                                 requirements.txt. Defaults to None.
             requirements_files_path (str, optional): File path to file/folder of files from
                                                       which to generate requirements file.
                                                       Defaults to None.
-            model_flavour (str, optional): Name of the flavour of model. Supported flavours are
-                                            those provided by MLflow. Defaults to None.
+            model_flavour (str, optional): Name of the flavour of model. Defaults to None.
             additional_files (list[str], optional): List or tuple of file paths of additional dependencies
                                                     or directories of dependencies for the model.
                                                     Defaults to None.
@@ -117,12 +108,11 @@ class Bundler:
             model_binary (str): Path to the model binary file
             model_py (str, optional): Path to model.py file. Will use the template for the
                                         model flavour if not provided. Defaults to None.
-            model_requirements (str, optional): Model requirements.txt file. Will be generated
-                                                by MLflow if not provided. Defaults to None.
+            model_requirements (str, optional): Model requirements.txt file. Defaults to None.
             requirements_files_path (str, optional): File path to file/folder of files from
                                                       which to generate requirements file.
                                                       Defaults to None.
-            model_flavour (str): Model flavour. Must be supported by MLflow
+            model_flavour (str): Model flavour.
             additional_files (List[str], optional): List of additional files to include as
                                                     dependencies. Defaults to None.
 
@@ -169,17 +159,16 @@ class Bundler:
         model_requirements: str = None,
         requirements_files_path: str = None,
     ):
-        """Bundle model files via MLflow. Accepts models in 'flavors' that are supported
-            by MLflow.
+        """Bundle model files via bundler.
 
         Args:
             output_path (str): Output path to save model files to
-            model (any): Model object in a format supported by MLflow
+            model (any): Model object
             model_py (str, optional): Path to model.py file. Will use the template for the
                                         model flavour if not provided. Defaults to None.
-            model_flavour (str, optional): Model flavour. Must be supported by MLflow. Defaults to None.
-            model_requirements (str, optional): Model requirements.txt file. Will be generated
-                                                by MLflow if not provided. Defaults to None.
+            model_flavour (str, optional): Model flavour. Defaults to None.
+            model_requirements (str, optional): Model requirements.txt file. Generated based on requirements_files_path
+                                                if model_requirements not provided. Defaults to None.
             requirements_files_path (str, optional): File path to file/folder of files from
                                                       which to generate requirements file.
                                                       Defaults to None.
