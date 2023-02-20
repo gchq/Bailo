@@ -37,7 +37,13 @@ def test_bundle_model_converts_flavour_to_lower_case(mock_bundle_files, bundler)
     bundler.bundle_model(output_path=".", model_flavour="FLAVOUR")
 
     mock_bundle_files.assert_called_once_with(
-        ".", None, None, None, None, "flavour", None
+        output_path=".",
+        model_binary=None,
+        model_code=None,
+        model_requirements=None,
+        requirements_files_path=None,
+        model_flavour="flavour",
+        additional_files=None,
     )
 
 
@@ -214,7 +220,7 @@ def test_bundle_model_raises_exception_if_bundler_function_not_found(bundler):
 
 
 def test_bundle_model_calls_expected_bundler_function(bundler):
-    def bundler_function(model, path, code_paths):
+    def bundler_function(model, output_path, code_paths):
         return ("model/", [])
 
     mock_bundler_function = Mock(side_effect=bundler_function)
@@ -225,12 +231,12 @@ def test_bundle_model_calls_expected_bundler_function(bundler):
         )
 
     mock_bundler_function.assert_called_once_with(
-        model="model", path="output/path", code_paths=None
+        model="model", output_path="output/path", code_paths=None
     )
 
 
 def test_bundle_model_returns_normalised_paths(bundler):
-    def bundler_function(model, path, code_paths):
+    def bundler_function(model, output_path, code_paths):
         return ("model/", ["additional_file/"])
 
     mock_bundler_function = Mock(side_effect=bundler_function)

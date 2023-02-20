@@ -7,9 +7,9 @@ from glob import glob
 from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
 from json import JSONDecodeError
 
-from ..bailoclient.api import AuthorisedAPI
-from ..bailoclient.auth import NullAuthenticator, Pkcs12Authenticator
-from ..bailoclient.utils.exceptions import (
+from bailoclient.api import AuthorisedAPI
+from bailoclient.auth import NullAuthenticator, Pkcs12Authenticator
+from bailoclient.utils.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
 )
