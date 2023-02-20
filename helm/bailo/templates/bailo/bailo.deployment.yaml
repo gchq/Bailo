@@ -71,8 +71,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /app/config/production.js
-              subPath: production.js
+              mountPath: /app/config/production.cjs
+              subPath: production.cjs
             - name: config
               mountPath: /app/config/custom-environment-variables.js
               subPath: custom-environment-variables.js
@@ -104,8 +104,8 @@ spec:
           configMap:
             name: {{ include "bailo.fullname" . }}-config
             items:
-              - key: production.js
-                path: production.js
+              - key: production.cjs
+                path: production.cjs
               - key: custom-environment-variables.js
                 path: custom-environment-variables.js
         - name: certs

@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "bailo.labels" . | nindent 4 }}
 data:
-  production.js: |
+  production.cjs: |
     module.exports = {
       minio: {
         endPoint: '{{ include "bailo.minio.host" .}}',
