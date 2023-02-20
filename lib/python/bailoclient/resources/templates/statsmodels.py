@@ -1,4 +1,7 @@
-class _StatsmodelsModelWrapper:
+from .basemodel import BaseModel
+
+
+class StatsmodelsModel(BaseModel):
     def __init__(self, statsmodels_model):
         self.statsmodels_model = statsmodels_model
 

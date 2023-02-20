@@ -1,4 +1,7 @@
-class _KerasModelWrapper:
+from .basemodel import BaseModel
+
+
+class KerasModel(BaseModel):
     def __init__(self, keras_model, graph, sess):
         self.keras_model = keras_model
         self._graph = graph

@@ -1,4 +1,7 @@
-class _H2OModelWrapper:
+from .basemodel import BaseModel
+
+
+class H2OModel(BaseModel):
     def __init__(self, h2o_model):
         self.h2o_model = h2o_model
 

@@ -1,4 +1,7 @@
-class _SpacyModelWrapper:
+from .basemodel import BaseModel
+
+
+class SpacyModel(BaseModel):
     def __init__(self, spacy_model):
         self.spacy_model = spacy_model
 

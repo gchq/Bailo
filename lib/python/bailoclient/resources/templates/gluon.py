@@ -1,4 +1,7 @@
-class _GluonModelWrapper:
+from .basemodel import BaseModel
+
+
+class GluonModel(BaseModel):
     def __init__(self, gluon_model):
         self.gluon_model = gluon_model
 

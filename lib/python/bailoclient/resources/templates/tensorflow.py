@@ -1,4 +1,7 @@
-class _TF2Wrapper:
+from .basemodel import BaseModel
+
+
+class TensorflowModel(BaseModel):
     """
     Wrapper class that exposes a TensorFlow model for inference via a ``predict`` function such that
     ``predict(data: pandas.DataFrame) -> pandas.DataFrame``. For TensorFlow versions >= 2.0.0.

@@ -1,4 +1,7 @@
-class _PyFuncModelWrapper:
+from .basemodel import BaseModel
+
+
+class SparkModel(BaseModel):
     """
     Wrapper around Spark MLlib PipelineModel providing interface for scoring pandas DataFrame.
     """

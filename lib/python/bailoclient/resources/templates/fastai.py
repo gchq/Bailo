@@ -1,4 +1,7 @@
-class _FastaiModelWrapper:
+from .basemodel import BaseModel
+
+
+class FastaiModel(BaseModel):
     def __init__(self, learner):
         self.learner = learner
 

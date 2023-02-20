@@ -1,4 +1,7 @@
-class _PyTorchWrapper:
+from .basemodel import BaseModel
+
+
+class PyTorchModel(BaseModel):
     """
     Wrapper class that creates a predict function such that
     predict(data: pd.DataFrame) -> model's output as pd.DataFrame (pandas DataFrame)

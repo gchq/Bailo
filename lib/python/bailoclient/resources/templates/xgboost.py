@@ -1,4 +1,7 @@
-class _XGBModelWrapper:
+from .basemodel import BaseModel
+
+
+class XGBModel(BaseModel):
     def __init__(self, xgb_model):
         self.xgb_model = xgb_model
 

@@ -1,8 +1,11 @@
+from .basemodel import BaseModel
+
+
 FLAVOR_NAME = "onnx"
 ONNX_EXECUTION_PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
 
 
-class _OnnxModelWrapper:
+class OnnxModel(BaseModel):
     def __init__(self, path, providers=None):
         import onnxruntime
         import os

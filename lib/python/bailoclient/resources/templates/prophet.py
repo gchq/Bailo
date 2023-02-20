@@ -1,4 +1,7 @@
-class _ProphetModelWrapper:
+from .basemodel import BaseModel
+
+
+class ProphetModel(BaseModel):
     def __init__(self, pr_model):
         self.pr_model = pr_model
 
