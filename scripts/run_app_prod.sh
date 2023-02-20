@@ -5,9 +5,9 @@ if [[ -z "${SCHEMA_SETUP_SCRIPT}" ]]; then
   echo "No schemas setup script set; You will have to add schemas after startup"
 else
   echo "Running node $SCHEMA_SETUP_SCRIPT"
-  node $SCHEMA_SETUP_SCRIPT
+  node --experimental-vm-modules $SCHEMA_SETUP_SCRIPT
 fi
 
 echo "Running 'npm run start'"
 #npm run start
-NODE_ENV=production node dist/server/index.js
+NODE_ENV=production node --experimental-vm-modules dist/server/index.js

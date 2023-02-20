@@ -4,7 +4,7 @@ import fs from 'fs'
 import open from 'open'
 import { join } from 'path'
 import { fileURLToPath } from 'url'
-import Bailo from '../../lib/node'
+import Bailo from '../../lib/node/index.js'
 import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {
