@@ -15,7 +15,7 @@ from bailoclient.utils.exceptions import (
     UnableToCreateBailoClient,
 )
 
-from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator, NullAuthenticator
+from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from .client import Client
 from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
 from .model_handlers import Bundler, Loader
@@ -345,6 +345,7 @@ class Bailo(Client):
             output_path (str): Output path in format output/path/
         """
 
+        module_path = os.path.normpath(module_path)
         output_path = os.path.normpath(output_path)
 
         if not output_path.endswith("requirements.txt"):
