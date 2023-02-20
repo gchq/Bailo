@@ -165,7 +165,7 @@ function Upload() {
       headers: { 'Content-Type': 'multipart/form-data' },
       data: form,
       onUploadProgress: (progressEvent) => {
-        setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
+        setUploadPercentage(progressEvent.total ? (progressEvent.loaded * 100) / progressEvent.total : 0)
       },
     })
       .then((res) => {
