@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "Node16",
+    "module": "NodeNext",
     "outDir": "dist",
     "target": "ES2016",
-    "moduleResolution": "node16",
+    "moduleResolution": "nodenext",
     "isolatedModules": false,
     "noEmit": false
   },
