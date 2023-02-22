@@ -8,6 +8,8 @@ import getpass
 from typing import Union, List
 
 from dotenv import load_dotenv
+from pkg_resources import resource_filename
+import json
 
 from bailoclient.utils.exceptions import (
     IncompleteDotEnvFile,
@@ -38,10 +40,14 @@ class Bailo(Client):
         cognito_region: str = None,
         cognito_username: str = None,
         cognito_pwd: str = None,
+        client: bool = True,
     ):
 
         self.bundler = Bundler()
         self.loader = Loader()
+
+        if not client:
+            return
 
         # if no config provided, try and load dotenv file
         if not any(
@@ -104,6 +110,19 @@ class Bailo(Client):
         except ValueError:
             self.connect()
 
+        with open(
+            resource_filename("bailoclient", "resources/minimal_metadata.json")
+        ) as json_file:
+            metadata = json.load(json_file)
+
+        self._minimal_metadata = metadata
+        self._minimal_binary = resource_filename(
+            "bailoclient", "resources/minimal_binary.zip"
+        )
+        self._minimal_code = resource_filename(
+            "bailoclient", "resources/minimal_code.zip"
+        )
+
     @property
     def bundlers(self):
         """Get list of available bundler flavours"""
@@ -117,6 +136,18 @@ class Bailo(Client):
     @property
     def flavours(self):
         return [flavour.value for flavour in ModelFlavour.__members__.values()]
+
+    @property
+    def minimal_metadata(self):
+        return self._minimal_metadata
+
+    @property
+    def minimal_binary(self):
+        return self._minimal_binary
+
+    @property
+    def minimal_code(self):
+        return self._minimal_code
 
     def __create_client_from_env(self):
         """Create a Client from configuration saved in a .env file
