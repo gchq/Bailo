@@ -1,31 +1,25 @@
 import { ObjectId } from 'mongodb'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import supertest from 'supertest'
 import { v4 as uuidv4 } from 'uuid'
 import { server } from '../../index.js'
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
-import {
-  serializedUserFields,
-  getUserById,
-  getUserByInternalId,
-  findUsers,
-  findAndUpdateUser,
-  findUserCached,
-} from '../../services/user.js'
+import { getUserByInternalId, findAndUpdateUser } from '../../services/user.js'
 import '../../utils/mockMongo'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
-const userService = {
-  serializedUserFields,
-  getUserById,
-  getUserByInternalId,
-  findUsers,
-  findAndUpdateUser,
-  findUserCached,
-}
+jest.mock('../../services/user.js', () => {
+  const original = jest.requireActual('../../services/user.js')
+  return {
+    ...original,
+    getUserByInternalId: jest.fn(),
+  }
+})
 
 const request = supertest(server)
+
+const modelId = new Types.ObjectId()
 
 const testUser: any = {
   userId: 'user',
@@ -33,8 +27,6 @@ const testUser: any = {
   data: { some: 'value' },
   token: uuidv4(),
 }
-
-const modelId = new ObjectId()
 
 const testModel: any = {
   _id: modelId,
@@ -50,7 +42,7 @@ let userDoc
 
 describe('test user routes', () => {
   beforeEach(async () => {
-    userDoc = await userService.findAndUpdateUser(testUser)
+    userDoc = await findAndUpdateUser(testUser)
     await ModelModel.create(testModel)
   })
 
@@ -63,8 +55,7 @@ describe('test user routes', () => {
   })
 
   test('that we can get the logged in user', async () => {
-    const mock = jest.spyOn(userService, 'getUserByInternalId')
-    mock.mockReturnValue(userDoc)
+    ;(getUserByInternalId as unknown as jest.Mock).mockReturnValue(userDoc)
     const res = await authenticatedGetRequest('/api/v1/user')
     validateTestRequest(res)
     expect(res.body.id).toBe(testUser.userId)

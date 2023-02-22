@@ -1,10 +1,19 @@
 import mongoose from 'mongoose'
 import ApprovalModel from '../../models/Approval.js'
-import * as approvalService from '../../services/approval.js'
+import { readApprovals, readNumApprovals } from '../../services/approval.js'
 import { findAndUpdateUser } from '../../services/user.js'
 import '../../utils/mockMongo'
 import { testApproval, testUser } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
+
+jest.mock('../../services/approval.js', () => {
+  const original = jest.requireActual('../../services/approval.js')
+  return {
+    ...original,
+    readApprovals: jest.fn(),
+    readNumApprovals: jest.fn(),
+  }
+})
 
 describe('test approvals routes', () => {
   beforeAll(async () => {
@@ -15,19 +24,14 @@ describe('test approvals routes', () => {
   })
 
   test('that we can fetch approvals', async () => {
-    const mock = jest.spyOn(approvalService, 'readApprovals')
-    const approvalArray: any = []
-    approvalArray.push(testApproval)
-    mock.mockReturnValue(approvalArray)
+    ;(readApprovals as unknown as jest.Mock).mockReturnValueOnce([testApproval])
     const res = await authenticatedGetRequest('/api/v1/approvals?approvalCategory=Upload')
     validateTestRequest(res)
     expect(res.body.approvals.length).toBe(1)
   })
 
   test('that we can fetch approvals count', async () => {
-    const mock = jest.spyOn(approvalService, 'readNumApprovals')
-    const mockedReturnCount: any = 1
-    mock.mockReturnValue(mockedReturnCount)
+    ;(readNumApprovals as unknown as jest.Mock).mockReturnValueOnce(1)
     const res = await authenticatedGetRequest('/api/v1/approvals/count')
     validateTestRequest(res)
     expect(res.body.count).toBe(1)

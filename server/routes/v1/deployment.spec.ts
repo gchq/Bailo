@@ -5,9 +5,9 @@ import ModelModel from '../../models/Model.js'
 import SchemaModel from '../../models/Schema.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
-import * as deploymentService from '../../services/deployment.js'
-import * as approvalService from '../../services/approval.js'
-import * as versionService from '../../services/version.js'
+import { findDeployments } from '../../services/deployment.js'
+import { createDeploymentApprovals } from '../../services/approval.js'
+import { findVersionByName } from '../../services/version.js'
 import '../../utils/mockMongo'
 import {
   deploymentSchema,
@@ -21,7 +21,35 @@ import {
   deploymentData,
 } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
-import * as validateSchemaUtil from '../../utils/validateSchema.js'
+import { validateSchema } from '../../utils/validateSchema.js'
+
+jest.mock('../../services/approval.js', () => {
+  const original = jest.requireActual('../../services/approval.js')
+  return {
+    ...original,
+    createDeploymentApprovals: jest.fn(),
+  }
+})
+
+jest.mock('../../services/deployment.js', () => {
+  const original = jest.requireActual('../../services/deployment.js')
+  return {
+    ...original,
+    findDeployments: jest.fn(),
+  }
+})
+
+jest.mock('../../services/version.js', () => {
+  const original = jest.requireActual('../../services/version.js')
+  return {
+    ...original,
+    findVersionByName: jest.fn(),
+  }
+})
+
+jest.mock('../../utils/validateSchema.js', () => ({
+  validateSchema: jest.fn(),
+}))
 
 let deploymentDoc: any
 let versionDoc: any
@@ -46,29 +74,24 @@ describe('test deployment routes', () => {
 
   test('get user deployments', async () => {
     const deploymentArray: any = new Array(1).fill(testDeployment)
-    const deploymentsMock = jest.spyOn(deploymentService, 'findDeployments')
-    deploymentsMock.mockReturnValue(deploymentArray)
-    const res = await authenticatedGetRequest(`/api/v1/deployment/user/${testDeployment.metadata.contacts.requester}`)
+    ;(findDeployments as unknown as jest.Mock).mockReturnValueOnce(deploymentArray)
+    const res = await authenticatedGetRequest(`/api/v1/deployment/user/${testDeployment.metadata.contacts.owner.id}`)
     validateTestRequest(res)
     expect(res.body.length).not.toBe(0)
     expect(res.body[0].uuid).toBe(deploymentUuid)
   })
 
   test('reset approvals for deployment with a given uuid', async () => {
-    const versionMock = jest.spyOn(versionService, 'findVersionByName')
-    versionMock.mockReturnValue(versionDoc)
-    const approvalMock = jest.spyOn(approvalService, 'createDeploymentApprovals')
-    approvalMock.mockImplementation()
+    ;(findVersionByName as unknown as jest.Mock).mockReturnValueOnce(versionDoc)
+    ;(createDeploymentApprovals as unknown as jest.Mock).mockImplementation()
     const res = await authenticatedPostRequest(`/api/v1/deployment/${deploymentUuid}/reset-approvals`)
     validateTestRequest(res)
     expect(res.body.uuid).toBe(deploymentUuid)
   })
 
   test('that we can request a deployment', async () => {
-    const mockValidation = jest.spyOn(validateSchemaUtil, 'validateSchema')
-    mockValidation.mockReturnValue(null)
-    const approvalMock = jest.spyOn(approvalService, 'createDeploymentApprovals')
-    approvalMock.mockReturnValue(managerApproval)
+    ;(validateSchema as unknown as jest.Mock).mockReturnValueOnce(null)
+    ;(createDeploymentApprovals as unknown as jest.Mock).mockReturnValueOnce(managerApproval)
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
 
     validateTestRequest(res)

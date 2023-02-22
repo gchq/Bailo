@@ -12,9 +12,13 @@ import {
   validateTestRequest,
 } from '../../utils/test/testUtils.js'
 
-jest.mock('../../services/approval.js', () => ({
-  createVersionApprovals: jest.fn(),
-}))
+jest.mock('../../services/approval.js', () => {
+  const original = jest.requireActual('../../services/approval.js')
+  return {
+    ...original,
+    createVersionApprovals: jest.fn(),
+  }
+})
 
 describe('test version routes', () => {
   beforeEach(async () => {

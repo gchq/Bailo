@@ -14,24 +14,19 @@ import {
   readNumApprovals,
   readApprovals,
 } from './approval.js'
-import {
-  serializedUserFields,
-  getUserById,
-  getUserByInternalId,
-  findUsers,
-  findAndUpdateUser,
-  findUserCached,
-} from './user.js'
+import { getUserById } from './user.js'
 
-const emailService = { sendEmail }
-const userService = {
-  serializedUserFields,
-  getUserById,
-  getUserByInternalId,
-  findUsers,
-  findAndUpdateUser,
-  findUserCached,
-}
+jest.mock('./user.js', () => {
+  const original = jest.requireActual('./user.js')
+  return {
+    ...original,
+    getUserById: jest.fn(),
+  }
+})
+
+jest.mock('../utils/smtp.js', () => ({
+  sendEmail: jest.fn(),
+}))
 
 const managerId = new Types.ObjectId()
 const modelId = new Types.ObjectId()
@@ -130,10 +125,8 @@ describe('test approval service', () => {
   })
 
   test('that we can create a deployment approval object', async () => {
-    const getUserMock = jest.spyOn(userService, 'getUserById')
-    getUserMock.mockReturnValue(testUser)
-    const emailMock = jest.spyOn(emailService, 'sendEmail')
-    emailMock.mockImplementation()
+    ;(getUserById as unknown as jest.Mock).mockReturnValue(testUser)
+    ;(sendEmail as unknown as jest.Mock).mockImplementation()
     const approval = await createDeploymentApprovals({ deployment, user: testUser })
     expect(approval).not.toBe(undefined)
     expect(approval.approvalType).toBe('Manager')
@@ -141,17 +134,15 @@ describe('test approval service', () => {
   })
 
   test('that we can create a version approval object', async () => {
-    const getUserMock = jest.spyOn(userService, 'getUserById')
-    getUserMock.mockReturnValue(testUser)
-    const emailMock = jest.spyOn(emailService, 'sendEmail')
-    emailMock.mockImplementation()
+    ;(getUserById as unknown as jest.Mock).mockReturnValue(testUser)
+    ;(sendEmail as unknown as jest.Mock).mockImplementation()
     const approvals = await createVersionApprovals({ version, user: testUser })
     expect(approvals).not.toBe(undefined)
     expect(approvals.length).toBe(2)
     expect(approvals[0].approvalCategory).toBe('Upload')
   })
 
-  test('that we can read the number of approvals has', async () => {
+  test('that we can read the number of approvals', async () => {
     const approvals = await readNumApprovals({ userId })
     expect(approvals).toBe(1)
   })
