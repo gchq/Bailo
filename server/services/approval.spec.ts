@@ -6,7 +6,7 @@ import ApprovalModel, { ApprovalCategory } from '../models/Approval.js'
 import UserModel from '../models/User.js'
 import VersionModel, { VersionDoc } from '../models/Version.js'
 import '../utils/mockMongo'
-import * as emailService from '../utils/smtp.js'
+import { sendEmail } from '../utils/smtp.js'
 import {
   createDeploymentApprovals,
   createVersionApprovals,
@@ -14,7 +14,24 @@ import {
   readNumApprovals,
   readApprovals,
 } from './approval.js'
-import * as userService from './user.js'
+import {
+  serializedUserFields,
+  getUserById,
+  getUserByInternalId,
+  findUsers,
+  findAndUpdateUser,
+  findUserCached,
+} from './user.js'
+
+const emailService = { sendEmail }
+const userService = {
+  serializedUserFields,
+  getUserById,
+  getUserByInternalId,
+  findUsers,
+  findAndUpdateUser,
+  findUserCached,
+}
 
 const managerId = new Types.ObjectId()
 const modelId = new Types.ObjectId()
