@@ -16,12 +16,15 @@ import modelSchema from './example_schemas/minimal_upload_schema.json'
     true
   )
 
-  await createSchema({
-    name: 'Minimal Deployment Schema v6',
-    reference: '/Minimal/Deployment/v6',
-    schema: deploySchema,
-    use: 'DEPLOYMENT',
-  })
+  await createSchema(
+    {
+      name: 'Minimal Deployment Schema v6',
+      reference: '/Minimal/Deployment/v6',
+      schema: deploySchema,
+      use: 'DEPLOYMENT',
+    },
+    true
+  )
 
   setTimeout(disconnectFromMongoose, 50)
 })()

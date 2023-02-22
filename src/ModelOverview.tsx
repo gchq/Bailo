@@ -12,14 +12,22 @@ function ModelOverview(props: any) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={4}>
-        <Box sx={{ backgroundColor: theme.palette.primary.main, color: 'white', borderRadius: 2 }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            borderRadius: 2,
+          }}
+        >
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model name</Typography>
             <Typography variant='body1'>{version.metadata.highLevelDetails.name}</Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
-            <Typography variant='body1'>{version.metadata.highLevelDetails.modelOverview}</Typography>
+            <Typography variant='body1' style={{ whiteSpace: 'pre-line' }}>
+              {version.metadata.highLevelDetails.modelOverview}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model tags</Typography>
@@ -32,28 +40,31 @@ function ModelOverview(props: any) {
               {version?.metadata?.highLevelDetails?.tags !== undefined &&
                 version?.metadata?.highLevelDetails?.tags.map((tag: any) => (
                   <Chip
-                    sx={{
-                      color: theme.palette.mode === 'light' ? 'white' : 'primary',
-                      backgroundColor: 'primary',
-                    }}
                     key={`chip-${tag}`}
                     label={tag}
                     variant='outlined'
+                    sx={{ color: 'white', borderColor: 'white' }}
                   />
                 ))}
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Uploader</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.uploader}</Typography>
+            <Typography variant='h6'>Uploaders</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.uploader.map((uploader) => uploader.id).join(', ')}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Reviewer</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.reviewer}</Typography>
+            <Typography variant='h6'>Reviewers</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.reviewer.map((reviewer) => reviewer.id).join(', ')}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Manager</Typography>
-            <Typography variant='body1'>{version.metadata.contacts.manager}</Typography>
+            <Typography variant='h6'>Managers</Typography>
+            <Typography variant='body1'>
+              {version.metadata.contacts.manager.map((manager) => manager.id).join(', ')}
+            </Typography>
           </Box>
         </Box>
       </Grid>

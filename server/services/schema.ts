@@ -1,5 +1,5 @@
 import SchemaModel, { Schema } from '../models/Schema'
-import { SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 
 export function serializedSchemaFields(): SerializerOptions {
   return {
@@ -10,6 +10,14 @@ export function serializedSchemaFields(): SerializerOptions {
 export async function findSchemaByRef(ref: string) {
   const schema = await SchemaModel.findOne({
     reference: ref,
+  })
+
+  return schema
+}
+
+export async function findSchemaByName(name: string) {
+  const schema = await SchemaModel.findOne({
+    name,
   })
 
   return schema

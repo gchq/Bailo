@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import getAppRoot from 'app-root-path'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
@@ -6,21 +7,17 @@ import config from 'config'
 import devnull from 'dev-null'
 import { NextFunction, Request, Response } from 'express'
 import fsPromise from 'fs/promises'
-import { castArray, get, pick, set } from 'lodash'
-import omit from 'lodash/omit'
 import { WritableStream } from 'node:stream/web'
 import morgan from 'morgan'
 import { join, resolve, sep } from 'path'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
+import { omit } from 'lodash'
 import { StatusError } from '../../types/interfaces'
-import { serializedDeploymentFields } from '../services/deployment'
-import { serializedModelFields } from '../services/model'
-import { serializedSchemaFields } from '../services/schema'
-import { serializedUserFields } from '../services/user'
-import { serializedVersionFields } from '../services/version'
 import { ensurePathExists, getFilesInDir } from './filesystem'
 import { consoleError } from '../../utils/logging'
+import LogModel from '../models/Log'
+import serializers from './serializers'
 
 const appRoot = getAppRoot.toString()
 
@@ -109,52 +106,40 @@ class Writer {
   }
 }
 
-export interface SerializerOptions {
-  mandatory?: Array<string>
-  optional?: Array<string>
-  serializable?: Array<any>
-}
-
-export function createSerializer(options: SerializerOptions) {
-  const mandatory = options.mandatory || []
-  const optional = options.optional || []
-  const serializable = options.serializable || []
-
-  return function serializer(unserialized: any) {
-    if (!unserialized) {
-      return unserialized
+class MongoWriter {
+  async write(data: any) {
+    // sometimes we are unable to write log messages to the database
+    if (data.log === false) {
+      return
     }
 
-    const asArray = castArray(unserialized)
+    return
 
-    if (!asArray.every((item) => mandatory.every((value) => get(item, value) !== undefined))) {
-      return unserialized
-    }
-
-    const serialized = asArray.map((item) => {
-      const segments = pick(item, mandatory.concat(optional))
-      const remotes = {}
-
-      serializable.forEach(({ type, field }) => {
-        set(remotes, field, type(get(item, field)))
-      })
-
-      return { ...segments, ...remotes }
-    })
-
-    return Array.isArray(unserialized) ? serialized : serialized[0]
+    const log = new LogModel(data)
+    await log.save()
   }
 }
 
-const streams: Array<bunyan.Stream> = []
+const streams: Array<bunyan.Stream> = [
+  {
+    level: 'trace',
+    type: 'raw',
+    stream: new MongoWriter(),
+  },
+]
 
 if (process.env.NODE_ENV !== 'production') {
   streams.push({
-    level: 'info',
+    level: 'trace',
     type: 'raw',
     stream: new Writer({
       basepath: join(__dirname, '..'),
     }),
+  })
+} else {
+  streams.push({
+    level: 'trace',
+    stream: process.stdout,
   })
 }
 
@@ -192,7 +177,7 @@ async function processStroomFiles() {
       await sendLogsToStroom(name)
     } catch (e) {
       // ironically we cannot use our logger here.
-      consoleError('Unable to send logs to ACE', e)
+      consoleError('Unable to send logs to stroom', e)
     }
   }
 }
@@ -238,12 +223,12 @@ if (config.get('logging.stroom.enabled')) {
     },
   })
 
-  // send logs to ACE every hour
+  // send logs to stroom every hour
   processStroomFiles()
   setInterval(() => {
     date = new Date()
     processStroomFiles()
-  }, 1000 * 60 * 60)
+  }, config.get('logging.stroom.interval'))
 
   streams.push({
     level: 'trace',
@@ -257,18 +242,7 @@ const log = bunyan.createLogger({
   level: 'trace',
   src: process.env.NODE_ENV !== 'production',
   streams: streams.length ? streams : undefined,
-  serializers: {
-    version: createSerializer(serializedVersionFields()),
-    versions: createSerializer(serializedVersionFields()),
-    model: createSerializer(serializedModelFields()),
-    models: createSerializer(serializedModelFields()),
-    deployment: createSerializer(serializedDeploymentFields()),
-    deployments: createSerializer(serializedDeploymentFields()),
-    schema: createSerializer(serializedSchemaFields()),
-    schemas: createSerializer(serializedSchemaFields()),
-    user: createSerializer(serializedUserFields()),
-    users: createSerializer(serializedUserFields()),
-  },
+  serializers,
 })
 
 const morganLog = morgan<any, any>(
@@ -279,6 +253,7 @@ const morganLog = morgan<any, any>(
         method: tokens.method(req, res),
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
+        code: 'approval',
       },
       tokens.dev(morgan, req, res)
     )

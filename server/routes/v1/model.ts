@@ -1,9 +1,11 @@
 import { Request, Response } from 'express'
+import { VersionDoc } from 'server/models/Version'
+import { isUserInEntityList } from '../../utils/entity'
 import { findDeployments } from '../../services/deployment'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version'
-import { BadReq, NotFound } from '../../utils/result'
+import { BadReq, NotFound, NotImplemented } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 
 export const getModels = [
@@ -22,7 +24,7 @@ export const getModels = [
       throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await findModels(req.user, { filter: filter as string, type })
+    const models = await findModels(req.user, { filter: filter as string, type }, { populate: true })
 
     req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
 
@@ -37,7 +39,7 @@ export const getModelByUuid = [
   async (req: Request, res: Response) => {
     const { uuid } = req.params
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -116,7 +118,7 @@ export const getModelVersions = [
     const { logs } = req.query
     const showLogs = logs === 'true'
 
-    const model = await findModelByUuid(req.user, uuid)
+    const model = await findModelByUuid(req.user, uuid, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
@@ -161,5 +163,40 @@ export const getModelVersion = [
       'User finding specific version for model'
     )
     return res.json(version)
+  },
+]
+
+export const getModelAccess = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { user } = req
+    const { uuid } = req.params
+
+    const model = await findModelByUuid(req.user, uuid)
+
+    if (!model) {
+      throw NotFound({ code: 'model_not_found', uuid }, `Unable to find model '${uuid}'`)
+    }
+
+    const latestVersion = model.latestVersion as VersionDoc
+
+    const [uploader, reviewer, manager] = await Promise.all([
+      isUserInEntityList(user, latestVersion.metadata.contacts.uploader),
+      isUserInEntityList(user, latestVersion.metadata.contacts.reviewer),
+      isUserInEntityList(user, latestVersion.metadata.contacts.manager),
+    ])
+
+    return res.json({
+      uploader,
+      reviewer,
+      manager,
+    })
+  },
+]
+
+export const deleteModel = [
+  ensureUserRole('user'),
+  async (_req: Request, _res: Response) => {
+    throw NotImplemented({}, 'This API call is temporarily unavailable')
   },
 ]

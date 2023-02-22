@@ -114,7 +114,7 @@ function getModelDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'owner', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'latestVersion', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',
@@ -124,13 +124,11 @@ function getModelDefinition(populated: boolean) {
         type: 'string',
         example: 'fasttext-language-identification-30v93x',
       },
-
-      parent: getModelDefinition(false),
       versions: {
         type: 'array',
         items: getVersionDefinition(false),
       },
-      currentMetadata: {
+      latestVersion: {
         example: {
           highLevelDetails: {
             tags: ['facebook', 'fasttext', 'NLP', 'language', 'language_identification', 'multilingual'],
@@ -149,8 +147,6 @@ function getModelDefinition(populated: boolean) {
           timeStamp: '2022-07-03T20:52:59.176Z',
         },
       },
-
-      owner: getUserDefinition(false),
 
       createdAt: {
         type: 'string',
@@ -367,7 +363,7 @@ function getDeploymentDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['schemaRef', 'uuid', 'parent', 'versions', 'currentMetadata', 'owner', 'createdAt', 'updatedAt'],
+    required: ['schemaRef', 'uuid', 'parent', 'versions', 'latestVersion', 'createdAt', 'updatedAt'],
     properties: {
       schemaRef: {
         type: 'string',
@@ -392,7 +388,6 @@ function getDeploymentDefinition(populated: boolean) {
               date: '2022-11-16',
             },
             modelID: 'fasttext-language-identification-rjjic1',
-            initialVersionRequested: 'v1.099',
           },
           contacts: {
             requester: 'user',
@@ -432,9 +427,6 @@ function getDeploymentDefinition(populated: boolean) {
       built: {
         type: 'boolean',
       },
-
-      owner: getUserDefinition(false),
-
       createdAt: {
         type: 'string',
         format: 'date-time',
@@ -447,7 +439,7 @@ function getDeploymentDefinition(populated: boolean) {
   }
 }
 
-function getRequestDefinition(populated: boolean) {
+function getApprovalDefinition(populated: boolean) {
   if (!populated) {
     return {
       type: 'string',
@@ -457,7 +449,7 @@ function getRequestDefinition(populated: boolean) {
 
   return {
     type: 'object',
-    required: ['version', 'deployment', 'user', 'status', 'approvalType', 'request', 'createdAt', 'updatedAt'],
+    required: ['version', 'deployment', 'user', 'status', 'approvalType', 'approval', 'createdAt', 'updatedAt'],
     properties: {
       version: {
         type: 'string',
@@ -482,7 +474,7 @@ function getRequestDefinition(populated: boolean) {
         enum: ['Manager', 'Reviewer'],
         example: 'Manager',
       },
-      request: {
+      approval: {
         type: 'string',
         enum: ['Upload', 'Deployment'],
         example: 'Upload',
@@ -564,8 +556,8 @@ function generateSpecification() {
         description: 'A schema is a template for an upload or deployment model card',
       },
       {
-        name: 'request',
-        description: 'A request is used to ask permission for a model / deployment',
+        name: 'approval',
+        description: 'An approval is used to ask permission for a model / deployment',
       },
       {
         name: 'user',
@@ -860,7 +852,6 @@ function generateSpecification() {
                   },
                   name: 'Test Deployment',
                   modelID: 'test-model-abcde',
-                  initialVersionRequested: 'v1.0',
                 },
                 contacts: {
                   requester: 'user',
@@ -1051,6 +1042,25 @@ function generateSpecification() {
             },
           },
         },
+        delete: {
+          tags: ['version'],
+          description:
+            "Delete a specific version by it's internal ID. This will also delete any associated approvals, and also any model/deployment documents depending on how many versions are left.",
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              description: 'ID of version to delete.',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'ID of the deleted version.',
+              type: 'string',
+            },
+          },
+        },
       },
       '/version/{id}/reset-approvals': {
         post: {
@@ -1069,6 +1079,34 @@ function generateSpecification() {
               description: 'A version.',
               schema: {
                 $ref: '#/definitions/Version',
+              },
+            },
+          },
+        },
+      },
+      '/version/{id}/rebuild': {
+        post: {
+          tags: ['version'],
+          description: 'Attempt to rebuild a model.',
+          parameters: [
+            {
+              name: 'uuid',
+              in: 'path',
+              description: 'UUID of version to rebuild the model of.',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Successfully rebuilt model.',
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Successfully created build job in upload queue',
+                  },
+                },
               },
             },
           },
@@ -1096,6 +1134,39 @@ function generateSpecification() {
                 items: {
                   $ref: '#/definitions/Schema',
                 },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ['schema'],
+          description: 'Upload a new schema',
+          parameters: [
+            {
+              name: 'schema',
+              in: 'body',
+              description: 'Schema metadata',
+              required: true,
+              type: 'object',
+              default: {
+                name: '',
+                reference: '',
+                schema: {},
+                use: 'UPLOAD',
+              },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The name of the submitted schema.',
+              schema: {
+                type: 'string',
+              },
+            },
+            '409': {
+              description: 'Duplicated name or reference.',
+              schema: {
+                type: 'string',
               },
             },
           },
@@ -1259,15 +1330,15 @@ function generateSpecification() {
           },
         },
       },
-      '/requests': {
+      '/approvals': {
         get: {
-          tags: ['request'],
-          description: 'List requests for model uploads and deployments.',
+          tags: ['approval'],
+          description: 'List approvals for model uploads and deployments.',
           parameters: [
             {
-              name: 'type',
+              name: 'approvalCategory',
               in: 'query',
-              description: 'Type of request to fetch.',
+              description: 'Category of approval to fetch.',
               type: 'string',
               required: true,
               enum: ['Upload', 'Deployment'],
@@ -1282,24 +1353,24 @@ function generateSpecification() {
           ],
           responses: {
             '200': {
-              description: 'An array of requests.',
+              description: 'An array of approvals.',
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/definitions/Request',
+                  $ref: '#/definitions/Approval',
                 },
               },
             },
           },
         },
       },
-      '/requests/count': {
+      '/approvals/count': {
         get: {
-          tags: ['request'],
-          description: 'Count number of requests a user has.',
+          tags: ['approval'],
+          description: 'Count number of approvals a user has.',
           responses: {
             '200': {
-              description: 'The number of requests for the user.',
+              description: 'The number of approvals for the user.',
               schema: {
                 type: 'object',
                 properties: {
@@ -1313,22 +1384,22 @@ function generateSpecification() {
           },
         },
       },
-      '/request/{id}/respond': {
+      '/approval/{id}/respond': {
         post: {
-          tags: ['request'],
-          description: 'Approve or decline a request.',
+          tags: ['approval'],
+          description: 'Approve or decline an approval.',
           parameters: [
             {
               name: 'id',
               in: 'path',
-              description: 'ID of request to respond to.',
+              description: 'ID of approval to respond to.',
               type: 'string',
               required: true,
             },
             {
               name: 'body',
               in: 'body',
-              description: 'Whether to accept or decline the request.',
+              description: 'Whether to accept or decline the approval.',
               type: 'object',
               properties: {
                 choice: {
@@ -1341,7 +1412,7 @@ function generateSpecification() {
           ],
           responses: {
             '200': {
-              description: 'The number of requests for the user.',
+              description: 'The number of approvals for the user.',
               schema: {
                 type: 'object',
                 properties: {
@@ -1362,7 +1433,7 @@ function generateSpecification() {
       User: getUserDefinition(true),
       Schema: getSchemaDefinition(true),
       Deployment: getDeploymentDefinition(true),
-      Request: getRequestDefinition(true),
+      Approval: getApprovalDefinition(true),
       UiConfig: getUiConfigDefinition(),
     },
   }

@@ -1,0 +1,11 @@
+{
+  "highLevelDetails": {
+    "endDate": {
+      "hasEndDate": false
+    },
+    "name": "Test Deployment"
+  },
+  "contacts": {
+    "owner": [{ "kind": "user", "id": "user" }]
+  }
+}

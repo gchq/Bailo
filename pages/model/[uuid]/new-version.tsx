@@ -2,6 +2,7 @@ import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { VersionDoc } from 'server/models/Version'
 import { useGetModel, useGetModelVersions } from '../../../data/model'
 import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
@@ -42,7 +43,7 @@ function Upload() {
   const router = useRouter()
   const { uuid: modelUuid }: { uuid?: string } = router.query
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelUuid)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
   const { versions } = useGetModelVersions(modelUuid)
 
@@ -56,7 +57,17 @@ function Upload() {
 
   useEffect(() => {
     if (!cSchema || !cModel) return
-    const steps = getStepsFromSchema(cSchema, {}, [], cModel.currentMetadata)
+    const latestVersion = cModel.latestVersion as VersionDoc
+    const steps = getStepsFromSchema(
+      cSchema,
+      {
+        buildOptions: {
+          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+        },
+      },
+      [],
+      latestVersion.metadata
+    )
 
     steps.push(
       createStep({
@@ -123,7 +134,7 @@ function Upload() {
     setError(undefined)
 
     if (!splitSchema.steps.every((e) => e.isComplete(e))) {
-      return setError('Ensure all steps are complete before submitting')
+      return setError('Ensure that all steps are complete before submitting')
     }
 
     const data = getStepsData(splitSchema, true)
@@ -142,7 +153,7 @@ function Upload() {
 
     form.append('code', data.files.code)
     form.append('binary', data.files.binary)
-
+    form.append('docker', data.files.docker)
     delete data.files
 
     form.append('metadata', JSON.stringify(data))
@@ -157,7 +168,10 @@ function Upload() {
         setUploadPercentage((progressEvent.loaded * 100) / progressEvent.total)
       },
     })
-      .then((res) => router.push(`/model/${res.data.uuid}`))
+      .then((res) => {
+        mutateModel()
+        router.push(`/model/${res.data.uuid}`)
+      })
       .catch((e) => {
         setModelUploading(false)
         setError(e.response.data.message)

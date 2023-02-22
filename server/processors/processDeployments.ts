@@ -17,7 +17,7 @@ export default async function processDeployments() {
     try {
       const startTime = new Date()
 
-      const { deploymentId, userId } = msg.payload
+      const { deploymentId, userId, version } = msg.payload
 
       const user = await getUserByInternalId(userId)
 
@@ -35,23 +35,23 @@ export default async function processDeployments() {
 
       const dlog = logger.child({ deploymentId: deployment._id })
 
-      const { modelID, initialVersionRequested } = deployment.metadata.highLevelDetails
+      const { modelID } = deployment.metadata.highLevelDetails
 
       const registry = `${config.get('registry.protocol')}://${config.get('registry.host')}/v2`
-      const tag = `${modelID}:${initialVersionRequested}`
-      const externalImage = `${config.get('registry.host')}/${user.id}/${tag}`
+      const tag = `${modelID}:${version}`
+      const externalImage = `${config.get('registry.host')}/${deployment.uuid}/${tag}`
 
       deployment.log('info', `Retagging image.  Current: internal/${tag}`)
       deployment.log('info', `New: ${user.id}/${tag}`)
 
       const token = await getAccessToken({ id: 'admin', _id: 'admin' }, [
         { type: 'repository', name: `internal/${modelID}`, actions: ['pull'] },
-        { type: 'repository', name: `${user.id}/${modelID}`, actions: ['push', 'pull'] },
+        { type: 'repository', name: `${deployment.uuid}/${modelID}`, actions: ['push', 'pull'] },
       ])
       const authorisation = `Bearer ${token}`
 
-      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${initialVersionRequested}`)
-      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${initialVersionRequested}`, {
+      deployment.log('info', `Requesting ${registry}/internal/${modelID}/manifests/${version}`)
+      const manifest = await fetch(`${registry}/internal/${modelID}/manifests/${version}`, {
         headers: {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
           Authorization: authorisation,
@@ -69,7 +69,7 @@ export default async function processDeployments() {
       await Promise.all(
         manifest.layers.map(async (layer: any) => {
           const res = await fetch(
-            `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
+            `${registry}/${deployment.uuid}/${modelID}/blobs/uploads/?mount=${layer.digest}&from=internal/${modelID}`,
             {
               method: 'POST',
               headers: {
@@ -83,12 +83,12 @@ export default async function processDeployments() {
             throw new Error(`Invalid status response: ${res.status}`)
           }
 
-          deployment.log('info', `Copied layer ${layer.digest}`)
+          deployment.log('info', `Copied layer ${layer.digest} for version ${version}`)
         })
       )
 
       const mountPostRes = await fetch(
-        `${registry}/${user.id}/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
+        `${registry}/${deployment.uuid}/${modelID}/blobs/uploads/?mount=${manifest.config.digest}&from=internal/${modelID}`,
         {
           method: 'POST',
           headers: {
@@ -104,7 +104,7 @@ export default async function processDeployments() {
 
       deployment.log('info', `Copied manifest to new repository`)
 
-      const manifestPutRes = await fetch(`${registry}/${user.id}/${modelID}/manifests/${initialVersionRequested}`, {
+      const manifestPutRes = await fetch(`${registry}/${deployment.uuid}/${modelID}/manifests/${version}`, {
         method: 'PUT',
         body: JSON.stringify(manifest),
         headers: {

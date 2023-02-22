@@ -1,9 +1,8 @@
 import { Document, model, Schema, Types } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 import logger from '../utils/logger'
 import { ModelDoc } from './Model'
-import { UserDoc } from './User'
-import { VersionDoc } from './Version'
-import { ApprovalStates, approvalStateOptions } from '../../types/interfaces'
+import { ApprovalStates, approvalStateOptions, DeploymentMetadata } from '../../types/interfaces'
 
 export interface LogStatement {
   timestamp: Date
@@ -12,19 +11,17 @@ export interface LogStatement {
 }
 
 export interface Deployment {
-  schemaRef: string
+  schemaRef: string | null
   uuid: string
 
   model: Types.ObjectId | ModelDoc
-  versions: Types.Array<Types.ObjectId | VersionDoc>
-  metadata: any
+  metadata: DeploymentMetadata
 
   managerApproved: ApprovalStates
 
   logs: Types.Array<LogStatement>
   built: boolean
-
-  owner: Types.ObjectId | UserDoc
+  ungoverned: boolean
 
   createdAt: Date
   updatedAt: Date
@@ -36,24 +33,28 @@ export type DeploymentDoc = Deployment & Document<any, any, Deployment>
 
 const DeploymentSchema = new Schema<Deployment>(
   {
-    schemaRef: { type: String, required: true },
+    schemaRef: { type: String },
     uuid: { type: String, required: true, index: true, unique: true },
 
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
-    versions: [{ type: Schema.Types.ObjectId, ref: 'Version' }],
     metadata: { type: Schema.Types.Mixed },
 
     managerApproved: { type: String, required: true, enum: approvalStateOptions, default: 'No Response' },
 
     logs: [{ timestamp: Date, level: String, msg: String }],
     built: { type: Boolean, required: true, default: false },
-
-    owner: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+    ungoverned: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   }
 )
+
+DeploymentSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+})
 
 DeploymentSchema.methods.log = async function log(level: string, msg: string) {
   logger[level]({ deploymentId: this._id }, msg)

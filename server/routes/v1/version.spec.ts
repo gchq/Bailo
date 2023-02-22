@@ -1,9 +1,9 @@
 import mongoose from 'mongoose'
 import UserModel from '../../models/User'
 import VersionModel from '../../models/Version'
-import * as requestService from '../../services/request'
+import * as approvalService from '../../services/approval'
 import '../../utils/mockMongo'
-import { testManager, testReviewer, testVersion } from '../../utils/test/testModels'
+import { testUser, testManager, testReviewer, testVersion } from '../../utils/test/testModels'
 import {
   authenticatedGetRequest,
   authenticatedPostRequest,
@@ -13,8 +13,10 @@ import {
 
 describe('test version routes', () => {
   beforeEach(async () => {
+    await UserModel.create(testUser)
     await UserModel.create(testManager)
     await UserModel.create(testReviewer)
+
     const versionDoc = await VersionModel.create(testVersion)
     testVersion._id = versionDoc._id
   })
@@ -26,7 +28,7 @@ describe('test version routes', () => {
   })
 
   test('that we can edit a version', async () => {
-    const mock: any = jest.spyOn(requestService, 'createVersionRequests')
+    const mock: any = jest.spyOn(approvalService, 'createVersionApprovals')
     const editedVersion = testVersion
     editedVersion.metadata.highLevelDetails.name = 'test2'
     mock.mockReturnValue({})

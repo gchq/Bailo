@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
-    "lib": ["dom", "es2017"],
+    "lib": ["dom", "dom.iterable", "es2017"],
     "baseUrl": ".",
     "moduleResolution": "node",
     "strict": true,
@@ -38,7 +38,8 @@
     "node_modules",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "**/testUtils.ts"
+    "**/testUtils.ts",
+    "lib/landing"
   ],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
 }

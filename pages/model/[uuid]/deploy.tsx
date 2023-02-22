@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import { VersionDoc } from '../../../server/models/Version'
 import { postEndpoint } from '../../../data/api'
 import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
@@ -40,10 +41,7 @@ export default function Deploy() {
     if (!currentSchema) return
 
     const { reference } = currentSchema
-    const newSteps = getStepsFromSchema(currentSchema, {}, [
-      'properties.highLevelDetails.properties.modelID',
-      'properties.highLevelDetails.properties.initialVersionRequested',
-    ])
+    const newSteps = getStepsFromSchema(currentSchema, {}, ['properties.highLevelDetails.properties.modelID'])
 
     newSteps.push(
       createStep({
@@ -89,7 +87,6 @@ export default function Deploy() {
     const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
-    data.highLevelDetails.initialVersionRequested = model.currentMetadata.highLevelDetails.modelCardVersion
     data.schemaRef = currentSchema?.reference
 
     const deploy = await postEndpoint(`/api/v1/deployment`, data)
@@ -110,8 +107,10 @@ export default function Deploy() {
     router.push(`/deployment/${uuid}`)
   }
 
+  const latestVersion = model.latestVersion as VersionDoc
+
   return (
-    <Wrapper title={`Deploy: ${model.currentMetadata.highLevelDetails.name}`} page='model'>
+    <Wrapper title={`Deploy: ${latestVersion.metadata.highLevelDetails.name}`} page='model'>
       <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           <Box />

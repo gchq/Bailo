@@ -1,12 +1,24 @@
 import bodyParser from 'body-parser'
+import config from 'config'
+import { basename } from 'path'
 import { Request, Response } from 'express'
-import RequestModel, { ApprovalTypes } from '../../models/Request'
-import { ApprovalStates } from '../../../types/interfaces'
-import { createVersionRequests } from '../../services/request'
-import { findVersionById, updateManagerLastViewed, updateReviewerLastViewed } from '../../services/version'
+import { getClient } from '../../utils/minio'
+import { MinioRandomAccessReader, getFileStream } from '../../utils/zip'
+import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
+import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
+import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
+import {
+  findVersionById,
+  findVersionFileList,
+  updateManagerLastViewed,
+  updateReviewerLastViewed,
+} from '../../services/version'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
-import { getUserById } from '../../services/user'
+import { isUserInEntityList, parseEntityList } from '../../utils/entity'
+import { removeVersionFromModel } from '../../services/model'
+import { FileRef } from '../../utils/build/build'
+import { getUploadQueue } from '../../utils/queues'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -26,6 +38,74 @@ export const getVersion = [
   },
 ]
 
+export const getVersionFileList = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id, file } = req.params
+
+    if (file !== 'code') {
+      throw BadReq({ file }, 'Only code listing is supported.')
+    }
+
+    const version = await findVersionById(req.user, id, { showFiles: true })
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version')
+    }
+
+    const fileList = await findVersionFileList(version)
+
+    return res.json({
+      fileList,
+    })
+  },
+]
+
+export const getVersionFile = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id, file } = req.params
+    const { path } = req.query
+
+    if (typeof path !== 'string') {
+      throw BadReq({ path }, 'Path should be of type string.')
+    }
+
+    if (file !== 'code') {
+      throw BadReq({ file }, 'Only code listing is supported.')
+    }
+
+    const version = await findVersionById(req.user, id, { showFiles: true })
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version')
+    }
+
+    if (!version.files.rawCodePath) {
+      throw NotFound({ code: 'version_not_found', versionId: id }, 'Unable to find version code path')
+    }
+
+    const fileList = await findVersionFileList(version)
+    const entry = fileList.find((item) => item.fileName === path)
+
+    if (!entry) {
+      throw NotFound({ code: 'version_not_found', versionId: id, path }, 'Unable to find version file')
+    }
+
+    const fileRef: FileRef = {
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawCodePath,
+      name: basename(path),
+    }
+
+    const minio = getClient()
+    const reader = new MinioRandomAccessReader(minio, fileRef)
+    const stream = await getFileStream(reader, entry)
+
+    stream.pipe(res)
+  },
+]
+
 export const putVersion = [
   ensureUserRole('user'),
   bodyParser.json(),
@@ -35,33 +115,60 @@ export const putVersion = [
     const metadata = req.body
 
     const version = await findVersionById(req.user, id, { populate: true })
+    const uploadType = metadata.buildOptions.uploadType as ModelUploadType
 
     if (!version) {
       throw NotFound({ code: 'version_not_found', id }, 'Unable to find version')
     }
 
-    if (req.user.id !== version.metadata.contacts.uploader) {
+    if (!(await isUserInEntityList(req.user, version.metadata.contacts.uploader))) {
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
+      throw Forbidden(
+        { code: 'user_unauthorised' },
+        'User is not able to edit a model if it has already been approved.'
+      )
+    }
+
+    if (uploadType === ModelUploadType.Zip) {
+      const { seldonVersion } = metadata.buildOptions
+      const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+      if (
+        seldonVersionsFromConfig.filter((configSeldonVersion) => configSeldonVersion.image === seldonVersion).length ===
+        0
+      ) {
+        throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+      }
     }
 
     version.metadata = metadata
 
-    const [manager, reviewer] = await Promise.all([
-      getUserById(version.metadata.contacts.manager),
-      getUserById(version.metadata.contacts.reviewer),
+    const [managers, reviewers] = await Promise.all([
+      parseEntityList(version.metadata.contacts.manager),
+      parseEntityList(version.metadata.contacts.reviewer),
     ])
 
-    await RequestModel.deleteMany({
+    if (!managers.valid) {
+      throw BadReq({ managers: version.metadata.contacts.manager }, `Invalid manager: ${managers.reason}`)
+    }
+
+    if (!reviewers.valid) {
+      throw BadReq({ reviewers: version.metadata.contacts.reviewer }, `Invalid reviewer: '${reviewers.reason}'`)
+    }
+
+    await ApprovalModel.deleteMany({
       version: version._id,
-      request: 'Upload',
+      approvalCategory: 'Upload',
       $or: [
         {
           approvalType: ApprovalTypes.Manager,
-          user: { $ne: manager },
+          approvers: { $ne: managers },
         },
         {
           approvalType: ApprovalTypes.Reviewer,
-          user: { $ne: reviewer },
+          approvers: { $ne: reviewers },
         },
         {
           status: { $in: [ApprovalStates.Accepted, ApprovalStates.Declined] },
@@ -69,7 +176,7 @@ export const putVersion = [
       ],
     })
 
-    await createVersionRequests({ version })
+    await createVersionApprovals({ version, user: req.user })
 
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
@@ -80,29 +187,95 @@ export const putVersion = [
   },
 ]
 
-export const resetVersionApprovals = [
+export const postResetVersionApprovals = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
     const { user } = req
     const version = await findVersionById(req.user, id, { populate: true })
     if (!version) {
-      throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
     }
-    if (user?.id !== version.metadata.contacts.uploader) {
-      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+
+    if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
     }
     version.managerApproved = ApprovalStates.NoResponse
     version.reviewerApproved = ApprovalStates.NoResponse
     await version.save()
-    await createVersionRequests({ version })
+    await createVersionApprovals({ version, user: req.user })
 
-    req.log.info({ code: 'version_approvals_reset', version }, 'User reset version approvals')
+    req.log.info({ code: 'version_approvals_reset', version: version._id }, 'User reset version approvals')
     return res.json(version)
   },
 ]
 
-export const updateLastViewed = [
+export const postRebuildModel = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { user } = req
+    const version = await findVersionById(req.user, id, { populate: true })
+    if (!version) {
+      throw BadReq({ code: 'version_not_found', version: id }, 'Unable to find requested version')
+    }
+
+    if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
+      throw Forbidden(
+        { code: 'user_unauthorised', version: version._id },
+        'User is not authorised to do this operation.'
+      )
+    }
+
+    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
+      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
+    }
+
+    if (version.state.build.state === 'retrying') {
+      throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
+    }
+
+    const binaryRef = {
+      name: 'binary.zip',
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawBinaryPath,
+    }
+
+    const codeRef = {
+      name: 'code.zip',
+      bucket: config.get('minio.uploadBucket'),
+      path: version.files.rawCodePath,
+    }
+
+    const jobId = await (
+      await getUploadQueue()
+    ).add({
+      versionId: version._id,
+      userId: req.user._id,
+      binary: binaryRef,
+      code: codeRef,
+      uploadType: ModelUploadType.Zip,
+    })
+
+    version.state.build = {
+      ...(version.state.build || {}),
+      state: 'retrying',
+    }
+    version.markModified('state')
+    await version.save()
+
+    const message = 'Successfully created build job in upload queue'
+    req.log.info({ code: 'created_upload_job', jobId, version: version._id }, message)
+    return res.json({
+      message,
+    })
+  },
+]
+
+export const putUpdateLastViewed = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id, role } = req.params
@@ -114,27 +287,82 @@ export const updateLastViewed = [
     if (!version) {
       throw BadReq({ code: 'version_not_found' }, 'Unable to find requested version')
     }
-    if (user.id !== version.metadata.contacts[role]) {
-      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
-    }
-    if (role === 'manager') {
-      updateManagerLastViewed(id)
-      req.log.info(
-        { code: 'version_last_viewed_updated', version: id, role },
-        "Version's manager last viewed date has been updated"
-      )
-    } else if (role === 'reviewer') {
-      updateReviewerLastViewed(id)
-      req.log.info(
-        { code: 'version_last_viewed_updated', version: id, role },
-        "Version's reviewer last viewed date has been updated"
-      )
-    } else {
+
+    if (!['manager', 'reviewer'].includes(role)) {
       throw BadReq(
         { code: 'invalid_version_role' },
         'Cannot update last view date as role type specified is not recognised.'
       )
     }
+
+    if (!(await isUserInEntityList(user, version.metadata.contacts[role]))) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    if (role === 'manager') {
+      await updateManagerLastViewed(id)
+      req.log.info(
+        { code: 'version_last_viewed_updated', version: id, role },
+        "Version's manager last viewed date has been updated"
+      )
+    } else if (role === 'reviewer') {
+      await updateReviewerLastViewed(id)
+      req.log.info(
+        { code: 'version_last_viewed_updated', version: id, role },
+        "Version's reviewer last viewed date has been updated"
+      )
+    }
+
     return res.json({ version: id, role })
+  },
+]
+
+export const deleteVersion = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { user } = req
+
+    const version = await findVersionById(user, id)
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', id }, `Unable to find version '${id}'`)
+    }
+
+    if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    await Promise.all([deleteApprovalsByVersion(user, version), removeVersionFromModel(user, version)])
+
+    await version.delete(user._id)
+
+    return res.json({ id })
+  },
+]
+
+export const getVersionAccess = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { user } = req
+    const { id } = req.params
+
+    const version = await findVersionById(user, id)
+
+    if (!version) {
+      throw NotFound({ code: 'version_not_found', id }, `Unable to find version '${id}'`)
+    }
+
+    const [uploader, reviewer, manager] = await Promise.all([
+      isUserInEntityList(user, version.metadata.contacts.uploader),
+      isUserInEntityList(user, version.metadata.contacts.reviewer),
+      isUserInEntityList(user, version.metadata.contacts.manager),
+    ])
+
+    return res.json({
+      uploader,
+      reviewer,
+      manager,
+    })
   },
 ]

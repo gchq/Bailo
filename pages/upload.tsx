@@ -13,7 +13,7 @@ import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '@/src/Form/R
 import SchemaSelector from '@/src/Form/SchemaSelector'
 import SubmissionError from '@/src/Form/SubmissionError'
 import Wrapper from '@/src/Wrapper'
-import { Schema, SplitSchema, User } from '@/types/interfaces'
+import { EntityKind, Schema, SplitSchema, User } from '@/types/interfaces'
 import { createStep, getStepsData, getStepsFromSchema } from '@/utils/formUtils'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -71,10 +71,19 @@ function Upload() {
 
     const { reference } = currentSchema
     const defaultState = {
-      contacts: { uploader: user.id },
+      contacts: { uploader: [{ kind: EntityKind.USER, id: user.id }] },
     }
 
-    const steps = getStepsFromSchema(currentSchema, {}, [], defaultState)
+    const steps = getStepsFromSchema(
+      currentSchema,
+      {
+        buildOptions: {
+          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
+        },
+      },
+      [],
+      defaultState
+    )
 
     steps.push(
       createStep({

@@ -2,7 +2,7 @@ import memoize from 'memoizee'
 import { Types } from 'mongoose'
 import { ModelId } from '../../types/interfaces'
 import UserModel from '../models/User'
-import { SerializerOptions } from '../utils/logger'
+import { SerializerOptions } from '../utils/serializers'
 
 interface GetUserOptions {
   includeToken?: boolean
@@ -33,17 +33,18 @@ export async function findUsers() {
 }
 
 interface FindAndUpdateUserArgs {
-  userId: string
+  userId?: string
   email?: string
   data?: any
+  roles: Array<string>
 }
 
-export async function findAndUpdateUser({ userId, email, data }: FindAndUpdateUserArgs) {
+export async function findAndUpdateUser({ userId, email, data, roles }: FindAndUpdateUserArgs) {
   // findOneAndUpdate is atomic, so we don't need to worry about
   // multiple threads calling this simultaneously.
   return UserModel.findOneAndUpdate(
     { $or: [{ id: userId }, { email }] },
-    { id: userId, email, data }, // upsert docs
+    { id: userId, email, data, roles }, // upsert docs
     { new: true, upsert: true }
   )
 }

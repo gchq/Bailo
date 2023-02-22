@@ -13,10 +13,10 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 
-import { ApprovalStates } from '../../types/interfaces'
+import { ApprovalStates, Entity } from '../../types/interfaces'
 
 type Approval = {
-  reviewer: string
+  reviewers: Array<Entity>
   status: ApprovalStates
 }
 
@@ -42,10 +42,10 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
     return '#4c8a4c'
   }, [numApprovals, totalApprovals, theme])
 
-  const getRequestResponses = useCallback((approval: Approval, index: number) => {
+  const getApprovalResponses = useCallback((approval: Approval, index: number) => {
     let Icon
     let secondaryText = ''
-    const primaryText = approval.reviewer
+    const primaryText = approval.reviewers.map((reviewer) => reviewer.id).join(', ')
 
     if (approval.status === ApprovalStates.Accepted) {
       Icon = Done
@@ -68,9 +68,9 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
     )
   }, [])
 
-  const requestResponseListItems = useMemo(
-    () => approvals.map((approval, index) => getRequestResponses(approval, index)),
-    [approvals, getRequestResponses]
+  const approvalResponseListItems = useMemo(
+    () => approvals.map((approval, index) => getApprovalResponses(approval, index)),
+    [approvals, getApprovalResponses]
   )
 
   const handleApprovalsClicked = (event: MouseEvent<HTMLDivElement>) => {
@@ -97,9 +97,10 @@ export default function ApprovalsChip({ approvals }: ApprovalsChipProps): ReactE
         aria-controls='model-approvals-menu'
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
+        data-test='approvalsChip'
       />
       <Menu id='model-approvals-menu' anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <List dense>{requestResponseListItems}</List>
+        <List dense>{approvalResponseListItems}</List>
       </Menu>
     </Stack>
   )

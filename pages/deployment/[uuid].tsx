@@ -2,7 +2,6 @@ import Info from '@mui/icons-material/Info'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
-import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -17,7 +16,6 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -29,14 +27,18 @@ import Link from 'next/link'
 import copy from 'copy-to-clipboard'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react'
-import { Elements } from 'react-flow-renderer'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import { useGetModelVersions } from '@/data/model'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
+import { ModelUploadType } from '@/types/interfaces'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
+import { Node, Edge } from 'reactflow'
 import { ModelDoc } from '../../server/models/Model'
 import { useGetDeployment } from '../../data/deployment'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
-import CopiedSnackbar from '../../src/common/CopiedSnackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import TerminalLog from '../../src/TerminalLog'
@@ -45,8 +47,8 @@ import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { postEndpoint } from '../../data/api'
 import RawModelExportList from '../../src/RawModelExportList'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import { ModelUploadType } from '../../types/interfaces'
-import { VersionDoc } from '../../server/models/Version'
+import { getErrorMessage } from '../../utils/fetcher'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
@@ -58,38 +60,35 @@ function isTabOption(value: string): value is TabOptions {
 
 function CodeLine({ line }) {
   const theme = useTheme()
-  const [openSnackbar, setOpenSnackbar] = useState(false)
+  const sendNotification = useNotification()
 
   const handleButtonClick = () => {
     navigator.clipboard.writeText(line)
-    setOpenSnackbar(true)
+    sendNotification({ variant: 'success', msg: 'Copied to clipboard' })
   }
 
   return (
-    <>
-      <div
-        style={{
-          cursor: 'pointer',
-        }}
-        role='button'
-        tabIndex={0}
-        onClick={() => {
+    <div
+      style={{
+        cursor: 'pointer',
+      }}
+      role='button'
+      tabIndex={0}
+      onClick={() => {
+        handleButtonClick()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
           handleButtonClick()
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleButtonClick()
-          }
-        }}
-      >
-        <Tooltip title='Copy to clipboard' arrow>
-          <Box sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', p: 1, borderRadius: 2 }}>
-            $ <b>{line}</b>
-          </Box>
-        </Tooltip>
-      </div>
-      <CopiedSnackbar {...{ openSnackbar, setOpenSnackbar }} />
-    </>
+        }
+      }}
+    >
+      <Tooltip title='Copy to clipboard' arrow>
+        <Box sx={{ backgroundColor: theme.palette.container.main, p: 1, borderRadius: 2 }}>
+          $ <b>{line}</b>
+        </Box>
+      </Tooltip>
+    </div>
   )
 }
 
@@ -98,38 +97,45 @@ export default function Deployment() {
   const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
 
   const [group, setGroup] = useState<TabOptions>('overview')
-  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
-  const [open, setOpen] = useState<boolean>(false)
-  const [tag, setTag] = useState<string>('')
+  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>({ edges: [], nodes: [] })
+  const [open, setOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  const [copyDeploymentCardSnackbarOpen, setCopyDeploymentCardSnackbarOpen] = useState(false)
+  const [imageName, setImageName] = useState('')
+  const [selectedImageTag, setSelectedImageTag] = useState('')
+
   const actionOpen = anchorEl !== null
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { deployment, isDeploymentLoading, isDeploymentError } = useGetDeployment(uuid, true)
+  const { deployment, isDeploymentLoading, isDeploymentError, mutateDeployment } = useGetDeployment(uuid, true)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const model: ModelDoc = deployment?.model as ModelDoc
+  const { versions } = useGetModelVersions(model?.uuid)
 
   const theme = useTheme()
+  const sendNotification = useNotification()
 
-  const initialVersionRequested: Partial<VersionDoc> | undefined = useMemo(() => {
-    if (!deployment) return undefined
-    const initialVersion = deployment.versions.find(
-      (version: Partial<VersionDoc>) => version.version === deployment.metadata.highLevelDetails.initialVersionRequested
-    )
-    return initialVersion
-  }, [deployment])
+  const versionOptions = useMemo(() => {
+    if (!versions) return []
 
-  const hasUploadType = useMemo(
-    () => initialVersionRequested !== undefined && !!initialVersionRequested.metadata.buildOptions?.uploadType,
-    [initialVersionRequested]
-  )
+    return versions
+      .filter(
+        (version) =>
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Docker ||
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Zip
+      )
+      .map((version) => (
+        <MenuItem value={version.version} key={`version-${version.version}`}>
+          {version.version}
+        </MenuItem>
+      ))
+  }, [versions])
 
   useEffect(() => {
-    if (deployment?.metadata?.highLevelDetails !== undefined) {
-      const { modelID, initialVersionRequested: versionRequested } = deployment.metadata.highLevelDetails
-      setTag(`${modelID}:${versionRequested}`)
+    if (deployment && uiConfig) {
+      const { modelID } = deployment.metadata.highLevelDetails
+      setImageName(`${uiConfig?.registry.host}/${deployment.uuid}/${modelID}`)
     }
-  }, [deployment])
+  }, [deployment, uiConfig])
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
@@ -166,9 +172,13 @@ export default function Deployment() {
     setAnchorEl(null)
   }
 
+  const onSelectedTagChange = (event: SelectChangeEvent) => {
+    setSelectedImageTag(event.target.value)
+  }
+
   const copyDeploymentCardToClipboard = () => {
     copy(JSON.stringify(deployment?.metadata, null, 2))
-    setCopyDeploymentCardSnackbarOpen(true)
+    sendNotification({ variant: 'success', msg: 'Copied deployment metadata to clipboard' })
   }
 
   const error = MultipleErrorWrapper(`Unable to load deployment page`, {
@@ -184,10 +194,15 @@ export default function Deployment() {
   if (isUiConfigLoading || !uiConfig) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const deploymentTag = `${uiConfig?.registry.host}/${deployment.metadata.contacts.requester}/${tag}`
-
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/deployment/${deployment?.uuid}/reset-approvals`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
+      mutateDeployment()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
   }
 
   return (
@@ -203,62 +218,15 @@ export default function Deployment() {
             >
               Back to model
             </Button>
-            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
-              <Box>
-                <Alert
-                  severity='info'
-                  sx={{
-                    width: 'fit-content',
-                    m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
-                      color: '#fff',
-                    },
-                  }}
-                >
-                  This model version was uploaded as just a model card
-                </Alert>
-              </Box>
-            )}
-            {hasUploadType && initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.Docker && (
-              <Box>
-                <Alert
-                  severity='info'
-                  sx={{
-                    width: 'fit-content',
-                    m: 'auto',
-                    backgroundColor: '#0288d1',
-                    color: '#fff',
-                    '& .MuiAlert-icon': {
-                      color: '#fff',
-                    },
-                  }}
-                >
-                  This model was not built by Bailo and may not follow the standard format.
-                </Alert>
-              </Box>
-            )}
-            <Box>
-              <Button
-                variant='outlined'
-                color='primary'
-                disabled={
-                  !hasUploadType ||
-                  initialVersionRequested?.metadata?.buildOptions.uploadType === ModelUploadType.ModelCard
-                }
-                startIcon={<Info />}
-                onClick={handleClickOpen}
-              >
-                Show download commands
-              </Button>
-            </Box>
+            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+              Show download commands
+            </Button>
           </Stack>
         )}
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
-              approvals={[{ reviewer: deployment.metadata.contacts.manager, status: deployment.managerApproved }]}
+              approvals={[{ reviewers: deployment.metadata.contacts.owner, status: deployment.managerApproved }]}
             />
             <Divider orientation='vertical' flexItem />
             <Button
@@ -279,7 +247,7 @@ export default function Deployment() {
               <DisabledElementTooltip
                 conditions={[
                   deployment?.managerApproved === 'No Response'
-                    ? 'Deployment needs to be approved before it can have its approvals reset.'
+                    ? 'Deployment needs to have been responded to before it can have its approvals reset.'
                     : '',
                 ]}
               >
@@ -293,39 +261,20 @@ export default function Deployment() {
             </MenuList>
           </Menu>
           <Box sx={{ borderBottom: 1, marginTop: 1, borderColor: 'divider' }}>
-            <Tabs
-              textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-              indicatorColor='secondary'
-              value={group}
-              onChange={handleTabChange}
-              aria-label='basic tabs example'
-            >
+            <Tabs value={group} onChange={handleTabChange} aria-label='basic tabs example'>
               <Tab label='Overview' value='overview' />
               <Tab label='Compliance' value='compliance' />
-              <Tab
-                label='Build Logs'
-                value='build'
-                disabled={
-                  hasUploadType &&
-                  initialVersionRequested?.metadata.buildOptions.uploadType === ModelUploadType.ModelCard
-                }
-              />
+              <Tab label='Build Logs' value='build' />
               <Tab label='Settings' value='settings' />
               <Tab
                 style={{ pointerEvents: 'auto' }}
-                disabled={
-                  deployment.managerApproved !== 'Accepted' ||
-                  (hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType)
-                }
+                disabled={deployment.managerApproved !== 'Accepted'}
                 value='exports'
                 label={
                   <DisabledElementTooltip
                     conditions={[
                       deployment.managerApproved !== 'Accepted'
                         ? 'Deployment needs to be approved before you can view the exported model list.'
-                        : '',
-                      hasUploadType && ModelUploadType.Zip !== initialVersionRequested?.metadata.buildOptions.uploadType
-                        ? 'Model does not have raw artifacts attached'
                         : '',
                     ]}
                     placement='top'
@@ -341,7 +290,9 @@ export default function Deployment() {
 
           {group === 'overview' && <DeploymentOverview deployment={deployment} />}
 
-          {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+          {group === 'compliance' && (
+            <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
+          )}
 
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
 
@@ -354,19 +305,6 @@ export default function Deployment() {
                 <Button variant='outlined' onClick={copyDeploymentCardToClipboard}>
                   Copy deployment metadata to clipboard
                 </Button>
-                <Snackbar
-                  open={copyDeploymentCardSnackbarOpen}
-                  autoHideDuration={6000}
-                  onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
-                >
-                  <Alert
-                    onClose={() => setCopyDeploymentCardSnackbarOpen(false)}
-                    severity='success'
-                    sx={{ width: '100%' }}
-                  >
-                    Copied deployment metadata to clipboard
-                  </Alert>
-                </Snackbar>
               </Box>
             </>
           )}
@@ -377,39 +315,48 @@ export default function Deployment() {
         </Paper>
       </Wrapper>
       <Dialog maxWidth='lg' onClose={handleClose} open={open}>
-        <DialogTitle sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a' }}>
-          Pull from Docker
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ p: 2 }}>
-            <Box>
-              <p style={{ margin: 0 }}>
-                # Login to Docker (your token can be found on the
-                <Link href='/settings' passHref>
-                  <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
-                </Link>
-                page) {theme.palette.mode}
-              </p>
-              <CodeLine line={`docker login ${uiConfig.registry.host} -u ${deployment.metadata.contacts.requester}`} />
-              <br />
-
-              <p style={{ margin: 0 }}># Pull model</p>
-              <CodeLine line={`docker pull ${deploymentTag}`} />
-              <br />
-
-              <p style={{ margin: 0 }}># Run Docker image</p>
-              <CodeLine line={`docker run -p 9999:9000 ${deploymentTag}`} />
-              <p style={{ margin: 0 }}># (the container exposes on port 9000, available on the host as port 9999)</p>
-              <br />
-
-              <p style={{ margin: 0 }}># Check that the Docker container is running</p>
-              <CodeLine line='docker ps' />
-              <br />
-
-              <p style={{ margin: 0 }}># The model is accessible at localhost:9999</p>
+        <DialogTitle sx={{ backgroundColor: theme.palette.container.main }}>Pull from Docker</DialogTitle>
+        {versions && (
+          <DialogContent>
+            <Box sx={{ p: 2 }}>
+              <FormControl sx={{ minWidth: 180 }}>
+                <InputLabel>Select a version</InputLabel>
+                <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
+                  {versionOptions}
+                </Select>
+              </FormControl>
             </Box>
-          </DialogContentText>
-        </DialogContent>
+            <DialogContentText sx={{ p: 2 }}>
+              {selectedImageTag && (
+                <Box>
+                  <p style={{ margin: 0 }}>
+                    # Login to Docker (your token can be found on the
+                    <Link href='/settings' passHref>
+                      <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
+                    </Link>
+                    page)
+                  </p>
+                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+                  <br />
+
+                  <p style={{ margin: 0 }}># Pull model</p>
+                  <CodeLine line={`docker pull ${imageName}:${selectedImageTag}`} />
+                  <br />
+
+                  <p style={{ margin: 0 }}># Run Docker image</p>
+                  <CodeLine line={`docker run -p 9000 ${imageName}:${selectedImageTag}`} />
+                  <br />
+
+                  <p style={{ margin: 0 }}># Check that the Docker container is running</p>
+                  <CodeLine line='docker ps' />
+                  <br />
+
+                  <p style={{ margin: 0 }}># The model is accessible at localhost:9000</p>
+                </Box>
+              )}
+            </DialogContentText>
+          </DialogContent>
+        )}
       </Dialog>
     </>
   )

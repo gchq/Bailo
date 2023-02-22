@@ -3,6 +3,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
+import { ExtendedSelectDisplayProps } from '@/src/types'
 import { Schema } from '../../types/interfaces'
 
 export default function SchemaSelector({
@@ -23,16 +24,19 @@ export default function SchemaSelector({
 
   return (
     <FormControl sx={{ minWidth: 300 }}>
-      <InputLabel id='schema-label'>Schema</InputLabel>
+      <InputLabel>Schema</InputLabel>
       <Select
-        labelId='schema-selector-label'
-        id='schema-selector'
         value={currentSchema.name}
         label='Schema'
         onChange={onSchemaChange}
+        SelectDisplayProps={
+          {
+            'data-test': 'selectSchemaInput',
+          } as ExtendedSelectDisplayProps
+        }
       >
         {schemas.map((schema: Schema) => (
-          <MenuItem key={`schema-${schema.reference}`} value={schema.name}>
+          <MenuItem value={schema.name} key={`schema-${schema.reference}`}>
             {schema.name}
           </MenuItem>
         ))}

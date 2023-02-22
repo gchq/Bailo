@@ -26,11 +26,12 @@ function MetadataDisplay({
   useEffect(() => {
     if (!schemas) return
 
-    const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user']
+    const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user', 'contacts']
 
     const currentSchema = schemas.filter(({ reference }) => reference === item.schemaRef)[0].schema
     const keys = Object.keys(currentSchema.properties).filter(
-      (sectionName) => !propertiesToIgnore.includes(sectionName)
+      (sectionName) =>
+        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false
     )
 
     setSchema(currentSchema)
@@ -78,7 +79,9 @@ function MetadataDisplay({
     return schemaPart ? (
       <Box sx={{ p: 2 }}>
         {subHeading(schemaPart.title)}
-        <div>{printProperty(value, true, true, true, format)}</div>
+        <div>
+          <Typography style={{ whiteSpace: 'pre-line' }}>{printProperty(value, true, true, true, format)}</Typography>
+        </div>
       </Box>
     ) : null
   }
@@ -150,7 +153,7 @@ function MetadataDisplay({
     })
   }
   return (
-    <Box sx={{ p: 4, backgroundColor: theme.palette.mode === 'light' ? '#f3f1f1' : '#5a5a5a', borderRadius: 2 }}>
+    <Box sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }} data-test='metadataDisplay'>
       {printSections()}
     </Box>
   )

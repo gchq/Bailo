@@ -8,12 +8,12 @@
       "modelCardVersion": "v1.0"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true
+      "uploadType": "Model card only"
     }
   },
   {
@@ -22,16 +22,16 @@
       "name": "YOLO v4 (tiny)",
       "modelInASentence": "Performs object detection on an image.",
       "modelOverview": "Locate common objects within an image, from a list of 80 known 80 pre-trained classes e.g. person, bicycle, car.",
-      "modelCardVersion": "v1.8"
+      "modelCardVersion": "v1.0"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true,
-      "uploadType": "Code and binaries"
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
     }
   },
   {
@@ -40,15 +40,16 @@
       "name": "BERT Language",
       "modelInASentence": "Performs language modelling and next sentence prediction.",
       "modelOverview": "Performs language modelling and next sentence prediction.",
-      "modelCardVersion": "v1.8"
+      "modelCardVersion": "v1.0"
     },
     "contacts": {
-      "uploader": "user",
-      "reviewer": "user",
-      "manager": "user"
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
     },
     "buildOptions": {
-      "exportRawModel": true
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
     }
   }
 ]

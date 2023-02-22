@@ -4,7 +4,6 @@ import OpenInNew from '@mui/icons-material/OpenInNew'
 import Upload from '@mui/icons-material/Upload'
 import LoadingButton from '@mui/lab/LoadingButton'
 import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -58,18 +57,12 @@ function ModelExportAndSubmission({
   const getGlobalCss = () => {
     const css: Array<string> = []
 
-    for (const sheet of document.styleSheets as unknown as Array<CSSStyleSheet>) {
+    for (const sheet of document.styleSheets) {
       try {
-        const rules = 'cssRules' in sheet ? sheet.cssRules : sheet.rules
-        if (rules) {
+        if (sheet.cssRules) {
           css.push(`\n/* Stylesheet : ${sheet.href || '[inline styles]'} */`)
-          for (const rule of rules as any) {
-            if ('cssText' in rule) {
-              css.push(rule.cssText)
-            } else {
-              const styleRule = rule as CSSStyleRule
-              css.push(`${styleRule.selectorText} {\n${styleRule.style.cssText}\n}\n`)
-            }
+          for (const rule of sheet.cssRules) {
+            css.push(rule.cssText)
           }
         }
       } catch (e) {
@@ -137,14 +130,8 @@ function ModelExportAndSubmission({
       <Grid container justifyContent='center'>
         {uiConfig.uploadWarning.showWarning && (
           <Alert sx={{ width: '100%' }} severity={warningCheckboxVal ? 'success' : 'warning'}>
-            <AlertTitle sx={{ m: 0 }}>
-              <Checkbox
-                sx={{ p: '0px !important', mr: 1 }}
-                checked={warningCheckboxVal}
-                onChange={handleCheckboxChange}
-              />
-              {uiConfig.uploadWarning.checkboxText}
-            </AlertTitle>
+            <Checkbox size='small' checked={warningCheckboxVal} onChange={handleCheckboxChange} sx={{ p: 0, mr: 1 }} />
+            {uiConfig.uploadWarning.checkboxText}
           </Alert>
         )}
         <Stack direction='row' spacing={2} sx={{ mt: 5, mb: 5 }}>

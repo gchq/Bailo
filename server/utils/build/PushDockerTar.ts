@@ -9,6 +9,7 @@ import defaultAxios, { AxiosInstance } from 'axios'
 import { createHash } from 'crypto'
 import https from 'https'
 
+import { ContentTypes } from '../registry'
 import { VersionDoc } from '../../models/Version'
 import { BuildOpts, BuildStep, Files } from './BuildStep'
 import { BuildLogger } from './BuildLogger'
@@ -16,13 +17,6 @@ import { getAccessToken } from '../../routes/v1/registryAuth'
 import { ModelDoc } from '../../models/Model'
 
 const CHUNK_SIZE = 8 * 1024 * 1024
-
-export enum ContentTypes {
-  APPLICATION_OCTET_STREAM = 'application/octet-stream',
-  APPLICATION_MANIFEST = 'application/vnd.docker.distribution.manifest.v2+json',
-  APPLICATION_LAYER = 'application/vnd.docker.image.rootfs.diff.tar',
-  APPLICATION_CONFIG = 'application/vnd.docker.container.image.v1+json',
-}
 
 export type Layer = {
   size: number

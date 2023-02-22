@@ -29,7 +29,6 @@ module.exports = {
     // allow dot notation for styles (e.g. .A200)
     'dot-notation': ['error', { allowPattern: '^[a-zA-Z][0-9]{3}$' }],
     'react/jsx-filename-extension': [1, { extensions: ['.ts', '.tsx'] }],
-    'react/jsx-props-no-spreading': ['error', { custom: 'ignore' }],
     'prettier/prettier': 'error',
     'import/no-cycle': [0, { ignoreExternal: true }],
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
@@ -46,9 +45,11 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'jsx-a11y/anchor-is-valid': 'off',
     'no-await-in-loop': 'off',
+    'no-continue': 'off',
     'no-restricted-exports': 'off',
     'no-restricted-syntax': 'off',
     'no-underscore-dangle': 'off',
+    'react/jsx-props-no-spreading': 'off',
     // needed because of https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md#how-to-use & https://stackoverflow.com/questions/63818415/react-was-used-before-it-was-defined
     'no-use-before-define': 'off',
     'no-shadow': 'off',

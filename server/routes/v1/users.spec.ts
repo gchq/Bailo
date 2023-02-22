@@ -25,8 +25,7 @@ const testModel: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test',
-  currentMetadata: {},
-  owner: new ObjectId(),
+  latestVersion: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }

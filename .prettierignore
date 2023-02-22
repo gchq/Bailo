@@ -28,3 +28,5 @@ helm/**/*.yaml
 helm/**/*.yml
 
 coverage
+
+lib/landing/.next

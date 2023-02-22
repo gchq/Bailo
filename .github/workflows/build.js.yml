@@ -1,0 +1,349 @@
+name: Build Bailo Image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build_image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build production image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile.prod
+          tags: bailo:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/bailo.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bailo
+          path: /tmp/bailo.tar
+
+  unit_testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Install dependencies
+      - run: npm ci
+
+      # Run unit tests
+      - run: npm run test
+
+  style:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Install dependencies
+      - run: npm ci
+
+      # Run style checks
+      - run: npm run check-style
+      - run: npm run lint
+
+  kubernetes:
+    needs: build_image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Get Bailo Docker image
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo
+          path: /tmp
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: List Cluster
+        run: kubectl get pods -A
+
+      - name: Load docker image to minikube
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker load -i /tmp/bailo.tar
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Add bailo NodePort
+      - name: Create NodePort Config
+        run: |
+          cat << EOT >> helm/bailo/templates/nodePort.yaml
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: node-port
+          spec:
+            type: NodePort
+            ports:
+              - port: {{ .Values.nginxAuth.port }}
+                targetPort: {{ .Values.nginxAuth.port }}
+            selector:
+               name: {{ .Values.nginxAuth.host }}
+          EOT
+
+      # Create local.yaml
+      - name: Create local.yaml
+        run: |
+          cat << EOT >> helm/bailo/local.yaml
+          ---
+          # Instance Settings
+          config:
+            s2i:
+              image: seldonio/seldon-core-s2i-python37:1.10.0
+            supportEmail: "support@example.com"
+            ui:
+              banner:
+                text: "BAILO"
+                colour: '#047a06'
+            smtp:
+              host: 'mail'
+              from: 'bailo@example.com'
+            schema:
+              script: "dist/server/scripts/exampleSetAllSchemas.js"
+            build:
+              environment: img
+          # Bailo
+          image:
+            repository: "bailo"
+            tag: "latest"
+          # Used for k8s not openshift
+          ingress:
+            enabled: false
+          route:
+            enabled: false
+          mongodb:
+            auth:
+              passwords:
+                - MongoDBPassword
+              usernames:
+                - bailo_user
+            image:
+              registry: docker.io
+            host: 'bailo-mongodb:27017/bailo'
+          minio:
+            image:
+              registry: docker.io
+            persistence:
+              size: 20Gi
+          registry:
+            repository: registry
+            certFile: cert.pem
+            keyFile: key.pem
+          maildev:
+            enabled: true
+            
+          openshift:
+            appPublicRoute: not.required.for.this.test
+          nginxcert:
+            cert: cert.pem
+            key: key.pem
+          EOT
+
+      - name: Set Bailo image pull policy to Never
+        run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' helm/bailo/templates/bailo/bailo.deployment.yaml
+
+      - name: HELM update dependency update
+        working-directory: ./helm/bailo
+        run: helm dependency update
+
+      - name: HELM deploy to minikube
+        working-directory: ./helm/bailo
+        run: helm install --values ./local.yaml bailo .
+
+      - name: Sleep for 90 seconds
+        run: sleep 90s
+        shell: bash
+
+      - name: List Pods
+        run: kubectl get pods
+
+      - name: List Services
+        run: kubectl get services
+
+      - name: HELM test Bailo
+        working-directory: ./helm/bailo
+        run: helm test bailo
+
+      - name: Test Bailo URL
+        run: |
+          minikube service list
+          echo "----------------curl connect to bailo---------------"
+          curl $(minikube service node-port --url)
+
+      # Install dependencies
+      - run: npm ci
+
+      # Run Cypress integration tests
+      # - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots-k8s
+          path: cypress/screenshots
+
+      # - uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: cypress/videos
+
+      - name: Print appliation logs
+        if: always()
+        run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
+
+  end_to_end:
+    needs: build_image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Get Bailo Docker image
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/bailo.tar
+          docker image ls -a
+
+      # Create logs directory
+      - run: mkdir logs
+
+      # Create certs
+      - run: sudo chown -R runner:docker certs
+      - run: npm run certs
+
+      # Configure application
+      - name: Configure Bailo
+        run: |
+          cat <<EOT >> config/local.js
+          module.exports = {
+            minio: {
+              accessKey: 'minioadmin',
+              secretKey: 'minioadmin',
+            },
+
+            smtp: {
+              auth: {
+                user: 'mailuser',
+                pass: 'mailpass',
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+            },
+
+            logging: {
+              file: {
+                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
+              },
+            },
+          }
+          EOT
+
+      - run: docker-compose up -d
+
+      # Install dependencies
+      - run: npm ci
+
+      # wait for app to start
+      - run: |
+          chmod +x ./server/scripts/waitForIt.sh
+          ./server/scripts/waitForIt.sh localhost:8080 -t 10
+
+      - uses: cypress-io/github-action@v5
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots-e2e
+          path: cypress/screenshots
+
+      # - uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: cypress/videos
+
+      - name: Dump docker-compose logs
+        if: always()
+        run: docker-compose logs > logs/stack.log
+
+      - name: Docker Compose Logs
+        if: always()
+        run: cat logs/stack.log
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: logs

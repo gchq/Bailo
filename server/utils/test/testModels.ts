@@ -1,6 +1,7 @@
 import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalStates } from '../../../types/interfaces'
+import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
+import { ApprovalStates, EntityKind } from '../../../types/interfaces'
 import UserModel from '../../models/User'
 
 global.TextEncoder = TextEncoder
@@ -9,22 +10,35 @@ export const deploymentUuid = 'test-deployment'
 export const requesterId = new ObjectId()
 export const modelId = new ObjectId()
 export const modelUuid = 'test-model'
+export const versionId = new ObjectId()
 
 export const uploadData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
-    initialVersionRequested: 1,
     name: 'test-deployment',
     modelID: 'test-model',
   },
   contacts: {
-    requester: 'user',
+    uploader: [{ kind: EntityKind.USER, id: 'user' }],
+    reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+    manager: [{ kind: EntityKind.USER, id: 'manager' }],
+  },
+}
+
+export const deploymentData: any = {
+  schemaRef: 'test-schema3',
+  highLevelDetails: {
+    name: 'test-deployment',
+    modelID: 'test-model',
+  },
+  contacts: {
+    owner: [{ kind: EntityKind.USER, id: 'user' }],
   },
 }
 
 export const testUser: any = {
   id: 'user',
-  email: 'test',
+  email: 'test@example.com',
 }
 export const userDoc = new UserModel(testUser)
 
@@ -43,7 +57,7 @@ export const testReviewer: any = {
   email: 'test4',
 }
 
-export const managerRequest: any = {
+export const managerApproval: any = {
   _id: 'managerId',
 }
 
@@ -71,6 +85,7 @@ export const uploadSchema2: any = {
 }
 
 export const testVersion: any = {
+  _id: versionId,
   model: modelId,
   version: '1',
   metadata: {
@@ -78,9 +93,12 @@ export const testVersion: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
+    },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {
@@ -104,9 +122,12 @@ export const testVersion2: any = {
       name: 'test',
     },
     contacts: {
-      uploader: 'user',
-      reviewer: 'reviewer',
-      manager: 'manager',
+      uploader: [{ kind: EntityKind.USER, id: 'user' }],
+      reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+      manager: [{ kind: EntityKind.USER, id: 'manager' }],
+    },
+    buildOptions: {
+      seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   },
   files: {
@@ -127,8 +148,7 @@ export const testModel: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: modelUuid,
-  currentMetadata: uploadData,
-  owner: userDoc,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -137,8 +157,7 @@ export const testModel2: any = {
   versions: [],
   schemaRef: 'test-schema',
   uuid: 'model-test2',
-  currentMetadata: uploadData,
-  owner: userDoc,
+  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -149,8 +168,7 @@ export const testDeployment: any = {
   schemaRef: 'test-schema3',
   uuid: deploymentUuid,
   model: modelId,
-  metadata: uploadData,
-  owner: new ObjectId(),
+  metadata: deploymentData,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -163,19 +181,18 @@ export const testDeployment2: any = {
   model: modelId,
   metadata: {
     contacts: {
-      requester: requesterId,
+      owner: [{ kind: EntityKind.USER, id: 'user' }],
     },
   },
-  owner: new ObjectId(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
-export const testRequest: any = {
-  status: 'No Response',
-  approvalType: 'Manager',
-  request: 'Upload',
-  version: null,
+export const testApproval: any = {
+  status: ApprovalStates.NoResponse,
+  approvalType: ApprovalTypes.Manager,
+  approvalCategory: ApprovalCategory.Upload,
+  version: undefined,
   __v: 0,
   createdAt: new Date(),
   updatedAt: new Date(),

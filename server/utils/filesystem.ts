@@ -1,18 +1,21 @@
-import { dirname } from 'path'
 import fs, { constants } from 'fs'
 import { access, mkdir, readdir } from 'fs/promises'
 
 export function ensurePathExists(path: string, sync = false) {
-  const folder = dirname(path)
-
   if (sync) {
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true })
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true })
     }
     return
   }
 
   access(path, constants.F_OK).catch(() => mkdir(path))
+}
+
+export function checkFileExists(file) {
+  return access(file, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
 }
 
 export async function getFilesInDir(path: string) {

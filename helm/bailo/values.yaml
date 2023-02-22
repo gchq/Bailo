@@ -35,26 +35,28 @@ securityContext:
   # runAsUser: 1002380001
 
 # Networking
-# Ingress is implemented as routes in OpenShift. See appPublicRoute below. 
+# Ingress/route implementation. Also, see appPublicRoute below. 
 service:
   type: ClusterIP
   port: 3000
+
+# k8s config
 ingress:
-  enabled: "false" # set to false for OpenShift
-  className: "nginx"
+  enabled: false
+  name: "nginx"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+    # kubernetes.io/tls-acme: "true
+  fqdn: "example.com"
+  path: "/"
+  pathType: "Prefix"
+  service:
+    name: "node-port"
+    port: 8080
 
+# Used for OpenShift 
+route:
+  enabled: false
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -77,6 +79,13 @@ affinity: {}
 # Mongo Dependencies
 mongodb:
   enabled: true
+  architecture: standalone
+  ssl: false
+  sslValidate: false
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false #Rediness probe failed: /bitnami/scripts/readiness-probe.sh: line 9: mongosh: command not found
   auth:
     enabled: true
     rootUser: ""
@@ -86,7 +95,7 @@ mongodb:
     passwords: [ ] # required for ConfigMap bailo-config
     databases: [ bailo ] # defined database for Mongo
   service:
-    port: 31110 #default 27017./config/default.js:21 host: 'localhost:8080'
+    port: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
     size: 10Gi
@@ -102,6 +111,7 @@ mongodb:
 # MinIO Dependencies
 minio:
   enabled: true
+  mode: standalone
   auth:
     rootUser: ""
     rootPassword: ""
@@ -136,7 +146,7 @@ registry:
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
-  certFile: "yourcert.pem"
+  certFile: "yourcert.pem" #use san.cnf to create certs
   keyFile: "yourkey.pem"
 
 
@@ -144,33 +154,37 @@ registry:
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
   tag: latest
-  host: "bailo-nginx-auth-proxy" # service name
+  host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
   #certFile: "tls.crt"
   #keyFile: "tls.key"
 
+# Maildev
+maildev:
+  enabled: true
+
 # Openshift specific configuration   
 openshift:
-  namespace: bailo # project
+  namespace: openshift-project
   appPublicRoute: 'openshift-route-url'
   dockerPushSecretName: 'registry-push-secret'
+  termination: edge
 
 # Instance Settings
 config:
   s2i:
     image: seldonio/seldon-core-s2i-python37:1.10.0
   supportEmail: "support@example.com"
-  documentationLink: "https://example.com/support"
 
   ui:
     banner:
-      enabled: "true"
-      text: "Banner Text Here"
-      colour: '#00CC00'
+      enabled: "false"
+      text: "BAILO"
+      colour: '#047a06'
 
   smtp:
-    host: 'example.com'
+    host: 'mail'
     port: 1025
     secure: false
     rejectUnauthorized: false
@@ -181,11 +195,23 @@ config:
   build:
     environment: openshift # or img
 
-  schema:
-    script: 'schema-setup-script.sh'
+  app:
+    protocol: 'https'
+    host: 'example.com'
+    port: 443
 
+  schema:
+    script: "dist/server/scripts/exampleSetAllSchemas.js"
+
+stroom:
+  enabled: false
+  url: 'http://localhost:8090/stroom/datafeed'
+  feed: 'bailo'
+  environment: 'Development'
+  insecure: true
+  interval: 300000
 
 # nginx.deployment registry.deployment
 nginxcert:
-  cert: "cert.pem"
-  key: "key.pem"
+  cert: "yourcert.pem" #use san.cnf to create certs
+  key: "yourkey.pem"

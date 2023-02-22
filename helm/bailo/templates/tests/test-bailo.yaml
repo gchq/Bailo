@@ -1,0 +1,50 @@
+# Test limited to infrastructure/Pods running with expected listening ports
+# Application test is done seperately
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bailo.fullname" . }}-test-script
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+data:
+  testconn.sh: |-
+    set -x
+
+    echo "Checking Bailo"
+    nc -vz bailo {{ .Values.service.port }}
+    echo "Checking Mail"
+    nc -vz mail {{ .Values.config.smtp.port }}
+    echo "Checking Minio"
+    nc -vz bailo-minio {{ .Values.minio.service.ports.api }}
+    echo "Checking Mongo"
+    nc -vz bailo-mongodb {{ .Values.mongodb.service.port }}
+    echo "Checking Nginx"
+    nc -vz nginx {{ .Values.nginxAuth.port }}
+    echo "Checking Registry"
+    nc -vz registry {{ .Values.registry.port }}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "bailo.fullname" . }}-test
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: {{ include "bailo.fullname" . }}-test
+      image: busybox
+      command: ['/bin/sh']
+      args: [ '-c', '/scripts/testconn.sh' ]
+      volumeMounts:
+        - name: {{ include "bailo.fullname" . }}-test-script
+          mountPath: /scripts
+  restartPolicy: Never
+  volumes:
+    - name: {{ include "bailo.fullname" . }}-test-script
+      configMap:
+        name: {{ include "bailo.fullname" . }}-test-script
+        defaultMode: 0777

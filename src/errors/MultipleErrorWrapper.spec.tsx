@@ -4,6 +4,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import MultipleErrorWrapper from './MultipleErrorWrapper'
+import { mockNextUseRouter } from '../../utils/testUtils'
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}
@@ -15,6 +16,7 @@ describe('MultipleErrorWrapper', () => {
   })
 
   it('renders an MultipleErrorWrapper component', async () => {
+    mockNextUseRouter({ pathname: '/' })
     if (errorWrapper) {
       render(errorWrapper)
     }

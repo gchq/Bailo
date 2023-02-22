@@ -1,0 +1,18 @@
+{
+  "highLevelDetails": {
+    "tags": ["Test"],
+    "name": "Minimal Model for Testing",
+    "modelInASentence": "This \"model\" reverses its input.",
+    "modelOverview": "This \"model\" reverses its input. It is a tiny model for testing Bailo functionality.",
+    "modelCardVersion": "v1.0"
+  },
+  "contacts": {
+    "uploader": [{ "kind": "user", "id": "user" }],
+    "reviewer": [{ "kind": "user", "id": "user" }],
+    "manager": [{ "kind": "user", "id": "user" }]
+  },
+  "buildOptions": {
+    "uploadType": "Code and binaries",
+    "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
+  }
+}

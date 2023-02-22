@@ -6,6 +6,7 @@ import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
 import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
+import ReplayIcon from '@mui/icons-material/Replay'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -22,14 +23,14 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Paper from '@mui/material/Paper'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
-import { postEndpoint, putEndpoint } from 'data/api'
+import { postEndpoint, putEndpoint, deleteEndpoint } from 'data/api'
+import { useGetVersionAccess } from 'data/version'
 import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { Types } from 'mongoose'
@@ -37,24 +38,31 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Elements } from 'react-flow-renderer'
+import { Node, Edge } from 'reactflow'
 import UserAvatar from 'src/common/UserAvatar'
 import ModelOverview from 'src/ModelOverview'
 import TerminalLog from 'src/TerminalLog'
 import Wrapper from 'src/Wrapper'
 import createComplianceFlow from 'utils/complianceFlow'
+import CodeExplorer from 'src/model/CodeExplorer'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import TextField from '@mui/material/TextField'
+import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString } from '../../types/interfaces'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
+import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
+import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 
-type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'settings'
+type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
 function isTabOption(value: string): value is TabOptions {
-  return ['overview', 'compliance', 'build', 'deployments', 'settings'].includes(value)
+  return ['overview', 'compliance', 'build', 'deployments', 'code', 'settings'].includes(value)
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
@@ -64,9 +72,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => (
 function Model() {
   const router = useRouter()
   const theme = useTheme()
-  const { uuid, tab }: { uuid?: string; tab?: TabOptions } = router.query
-
-  const deploymentVersionsDisplayLimit = 5
+  const { uuid, tab, version: versionParameter }: { uuid?: string; tab?: TabOptions; version?: string } = router.query
 
   const [group, setGroup] = useState<TabOptions>('overview')
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>(undefined)
@@ -74,74 +80,97 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [copyModelCardSnackbarOpen, setCopyModelCardSnackbarOpen] = useState(false)
-  const [complianceFlow, setComplianceFlow] = useState<Elements>([])
+  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>({ edges: [], nodes: [] })
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
+  const [ungovernedDialogOpen, setUngovernedDialogOpen] = useState(false)
+  const [ungovernedDeploymentName, setUngovernedDeploymentName] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
   const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
   const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const { versionAccess } = useGetVersionAccess(version?._id)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
+  const sendNotification = useNotification()
+
+  // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
+  // It defaults to true, until it hears false from the network access check.
+  const isPotentialUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
+
+  const onRebuildModelClick = useCallback(async () => {
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/rebuild`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Requested model rebuild' })
+      mutateVersion()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
+  }, [sendNotification, version, mutateVersion])
+
+  const addQueryParameter = (key: string, value: string) => {
+    const routerParameters = router.query
+    routerParameters[key] = value
+    let path = `/model/${uuid}?`
+    Object.keys(routerParameters).forEach((routerParameter: string) => {
+      if (routerParameter !== 'uuid') {
+        path += `${routerParameter}=${routerParameters[routerParameter]}&`
+      }
+    })
+    path = path.substring(0, path.length - 1)
+    router.push(path)
+  }
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
     setSelectedVersion(event.target.value)
+    addQueryParameter('version', event.target.value)
   }
 
   const handleGroupChange = (_event: React.SyntheticEvent, newValue: TabOptions) => {
     setGroup(newValue)
     mutateVersion()
-    router.push(`/model/${uuid}?tab=${newValue}`)
+    addQueryParameter('tab', newValue)
   }
 
   const requestDeployment = () => {
-    router.push(`/model/${uuid}/deploy`)
+    if (version) router.push(`/model/${uuid}/deploy`)
   }
 
   const copyModelCardToClipboard = () => {
     copy(JSON.stringify(version?.metadata, null, 2))
-    setCopyModelCardSnackbarOpen(true)
-  }
-
-  const handleCopyModelCardSnackbarClose = () => {
-    setCopyModelCardSnackbarOpen(false)
+    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
   }
 
   useEffect(() => {
-    if (currentUser && version) {
-      setIsManager(currentUser.id === version.metadata.contacts.manager)
-      setIsReviewer(currentUser.id === version.metadata.contacts.reviewer)
+    if (versionAccess) {
+      setIsManager(versionAccess.manager)
+      setIsReviewer(versionAccess.reviewer)
     }
-  }, [currentUser, version])
+  }, [versionAccess])
 
   const updateLastViewed = useCallback(
     (role: string) => {
-      if (isManager && version?.updatedAt && currentUser) {
+      if (isManager && version?.updatedAt) {
         const versionLastUpdatedAt = new Date(version?.updatedAt)
         if (
           ((managerLastViewed && new Date(managerLastViewed).getTime() < versionLastUpdatedAt.getTime()) ||
             (reviewerLastViewed && new Date(reviewerLastViewed).getTime() < versionLastUpdatedAt.getTime())) &&
-          currentUser.id !== version?.metadata.contacts.uploader
+          !isPotentialUploader
         ) {
           setShowLastViewedWarning(true)
         }
         putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
       }
     },
-    [
-      managerLastViewed,
-      reviewerLastViewed,
-      currentUser,
-      version?.metadata.contacts.uploader,
-      version?._id,
-      version?.updatedAt,
-      isManager,
-    ]
+    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, isPotentialUploader]
   )
 
   useEffect(() => {
@@ -175,6 +204,12 @@ function Model() {
       setGroup(tab)
     }
   }, [tab])
+
+  useEffect(() => {
+    if (versionParameter !== undefined) {
+      setSelectedVersion(versionParameter)
+    }
+  }, [versionParameter])
 
   useEffect(() => {
     if (!currentUser || !version?.model) return
@@ -225,14 +260,68 @@ function Model() {
   }
 
   const requestApprovalReset = async () => {
-    await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {}).then((res) => res.json())
+    const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
+
+    if (response.ok) {
+      sendNotification({ variant: 'success', msg: 'Approvals reset' })
+      mutateVersion()
+    } else {
+      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
+    }
+  }
+
+  const handleDelete = () => {
+    setDeleteModelErrorMessage('')
+    setDeleteConfirmOpen(true)
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false)
+  }
+
+  const handleDeleteConfirm = async () => {
+    const response = await deleteEndpoint(`/api/v1/version/${version._id}`)
+
+    if (response.ok) {
+      router.push('/')
+    } else {
+      setDeleteModelErrorMessage(await getErrorMessage(response))
+    }
+  }
+
+  const handleUngovernedDialogClose = () => {
+    setUngovernedDialogOpen(false)
+  }
+
+  const requestUngovernedDeployment = async () => {
+    setErrorMessage('')
+    const response = await postEndpoint(`/api/v1/deployment/ungoverned`, {
+      name: ungovernedDeploymentName,
+      modelUuid: uuid,
+      initialVersionRequested: version.version,
+    })
+    if (response.status >= 400) {
+      let responseError = response.statusText
+      try {
+        responseError = `${response.statusText}: ${(await response.json()).message}`
+      } catch (e) {
+        setErrorMessage('No response from server')
+        return
+      }
+
+      setErrorMessage(responseError)
+      return
+    }
+
+    const { uuid: responseUuid } = await response.json()
+    router.push(`/deployment/${responseUuid}`)
   }
 
   return (
     <Wrapper title={`Model: ${version.metadata.highLevelDetails.name}`} page='model'>
-      {hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard && (
+      {hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard && (
         <Box sx={{ pb: 2 }}>
-          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }}>
+          <Alert severity='info' sx={{ width: 'fit-content', m: 'auto' }} data-test='modelCardPageAlert'>
             This model version was uploaded as just a model card
           </Alert>
         </Box>
@@ -254,8 +343,8 @@ function Model() {
             <Stack direction='row' spacing={2}>
               <ApprovalsChip
                 approvals={[
-                  { reviewer: version.metadata.contacts.manager, status: version.managerApproved },
-                  { reviewer: version.metadata.contacts.reviewer, status: version.reviewerApproved },
+                  { reviewers: version.metadata.contacts.manager, status: version.managerApproved },
+                  { reviewers: version.metadata.contacts.reviewer, status: version.reviewerApproved },
                 ]}
               />
               <Divider orientation='vertical' flexItem />
@@ -296,9 +385,25 @@ function Model() {
                     <ListItemText>Request deployment</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
+                <DisabledElementTooltip conditions={[!version.built ? 'Version needs to build.' : '']}>
+                  <MenuItem
+                    onClick={() => setUngovernedDialogOpen(true)}
+                    disabled={!version.built}
+                    data-test='submitUngovernedDeployment'
+                  >
+                    <ListItemIcon>
+                      <UploadIcon fontSize='small' />
+                    </ListItemIcon>
+                    <ListItemText>Request ungoverned deployment</ListItemText>
+                  </MenuItem>
+                </DisabledElementTooltip>
                 <Divider />
                 {!modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(true)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(true)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='favouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <FavoriteBorder fontSize='small' />
@@ -308,7 +413,11 @@ function Model() {
                   </MenuItem>
                 )}
                 {modelFavourited && (
-                  <MenuItem onClick={() => setModelFavourite(false)} disabled={favouriteButtonDisabled}>
+                  <MenuItem
+                    onClick={() => setModelFavourite(false)}
+                    disabled={favouriteButtonDisabled}
+                    data-test='unfavouriteModelButton'
+                  >
                     <>
                       <ListItemIcon>
                         <Favorite fontSize='small' />
@@ -322,16 +431,14 @@ function Model() {
                     version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
                       ? 'Version has already been approved by both a manager and a technical reviewer.'
                       : '',
-                    currentUser.id !== version?.metadata?.contacts?.uploader
-                      ? 'You do not have permission to edit this model.'
-                      : '',
+                    !isPotentialUploader ? 'You do not have permission to edit this model.' : '',
                   ]}
                 >
                   <MenuItem
                     onClick={editModel}
                     disabled={
                       (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
-                      currentUser.id !== version?.metadata?.contacts?.uploader
+                      !isPotentialUploader
                     }
                     data-test='editModelButton'
                   >
@@ -341,11 +448,7 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-                <MenuItem
-                  onClick={uploadNewVersion}
-                  disabled={currentUser.id !== version.metadata?.contacts?.uploader}
-                  data-test='newVersionButton'
-                >
+                <MenuItem onClick={uploadNewVersion} disabled={!isPotentialUploader} data-test='newVersionButton'>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -390,22 +493,22 @@ function Model() {
             </Stack>
           </Grid>
 
-          <Tabs
-            indicatorColor='secondary'
-            textColor={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-            value={group}
-            onChange={handleGroupChange}
-            aria-label='basic tabs example'
-          >
+          <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
             <Tab
               label='Build Logs'
               value='build'
-              disabled={hasUploadType && version.metadata.buildOptions.uploadType === ModelUploadType.ModelCard}
+              disabled={hasUploadType && version.metadata?.buildOptions?.uploadType === ModelUploadType.ModelCard}
+              data-test='buildLogsTab'
             />
             <Tab label='Deployments' value='deployments' />
-            <Tab label='Settings' value='settings' data-test='settingsButton' />
+            <Tab
+              label='Explore Code'
+              value='code'
+              disabled={hasUploadType && version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip}
+            />
+            <Tab label='Settings' value='settings' data-test='settingsTab' />
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
@@ -426,9 +529,29 @@ function Model() {
           </>
         )}
 
-        {group === 'compliance' && <ComplianceFlow initialElements={complianceFlow} />}
+        {group === 'compliance' && (
+          <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
+        )}
 
-        {group === 'build' && <TerminalLog logs={version.logs} title='Model Build Logs' />}
+        {group === 'build' && (
+          <>
+            <Grid container justifyContent='flex-end' sx={{ pb: 2 }}>
+              <DisabledElementTooltip
+                conditions={[version.state?.build?.state === 'retrying' ? 'Model is already retrying.' : '']}
+              >
+                <Button
+                  disabled={version.state?.build?.state === 'retrying'}
+                  onClick={onRebuildModelClick}
+                  variant='outlined'
+                  startIcon={<ReplayIcon />}
+                >
+                  Rebuild Model
+                </Button>
+              </DisabledElementTooltip>
+            </Grid>
+            <TerminalLog logs={version.logs} title='Model Build Logs' />
+          </>
+        )}
 
         {group === 'deployments' && (
           <>
@@ -449,45 +572,14 @@ function Model() {
                     <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
                       Contacts:
                     </Typography>
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      avatar={<UserAvatar username={deployment.metadata.contacts.requester} size='chip' />}
-                      label={deployment.metadata.contacts.requester}
-                    />
-                    <Chip
-                      color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                      sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                      avatar={<UserAvatar username={deployment.metadata.contacts.secondPOC} size='chip' />}
-                      label={deployment.metadata.contacts.secondPOC}
-                    />
-                  </Stack>
-                </Box>
-
-                <Box sx={{ mb: 1 }}>
-                  <Stack direction='row'>
-                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
-                      Associated versions:
-                    </Typography>
-                    {deployment.versions.length > 0 &&
-                      versions
-                        .filter((deploymentVersion) => deployment.versions.includes(deploymentVersion._id))
-                        .slice(0, deploymentVersionsDisplayLimit)
-                        .map((filteredVersion) => (
-                          <Chip
-                            color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
-                            sx={{ backgroundColor: theme.palette.mode === 'light' ? 'primary' : 'secondary' }}
-                            key={filteredVersion.version}
-                            label={filteredVersion.version}
-                          />
-                        ))}
-                    {deployment.versions.length > 3 && (
-                      <Typography sx={{ mt: 'auto', mb: 'auto' }}>{`...plus ${
-                        versions.filter((deploymentVersionForLimit) =>
-                          deployment.versions.includes(deploymentVersionForLimit._id)
-                        ).length - deploymentVersionsDisplayLimit
-                      } more`}</Typography>
-                    )}
+                    {deployment.metadata.contacts.owner.map((owner) => (
+                      <Chip
+                        key={owner.id}
+                        color='primary'
+                        avatar={<UserAvatar entity={owner} size='chip' />}
+                        label={owner.id}
+                      />
+                    ))}
                   </Stack>
                 </Box>
 
@@ -497,8 +589,10 @@ function Model() {
           </>
         )}
 
+        {group === 'code' && <CodeExplorer id={version._id} addQueryParameter={addQueryParameter} />}
+
         {group === 'settings' && (
-          <>
+          <Box data-test='modelSettingsPage'>
             <Typography variant='h6' sx={{ mb: 1 }}>
               General
             </Typography>
@@ -507,28 +601,66 @@ function Model() {
               <Button variant='outlined' onClick={copyModelCardToClipboard}>
                 Copy model card to clipboard
               </Button>
-              <Snackbar
-                open={copyModelCardSnackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleCopyModelCardSnackbarClose}
-              >
-                <Alert onClose={handleCopyModelCardSnackbarClose} severity='success' sx={{ width: '100%' }}>
-                  Copied model card to clipboard
-                </Alert>
-              </Snackbar>
             </Box>
 
             <Box sx={{ mb: 4 }} />
-
+            <ConfirmationDialogue
+              open={deleteConfirmOpen}
+              title='Delete version'
+              onConfirm={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
+              errorMessage={deleteModelErrorMessage}
+            />
             <Typography variant='h6' sx={{ mb: 1 }}>
               Danger Zone
             </Typography>
-            <Button variant='contained' color='error'>
-              Delete Model
-            </Button>
-          </>
+            <Stack direction='row' spacing={2}>
+              <DisabledElementTooltip
+                conditions={[!isPotentialUploader ? 'You do not have permission to delete this version.' : '']}
+                placement='bottom'
+              >
+                <Button
+                  variant='contained'
+                  disabled={!isPotentialUploader}
+                  color='error'
+                  onClick={handleDelete}
+                  data-test='deleteVersionButton'
+                >
+                  Delete version
+                </Button>
+              </DisabledElementTooltip>
+              <Button variant='contained' color='error' disabled data-test='deleteModelButton'>
+                Delete model
+              </Button>
+            </Stack>
+          </Box>
         )}
       </Paper>
+      <Dialog open={ungovernedDialogOpen} onClose={handleUngovernedDialogClose}>
+        <DialogContent>
+          <Stack spacing={1}>
+            <Stack direction='row' spacing={2}>
+              <TextField
+                label='Deployment name'
+                variant='outlined'
+                value={ungovernedDeploymentName}
+                onChange={(event) => setUngovernedDeploymentName(event.target.value)}
+              />
+              <Button
+                disabled={ungovernedDeploymentName === ''}
+                variant='contained'
+                onClick={requestUngovernedDeployment}
+                autoFocus
+              >
+                Request
+              </Button>
+            </Stack>
+            <Typography sx={{ color: theme.palette.error.main }} variant='caption'>
+              {errorMessage}
+            </Typography>
+          </Stack>
+        </DialogContent>
+      </Dialog>
     </Wrapper>
   )
 }

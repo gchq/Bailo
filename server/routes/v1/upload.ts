@@ -3,11 +3,11 @@ import { Request, Response } from 'express'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
+import { ObjectId } from 'mongodb'
 import { moveFile } from '../../utils/minio'
 import { createFileRef } from '../../utils/multer'
-import { updateDeploymentVersions } from '../../services/deployment'
 import { createModel, findModelByUuid } from '../../services/model'
-import { createVersionRequests } from '../../services/request'
+import { createVersionApprovals } from '../../services/approval'
 import { findSchemaByRef } from '../../services/schema'
 import { createVersion, markVersionBuilt } from '../../services/version'
 import MinioStore from '../../utils/MinioStore'
@@ -16,7 +16,7 @@ import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
 import VersionModel from '../../models/Version'
-import { ModelUploadType, UploadModes } from '../../../types/interfaces'
+import { ModelUploadType, SeldonVersion, UploadModes } from '../../../types/interfaces'
 import { getPropertyFromEnumValue } from '../../utils/general'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
@@ -83,6 +83,13 @@ function checkTarFile(name: string, file: Array<MinioFile>) {
   }
 }
 
+function checkSeldonVersion(seldonVersion: string) {
+  const seldonVersionsFromConfig: Array<SeldonVersion> = config.get('uiConfig.seldonVersions')
+  if (seldonVersionsFromConfig.filter((version) => version.image === seldonVersion).length === 0) {
+    throw BadReq({ seldonVersion }, `Seldon version ${seldonVersion} not recognised`)
+  }
+}
+
 export const postUpload = [
   ensureUserRole('user'),
   upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }]),
@@ -101,6 +108,7 @@ export const postUpload = [
       case ModelUploadType.Zip:
         checkZipFile('binary', files.binary)
         checkZipFile('code', files.code)
+        checkSeldonVersion(metadata.buildOptions.seldonVersion)
         break
       case ModelUploadType.Docker:
         checkTarFile('docker', files.docker)
@@ -115,6 +123,7 @@ export const postUpload = [
     let mode: UploadModes
 
     const prop = typeof req.query.mode === 'string' ? getPropertyFromEnumValue(UploadModes, req.query.mode) : undefined
+
     if (!req.query.mode) {
       mode = UploadModes.NewModel
     } else if (prop) {
@@ -137,7 +146,7 @@ export const postUpload = [
 
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
-      model = await findModelByUuid(req.user, modelUuid)
+      model = await findModelByUuid(req.user, modelUuid, { populate: true })
     } else {
       // Save a new model, and add the uploaded version to its array
       model = await createModel(req.user, {
@@ -145,10 +154,8 @@ export const postUpload = [
         uuid: `${name}-${nanoid()}`,
 
         versions: [],
-        currentMetadata: metadata,
-        parent: undefined,
-
-        owner: req.user._id,
+        // Temporarily set a new ObjectId to satisfy the type, then override below
+        latestVersion: new ObjectId(),
       })
     }
 
@@ -176,10 +183,7 @@ export const postUpload = [
     req.log.info({ code: 'created_model_version', version }, 'Created model version')
 
     model.versions.push(version._id)
-    model.currentMetadata = metadata
-
-    // Find all existing deployments for this model and update their versions array
-    await updateDeploymentVersions(req.user, model._id, version)
+    model.latestVersion = version._id
 
     await model.save()
 
@@ -188,12 +192,13 @@ export const postUpload = [
 
     req.log.info({ code: 'created_model', model }, 'Created model document')
 
-    const [managerRequest, reviewerRequest] = await createVersionRequests({
+    const [managerApproval, reviewerApproval] = await createVersionApprovals({
       version: await version.populate('model').execPopulate(),
+      user: req.user,
     })
     req.log.info(
-      { code: 'created_review_requests', managerId: managerRequest._id, reviewRequest: reviewerRequest._id },
-      'Successfully created requests for reviews'
+      { code: 'created_review_approvals', managerId: managerApproval._id, reviewApproval: reviewerApproval._id },
+      'Successfully created approvals for review'
     )
 
     switch (uploadType) {

@@ -6,13 +6,12 @@ export function getPropertyFromEnumValue<Enum extends { [key: string]: string | 
   t: Enum,
   key: string
 ): string | undefined {
-  const entries = Object.entries(t)
+  const values = Object.values(t)
 
-  for (const [index, value] of entries) {
+  for (const value of values) {
     if (value === key) {
-      return index
+      return value
     }
   }
-
   return undefined
 }

@@ -15,7 +15,6 @@ from bailoclient.utils.exceptions import (
     InvalidFilePath,
     InvalidFileRequested,
     InvalidMetadata,
-    ModelFileExportNotAllowed,
 )
 
 from tests.mocks.mock_api import MockAPI
@@ -36,7 +35,6 @@ def mock_client():
 
 @patch("bailoclient.client.Client.get_model_schema")
 def test_get_model_schema(mock_get_model_schema, mock_client):
-
     mock_get_model_schema.return_value = {"response": "this is a thing"}
 
     model_uuid = "xyz"
@@ -50,7 +48,6 @@ def test_get_model_schema(mock_get_model_schema, mock_client):
 def test_get_user_by_name_returns_user_object_with_matching_name(
     mock_get_users, mock_client
 ):
-
     mock_get_users.return_value = [User({"id": "user"})]
 
     user = mock_client.get_user_by_name("user")
@@ -62,7 +59,6 @@ def test_get_user_by_name_returns_user_object_with_matching_name(
 def test_get_user_by_name_returns_None_if_no_matching_users(
     mock_get_users, mock_client
 ):
-
     mock_get_users.return_value = [User({"id": "user"})]
 
     user = mock_client.get_user_by_name("test")
@@ -97,7 +93,6 @@ def test_get_model_card_gets_model_if_no_version_provided(mock_model, mock_clien
 def test_validate_model_card_raises_error_if_model_card_is_invalid(
     mock_validate, mock_client
 ):
-
     validation_errors = [ValidationError("field", "message")]
     mock_validate.return_value = ValidationResult(validation_errors)
 
@@ -127,7 +122,7 @@ def test_validate_metadata_raises_error_if_metadata_is_invalid(
     ):
         mock_client._Client__validate_metadata(
             metadata=metadata,
-            minimal_metadata_path="./examples/resources/example_metadata.json",
+            minimal_metadata_path="../../cypress/fixtures/minimal_metadata.json",
         )
 
 
@@ -147,11 +142,10 @@ def test_validate_filepaths_raises_error_if_a_directory_is_uploaded(mock_client)
 
     with pytest.raises(
         InvalidFilePath,
-        match=re.escape("../../__tests__/example_models/minimal_model is a directory"),
+        match=re.escape("../../cypress/fixtures is a directory"),
     ):
-
         mock_client._Client__validate_file_paths(
-            "../../__tests__/example_models/minimal_model",
+            "../../cypress/fixtures",
         )
 
 
@@ -167,8 +161,8 @@ def test_generate_payload_raises_error_if_payload_too_large_and_aws_gateway(
     ):
         mock_client._generate_payload(
             metadata=json.dumps({"schema": "value"}),
-            binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-            code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+            binary_file="../../cypress/fixtures/minimal_binary.zip",
+            code_file="../../cypress/fixtures/minimal_code.zip",
         )
 
 
@@ -176,8 +170,8 @@ def test_add_files_to_payload_adds_code_and_binary_files(mock_client):
     payloads = []
     mock_client._Client__add_files_to_payload(
         payloads=payloads,
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     assert len(payloads) == 2
@@ -188,7 +182,6 @@ def test_add_files_to_payload_adds_code_and_binary_files(mock_client):
 
 
 def test_post_model_raises_error_if_invalid_mode_given(mock_client):
-
     with pytest.raises(
         ValueError,
         match=re.escape("Invalid mode - must be either newVersion or newModel"),
@@ -224,7 +217,6 @@ def test_increment_model_version_raises_error_if_unable_to_increase_version_by_o
 def test_update_model_is_called_with_expected_params(
     mock_increment_version, mock_generate_payload, mock_client
 ):
-
     payload = Mock({"payload": "data"}, content_type="content")
     mode = "newVersion"
     model_uuid = "model"
@@ -234,13 +226,9 @@ def test_update_model_is_called_with_expected_params(
     mock_client.api.post = Mock(return_value={"uuid": model_uuid})
 
     mock_client.update_model(
-        model_card=Model(
-            uuid=model_uuid,
-            _schema={"key": "value"},
-            currentMetadata={"highLevelDetails": {"modelCardVersion": "2"}},
-        ),
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        metadata={"highLevelDetails": {"modelCardVersion": "2"}},
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     mock_client.api.post.assert_called_once_with(
@@ -255,7 +243,6 @@ def test_update_model_is_called_with_expected_params(
 def test_upload_model_is_called_with_expected_params(
     mock_validate_uploads, mock_generate_payload, mock_client
 ):
-
     payload = Mock({"payload": "data"}, content_type="content")
     model_uuid = "model"
 
@@ -264,8 +251,8 @@ def test_upload_model_is_called_with_expected_params(
 
     mock_client.upload_model(
         metadata={"key": "value"},
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     mock_client.api.post.assert_called_once_with(
@@ -275,19 +262,7 @@ def test_upload_model_is_called_with_expected_params(
     )
 
 
-@patch("bailoclient.client.Client._Client__allow_exports", return_value=False)
-def test_download_model_files_raises_error_if_model_files_are_not_exportable(
-    mock_allow_exports, mock_client
-):
-    with pytest.raises(ModelFileExportNotAllowed):
-        mock_client.download_model_files(
-            deployment_uuid="test", model_version="1", file_type="invalid"
-        )
-
-
-@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
-    mock_allow_exports,
     mock_client,
 ):
     with pytest.raises(InvalidFileRequested):
@@ -296,9 +271,8 @@ def test_download_model_files_raises_error_if_file_type_is_not_code_or_binary(
         )
 
 
-@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_raises_error_if_output_dir_already_exists_and_user_has_not_specified_overwrite(
-    mock_allow_exports, mock_client, tmpdir
+    mock_client, tmpdir
 ):
     with pytest.raises(FileExistsError):
         mock_client.download_model_files(
@@ -306,9 +280,8 @@ def test_download_model_files_raises_error_if_output_dir_already_exists_and_user
         )
 
 
-@patch("bailoclient.client.Client._Client__allow_exports", return_value=True)
 def test_download_model_files_overwrites_existing_output_dir_if_user_has_specified_overwrite(
-    mock_allow_exports, mock_client, tmpdir
+    mock_client, tmpdir
 ):
     deployment_uuid = "test"
     model_version = "1"
@@ -328,23 +301,6 @@ def test_download_model_files_overwrites_existing_output_dir_if_user_has_specifi
         f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
         output_dir=str(tmpdir),
     )
-
-
-@patch("bailoclient.client.Client.get_deployment_by_uuid")
-@patch("bailoclient.client.Client.get_model_card")
-def test_allow_exports_returns_false_if_model_does_not_allow_exports(
-    mock_get_model_card, mock_get_deployment, mock_client
-):
-    mock_get_deployment.return_value = {"model": {"uuid": "123"}}
-    mock_get_model_card.return_value = {
-        "currentMetadata": {"buildOptions": {"exportRawModel": False}}
-    }
-
-    allow_exports = mock_client._Client__allow_exports("dep")
-
-    mock_get_deployment.mock_called_once_with("dep")
-    mock_get_model_card.assert_called_once_with(model_uuid="123")
-    assert not allow_exports
 
 
 @patch("bailoclient.client.Client.get_me", return_value=User(_id="user"))
