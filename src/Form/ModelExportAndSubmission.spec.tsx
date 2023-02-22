@@ -8,7 +8,7 @@ import { useGetUiConfig } from '../../data/uiConfig'
 import ModelExportAndSubmission from './ModelExportAndSubmission'
 import { doNothing } from '../../utils/testUtils'
 
-jest.mock('../data/uiConfig', () => ({
+jest.mock('../../data/uiConfig', () => ({
   useGetUiConfig: jest.fn(),
 }))
 

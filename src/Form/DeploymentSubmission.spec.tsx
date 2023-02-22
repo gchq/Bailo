@@ -8,7 +8,7 @@ import DeploymentSubmission from './DeploymentSubmission'
 import { doNothing } from '../../utils/testUtils'
 import { useGetUiConfig } from '../../data/uiConfig'
 
-jest.mock('../data/uiConfig', () => ({
+jest.mock('../../data/uiConfig', () => ({
   useGetUiConfig: jest.fn(),
 }))
 

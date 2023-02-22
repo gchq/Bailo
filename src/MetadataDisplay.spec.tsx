@@ -42,7 +42,8 @@ describe('MetadataDisplay', () => {
       isSchemasError: false,
     }
 
-    ;(useGetSchemas as unknown as jest.Mock).mockReturnValueOnce(mockedSchema)
+    const getSchemas = useGetSchemas as unknown as jest.Mock
+    getSchemas.mockReturnValueOnce(mockedSchema).mockReturnValueOnce(mockedSchema)
 
     render(
       <ThemeProvider theme={lightTheme}>
