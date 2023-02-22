@@ -5,9 +5,25 @@ import { v4 as uuidv4 } from 'uuid'
 import { server } from '../../index.js'
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
-import * as userService from '../../services/user.js'
+import {
+  serializedUserFields,
+  getUserById,
+  getUserByInternalId,
+  findUsers,
+  findAndUpdateUser,
+  findUserCached,
+} from '../../services/user.js'
 import '../../utils/mockMongo'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
+
+const userService = {
+  serializedUserFields,
+  getUserById,
+  getUserByInternalId,
+  findUsers,
+  findAndUpdateUser,
+  findUserCached,
+}
 
 const request = supertest(server)
 
