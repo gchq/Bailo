@@ -5,9 +5,11 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
 import React from 'react'
-import * as schemaService from '../data/schema'
+import { useGetSchemas } from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'
+
+const schemaService = { useGetSchemas }
 
 describe('MetadataDisplay', () => {
   it('renders a MetadataDisplay component', async () => {

@@ -4,9 +4,11 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import * as uiConfig from '../../data/uiConfig'
+import { useGetUiConfig } from '../../data/uiConfig'
 import ModelEditSubmission from './ModelEditSubmission'
 import { doNothing } from '../../utils/testUtils'
+
+const uiConfig = { useGetUiConfig }
 
 describe('ModelEditSubmission', () => {
   it('renders an ModelEditSubmission component', async () => {

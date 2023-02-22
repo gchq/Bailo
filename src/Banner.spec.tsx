@@ -4,8 +4,10 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import * as uiConfig from '../data/uiConfig'
+import { useGetUiConfig } from '../data/uiConfig'
 import Banner from './Banner'
+
+const uiConfig = { useGetUiConfig }
 
 describe('Banner', () => {
   it('renders a Banner component', async () => {
