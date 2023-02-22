@@ -43,4 +43,4 @@ def keras_template():
     Returns:
         str: Path to Keras model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/keras.py")
+    return resource_filename("bailoclient", "resources/templates/keras.py")

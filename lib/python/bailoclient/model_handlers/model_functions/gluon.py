@@ -47,4 +47,4 @@ def gluon_template():
     Returns:
         str: Path to Gluon model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/gluon.py")
+    return resource_filename("bailoclient", "resources/templates/gluon.py")

@@ -43,4 +43,4 @@ def onnx_template():
     Returns:
         str: Path to ONNX model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/onnx.py")
+    return resource_filename("bailoclient", "resources/templates/onnx.py")

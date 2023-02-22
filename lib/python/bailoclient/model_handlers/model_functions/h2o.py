@@ -47,4 +47,4 @@ def h2o_template():
     Returns:
         str: Path to H2O model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/h2o.py")
+    return resource_filename("bailoclient", "resources/templates/h2o.py")

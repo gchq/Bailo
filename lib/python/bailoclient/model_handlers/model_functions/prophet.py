@@ -43,4 +43,4 @@ def prophet_template():
     Returns:
         str: Path to Prophet model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/prophet.py")
+    return resource_filename("bailoclient", "resources/templates/prophet.py")

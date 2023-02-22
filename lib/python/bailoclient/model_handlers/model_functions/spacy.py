@@ -43,4 +43,4 @@ def spacy_template():
     Returns:
         str: Path to spaCy model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/spacy.py")
+    return resource_filename("bailoclient", "resources/templates/spacy.py")

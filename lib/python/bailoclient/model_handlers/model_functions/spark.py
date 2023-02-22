@@ -43,4 +43,4 @@ def spark_template():
     Returns:
         str: Path to Spark model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/spark.py")
+    return resource_filename("bailoclient", "resources/templates/spark.py")

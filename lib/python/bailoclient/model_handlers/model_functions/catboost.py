@@ -47,4 +47,4 @@ def catboost_template():
     Returns:
         str: Path to CatBoost model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/catboost.py")
+    return resource_filename("bailoclient", "resources/templates/catboost.py")

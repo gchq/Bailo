@@ -47,4 +47,4 @@ def fastai_template():
     Returns:
         str: Path to fast.ai model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/fastai.py")
+    return resource_filename("bailoclient", "resources/templates/fastai.py")

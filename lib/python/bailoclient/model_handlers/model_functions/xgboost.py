@@ -43,4 +43,4 @@ def xgboost_template():
     Returns:
         str: Path to XGBoost model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/xgboost.py")
+    return resource_filename("bailoclient", "resources/templates/xgboost.py")

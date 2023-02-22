@@ -43,4 +43,4 @@ def tensorflow_template():
     Returns:
         str: Path to TensorFlow model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/tensorflow.py")
+    return resource_filename("bailoclient", "resources/templates/tensorflow.py")

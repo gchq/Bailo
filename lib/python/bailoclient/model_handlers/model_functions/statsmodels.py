@@ -43,4 +43,4 @@ def statsmodels_template():
     Returns:
         str: Path to statsmodels model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/statsmodels.py")
+    return resource_filename("bailoclient", "resources/templates/statsmodels.py")

@@ -43,4 +43,4 @@ def lightgbm_template():
     Returns:
         str: Path to LightGBM model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/lightgbm.py")
+    return resource_filename("bailoclient", "resources/templates/lightgbm.py")

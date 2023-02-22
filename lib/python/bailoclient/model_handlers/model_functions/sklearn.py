@@ -43,4 +43,4 @@ def sklearn_template():
     Returns:
         str: Path to sklearn model.py template
     """
-    return resource_filename("bailoclient", "resource/templates/sklearn.py")
+    return resource_filename("bailoclient", "resources/templates/sklearn.py")
