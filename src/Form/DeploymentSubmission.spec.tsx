@@ -8,7 +8,9 @@ import DeploymentSubmission from './DeploymentSubmission'
 import { doNothing } from '../../utils/testUtils'
 import { useGetUiConfig } from '../../data/uiConfig'
 
-const uiConfig = { useGetUiConfig }
+jest.mock('../data/uiConfig', () => ({
+  useGetUiConfig: jest.fn(),
+}))
 
 describe('DeploymentSubmission', () => {
   it('renders an DeploymentSubmission component', async () => {
@@ -23,8 +25,7 @@ describe('DeploymentSubmission', () => {
       isUiConfigError: false,
     }
 
-    const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
-    uiConfigMock.mockReturnValue(mockedConfig)
+    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
 
     render(<DeploymentSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} />)
 

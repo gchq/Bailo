@@ -8,7 +8,9 @@ import { useGetUiConfig } from '../../data/uiConfig'
 import ModelExportAndSubmission from './ModelExportAndSubmission'
 import { doNothing } from '../../utils/testUtils'
 
-const uiConfig = { useGetUiConfig }
+jest.mock('../data/uiConfig', () => ({
+  useGetUiConfig: jest.fn(),
+}))
 
 describe('ModelExportAndSubmission', () => {
   it('renders a ModelExportAndSubmission component', async () => {
@@ -23,8 +25,7 @@ describe('ModelExportAndSubmission', () => {
       isUiConfigError: false,
     }
 
-    const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
-    uiConfigMock.mockReturnValue(mockedConfig)
+    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
 
     const formData = {
       name: 'test name',

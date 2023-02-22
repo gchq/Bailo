@@ -9,7 +9,9 @@ import { useGetSchemas } from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'
 
-const schemaService = { useGetSchemas }
+jest.mock('../data/schema', () => ({
+  useGetSchemas: jest.fn(),
+}))
 
 describe('MetadataDisplay', () => {
   it('renders a MetadataDisplay component', async () => {
@@ -40,8 +42,7 @@ describe('MetadataDisplay', () => {
       isSchemasError: false,
     }
 
-    const mockedSchemaService = jest.spyOn(schemaService, 'useGetSchemas')
-    mockedSchemaService.mockReturnValue(mockedSchema)
+    ;(useGetSchemas as unknown as jest.Mock).mockReturnValueOnce(mockedSchema)
 
     render(
       <ThemeProvider theme={lightTheme}>

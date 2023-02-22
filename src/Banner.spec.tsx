@@ -7,7 +7,9 @@ import React from 'react'
 import { useGetUiConfig } from '../data/uiConfig'
 import Banner from './Banner'
 
-const uiConfig = { useGetUiConfig }
+jest.mock('../data/uiConfig', () => ({
+  useGetUiConfig: jest.fn(),
+}))
 
 describe('Banner', () => {
   it('renders a Banner component', async () => {
@@ -23,8 +25,7 @@ describe('Banner', () => {
       isUiConfigError: false,
     }
 
-    const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
-    uiConfigMock.mockReturnValue(mockedConfig)
+    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
 
     render(<Banner />)
 

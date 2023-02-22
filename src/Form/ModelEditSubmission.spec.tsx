@@ -8,7 +8,9 @@ import { useGetUiConfig } from '../../data/uiConfig'
 import ModelEditSubmission from './ModelEditSubmission'
 import { doNothing } from '../../utils/testUtils'
 
-const uiConfig = { useGetUiConfig }
+jest.mock('../data/uiConfig', () => ({
+  useGetUiConfig: jest.fn(),
+}))
 
 describe('ModelEditSubmission', () => {
   it('renders an ModelEditSubmission component', async () => {
@@ -23,8 +25,7 @@ describe('ModelEditSubmission', () => {
       isUiConfigError: false,
     }
 
-    const uiConfigMock = jest.spyOn(uiConfig, 'useGetUiConfig')
-    uiConfigMock.mockReturnValue(mockedConfig)
+    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
 
     render(<ModelEditSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} modelUploading={false} />)
 
