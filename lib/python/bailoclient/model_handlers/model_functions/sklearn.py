@@ -20,9 +20,8 @@ def sklearn_bundler(model, output_path: str, code_paths: List[str]):
 
     save_model(model, path=output_path, code_paths=code_paths)
 
-    model_binary = os.path.join(output_path, "data", "model.pkl")
+    model_binary = os.path.join(output_path, "model.pkl")
     mlflow_files = [
-        os.path.join(output_path, "data", "pickle_module_info.txt"),
         os.path.join(output_path, "MLmodel"),
     ]
 
@@ -31,9 +30,10 @@ def sklearn_bundler(model, output_path: str, code_paths: List[str]):
 
 @loader(flavour=ModelFlavour.SKLEARN)
 def sklearn_loader(model_path: str):
-    raise ModelMethodNotAvailable(
-        "The model loader function has not yet been implemented for H2O models"
-    )
+    import pickle
+
+    with open(model_path, "rb") as model_file:
+        return pickle.load(model_file)
 
 
 @template(flavour=ModelFlavour.SKLEARN)

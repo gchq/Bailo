@@ -32,7 +32,7 @@ def spark_bundler(model, output_path: str, code_paths: List[str]):
 @loader(flavour=ModelFlavour.SPARK)
 def spark_loader(model_path: str):
     raise ModelMethodNotAvailable(
-        "The model loader function has not yet been implemented for H2O models"
+        "The model loader function has not yet been implemented for Spark models"
     )
 
 
