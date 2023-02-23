@@ -1,7 +1,8 @@
 {
   "name": "p-mongo-queue",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "Message queues which uses MongoDB.",
+  "type": "module",
   "main": "dist/pMongoQueue.js",
   "types": "dist/pMongoQueue.d.ts",
   "files": [
