@@ -66,7 +66,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
     const userEntities = await getEntitiesForUser(user)
 
     const userModels: ModelDoc[] = []
-    const models = await ModelModel.find().populate('latestVersion').sort({ updatedAt: -1 })
+    const models = await ModelModel.find(query).populate('latestVersion').sort({ updatedAt: -1 })
 
     userEntities.forEach((userEntity) => {
       const modelsForUser = models.filter((model) => {
