@@ -127,7 +127,8 @@ export default function Deployment() {
       )
       .map((version) => (
         <MenuItem value={version.version} key={`version-${version.version}`}>
-          {version.version} {version._id === model.latestVersion ? '(Latest version)' : ''}
+          {version.version}
+          {version._id === model.latestVersion ? ' (Latest version)' : ''}
         </MenuItem>
       ))
   }, [versions, model])
@@ -324,12 +325,7 @@ export default function Deployment() {
               <FormControl sx={{ minWidth: 180 }}>
                 <InputLabel>Select a version</InputLabel>
                 {versions && model && (
-                  <Select
-                    value={selectedImageTag}
-                    defaultValue={selectedImageTag}
-                    label='Select a version'
-                    onChange={onSelectedTagChange}
-                  >
+                  <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
                     {versionOptions}
                   </Select>
                 )}
