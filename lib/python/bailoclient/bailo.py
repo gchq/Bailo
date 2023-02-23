@@ -6,6 +6,7 @@ import os
 import logging
 import getpass
 from typing import Union, List
+from copy import deepcopy
 
 from dotenv import load_dotenv
 from pkg_resources import resource_filename
@@ -116,12 +117,15 @@ class Bailo(Client):
             metadata = json.load(json_file)
 
         self._minimal_metadata = metadata
-        self._minimal_binary = resource_filename(
-            "bailoclient", "resources/minimal_binary.zip"
-        )
-        self._minimal_code = resource_filename(
-            "bailoclient", "resources/minimal_code.zip"
-        )
+
+        with open(
+            resource_filename(
+                "bailoclient", "resources/minimal_deployment_metadata.json"
+            )
+        ) as json_file:
+            metadata = json.load(json_file)
+
+        self._minimal_deployment_metadata = metadata
 
     @property
     def bundlers(self):
@@ -139,15 +143,11 @@ class Bailo(Client):
 
     @property
     def minimal_metadata(self):
-        return self._minimal_metadata
+        return deepcopy(self._minimal_metadata)
 
     @property
-    def minimal_binary(self):
-        return self._minimal_binary
-
-    @property
-    def minimal_code(self):
-        return self._minimal_code
+    def minimal_deployment_metadata(self):
+        return deepcopy(self._minimal_deployment_metadata)
 
     def __create_client_from_env(self):
         """Create a Client from configuration saved in a .env file
