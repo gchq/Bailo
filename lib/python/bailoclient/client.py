@@ -504,18 +504,20 @@ class Client:
     def update_model(
         self,
         metadata: dict,
+        model_uuid: str,
         binary_file: str,
         code_file: str,
+        aws_gateway: bool = True,
     ):
         """Update an existing model based on its UUID.
 
         Args:
-            model_card (Model): The model card of the existing model
+            metadata (dict): Updated model metadata
+            model_uuid (str): UUID of model to update
             binary_file (str): Path to the model binary file
             code_file (str): Path to the model code file
-            model_version (str, optional): Incremented mode version number.
-                                           Automatically attempts to increase by 1 if None.
-                                           Defaults to None.
+            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
+                                Defaults to True.
 
         Returns:
             str: UUID of the updated model
@@ -530,21 +532,20 @@ class Client:
             binary_file=binary_file,
             code_file=code_file,
             metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
+            minimal_metadata_path=resource_filename(
+                "bailoclient", "resources/minimal_metadata.json"
+            ),
         )
 
-        if not model_version:
-            model_version = self._increment_model_version(model_card["uuid"])
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
 
-        payload = self._generate_payload(metadata, binary_file, code_file)
-
-        if self._too_large_for_gateway(payload):
+        if self._too_large_for_gateway(payload, aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
 
         return self._post_model(
-            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
+            model_data=payload, mode="newVersion", model_uuid=model_uuid
         )
 
     @handle_reconnect
@@ -556,7 +557,9 @@ class Client:
         """
         self._validate_uploads(
             metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/deployment.json",
+            minimal_metadata_path=resource_filename(
+                "bailoclient", "resources/minimal_deployment_metadata.json"
+            ),
         )
 
         metadata_json = json.dumps(metadata)
