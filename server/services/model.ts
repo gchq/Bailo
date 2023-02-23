@@ -1,7 +1,7 @@
 import { castArray } from 'lodash'
 import { Types } from 'mongoose'
 import { Model, ModelId } from '../../types/interfaces'
-import ModelModel from '../models/Model'
+import ModelModel, { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
 import Authorisation from '../external/Authorisation'
 import { asyncFilter } from '../utils/general'
@@ -65,13 +65,25 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
   } else if (type === 'user') {
     const userEntities = await getEntitiesForUser(user)
 
-    query.$or = userEntities.map((userEntity) => ({
-      'latestVersion.metadata.contacts.uploader': { $elemMatch: { kind: userEntity.kind, id: userEntity.id } },
-    }))
+    const userModels: ModelDoc[] = []
+    const models = await ModelModel.find().populate('latestVersion').sort({ updatedAt: -1 })
+
+    userEntities.forEach((userEntity) => {
+      const modelsForUser = models.filter((model) => {
+        const latestVersion = model.latestVersion as VersionDoc
+        return latestVersion.metadata.contacts.uploader.filter(
+          (modelUserEntity) => modelUserEntity.id === userEntity.id
+        )
+      })
+      userModels.push(...modelsForUser)
+    })
+
+    return filterModel(user, userModels)
   }
 
   let models = ModelModel.find(query).sort({ updatedAt: -1 })
   if (opts?.populate) models = models.populate('latestVersion', 'metadata')
+
   return filterModel(user, await models)
 }
 
