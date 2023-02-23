@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Image from 'next/image'
+import Image from 'next/legacy/image'
 import React from 'react'
 
 export default function EmptyBlob({ text }: { text: string }) {

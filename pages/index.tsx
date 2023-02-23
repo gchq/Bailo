@@ -83,7 +83,7 @@ export default function ExploreModels() {
                 const latestVersion = model.latestVersion as VersionDoc
                 return (
                   <Box key={model.uuid}>
-                    <Link href={`/model/${model.uuid}`} passHref>
+                    <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
                       <MuiLink
                         variant='h5'
                         sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}

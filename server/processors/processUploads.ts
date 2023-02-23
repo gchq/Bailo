@@ -1,7 +1,6 @@
 import config from 'config'
 
-// eslint-disable-next-line import/no-relative-packages
-import { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue.js'
+import { QueueMessage } from 'p-mongo-queue'
 import { findVersionById, markVersionBuilt } from '../services/version.js'
 import logger from '../utils/logger.js'
 import { getUserByInternalId } from '../services/user.js'

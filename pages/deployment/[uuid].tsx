@@ -331,7 +331,7 @@ export default function Deployment() {
                 <Box>
                   <p style={{ margin: 0 }}>
                     # Login to Docker (your token can be found on the
-                    <Link href='/settings' passHref>
+                    <Link href='/settings' passHref legacyBehavior>
                       <MuiLink sx={{ ml: 0.5, mr: 0.5, color: theme.palette.secondary.main }}>settings</MuiLink>
                     </Link>
                     page)

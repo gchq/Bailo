@@ -113,7 +113,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
             <Grid item xs={12} md={6} lg={7}>
               {category === 'Upload' && (
                 <>
-                  <Link href={`/model/${approvalObj.version?.model?.uuid}`} passHref>
+                  <Link href={`/model/${approvalObj.version?.model?.uuid}`} passHref legacyBehavior>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
@@ -141,7 +141,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
               )}
               {category === 'Deployment' && (
                 <>
-                  <Link href={`/deployment/${approvalObj.deployment?.uuid}`} passHref>
+                  <Link href={`/deployment/${approvalObj.deployment?.uuid}`} passHref legacyBehavior>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
@@ -151,7 +151,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
                   </Link>
                   <Typography variant='body1'>
                     Requesting deployment of{' '}
-                    <Link href={`/model/${approvalObj.deployment?.model?.uuid}`} passHref>
+                    <Link href={`/model/${approvalObj.deployment?.model?.uuid}`} passHref legacyBehavior>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
                         {approvalObj.deployment?.model?.latestVersion?.highLevelDetails?.name}
                       </MuiLink>
