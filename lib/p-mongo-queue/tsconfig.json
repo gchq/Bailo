@@ -1,8 +1,26 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "target": "es2020",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "isolatedModules": false,
+    "strict": true,
+    "pretty": true,
+    "newLine": "lf",
+    "sourceMap": true,
     "declaration": true,
+    "declarationMap": true,
+    "importHelpers": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
     "outDir": "./dist"
   },
   "include": ["./pMongoQueue.ts"]

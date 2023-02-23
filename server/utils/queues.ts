@@ -1,6 +1,6 @@
 import config from 'config'
 import mongoose from 'mongoose'
-import PMongoQueue, { QueueMessage } from 'p-mongo-queue'
+import { PMongoQueue, QueueMessage } from 'p-mongo-queue'
 import { findModelById } from '../services/model.js'
 // eslint-disable-next-line import/no-relative-packages
 import { findDeploymentById } from '../services/deployment.js'

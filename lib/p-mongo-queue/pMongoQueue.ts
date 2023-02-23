@@ -25,7 +25,7 @@ export type ArrayPayload = Array<any>
 export type Processor = (msg: QueueMessage) => ProcessResponse
 
 export interface QueueOptions {
-  deadQueue?: Queue | undefined
+  deadQueue?: PMongoQueue | undefined
   delay?: number | undefined
   maxRetries?: number | undefined
   visibility?: number | undefined
@@ -38,14 +38,14 @@ export interface QueueMessage {
   tries: number
 }
 
-export default class Queue extends EventEmitter {
+export class PMongoQueue extends EventEmitter {
   db: Db
   name: string
   col: Collection
   visibility: number
   delay: number
 
-  deadQueue?: Queue
+  deadQueue?: PMongoQueue
   maxRetries?: number
 
   parallelism: number
@@ -85,7 +85,7 @@ export default class Queue extends EventEmitter {
     return indexName
   }
 
-  async add(payload, opts: QueueOptions = {}) {
+  async add(payload: Payload, opts: QueueOptions = {}) {
     const delay = opts.delay || this.delay
     const visible = delay ? nowPlusSecs(delay) : now()
 
@@ -109,7 +109,7 @@ export default class Queue extends EventEmitter {
     return String(results.insertedIds[0])
   }
 
-  async get(opts: QueueOptions = {}) {
+  async get(opts: QueueOptions = {}): Promise<any> {
     const visibility = opts.visibility || this.visibility
     const query = {
       deleted: null,
