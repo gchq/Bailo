@@ -1,8 +1,8 @@
 import config from 'config'
 import mongoose from 'mongoose'
+import PMongoQueue, { QueueMessage } from 'p-mongo-queue'
 import { findModelById } from '../services/model.js'
 // eslint-disable-next-line import/no-relative-packages
-import PMongoQueue, { QueueMessage } from '../../lib/p-mongo-queue/pMongoQueue.js'
 import { findDeploymentById } from '../services/deployment.js'
 import { getUserByInternalId } from '../services/user.js'
 import { findVersionById, markVersionState } from '../services/version.js'

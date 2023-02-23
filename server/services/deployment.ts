@@ -10,7 +10,7 @@ import Authorisation from '../external/Authorisation.js'
 import { asyncFilter } from '../utils/general.js'
 import { SerializerOptions } from '../utils/serializers.js'
 import { Forbidden } from '../utils/result.js'
-import { getUserByInternalId } from './user.js'
+import { getUserById } from './user.js'
 import { getEntitiesForUser } from '../utils/entity.js'
 
 const auth = new Authorisation()
@@ -85,7 +85,7 @@ export async function findDeployments(user: UserDoc, { owner, model }: Deploymen
   const query: any = {}
 
   if (owner) {
-    const ownerUser = await getUserByInternalId(owner)
+    const ownerUser = await getUserById(owner)
 
     if (!ownerUser) {
       throw new Error(`Finding deployments for user that does not exist: ${owner}`)

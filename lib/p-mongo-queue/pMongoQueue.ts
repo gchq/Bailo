@@ -1,31 +1,62 @@
-const crypto = require('crypto')
-const { EventEmitter } = require('events')
+import { randomBytes } from 'crypto'
+import { EventEmitter } from 'events'
+import { Collection, Db } from 'mongodb'
 
 // some helper functions
 function id() {
-  return crypto.randomBytes(16).toString('hex')
+  return randomBytes(16).toString('hex')
 }
 
 function now() {
   return new Date().toISOString()
 }
 
-function nowPlusSecs(secs) {
+function nowPlusSecs(secs: number) {
   return new Date(Date.now() + secs * 1000).toISOString()
 }
 
-function pause(time) {
+function pause(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
-module.exports = class Queue extends EventEmitter {
-  constructor(db, name, opts) {
+export type ProcessResponse = void | Promise<void>
+export type Payload = any
+export type ArrayPayload = Array<any>
+export type Processor = (msg: QueueMessage) => ProcessResponse
+
+export interface QueueOptions {
+  deadQueue?: Queue | undefined
+  delay?: number | undefined
+  maxRetries?: number | undefined
+  visibility?: number | undefined
+}
+
+export interface QueueMessage {
+  ack: string
+  id: string
+  payload: Payload | ArrayPayload
+  tries: number
+}
+
+export default class Queue extends EventEmitter {
+  db: Db
+  name: string
+  col: Collection
+  visibility: number
+  delay: number
+
+  deadQueue?: Queue
+  maxRetries?: number
+
+  parallelism: number
+  currentlyProcessing: number
+  processor?: Processor
+  interval?: NodeJS.Timer
+
+  constructor(db: Db, name: string, opts?: QueueOptions) {
     if (!db) {
       throw new Error('p-mongo-queue: provide a mongodb.MongoClient.db')
     }
-    // if (db instanceof EventEmitter) {
-    //   throw new Error('p-mongo-queue: provide a mongodb.MongoClient.db from mongodb@4')
-    // }
     if (!name) {
       throw new Error('p-mongo-queue: provide a queue name')
     }
@@ -37,6 +68,9 @@ module.exports = class Queue extends EventEmitter {
     this.col = db.collection(name)
     this.visibility = opts.visibility || 30
     this.delay = opts.delay || 0
+
+    this.currentlyProcessing = 0
+    this.parallelism = 1
 
     if (opts.deadQueue) {
       this.deadQueue = opts.deadQueue
@@ -51,11 +85,11 @@ module.exports = class Queue extends EventEmitter {
     return indexName
   }
 
-  async add(payload, opts = {}) {
+  async add(payload, opts: QueueOptions = {}) {
     const delay = opts.delay || this.delay
     const visible = delay ? nowPlusSecs(delay) : now()
 
-    const msgs = []
+    const msgs: Array<{ visible: string; payload: Payload }> = []
     if (Array.isArray(payload)) {
       if (payload.length === 0) {
         throw new Error('Queue.add(): Array payload length must be greater than 0')
@@ -75,7 +109,7 @@ module.exports = class Queue extends EventEmitter {
     return String(results.insertedIds[0])
   }
 
-  async get(opts = {}) {
+  async get(opts: QueueOptions = {}) {
     const visibility = opts.visibility || this.visibility
     const query = {
       deleted: null,
@@ -89,6 +123,8 @@ module.exports = class Queue extends EventEmitter {
       $set: { ack: id(), visible: nowPlusSecs(visibility) },
     }
 
+    // MongoDB typing of findOneAndUpdate is incorrect here, fixed in latest MongoDB version.
+    // @ts-ignore
     const { value: doc } = await this.col.findOneAndUpdate(query, update, { sort, returnDocument: 'after' })
     if (!doc) return
 
@@ -101,7 +137,7 @@ module.exports = class Queue extends EventEmitter {
     }
 
     // if we have a deadQueue, then check the tries, else don't
-    if (this.deadQueue && msg.tries > this.maxRetries) {
+    if (this.deadQueue && msg.tries > (this.maxRetries || 0)) {
       // So:
       // 1) add this message to the deadQueue
       // 2) ack this message from the regular queue
@@ -114,7 +150,7 @@ module.exports = class Queue extends EventEmitter {
     return msg
   }
 
-  async ping(ack, opts = {}) {
+  async ping(ack: string, opts: QueueOptions = {}) {
     const visibility = opts.visibility || this.visibility
     const query = {
       ack,
@@ -130,7 +166,7 @@ module.exports = class Queue extends EventEmitter {
     return String(msg.value._id)
   }
 
-  async ack(ack) {
+  async ack(ack: string) {
     const query = {
       ack,
       visible: { $gt: now() },
@@ -145,7 +181,7 @@ module.exports = class Queue extends EventEmitter {
     return String(msg.value._id)
   }
 
-  async fail(ack) {
+  async fail(ack: string) {
     const query = {
       ack,
     }
@@ -198,9 +234,11 @@ module.exports = class Queue extends EventEmitter {
     return this.col.countDocuments(query)
   }
 
-  process(parallelism, processor) {
+  process(processor: Processor): void
+  process(parallelism: number, processor: Processor): void
+  process(parallelism: number | Processor, processor?: (msg: QueueMessage) => ProcessResponse): void {
     if (!processor) {
-      processor = parallelism
+      processor = parallelism as Processor
       parallelism = 1
     }
 
@@ -212,7 +250,7 @@ module.exports = class Queue extends EventEmitter {
       throw new Error('Queue.process(): Requires a processor provided')
     }
 
-    this.parallelism = parallelism
+    this.parallelism = parallelism as number
     this.processor = processor
     this.currentlyProcessing = 0
     this.interval = setInterval(this._checkJobs.bind(this), 1000)
@@ -247,13 +285,17 @@ module.exports = class Queue extends EventEmitter {
     }
 
     try {
+      if (!this.processor) {
+        throw new Error('p-mongo-queue: tried to process a message but found no processor.')
+      }
+
       const processing = this.processor(message)
       await processing
 
       await this.ack(message.ack)
       this.emit('succeeded', message)
     } catch (e) {
-      if (this.deadQueue && message.tries >= this.maxRetries) {
+      if (this.deadQueue && message.tries >= (this.maxRetries || 0)) {
         this.emit('failed', message, e)
       } else {
         this.emit('retrying', message, e)
