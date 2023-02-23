@@ -115,7 +115,9 @@ export default function Deployment() {
   const sendNotification = useNotification()
 
   const versionOptions = useMemo(() => {
-    if (!versions) return []
+    if (!versions || !model) return []
+
+    setSelectedImageTag(versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0].version)
 
     return versions
       .filter(
@@ -126,9 +128,10 @@ export default function Deployment() {
       .map((version) => (
         <MenuItem value={version.version} key={`version-${version.version}`}>
           {version.version}
+          {version._id === model.latestVersion ? ' (Latest version)' : ''}
         </MenuItem>
       ))
-  }, [versions])
+  }, [versions, model])
 
   useEffect(() => {
     if (deployment && uiConfig) {
@@ -321,9 +324,11 @@ export default function Deployment() {
             <Box sx={{ p: 2 }}>
               <FormControl sx={{ minWidth: 180 }}>
                 <InputLabel>Select a version</InputLabel>
-                <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
-                  {versionOptions}
-                </Select>
+                {versions && model && (
+                  <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
+                    {versionOptions}
+                  </Select>
+                )}
               </FormControl>
             </Box>
             <DialogContentText sx={{ p: 2 }}>
