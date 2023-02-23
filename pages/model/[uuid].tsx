@@ -522,7 +522,7 @@ function Model() {
             {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
             {deployments.map((deployment: Deployment) => (
               <Box key={`deployment-${deployment.uuid}`}>
-                <Link href={`/deployment/${deployment.uuid}`} passHref>
+                <Link href={`/deployment/${deployment.uuid}`} passHref legacyBehavior>
                   <MuiLink
                     variant='h5'
                     sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}

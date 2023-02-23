@@ -112,7 +112,7 @@ function Deployments() {
             <Box>
               {orderedDeployments?.map((deployment, index) => (
                 <Box key={`deployment-${deployment.uuid}`} sx={{ mt: 2 }}>
-                  <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                  <Link href={`/deployment/${deployment?.uuid}`} passHref legacyBehavior>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
@@ -140,7 +140,7 @@ function Deployments() {
                     {groupedDeployments[key].map((deployment) => (
                       <Box sx={{ p: 1, m: 1, borderRadius: 2 }} key={deployment.uuid}>
                         <Box>
-                          <Link href={`/deployment/${deployment?.uuid}`} passHref>
+                          <Link href={`/deployment/${deployment?.uuid}`} passHref legacyBehavior>
                             <MuiLink
                               variant='h5'
                               sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}

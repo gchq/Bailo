@@ -1,7 +1,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, Navigation } from 'swiper'
 import 'swiper/css/pagination'
-import Image from 'next/image'
+import Image from 'next/legacy/image'
 
 import imageLoader from '@/components/imageLoader'
 
