@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "outDir": "dist",
     "target": "ES2016",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "isolatedModules": false,
     "noEmit": false
   },
