@@ -1,6 +1,6 @@
 import yauzl from 'yauzl'
 import * as Minio from 'minio'
-import { pick } from 'lodash'
+import { pick } from 'lodash-es'
 import { PassThrough, Readable } from 'stream'
 import { FileRef } from './build/build'
 import { MinimalEntry } from '../../types/interfaces'

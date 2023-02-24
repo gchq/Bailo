@@ -1,4 +1,3 @@
-/* eslint-disable import/newline-after-import */
 import config from 'config'
 import https from 'https'
 import axios from 'axios'

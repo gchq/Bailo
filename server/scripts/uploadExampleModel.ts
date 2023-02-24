@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'
@@ -8,8 +7,6 @@ import Bailo from '../../lib/node/index.js'
 import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const __dirname = fileURLToPath(new URL('.', import.meta.url))
   const api = new Bailo('http://localhost:8080/api/v1')
 

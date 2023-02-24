@@ -134,8 +134,6 @@ if (process.env.NODE_ENV !== 'production') {
   try {
     currentDirectory = __dirname
   } catch (e) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     currentDirectory = fileURLToPath(new URL('.', import.meta.url))
   }
 
