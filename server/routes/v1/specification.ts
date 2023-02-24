@@ -1084,6 +1084,34 @@ function generateSpecification() {
           },
         },
       },
+      '/version/{id}/rebuild': {
+        post: {
+          tags: ['version'],
+          description: 'Attempt to rebuild a model.',
+          parameters: [
+            {
+              name: 'uuid',
+              in: 'path',
+              description: 'UUID of version to rebuild the model of.',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Successfully rebuilt model.',
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Successfully created build job in upload queue',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       '/schemas': {
         get: {
           tags: ['schema'],

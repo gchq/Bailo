@@ -1,12 +1,18 @@
 import { ModelDoc } from 'server/models/Model.js'
+import { basename } from 'path'
+import config from 'config'
 import { DateString, ModelId } from '../../types/interfaces.js'
 import { UserDoc } from '../models/User.js'
 import VersionModel, { VersionDoc } from '../models/Version.js'
 import Authorisation from '../external/Authorisation.js'
 import { asyncFilter } from '../utils/general.js'
 import { createSerializer, SerializerOptions } from '../utils/serializers.js'
-import { BadReq, Forbidden } from '../utils/result.js'
+import { BadReq, Forbidden, NotFound } from '../utils/result.js'
 import { serializedModelFields } from './model.js'
+import logger from '../utils/logger.js'
+import { listZipFiles, MinioRandomAccessReader } from '../utils/zip.js'
+import { getClient } from '../utils/minio.js'
+import { FileRef } from '../utils/build/build.js'
 
 const auth = new Authorisation()
 
@@ -14,6 +20,7 @@ interface GetVersionOptions {
   thin?: boolean
   populate?: boolean
   showLogs?: boolean
+  showFiles?: boolean
 }
 
 export function serializedVersionFields(): SerializerOptions {
@@ -44,6 +51,7 @@ export async function findVersionById(user: UserDoc, id: ModelId | VersionDoc, o
   let version = VersionModel.findById(id)
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
+  if (!opts?.showFiles) version = version.select({ 'files.code': 0, 'files.binary': 0 })
   if (opts?.populate) version = version.populate('model')
 
   return filterVersion(user, await version)
@@ -58,6 +66,7 @@ export async function findVersionByName(
   let version = VersionModel.findOne({ model, version: name })
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
+  if (!opts?.showFiles) version = version.select({ 'files.code': 0, 'files.binary': 0 })
   if (opts?.populate) version = version.populate('model')
 
   return filterVersion(user, await version)
@@ -67,6 +76,7 @@ export async function findModelVersions(user: UserDoc, model: ModelId, opts?: Ge
   let versions = VersionModel.find({ model })
   if (opts?.thin) versions = versions.select({ state: 0 })
   if (!opts?.showLogs) versions = versions.select({ logs: 0 })
+  if (!opts?.showFiles) versions = versions.select({ 'files.code': 0, 'files.binary': 0 })
   if (opts?.populate) versions = versions.populate('model')
 
   return filterVersionArray(user, await versions)
@@ -128,4 +138,36 @@ export async function updateReviewerLastViewed(id: ModelId) {
     { $set: { reviewerLastViewed: new Date() as DateString } },
     { timestamps: false }
   )
+}
+
+export async function findVersionFileList(version: VersionDoc) {
+  if (version.files.code?.fileList) {
+    return version.files.code.fileList
+  }
+
+  logger.trace({ version: version._id }, 'Unable to find cached file list')
+
+  const path = version.files.rawCodePath
+  if (!path) {
+    throw NotFound({ code: 'version_code_not_found', versionId: version._id }, 'Unable to find version zip file')
+  }
+
+  const fileRef: FileRef = {
+    bucket: config.get('minio.uploadBucket'),
+    path,
+    name: basename(path),
+  }
+
+  const minio = getClient()
+  const reader = new MinioRandomAccessReader(minio, fileRef)
+  const fileList = await listZipFiles(reader)
+
+  // eslint-disable-next-line no-param-reassign
+  if (!version.files.code) version.files.code = {}
+  // eslint-disable-next-line no-param-reassign
+  version.files.code.fileList = fileList
+  version.markModified('files')
+  await version.save()
+
+  return fileList
 }

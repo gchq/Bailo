@@ -48,7 +48,7 @@ export default async function processUploads() {
           {
             construct: getSeldonDockerfile(),
             props: {
-              seldonDockerfile: version.metadata.buildOptions.seldonVersion,
+              seldonDockerfile: version.metadata?.buildOptions?.seldonVersion,
             },
           },
         ])

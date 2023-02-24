@@ -27,7 +27,7 @@ import {
   getModelVersions,
   getModelAccess,
 } from './routes/v1/model.js'
-import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
+import { getAdminToken, getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema.js'
 import { getSpecification } from './routes/v1/specification.js'
@@ -41,6 +41,9 @@ import {
   putVersion,
   postResetVersionApprovals,
   putUpdateLastViewed,
+  getVersionFileList,
+  getVersionFile,
+  postRebuildModel,
 } from './routes/v1/version.js'
 import { runMigrations, connectToMongoose } from './utils/database.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
@@ -85,10 +88,13 @@ server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRa
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
 
 server.get('/api/v1/version/:id', ...getVersion)
+server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)
+server.get('/api/v1/version/:id/contents/:file', ...getVersionFile)
 server.put('/api/v1/version/:id', ...putVersion)
 server.get('/api/v1/version/:id/access', ...getVersionAccess)
 server.delete('/api/v1/version/:id', ...deleteVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
+server.post('/api/v1/version/:id/rebuild', ...postRebuildModel)
 server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
 
 server.get('/api/v1/schemas', ...getSchemas)
@@ -141,6 +147,8 @@ export async function startServer() {
   pullBuilderImage()
 
   await Promise.all([app.prepare(), processUploads(), processDeployments()])
+
+  getAdminToken().then((token) => logger.info(`Admin token: ${token}`))
 
   // handle next requests
   server.use((req, res) => handle(req, res))

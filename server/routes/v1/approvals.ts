@@ -1,26 +1,28 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { Types } from 'mongoose'
-import ModelModel from '../../models/Model.js'
-import DeploymentModel, { DeploymentDoc } from '../../models/Deployment.js'
-import { ApprovalStates } from '../../../types/interfaces.js'
+import ModelModel, { ModelDoc } from '../../models/Model.js'
+import { DeploymentDoc } from '../../models/Deployment.js'
+import { ApprovalStates, Entity } from '../../../types/interfaces.js'
 import { ApprovalCategory } from '../../models/Approval.js'
 import { VersionDoc } from '../../models/Version.js'
-import { findDeploymentById, removeModelDeploymentsFromRegistry } from '../../services/deployment.js'
+import {
+  findDeploymentById,
+  findDeploymentsByModel,
+  removeModelDeploymentsFromRegistry,
+} from '../../services/deployment.js'
 import {
   getApproval,
   readNumApprovals,
   readApprovals,
   requestDeploymentsForModelVersions,
 } from '../../services/approval.js'
-import { getUserByInternalId } from '../../services/user.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
 import { BadReq, Unauthorised } from '../../utils/result.js'
 import { sendEmail } from '../../utils/smtp.js'
 import { ensureUserRole, hasRole } from '../../utils/user.js'
-import { isUserInEntityList } from '../../utils/entity.js'
+import { isUserInEntityList, getUserListFromEntityList } from '../../utils/entity.js'
 
 export const getApprovals = [
   ensureUserRole('user'),
@@ -111,7 +113,7 @@ export const postApprovalResponse = [
       field = 'reviewerApproved'
     }
 
-    let userId: Types.ObjectId
+    let entities: Array<Entity>
     let approvalCategory: ApprovalCategory
     let document: VersionDoc | DeploymentDoc
 
@@ -125,22 +127,22 @@ export const postApprovalResponse = [
         )
       }
 
-      userId = req.user._id
+      entities = version.metadata.contacts.uploader
       approvalCategory = ApprovalCategory.Upload
       document = version
 
       version[field] = choice
       await version.save()
 
-      if (version.managerApproved && version.reviewerApproved) {
-        const deployments = await DeploymentModel.find({ model: version.model })
+      if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
+        const deployments = await findDeploymentsByModel(req.user, version.model as ModelDoc)
         deployments.forEach(async (deployment) => {
-          if (deployment.managerApproved) {
+          if (deployment.managerApproved === ApprovalStates.Accepted) {
             await (
               await getDeploymentQueue()
             ).add({
               deploymentId: deployment._id,
-              userId,
+              userId: req.user._id,
               version: version.version,
             })
           }
@@ -156,6 +158,7 @@ export const postApprovalResponse = [
         )
       }
 
+      entities = deployment.metadata.contacts.owner
       approvalCategory = ApprovalCategory.Deployment
       document = deployment
 
@@ -177,8 +180,18 @@ export const postApprovalResponse = [
     }
 
     const reviewingUser = req.user.id
-    const user = await getUserByInternalId(req.user._id)
-    if (user?.email) {
+    const userList = await getUserListFromEntityList(entities)
+
+    if (userList.length > 20) {
+      // refusing to send more than 20 emails.
+      req.log.warn({ count: userList.length, approval: approval._id }, 'Refusing to send too many emails')
+      return
+    }
+
+    for (const user of userList) {
+      if (!user.email) {
+        continue
+      }
       await sendEmail({
         to: user.email,
         ...(await reviewedApproval({

@@ -18,7 +18,7 @@
   <p align="center">
     Making it easy to compliantly manage the machine learning lifecycle
     <br />
-    <a href="https://github.com/gchq/Bailo/blob/main/docs/user-guide.md"><strong>Explore the docs »</strong></a>
+    <a href="https://gchq.github.io/Bailo/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/gchq/bailo/issues">Report a Bug</a>
@@ -199,7 +199,7 @@ List of near term goals:
 
 ## Usage
 
-See [docs/USER-GUIDE.md](docs/user-guide.md)
+See [our user documentation](https://gchq.github.io/Bailo/docs/users/upload-a-model/why-upload-a-model)
 
 <br />
 
@@ -207,7 +207,7 @@ See [docs/USER-GUIDE.md](docs/user-guide.md)
 
 ## Contributing
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+See [our contribution guide](https://gchq.github.io/Bailo/docs/developers/contributing)
 
 <br />
 

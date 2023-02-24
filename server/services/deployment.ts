@@ -52,7 +52,9 @@ export async function filterDeployment(user: UserDoc, unfiltered: DeploymentDoc 
 export async function findDeploymentByUuid(user: UserDoc, uuid: string, opts?: GetDeploymentOptions) {
   let deployment = DeploymentModel.findOne({ uuid })
   if (!opts?.showLogs) deployment = deployment.select({ logs: 0 })
-  deployment = deployment.populate('model', ['_id', 'uuid'])
+  deployment = deployment
+    .populate('model', ['_id', 'uuid', 'latestVersion'])
+    .populate('versions', ['version', 'metadata'])
 
   if (opts?.overrideFilter) return deployment
   return filterDeployment(user, await deployment)
@@ -65,6 +67,14 @@ export async function findDeploymentById(user: UserDoc, id: ModelId | Deployment
 
   if (opts?.overrideFilter) return deployment
   return filterDeployment(user, await deployment)
+}
+export async function findDeploymentsByModel(user: UserDoc, model: ModelDoc, opts?: GetDeploymentOptions) {
+  let deployments = DeploymentModel.find({ model })
+  if (opts?.populate) deployments = deployments.populate('model')
+  if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
+
+  if (opts?.overrideFilter) return deployments
+  return filterDeploymentArray(user, await deployments)
 }
 
 export async function findDeploymentsByVersion(user: UserDoc, version: VersionDoc, opts?: GetDeploymentOptions) {
