@@ -2,8 +2,8 @@ import yauzl from 'yauzl'
 import * as Minio from 'minio'
 import { pick } from 'lodash-es'
 import { PassThrough, Readable } from 'stream'
-import { FileRef } from './build/build'
-import { MinimalEntry } from '../../types/interfaces'
+import { FileRef } from './build/build.js'
+import { MinimalEntry } from '../../types/interfaces.js'
 
 const MAX_FILE_COUNT = 25_000
 const MAX_UNCOMPRESSED_FILE_SIZE = 10_000_000

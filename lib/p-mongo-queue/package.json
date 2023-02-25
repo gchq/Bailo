@@ -1,6 +1,6 @@
 {
   "name": "p-mongo-queue",
-  "version": "8.1.0",
+  "version": "8.4.0",
   "description": "Message queues which uses MongoDB.",
   "type": "module",
   "main": "dist/pMongoQueue.js",
@@ -21,10 +21,10 @@
     "typescript": "^4.9.5",
     "uvu": "^0.5.3"
   },
-  "homepage": "https://github.com/gchq/p-mongo-queue",
+  "homepage": "https://github.com/gchq/Bailo",
   "repository": {
     "type": "git",
-    "url": "git://github.com/gchq/p-mongo-queue.git"
+    "url": "git://github.com/gchq/bailo.git"
   },
   "license": "MIT",
   "keywords": [

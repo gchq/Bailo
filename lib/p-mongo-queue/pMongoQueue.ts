@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto'
 import { EventEmitter } from 'events'
-import { Collection, Db } from 'mongodb'
+import { Collection } from 'mongodb'
 
 // some helper functions
 function id() {
@@ -23,9 +23,10 @@ export type ProcessResponse = void | Promise<void>
 export type Payload = any
 export type ArrayPayload = Array<any>
 export type Processor = (msg: QueueMessage) => ProcessResponse
+export type DeadQueue = Omit<PMongoQueue, 'deadQueue'>
 
 export interface QueueOptions {
-  deadQueue?: PMongoQueue | undefined
+  deadQueue?: DeadQueue | undefined
   delay?: number | undefined
   maxRetries?: number | undefined
   visibility?: number | undefined
@@ -39,13 +40,13 @@ export interface QueueMessage {
 }
 
 export class PMongoQueue extends EventEmitter {
-  db: Db
+  db: any // Type of Db leads to infinite recursion in TS
   name: string
   col: Collection
   visibility: number
   delay: number
 
-  deadQueue?: PMongoQueue
+  deadQueue?: DeadQueue
   maxRetries?: number
 
   parallelism: number
@@ -53,7 +54,7 @@ export class PMongoQueue extends EventEmitter {
   processor?: Processor
   interval?: NodeJS.Timer
 
-  constructor(db: Db, name: string, opts?: QueueOptions) {
+  constructor(db: any, name: string, opts?: QueueOptions) {
     if (!db) {
       throw new Error('p-mongo-queue: provide a mongodb.MongoClient.db')
     }
