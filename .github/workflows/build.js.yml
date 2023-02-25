@@ -53,7 +53,10 @@ jobs:
       - run: npm run certs
 
       # Install dependencies
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
 
       # Run unit tests
       - run: npm run test
@@ -72,7 +75,10 @@ jobs:
           cache: 'npm'
 
       # Install dependencies
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
 
       # Run style checks
       - run: npm run check-style
@@ -225,7 +231,10 @@ jobs:
           curl $(minikube service node-port --url)
 
       # Install dependencies
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
 
       # Run Cypress integration tests
       # - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
@@ -313,7 +322,10 @@ jobs:
       - run: docker-compose up -d
 
       # Install dependencies
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
 
       # wait for app to start
       - run: |
