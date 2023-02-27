@@ -208,6 +208,20 @@ export default function Deployment() {
     }
   }
 
+  const modelCardOnly = () => {
+    if (versions) {
+      console.log(versions)
+      return (
+        versions.filter(
+          (version) =>
+            version.metadata.buildOptions?.uploadType === ModelUploadType.Docker ||
+            version.metadata.buildOptions?.uploadType === ModelUploadType.Zip
+        ).length === 0
+      )
+    }
+    return false
+  }
+
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
@@ -221,9 +235,11 @@ export default function Deployment() {
             >
               Back to model
             </Button>
-            <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-              Show download commands
-            </Button>
+            {modelCardOnly() && (
+              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+                Show download commands
+              </Button>
+            )}
           </Stack>
         )}
         <Paper sx={{ p: 3 }}>

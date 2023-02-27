@@ -7,7 +7,7 @@ import Box from '@mui/system/Box'
 import Button from '@mui/material/Button'
 
 import { useGetModelById, useGetModelVersions } from '../data/model'
-import { Deployment } from '../types/interfaces'
+import { Deployment, ModelUploadType } from '../types/interfaces'
 import { ModelDoc } from '../server/models/Model'
 import EmptyBlob from './common/EmptyBlob'
 
@@ -25,24 +25,29 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
               <Box sx={{ p: 2 }}>
                 <Typography variant='h4'>Version: {version.version}</Typography>
               </Box>
-              <Stack spacing={2} direction='row' sx={{ p: 1 }}>
-                <Button
-                  variant='contained'
-                  href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/code`}
-                  target='_blank'
-                  data-test='downloadCodeFile'
-                >
-                  Download code file
-                </Button>
-                <Button
-                  variant='contained'
-                  href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/binary`}
-                  target='_blank'
-                  data-test='downloadBinaryFile'
-                >
-                  Download binary file
-                </Button>
-              </Stack>
+              {version.metadata.buildOptions?.uploadType !== ModelUploadType.ModelCard && (
+                <Stack spacing={2} direction='row' sx={{ p: 1 }}>
+                  <Button
+                    variant='contained'
+                    href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/code`}
+                    target='_blank'
+                    data-test='downloadCodeFile'
+                  >
+                    Download code file
+                  </Button>
+                  <Button
+                    variant='contained'
+                    href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/binary`}
+                    target='_blank'
+                    data-test='downloadBinaryFile'
+                  >
+                    Download binary file
+                  </Button>
+                </Stack>
+              )}
+              {version.metadata.buildOptions?.uploadType === ModelUploadType.ModelCard && (
+                <Typography sx={{ p: 1 }}>This is a Model Card Only</Typography>
+              )}
             </Box>
             <Divider orientation='horizontal' />
           </Box>
