@@ -117,9 +117,9 @@ export default function Deployment() {
   const versionOptions = useMemo(() => {
     if (!versions || !model) return []
 
-    const latestVersion = versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0]
-    if (latestVersion.metadata.buildOptions?.uploadType !== ModelUploadType.ModelCard) {
-      setSelectedImageTag(versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0].version)
+    const latestVersion = versions.find((versionToFilter) => versionToFilter._id === model.latestVersion)
+    if (latestVersion && latestVersion.metadata.buildOptions?.uploadType !== ModelUploadType.ModelCard) {
+      setSelectedImageTag(latestVersion.version)
     }
 
     return versions
