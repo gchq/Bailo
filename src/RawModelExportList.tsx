@@ -25,7 +25,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
               <Box sx={{ p: 2 }}>
                 <Typography variant='h4'>Version: {version.version}</Typography>
               </Box>
-              {version.metadata.buildOptions?.uploadType !== ModelUploadType.ModelCard && (
+              {version.metadata.buildOptions?.uploadType === ModelUploadType.Zip && (
                 <Stack spacing={2} direction='row' sx={{ p: 1 }}>
                   <Button
                     variant='contained'
@@ -45,8 +45,11 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   </Button>
                 </Stack>
               )}
-              {version.metadata.buildOptions?.uploadType === ModelUploadType.ModelCard && (
-                <Typography sx={{ p: 1 }}>This is a Model Card Only</Typography>
+              {version.metadata.buildOptions?.uploadType !== ModelUploadType.Zip && (
+                <Typography sx={{ p: 1 }}>
+                  This is a {version.metadata.buildOptions.uploadType.toLowerCase()} version and does not have any
+                  associated raw code/binary files available
+                </Typography>
               )}
             </Box>
             <Divider orientation='horizontal' />

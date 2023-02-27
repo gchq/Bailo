@@ -117,7 +117,10 @@ export default function Deployment() {
   const versionOptions = useMemo(() => {
     if (!versions || !model) return []
 
-    setSelectedImageTag(versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0].version)
+    const latestVersion = versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0]
+    if (latestVersion.metadata.buildOptions?.uploadType !== ModelUploadType.ModelCard) {
+      setSelectedImageTag(versions?.filter((versionToFilter) => versionToFilter._id === model.latestVersion)[0].version)
+    }
 
     return versions
       .filter(
@@ -208,20 +211,6 @@ export default function Deployment() {
     }
   }
 
-  const modelCardOnly = () => {
-    if (versions) {
-      console.log(versions)
-      return (
-        versions.filter(
-          (version) =>
-            version.metadata.buildOptions?.uploadType === ModelUploadType.Docker ||
-            version.metadata.buildOptions?.uploadType === ModelUploadType.Zip
-        ).length === 0
-      )
-    }
-    return false
-  }
-
   return (
     <>
       <Wrapper title={`Deployment: ${deployment.metadata.highLevelDetails.name}`} page='deployment'>
@@ -235,11 +224,13 @@ export default function Deployment() {
             >
               Back to model
             </Button>
-            {modelCardOnly() && (
-              <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
-                Show download commands
-              </Button>
-            )}
+            {versions &&
+              versions.filter((version) => version.metadata.buildOptions?.uploadType === ModelUploadType.Zip).length >
+                0 && (
+                <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
+                  Show download commands
+                </Button>
+              )}
           </Stack>
         )}
         <Paper sx={{ p: 3 }}>
@@ -341,9 +332,18 @@ export default function Deployment() {
               <FormControl sx={{ minWidth: 180 }}>
                 <InputLabel>Select a version</InputLabel>
                 {versions && model && (
-                  <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
-                    {versionOptions}
-                  </Select>
+                  <>
+                    <Select value={selectedImageTag} label='Select a version' onChange={onSelectedTagChange}>
+                      {versionOptions}
+                    </Select>
+                    <Box>
+                      {selectedImageTag === '' && (
+                        <Typography variant='caption'>
+                          Latest version is not usable, please select one from the list above
+                        </Typography>
+                      )}
+                    </Box>
+                  </>
                 )}
               </FormControl>
             </Box>
