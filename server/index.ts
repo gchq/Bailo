@@ -1,7 +1,12 @@
 import config from 'config'
 import express from 'express'
 import http from 'http'
-import next from 'next'
+// TODO - BAI-462
+// eslint-disable-next-line import/no-duplicates, import/no-named-default
+import * as _next from 'next'
+// TODO - BAI-462
+// eslint-disable-next-line import/no-duplicates
+import { NextServer, NextServerOptions } from 'next/dist/server/next.js'
 import { fileURLToPath } from 'url'
 import { createIndexes } from './models/Model.js'
 import { logCreateIndexes } from './models/Log.js'
@@ -51,6 +56,9 @@ import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { ensureBucketExists } from './utils/minio.js'
 import { getUser } from './utils/user.js'
 import { pullBuilderImage } from './utils/build/build.js'
+
+// TODO - BAI-462
+const next = _next as unknown as (options: NextServerOptions) => NextServer
 
 const port = config.get('listen')
 const dev = process.env.NODE_ENV !== 'production'
