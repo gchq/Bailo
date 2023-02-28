@@ -44,5 +44,6 @@ ENV XDG_RUNTIME_DIR=/run/user/$user_id
 # RUN img pull seldonio/seldon-core-s2i-python37:1.10.0
 
 EXPOSE 3000
+EXPOSE 9229
 #CMD ["npm", "run", "dev"]
 CMD ./scripts/run_app_dev.sh
