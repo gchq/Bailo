@@ -363,6 +363,26 @@ def test_download_model_files_overwrites_existing_output_dir_if_user_has_specifi
     )
 
 
+@pytest.mark.parametrize(
+    "file_type, expected_call_count",
+    [("binary", 1), ("code", 1), (None, 2)],
+)
+def test_download_model_files_does_expected_api_calls(
+    file_type, expected_call_count, mock_client
+):
+    mock_client.api.get = Mock(return_value=200)
+
+    mock_client.download_model_files(
+        deployment_uuid="test",
+        model_version="1",
+        file_type=file_type,
+        output_dir="dir",
+        overwrite=True,
+    )
+
+    assert mock_client.api.get.call_count == expected_call_count
+
+
 @patch("bailoclient.client.Client.get_me", return_value=User(_id="user"))
 @patch(
     "bailoclient.client.Client.get_user_deployments",

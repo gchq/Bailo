@@ -184,7 +184,7 @@ class Client:
         self,
         deployment_uuid: str,
         model_version: str,
-        file_type: str = "binary",
+        file_type: str = None,
         output_dir: str = "./model/",
         overwrite: bool = False,
     ):
@@ -194,7 +194,7 @@ class Client:
             deployment_uuid (str): UUID of the deployment
             model_version (str): Version of the model
             file_type (str, optional): Model files to download. Either 'code' or 'binary'. Defaults to "binary".
-            dir (str, optional): Output directory for file downloads. Defaults to "./model/".
+            output_dir (str, optional): Output directory for file downloads. Defaults to "./model/".
             overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
         Raises:
@@ -205,7 +205,7 @@ class Client:
             str: Response status code
         """
 
-        if not file_type in ["code", "binary"]:
+        if file_type and not file_type in ["code", "binary"]:
             raise InvalidFileRequested(
                 "Invalid file_type provided - file_type can either be 'code' or 'binary'"
             )
@@ -214,6 +214,19 @@ class Client:
             raise FileExistsError(
                 "A folder already exists at this location. Use overwrite=True if you want to overwrite the existing folder."
             )
+
+        if not file_type:
+            code_response = self.api.get(
+                f"/deployment/{deployment_uuid}/version/{model_version}/raw/code",
+                output_dir=output_dir,
+            )
+
+            binary_response = self.api.get(
+                f"/deployment/{deployment_uuid}/version/{model_version}/raw/binary",
+                output_dir=output_dir,
+            )
+
+            return code_response, binary_response
 
         return self.api.get(
             f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
