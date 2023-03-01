@@ -1,18 +1,19 @@
-import { castArray } from 'lodash'
-import https from 'https'
 import config from 'config'
-import { deleteImageTag } from '../utils/registry'
-import { ModelId, ApprovalStates } from '../../types/interfaces'
+import https from 'https'
+import { castArray } from 'lodash'
+
+import { ApprovalStates, ModelId } from '../../types/interfaces'
+import Authorisation from '../external/Authorisation'
 import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import { ModelDoc } from '../models/Model'
 import { UserDoc } from '../models/User'
-import VersionModel, { VersionDoc } from '../models/Version'
-import Authorisation from '../external/Authorisation'
-import { asyncFilter } from '../utils/general'
-import { SerializerOptions } from '../utils/serializers'
-import { Forbidden } from '../utils/result'
-import { getUserByInternalId } from './user'
+import VersionModel from '../models/Version'
 import { getEntitiesForUser } from '../utils/entity'
+import { asyncFilter } from '../utils/general'
+import { deleteImageTag } from '../utils/registry'
+import { Forbidden } from '../utils/result'
+import { SerializerOptions } from '../utils/serializers'
+import { getUserByInternalId } from './user'
 
 const auth = new Authorisation()
 
@@ -65,15 +66,6 @@ export async function findDeploymentById(user: UserDoc, id: ModelId, opts?: GetD
 }
 export async function findDeploymentsByModel(user: UserDoc, model: ModelDoc, opts?: GetDeploymentOptions) {
   let deployments = DeploymentModel.find({ model })
-  if (opts?.populate) deployments = deployments.populate('model')
-  if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
-
-  if (opts?.overrideFilter) return deployments
-  return filterDeployment(user, await deployments)
-}
-
-export async function findDeploymentsByVersion(user: UserDoc, version: VersionDoc, opts?: GetDeploymentOptions) {
-  let deployments = DeploymentModel.find({ versions: { $in: [version._id] } })
   if (opts?.populate) deployments = deployments.populate('model')
   if (!opts?.showLogs) deployments = deployments.select({ logs: 0 })
 
