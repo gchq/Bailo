@@ -530,6 +530,7 @@ class Bundler:
         try:
             subprocess.run(
                 ["pipreqsnb", module_path, "--savepath", output_path],
+                stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
             )
 
