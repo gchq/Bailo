@@ -16,16 +16,28 @@ def sklearn_bundler(model, output_path: str, code_paths: List[str]):
         output_path (str): Path to export the model to
         code_paths (List[str]): List of additional code paths
     """
-    from mlflow.sklearn import save_model
-
-    save_model(model, path=output_path, code_paths=code_paths)
-
     model_binary = os.path.join(output_path, "model.pkl")
-    mlflow_files = [
-        os.path.join(output_path, "MLmodel"),
-    ]
 
-    return model_binary, mlflow_files
+    try:
+        from mlflow.sklearn import save_model
+
+        save_model(model, path=output_path, code_paths=code_paths)
+
+        mlflow_files = [
+            os.path.join(output_path, "MLmodel"),
+        ]
+
+        return model_binary, mlflow_files
+
+    except ModuleNotFoundError:
+        import pickle
+
+        os.makedirs(f"{output_path}", exist_ok=True)
+
+        with open(model_binary, "wb") as f:
+            pickle.dump(model, f)
+
+        return (model_binary, [])
 
 
 @loader(flavour=ModelFlavour.SKLEARN)
