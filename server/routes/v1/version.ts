@@ -1,24 +1,27 @@
 import bodyParser from 'body-parser'
 import config from 'config'
-import { basename } from 'path'
 import { Request, Response } from 'express'
-import { getClient } from '../../utils/minio'
-import { MinioRandomAccessReader, getFileStream } from '../../utils/zip'
-import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
+import { basename } from 'path'
+import ModelModel from 'server/models/Model'
+import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from 'server/services/deployment'
+
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
+import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
 import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
+import { removeVersionFromModel } from '../../services/model'
 import {
   findVersionById,
   findVersionFileList,
   updateManagerLastViewed,
   updateReviewerLastViewed,
 } from '../../services/version'
+import { FileRef } from '../../utils/build/build'
+import { isUserInEntityList, parseEntityList } from '../../utils/entity'
+import { getClient } from '../../utils/minio'
+import { getUploadQueue } from '../../utils/queues'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
-import { isUserInEntityList, parseEntityList } from '../../utils/entity'
-import { removeVersionFromModel } from '../../services/model'
-import { FileRef } from '../../utils/build/build'
-import { getUploadQueue } from '../../utils/queues'
+import { getFileStream, MinioRandomAccessReader } from '../../utils/zip'
 
 export const getVersion = [
   ensureUserRole('user'),
@@ -333,9 +336,17 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
+    const model = await ModelModel.findById(version.model)
+    if (!model) {
+      throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
+    }
     await Promise.all([deleteApprovalsByVersion(user, version), removeVersionFromModel(user, version)])
 
     await version.delete(user._id)
+
+    // Send email to owners of affected deployments
+    const deployments = await findDeploymentsByModel(user, model)
+    emailDeploymentOwnersOnVersionDeletion(deployments, version)
 
     return res.json({ id })
   },

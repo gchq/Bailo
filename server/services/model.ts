@@ -1,4 +1,3 @@
-import config from 'config'
 import { castArray } from 'lodash'
 import { Types } from 'mongoose'
 
@@ -7,14 +6,10 @@ import Authorisation from '../external/Authorisation'
 import ModelModel from '../models/Model'
 import { UserDoc } from '../models/User'
 import { VersionDoc } from '../models/Version'
-import { simpleEmail } from '../templates/simpleEmail'
-import { getEntitiesForUser, getUserListFromEntityList } from '../utils/entity'
+import { getEntitiesForUser } from '../utils/entity'
 import { asyncFilter } from '../utils/general'
-import logger from '../utils/logger'
 import { Forbidden, NotFound } from '../utils/result'
 import { SerializerOptions } from '../utils/serializers'
-import { sendEmail } from '../utils/smtp'
-import { findDeploymentsByModel } from './deployment'
 
 const auth = new Authorisation()
 
@@ -106,41 +101,13 @@ export async function deleteModel(user: UserDoc, modelId: ModelId) {
 export async function removeVersionFromModel(user: UserDoc, version: VersionDoc) {
   // Deletes model if no versions left
   const model = await ModelModel.findById(version.model)
-
   if (!model) {
     throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
   }
 
-  const deployments = await findDeploymentsByModel(user, model)
-  const base = `${config.get('app.protocol')}://${config.get('app.host')}:${config.get('app.port')}`
-  for (const deployment of deployments) {
-    const userList = await getUserListFromEntityList(deployment.metadata.contacts.owner)
-
-    for (const owner of userList) {
-      if (!user.email) {
-        logger.warn({ owner, deployment }, 'Unable able to send email to deployment owner: missing email')
-        continue
-      }
-      sendEmail({
-        to: owner.email,
-        ...simpleEmail({
-          subject: `Your deployment '${deployment.metadata.highLevelDetails.name}' is being updated.`,
-          columns: [
-            { header: 'Model Name', value: version.metadata.highLevelDetails.name },
-            { header: 'Version Name', value: version.version },
-            { header: 'Status', value: 'DELETED' },
-          ],
-          text: `A version of a model you have deployed has been deleted and will be removed from your deployment. 
-            You are being notified of this change as it affects a deployment you own named 
-            '${deployment.metadata.highLevelDetails.name}'.`,
-          buttons: [{ text: 'Deployment Details', href: `${base}/deployment/${deployment.uuid}` }],
-        }),
-      })
-    }
-
-    await model.versions.remove(version._id)
-    if (model.versions.length === 0) {
-      await model.delete(user._id)
-    }
+  // Remove model record
+  await model.versions.remove(version._id)
+  if (model.versions.length === 0) {
+    await model.delete(user._id)
   }
 }
