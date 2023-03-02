@@ -271,7 +271,6 @@ def test_upload_model_is_called_with_expected_params(
     mock_generate_payload,
     mock_client,
 ):
-
     binary_file = "../../cypress/fixtures/minimal_binary.zip"
     code_file = "../../cypress/fixtures/minimal_code.zip"
     metadata = {"highLevelDetails": {"modelCardVersion": "2"}}

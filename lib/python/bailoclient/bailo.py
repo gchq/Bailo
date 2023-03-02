@@ -43,7 +43,6 @@ class Bailo(Client):
         cognito_pwd: str = None,
         client: bool = True,
     ):
-
         self.bundler = Bundler()
         self.loader = Loader()
 

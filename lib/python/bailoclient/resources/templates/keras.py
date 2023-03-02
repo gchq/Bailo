@@ -22,7 +22,6 @@ class KerasModel(BaseModel):
 
         # In TensorFlow < 2.0, we use a graph and session to predict
         if self._graph is not None:
-
             with self._graph.as_default():
                 with self._sess.as_default():
                     predicted = _predict(data)

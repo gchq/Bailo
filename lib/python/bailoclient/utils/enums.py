@@ -12,7 +12,6 @@ class ModelFlavoursMeta(EnumMeta):
 
 
 class ModelFlavour(Enum, metaclass=ModelFlavoursMeta):
-
     H2O = "h2o"
     KERAS = "keras"
     MLEAP = "mleap"

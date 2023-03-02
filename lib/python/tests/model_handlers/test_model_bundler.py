@@ -287,7 +287,6 @@ def test_transfer_and_bundle_model_files_zips_code_and_binary_folders(
     bundler,
     tmpdir,
 ):
-
     mock_tmpdir.return_value.__enter__.return_value = tmpdir
 
     model_binary = "model/binary/path/model.py"
@@ -402,7 +401,6 @@ def test_copy_or_generate_requirements_copies_provided_requirements_if_given(
 def test_copy_optional_files_copies_files_from_temp_to_specified_location(
     mock_copyfile, bundler
 ):
-
     output_path = "output/location"
     optional_files = [
         "/tmp/tmpfolder/optional/filepath/file_1.txt",
@@ -436,7 +434,6 @@ def test_copy_optional_files_copies_files_from_temp_to_specified_location(
 def test_copy_additional_files_copies_from_tmpdir_if_files_created_in_tmp(
     mock_copy_files_tmp, bundler
 ):
-
     additional_files = ["tmp/tmpxyz/files/file.txt"]
     model_binary = "tmp/tmpxyz/model.pth"
     code_path = "tmp/tmpabc/code"
@@ -456,7 +453,6 @@ def test_copy_additional_files_copies_from_tmpdir_if_files_created_in_tmp(
 def test_copy_additional_files_copies_from_local_if_no_commonpath_with_tmpdir(
     mock_copy_files_local, bundler
 ):
-
     additional_files = ["local/path/files/file.txt"]
     model_binary = "local/path/model.pth"
     code_path = "tmp/tmpabc/code"
@@ -473,7 +469,6 @@ def test_copy_additional_files_copies_from_local_if_no_commonpath_with_tmpdir(
 @patch("bailoclient.model_handlers.model_bundler.Path.mkdir")
 @patch("bailoclient.model_handlers.model_bundler.copyfile")
 def test_copy_additional_files_from_temp_dir(mock_copyfile, mock_mkdir, bundler):
-
     additional_files = ["tmp/tmpxyz/files/file1.txt", "tmp/tmpxyz/files/file2.txt"]
     output_path = "tmp/tmpxyz/additional_files"
 
@@ -490,7 +485,6 @@ def test_copy_additional_files_from_temp_dir(mock_copyfile, mock_mkdir, bundler)
 @patch("bailoclient.model_handlers.model_bundler.os.makedirs")
 @patch("bailoclient.model_handlers.model_bundler.copyfile")
 def test_copy_additional_files_from_local(mock_copyfile, mock_mkdir, bundler):
-
     additional_files = ["local/path/files/file1.txt", "local/path/files/file2.txt"]
     output_path = "local/path/model/code/additional_files"
     model_parent_path = "local/path"
@@ -515,7 +509,6 @@ def test_copy_additional_files_from_local(mock_copyfile, mock_mkdir, bundler):
 
 @patch("bailoclient.model_handlers.model_bundler.ZipFile")
 def test_zip_file_writes_file_to_zip_at_specified_zip_path(mock_zip_file, bundler):
-
     mock_zip_file.return_value.__enter__.return_value.write = Mock()
 
     file_path = "path/to/file.txt"
@@ -534,7 +527,6 @@ def test_zip_file_writes_file_to_zip_at_specified_zip_path(mock_zip_file, bundle
 def test_zip_directory_creates_zipfile_at_the_output_directory(
     mock_os_walk, mock_zip_file, mock_get_output_dir, bundler, tmpdir
 ):
-
     code_dir = os.path.join(tmpdir, "code_dir")
     code_data_dir = os.path.join(tmpdir, "code_data_dir")
     output_path = os.path.join(tmpdir, "code.zip")
