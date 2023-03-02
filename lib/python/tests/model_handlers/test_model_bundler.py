@@ -250,9 +250,14 @@ def test_bundle_model_returns_normalised_paths(bundler):
     assert "additional_file" in additional_files
 
 
+import zipfile
+
+
 def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmpdir):
-    subprocess.run(["touch", f"{tmpdir}/test.txt"])
-    subprocess.run(["mkdir", f"{tmpdir}/output"])
+    with open(f"{tmpdir}/test.txt", "w") as f:
+        f.write("")
+
+    os.makedirs(os.path.join(tmpdir, "output"))
 
     file_path = os.path.join(tmpdir, "test.txt")
     zip_path = os.path.join(tmpdir, "output", "output.zip")
@@ -261,7 +266,8 @@ def test_zip_file_creates_zipfile_at_output_directory_with_one_file(bundler, tmp
 
     assert os.path.exists(zip_path)
 
-    subprocess.run(["unzip", zip_path, "-d", f"{tmpdir}/output"])
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(f"{tmpdir}/output")
 
     expected_output = os.path.join(tmpdir, "output", "test.txt")
     assert os.path.exists(expected_output)
