@@ -21,6 +21,15 @@
   "eslintConfig": {
     "extends": "next/core-web-vitals"
   },
+  "prettier": {
+    "jsxSingleQuote": true,
+    "printWidth": 120,
+    "proseWrap": "always",
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false
+  },
   "dependencies": {
     "@emotion/server": "^11.10.0",
     "@next/mdx": "^13.1.2",

@@ -1,19 +1,12 @@
 {
-      "files.exclude": {
-            "**/.next": true,
-            "**/dist": true,
-            "**/node_modules": true,
-            "**/.vscode": true
-      },
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "prettier.tabWidth": 2,
-      "prettier.useTabs": false,
-      "prettier.printWidth": 120,
-      "prettier.semi": false,
-      "prettier.singleQuote": true,
-      "prettier.jsxSingleQuote": true,
-      "editor.formatOnSave": true,
-      "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": true
-      }
+  "files.exclude": {
+    "**/.next": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/.vscode": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  }
 }
