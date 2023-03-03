@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import config from 'config'
 import { Request, Response } from 'express'
 import { basename } from 'path'
-import ModelModel from 'server/models/Model'
-import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from 'server/services/deployment'
 
 import { ApprovalStates, ModelUploadType, SeldonVersion } from '../../../types/interfaces'
 import ApprovalModel, { ApprovalTypes } from '../../models/Approval'
+import ModelModel from '../../models/Model'
 import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval'
+import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from '../../services/deployment'
 import { removeVersionFromModel } from '../../services/model'
 import {
   findVersionById,
@@ -17,6 +17,7 @@ import {
 } from '../../services/version'
 import { FileRef } from '../../utils/build/build'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
+import logger from '../../utils/logger'
 import { getClient } from '../../utils/minio'
 import { getUploadQueue } from '../../utils/queues'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
@@ -336,17 +337,18 @@ export const deleteVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    const model = await ModelModel.findById(version.model)
-    if (!model) {
-      throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
-    }
     await Promise.all([deleteApprovalsByVersion(user, version), removeVersionFromModel(user, version)])
 
     await version.delete(user._id)
 
     // Send email to owners of affected deployments
-    const deployments = await findDeploymentsByModel(user, model)
-    emailDeploymentOwnersOnVersionDeletion(deployments, version)
+    const model = await ModelModel.findById(version.model)
+    if (model) {
+      const deployments = await findDeploymentsByModel(user, model)
+      emailDeploymentOwnersOnVersionDeletion(deployments, version)
+    } else {
+      logger.warn({ model, version }, 'Unable to find Model so cannot email deployment owners')
+    }
 
     return res.json({ id })
   },

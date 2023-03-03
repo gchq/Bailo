@@ -1,15 +1,36 @@
+import '../../utils/mockMongo'
+
 import mongoose from 'mongoose'
+
+import * as modelModel from '../../models/Model'
 import UserModel from '../../models/User'
 import VersionModel from '../../models/Version'
 import * as approvalService from '../../services/approval'
-import '../../utils/mockMongo'
-import { testUser, testManager, testReviewer, testVersion } from '../../utils/test/testModels'
+import { testManager, testReviewer, testUser, testVersion } from '../../utils/test/testModels'
 import {
+  authenticatedDeleteRequest,
   authenticatedGetRequest,
   authenticatedPostRequest,
   authenticatedPutRequest,
   validateTestRequest,
 } from '../../utils/test/testUtils'
+
+jest.mock('../../services/model', () => ({
+  removeVersionFromModel: jest.fn(() => Promise.resolve()),
+  serializedModelFields: () => ({
+    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
+  }),
+}))
+
+jest.mock('../../services/deployment', () => ({
+  findDeploymentsByModel: jest.fn(() => Promise.resolve({ irrelevant: 'content' })),
+  emailDeploymentOwnersOnVersionDeletion: jest.fn(() => Promise.resolve({ irrelevant: 'content' })),
+  serializedDeploymentFields: () => ({
+    mandatory: ['_id', 'uuid', 'name'],
+    optional: [],
+    serializable: [],
+  }),
+}))
 
 describe('test version routes', () => {
   beforeEach(async () => {
@@ -25,6 +46,17 @@ describe('test version routes', () => {
     const res = await authenticatedGetRequest(`/api/v1/version/${testVersion._id}`)
     validateTestRequest(res)
     expect(res.body.version).toBe('1')
+  })
+
+  test('that we can delete a version by its ID', async () => {
+    jest.mock('../../models/Model', () => ({
+      findById: jest.fn(() => Promise.resolve({ '': '' })),
+    }))
+    const spy: any = jest.spyOn(modelModel, 'findById')
+    const res = await authenticatedDeleteRequest(`/api/v1/version/${testVersion._id}`)
+
+    validateTestRequest(res)
+    expect(res.body.id.toString()).toBe(testVersion._id.toString())
   })
 
   test('that we can edit a version', async () => {
