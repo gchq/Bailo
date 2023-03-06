@@ -2,11 +2,13 @@ import '../../utils/mockMongo'
 
 import mongoose from 'mongoose'
 
-import * as modelModel from '../../models/Model'
+import ModelModel from '../../models/Model'
 import UserModel from '../../models/User'
 import VersionModel from '../../models/Version'
 import * as approvalService from '../../services/approval'
-import { testManager, testReviewer, testUser, testVersion } from '../../utils/test/testModels'
+import * as deploymentService from '../../services/deployment'
+import * as modelService from '../../services/model'
+import { testManager, testModel, testReviewer, testUser, testVersion } from '../../utils/test/testModels'
 import {
   authenticatedDeleteRequest,
   authenticatedGetRequest,
@@ -49,14 +51,31 @@ describe('test version routes', () => {
   })
 
   test('that we can delete a version by its ID', async () => {
-    jest.mock('../../models/Model', () => ({
-      findById: jest.fn(() => Promise.resolve({ '': '' })),
-    }))
-    const spy: any = jest.spyOn(modelModel, 'findById')
+    await ModelModel.create(testModel)
+    const mock: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
+    mock.mockReturnValue({ irrelevant: 'content' })
+
     const res = await authenticatedDeleteRequest(`/api/v1/version/${testVersion._id}`)
+    const versionafterDeletion = await VersionModel.findById(testVersion._id)
 
     validateTestRequest(res)
+    // Assert version was deleted
     expect(res.body.id.toString()).toBe(testVersion._id.toString())
+    expect(versionafterDeletion).toBeNull()
+    expect(modelService.removeVersionFromModel).toHaveBeenCalledTimes(1)
+    expect(approvalService.deleteApprovalsByVersion).toHaveBeenCalledTimes(1)
+    // Assert email was sent to deployment owners
+    expect(deploymentService.findDeploymentsByModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: testUser.id,
+        email: testUser.email,
+      }),
+      expect.objectContaining({
+        uuid: testModel.uuid,
+        schemaRef: testModel.schemaRef,
+      })
+    )
+    expect(deploymentService.emailDeploymentOwnersOnVersionDeletion).toHaveBeenCalledTimes(1)
   })
 
   test('that we can edit a version', async () => {
