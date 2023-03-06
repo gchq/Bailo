@@ -53,8 +53,8 @@ describe('test version routes', () => {
 
   test('that when we delete a version, we send an email to the relvant deployment owners', async () => {
     await ModelModel.create(testModel)
-    const mock: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
-    mock.mockReturnValue({ irrelevant: 'content' })
+    const spy: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
+    spy.mockReturnValue({ irrelevant: 'content' })
     const updateImplementation = (deploymentService.findDeploymentsByModel as jest.Mock).mockImplementationOnce(() => [
       'deployment',
     ])
@@ -84,8 +84,8 @@ describe('test version routes', () => {
 
   test('that when we delete a version, we do not send an email to deployment owners if there are no deployments', async () => {
     await ModelModel.create(testModel)
-    const mock: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
-    mock.mockReturnValue({ irrelevant: 'content' })
+    const spy: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
+    spy.mockReturnValue({ irrelevant: 'content' })
 
     const res = await authenticatedDeleteRequest(`/api/v1/version/${testVersion._id}`)
     const versionafterDeletion = await VersionModel.findById(testVersion._id)

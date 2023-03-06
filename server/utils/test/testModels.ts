@@ -1,7 +1,8 @@
-import { TextEncoder } from 'util'
 import { ObjectId } from 'mongodb'
-import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
+import { TextEncoder } from 'util'
+
 import { ApprovalStates, EntityKind } from '../../../types/interfaces'
+import { ApprovalCategory, ApprovalTypes } from '../../models/Approval'
 import UserModel from '../../models/User'
 
 global.TextEncoder = TextEncoder
@@ -29,6 +30,17 @@ export const deploymentData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
     name: 'test-deployment',
+    modelID: 'test-model',
+  },
+  contacts: {
+    owner: [{ kind: EntityKind.USER, id: 'user' }],
+  },
+}
+
+export const deployment2Data: any = {
+  schemaRef: 'test-schema3',
+  highLevelDetails: {
+    name: 'test-deployment-2',
     modelID: 'test-model',
   },
   contacts: {
@@ -179,11 +191,7 @@ export const testDeployment2: any = {
   schemaRef: 'test-schema3',
   uuid: deploymentUuid,
   model: modelId,
-  metadata: {
-    contacts: {
-      owner: [{ kind: EntityKind.USER, id: 'user' }],
-    },
-  },
+  metadata: deployment2Data,
   createdAt: new Date(),
   updatedAt: new Date(),
 }
