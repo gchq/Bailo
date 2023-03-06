@@ -345,7 +345,9 @@ export const deleteVersion = [
     const model = await ModelModel.findById(version.model)
     if (model) {
       const deployments = await findDeploymentsByModel(user, model)
-      emailDeploymentOwnersOnVersionDeletion(deployments, version)
+      if (deployments.length > 0) {
+        emailDeploymentOwnersOnVersionDeletion(deployments, version)
+      }
     } else {
       logger.warn({ model, version }, 'Unable to find Model so cannot email deployment owners')
     }
