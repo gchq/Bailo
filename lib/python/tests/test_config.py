@@ -1,6 +1,6 @@
 import pytest
 
-from ..bailoclient.config import *
+from bailoclient.config import *
 
 
 @pytest.fixture

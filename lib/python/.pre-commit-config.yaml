@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        verbose: true
+        args: ['--exit-zero', 'bailoclient']
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.4.0
+    hooks:
+      - id: nbstripout
+        name: nbstripout - Strip outputs from notebooks (auto-fixes)
+        args:
+          - --extra-keys
+          - 'metadata.colab metadata.kernelspec cell.metadata.colab cell.metadata.executionInfo cell.metadata.id
+            cell.metadata.outputId'

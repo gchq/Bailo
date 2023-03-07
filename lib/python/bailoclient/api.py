@@ -2,9 +2,10 @@
 
 import abc
 from typing import Dict, Optional
+import os
+import shutil
 
 import zipfile
-import subprocess
 import io
 import requests
 import requests_pkcs12
@@ -321,10 +322,5 @@ class AuthorisedAPI(APIInterface):
         z = zipfile.ZipFile(io.BytesIO(content))
         z.extractall(output_dir)
 
-        # remove the __MACOSX file
-        subprocess.call(
-            [f"rm -r {output_dir}/__MACOSX"],
-            shell=True,
-            stderr=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-        )
+        if os.path.exists(f"{output_dir}/__MACOSX"):
+            shutil.rmtree(f"{output_dir}/__MACOSX")

@@ -7,9 +7,9 @@ from glob import glob
 from bailoclient.config import APIConfig, BailoConfig, Pkcs12Config
 from json import JSONDecodeError
 
-from ..bailoclient.api import AuthorisedAPI
-from ..bailoclient.auth import NullAuthenticator, Pkcs12Authenticator
-from ..bailoclient.utils.exceptions import (
+from bailoclient.api import AuthorisedAPI
+from bailoclient.auth import NullAuthenticator, Pkcs12Authenticator
+from bailoclient.utils.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
 )
@@ -247,3 +247,16 @@ def test_decode_file_content_downloads_file_to_output_dir_from_byte_stream(
     authorised_api._AuthorisedAPI__decode_file_content(data, tmpdir)
 
     assert glob(f"{tmpdir}/model.bin")
+
+
+def test_decode_file_content_removes_macosx_folder_if_present(authorised_api, tmpdir):
+    with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
+        data = zipfile.read()
+
+    os.makedirs(os.path.join(tmpdir, "__MACOSX"))
+
+    assert glob(os.path.join(tmpdir, "__MACOSX"))
+
+    authorised_api._AuthorisedAPI__decode_file_content(data, tmpdir)
+
+    assert not glob(os.path.join(tmpdir, "__MACOSX"))
