@@ -6,7 +6,7 @@ ONNX_EXECUTION_PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
 
 
 class OnnxModel(BaseModel):
-    def __init__(self, path, providers=None):
+    def __init__(self, path):
         import onnxruntime
         import os
         import numpy as np
