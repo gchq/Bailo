@@ -105,7 +105,6 @@ export async function removeVersionFromModel(user: UserDoc, version: VersionDoc)
     throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
   }
 
-  // Remove model record
   await model.versions.remove(version._id)
   if (model.versions.length === 0) {
     await model.delete(user._id)

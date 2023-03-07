@@ -87,7 +87,7 @@ describe('test deployment service', () => {
 
     await emailDeploymentOwnersOnVersionDeletion(deployments, testVersion)
 
-    // Assert that for each deployment, each owner has been send an email about that deployment
+    // Assert that for each deployment, each owner has been sent an email about that deployment
     for (const deployment of deployments) {
       for (const user of userList) {
         expect(emailClient.sendEmail).toHaveBeenCalledWith(
