@@ -17,7 +17,6 @@ import {
 } from '../../services/version'
 import { FileRef } from '../../utils/build/build'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity'
-import logger from '../../utils/logger'
 import { getClient } from '../../utils/minio'
 import { getUploadQueue } from '../../utils/queues'
 import { BadReq, Forbidden, NotFound } from '../../utils/result'
@@ -343,13 +342,12 @@ export const deleteVersion = [
 
     // Send email to owners of affected deployments
     const model = await ModelModel.findById(version.model)
-    if (model) {
-      const deployments = await findDeploymentsByModel(user, model)
-      if (deployments.length > 0) {
-        emailDeploymentOwnersOnVersionDeletion(deployments, version)
-      }
-    } else {
-      logger.warn({ model, version }, 'Unable to find Model so cannot email deployment owners')
+    if (!model) {
+      throw NotFound({ code: 'model_not_found', modelId: version.model }, `Unable to find model '${version.model}'`)
+    }
+    const deployments = await findDeploymentsByModel(user, model)
+    if (deployments.length > 0) {
+      emailDeploymentOwnersOnVersionDeletion(deployments, version)
     }
 
     return res.json({ id })
