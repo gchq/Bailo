@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 import os
 
-from ..bailoclient.auth import CognitoSRPAuthenticator
-from ..bailoclient.config import APIConfig, BailoConfig, CognitoConfig
-from ..bailoclient.utils.exceptions import UnauthorizedException
+from bailoclient.auth import CognitoSRPAuthenticator
+from bailoclient.config import APIConfig, BailoConfig, CognitoConfig
+from bailoclient.utils.exceptions import UnauthorizedException
 
 
 @pytest.fixture()

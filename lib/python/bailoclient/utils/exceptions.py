@@ -55,3 +55,27 @@ class InvalidFileRequested(Exception):
 
 class DeploymentNotFound(Exception):
     """Could not find a deployment"""
+
+
+class ModelFileExportNotAllowed(Exception):
+    """Exporting model files not allowed for this model"""
+
+
+class ModelFlavourNotFound(Exception):
+    """MLflow model flavour not found"""
+
+
+class ModelTemplateNotAvailable(Exception):
+    """No model.py template code available"""
+
+
+class DirectoryNotFound(Exception):
+    """Unable to find directory"""
+
+
+class ModelMethodNotAvailable(Exception):
+    """Model bundler/loader function hasn't been implemented for the model type"""
+
+
+class MissingFilesError(Exception):
+    """Some of the files required for bundling the ML model are missing"""

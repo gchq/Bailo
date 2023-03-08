@@ -300,3 +300,64 @@ class TestLogging(TestCase):
                     "INFO:bailoclient.bailo:Unable to find required environment variables for PKI authentication: 'P12_FILE' not found"
                 ],
             )
+
+
+@patch("bailoclient.bailo.os.path.abspath")
+@patch("bailoclient.model_handlers.model_bundler.Bundler.bundle_model")
+def test_bundle_model_formats_inputs(mock_bundle_model, mock_abspath, bailo_client):
+    def mock_abs_path(path):
+        if path.endswith("/"):
+            return path[0:-1]
+        return path
+
+    mock_abspath.side_effect = mock_abs_path
+
+    output_path = "output_path/"
+    model_binary = "model_binary/"
+    model_py = "model_py/"
+    model_requirements = "model_requirements"
+    model_flavour = "pytorch"
+    additional_files = ["additional_files/file_1.py", "additional_files/file_2.py"]
+
+    bailo_client.bundle_model(
+        output_path=output_path,
+        model_binary=model_binary,
+        model_py=model_py,
+        model_requirements=model_requirements,
+        model_flavour=model_flavour,
+        additional_files=additional_files,
+    )
+
+    mock_bundle_model.assert_called_once_with(
+        output_path="output_path",
+        model=None,
+        model_binary="model_binary",
+        model_py="model_py",
+        model_requirements=model_requirements,
+        requirements_files_path=None,
+        model_flavour=model_flavour,
+        additional_files=additional_files,
+    )
+
+    assert mock_abspath.call_count == 6
+
+
+@patch("bailoclient.bailo.os.makedirs")
+@patch("bailoclient.bailo.os.path.exists", return_value=False)
+@patch("bailoclient.model_handlers.model_bundler.Bundler.generate_requirements_file")
+def test_generate_requirements_file_formats_inputs_and_creates_output_directory_if_it_does_not_exist(
+    mock_gen_requirements, mock_path_exists, mock_mkdir, bailo_client
+):
+    module_path = "/path/"
+    output_path = "./output/somewhere"
+
+    bailo_client.generate_requirements_file(module_path, output_path)
+
+    expected_output_dir = "output/somewhere"
+    expected_module_path = "/path"
+    expected_output_path = "output/somewhere/requirements.txt"
+
+    mock_mkdir.assert_called_once_with(expected_output_dir, exist_ok=True)
+    mock_gen_requirements.assert_called_once_with(
+        expected_module_path, expected_output_path
+    )

@@ -9,6 +9,7 @@ from datetime import datetime
 from glob import glob
 from functools import wraps
 from typing import Callable, Union
+from pkg_resources import resource_filename
 
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
@@ -183,7 +184,7 @@ class Client:
         self,
         deployment_uuid: str,
         model_version: str,
-        file_type: str = "binary",
+        file_type: str = None,
         output_dir: str = "./model/",
         overwrite: bool = False,
     ):
@@ -193,7 +194,7 @@ class Client:
             deployment_uuid (str): UUID of the deployment
             model_version (str): Version of the model
             file_type (str, optional): Model files to download. Either 'code' or 'binary'. Defaults to "binary".
-            dir (str, optional): Output directory for file downloads. Defaults to "./model/".
+            output_dir (str, optional): Output directory for file downloads. Defaults to "./model/".
             overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
 
         Raises:
@@ -204,7 +205,7 @@ class Client:
             str: Response status code
         """
 
-        if not file_type in ["code", "binary"]:
+        if file_type and not file_type in ["code", "binary"]:
             raise InvalidFileRequested(
                 "Invalid file_type provided - file_type can either be 'code' or 'binary'"
             )
@@ -213,6 +214,19 @@ class Client:
             raise FileExistsError(
                 "A folder already exists at this location. Use overwrite=True if you want to overwrite the existing folder."
             )
+
+        if not file_type:
+            code_response = self.api.get(
+                f"/deployment/{deployment_uuid}/version/{model_version}/raw/code",
+                output_dir=output_dir,
+            )
+
+            binary_response = self.api.get(
+                f"/deployment/{deployment_uuid}/version/{model_version}/raw/binary",
+                output_dir=output_dir,
+            )
+
+            return code_response, binary_response
 
         return self.api.get(
             f"/deployment/{deployment_uuid}/version/{model_version}/raw/{file_type}",
@@ -460,16 +474,23 @@ class Client:
         return self.api.get(f"model/{model_uuid}/deployments")
 
     @handle_reconnect
-    def upload_model(self, metadata: dict, binary_file: str, code_file: str):
+    def upload_model(
+        self, metadata: dict, binary_file: str, code_file: str, aws_gateway: bool = True
+    ):
         """Upload a new model
 
         Args:
             metadata (dict): Required metadata for upload
             binary_file (str): Path to model binary file
             code_file (str): Path to model code file
+            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
+                                Defaults to True.
 
         Returns:
             str: UUID of the new model
+
+        Raises:
+            ValueError: Payload is too large for the AWS gateway (if using)
         """
 
         metadata_json = json.dumps(metadata)
@@ -478,10 +499,17 @@ class Client:
             binary_file=binary_file,
             code_file=code_file,
             metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
+            minimal_metadata_path=resource_filename(
+                "bailoclient", "resources/minimal_metadata.json"
+            ),
         )
 
         payload = self._generate_payload(metadata_json, binary_file, code_file)
+
+        if self._too_large_for_gateway(payload, aws_gateway):
+            raise ValueError(
+                "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
+            )
 
         return self._post_model(payload)
 
@@ -489,21 +517,26 @@ class Client:
     def update_model(
         self,
         metadata: dict,
+        model_uuid: str,
         binary_file: str,
         code_file: str,
+        aws_gateway: bool = True,
     ):
         """Update an existing model based on its UUID.
 
         Args:
-            model_card (Model): The model card of the existing model
+            metadata (dict): Updated model metadata
+            model_uuid (str): UUID of model to update
             binary_file (str): Path to the model binary file
             code_file (str): Path to the model code file
-            model_version (str, optional): Incremented mode version number.
-                                           Automatically attempts to increase by 1 if None.
-                                           Defaults to None.
+            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
+                                Defaults to True.
 
         Returns:
             str: UUID of the updated model
+
+        Raises:
+            ValueError: Payload is too large for the AWS gateway (if using)
         """
 
         metadata_json = json.dumps(metadata)
@@ -512,16 +545,20 @@ class Client:
             binary_file=binary_file,
             code_file=code_file,
             metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/minimal_metadata.json",
+            minimal_metadata_path=resource_filename(
+                "bailoclient", "resources/minimal_metadata.json"
+            ),
         )
 
-        if not model_version:
-            model_version = self._increment_model_version(model_card["uuid"])
+        payload = self._generate_payload(metadata_json, binary_file, code_file)
 
-        payload = self._generate_payload(metadata, binary_file, code_file)
+        if self._too_large_for_gateway(payload, aws_gateway):
+            raise ValueError(
+                "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
+            )
 
         return self._post_model(
-            model_data=payload, mode="newVersion", model_uuid=model_card["uuid"]
+            model_data=payload, mode="newVersion", model_uuid=model_uuid
         )
 
     @handle_reconnect
@@ -533,7 +570,9 @@ class Client:
         """
         self._validate_uploads(
             metadata=metadata,
-            minimal_metadata_path="bailoclient/resources/deployment.json",
+            minimal_metadata_path=resource_filename(
+                "bailoclient", "resources/minimal_deployment_metadata.json"
+            ),
         )
 
         metadata_json = json.dumps(metadata)
@@ -685,23 +724,13 @@ class Client:
             binary_file (str): Path to model binary file
             code_file (str): Path to model code file
 
-        Raises:
-            ValueError: Payload is too large for the AWS gateway (if using)
-
         Returns:
             MultipartEncoder: Payload of model data
         """
         payloads = [("metadata", metadata)]
         payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
 
-        data = MultipartEncoder(payloads)
-
-        if self._too_large_for_gateway(data):
-            raise ValueError(
-                "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
-            )
-
-        return data
+        return MultipartEncoder(payloads)
 
     def __add_files_to_payload(self, payloads: list, binary_file: str, code_file: str):
         """Add code and binary files to the payload
@@ -719,16 +748,17 @@ class Client:
         return payloads
 
     @staticmethod
-    def _too_large_for_gateway(data) -> bool:
+    def _too_large_for_gateway(data, aws_gateway: bool) -> bool:
         """If there is an AWS gateway, check that data is not too large
 
         Args:
             data (MultipartEncoder): the data to be uploaded
+            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
 
         Returns:
             bool: True if data is too large to be uploaded
         """
-        return os.getenv("AWS_GATEWAY").lower() == "true" and data.len > 10000000
+        return bool(os.getenv("AWS_GATEWAY", aws_gateway)) and data.len > 10000000
 
     def _increment_model_version(self, model_uuid: str):
         """Increment the latest version of a model by 1
