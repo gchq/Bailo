@@ -6,7 +6,14 @@ import DeploymentModel, { DeploymentDoc } from '../models/Deployment'
 import UserModel from '../models/User'
 import * as entityUtils from '../utils/entity'
 import * as emailClient from '../utils/smtp'
-import { deploymentUuid, testDeployment, testDeployment2, testUser, testVersion } from '../utils/test/testModels'
+import {
+  deploymentUuid,
+  testDeployment,
+  testDeployment2,
+  testUser,
+  testUser2,
+  testVersion,
+} from '../utils/test/testModels'
 import {
   createDeployment,
   DeploymentFilter,
@@ -65,29 +72,26 @@ describe('test deployment service', () => {
   test('that we can email deployment owners about changes for multiple deployments', async () => {
     const deployments: DeploymentDoc[] = [testDeployment, testDeployment2]
     const spy: any = jest.spyOn(entityUtils, 'getUserListFromEntityList')
-    const userList: object[] = [
-      { name: 'Alice', email: 'alice@email.com' },
-      { name: 'Bob', email: 'bob@email.com' },
-    ]
+    const userList: any[] = [testUser, testUser2]
     spy.mockReturnValue(userList)
 
     await emailDeploymentOwnersOnVersionDeletion(deployments, testVersion)
 
-    expect(emailClient.sendEmail).toHaveBeenCalledTimes(deployments.length * userList.length)
+    assertThatAnEmailHasBeenSentToDeploymentOwners(deployments, userList)
   })
 
   test('that we can email deployment owners about changes for a single deployment', async () => {
     const deployments: DeploymentDoc[] = [testDeployment]
     const spy: any = jest.spyOn(entityUtils, 'getUserListFromEntityList')
-    const userList: Array<any> = [
-      { name: 'Alice', email: 'alice@email.com' },
-      { name: 'Bob', email: 'bob@email.com' },
-    ]
+    const userList: any[] = [testUser, testUser2]
     spy.mockReturnValue(userList)
 
     await emailDeploymentOwnersOnVersionDeletion(deployments, testVersion)
 
-    // Assert that for each deployment, each owner has been sent an email about that deployment
+    assertThatAnEmailHasBeenSentToDeploymentOwners(deployments, userList)
+  })
+
+  function assertThatAnEmailHasBeenSentToDeploymentOwners(deployments: any[], userList: any[]) {
     for (const deployment of deployments) {
       for (const user of userList) {
         expect(emailClient.sendEmail).toHaveBeenCalledWith(
@@ -98,5 +102,5 @@ describe('test deployment service', () => {
         )
       }
     }
-  })
+  }
 })
