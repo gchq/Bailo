@@ -9,6 +9,7 @@ import {
   findModels,
   isValidFilter,
   isValidType,
+  removeVersionFromModel,
   serializedModelFields,
 } from './model'
 
@@ -69,5 +70,41 @@ describe('test version service', () => {
     const model: any = await createModel(userDoc, testModel2)
     expect(model).not.toBe(undefined)
     expect(model.uuid).toBe(testModel2.uuid)
+  })
+
+  test('model is deleted if the sole version is removed', async () => {
+    const mockModel = {
+      ...testModel,
+      save: jest.fn(() => Promise.resolve()),
+      delete: jest.fn(() => Promise.resolve()),
+      versions: {
+        remove: jest.fn(() => Promise.resolve()),
+        length: 0,
+      },
+    }
+    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+
+    await removeVersionFromModel(userDoc, testVersion)
+
+    expect(mockModel.delete).toHaveBeenCalledTimes(1)
+  })
+
+  test('latest version is updated if that version is removed', async () => {
+    const mockModel = {
+      ...testModel,
+      save: jest.fn(() => Promise.resolve()),
+      delete: jest.fn(() => Promise.resolve()),
+      versions: {
+        remove: jest.fn(() => Promise.resolve()),
+        at: jest.fn(() => 'new latest version'),
+        length: 3,
+      },
+    }
+
+    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+
+    await removeVersionFromModel(userDoc, testVersion)
+
+    expect(mockModel.latestVersion).toEqual('new latest version')
   })
 })
