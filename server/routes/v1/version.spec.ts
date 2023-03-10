@@ -55,9 +55,7 @@ describe('test version routes', () => {
     await ModelModel.create(testModel)
     const spy: any = jest.spyOn(approvalService, 'deleteApprovalsByVersion')
     spy.mockReturnValue({ irrelevant: 'content' })
-    const updateImplementation = (deploymentService.findDeploymentsByModel as jest.Mock).mockImplementationOnce(() => [
-      'deployment',
-    ])
+    ;(deploymentService.findDeploymentsByModel as jest.Mock).mockImplementationOnce(() => ['deployment'])
 
     const res = await authenticatedDeleteRequest(`/api/v1/version/${testVersion._id}`)
     const versionafterDeletion = await VersionModel.findById(testVersion._id)
