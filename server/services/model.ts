@@ -99,21 +99,20 @@ export async function deleteModel(user: UserDoc, modelId: ModelId) {
 
 export async function removeVersionFromModel(user: UserDoc, version: VersionDoc) {
   const model = await ModelModel.findById(version.model)
-
   if (!model) {
     throw NotFound({ modelId: version.model }, 'Unable to find model to remove.')
   }
 
   await model.versions.remove(version._id)
-  // Deletes model if no versions left, else updates latest version id
+  // Deletes model if no versions left, updates latest version id if that version has been removed
   if (model.versions.length === 0) {
     await model.delete(user._id)
-  } else {
+  } else if (version._id.equals(model.latestVersion)) {
     const latestVersion = model.versions.at(-1)
     if (!latestVersion) {
       throw NotFound({ code: 'version_not_found', ModelId: model._id }, 'Unable to set latest version for model')
     }
     model.latestVersion = latestVersion
-    await model.save()
   }
+  await model.save()
 }
