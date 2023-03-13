@@ -1,7 +1,7 @@
 import ModelModel from '../models/Model'
 import VersionModel from '../models/Version'
 import '../utils/mockMongo'
-import { testModel, testModel2, testVersion, userDoc } from '../utils/test/testModels'
+import { testModel, testModel2, testVersion, testVersion2, userDoc } from '../utils/test/testModels'
 import {
   createModel,
   findModelById,
@@ -106,5 +106,27 @@ describe('test version service', () => {
     await removeVersionFromModel(userDoc, testVersion)
 
     expect(mockModel.latestVersion).toEqual('new latest version')
+    expect(mockModel.delete).not.toHaveBeenCalled()
+  })
+
+  test('latest version is not updated if an older version is removed', async () => {
+    const mockModel = {
+      ...testModel,
+      save: jest.fn(() => Promise.resolve()),
+      delete: jest.fn(() => Promise.resolve()),
+      versions: {
+        remove: jest.fn(() => Promise.resolve()),
+        at: jest.fn(() => 'new latest version'),
+        length: 3,
+      },
+    }
+    const { latestVersion } = mockModel
+
+    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+
+    await removeVersionFromModel(userDoc, testVersion2)
+
+    expect(mockModel.latestVersion).toEqual(latestVersion)
+    expect(mockModel.delete).not.toHaveBeenCalled()
   })
 })
