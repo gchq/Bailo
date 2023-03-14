@@ -15,3 +15,13 @@ A quick list of things that developers think of when coding.
 - Never respond with status codes, instead `throw BadReq` and let the error handler sort it.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
+
+## Remote Debug (Visual Studio Code)
+
+Remote debug has been configured to enable developers to start a debug session that is connected to a running Bailo
+container. To use Remote Debug in VS Code naivgate to 'Run and Debug', select 'Docker: Attach to Node' and press the
+green trigangle icon. Developers can use debugging tools as they would if the application was running in VS Code. For
+example, inserting breakpoints, stepping through code and inspecting the variable explorer.
+
+Remote Debug has been configured for the local development environment via the 'docker-compose-dev' and is running on
+port '9229'.
