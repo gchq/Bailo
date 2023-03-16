@@ -39,12 +39,14 @@ export const deploymentData: any = {
 export const testUser: any = {
   id: 'user',
   email: 'test@example.com',
+  roles: ['user'],
 }
 export const userDoc = new UserModel(testUser)
 
 export const testUser2: any = {
   id: 'user2',
   email: 'test2',
+  roles: ['user'],
 }
 
 export const testManager: any = {

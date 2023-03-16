@@ -1,9 +1,16 @@
 import '../../utils/mockMongo'
 
 import * as versionService from '../../services/version'
-import { testApproval, testModel, testVersion } from '../../utils/test/testModels'
+import { testApproval, testModel, testUser, testVersion } from '../../utils/test/testModels'
 import { authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
-import { getUser } from '../../utils/user'
+
+// Mock user service for user details in authenticated request
+jest.mock('../../services/user', () => ({
+  findAndUpdateUser: jest.fn(() => Promise.resolve(testUser)),
+  serializedUserFields: () => ({
+    mandatory: ['_id', 'id', 'email'],
+  }),
+}))
 
 jest.mock('../../services/schema', () => ({
   findSchemaByRef: jest.fn(() => Promise.resolve({ irrelevant: 'content' })),
@@ -61,30 +68,20 @@ jest.mock('../../utils/queues', () => ({
   ),
 }))
 
-jest.mock('../../services/user', () => ({
-  findAndUpdateUser: jest.fn(() =>
-    Promise.resolve({
-      irrelevant: 'content',
-      roles: ['user'],
-    })
-  ),
-  serializedUserFields: () => ({
-    mandatory: ['_id', 'id', 'email'],
-  }),
-}))
-
 describe('test upload routes', () => {
   const formData =
     '------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="code"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="binary"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="docker"\r\n\r\nundefined\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3--\r\n'
+  const path = `/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`
+  const contentType = 'multipart/form-data; boundary=----WebKitFormBoundary1ZWhiXR3eQRjufe3'
   test('that we can upload a version', async () => {
-    const res = await authenticatedPostRequest(`/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`, formData)
+    const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
 
     validateTestRequest(res)
   })
   test('that we cant upload a version without a unique name', async () => {
     ;(versionService.createVersion as jest.Mock).mockRejectedValueOnce({ code: 11000 })
 
-    const res = await authenticatedPostRequest(`/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`, formData)
+    const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
 
     expect(res.body).toEqual({
       message: 'This model already has a version with the same name',

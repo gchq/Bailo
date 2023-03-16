@@ -11,15 +11,14 @@ export function authenticatedGetRequest(path: string) {
     .set('Accept', 'application/json')
 }
 
-export function authenticatedPostRequest(path: string, body?: any) {
+export function authenticatedPostRequest(path: string) {
   const request = supertest(server)
   return request
     .post(path)
     .set('x-userid', 'user')
-    .set('x-email', 'faketest@example.com')
-    .set('Content-Type', 'multipart/form-data; boundary=----WebKitFormBoundary1ZWhiXR3eQRjufe3')
+    .set('x-email', 'test@example.com')
+    .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
-    .send(body)
 }
 
 export function authenticatedPutRequest(path: string) {
