@@ -1,5 +1,3 @@
-import '../../utils/mockMongo'
-
 import VersionModel from '../../models/Version'
 import * as modelService from '../../services/model'
 import * as versionService from '../../services/version'
