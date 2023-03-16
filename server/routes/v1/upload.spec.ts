@@ -91,6 +91,7 @@ describe('test upload routes', () => {
     expect(minioMock.moveFile).toBeCalledTimes(2)
     expect(VersionModel.findOneAndUpdate).toBeCalledTimes(1)
     expect(mockUploadQueue.add).toBeCalledTimes(1)
+    expect(res.body).toEqual({ uuid: testModel.uuid })
   })
 
   test('that we cant upload a version of an existing model in zip format without a unique name', async () => {
