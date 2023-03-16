@@ -11,6 +11,7 @@ export const requesterId = new ObjectId()
 export const modelId = new ObjectId()
 export const modelUuid = 'test-model'
 export const versionId = new ObjectId()
+export const version2Id = new ObjectId()
 
 export const uploadData: any = {
   schemaRef: 'test-schema3',
@@ -136,7 +137,8 @@ export const testVersion: any = {
 }
 
 export const testVersion2: any = {
-  model: modelId,
+  _id: version2Id,
+  model: testModel,
   version: '2',
   metadata: {
     highLevelDetails: {

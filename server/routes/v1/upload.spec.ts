@@ -1,7 +1,10 @@
 import '../../utils/mockMongo'
 
+import VersionModel from '../../models/Version'
+import * as modelService from '../../services/model'
 import * as versionService from '../../services/version'
-import { testApproval, testModel, testUser, testVersion } from '../../utils/test/testModels'
+import * as minioMock from '../../utils/minio'
+import { testApproval, testModel, testUser, testVersion2 } from '../../utils/test/testModels'
 import { authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 // Mock user service for user details in authenticated request
@@ -27,9 +30,11 @@ jest.mock('../../utils/minio', () => ({
   moveFile: jest.fn(),
 }))
 
+const mockModel = { ...testModel, save: jest.fn(() => Promise.resolve()) }
+
 jest.mock('../../services/model', () => ({
   createModel: jest.fn(() => Promise.resolve()),
-  findModelByUuid: jest.fn(() => Promise.resolve({ ...testModel, save: jest.fn(() => Promise.resolve()) })),
+  findModelByUuid: jest.fn(() => Promise.resolve(mockModel)),
   serializedModelFields: () => ({
     mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
   }),
@@ -38,7 +43,7 @@ jest.mock('../../services/model', () => ({
 jest.mock('../../services/version', () => ({
   createVersion: jest.fn(() =>
     Promise.resolve({
-      ...testVersion,
+      ...testVersion2,
       save: jest.fn(() => Promise.resolve()),
       populate: jest.fn(() => ({
         execPopulate: jest.fn(() => Promise.resolve([])),
@@ -60,12 +65,12 @@ jest.mock('../../models/Version', () => ({
   findOneAndUpdate: jest.fn(),
 }))
 
+const mockUploadQueue = {
+  add: jest.fn(() => 'testJobId'),
+}
+
 jest.mock('../../utils/queues', () => ({
-  getUploadQueue: jest.fn(() =>
-    Promise.resolve({
-      add: jest.fn(() => 'testJobId'),
-    })
-  ),
+  getUploadQueue: jest.fn(() => Promise.resolve(mockUploadQueue)),
 }))
 
 describe('test upload routes', () => {
@@ -73,16 +78,30 @@ describe('test upload routes', () => {
     '------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="code"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="binary"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="docker"\r\n\r\nundefined\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3--\r\n'
   const path = `/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`
   const contentType = 'multipart/form-data; boundary=----WebKitFormBoundary1ZWhiXR3eQRjufe3'
-  test('that we can upload a version', async () => {
+
+  beforeEach(async () => {
+    jest.clearAllMocks()
+  })
+
+  test('that we can upload a version of an existing model in zip format', async () => {
     const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
 
     validateTestRequest(res)
+    expect(modelService.findModelByUuid).toBeCalledTimes(1)
+    expect(versionService.createVersion).toBeCalledTimes(1)
+    expect(mockModel.latestVersion).toEqual(testVersion2._id)
+    expect(minioMock.moveFile).toBeCalledTimes(2)
+    expect(VersionModel.findOneAndUpdate).toBeCalledTimes(1)
+    expect(mockUploadQueue.add).toBeCalledTimes(1)
   })
-  test('that we cant upload a version without a unique name', async () => {
+
+  test('that we cant upload a version of an existing model in zip format without a unique name', async () => {
     ;(versionService.createVersion as jest.Mock).mockRejectedValueOnce({ code: 11000 })
 
     const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
 
+    expect(modelService.findModelByUuid).toBeCalledTimes(1)
+    expect(versionService.createVersion).toBeCalledTimes(1)
     expect(res.body).toEqual({
       message: 'This model already has a version with the same name',
     })

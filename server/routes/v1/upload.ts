@@ -245,8 +245,6 @@ export const postUpload = [
 
     await version.save()
 
-    console.log(req.user)
-
     if (uploadType === ModelUploadType.Zip) {
       const jobId = await (
         await getUploadQueue()
