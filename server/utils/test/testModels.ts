@@ -84,9 +84,28 @@ export const uploadSchema2: any = {
   schema: {},
 }
 
+export const testModel: any = {
+  _id: modelId,
+  versions: [],
+  schemaRef: 'test-schema',
+  uuid: modelUuid,
+  latestVersion: versionId,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const testModel2: any = {
+  versions: [],
+  schemaRef: 'test-schema',
+  uuid: 'model-test2',
+  latestVersion: versionId,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
 export const testVersion: any = {
   _id: versionId,
-  model: modelId,
+  model: testModel,
   version: '1',
   metadata: {
     highLevelDetails: {
@@ -139,25 +158,6 @@ export const testVersion2: any = {
   reviewerApproved: ApprovalStates.NoResponse,
   state: {},
   logs: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-export const testModel: any = {
-  _id: modelId,
-  versions: [],
-  schemaRef: 'test-schema',
-  uuid: modelUuid,
-  latestVersion: versionId,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-export const testModel2: any = {
-  versions: [],
-  schemaRef: 'test-schema',
-  uuid: 'model-test2',
-  latestVersion: versionId,
   createdAt: new Date(),
   updatedAt: new Date(),
 }

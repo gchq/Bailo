@@ -1,23 +1,24 @@
 import config from 'config'
 import { Request, Response } from 'express'
+import { ObjectId } from 'mongodb'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
-import { ObjectId } from 'mongodb'
-import { moveFile } from '../../utils/minio'
-import { createFileRef } from '../../utils/multer'
-import { createModel, findModelByUuid } from '../../services/model'
+
+import { ModelUploadType, SeldonVersion, UploadModes } from '../../../types/interfaces'
+import VersionModel from '../../models/Version'
 import { createVersionApprovals } from '../../services/approval'
+import { createModel, findModelByUuid } from '../../services/model'
 import { findSchemaByRef } from '../../services/schema'
 import { createVersion, markVersionBuilt } from '../../services/version'
+import { getPropertyFromEnumValue } from '../../utils/general'
+import { moveFile } from '../../utils/minio'
 import MinioStore from '../../utils/MinioStore'
+import { createFileRef } from '../../utils/multer'
 import { getUploadQueue } from '../../utils/queues'
 import { BadReq, Conflict, GenericError } from '../../utils/result'
 import { ensureUserRole } from '../../utils/user'
 import { validateSchema } from '../../utils/validateSchema'
-import VersionModel from '../../models/Version'
-import { ModelUploadType, SeldonVersion, UploadModes } from '../../../types/interfaces'
-import { getPropertyFromEnumValue } from '../../utils/general'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
 export interface MulterFiles {
@@ -163,6 +164,7 @@ export const postUpload = [
     try {
       version = await createVersion(req.user, {
         version: metadata.highLevelDetails.modelCardVersion,
+        model: model._id,
         metadata,
         files: {},
       })
@@ -186,9 +188,6 @@ export const postUpload = [
     model.latestVersion = version._id
 
     await model.save()
-
-    version.model = model._id
-    await version.save()
 
     req.log.info({ code: 'created_model', model }, 'Created model document')
 
@@ -245,6 +244,8 @@ export const postUpload = [
     }
 
     await version.save()
+
+    console.log(req.user)
 
     if (uploadType === ModelUploadType.Zip) {
       const jobId = await (

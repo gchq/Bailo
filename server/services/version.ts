@@ -1,18 +1,19 @@
+import config from 'config'
 import { castArray } from 'lodash'
 import { basename } from 'path'
-import config from 'config'
+
 import { DateString, ModelId } from '../../types/interfaces'
-import logger from '../utils/logger'
+import Authorisation from '../external/Authorisation'
 import { UserDoc } from '../models/User'
 import VersionModel, { VersionDoc } from '../models/Version'
-import Authorisation from '../external/Authorisation'
+import { FileRef } from '../utils/build/build'
 import { asyncFilter } from '../utils/general'
+import logger from '../utils/logger'
+import { getClient } from '../utils/minio'
 import { BadReq, Forbidden, NotFound } from '../utils/result'
 import { createSerializer, SerializerOptions } from '../utils/serializers'
-import { serializedModelFields } from './model'
 import { listZipFiles, MinioRandomAccessReader } from '../utils/zip'
-import { getClient } from '../utils/minio'
-import { FileRef } from '../utils/build/build'
+import { serializedModelFields } from './model'
 
 const auth = new Authorisation()
 
@@ -97,6 +98,7 @@ interface CreateVersion {
   version: string
   metadata: any
   files: any
+  model: ModelId
 }
 
 export async function createVersion(user: UserDoc, data: CreateVersion) {
