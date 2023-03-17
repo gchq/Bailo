@@ -1,7 +1,7 @@
 import VersionModel from '../../models/Version'
 import * as modelService from '../../services/model'
 import * as versionService from '../../services/version'
-import * as minioMock from '../../utils/minio'
+import * as minioUtils from '../../utils/minio'
 import { testApproval, testModel, testUser, testVersion2 } from '../../utils/test/testModels'
 import { authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 
@@ -71,6 +71,15 @@ jest.mock('../../utils/queues', () => ({
   getUploadQueue: jest.fn(() => Promise.resolve(mockUploadQueue)),
 }))
 
+jest.mock('minio', () => ({
+  Client: jest.fn(() => ({
+    putObject: jest.fn().mockImplementation((bucket, path, stream) => {
+      // Stream must be read for middleware to progress
+      stream.read()
+    }),
+  })),
+}))
+
 describe('test upload routes', () => {
   const formData =
     '------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="code"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="binary"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="docker"\r\n\r\nundefined\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3--\r\n'
@@ -88,7 +97,7 @@ describe('test upload routes', () => {
     expect(modelService.findModelByUuid).toBeCalledTimes(1)
     expect(versionService.createVersion).toBeCalledTimes(1)
     expect(mockModel.latestVersion).toEqual(testVersion2._id)
-    expect(minioMock.moveFile).toBeCalledTimes(2)
+    expect(minioUtils.moveFile).toBeCalledTimes(2)
     expect(VersionModel.findOneAndUpdate).toBeCalledTimes(1)
     expect(mockUploadQueue.add).toBeCalledTimes(1)
     expect(res.body).toEqual({ uuid: testModel.uuid })
