@@ -1,3 +1,4 @@
+import { NextFunction } from 'express'
 import VersionModel from '../../models/Version'
 import * as modelService from '../../services/model'
 import * as versionService from '../../services/version'
@@ -78,6 +79,41 @@ jest.mock('minio', () => ({
       stream.read()
     }),
   })),
+}))
+
+jest.mock('multer', () => ({
+  __esModule: true,
+  default: () => ({
+    fields: () => (req: Request, res: Response, next: NextFunction) => {
+      req.body = {
+        metadata:
+          '{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}',
+      }
+      req.files = {
+        binary: [
+          {
+            fieldname: 'binary',
+            originalname: 'test.zip',
+            encoding: '7bit',
+            mimetype: 'application/zip',
+            path: '89309830-6814-47d8-ac7a-d1a0276f1eeb',
+            bucket: 'uploads',
+          },
+        ],
+        code: [
+          {
+            fieldname: 'code',
+            originalname: 'test.zip',
+            encoding: '7bit',
+            mimetype: 'application/zip',
+            path: '8c35ff9e-1b34-44d4-9b68-14589a5d7f76',
+            bucket: 'uploads',
+          },
+        ],
+      }
+      return next()
+    },
+  }),
 }))
 
 describe('test upload routes', () => {
