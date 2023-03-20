@@ -3,7 +3,7 @@ import VersionModel from '../../models/Version'
 import * as modelService from '../../services/model'
 import * as versionService from '../../services/version'
 import * as minioUtils from '../../utils/minio'
-import { testApproval, testModel, testUser, testVersion2 } from '../../utils/test/testModels'
+import { testApproval, testModel, testModelUpload, testUser, testVersion2 } from '../../utils/test/testModels'
 import { authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils'
 
 // Mock user service for user details in authenticated request
@@ -11,6 +11,40 @@ jest.mock('../../services/user', () => ({
   findAndUpdateUser: jest.fn(() => Promise.resolve(testUser)),
   serializedUserFields: () => ({
     mandatory: ['_id', 'id', 'email'],
+  }),
+}))
+
+jest.mock('multer', () => ({
+  __esModule: true,
+  default: () => ({
+    fields: () => (req: Request, res: Response, next: NextFunction) => {
+      req.body = {
+        metadata: JSON.stringify(testModelUpload),
+      }
+      req.files = {
+        binary: [
+          {
+            fieldname: 'binary',
+            originalname: 'test.zip',
+            encoding: '7bit',
+            mimetype: 'application/zip',
+            path: '89309830-6814-47d8-ac7a-d1a0276f1eeb',
+            bucket: 'uploads',
+          },
+        ],
+        code: [
+          {
+            fieldname: 'code',
+            originalname: 'test.zip',
+            encoding: '7bit',
+            mimetype: 'application/zip',
+            path: '8c35ff9e-1b34-44d4-9b68-14589a5d7f76',
+            bucket: 'uploads',
+          },
+        ],
+      }
+      return next()
+    },
   }),
 }))
 
@@ -81,44 +115,7 @@ jest.mock('minio', () => ({
   })),
 }))
 
-jest.mock('multer', () => ({
-  __esModule: true,
-  default: () => ({
-    fields: () => (req: Request, res: Response, next: NextFunction) => {
-      req.body = {
-        metadata:
-          '{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}',
-      }
-      req.files = {
-        binary: [
-          {
-            fieldname: 'binary',
-            originalname: 'test.zip',
-            encoding: '7bit',
-            mimetype: 'application/zip',
-            path: '89309830-6814-47d8-ac7a-d1a0276f1eeb',
-            bucket: 'uploads',
-          },
-        ],
-        code: [
-          {
-            fieldname: 'code',
-            originalname: 'test.zip',
-            encoding: '7bit',
-            mimetype: 'application/zip',
-            path: '8c35ff9e-1b34-44d4-9b68-14589a5d7f76',
-            bucket: 'uploads',
-          },
-        ],
-      }
-      return next()
-    },
-  }),
-}))
-
 describe('test upload routes', () => {
-  const formData =
-    '------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="code"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="binary"; filename="test.zip"\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="docker"\r\n\r\nundefined\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n{"highLevelDetails":{"name":"a","modelInASentence":"a","modelOverview":"a","modelCardVersion":"ad","tags":["a"]},"contacts":{"uploader":[{"kind":"user","id":"user"}],"reviewer":[{"kind":"user","id":"user"}],"manager":[{"kind":"user","id":"user"}]},"buildOptions":{"uploadType":"Code and binaries","seldonVersion":"seldonio/seldon-core-s2i-python37:1.10.0"},"submission":{},"schemaRef":"/Minimal/General/v10"}\r\n------WebKitFormBoundary1ZWhiXR3eQRjufe3--\r\n'
   const path = `/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`
   const contentType = 'multipart/form-data; boundary=----WebKitFormBoundary1ZWhiXR3eQRjufe3'
 
@@ -127,7 +124,7 @@ describe('test upload routes', () => {
   })
 
   test('that we can upload a version of an existing model in zip format', async () => {
-    const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
+    const res = await authenticatedPostRequest(path).set('Content-Type', contentType)
 
     validateTestRequest(res)
     expect(modelService.findModelByUuid).toBeCalledTimes(1)
@@ -142,7 +139,7 @@ describe('test upload routes', () => {
   test('that we cant upload a version of an existing model in zip format without a unique name', async () => {
     ;(versionService.createVersion as jest.Mock).mockRejectedValueOnce({ code: 11000 })
 
-    const res = await authenticatedPostRequest(path).send(formData).set('Content-Type', contentType)
+    const res = await authenticatedPostRequest(path).set('Content-Type', contentType)
 
     expect(modelService.findModelByUuid).toBeCalledTimes(1)
     expect(versionService.createVersion).toBeCalledTimes(1)

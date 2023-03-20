@@ -87,6 +87,26 @@ export const uploadSchema2: any = {
   schema: {},
 }
 
+export const testModelUpload: any = {
+  highLevelDetails: {
+    name: modelUuid,
+    modelInASentence: 'Test Model',
+    modelOverview: 'Test Model',
+    modelCardVersion: 'Model Card Overview',
+    tags: ['tag1', 'tag2'],
+  },
+  contacts: {
+    uploader: [{ kind: EntityKind.USER, id: 'user' }],
+    reviewer: [{ kind: EntityKind.USER, id: 'reviewer' }],
+    manager: [{ kind: EntityKind.USER, id: 'manager' }],
+  },
+  buildOptions: {
+    seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
+    uploadType: 'Code and binaries',
+  },
+  schemaRef: '/Minimal/General/v10',
+}
+
 export const testModel: any = {
   _id: modelId,
   versions: [],
