@@ -1,5 +1,6 @@
 import { Request } from 'express'
 import * as Minio from 'minio'
+
 import logger from './logger.js'
 
 export default class MinioStore {
@@ -34,7 +35,7 @@ export default class MinioStore {
     logger.info({ bucket, path }, 'Uploading file to Minio')
 
     try {
-      await this.client.putObject(bucket, path, file.stream)
+      await this.client.putObject(bucket, path, file.stream, file.size)
       logger.info({ bucket, path }, 'Finished uploading file to Minio')
     } catch (e) {
       logger.error({ error: e }, 'Unable to add file to Minio')
