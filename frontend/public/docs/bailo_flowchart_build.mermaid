@@ -1,0 +1,11 @@
+graph LR;
+    post_upload[POST /api/v1/upload]
+    upload_queue>Upload Queue]
+    mongo[(MongoDB)]
+    upload_process[Upload Processor]
+    registry[(Registry)]
+
+    post_upload-->upload_queue;
+    upload_queue-->mongo;
+    mongo-->upload_process;
+    upload_process-->registry;

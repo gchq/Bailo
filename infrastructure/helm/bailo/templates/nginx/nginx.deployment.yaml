@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-nginx
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nginx
+  template:
+    metadata:
+      labels:
+        name: nginx
+    spec:
+      containers:
+      - name: {{ include "bailo.fullname" . }}-nginx
+        image: {{ .Values.nginxAuth.repository }}:{{ .Values.nginxAuth.tag }}
+        resources:
+          requests:
+            cpu: 125m
+            memory: 150Mi
+        ports:
+          - name: http
+            containerPort: {{ .Values.nginxAuth.port }}
+            protocol: TCP
+        volumeMounts:
+        - name: nginx-template
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf 
+      volumes:
+      - name: nginx-template
+        configMap:
+          name: {{ include "bailo.fullname" . }}-nginx-template

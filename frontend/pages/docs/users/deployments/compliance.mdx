@@ -1,0 +1,36 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+
+import bailoDeploymentCompliance from '../../../../public/docs/bailo_deployment_compliance.png'
+
+# Deployment Compliance
+
+A deployment is unavailable until it has passed all compliance checks. These are outlined under the 'compliance' tab.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoDeploymentCompliance} />
+</Box>
+
+The colour of each step represents its current state:
+
+- White: Step cannot be completed at this time
+- Yellow: Step in progress
+- Red: Step failed
+- Green: Step succeeded
+
+### Troubleshooting
+
+#### Build Failed
+
+If Bailo fails to deploy an image, this step will fail. Bailo automatically retries deployments three times. The logs
+from Bailo deploying can be found under the 'build logs' tag. Deployments should not fail to build, any failure here
+will need to be fixed by a system administrator.
+
+#### Checks Failed
+
+If an approver rejects your model, the 'check' field will be red. You will need to contact the approver and discuss how
+to resolve the issue. An approver can go to the 'archived' section of the approvals at any time to update the state of
+the approval.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

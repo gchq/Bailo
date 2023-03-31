@@ -8,6 +8,15 @@
     "pMongoQueue.js",
     "pMongoQueue.d.ts"
   ],
+  "prettier": {
+    "jsxSingleQuote": true,
+    "printWidth": 120,
+    "proseWrap": "always",
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false
+  },
   "scripts": {
     "test": "uvu tests",
     "test:coverage": "c8 npm test"

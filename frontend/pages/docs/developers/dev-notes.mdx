@@ -1,0 +1,23 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Developer Notes
+
+A quick list of things that developers think of when coding.
+
+- Never use `console.log` on the server, always use `logger` from utils.
+- Always run `npm run build` to check your types are valid across the project.
+- Don't run `npm run build` and `npm run dev` simultaneously.
+- VS: Code TypeScript messing around? Try `Ctrl + Shift + P` -> `Typescript: Restart TS Server`
+- Never respond with status codes, instead `throw BadReq` and let the error handler sort it.
+
+## Remote Debug (Visual Studio Code)
+
+Remote debug has been configured to enable developers to start a debug session that is connected to a running Bailo
+container. To use Remote Debug in VS Code navigate to 'Run and Debug', select 'Docker: Attach to Node' and press the
+green triangle icon. Developers can use debugging tools as they would if the application was running in VS Code. For
+example, inserting breakpoints, stepping through code and inspecting the variable explorer.
+
+Remote Debug has been configured for the local development environment via the 'docker-compose-dev' and is running on
+port '9229'.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

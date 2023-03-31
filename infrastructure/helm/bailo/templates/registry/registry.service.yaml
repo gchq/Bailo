@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bailo.fullname" . }}-registry
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.registry.port }}
+      targetPort: {{ .Values.registry.port }}
+      protocol: TCP
+      name: tcp
+  selector:
+    name: registry

@@ -1,0 +1,21 @@
+{{- if .Values.mail.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bailo.fullname" . }}-mail
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 1080
+      targetPort: 1080
+      protocol: TCP
+      name: http
+    - port: {{ .Values.config.smtp.port }}
+      targetPort: {{ .Values.config.smtp.port }}
+      protocol: TCP
+      name: smtp
+  selector:
+    name: mail
+{{- end }}
