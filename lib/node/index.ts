@@ -80,7 +80,7 @@ class Model {
   async getDeployments() {
     const deployments = await this.api.apiGet(`/model/${this.model.uuid}/deployments`)
 
-    return deployments.map((deployment) => new Deployment(this.api, deployment))
+    return deployments.map((deployment: any) => new Deployment(this.api, deployment))
   }
 
   async getSchema() {
@@ -90,7 +90,7 @@ class Model {
   async getVersions() {
     const versions = await this.api.apiGet(`/model/${this.model.uuid}/versions`)
 
-    return versions.map((version) => new Version(this.api, version))
+    return versions.map((version: any) => new Version(this.api, version))
   }
 
   async getVersion(versionName: VersionName) {
@@ -117,7 +117,7 @@ export default class API {
   }
 
   apiGet(endpoint: string) {
-    return fetch(`${this.base}${endpoint}`).then((res) => res.json())
+    return fetch(`${this.base}${endpoint}`).then((res: any) => res.json())
   }
 
   apiPost(endpoint: string, body: any) {
@@ -127,7 +127,7 @@ export default class API {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    }).then((res) => res.json())
+    }).then((res: any) => res.json())
   }
 
   async getModels(type: ModelsType, filter?: string) {
@@ -138,7 +138,7 @@ export default class API {
       })}`
     )
 
-    return models.map((model) => new Model(this, model))
+    return models.map((model: any) => new Model(this, model))
   }
 
   async getModel(uuid: string) {
@@ -159,7 +159,7 @@ export default class API {
       method: 'POST',
       headers: encoder.headers,
       body: Readable.from(encoder) as any,
-    }).then((res) => res.json())
+    }).then((res: any) => res.json())
   }
 
   async getDeployment(uuid: string) {
@@ -181,7 +181,7 @@ export default class API {
       })}`
     )
 
-    return schemas.map((schema) => new Schema(this, schema))
+    return schemas.map((schema: any) => new Schema(this, schema))
   }
 
   async getDefaultSchema(use: SchemaUse) {
@@ -203,7 +203,7 @@ export default class API {
   async getUsers() {
     const { users } = await this.apiGet(`/users`)
 
-    return users.map((user) => new User(this, user))
+    return users.map((user: any) => new User(this, user))
   }
 
   async getUser() {
@@ -220,7 +220,7 @@ export default class API {
       })}`
     )
 
-    return approvals.map((approval) => new Approval(this, approval))
+    return approvals.map((approval: any) => new Approval(this, approval))
   }
 
   async getApprovalCount() {

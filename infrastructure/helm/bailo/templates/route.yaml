@@ -1,0 +1,22 @@
+{{- if .Values.route.enabled }}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ include "bailo.fullname" . }}-route
+  namespace: {{ .Values.openshift.namespace }}
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  host: {{ .Values.route.appPublicRoute }}
+  to:
+    kind: Service
+    name: {{ include "bailo.fullname" . }}-nginx
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: {{ .Values.openshift.termination }}
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+{{- end }}

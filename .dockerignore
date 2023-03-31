@@ -1,22 +1,10 @@
-# Docker files aren't used in the application
-Dockerfile*
-.dockerignore
-docker-compose*
-
-# Depdencies are installed inside of container
 node_modules
 
-# Temp files / logs
-npm-debug.log
-.next
+backend/.git
+backend/dist
+backend/node_modules
 
-# Markdown files
-README.md
-docs/CONTRIBUTING.md
-
-# Certificates will be explicity mounted
-certs 
-
-# Ignore .git folders
-.git
-.github
+frontend/.git
+frontend/.next
+frontend/.swc
+frontend/node_modules

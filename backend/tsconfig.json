@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "node16",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "noImplicitAny": false
+  },
+  "include": ["global.d.ts", "src/**/*"],
+  "ts-node": {
+    "esm": true,
+    "swc": true
+  }
+}

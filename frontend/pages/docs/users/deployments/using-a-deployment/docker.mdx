@@ -1,0 +1,60 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+
+import bailoDockerDownloadCommands from '../../../../../public/docs/bailo_docker_download_commands.png'
+
+# Docker Deployments
+
+> _Please ensure that a deployment has gone through the [requesting](../requesting-a-deployment) and
+> [compliance](../compliance) steps prior to using it._
+
+Models that have been uploaded as either a Docker image or as a model binary are available from Bailo's internal Docker
+store. This is compatible with a variety of Docker clients, including 'Kubernetes', 'Docker' and 'Podman'.
+
+## Running a Deployed Docker image
+
+Instructions and commands required to download and run a Docker image can be found by clicking "Show download commands"
+from the deployment page.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoDockerDownloadCommands} />
+</Box>
+
+Within Kubernetes and OpenShift, you must first create a secret containing your docker authentication before you can
+pull images from Bailo. To do so, follow the
+[kubernetes private registry instructions](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+
+## Using a Deployed Docker image
+
+When an image is run, it starts up a load balancer and multiple instances of your model that each expose a web API. This
+API can either be consumed via gRPC or HTTP. More extensive documentation can be found
+[on the Seldon Core page](https://docs.seldon.io/projects/seldon-core/en/latest/reference/apis/v2-protocol.html). The
+gRPC proto files can be found
+[here](https://docs.seldon.io/projects/seldon-core/en/latest/reference/apis/prediction.html#proto-buffer-and-grpc-definition).
+You can also access an OpenAPI definition for a model by going to `<host>/seldon.json`.
+
+The primary endpoint that can be used to make predictions on a model is the `/predict` endpoint. Send a `post` request
+with your data included to infer a result. Examples include:
+
+```sh
+# curl
+curl <host>/predict -d 'json={"jsonData":{"data":["some string data"]}}'
+```
+
+```python
+# python
+import requests
+import json
+
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+}
+
+content = { "jsonData": { "data": ["some string data"] } }
+data = f'json={json.dumps(content)}'
+
+response = requests.post('<host>/predict', headers=headers, data=data)
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

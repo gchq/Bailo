@@ -1,0 +1,78 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Adding an Endpoint
+
+Checklist for adding an endpoint to Bailo:
+
+1. Define your route in `backend/src/routes/v1/<file>.ts`:
+
+```typescript
+import { NextFunction, Request, Response } from 'express'
+
+export const echoRequest = [
+  // each item in this list is middleware
+  (req: Request, res: Response, next: NextFunction) => {
+    // do nothing, call next to go to next middleware
+    next()
+  }
+
+  // ensureUserRole can be used to check a user is logged in
+  ensureUserRole('user'),
+
+  // actual route handler
+  async (req: Request, res: Response) => {
+    if (!req.query.message) {
+      // throw an error, more in backend/src/utils/result.ts
+      // first argument is server-only log data, second argument is user facing message
+      throw BadReq({}, 'No message provided')
+    }
+
+    // most logic here should be in a service
+
+    // in this example we're just returning the data given to us
+    res.json({
+      message: req.query.message
+    })
+  },
+]
+```
+
+2. Add the route to the router to `backend/src/routes.ts`:
+
+```typescript
+import { getEcho } from './routes/v1/admin.js'
+
+server.get('/api/v1/echo', ...getEcho)
+```
+
+3. Add tests in `backend/src/routes/v1/<file>.spec.ts`:
+
+```typescript
+describe('test echo route', () => {
+  test('we get an echo', async () => {
+    const res = await authenticatedGetRequest('/api/v1/echo?message=hello')
+    expect(res.body.message).toBe('hello')
+  })
+})
+```
+
+4. Document the endpoint using OpenAPI in `backend/src/routes/v1/specification.ts`
+5. Create a UI binding in `data/<file>.ts`:
+
+```typescript
+import useSWR from 'swr'
+import { fetcher } from '../utils/fetcher.js'
+
+export function useEcho(message: string) {
+  const { data, error, mutate } = useSWR<{ message: string }>(`/api/v1/echo?message=${message}`, fetcher)
+
+  return {
+    mutateEcho: mutate,
+    message: data ? data.message : undefined,
+    isEchoLoading: !error && !data,
+    isEchoError: error,
+  }
+}
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
