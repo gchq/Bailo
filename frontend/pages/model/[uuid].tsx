@@ -29,6 +29,10 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import copy from 'copy-to-clipboard'
+import { postEndpoint, putEndpoint, deleteEndpoint } from 'data/api'
+import { useGetVersionAccess } from 'data/version'
+import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
+import { useGetCurrentUser } from 'data/user'
 import { Types } from 'mongoose'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -40,21 +44,17 @@ import CodeExplorer from 'src/model/CodeExplorer'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import TextField from '@mui/material/TextField'
+import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import Wrapper from '../../src/Wrapper'
 import TerminalLog from '../../src/TerminalLog'
 import ModelOverview from '../../src/ModelOverview'
 import UserAvatar from '../../src/common/UserAvatar'
-import { postEndpoint, putEndpoint, deleteEndpoint } from '../../data/api'
-import { useGetVersionAccess } from '../../data/version'
-import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from '../../data/model'
-import { useGetCurrentUser } from '../../data/user'
 import { getErrorMessage } from '../../utils/fetcher'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import { Deployment, User, Version, ModelUploadType, DateString, Entity } from '../../../lib/shared/types'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import useNotification from '../../src/common/Snackbar'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
@@ -233,10 +233,6 @@ function Model() {
   if (isDeploymentsLoading || !deployments) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const editModel = () => {
-    router.push(`/model/${uuid}/edit/${version?.version}`)
-  }
-
   const uploadNewVersion = () => {
     router.push(`/model/${uuid}/new-version`)
   }
@@ -245,7 +241,7 @@ function Model() {
     setAnchorEl(event.currentTarget as HTMLDivElement)
   }
 
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null)
   }
 
@@ -258,17 +254,6 @@ function Model() {
           setFavouriteButtonDisabled(false)
           mutateCurrentUser(user)
         })
-    }
-  }
-
-  const requestApprovalReset = async () => {
-    const response = await postEndpoint(`/api/v1/version/${version?._id}/reset-approvals`, {})
-
-    if (response.ok) {
-      sendNotification({ variant: 'success', msg: 'Approvals reset' })
-      mutateVersion()
-    } else {
-      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
     }
   }
 
@@ -363,7 +348,7 @@ function Model() {
                 Actions
               </Button>
             </Stack>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
               <MenuList>
                 <DisabledElementTooltip
                   conditions={[
@@ -429,19 +414,10 @@ function Model() {
                   </MenuItem>
                 )}
                 <DisabledElementTooltip
-                  conditions={[
-                    version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted'
-                      ? 'Version has already been approved by both a manager and a technical reviewer'
-                      : '',
-                    !isPotentialUploader ? 'You do not have permission to edit this model' : '',
-                  ]}
+                  conditions={[!isPotentialUploader ? 'You do not have permission to edit this model' : '']}
                 >
                   <MenuItem
-                    onClick={editModel}
-                    disabled={
-                      (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted') ||
-                      !isPotentialUploader
-                    }
+                    onClick={() => router.push(`/model/${uuid}/edit/${version?.version}`)}
                     data-test='editModelButton'
                   >
                     <ListItemIcon>
@@ -450,29 +426,13 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
+
                 <MenuItem onClick={uploadNewVersion} disabled={!isPotentialUploader} data-test='newVersionButton'>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Upload new version</ListItemText>
                 </MenuItem>
-                <DisabledElementTooltip
-                  conditions={[
-                    version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'
-                      ? 'Version needs to have at least one approval before it can have its approvals reset,'
-                      : '',
-                  ]}
-                >
-                  <MenuItem
-                    onClick={requestApprovalReset}
-                    disabled={version.managerApproved === 'No Response' && version.reviewerApproved === 'No Response'}
-                  >
-                    <ListItemIcon>
-                      <RestartAlt fontSize='small' />
-                    </ListItemIcon>
-                    <ListItemText>Reset approvals</ListItemText>
-                  </MenuItem>
-                </DisabledElementTooltip>
               </MenuList>
             </Menu>
             <Stack direction='row' spacing={2}>

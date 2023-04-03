@@ -128,13 +128,6 @@ export const putVersion = [
       throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
     }
 
-    if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
-      throw Forbidden(
-        { code: 'user_unauthorised' },
-        'User is not able to edit a model if it has already been approved.'
-      )
-    }
-
     if (uploadType === ModelUploadType.Zip) {
       const { seldonVersion } = metadata.buildOptions
       const seldonVersionsFromConfig: Array<SeldonVersion> = config.ui.seldonVersions

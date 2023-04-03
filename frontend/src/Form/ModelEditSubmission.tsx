@@ -48,6 +48,9 @@ function ModelEditSubmission({
               Edit Model
             </Typography>
             <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
+              Editing this model will cause all existing approvals to be reset.
+            </Typography>
+            <Typography sx={{ p: 1, mb: 1.5 }} variant='body1' component='p'>
               If you are happy with your submission click below to upload your model to Bailo.
             </Typography>
             <LoadingButton
