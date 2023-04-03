@@ -19,21 +19,37 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build production image
+      - name: Build frontend image
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile.prod
-          tags: bailo:latest
+          file: frontend/Dockerfile
+          tags: bailo_frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=docker,dest=/tmp/bailo.tar
+          outputs: type=docker,dest=/tmp/bailo_frontend.tar
+
+      - name: Build backend image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: backend/Dockerfile
+          tags: bailo_backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/bailo_backend.tar
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: bailo
-          path: /tmp/bailo.tar
+          name: bailo_backend
+          path: /tmp/bailo_backend.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bailo_frontend
+          path: /tmp/bailo_frontend.tar
 
   unit_testing:
     runs-on: ubuntu-latest
@@ -49,8 +65,8 @@ jobs:
           cache: 'npm'
 
       # Create certs
-      - run: sudo chown -R runner:docker certs
-      - run: npm run certs
+      - run: sudo chown -R runner:docker backend/certs
+      - run: npm run --workspace=backend certs
 
       # Install dependencies
       - run: npm ci
@@ -99,7 +115,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: bailo
+          name: bailo_backend
+          path: /tmp
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo_frontend
           path: /tmp
 
       - name: Start minikube
@@ -111,16 +132,17 @@ jobs:
       - name: Load docker image to minikube
         run: |
           eval $(minikube -p minikube docker-env)
-          docker load -i /tmp/bailo.tar
+          docker load -i /tmp/bailo_backend.tar
+          docker load -i /tmp/bailo_frontend.tar
 
       # Create certs
-      - run: sudo chown -R runner:docker certs
-      - run: npm run certs
+      - run: sudo chown -R runner:docker backend/certs
+      - run: npm run --workspace=backend certs
 
       # Add bailo NodePort
       - name: Create NodePort Config
         run: |
-          cat << EOT >> helm/bailo/templates/nodePort.yaml
+          cat << EOT >> infrastructure/helm/bailo/templates/nodePort.yaml
           ---
           apiVersion: v1
           kind: Service
@@ -132,76 +154,53 @@ jobs:
               - port: {{ .Values.nginxAuth.port }}
                 targetPort: {{ .Values.nginxAuth.port }}
             selector:
-               name: {{ .Values.nginxAuth.host }}
+               name: nginx
           EOT
 
       # Create local.yaml
       - name: Create local.yaml
         run: |
-          cat << EOT >> helm/bailo/local.yaml
+          cat << EOT >> infrastructure/helm/bailo/local.yaml
           ---
           # Instance Settings
           config:
-            s2i:
-              image: seldonio/seldon-core-s2i-python37:1.10.0
-            supportEmail: "support@example.com"
             ui:
               banner:
-                text: "BAILO"
-                colour: '#047a06'
-            smtp:
-              host: 'mail'
-              from: 'bailo@example.com'
-            schema:
-              script: "dist/server/scripts/exampleSetAllSchemas.js"
+                enabled: "true"
+                text: "BAILO TEST"
             build:
               environment: img
           # Bailo
           image:
-            repository: "bailo"
-            tag: "latest"
+            frontendRepository: "bailo_frontend"
+            frontendTag: latest
+            backendRepository: "bailo_backend"
+            backendTag: latest
           # Used for k8s not openshift
           ingress:
             enabled: false
           route:
             enabled: false
+            appPublicRoute: localhost
           mongodb:
+            architecture: standalone
             auth:
               passwords:
                 - MongoDBPassword
               usernames:
                 - bailo_user
-            image:
-              registry: docker.io
             host: 'bailo-mongodb:27017/bailo'
-          minio:
-            image:
-              registry: docker.io
-            persistence:
-              size: 20Gi
-          registry:
-            repository: registry
-            certFile: cert.pem
-            keyFile: key.pem
-          maildev:
-            enabled: true
-            
-          openshift:
-            appPublicRoute: not.required.for.this.test
-          nginxcert:
-            cert: cert.pem
-            key: key.pem
           EOT
 
       - name: Set Bailo image pull policy to Never
-        run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' helm/bailo/templates/bailo/bailo.deployment.yaml
+        run: sed -i 's/{{ .Values.image.pullPolicy }}/Never/g' infrastructure/helm/bailo/templates/bailo/bailo.deployment.yaml
 
       - name: HELM update dependency update
-        working-directory: ./helm/bailo
+        working-directory: ./infrastructure/helm/bailo
         run: helm dependency update
 
       - name: HELM deploy to minikube
-        working-directory: ./helm/bailo
+        working-directory: ./infrastructure/helm/bailo
         run: helm install --values ./local.yaml bailo .
 
       - name: Sleep for 90 seconds
@@ -215,13 +214,13 @@ jobs:
         run: kubectl get services
 
       - name: HELM test Bailo
-        working-directory: ./helm/bailo
+        working-directory: ./infrastructure/helm/bailo
         run: helm test bailo
 
       - name: Test Bailo URL
         run: |
           minikube service list
-          echo "----------------curl connect to bailo---------------"
+          echo "---------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
 
       # Install dependencies
@@ -263,29 +262,35 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Get Bailo Docker image
+      # Get Bailo Docker images
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: bailo
+          name: bailo_backend
+          path: /tmp
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo_frontend
           path: /tmp
 
       - name: Load image
         run: |
-          docker load --input /tmp/bailo.tar
+          docker load --input /tmp/bailo_frontend.tar
+          docker load --input /tmp/bailo_backend.tar
           docker image ls -a
 
       # Create logs directory
       - run: mkdir logs
 
       # Create certs
-      - run: sudo chown -R runner:docker certs
-      - run: npm run certs
+      - run: sudo chown -R runner:docker backend/certs
+      - run: npm run --workspace=backend certs
 
       # Configure application
       - name: Configure Bailo
         run: |
-          cat <<EOT >> config/local.js
+          cat <<EOT >> backend/config/local.cjs
           module.exports = {
             minio: {
               accessKey: 'minioadmin',
@@ -310,23 +315,33 @@ jobs:
           }
           EOT
 
-      - run: docker-compose up -d
+      - run: docker-compose -f docker-compose-prod.yml up -d
 
       # Install dependencies
       - run: npm ci
 
       # wait for app to start
       - run: |
-          chmod +x ./server/scripts/waitForIt.sh
-          ./server/scripts/waitForIt.sh localhost:8080 -t 10
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:8080 -t 10
+
+      # wait for mongo to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
+
+      # Add schemas
+      - run: npm run --workspace=backend script -- exampleSetAllSchemas
 
       - uses: cypress-io/github-action@v5
+        with:
+          project: ./frontend
 
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots-e2e
-          path: cypress/screenshots
+          path: frontend/cypress/screenshots
 
       # - uses: actions/upload-artifact@v3
       #   if: always()

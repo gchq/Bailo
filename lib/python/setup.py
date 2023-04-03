@@ -17,6 +17,7 @@ setup(
         "requests-pkcs12 >= 1.13",
         "jsonschema >= 3.2.0",
         "python-dotenv >= 0.20.0",
+        "pipreqsnb >= 0.2.4",
     ],
     extras_require={
         "dev": [
@@ -24,6 +25,7 @@ setup(
             "pylint",
             "pre-commit",
         ],
+        "bundling": ["mlflow"],
     },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

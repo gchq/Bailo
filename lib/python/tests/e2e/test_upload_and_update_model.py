@@ -49,8 +49,8 @@ def test_upload_and_update_model():
     # Update the model
     updated_model = client.update_model(
         model_card,
-        binary_file="../../__tests__/example_models/minimal_model/minimal_binary.zip",
-        code_file="../../__tests__/example_models/minimal_model/minimal_code.zip",
+        binary_file="../../cypress/fixtures/minimal_binary.zip",
+        code_file="../../cypress/fixtures/minimal_code.zip",
     )
 
     assert updated_model["uuid"] == model_uuid

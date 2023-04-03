@@ -1,0 +1,20 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Building the Bailo Image
+
+Bailo does not provide pre-built images. Building one yourself is easy! Two images should be produced, one for the
+frontend and one for the backend.
+
+```bash
+# Bailo uses a monorepo, so images should be built from the root directory
+$ docker build -t "bailo-backend" -f ./backend/Dockerfile .
+$ docker build -t "bailo-frontend" -f ./frontend/Dockerfile .
+```
+
+Ensure you do not use the development Dockerfiles (called `Dockerfile.dev`) as they expect the application to be mounted
+into them at a later point in time (to enable hot code reloading).
+
+`docker` can be swapped out for any other OCI compliant container build platform. We routinely test with both `podman`
+and `OpenShift Builder`. This image should be pushed to a registry that is accessible from your deployment target.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

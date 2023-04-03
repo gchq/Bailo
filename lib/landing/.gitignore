@@ -36,6 +36,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-src
+src/Copyright.tsx
+src/Link.tsx
+src/docs
+
 pages/docs
 public

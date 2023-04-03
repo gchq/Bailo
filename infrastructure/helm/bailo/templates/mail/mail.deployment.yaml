@@ -1,0 +1,22 @@
+{{- if .Values.mail.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-mail
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mail
+  template:
+    metadata:
+      labels:
+        name: mail
+    spec:
+      containers:
+      - name: {{ include "bailo.fullname" . }}-mail
+        image: marlonb/mailcrab:latest
+{{- end }}

@@ -1,0 +1,88 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo:6.0.4
+    ports:
+      - 27017:27017
+    volumes:
+      - mongoVolume:/data/db
+    command: --quiet
+
+  minio:
+    image: minio/minio:RELEASE.2023-01-31T02-24-19Z
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minioVolume:/data
+    command: server /data --console-address ":9001"
+
+  mailcrab:
+    image: marlonb/mailcrab:v0.10.0
+    ports:
+      - 1080:1080
+      - 1025:1025
+
+  nginx:
+    image: nginx:1.21.6-alpine
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8080:8080
+    depends_on:
+      - frontend
+      - backend
+
+  registry:
+    restart: always
+    image: registry:2.8.1
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/key.pem
+
+      REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
+      REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+
+      REGISTRY_AUTH: token
+      REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
+      REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
+      REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
+    volumes:
+      - ./backend/config/registry.conf:/etc/docker/registry/config.yml
+      - ./backend/certs:/certs
+
+  frontend:
+    image: bailo_frontend:latest
+    build:
+      context: ./
+      dockerfile: ./frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+
+  backend:
+    image: bailo_backend:latest
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - 3001:3001
+    volumes:
+      - ./backend/certs:/certs
+      - ./backend/certs:/usr/local/share/ca-certificates
+    depends_on:
+      - mongo
+      - minio
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      - NODE_CONFIG_ENV=docker_compose
+
+volumes:
+  minioVolume:
+  mongoVolume:

@@ -126,9 +126,8 @@ bailo = Bailo(pki_p12='path/to/p12',
                 pki_ca='path/to/ca',
                 bailo_url='http://localhost:8080/api/v1'
             )
-client = bailo.client
 
-client.get_my_models()
+bailo.get_my_models()
 ```
 
 You will be prompted for your certificate password before you can connect.
@@ -146,9 +145,8 @@ bailo = Bailo(cognito_user_pool_id="eu-west-2_xx1xxx1xx",
                 cognito_username="username",
                 cognito_pwd="password"
             )
-client = bailo.client
 
-client.get_my_models()
+bailo.get_my_models()
 
 ```
 
@@ -160,9 +158,8 @@ With a .env file configured you can create your bailo instance with no config.
 from bailoclient import Bailo
 
 bailo = Bailo()
-client = bailo.client
 
-client.get_my_models()
+bailo.get_my_models()
 
 ```
 
