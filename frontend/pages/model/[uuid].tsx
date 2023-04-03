@@ -242,7 +242,6 @@ function Model() {
   }
 
   const handleMenuClose = () => {
-    console.log('here')
     setAnchorEl(null)
   }
 
