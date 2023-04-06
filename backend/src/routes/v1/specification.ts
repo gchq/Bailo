@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+
 import config from '../../utils/config.js'
 import { ensureUserRole } from '../../utils/user.js'
 
@@ -528,7 +529,7 @@ function parseValue(value: any) {
   throw new Error(`Unexpected value ${value}`)
 }
 
-function generateSpecification() {
+export function generateSpecification() {
   return {
     swagger: '2.0',
     info: {
