@@ -107,7 +107,7 @@ class Bailo(Client):
             username, password = creds
             self.connect(username=username, password=password)
 
-        except ValueError:
+        except NameError:
             self.connect()
 
         with open(
