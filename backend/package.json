@@ -65,6 +65,7 @@
     "tar": "^6.1.13",
     "unzipper": "^0.10.11",
     "uuid": "^9.0.0",
+    "yargs": "^17.7.1",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
