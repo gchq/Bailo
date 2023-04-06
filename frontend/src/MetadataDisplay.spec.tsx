@@ -1,16 +1,14 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
-import React from 'react'
+
 import { useGetSchemas } from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'
 
-jest.mock('../data/schema', () => ({
-  useGetSchemas: jest.fn(),
+import { expect, describe, it, vi } from 'vitest'
+
+vi.mock('../data/schema', () => ({
+  useGetSchemas: vi.fn(),
 }))
 
 describe('MetadataDisplay', () => {
@@ -42,8 +40,7 @@ describe('MetadataDisplay', () => {
       isSchemasError: false,
     }
 
-    const getSchemas = useGetSchemas as unknown as jest.Mock
-    getSchemas.mockReturnValueOnce(mockedSchema).mockReturnValueOnce(mockedSchema)
+    vi.mocked(useGetSchemas).mockReturnValueOnce(mockedSchema).mockReturnValueOnce(mockedSchema)
 
     render(
       <ThemeProvider theme={lightTheme}>

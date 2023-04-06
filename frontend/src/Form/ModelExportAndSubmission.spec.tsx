@@ -1,15 +1,11 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
 import { useGetUiConfig } from '../../data/uiConfig'
 import ModelExportAndSubmission from './ModelExportAndSubmission'
 import { doNothing } from '../../utils/testUtils'
+import { vi } from 'vitest'
 
-jest.mock('../../data/uiConfig', () => ({
-  useGetUiConfig: jest.fn(),
+vi.mock('../../data/uiConfig', () => ({
+  useGetUiConfig: vi.fn(),
 }))
 
 describe('ModelExportAndSubmission', () => {
@@ -25,7 +21,7 @@ describe('ModelExportAndSubmission', () => {
       isUiConfigError: false,
     }
 
-    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
+    vi.mocked(useGetUiConfig).mockReturnValueOnce(mockedConfig)
 
     const formData = {
       name: 'test name',

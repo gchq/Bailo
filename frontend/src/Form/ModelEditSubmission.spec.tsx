@@ -1,15 +1,11 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
 import { useGetUiConfig } from '../../data/uiConfig'
 import ModelEditSubmission from './ModelEditSubmission'
 import { doNothing } from '../../utils/testUtils'
+import { vi } from 'vitest'
 
-jest.mock('../../data/uiConfig', () => ({
-  useGetUiConfig: jest.fn(),
+vi.mock('../../data/uiConfig', () => ({
+  useGetUiConfig: vi.fn(),
 }))
 
 describe('ModelEditSubmission', () => {
@@ -25,7 +21,7 @@ describe('ModelEditSubmission', () => {
       isUiConfigError: false,
     }
 
-    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
+    vi.mocked(useGetUiConfig).mockReturnValueOnce(mockedConfig)
 
     render(<ModelEditSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} modelUploading={false} />)
 
