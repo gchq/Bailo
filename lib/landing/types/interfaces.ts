@@ -1,17 +1,17 @@
 export type DocHeading = {
-  title: string;
-  slug: string;
-  hasIndex: boolean;
-  children: DocFileOrHeading[];
-  priority: number;
-};
+  title: string
+  slug: string
+  hasIndex: boolean
+  children: DocFileOrHeading[]
+  priority: number
+}
 
 export type DocFile = {
-  title: string;
-  slug: string;
-  priority: number;
-};
+  title: string
+  slug: string
+  priority: number
+}
 
-export type DocFileOrHeading = DocHeading | DocFile;
+export type DocFileOrHeading = DocHeading | DocFile
 
-export type DocsMenuContent = DocFileOrHeading[];
+export type DocsMenuContent = DocFileOrHeading[]
