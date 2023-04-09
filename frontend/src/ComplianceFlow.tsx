@@ -1,6 +1,7 @@
-import React from 'react'
-import ReactFlow, { ConnectionLineType, Node, Edge, Position } from 'reactflow'
+import ReactFlow, { ConnectionLineType, Node, Edge, Position, Panel } from 'reactflow'
 import dagre from 'dagre'
+import { Chip, Stack } from '@mui/material'
+import { green, red, yellow } from '@mui/material/colors'
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
@@ -58,10 +59,22 @@ function ComplianceFlow({ initialEdges, initialNodes }: any) {
         zoomOnScroll={false}
         connectionLineType={ConnectionLineType.SmoothStep}
         fitView
-        // Bailo is an open source / non-commercial, so will disable attribution:
+        fitViewOptions={{
+          maxZoom: 1.5,
+        }}
+        // Bailo is open source / non-commercial, so will disable attribution:
         // https://reactflow.dev/docs/guides/remove-attribution/
         proOptions={{ hideAttribution: true }}
-      />
+      >
+        <Panel position='top-right'>
+          <Stack direction={'column'} spacing={0.5}>
+            <Chip label='Success' style={{ backgroundColor: green['A200'], border: '1px solid' }} />
+            <Chip label='In Progress' style={{ backgroundColor: yellow['200'], border: '1px solid' }} />
+            <Chip label='Failed' style={{ backgroundColor: red['200'], border: '1px solid' }} />
+            <Chip label='Not Started' style={{ border: '1px solid' }} />
+          </Stack>
+        </Panel>
+      </ReactFlow>
     </div>
   )
 }
