@@ -10,13 +10,22 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
     # Look for a `Dockerfile` in the `root` directory
-    directory: '/'
+    directory: '/frontend'
+    # Check for updates once a week
+    schedule:
+      interval: 'weekly'
+    # Allow up to 3 open pull requests for docker dependencies
+    open-pull-requests-limit: 3
+  - package-ecosystem: 'docker'
+    # Look for a `Dockerfile` in the `root` directory
+    directory: '/backend'
     # Check for updates once a week
     schedule:
       interval: 'weekly'
