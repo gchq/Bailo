@@ -39,7 +39,7 @@
     "jsonschema": "^1.4.1",
     "lodash-es": "^4.17.21",
     "next": "13.1.6",
-    "next-remove-imports": "^1.0.10",
+    "next-remove-imports": "^1.0.11",
     "next-router-mock": "^0.9.1",
     "notistack": "^2.0.8",
     "randomcolor": "^0.6.2",
