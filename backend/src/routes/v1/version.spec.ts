@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
-import { testManager, testModel,testReviewer, testUser, testVersion } from '../../utils/test/testModels.js'
+import { testManager, testModel, testReviewer, testUser, testVersion } from '../../utils/test/testModels.js'
 
 const approval = await import('../../services/approval.js')
 jest.unstable_mockModule('../../services/approval.js', () => {

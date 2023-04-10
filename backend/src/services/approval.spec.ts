@@ -7,7 +7,7 @@ import ApprovalModel from '../models/Approval.js'
 import ModelModel from '../models/Model.js'
 import UserModel from '../models/User.js'
 import VersionModel from '../models/Version.js'
-import { ApprovalCategory, ApprovalStates, DeploymentDoc,EntityKind, VersionDoc } from '../types/types.js'
+import { ApprovalCategory, ApprovalStates, DeploymentDoc, EntityKind, VersionDoc } from '../types/types.js'
 
 jest.unstable_mockModule('../utils/smtp.js', () => ({
   sendEmail: jest.fn(),

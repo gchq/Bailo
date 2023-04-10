@@ -2,7 +2,7 @@ import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 
 import VersionModel from '../models/Version.js'
-import { ApprovalCategory, DeploymentDoc,ModelDoc, VersionDoc } from '../types/types.js'
+import { ApprovalCategory, DeploymentDoc, ModelDoc, VersionDoc } from '../types/types.js'
 import config from '../utils/config.js'
 import createRequestUrl from '../utils/createRequestUrl.js'
 import { NotFound } from '../utils/result.js'
