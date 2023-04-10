@@ -10,6 +10,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -18,6 +19,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -26,6 +28,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -34,6 +37,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -42,6 +46,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -50,6 +55,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
   - package-ecosystem: 'npm'
@@ -58,6 +64,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
     
