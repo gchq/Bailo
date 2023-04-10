@@ -1,4 +1,4 @@
-FROM node:16-alpine AS builder
+FROM node:19-alpine AS builder
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
@@ -9,7 +9,7 @@ RUN npm install
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npx turbo run build --filter=@bailo/frontend...
 
-FROM node:16-alpine AS runner
+FROM node:19-alpine AS runner
 WORKDIR /app
 
 # Don't run production as root
