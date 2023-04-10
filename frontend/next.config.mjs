@@ -1,5 +1,3 @@
-/** @type {import('next').NextConfig} */
-
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -27,6 +25,7 @@ const withMDX = nextMDX({
 const isDevelopment = process.env.NODE_ENV === 'development'
 const backend = process.env.BACKEND_SERVICE ?? 'http://backend:3001'
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
