@@ -5,21 +5,10 @@ import { ObjectId } from 'mongodb'
 
 import DeploymentModel from '../models/Deployment.js'
 import UserModel from '../models/User.js'
-import { DeploymentDoc } from '../types/types.js'
-import * as entityUtils from '../utils/entity.js'
-import * as emailClient from '../utils/smtp.js'
-import {
-  deploymentUuid,
-  testDeployment,
-  testDeployment2,
-  testUser,
-  testUser2,
-  testVersion,
-} from '../utils/test/testModels.js'
+import { deploymentUuid, testDeployment, testDeployment2, testUser } from '../utils/test/testModels.js'
 import {
   createDeployment,
   DeploymentFilter,
-  emailDeploymentOwnersOnVersionDeletion,
   findDeploymentById,
   findDeploymentByUuid,
   findDeployments,

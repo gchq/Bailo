@@ -1,12 +1,14 @@
+import '../../utils/mockMongo'
+
 import { jest } from '@jest/globals'
 import { ObjectId } from 'mongodb'
 import mongoose, { Types } from 'mongoose'
 import supertest from 'supertest'
 import { v4 as uuidv4 } from 'uuid'
-import { server } from '../../routes.js'
+
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
-import '../../utils/mockMongo'
+import { server } from '../../routes.js'
 
 const user = await import('../../services/user.js')
 jest.unstable_mockModule('../../services/user.js', () => ({

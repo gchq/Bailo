@@ -1,5 +1,6 @@
-import VersionModel from '../models/Version.js'
 import '../utils/mockMongo'
+
+import VersionModel from '../models/Version.js'
 import { testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
 import {
   createVersion,

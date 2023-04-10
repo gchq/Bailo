@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from 'fs/promises'
 import matter from 'gray-matter'
 import { parse } from 'path'
+
 import { DocFileOrHeading, DocsMenuContent } from '../types/types.js'
 
 type DocsFrontMatter = {

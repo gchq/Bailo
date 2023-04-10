@@ -1,10 +1,11 @@
 import { Request, Response } from 'express'
-import { VersionDoc } from '../../types/types.js'
-import { isUserInEntityList } from '../../utils/entity.js'
+
 import { findDeployments } from '../../services/deployment.js'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
+import { VersionDoc } from '../../types/types.js'
+import { isUserInEntityList } from '../../utils/entity.js'
 import { BadReq, NotFound, NotImplemented } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 

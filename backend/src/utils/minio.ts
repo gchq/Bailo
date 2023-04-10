@@ -1,4 +1,5 @@
 import * as Minio from 'minio'
+
 import config from './config.js'
 import logger from './logger.js'
 

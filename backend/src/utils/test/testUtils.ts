@@ -1,4 +1,5 @@
 import supertest from 'supertest'
+
 import { server } from '../../routes.js'
 
 export function authenticatedGetRequest(path: string) {

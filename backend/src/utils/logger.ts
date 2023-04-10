@@ -1,23 +1,25 @@
 /* eslint-disable max-classes-per-file */
+import { WritableStream } from 'node:stream/web'
+
 import getAppRoot from 'app-root-path'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
-import { gzip } from 'pako'
 import devnull from 'dev-null'
 import { NextFunction, Request, Response } from 'express'
 import fsPromise from 'fs/promises'
 import { omit } from 'lodash-es'
-import { WritableStream } from 'node:stream/web'
 import morgan from 'morgan'
+import { gzip } from 'pako'
 import { join, resolve, sep } from 'path'
+import { fileURLToPath } from 'url'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
-import { fileURLToPath } from 'url'
-import { StatusError } from '../types/types.js'
-import { ensurePathExists, getFilesInDir } from './filesystem.js'
+
 import LogModel from '../models/Log.js'
-import serializers from './serializers.js'
+import { StatusError } from '../types/types.js'
 import config from './config.js'
+import { ensurePathExists, getFilesInDir } from './filesystem.js'
+import serializers from './serializers.js'
 
 const appRoot = getAppRoot.toString()
 

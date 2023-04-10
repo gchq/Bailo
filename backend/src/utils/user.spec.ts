@@ -1,7 +1,8 @@
+import './mockMongo'
+
 import UserModel from '../models/User.js'
 import { testUser } from './test/testModels.js'
 import { getUserFromAuthHeader } from './user.js'
-import './mockMongo'
 
 describe('user utils', () => {
   beforeEach(async () => {

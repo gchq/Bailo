@@ -1,11 +1,13 @@
+import '../../utils/mockMongo'
+
 import { cloneDeep } from 'lodash-es'
 import mongoose from 'mongoose'
+
 import DeploymentModel from '../../models/Deployment.js'
 import ModelModel from '../../models/Model.js'
 import SchemaModel from '../../models/Schema.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
-import '../../utils/mockMongo'
 import {
   modelId,
   modelUuid,

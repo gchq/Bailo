@@ -1,16 +1,19 @@
 import express from 'express'
-import { expressErrorHandler, expressLogger } from './utils/logger.js'
+
+import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
+import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
   fetchRawModelFiles,
-  getUserDeployments,
   getDeployment,
+  getDeploymentAccess,
+  getUserDeployments,
   postDeployment,
   postUngovernedDeployment,
   resetDeploymentApprovals,
-  getDeploymentAccess,
 } from './routes/v1/deployment.js'
 import getDocsMenuContent from './routes/v1/docs.js'
 import {
+  getModelAccess,
   getModelById,
   getModelByUuid,
   getModelDeployments,
@@ -18,27 +21,25 @@ import {
   getModelSchema,
   getModelVersion,
   getModelVersions,
-  getModelAccess,
 } from './routes/v1/model.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
-import { getNumApprovals, getApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema.js'
 import { getSpecification } from './routes/v1/specification.js'
 import { getUiConfig } from './routes/v1/uiConfig.js'
 import { postUpload } from './routes/v1/upload.js'
 import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users.js'
 import {
+  deleteVersion,
   getVersion,
   getVersionAccess,
-  deleteVersion,
-  putVersion,
+  getVersionFile,
+  getVersionFileList,
+  postRebuildModel,
   postResetVersionApprovals,
   putUpdateLastViewed,
-  getVersionFileList,
-  getVersionFile,
-  postRebuildModel,
+  putVersion,
 } from './routes/v1/version.js'
-import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
+import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 
 export const server = express()

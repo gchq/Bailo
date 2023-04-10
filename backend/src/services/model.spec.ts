@@ -1,6 +1,9 @@
+import '../utils/mockMongo'
+
+import { jest } from '@jest/globals'
+
 import ModelModel from '../models/Model.js'
 import VersionModel from '../models/Version.js'
-import '../utils/mockMongo'
 import { testModel, testModel2, testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
 import {
   createModel,
@@ -12,7 +15,6 @@ import {
   removeVersionFromModel,
   serializedModelFields,
 } from './model.js'
-import { jest } from '@jest/globals'
 
 let modelId: any
 

@@ -1,5 +1,6 @@
 import { Request } from 'express'
-import { ModelDoc, DeploymentDoc, UserDoc, VersionDoc } from '../types/types.js'
+
+import { DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
 import { Model } from '../types/types.js'
 
 export default class AuthorisationBase {

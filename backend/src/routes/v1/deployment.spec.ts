@@ -1,13 +1,16 @@
-import { ObjectId } from 'mongodb'
+import '../../utils/mockMongo.js'
+
 import { jest } from '@jest/globals'
+import { ObjectId } from 'mongodb'
 import mongoose from 'mongoose'
+
 import DeploymentModel from '../../models/Deployment.js'
 import ModelModel from '../../models/Model.js'
 import SchemaModel from '../../models/Schema.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
-import '../../utils/mockMongo.js'
 import {
+  deploymentData,
   deploymentSchema,
   deploymentUuid,
   managerApproval,
@@ -16,7 +19,6 @@ import {
   testModel,
   testUser,
   testVersion,
-  deploymentData,
 } from '../../utils/test/testModels.js'
 
 const approval = await import('../../services/approval.js')

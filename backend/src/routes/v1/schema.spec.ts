@@ -1,6 +1,8 @@
-import mongoose from 'mongoose'
-import SchemaModel from '../../models/Schema.js'
 import '../../utils/mockMongo'
+
+import mongoose from 'mongoose'
+
+import SchemaModel from '../../models/Schema.js'
 import { uploadSchema } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 

@@ -1,10 +1,11 @@
 import getAppRoot from 'app-root-path'
-import { join } from 'path'
 import { readdir } from 'fs/promises'
 import mongoose, { Types } from 'mongoose'
-import logger from './logger.js'
+import { join } from 'path'
+
 import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
 import config from './config.js'
+import logger from './logger.js'
 
 export async function connectToMongoose() {
   // is it already connected

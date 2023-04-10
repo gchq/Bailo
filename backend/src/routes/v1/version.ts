@@ -1,27 +1,28 @@
 import bodyParser from 'body-parser'
-import { basename } from 'path'
 import { Request, Response } from 'express'
+import { basename } from 'path'
+
+import audit from '../../external/Audit.js'
 import ApprovalModel from '../../models/Approval.js'
-import { ApprovalStates, ModelUploadType, SeldonVersion, ApprovalTypes } from '../../types/types.js'
+import ModelModel from '../../models/Model.js'
 import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval.js'
+import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from '../../services/deployment.js'
+import { removeVersionFromModel } from '../../services/model.js'
 import {
   findVersionById,
   findVersionFileList,
   updateManagerLastViewed,
   updateReviewerLastViewed,
 } from '../../services/version.js'
+import { ApprovalStates, ApprovalTypes,ModelUploadType, SeldonVersion } from '../../types/types.js'
+import { FileRef } from '../../utils/build/build.js'
+import config from '../../utils/config.js'
+import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
+import { getClient } from '../../utils/minio.js'
+import { getUploadQueue } from '../../utils/queues.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
-import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
-import { removeVersionFromModel } from '../../services/model.js'
-import { getClient } from '../../utils/minio.js'
-import { MinioRandomAccessReader, getFileStream } from '../../utils/zip.js'
-import { FileRef } from '../../utils/build/build.js'
-import { getUploadQueue } from '../../utils/queues.js'
-import config from '../../utils/config.js'
-import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from '../../services/deployment.js'
-import ModelModel from '../../models/Model.js'
-import audit from '../../external/Audit.js'
+import { getFileStream,MinioRandomAccessReader } from '../../utils/zip.js'
 
 export const getVersion = [
   ensureUserRole('user'),

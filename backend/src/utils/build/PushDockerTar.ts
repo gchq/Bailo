@@ -1,19 +1,19 @@
 /* eslint-disable no-param-reassign */
-import shelljs from 'shelljs'
-import tar from 'tar'
-import { readFile, stat } from 'fs/promises'
-import fs from 'fs'
-import { join } from 'path'
 import defaultAxios, { AxiosInstance } from 'axios'
 import { createHash } from 'crypto'
+import fs from 'fs'
+import { readFile, stat } from 'fs/promises'
 import https from 'https'
+import { join } from 'path'
+import shelljs from 'shelljs'
+import tar from 'tar'
 
-import { ContentTypes } from '../registry.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
-import { BuildLogger } from './BuildLogger.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import { ModelDoc, VersionDoc } from '../../types/types.js'
 import config from '../config.js'
+import { ContentTypes } from '../registry.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { rm } = shelljs
 

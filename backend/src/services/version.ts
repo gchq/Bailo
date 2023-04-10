@@ -1,16 +1,17 @@
 import { basename } from 'path'
-import { DateString, ModelId, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
-import VersionModel from '../models/Version.js'
+
 import Authorisation from '../external/Authorisation.js'
-import { asyncFilter } from '../utils/general.js'
-import { createSerializer, SerializerOptions } from '../utils/serializers.js'
-import { BadReq, Forbidden, NotFound } from '../utils/result.js'
-import { serializedModelFields } from './model.js'
-import logger from '../utils/logger.js'
-import { listZipFiles, MinioRandomAccessReader } from '../utils/zip.js'
-import { getClient } from '../utils/minio.js'
+import VersionModel from '../models/Version.js'
+import { DateString, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { FileRef } from '../utils/build/build.js'
 import config from '../utils/config.js'
+import { asyncFilter } from '../utils/general.js'
+import logger from '../utils/logger.js'
+import { getClient } from '../utils/minio.js'
+import { BadReq, Forbidden, NotFound } from '../utils/result.js'
+import { createSerializer, SerializerOptions } from '../utils/serializers.js'
+import { listZipFiles, MinioRandomAccessReader } from '../utils/zip.js'
+import { serializedModelFields } from './model.js'
 
 const auth = new Authorisation()
 

@@ -1,6 +1,7 @@
-import mongoose from 'mongoose'
-import { jest } from '@jest/globals'
 import '../../utils/mockMongo.js'
+
+import { jest } from '@jest/globals'
+import mongoose from 'mongoose'
 
 describe('test approvals routes', () => {
   test('that we can fetch approvals count', async () => {

@@ -1,7 +1,8 @@
 import memoize from 'memoizee'
 import { Types } from 'mongoose'
-import { ModelId } from '../types/types.js'
+
 import UserModel from '../models/User.js'
+import { ModelId } from '../types/types.js'
 import { SerializerOptions } from '../utils/serializers.js'
 
 interface GetUserOptions {

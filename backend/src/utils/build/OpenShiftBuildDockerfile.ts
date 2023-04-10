@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
-import OpenShift from 'openshift-rest-client'
 import AdmZip from 'adm-zip'
 import { createReadStream } from 'fs'
+import OpenShift from 'openshift-rest-client'
 
-import { VersionDoc, ModelDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
-import { BuildLogger } from './BuildLogger.js'
 import { getAdminToken } from '../../routes/v1/registryAuth.js'
+import { ModelDoc,VersionDoc } from '../../types/types.js'
 import config from '../config.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { OpenshiftClient } = OpenShift
 

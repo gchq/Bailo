@@ -1,11 +1,12 @@
 import { Types } from 'mongoose'
-import { Model, ModelId, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
-import ModelModel from '../models/Model.js'
+
 import Authorisation from '../external/Authorisation.js'
-import { asyncFilter } from '../utils/general.js'
-import { SerializerOptions } from '../utils/serializers.js'
-import { Forbidden, NotFound } from '../utils/result.js'
+import ModelModel from '../models/Model.js'
+import { Model, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { isUserInEntityList } from '../utils/entity.js'
+import { asyncFilter } from '../utils/general.js'
+import { Forbidden, NotFound } from '../utils/result.js'
+import { SerializerOptions } from '../utils/serializers.js'
 
 const auth = new Authorisation()
 

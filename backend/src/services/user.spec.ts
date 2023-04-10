@@ -1,5 +1,6 @@
-import UserModel from '../models/User.js'
 import '../utils/mockMongo'
+
+import UserModel from '../models/User.js'
 import {
   findAndUpdateUser,
   findUserCached,
