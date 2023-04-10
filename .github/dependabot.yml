@@ -13,61 +13,7 @@ updates:
     versioning-strategy: increase
     # Allow up to 3 open pull requests for node dependencies
     open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/backend'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/frontend'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/lib/landing'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/lib/node'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/lib/shared'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/lib/p-mongo-queue'
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: 'daily'
-    versioning-strategy: increase
-    # Allow up to 3 open pull requests for node dependencies
-    open-pull-requests-limit: 3
-    
+
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
     # Look for a `Dockerfile` in the `root` directory
