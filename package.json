@@ -19,7 +19,7 @@
     "backend"
   ],
   "devDependencies": {
-    "prettier": "^2.8.4",
+    "prettier": "^2.8.7",
     "turbo-linux-64": "^1.8.6",
     "turbo": "^1.8.6"
   }

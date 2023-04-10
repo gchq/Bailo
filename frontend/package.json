@@ -50,7 +50,7 @@
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
     "shelljs": "^0.8.5",
-    "swagger-ui-react": "^4.18.1",
+    "swagger-ui-react": "^4.18.2",
     "swr": "^2.0.4",
     "typescript": "4.9.5"
   },
@@ -62,7 +62,7 @@
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
-    "@types/swagger-ui-react": "^4.11.0",
+    "@types/swagger-ui-react": "^4.18.0",
     "@vitejs/plugin-react": "^3.1.0",
     "@vitest/coverage-c8": "^0.29.8",
     "cypress": "^12.7.0",
