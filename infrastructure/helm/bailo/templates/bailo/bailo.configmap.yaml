@@ -30,7 +30,7 @@ data:
         },
       },
       mongo: {
-        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ .Values.mongodb.host }}',
+        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}',
         connectionOptions: {
           useFindAndModify: false,
           useNewUrlParser: true,
