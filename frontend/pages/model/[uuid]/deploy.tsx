@@ -3,7 +3,6 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
-import { cloneDeep } from 'lodash-es'
 import { postEndpoint } from '../../../data/api'
 import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
@@ -85,7 +84,7 @@ export default function Deploy() {
   const onSubmit = async () => {
     setError(undefined)
 
-    const data = cloneDeep(getStepsData(splitSchema))
+    const data = getStepsData(splitSchema)
 
     data.highLevelDetails.modelID = modelUuid
     data.schemaRef = currentSchema?.reference
