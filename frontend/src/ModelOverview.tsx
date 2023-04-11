@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import MetadataDisplay from './MetadataDisplay'
 import EntitiesDisplay from '../components/EntitiesDisplay'
+import { printProperty } from '../utils/propertyUtils'
 
 function ModelOverview(props: any) {
   const { version } = props
@@ -26,8 +27,8 @@ function ModelOverview(props: any) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
-            <Typography variant='body1' style={{ whiteSpace: 'pre-line' }}>
-              {version.metadata.highLevelDetails.modelOverview}
+            <Typography variant='body1' style={{ whiteSpace: 'pre-wrap' }}>
+              {printProperty(version.metadata.highLevelDetails.modelOverview)}
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
