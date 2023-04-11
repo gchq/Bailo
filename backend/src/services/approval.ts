@@ -220,7 +220,7 @@ export async function readApprovals({
     query.status = { $ne: 'No Response' }
   }
 
-  return await ApprovalModel.find(query)
+  return ApprovalModel.find(query)
     .populate({
       path: 'version',
       populate: {
