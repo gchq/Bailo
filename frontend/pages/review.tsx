@@ -153,7 +153,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
                     Requesting deployment of{' '}
                     <Link href={`/model/${approvalObj.deployment?.model?.uuid}`} passHref legacyBehavior>
                       <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
-                        {approvalObj.deployment?.model?.latestVersion?.highLevelDetails?.name}
+                        {approvalObj.deployment?.model?.latestVersion?.metadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
                   </Typography>
