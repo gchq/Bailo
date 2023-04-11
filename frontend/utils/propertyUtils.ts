@@ -26,7 +26,7 @@ const printProperty = (prop: unknown, allowArrays = false, allowObjects = false,
     if (format === 'date-time') {
       return formatDateString(prop)
     }
-    return prop
+    return prop.replaceAll('\\t', '    ')
   }
   if (typeof prop === 'boolean') {
     return prop ? 'Yes' : 'No'
