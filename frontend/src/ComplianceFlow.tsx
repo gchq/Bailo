@@ -68,10 +68,10 @@ function ComplianceFlow({ initialEdges, initialNodes }: any) {
       >
         <Panel position='top-right'>
           <Stack direction={'column'} spacing={0.5}>
-            <Chip label='Success' style={{ backgroundColor: green['A200'], border: '1px solid' }} />
-            <Chip label='In Progress' style={{ backgroundColor: yellow['200'], border: '1px solid' }} />
-            <Chip label='Failed' style={{ backgroundColor: red['200'], border: '1px solid' }} />
-            <Chip label='Not Started' style={{ border: '1px solid' }} />
+            <Chip label='Success' sx={{ backgroundColor: green['A200'], border: '1px solid' }} />
+            <Chip label='In Progress' sx={{ backgroundColor: yellow['200'], border: '1px solid' }} />
+            <Chip label='Failed' sx={{ backgroundColor: red['200'], border: '1px solid' }} />
+            <Chip label='Not Started' sx={{ border: '1px solid' }} />
           </Stack>
         </Panel>
       </ReactFlow>
