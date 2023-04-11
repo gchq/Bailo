@@ -2,7 +2,7 @@ import subprocess
 import pytest
 import os
 
-from importlib_resources import files
+from importlib.resources import files
 from unittest.mock import patch, Mock, call
 from tests.resources import requirements
 
