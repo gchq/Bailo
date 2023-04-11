@@ -24,13 +24,15 @@ def test_upload_and_update_model():
     client.connect(username=username, password=password)
 
     # Upload model
-    with open("../../../../cypress/fixtures/minimal_metadata.json") as json_file:
+    with open(
+        "../../../../frontend/cypress/fixtures/minimal_metadata.json"
+    ) as json_file:
         metadata = json.load(json_file)
 
     uploaded_model = client.upload_model(
         metadata=metadata,
-        binary_file="../../../../cypress/fixtures/minimal_binary.zip",
-        code_file="../../../../cypress/fixtures/minimal_code.zip",
+        binary_file="../../../../frontend/cypress/fixtures/minimal_binary.zip",
+        code_file="../../../../frontend/cypress/fixtures/minimal_code.zip",
     )
 
     model_uuid = uploaded_model["uuid"]
@@ -49,8 +51,8 @@ def test_upload_and_update_model():
     # Update the model
     updated_model = client.update_model(
         model_card,
-        binary_file="../../cypress/fixtures/minimal_binary.zip",
-        code_file="../../cypress/fixtures/minimal_code.zip",
+        binary_file="../../frontend/cypress/fixtures/minimal_binary.zip",
+        code_file="../../frontend/cypress/fixtures/minimal_code.zip",
     )
 
     assert updated_model["uuid"] == model_uuid
