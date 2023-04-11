@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import MetadataDisplay from './MetadataDisplay'
+import EntitiesDisplay from '../components/EntitiesDisplay'
 import { printProperty } from '../utils/propertyUtils'
 
 function ModelOverview(props: any) {
@@ -52,19 +53,19 @@ function ModelOverview(props: any) {
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Uploaders</Typography>
             <Typography variant='body1'>
-              {version.metadata.contacts.uploader.map((uploader) => uploader.id).join(', ')}
+              <EntitiesDisplay entities={version.metadata.contacts.uploader} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Reviewers</Typography>
             <Typography variant='body1'>
-              {version.metadata.contacts.reviewer.map((reviewer) => reviewer.id).join(', ')}
+              <EntitiesDisplay entities={version.metadata.contacts.reviewer} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Managers</Typography>
             <Typography variant='body1'>
-              {version.metadata.contacts.manager.map((manager) => manager.id).join(', ')}
+              <EntitiesDisplay entities={version.metadata.contacts.manager} />
             </Typography>
           </Box>
         </Box>
