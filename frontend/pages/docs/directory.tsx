@@ -77,9 +77,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'E2e Testing', slug: 'developers/testing/e2e-testing' },
   { title: 'Manual Testing', slug: 'developers/testing/manual-testing' },
 
-  // Roadmap
-  { title: 'Roadmap', slug: 'roadmap' },
-
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
 ]
