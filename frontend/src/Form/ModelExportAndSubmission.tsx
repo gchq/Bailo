@@ -1,4 +1,3 @@
-import React, { Dispatch, SetStateAction, createRef, useState } from 'react'
 import Download from '@mui/icons-material/Download'
 import OpenInNew from '@mui/icons-material/OpenInNew'
 import Upload from '@mui/icons-material/Upload'
@@ -16,10 +15,12 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import React, { createRef, Dispatch, SetStateAction, useState } from 'react'
+
 import { useGetUiConfig } from '../../data/uiConfig'
-import ModelOverview from '../ModelOverview'
 import { SplitSchema } from '../../types/interfaces'
 import { consoleWarn } from '../../utils/logging'
+import ModelOverview from '../ModelOverview'
 
 const downloadToFile = (blob, filename) => {
   const a = document.createElement('a')

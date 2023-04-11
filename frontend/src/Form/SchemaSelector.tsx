@@ -1,10 +1,11 @@
-import React, { Dispatch, SetStateAction } from 'react'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
-import { ExtendedSelectDisplayProps } from '../types'
+import React, { Dispatch, SetStateAction } from 'react'
+
 import { Schema } from '../../../lib/shared/types'
+import { ExtendedSelectDisplayProps } from '../types'
 
 export default function SchemaSelector({
   currentSchema,

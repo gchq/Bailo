@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { TextWidgetProps } from '../TextWidget/index'
 
 function EmailWidget(props: TextWidgetProps) {

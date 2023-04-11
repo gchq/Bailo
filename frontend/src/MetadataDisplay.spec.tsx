@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
-import { render, screen, waitFor } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
+import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
+
 import { useGetSchemas } from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'

@@ -1,10 +1,11 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import MetadataDisplay from './MetadataDisplay'
+import Typography from '@mui/material/Typography'
+
 import { Deployment } from '../../lib/shared/types'
 import EntitiesDisplay from '../components/EntitiesDisplay'
+import MetadataDisplay from './MetadataDisplay'
 
 type DeploymentOverviewProps = {
   deployment: Deployment

@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react'
-import ChildLogDetails from './ChildLogDetails'
-import { LogFilters } from '../FilterMenu/FilterMenu'
+
 import { LogEntry, LogType } from '../../../lib/shared/types'
 import { useGetAppLogs } from '../../data/admin'
 import { useGetUiConfig } from '../../data/uiConfig'
+import { LogFilters } from '../FilterMenu/FilterMenu'
+import ChildLogDetails from './ChildLogDetails'
 
 function getLogType(log: LogEntry): LogType {
   switch (log.code) {

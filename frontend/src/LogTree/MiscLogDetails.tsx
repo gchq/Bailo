@@ -1,6 +1,7 @@
 import Typography from '@mui/material/Typography'
 import { omit } from 'lodash-es'
 import React, { ReactElement } from 'react'
+
 import { LogEntry } from '../../../lib/shared/types'
 
 export const miscIgnoreList = [

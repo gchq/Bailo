@@ -5,6 +5,7 @@ import InputLabel from '@mui/material/InputLabel'
 import { utils } from '@rjsf/core'
 import { JSONSchema7 } from 'json-schema'
 import React from 'react'
+
 import IconButton from '../IconButton/IconButton'
 
 const { ADDITIONAL_PROPERTY_FLAG } = utils
