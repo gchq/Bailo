@@ -28,7 +28,7 @@
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
     "@mui/icons-material": "^5.11.16",
-    "@mui/lab": "^5.0.0-alpha.125",
+    "@mui/lab": "^5.0.0-alpha.126",
     "@mui/material": "^5.11.16",
     "@next/mdx": "^13.3.0",
     "@rjsf/core": "4.2.3",
