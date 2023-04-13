@@ -86,7 +86,7 @@
     "@types/node": "^18.15.11",
     "@types/nodemailer": "^6.4.7",
     "@types/pako": "^2.0.0",
-    "@types/shelljs": "^0.8.11",
+    "@types/shelljs": "^0.8.12",
     "@types/supertest": "^2.0.12",
     "@types/tar": "^6.1.4",
     "@types/unzipper": "^0.10.5",
