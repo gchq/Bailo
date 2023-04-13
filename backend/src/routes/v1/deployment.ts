@@ -1,18 +1,20 @@
-import { Request, Response } from 'express'
+import { ModelDoc } from '@bailo/shared'
 import bodyParser from 'body-parser'
+import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
-import { ApprovalStates, EntityKind } from '../../types/types.js'
+
+import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
-import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
 import { findSchemaByRef } from '../../services/schema.js'
+import { findVersionById, findVersionByName } from '../../services/version.js'
+import { ApprovalStates, EntityKind } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
+import { getClient } from '../../utils/minio.js'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
-import { parseEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { validateSchema } from '../../utils/validateSchema.js'
-import { findVersionByName } from '../../services/version.js'
-import config from '../../utils/config.js'
-import { getClient } from '../../utils/minio.js'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
@@ -110,10 +112,22 @@ export const postDeployment = [
 
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
+    await deployment.populate('model')
+    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
+
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+
     const managerApproval = await createDeploymentApprovals({
-      deployment: await deployment.populate('model'),
+      deployment,
+      version,
       user: req.user,
     })
+
     req.log.info(
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
       'Successfully created deployment'
@@ -208,7 +222,14 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentApprovals({ deployment: await deployment.populate('model'), user: req.user })
+    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+    await createDeploymentApprovals({ deployment, version, user: req.user })
 
     return res.json(deployment)
   },

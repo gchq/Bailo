@@ -1,33 +1,42 @@
 import { Types } from 'mongoose'
-import { getDeploymentQueue } from '../utils/queues.js'
-import { getEntitiesForUser, getUserListFromEntityList, parseEntityList } from '../utils/entity.js'
-import {
-  ApprovalStates,
-  Approval,
-  Entity,
-  ApprovalTypes,
-  ApprovalCategory,
-  VersionDoc,
-  UserDoc,
-  DeploymentDoc,
-} from '../types/types.js'
+
 import ApprovalModel from '../models/Approval.js'
 import { reviewApproval } from '../templates/reviewApproval.js'
+import {
+  Approval,
+  ApprovalCategory,
+  ApprovalStates,
+  ApprovalTypes,
+  DeploymentDoc,
+  Entity,
+  UserDoc,
+  VersionDoc,
+} from '../types/types.js'
+import { getEntitiesForUser, getUserListFromEntityList, parseEntityList } from '../utils/entity.js'
+import { getDeploymentQueue } from '../utils/queues.js'
 import { BadReq } from '../utils/result.js'
 import { sendEmail } from '../utils/smtp.js'
+import { findModelById } from './model.js'
 import { getUserByInternalId } from './user.js'
 import { findVersionById } from './version.js'
-import { findModelById } from './model.js'
 
-export async function createDeploymentApprovals({ deployment, user }: { deployment: DeploymentDoc; user: UserDoc }) {
-  const managers = await parseEntityList(deployment.metadata.contacts.owner)
+export async function createDeploymentApprovals({
+  deployment,
+  version,
+  user,
+}: {
+  deployment: DeploymentDoc
+  version: VersionDoc
+  user: UserDoc
+}) {
+  const managers = await parseEntityList(version.metadata.contacts.manager)
 
   if (!managers.valid) {
-    throw BadReq({ managers: deployment.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
+    throw BadReq({ managers: version.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
   }
 
   return createDeploymentApproval({
-    approvers: deployment.metadata.contacts.owner,
+    approvers: version.metadata.contacts.manager,
     deployment,
     approvalType: ApprovalTypes.Manager,
     user,
