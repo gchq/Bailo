@@ -55,7 +55,7 @@
     "nanoid": "^4.0.2",
     "node-fetch": "3.3.1",
     "nodemailer": "^6.9.1",
-    "open": "^8.4.2",
+    "open": "^9.1.0",
     "openshift-rest-client": "^7.1.1",
     "p-mongo-queue": "^8.4.0",
     "pako": "^2.1.0",
