@@ -529,7 +529,7 @@ function parseValue(value: any) {
   throw new Error(`Unexpected value ${value}`)
 }
 
-function generateSpecification() {
+export function generateSpecification() {
   return {
     swagger: '2.0',
     info: {

@@ -1,5 +1,8 @@
-import mongoose from 'mongoose'
 import '../../utils/mockMongo.js'
+
+import mongoose from 'mongoose'
+import { afterAll, describe, expect, test } from 'vitest'
+
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 describe('test UI config routes', () => {
@@ -11,8 +14,7 @@ describe('test UI config routes', () => {
     expect(data.registry).not.toBe(undefined)
   })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

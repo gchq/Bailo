@@ -1,9 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import { describe, expect, it } from 'vitest'
 
 import SubmissionError from './SubmissionError'
 

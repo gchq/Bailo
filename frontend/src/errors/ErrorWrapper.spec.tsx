@@ -1,16 +1,12 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import mockRouter from 'next-router-mock'
+import { beforeAll, describe, expect, it } from 'vitest'
 
-import { mockNextUseRouter } from '../../utils/testUtils'
 import ErrorWrapper, { MinimalErrorWrapper } from './ErrorWrapper'
 
 describe('ErrorWrapper', () => {
   beforeAll(() => {
-    mockNextUseRouter({ pathname: '/' })
+    mockRouter.push('/')
   })
   it('renders an ErrorWrapper component', async () => {
     render(<ErrorWrapper message='error!' />)

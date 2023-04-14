@@ -1,9 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import { describe, expect } from 'vitest'
 
 import { doNothing } from '../../utils/testUtils'
 import Form from './Form'

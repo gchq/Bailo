@@ -6,7 +6,7 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon",
     "build": "tsc",
-    "test": "cross-env NODE_OPTIONS=\"--experimental-vm-modules\" jest",
+    "test": "vitest",
     "lint": "eslint . --ext .ts",
     "style": "prettier --write .",
     "script": "ts-node src/scripts/runScript.ts",
@@ -64,17 +64,15 @@
     "tar": "^6.1.13",
     "unzipper": "^0.10.11",
     "uuid": "^9.0.0",
+    "yargs": "^17.7.1",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
     "@swc/core": "^1.3.46",
-    "@swc/jest": "^0.2.24",
     "@types/adm-zip": "^0.5.0",
     "@types/bunyan": "^1.8.8",
     "@types/config": "^3.3.0",
     "@types/express": "^4.17.17",
-    "@types/jest": "^29.5.0",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/lodash": "^4.14.194",
     "@types/lodash-es": "^4.17.7",
@@ -94,6 +92,7 @@
     "@types/yauzl": "^2.10.0",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.57.1",
+    "@vitest/coverage-c8": "^0.29.8",
     "cross-env": "^7.0.3",
     "eslint": "^8.38.0",
     "esmock": "^2.2.1",
@@ -106,6 +105,7 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^0.29.8"
   }
 }

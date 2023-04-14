@@ -1,10 +1,6 @@
-/**
- * @jest-environment jsdom
- */
-
-import { expect } from '@jest/globals'
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import * as versionDataImport from '../../data/version'
 import { lightTheme } from '../theme'
@@ -12,7 +8,7 @@ import CodeExplorer from './CodeExplorer'
 
 const versionData = { ...versionDataImport }
 
-jest.mock('@uiw/react-textarea-code-editor', () => ({
+vi.mock('@uiw/react-textarea-code-editor', () => ({
   default: () => <p>Code editor render contents</p>,
 }))
 
@@ -30,14 +26,14 @@ describe('CodeExplorer', () => {
       },
     }
 
-    const getVersionFileListSpy = jest.spyOn(versionData, 'useGetVersionFileList')
+    const getVersionFileListSpy = vi.spyOn(versionData, 'useGetVersionFileList')
     getVersionFileListSpy.mockReturnValue(fileListData)
 
     const fileContentsData: any = {
       file: 'Hello, world!',
     }
 
-    const getVersionFileSpy = jest.spyOn(versionData, 'useGetVersionFile')
+    const getVersionFileSpy = vi.spyOn(versionData, 'useGetVersionFile')
     getVersionFileSpy.mockReturnValue(fileContentsData)
 
     const { container } = render(

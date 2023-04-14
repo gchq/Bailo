@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import Box from '@mui/material/Box'
 import { render, screen, waitFor } from '@testing-library/react'
 import { SnackbarProvider } from 'notistack'

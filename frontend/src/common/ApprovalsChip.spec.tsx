@@ -1,10 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
 
 import { ApprovalStates, EntityKind } from '../../../lib/shared/types'
 import { lightTheme } from '../theme'

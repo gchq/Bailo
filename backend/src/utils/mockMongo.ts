@@ -1,5 +1,6 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
+import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
 
 let mongod: MongoMemoryServer
 beforeAll(async () => {
