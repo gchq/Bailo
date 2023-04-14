@@ -1,19 +1,20 @@
+import os
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, Mock
+
+import pytest
+
 from bailoclient.auth import CognitoSRPAuthenticator, Pkcs12Authenticator
 from bailoclient.bailo import Bailo
+from bailoclient.client import Client
+from bailoclient.config import APIConfig, BailoConfig
 from bailoclient.utils.exceptions import (
     IncompleteDotEnvFile,
     MissingDotEnvFile,
     UnableToCreateBailoClient,
 )
-import pytest
-import os
-
-from bailoclient.config import APIConfig, BailoConfig
 from tests.mocks.mock_api import MockAPI
 from tests.mocks.mock_auth import MockAuthentication
-from bailoclient.client import Client
 
 BAILO_URL = os.environ["BAILO_URL"]
 

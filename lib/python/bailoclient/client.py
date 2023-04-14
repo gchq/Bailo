@@ -6,22 +6,22 @@ import json
 import logging
 import os
 from datetime import datetime
-from glob import glob
 from functools import wraps
+from glob import glob
 from typing import Callable, Union
-from pkg_resources import resource_filename
 
+from pkg_resources import resource_filename
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
-from .api import AuthorisedAPI
-from .auth import (
+from bailoclient.api import AuthorisedAPI
+from bailoclient.auth import (
     AuthenticationInterface,
     CognitoSRPAuthenticator,
     UnauthorizedException,
 )
-from .config import BailoConfig, load_config
-from .models import Model, User
-from .utils.exceptions import (
+from bailoclient.config import BailoConfig, load_config
+from bailoclient.models import Model, User
+from bailoclient.utils.exceptions import (
     CannotIncrementVersion,
     DataInvalid,
     DeploymentNotFound,
@@ -30,7 +30,10 @@ from .utils.exceptions import (
     InvalidMetadata,
     UnconnectedClient,
 )
-from .utils.utils import get_filename_and_mimetype, minimal_keys_in_dictionary
+from bailoclient.utils.utils import (
+    get_filename_and_mimetype,
+    minimal_keys_in_dictionary,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -1,19 +1,16 @@
-import subprocess
-import pytest
-import os
-
-from importlib.resources import files
 from unittest.mock import patch, Mock, call
-from tests.resources import requirements
+import os
+import pytest
+import subprocess
 
 from bailoclient.model_handlers.model_bundler import Bundler
+from bailoclient.utils.enums import ModelFlavoursMeta
 from bailoclient.utils.exceptions import (
     ModelFlavourNotFound,
     MissingFilesError,
     ModelTemplateNotAvailable,
     ModelMethodNotAvailable,
 )
-from bailoclient.utils.enums import ModelFlavoursMeta
 
 
 @pytest.fixture
@@ -587,7 +584,9 @@ def test_get_output_dir_returns_empty_string_if_paths_are_the_same(bundler):
 def test_generate_requirements_file_creates_requirements_file_at_filepath(
     bundler, tmpdir
 ):
-    python_file = files(requirements).joinpath("file.py")
+    python_file = os.path.join(
+        os.path.dirname(__file__), "../resources/requirements/file.py"
+    )
     output_path = os.path.join(tmpdir, "requirements.txt")
 
     bundler.generate_requirements_file(python_file, output_path)
@@ -598,7 +597,7 @@ def test_generate_requirements_file_creates_requirements_file_at_filepath(
         content = f.read()
 
     assert "pydantic" in content
-    assert "requests" in content
+    assert "Requests" in content
 
 
 @patch(
