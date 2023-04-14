@@ -597,6 +597,7 @@ export function generateSpecification() {
               description: 'Model card for the uploaded model',
               type: 'object',
               default: {
+                schemaRef: '/Minimal/General/v10',
                 highLevelDetails: {
                   tags: ['facebook', 'fasttext', 'NLP', 'language', 'language_identification', 'multilingual'],
                   name: 'FastText Language Identification',
@@ -606,9 +607,12 @@ export function generateSpecification() {
                   modelCardVersion: 'v1.0',
                 },
                 contacts: {
-                  uploader: 'user',
-                  reviewer: 'user',
-                  manager: 'user',
+                  uploader: [{ kind: 'user', id: 'user' }],
+                  reviewer: [{ kind: 'user', id: 'user' }],
+                  manager: [{ kind: 'user', id: 'user' }],
+                },
+                buildOptions: {
+                  uploadType: 'Model card only',
                 },
               },
             },
@@ -622,6 +626,12 @@ export function generateSpecification() {
               name: 'binary',
               in: 'formData',
               description: 'Model binary to upload',
+              type: 'file',
+            },
+            {
+              name: 'docker',
+              in: 'formData',
+              description: 'Docker tar to upload',
               type: 'file',
             },
           ],
