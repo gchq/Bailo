@@ -3,6 +3,8 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+
+import { Schema, Version } from '../../../../lib/shared/types'
 import { postEndpoint } from '../../../data/api'
 import { useGetModel } from '../../../data/model'
 import { useGetDefaultSchema, useGetSchemas } from '../../../data/schema'
@@ -14,7 +16,6 @@ import SchemaSelector from '../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
-import { Schema, Version } from '../../../../lib/shared/types'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 
 function renderSubmissionTab({ activeStep, setActiveStep, onSubmit }: RenderButtonsInterface) {

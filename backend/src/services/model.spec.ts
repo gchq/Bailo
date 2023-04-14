@@ -1,6 +1,6 @@
 import '../utils/mockMongo'
 
-import { jest } from '@jest/globals'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import ModelModel from '../models/Model.js'
 import VersionModel from '../models/Version.js'
@@ -78,14 +78,14 @@ describe('test version service', () => {
   test('model is deleted if the sole version is removed', async () => {
     const mockModel = {
       ...testModel,
-      save: jest.fn(() => Promise.resolve()),
-      delete: jest.fn(() => Promise.resolve()),
+      save: vi.fn(() => Promise.resolve()),
+      delete: vi.fn(() => Promise.resolve()),
       versions: {
-        remove: jest.fn(() => Promise.resolve()),
+        remove: vi.fn(() => Promise.resolve()),
         length: 0,
       },
     }
-    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+    vi.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
 
     await removeVersionFromModel(userDoc, testVersion)
 
@@ -95,16 +95,16 @@ describe('test version service', () => {
   test('latest version is updated if that version is removed', async () => {
     const mockModel = {
       ...testModel,
-      save: jest.fn(() => Promise.resolve()),
-      delete: jest.fn(() => Promise.resolve()),
+      save: vi.fn(() => Promise.resolve()),
+      delete: vi.fn(() => Promise.resolve()),
       versions: {
-        remove: jest.fn(() => Promise.resolve()),
-        at: jest.fn(() => 'new latest version'),
+        remove: vi.fn(() => Promise.resolve()),
+        at: vi.fn(() => 'new latest version'),
         length: 3,
       },
     }
 
-    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+    vi.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
 
     await removeVersionFromModel(userDoc, testVersion)
 
@@ -115,17 +115,17 @@ describe('test version service', () => {
   test('latest version is not updated if an older version is removed', async () => {
     const mockModel = {
       ...testModel,
-      save: jest.fn(() => Promise.resolve()),
-      delete: jest.fn(() => Promise.resolve()),
+      save: vi.fn(() => Promise.resolve()),
+      delete: vi.fn(() => Promise.resolve()),
       versions: {
-        remove: jest.fn(() => Promise.resolve()),
-        at: jest.fn(() => 'new latest version'),
+        remove: vi.fn(() => Promise.resolve()),
+        at: vi.fn(() => 'new latest version'),
         length: 3,
       },
     }
     const { latestVersion } = mockModel
 
-    jest.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
+    vi.spyOn(ModelModel, 'findById').mockReturnValueOnce(mockModel)
 
     await removeVersionFromModel(userDoc, testVersion2)
 

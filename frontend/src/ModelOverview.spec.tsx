@@ -1,13 +1,9 @@
-/**
- * @jest-environment jsdom
- */
-
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+
+import { EntityKind } from '../../lib/shared/types'
 import ModelOverview from './ModelOverview'
 import { lightTheme } from './theme'
-import { EntityKind } from '../../lib/shared/types'
 
 describe('ModelOverview', () => {
   const version: any = {

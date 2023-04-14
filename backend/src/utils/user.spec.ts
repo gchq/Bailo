@@ -1,5 +1,7 @@
 import './mockMongo'
 
+import { beforeEach, describe, expect, test } from 'vitest'
+
 import UserModel from '../models/User.js'
 import { testUser } from './test/testModels.js'
 import { getUserFromAuthHeader } from './user.js'

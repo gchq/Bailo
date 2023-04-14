@@ -1,14 +1,15 @@
-import React, { ReactElement, useState } from 'react'
-import { useTheme } from '@mui/material/styles'
+import { Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
-import { Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import React, { ReactElement, useState } from 'react'
+
 import { LogLevel } from '../../lib/shared/types'
 import { useGetCurrentUser } from '../data/user'
-import Wrapper from '../src/Wrapper'
 import FilterMenu, { LogFilters } from '../src/FilterMenu/FilterMenu'
 import LogTree from '../src/LogTree/LogTree'
+import Wrapper from '../src/Wrapper'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()

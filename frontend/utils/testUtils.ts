@@ -1,12 +1,9 @@
-import { NextRouter } from 'next/router'
+import { beforeAll, vi } from 'vitest'
 
-export const doNothing = () => undefined
+beforeAll(() => {
+  vi.mock('next/router', () => require('next-router-mock'))
+})
 
-const useRouter = jest.spyOn(require('next/router'), 'useRouter')
-
-export function mockNextUseRouter({ pathname }: Pick<NextRouter, 'pathname'>) {
-  useRouter.mockImplementation(() => ({
-    pathname,
-    prefetch: doNothing,
-  }))
+export function doNothing() {
+  /* Do nothing */
 }

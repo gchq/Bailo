@@ -1,7 +1,8 @@
-import useSWR from 'swr'
 import qs from 'qs'
+import useSWR from 'swr'
+
 import { MinimalEntry } from '../../lib/shared/types'
-import { fetcher, textFetcher, ErrorInfo } from '../utils/fetcher'
+import { ErrorInfo, fetcher, textFetcher } from '../utils/fetcher'
 
 interface VersionAccess {
   uploader: boolean

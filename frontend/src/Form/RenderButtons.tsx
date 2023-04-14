@@ -3,9 +3,10 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import React, { Dispatch, SetStateAction } from 'react'
-import useNotification from '../common/Snackbar'
+
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepValidate, validateForm } from '../../utils/formUtils'
+import useNotification from '../common/Snackbar'
 
 export interface RenderButtonsInterface {
   step: Step

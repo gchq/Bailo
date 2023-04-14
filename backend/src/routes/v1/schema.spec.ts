@@ -1,6 +1,7 @@
 import '../../utils/mockMongo'
 
 import mongoose from 'mongoose'
+import { afterAll, beforeEach, describe, expect, test } from 'vitest'
 
 import SchemaModel from '../../models/Schema.js'
 import { uploadSchema } from '../../utils/test/testModels.js'
@@ -29,8 +30,7 @@ describe('test schema routes', () => {
     expect(res.body.name).toBe('upload-schema')
   })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

@@ -1,4 +1,3 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
 import Edit from '@mui/icons-material/Edit'
 import LoadingButton from '@mui/lab/LoadingButton'
 import Alert from '@mui/material/Alert'
@@ -8,6 +7,8 @@ import Checkbox from '@mui/material/Checkbox'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import React, { Dispatch, SetStateAction, useState } from 'react'
+
 import { useGetUiConfig } from '../../data/uiConfig'
 
 function ModelEditSubmission({

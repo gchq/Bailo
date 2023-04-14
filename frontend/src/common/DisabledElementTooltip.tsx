@@ -1,5 +1,5 @@
-import React, { ReactNode, useEffect } from 'react'
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip'
+import React, { ReactNode, useEffect } from 'react'
 
 function DisabledElementTooltip({
   conditions,

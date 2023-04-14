@@ -1,14 +1,17 @@
 import '../../utils/mockMongo.js'
 
-import { jest } from '@jest/globals'
 import { ObjectId } from 'mongodb'
 import mongoose from 'mongoose'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DeploymentModel from '../../models/Deployment.js'
 import ModelModel from '../../models/Model.js'
 import SchemaModel from '../../models/Schema.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
+import * as approval from '../../services/approval.js'
+import * as deployment from '../../services/deployment.js'
+import * as version from '../../services/version.js'
 import {
   deploymentData,
   deploymentSchema,
@@ -20,50 +23,8 @@ import {
   testUser,
   testVersion,
 } from '../../utils/test/testModels.js'
-
-const approval = await import('../../services/approval.js')
-jest.unstable_mockModule('../../services/approval.js', () => {
-  return {
-    ...approval,
-    createDeploymentApprovals: jest.fn(),
-  }
-})
-
-const { createDeploymentApprovals } = await import('../../services/approval.js')
-
-const deployment = await import('../../services/deployment.js')
-jest.unstable_mockModule('../../services/deployment.js', () => {
-  return {
-    ...deployment,
-    findDeployments: jest.fn(),
-  }
-})
-
-const { findDeployments } = await import('../../services/deployment.js')
-
-const version = await import('../../services/version.js')
-jest.unstable_mockModule('../../services/version.js', () => {
-  return {
-    ...version,
-    findVersionByName: jest.fn(),
-  }
-})
-
-const { findVersionByName } = await import('../../services/version.js')
-
-const validateSchemaModule = await import('../../utils/validateSchema.js')
-jest.unstable_mockModule('../../utils/validateSchema.js', () => {
-  return {
-    ...validateSchemaModule,
-    validateSchema: jest.fn(),
-  }
-})
-
-const { validateSchema } = await import('../../utils/validateSchema.js')
-
-const { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } = await import(
-  '../../utils/test/testUtils.js'
-)
+import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
+import * as validateSchema from '../../utils/validateSchema.js'
 
 let deploymentDoc: any
 let versionDoc: any
@@ -87,8 +48,9 @@ describe('test deployment routes', () => {
   })
 
   test('get user deployments', async () => {
-    const deploymentArray: any = new Array(1).fill(testDeployment)
-    ;(findDeployments as unknown as jest.Mock).mockReturnValueOnce(deploymentArray)
+    const deploymentArray = new Array(1).fill(testDeployment)
+    vi.spyOn(deployment, 'findDeployments').mockReturnValueOnce(Promise.resolve(deploymentArray))
+
     const res = await authenticatedGetRequest(`/api/v1/deployment/user/${testDeployment.metadata.contacts.owner.id}`)
     validateTestRequest(res)
     expect(res.body.length).not.toBe(0)
@@ -96,24 +58,23 @@ describe('test deployment routes', () => {
   })
 
   test('reset approvals for deployment with a given uuid', async () => {
-    ;(findVersionByName as unknown as jest.Mock).mockReturnValueOnce(versionDoc)
-    ;(createDeploymentApprovals as unknown as jest.Mock).mockReturnValueOnce(undefined)
+    vi.spyOn(version, 'findVersionByName').mockReturnValueOnce(versionDoc)
+    vi.spyOn(approval, 'createDeploymentApprovals').mockReturnValueOnce(Promise.resolve(undefined as any))
     const res = await authenticatedPostRequest(`/api/v1/deployment/${deploymentUuid}/reset-approvals`)
     validateTestRequest(res)
     expect(res.body.uuid).toBe(deploymentUuid)
   })
 
   test('that we can request a deployment', async () => {
-    ;(validateSchema as unknown as jest.Mock).mockReturnValueOnce(null)
-    ;(createDeploymentApprovals as unknown as jest.Mock).mockReturnValueOnce(managerApproval)
+    vi.spyOn(validateSchema, 'validateSchema').mockReturnValueOnce(null)
+    vi.spyOn(approval, 'createDeploymentApprovals').mockReturnValueOnce(Promise.resolve(managerApproval))
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
 
     validateTestRequest(res)
     expect(Object.keys(res.body)[0]).toBe('uuid')
   })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

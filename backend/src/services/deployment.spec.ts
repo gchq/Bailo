@@ -1,7 +1,7 @@
 import '../utils/mockMongo'
 
-import { jest } from '@jest/globals'
 import { ObjectId } from 'mongodb'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DeploymentModel from '../models/Deployment.js'
 import UserModel from '../models/User.js'
@@ -17,13 +17,14 @@ import {
 
 const userDoc = new UserModel(testUser)
 
-jest.mock('../utils/smtp', () => ({
-  sendEmail: jest.fn(() => Promise.resolve()),
-}))
+vi.mock('../utils/smtp.js', () => {
+  return {
+    sendEmail: vi.fn(),
+  }
+})
 
 describe('test deployment service', () => {
   beforeEach(async () => {
-    jest.clearAllMocks()
     const deploymentDoc: any = await DeploymentModel.create(testDeployment)
     testDeployment._id = new ObjectId(deploymentDoc._id)
   })

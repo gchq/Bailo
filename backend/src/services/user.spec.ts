@@ -1,5 +1,7 @@
 import '../utils/mockMongo'
 
+import { beforeEach, describe, expect, test } from 'vitest'
+
 import UserModel from '../models/User.js'
 import {
   findAndUpdateUser,

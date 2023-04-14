@@ -1,4 +1,5 @@
 import supertest from 'supertest'
+import { expect } from 'vitest'
 
 import { server } from '../../routes.js'
 

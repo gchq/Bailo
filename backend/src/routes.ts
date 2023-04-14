@@ -11,7 +11,6 @@ import {
   postUngovernedDeployment,
   resetDeploymentApprovals,
 } from './routes/v1/deployment.js'
-import getDocsMenuContent from './routes/v1/docs.js'
 import {
   getModelAccess,
   getModelById,
@@ -96,8 +95,6 @@ server.post('/api/v1/approval/:id/respond', ...postApprovalResponse)
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
 server.get('/api/v1/specification', ...getSpecification)
-
-server.get('/api/v1/docs/menu-content', ...getDocsMenuContent)
 
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)

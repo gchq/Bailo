@@ -6,9 +6,9 @@
 // Use for each notification to send:
 // sendNotification({ variant: 'success/info/warning/error', msg: 'Notification message' })
 
-import { SnackbarKey, useSnackbar, VariantType } from 'notistack'
-import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
+import IconButton from '@mui/material/IconButton'
+import { SnackbarKey, useSnackbar, VariantType } from 'notistack'
 import React, { useEffect, useState } from 'react'
 
 interface SnackbarConfig {

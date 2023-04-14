@@ -1,15 +1,12 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
-import DeploymentSubmission from './DeploymentSubmission'
-import { doNothing } from '../../utils/testUtils'
-import { useGetUiConfig } from '../../data/uiConfig'
+import { describe, expect, vi } from 'vitest'
 
-jest.mock('../../data/uiConfig', () => ({
-  useGetUiConfig: jest.fn(),
+import { useGetUiConfig } from '../../data/uiConfig'
+import { doNothing } from '../../utils/testUtils'
+import DeploymentSubmission from './DeploymentSubmission'
+
+vi.mock('../../data/uiConfig', () => ({
+  useGetUiConfig: vi.fn(),
 }))
 
 describe('DeploymentSubmission', () => {
@@ -25,7 +22,7 @@ describe('DeploymentSubmission', () => {
       isUiConfigError: false,
     }
 
-    ;(useGetUiConfig as unknown as jest.Mock).mockReturnValueOnce(mockedConfig)
+    vi.mocked(useGetUiConfig).mockReturnValueOnce(mockedConfig)
 
     render(<DeploymentSubmission onSubmit={doNothing} activeStep={1} setActiveStep={doNothing} />)
 

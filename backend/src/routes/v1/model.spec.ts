@@ -2,6 +2,7 @@ import '../../utils/mockMongo'
 
 import { cloneDeep } from 'lodash-es'
 import mongoose from 'mongoose'
+import { afterAll, beforeEach, describe, expect, test } from 'vitest'
 
 import DeploymentModel from '../../models/Deployment.js'
 import ModelModel from '../../models/Model.js'
@@ -75,8 +76,7 @@ describe('test model routes', () => {
     expect(res.body.version).toBe('1')
   })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

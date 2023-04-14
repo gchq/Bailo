@@ -1,13 +1,10 @@
-/**
- * @jest-environment jsdom
- */
-
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import { describe, expect } from 'vitest'
+
+import { Deployment, EntityKind } from '../../lib/shared/types'
 import DeploymentOverview from './DeploymentOverview'
 import { lightTheme } from './theme'
-import { EntityKind, Deployment } from '../../lib/shared/types'
 
 describe('DeploymentOverview', () => {
   const deployment = {

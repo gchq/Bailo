@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import Router from 'next/router'
+import { useEffect } from 'react'
 
 export default function RedirectDirectoryVisitor() {
   useEffect(() => {
@@ -76,9 +76,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Unit Testing', slug: 'developers/testing/unit-testing' },
   { title: 'E2e Testing', slug: 'developers/testing/e2e-testing' },
   { title: 'Manual Testing', slug: 'developers/testing/manual-testing' },
-
-  // Roadmap
-  { title: 'Roadmap', slug: 'roadmap' },
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },

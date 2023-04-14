@@ -22,9 +22,9 @@
     "test:coverage": "c8 npm test"
   },
   "devDependencies": {
-    "c8": "^7.11.0",
+    "c8": "^7.13.0",
     "mongodb": "^4.5.0",
-    "uvu": "^0.5.3"
+    "uvu": "^0.5.6"
   },
   "homepage": "https://github.com/gchq/p-mongo-queue",
   "repository": {

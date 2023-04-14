@@ -1,25 +1,17 @@
 import '../../utils/mockMongo'
 
-import { jest } from '@jest/globals'
 import { ObjectId } from 'mongodb'
 import mongoose, { Types } from 'mongoose'
 import supertest from 'supertest'
 import { v4 as uuidv4 } from 'uuid'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
 import { server } from '../../routes.js'
-
-const user = await import('../../services/user.js')
-jest.unstable_mockModule('../../services/user.js', () => ({
-  ...user,
-  getUserByInternalId: jest.fn(),
-}))
-
-const { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } = await import(
-  '../../utils/test/testUtils.js'
-)
-const { getUserByInternalId, findAndUpdateUser } = await import('../../services/user.js')
+import * as user from '../../services/user.js'
+import { findAndUpdateUser } from '../../services/user.js'
+import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 const request = supertest(server)
 
@@ -59,7 +51,7 @@ describe('test user routes', () => {
   })
 
   test('that we can get the logged in user', async () => {
-    ;(getUserByInternalId as unknown as jest.Mock).mockReturnValue(userDoc)
+    vi.spyOn(user, 'getUserByInternalId').mockReturnValue(userDoc)
     const res = await authenticatedGetRequest('/api/v1/user')
     validateTestRequest(res)
     expect(res.body.id).toBe(testUser.userId)
@@ -112,8 +104,7 @@ describe('test user routes', () => {
     expect(res.body.favourites.length).toBe(0)
   })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

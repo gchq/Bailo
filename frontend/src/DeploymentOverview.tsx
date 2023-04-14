@@ -1,10 +1,11 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import React from 'react'
-import MetadataDisplay from './MetadataDisplay'
+import Typography from '@mui/material/Typography'
+
 import { Deployment } from '../../lib/shared/types'
+import EntitiesDisplay from '../components/EntitiesDisplay'
+import MetadataDisplay from './MetadataDisplay'
 
 type DeploymentOverviewProps = {
   deployment: Deployment
@@ -24,7 +25,7 @@ function DeploymentOverview({ deployment }: DeploymentOverviewProps) {
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Owner</Typography>
             <Typography variant='body1'>
-              {deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')}
+              <EntitiesDisplay entities={deployment.metadata.contacts.owner} />
             </Typography>
           </Box>
         </Box>

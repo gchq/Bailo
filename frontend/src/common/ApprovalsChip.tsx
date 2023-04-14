@@ -1,17 +1,18 @@
-import React, { useState, useMemo, useCallback, MouseEvent, ReactElement } from 'react'
+import AccessTime from '@mui/icons-material/AccessTime'
 import Close from '@mui/icons-material/CloseTwoTone'
 import Done from '@mui/icons-material/DoneTwoTone'
+import DownArrow from '@mui/icons-material/KeyboardArrowDown'
+import UpArrow from '@mui/icons-material/KeyboardArrowUp'
 import Chip from '@mui/material/Chip'
-import Menu from '@mui/material/Menu'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import AccessTime from '@mui/icons-material/AccessTime'
-import DownArrow from '@mui/icons-material/KeyboardArrowDown'
-import UpArrow from '@mui/icons-material/KeyboardArrowUp'
+import Menu from '@mui/material/Menu'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
+import React, { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+
 import { ApprovalStates, Entity } from '../../../lib/shared/types'
 
 type Approval = {

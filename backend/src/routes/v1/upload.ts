@@ -17,7 +17,7 @@ import { moveFile } from '../../utils/minio.js'
 import MinioStore from '../../utils/MinioStore.js'
 import { createFileRef } from '../../utils/multer.js'
 import { getUploadQueue } from '../../utils/queues.js'
-import { BadReq, Conflict, GenericError } from '../../utils/result.js'
+import { BadReq, Conflict, GenericError, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -149,6 +149,10 @@ export const postUpload = [
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
       model = await findModelByUuid(req.user, modelUuid, { populate: true })
+
+      if (!model) {
+        throw NotFound({ modelUuid }, 'Tried to upload a new version for an unknown model')
+      }
     } else {
       // Save a new model, and add the uploaded version to its array
       model = await createModel(req.user, {
