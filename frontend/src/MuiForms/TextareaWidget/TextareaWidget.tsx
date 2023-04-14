@@ -1,7 +1,7 @@
 import TextField, { StandardTextFieldProps as TextFieldProps } from '@mui/material/TextField'
 import { utils, WidgetProps } from '@rjsf/core'
-import React from 'react'
 import { omit } from 'lodash-es'
+import React from 'react'
 
 const { getDisplayLabel } = utils
 

@@ -1,6 +1,8 @@
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
-import Form from './Form'
+import { describe, expect } from 'vitest'
+
 import { doNothing } from '../../utils/testUtils'
+import Form from './Form'
 
 describe('Form', () => {
   const splitSchema: any = {

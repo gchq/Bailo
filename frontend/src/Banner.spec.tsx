@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { expect, describe, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { useGetUiConfig } from '../data/uiConfig'
 import Banner from './Banner'

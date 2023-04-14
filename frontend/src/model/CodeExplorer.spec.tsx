@@ -1,9 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
+import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+
 import * as versionDataImport from '../../data/version'
-import CodeExplorer from './CodeExplorer'
 import { lightTheme } from '../theme'
-import { vi } from 'vitest'
+import CodeExplorer from './CodeExplorer'
 
 const versionData = { ...versionDataImport }
 

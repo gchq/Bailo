@@ -10,9 +10,10 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React from 'react'
-import Wrapper from '../src/Wrapper'
+
 import { useGetUiConfig } from '../data/uiConfig'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
+import Wrapper from '../src/Wrapper'
 
 export default function Help() {
   const { uiConfig, isUiConfigError } = useGetUiConfig()

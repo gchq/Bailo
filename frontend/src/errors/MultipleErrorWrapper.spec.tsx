@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import MultipleErrorWrapper from './MultipleErrorWrapper'
 import mockRouter from 'next-router-mock'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+
+import MultipleErrorWrapper from './MultipleErrorWrapper'
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}

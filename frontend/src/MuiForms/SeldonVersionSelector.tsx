@@ -1,6 +1,7 @@
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import MenuItem from '@mui/material/MenuItem'
 import { TextField } from '@mui/material'
+import MenuItem from '@mui/material/MenuItem'
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+
 import { SeldonVersion } from '../../../lib/shared/types'
 import { useGetUiConfig } from '../../data/uiConfig'
 

@@ -1,7 +1,8 @@
 import qs from 'qs'
 import useSWR from 'swr'
+
 import { Schema } from '../../lib/shared/types'
-import { fetcher, ErrorInfo } from '../utils/fetcher'
+import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetDefaultSchema(use = 'UPLOAD') {
   const { data, error, mutate } = useSWR<Schema, ErrorInfo>(

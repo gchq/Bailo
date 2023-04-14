@@ -1,5 +1,6 @@
 import { green, red, yellow } from '@mui/material/colors'
 import { XYPosition } from 'reactflow'
+
 import { Deployment, Version } from '../../lib/shared/types'
 
 function approvalColour(state: string) {

@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import mockRouter from 'next-router-mock'
+import { describe, expect } from 'vitest'
 
 import { lightTheme } from './theme'
 import Wrapper from './Wrapper'

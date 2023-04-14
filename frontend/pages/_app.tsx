@@ -1,22 +1,20 @@
-import Head from 'next/head'
-import { AppProps } from 'next/app'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import { CacheProvider, EmotionCache } from '@emotion/react'
-
-import createEmotionCache from '../components/createEmotionCache'
-
-import useThemeMode from '../utils/hooks/useThemeMode'
-import ThemeModeContext from '../src/contexts/themeModeContext'
-
-import { SnackbarProvider } from 'notistack'
-
 import '../public/css/fonts.css'
 import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/terminal.css'
 import '../public/css/highlight.css'
 import 'reactflow/dist/style.css'
+
+import { CacheProvider, EmotionCache } from '@emotion/react'
+import CssBaseline from '@mui/material/CssBaseline'
+import { ThemeProvider } from '@mui/material/styles'
+import { AppProps } from 'next/app'
+import Head from 'next/head'
+import { SnackbarProvider } from 'notistack'
+
+import createEmotionCache from '../components/createEmotionCache'
+import ThemeModeContext from '../src/contexts/themeModeContext'
+import useThemeMode from '../utils/hooks/useThemeMode'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()

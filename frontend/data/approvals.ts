@@ -1,5 +1,6 @@
 import qs from 'qs'
 import useSWR from 'swr'
+
 import { Approval } from '../../lib/shared/types'
 import { fetcher } from '../utils/fetcher'
 

@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { expect, describe, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import Copyright from './Copyright'
 

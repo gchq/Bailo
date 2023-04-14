@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+
 import CommonTabs from './CommonTabs'
 
 describe('CommonTabs', () => {
