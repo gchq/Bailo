@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect } from 'vitest'
 
 import CommonTabs from './CommonTabs'
 
