@@ -5,6 +5,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
+
 import { mockNextUseRouter } from '../../utils/testUtils'
 import { lightTheme } from '../theme'
 import DocsWrapper from './DocsWrapper'

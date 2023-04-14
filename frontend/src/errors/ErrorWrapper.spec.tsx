@@ -4,8 +4,9 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import ErrorWrapper, { MinimalErrorWrapper } from './ErrorWrapper'
+
 import { mockNextUseRouter } from '../../utils/testUtils'
+import ErrorWrapper, { MinimalErrorWrapper } from './ErrorWrapper'
 
 describe('ErrorWrapper', () => {
   beforeAll(() => {

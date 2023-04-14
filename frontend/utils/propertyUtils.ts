@@ -1,6 +1,6 @@
 import { formatDateString } from './dateUtils'
-import isObject from './type-guards/isObject'
 import { consoleError } from './logging'
+import isObject from './type-guards/isObject'
 
 const PROP_NOT_FOUND = 'Property not Found'
 const PROP_NOT_HANDLED_TYPE = 'Property not a Handled Type: '
@@ -86,4 +86,4 @@ const printPropertyArrayOfObjects = (prop: unknown, isOptional = false) => {
   return prop.map((obj) => printPropertyObject(obj)).join(', ')
 }
 
-export { printProperty, printPropertyArray, printPropertyObject, printPropertyArrayOfObjects, printPropertyOptional }
+export { printProperty, printPropertyArray, printPropertyArrayOfObjects, printPropertyObject, printPropertyOptional }

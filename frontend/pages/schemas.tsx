@@ -1,12 +1,13 @@
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useRouter } from 'next/router'
 import React from 'react'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import SchemaDesigner from '../src/SchemaDesign/SchemaDesigner'
-import Wrapper from '../src/Wrapper'
+
 import { useGetCurrentUser } from '../data/user'
+import SchemaDesigner from '../src/SchemaDesign/SchemaDesigner'
 import SchemaList from '../src/SchemaDesign/SchemaList'
+import Wrapper from '../src/Wrapper'
 
 enum TabOptions {
   SCHEMAS = 'schemas',

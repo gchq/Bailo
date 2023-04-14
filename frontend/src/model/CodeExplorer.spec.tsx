@@ -2,12 +2,13 @@
  * @jest-environment jsdom
  */
 
-import { render, screen, waitFor } from '@testing-library/react'
 import { expect } from '@jest/globals'
 import { ThemeProvider } from '@mui/material/styles'
+import { render, screen, waitFor } from '@testing-library/react'
+
 import * as versionDataImport from '../../data/version'
-import CodeExplorer from './CodeExplorer'
 import { lightTheme } from '../theme'
+import CodeExplorer from './CodeExplorer'
 
 const versionData = { ...versionDataImport }
 

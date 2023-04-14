@@ -4,9 +4,10 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
+
 import { useGetUiConfig } from '../../data/uiConfig'
-import ModelEditSubmission from './ModelEditSubmission'
 import { doNothing } from '../../utils/testUtils'
+import ModelEditSubmission from './ModelEditSubmission'
 
 jest.mock('../../data/uiConfig', () => ({
   useGetUiConfig: jest.fn(),

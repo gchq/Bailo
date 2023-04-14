@@ -11,18 +11,19 @@ import Grid from '@mui/material/Grid'
 import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
+import { useTheme } from '@mui/material/styles'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import Wrapper from '../src/Wrapper'
+
+import { Approval } from '../../lib/shared/types'
 import { postEndpoint } from '../data/api'
 import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import { Approval } from '../../lib/shared/types'
+import Wrapper from '../src/Wrapper'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (

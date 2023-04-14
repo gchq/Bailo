@@ -4,8 +4,9 @@
 
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import UserAvatar from './UserAvatar'
+
 import { EntityKind } from '../../../lib/shared/types'
+import UserAvatar from './UserAvatar'
 
 describe('UserAvatar', () => {
   it('renders an UserAvatar component', async () => {
