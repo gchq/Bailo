@@ -14,7 +14,7 @@ import {
   updateManagerLastViewed,
   updateReviewerLastViewed,
 } from '../../services/version.js'
-import { ApprovalStates, ApprovalTypes,ModelUploadType, SeldonVersion } from '../../types/types.js'
+import { ApprovalStates, ApprovalTypes, ModelUploadType, SeldonVersion } from '../../types/types.js'
 import { FileRef } from '../../utils/build/build.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
@@ -22,7 +22,7 @@ import { getClient } from '../../utils/minio.js'
 import { getUploadQueue } from '../../utils/queues.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
-import { getFileStream,MinioRandomAccessReader } from '../../utils/zip.js'
+import { getFileStream, MinioRandomAccessReader } from '../../utils/zip.js'
 
 export const getVersion = [
   ensureUserRole('user'),

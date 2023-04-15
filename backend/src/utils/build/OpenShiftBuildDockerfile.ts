@@ -4,7 +4,7 @@ import { createReadStream } from 'fs'
 import OpenShift from 'openshift-rest-client'
 
 import { getAdminToken } from '../../routes/v1/registryAuth.js'
-import { ModelDoc,VersionDoc } from '../../types/types.js'
+import { ModelDoc, VersionDoc } from '../../types/types.js'
 import config from '../config.js'
 import { BuildLogger } from './BuildLogger.js'
 import { BuildOpts, BuildStep, Files } from './BuildStep.js'

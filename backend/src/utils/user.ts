@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import Authorisation from '../external/Authorisation.js'
 import { getAdminToken } from '../routes/v1/registryAuth.js'
-import { findAndUpdateUser,findUserCached, getUserById } from '../services/user.js'
+import { findAndUpdateUser, findUserCached, getUserById } from '../services/user.js'
 import { UserDoc } from '../types/types.js'
 import { Forbidden, Unauthorised } from './result.js'
 

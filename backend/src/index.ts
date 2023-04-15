@@ -8,7 +8,7 @@ import processDeployments from './processors/processDeployments.js'
 import processUploads from './processors/processUploads.js'
 import { server } from './routes.js'
 import config from './utils/config.js'
-import { connectToMongoose,runMigrations } from './utils/database.js'
+import { connectToMongoose, runMigrations } from './utils/database.js'
 import { ensureBucketExists } from './utils/minio.js'
 import { registerSigTerminate } from './utils/signals.js'
 

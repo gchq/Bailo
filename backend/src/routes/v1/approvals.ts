@@ -16,7 +16,7 @@ import {
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
 import { ApprovalCategory, ApprovalStates, DeploymentDoc, Entity, ModelDoc, VersionDoc } from '../../types/types.js'
-import { getUserListFromEntityList,isUserInEntityList } from '../../utils/entity.js'
+import { getUserListFromEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
 import { BadReq, Unauthorised } from '../../utils/result.js'
 import { sendEmail } from '../../utils/smtp.js'

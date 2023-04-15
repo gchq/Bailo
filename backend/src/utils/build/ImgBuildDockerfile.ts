@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { readFile,writeFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import { set } from 'lodash-es'
 import { homedir } from 'os'
 import { join } from 'path'
 
 import { getAdminToken } from '../../routes/v1/registryAuth.js'
-import { ModelDoc,VersionDoc } from '../../types/types.js'
+import { ModelDoc, VersionDoc } from '../../types/types.js'
 import config from '../config.js'
 import { checkFileExists, ensurePathExists } from '../filesystem.js'
 import { logCommand } from './build.js'
