@@ -1,6 +1,6 @@
 import shelljs from 'shelljs'
-import config from '../config.js'
 
+import config from '../config.js'
 import logger from '../logger.js'
 import { BuildLogger } from './BuildLogger.js'
 

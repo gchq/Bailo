@@ -1,17 +1,11 @@
 import memoize from 'memoizee'
 import { Types } from 'mongoose'
-import { ModelId } from '../types/types.js'
+
 import UserModel from '../models/User.js'
-import { SerializerOptions } from '../utils/serializers.js'
+import { ModelId } from '../types/types.js'
 
 interface GetUserOptions {
   includeToken?: boolean
-}
-
-export function serializedUserFields(): SerializerOptions {
-  return {
-    mandatory: ['_id', 'id', 'email'],
-  }
 }
 
 export async function getUserById(id: ModelId, opts?: GetUserOptions) {

@@ -1,7 +1,8 @@
-import mongoose from 'mongoose'
 import { ObjectId } from 'mongodb'
-import { connectToMongoose } from '../utils/database.js'
+import mongoose from 'mongoose'
+
 import { LogType } from '../types/types.js'
+import { connectToMongoose } from '../utils/database.js'
 
 export function getLogType(type: string): LogType | undefined {
   switch (type) {

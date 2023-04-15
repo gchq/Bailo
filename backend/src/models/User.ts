@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { model, Schema } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
+
 import { User } from '../types/types.js'
 
 const UserSchema = new Schema<User>(

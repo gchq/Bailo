@@ -5,13 +5,14 @@ import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
-import { isUserInEntityList } from '../../utils/entity.js'
+
+import { findDeploymentByUuid } from '../../services/deployment.js'
 import { ModelId } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { isUserInEntityList } from '../../utils/entity.js'
 import logger from '../../utils/logger.js'
 import { Forbidden } from '../../utils/result.js'
-import { findDeploymentByUuid } from '../../services/deployment.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
-import config from '../../utils/config.js'
 
 let adminToken: string | undefined
 

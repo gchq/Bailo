@@ -1,10 +1,12 @@
 import '../utils/mockMongo'
+import '../models/Model.js'
 
 import { ObjectId } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DeploymentModel from '../models/Deployment.js'
 import UserModel from '../models/User.js'
+import { serializedDeploymentFields } from '../utils/serializers.js'
 import { deploymentUuid, testDeployment, testDeployment2, testUser } from '../utils/test/testModels.js'
 import {
   createDeployment,
@@ -12,7 +14,6 @@ import {
   findDeploymentById,
   findDeploymentByUuid,
   findDeployments,
-  serializedDeploymentFields,
 } from './deployment.js'
 
 const userDoc = new UserModel(testUser)

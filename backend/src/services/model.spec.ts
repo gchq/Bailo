@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import ModelModel from '../models/Model.js'
 import VersionModel from '../models/Version.js'
+import { serializedModelFields } from '../utils/serializers.js'
 import { testModel, testModel2, testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
 import {
   createModel,
@@ -13,7 +14,6 @@ import {
   isValidFilter,
   isValidType,
   removeVersionFromModel,
-  serializedModelFields,
 } from './model.js'
 
 let modelId: any

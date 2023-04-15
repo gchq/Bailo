@@ -1,6 +1,6 @@
+import ModelModel from '../models/Model.js'
 import { VersionDoc } from '../types/types.js'
 import logger from '../utils/logger.js'
-import ModelModel from '../models/Model.js'
 
 export async function up() {
   const models = await ModelModel.find({})

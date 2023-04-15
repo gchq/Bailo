@@ -1,9 +1,10 @@
-import https from 'https'
 import axios from 'axios'
+import https from 'https'
+
 import { getAccessToken } from '../routes/v1/registryAuth.js'
+import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import logger from '../utils/logger.js'
-import config from '../utils/config.js'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.registry.insecure,

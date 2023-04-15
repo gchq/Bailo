@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
+import { readdir } from 'fs/promises'
 import { dirname, join } from 'path'
 import shelljs from 'shelljs'
 import unzip from 'unzipper'
-import { readdir } from 'fs/promises'
 
 import { VersionDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { rm } = shelljs
 

@@ -1,4 +1,5 @@
 import mjml2html from 'mjml'
+
 import { wrapper } from './partials.js'
 
 export interface Column {

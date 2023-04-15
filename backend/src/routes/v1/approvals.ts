@@ -1,25 +1,26 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+
 import ModelModel from '../../models/Model.js'
-import { ApprovalStates, Entity, ModelDoc, DeploymentDoc, ApprovalCategory, VersionDoc } from '../../types/types.js'
+import {
+  getApproval,
+  readApprovals,
+  readNumApprovals,
+  requestDeploymentsForModelVersions,
+} from '../../services/approval.js'
 import {
   findDeploymentById,
   findDeploymentsByModel,
   removeModelDeploymentsFromRegistry,
 } from '../../services/deployment.js'
-import {
-  getApproval,
-  readNumApprovals,
-  readApprovals,
-  requestDeploymentsForModelVersions,
-} from '../../services/approval.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
+import { ApprovalCategory, ApprovalStates, DeploymentDoc, Entity, ModelDoc, VersionDoc } from '../../types/types.js'
+import { getUserListFromEntityList,isUserInEntityList } from '../../utils/entity.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
 import { BadReq, Unauthorised } from '../../utils/result.js'
 import { sendEmail } from '../../utils/smtp.js'
 import { ensureUserRole, hasRole } from '../../utils/user.js'
-import { isUserInEntityList, getUserListFromEntityList } from '../../utils/entity.js'
 
 export const getApprovals = [
   ensureUserRole('user'),

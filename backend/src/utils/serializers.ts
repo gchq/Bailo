@@ -1,11 +1,5 @@
 import { castArray, get, pick, set } from 'lodash-es'
 
-import { serializedDeploymentFields } from '../services/deployment.js'
-import { serializedModelFields } from '../services/model.js'
-import { serializedSchemaFields } from '../services/schema.js'
-import { serializedUserFields } from '../services/user.js'
-import { serializedVersionFields } from '../services/version.js'
-
 export interface SerializerOptions {
   mandatory?: Array<string>
   optional?: Array<string>
@@ -40,6 +34,40 @@ export function createSerializer(options: SerializerOptions) {
     })
 
     return Array.isArray(unserialized) ? serialized : serialized[0]
+  }
+}
+
+export function serializedDeploymentFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'uuid', 'name'],
+    optional: [],
+    serializable: [],
+  }
+}
+
+export function serializedModelFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
+  }
+}
+
+export function serializedVersionFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'version', 'metadata.highLevelDetails.name'],
+    optional: [],
+    serializable: [{ type: createSerializer(serializedModelFields()), field: 'model' }],
+  }
+}
+
+export function serializedSchemaFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'reference', 'name', 'use'],
+  }
+}
+
+export function serializedUserFields(): SerializerOptions {
+  return {
+    mandatory: ['_id', 'id', 'email'],
   }
 }
 
