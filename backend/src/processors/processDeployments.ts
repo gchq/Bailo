@@ -1,6 +1,7 @@
 import https from 'https'
-import prettyMs from 'pretty-ms'
 import fetch from 'node-fetch'
+import prettyMs from 'pretty-ms'
+
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { findDeploymentById, markDeploymentBuilt } from '../services/deployment.js'
 import { getUserByInternalId } from '../services/user.js'

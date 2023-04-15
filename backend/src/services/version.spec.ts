@@ -3,14 +3,9 @@ import '../utils/mockMongo'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import VersionModel from '../models/Version.js'
+import { serializedVersionFields } from '../utils/serializers.js'
 import { testVersion, testVersion2, userDoc } from '../utils/test/testModels.js'
-import {
-  createVersion,
-  findModelVersions,
-  findVersionById,
-  findVersionByName,
-  serializedVersionFields,
-} from './version.js'
+import { createVersion, findModelVersions, findVersionById, findVersionByName } from './version.js'
 
 let versionDoc: any
 

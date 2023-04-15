@@ -1,5 +1,5 @@
 import { getUserById } from '../services/user.js'
-import { Entity, ParsedEntity, EntityKind, UserDoc } from '../types/types.js'
+import { Entity, EntityKind, ParsedEntity, UserDoc } from '../types/types.js'
 
 export async function parseEntity(
   entity: Entity

@@ -1,5 +1,5 @@
-import { consoleLog } from '../utils/logger.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { consoleLog } from '../utils/logger.js'
 
 async function main() {
   const model = 'nginx'

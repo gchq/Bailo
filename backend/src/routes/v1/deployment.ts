@@ -1,18 +1,19 @@
-import { Request, Response } from 'express'
 import bodyParser from 'body-parser'
+import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
-import { ApprovalStates, EntityKind } from '../../types/types.js'
+
+import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
-import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
 import { findSchemaByRef } from '../../services/schema.js'
+import { findVersionByName } from '../../services/version.js'
+import { ApprovalStates, EntityKind } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { isUserInEntityList,parseEntityList } from '../../utils/entity.js'
+import { getClient } from '../../utils/minio.js'
 import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
-import { parseEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { validateSchema } from '../../utils/validateSchema.js'
-import { findVersionByName } from '../../services/version.js'
-import config from '../../utils/config.js'
-import { getClient } from '../../utils/minio.js'
 
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 

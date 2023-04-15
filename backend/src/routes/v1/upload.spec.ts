@@ -9,9 +9,6 @@ const userService = await import('../../services/user.js')
 vi.doMock('../../services/user', () => ({
   ...userService,
   findAndUpdateUser: vi.fn(() => Promise.resolve(testUser)),
-  serializedUserFields: () => ({
-    mandatory: ['_id', 'id', 'email'],
-  }),
 }))
 
 vi.doMock('multer', () => ({
@@ -62,9 +59,6 @@ const schemaService = await import('../../services/schema.js')
 vi.doMock('../../services/schema', () => ({
   ...schemaService,
   findSchemaByRef: vi.fn(() => Promise.resolve({ irrelevant: 'content' })),
-  serializedSchemaFields: () => ({
-    mandatory: ['_id', 'reference', 'name', 'use'],
-  }),
 }))
 
 vi.doMock('../../utils/validateSchema', () => ({
@@ -84,9 +78,6 @@ const mockModelService = {
   ...modelService,
   createModel: vi.fn(() => Promise.resolve()),
   findModelByUuid: vi.fn(() => Promise.resolve(mockModel)),
-  serializedModelFields: () => ({
-    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
-  }),
 }
 vi.doMock('../../services/model', () => mockModelService)
 
@@ -102,11 +93,6 @@ const mockVersionService = {
       })),
     })
   ),
-  serializedVersionFields: () => ({
-    mandatory: [],
-    optional: [],
-    serializable: [],
-  }),
 }
 vi.doMock('../../services/version', () => mockVersionService)
 

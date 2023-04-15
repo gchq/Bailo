@@ -1,14 +1,11 @@
-/** @type {import('next').NextConfig} */
-
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
+import removeImports from 'next-remove-imports'
+import path from 'path'
+import rehypeHighlight from 'rehype-highlight'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
-import rehypeHighlight from 'rehype-highlight'
-import removeImports from 'next-remove-imports'
+import { fileURLToPath } from 'url'
 
 const withRemoveImports = removeImports()
 
@@ -27,6 +24,7 @@ const withMDX = nextMDX({
 const isDevelopment = process.env.NODE_ENV === 'development'
 const backend = process.env.BACKEND_SERVICE ?? 'http://backend:3001'
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',

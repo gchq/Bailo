@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
-import { join } from 'path'
 import { tmpdir } from 'os'
-import { v4 as uuidv4 } from 'uuid'
+import { join } from 'path'
 import shelljs from 'shelljs'
+import { v4 as uuidv4 } from 'uuid'
 
 import { VersionDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { mkdir, rm } = shelljs
 

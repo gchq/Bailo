@@ -1,4 +1,5 @@
 import Logger from 'bunyan'
+
 import { VersionDoc } from '../../types/types.js'
 
 export class BuildLogger {

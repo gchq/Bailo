@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import QueryString from 'qs'
-import { LogType } from '../../types/types.js'
+
 import { getLogs, getLogType } from '../../services/logs.js'
+import { LogType } from '../../types/types.js'
 import { BadReq } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 

@@ -1,7 +1,8 @@
 import { model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import logger from '../utils/logger.js'
+
 import { ApprovalStates, Deployment } from '../types/types.js'
+import logger from '../utils/logger.js'
 
 const DeploymentSchema = new Schema<Deployment>(
   {

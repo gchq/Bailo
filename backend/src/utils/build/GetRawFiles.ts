@@ -3,9 +3,9 @@ import { join } from 'path'
 import shelljs from 'shelljs'
 
 import { VersionDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
-import { BuildLogger } from './BuildLogger.js'
 import { getClient } from '../minio.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { rm } = shelljs
 

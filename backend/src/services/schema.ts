@@ -1,11 +1,4 @@
 import SchemaModel, { Schema } from '../models/Schema.js'
-import { SerializerOptions } from '../utils/serializers.js'
-
-export function serializedSchemaFields(): SerializerOptions {
-  return {
-    mandatory: ['_id', 'reference', 'name', 'use'],
-  }
-}
 
 export async function findSchemaByRef(ref: string) {
   const schema = await SchemaModel.findOne({

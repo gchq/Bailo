@@ -1,9 +1,10 @@
-import yauzl from 'yauzl'
-import * as Minio from 'minio'
 import { pick } from 'lodash-es'
+import * as Minio from 'minio'
 import { PassThrough, Readable } from 'stream'
-import { FileRef } from './build/build.js'
+import yauzl from 'yauzl'
+
 import { MinimalEntry } from '../types/types.js'
+import { FileRef } from './build/build.js'
 
 const MAX_FILE_COUNT = 25_000
 const MAX_UNCOMPRESSED_FILE_SIZE = 10_000_000

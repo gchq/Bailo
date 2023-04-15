@@ -3,14 +3,8 @@ import '../utils/mockMongo'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import UserModel from '../models/User.js'
-import {
-  findAndUpdateUser,
-  findUserCached,
-  findUsers,
-  getUserById,
-  getUserByInternalId,
-  serializedUserFields,
-} from './user.js'
+import { serializedUserFields } from '../utils/serializers.js'
+import { findAndUpdateUser, findUserCached, findUsers, getUserById, getUserByInternalId } from './user.js'
 
 const testUser = {
   userId: 'user',

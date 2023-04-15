@@ -1,15 +1,16 @@
 import mongoose from 'mongoose'
 import { PMongoQueue, QueueMessage } from 'p-mongo-queue'
-import { findModelById } from '../services/model.js'
+
 import { findDeploymentById } from '../services/deployment.js'
+import { findModelById } from '../services/model.js'
 import { getUserByInternalId } from '../services/user.js'
 import { findVersionById, markVersionState } from '../services/version.js'
 import { simpleEmail } from '../templates/simpleEmail.js'
+import config from './config.js'
 import { connectToMongoose } from './database.js'
-import { sendEmail } from './smtp.js'
 import { getUserListFromEntityList } from './entity.js'
 import logger from './logger.js'
-import config from './config.js'
+import { sendEmail } from './smtp.js'
 
 let uploadQueue: PMongoQueue | undefined
 let deploymentQueue: PMongoQueue | undefined

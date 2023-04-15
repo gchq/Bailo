@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
-import { isObjectId } from '../../utils/database.js'
+
 import { findModelById } from '../../services/model.js'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user.js'
+import { isObjectId } from '../../utils/database.js'
 import { BadReq, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 
