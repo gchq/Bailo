@@ -37,7 +37,7 @@ export async function findModelByUuid(user: UserDoc, uuid: string, opts?: GetMod
 
 export async function findModelById(user: UserDoc, id: string | Types.ObjectId | ModelDoc, opts?: GetModelOptions) {
   let model = ModelModel.findById(id)
-  if (opts?.populate) model = model.populate('latestVersion', 'metadata')
+  if (opts?.populate) model = model.populate('latestVersion')
   return filterModel(user, await model)
 }
 
