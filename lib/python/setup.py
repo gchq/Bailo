@@ -10,7 +10,7 @@ setup(
         "pydantic >= 1.8",
         "requests >= 2.25.1",
         "boto3 >= 1.17.109",
-        "warrant >= 0.6.1",
+        "pycognito >= 2022.12.0",
         "PyYAML >= 5.4.1",
         "munch >= 2.5.0",
         "requests-toolbelt >= 0.9.1",

@@ -5,7 +5,7 @@
 import abc
 from typing import Dict, Optional
 
-from warrant.aws_srp import AWSSRP
+from pycognito.aws_srp import AWSSRP
 
 from .config import BailoConfig
 from .utils.exceptions import UnauthorizedException
