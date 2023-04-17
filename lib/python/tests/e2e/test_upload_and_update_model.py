@@ -44,7 +44,7 @@ def test_upload_and_update_model(null_client):
     with open(
         os.path.join(
             os.path.dirname(__file__),
-            "../../bailoclient/resources/minimal_metadata.json"
+            "../../bailoclient/resources/minimal_metadata.json",
         )
     ) as json_file:
         metadata = json.load(json_file)

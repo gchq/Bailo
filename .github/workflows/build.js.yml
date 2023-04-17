@@ -376,25 +376,123 @@ jobs:
           path: logs
 
   end_to_end_python:
-    needs: [end_to_end]
+    needs: [build_backend, build_frontend]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.7', '3.10']
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      # Clone repository
+      - uses: actions/checkout@v2
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Get Bailo Docker images
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo_backend
+          path: /tmp
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bailo_frontend
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/bailo_frontend.tar
+          docker load --input /tmp/bailo_backend.tar
+          docker image ls -a
+
+      # Create logs directory
+      - run: mkdir logs
+
+      # Create certs
+      - run: sudo chown -R runner:docker backend/certs
+      - run: npm run --workspace=backend certs
+
+      # Configure application
+      - name: Configure Bailo
+        run: |
+          cat <<EOT >> backend/config/local.cjs
+          module.exports = {
+            minio: {
+              accessKey: 'minioadmin',
+              secretKey: 'minioadmin',
+            },
+
+            smtp: {
+              auth: {
+                user: 'mailuser',
+                pass: 'mailpass',
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+            },
+
+            logging: {
+              file: {
+                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
+              },
+            },
+          }
+          EOT
+
+      - run: docker-compose -f docker-compose-prod.yml up -d
+
+      # Install dependencies
+      - run: npm ci
+
+      # wait for app to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:8080 -t 10
+
+      # wait for mongo to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
+
+      # Add schemas
+      - run: npm run --workspace=backend script -- exampleSetAllSchemas
+
+      # Setup python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.10'
+
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
 
           cd lib/python
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # Run tests
       - name: Test with pytest
         run: |
           cd lib/python
           python -m pytest tests/e2e
+
+      - name: Dump docker-compose logs
+        if: always()
+        run: docker-compose logs > logs/stack.log
+
+      - name: Docker Compose Logs
+        if: always()
+        run: cat logs/stack.log
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: logs

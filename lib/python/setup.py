@@ -16,7 +16,8 @@ setup(
         "requests-pkcs12 >= 1.13",
         "jsonschema >= 3.2.0",
         "python-dotenv >= 0.20.0",
-        "pipreqsnb >= 0.4.13",
+        "pipreqs >= 0.4.13",
+        "pipreqsnb >= 0.2.4",
     ],
     extras_require={
         "dev": [
