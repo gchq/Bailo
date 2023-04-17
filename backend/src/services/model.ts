@@ -31,7 +31,7 @@ export async function filterModel(user: UserDoc, unfiltered: ModelDoc | null) {
 
 export async function findModelByUuid(user: UserDoc, uuid: string, opts?: GetModelOptions) {
   let model = ModelModel.findOne({ uuid })
-  if (opts?.populate) model = model.populate('latestVersion', 'metadata')
+  if (opts?.populate) model = model.populate('latestVersion')
   return filterModel(user, await model)
 }
 
@@ -78,7 +78,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
   }
 
   let models = ModelModel.find(query).sort({ updatedAt: -1 })
-  if (opts?.populate) models = models.populate('latestVersion', 'metadata')
+  if (opts?.populate) models = models.populate('latestVersion')
   return filterModelArray(user, await models)
 }
 
