@@ -6,7 +6,6 @@ setup(
     description="A python client for interacting with the Bailo model management platform",
     packages=["bailoclient"],
     install_requires=[
-        "pytest >= 6.2",
         "pydantic >= 1.8",
         "requests >= 2.25.1",
         "boto3 >= 1.17.109",
@@ -17,13 +16,14 @@ setup(
         "requests-pkcs12 >= 1.13",
         "jsonschema >= 3.2.0",
         "python-dotenv >= 0.20.0",
-        "pipreqsnb >= 0.2.4",
+        "pipreqsnb >= 0.4.13",
     ],
     extras_require={
         "dev": [
             "black[jupyter]",
-            "pylint",
             "pre-commit",
+            "pylint",
+            "pytest >= 6.2",
         ],
         "bundling": ["mlflow"],
     },

@@ -35,7 +35,7 @@ def minimal_keys_in_dictionary(minimal_dict: dict, test_dict: dict):
 
         model_value = test_dict.get(key)
 
-        if not model_value and model_value != False:
+        if not model_value and model_value is not False:
             return {"valid": False, "error_message": f"'{key}' cannot be empty"}
 
         if isinstance(value, dict) and not isinstance(model_value, dict):

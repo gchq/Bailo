@@ -585,7 +585,7 @@ def test_generate_requirements_file_creates_requirements_file_at_filepath(
     bundler, tmpdir
 ):
     python_file = os.path.join(
-        os.path.dirname(__file__), "../resources/requirements/file.py"
+        os.path.dirname(__file__), "../../resources/requirements/file.py"
     )
     output_path = os.path.join(tmpdir, "requirements.txt")
 

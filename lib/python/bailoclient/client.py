@@ -208,7 +208,7 @@ class Client:
             str: Response status code
         """
 
-        if file_type and not file_type in ["code", "binary"]:
+        if file_type and file_type not in ["code", "binary"]:
             raise InvalidFileRequested(
                 "Invalid file_type provided - file_type can either be 'code' or 'binary'"
             )
