@@ -4,8 +4,8 @@ import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import Remove from '@mui/icons-material/Remove'
 import Button from '@mui/material/Button'
 import { IconButtonProps as MuiIconButtonProps } from '@mui/material/IconButton'
-import React from 'react'
 import { omit } from 'lodash-es'
+import React from 'react'
 
 const mappings: any = {
   remove: Remove,

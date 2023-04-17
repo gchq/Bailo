@@ -1,4 +1,5 @@
-import { MongoClient, Collection, Document, ObjectId } from 'mongodb'
+import { Collection, Document, MongoClient, ObjectId } from 'mongodb'
+
 import config from '../utils/config.js'
 import logger from '../utils/logger.js'
 

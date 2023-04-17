@@ -1,4 +1,5 @@
 import Bailo from '@bailo/node'
+
 import logger from '../utils/logger.js'
 
 async function approveAllApprovals() {

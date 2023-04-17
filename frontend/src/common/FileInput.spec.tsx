@@ -1,11 +1,8 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
-import FileInput from './FileInput'
+import { describe, expect } from 'vitest'
+
 import { doNothing } from '../../utils/testUtils'
+import FileInput from './FileInput'
 
 describe('FileInput', () => {
   it('renders an FileInput component', async () => {

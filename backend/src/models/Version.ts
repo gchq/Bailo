@@ -1,5 +1,6 @@
 import { IndexOptions, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
+
 import { ApprovalStates, Version } from '../types/types.js'
 import logger from '../utils/logger.js'
 

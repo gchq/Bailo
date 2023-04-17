@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+
 import config from '../../utils/config.js'
 import { ensureUserRole } from '../../utils/user.js'
 
@@ -528,7 +529,7 @@ function parseValue(value: any) {
   throw new Error(`Unexpected value ${value}`)
 }
 
-function generateSpecification() {
+export function generateSpecification() {
   return {
     swagger: '2.0',
     info: {
@@ -596,6 +597,7 @@ function generateSpecification() {
               description: 'Model card for the uploaded model',
               type: 'object',
               default: {
+                schemaRef: '/Minimal/General/v10',
                 highLevelDetails: {
                   tags: ['facebook', 'fasttext', 'NLP', 'language', 'language_identification', 'multilingual'],
                   name: 'FastText Language Identification',
@@ -605,9 +607,12 @@ function generateSpecification() {
                   modelCardVersion: 'v1.0',
                 },
                 contacts: {
-                  uploader: 'user',
-                  reviewer: 'user',
-                  manager: 'user',
+                  uploader: [{ kind: 'user', id: 'user' }],
+                  reviewer: [{ kind: 'user', id: 'user' }],
+                  manager: [{ kind: 'user', id: 'user' }],
+                },
+                buildOptions: {
+                  uploadType: 'Model card only',
                 },
               },
             },
@@ -621,6 +626,12 @@ function generateSpecification() {
               name: 'binary',
               in: 'formData',
               description: 'Model binary to upload',
+              type: 'file',
+            },
+            {
+              name: 'docker',
+              in: 'formData',
+              description: 'Docker tar to upload',
               type: 'file',
             },
           ],

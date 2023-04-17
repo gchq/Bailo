@@ -231,11 +231,21 @@ export async function readApprovals({
   return ApprovalModel.find(query)
     .populate({
       path: 'version',
-      populate: { path: 'model' },
+      populate: {
+        path: 'model',
+        populate: {
+          path: 'latestVersion',
+        },
+      },
     })
     .populate({
       path: 'deployment',
-      populate: { path: 'model' },
+      populate: {
+        path: 'model',
+        populate: {
+          path: 'latestVersion',
+        },
+      },
     })
     .sort({ updatedAt: -1 })
 }

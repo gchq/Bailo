@@ -1,11 +1,11 @@
-import DeploymentModel from '../models/Deployment.js'
-import ModelModel from '../models/Model.js'
 import ApprovalModel from '../models/Approval.js'
+import DeploymentModel from '../models/Deployment.js'
+import MigrationModel from '../models/Migration.js'
+import ModelModel from '../models/Model.js'
 import UserModel from '../models/User.js'
 import VersionModel from '../models/Version.js'
-import MigrationModel from '../models/Migration.js'
-import { emptyBucket, ensureBucketExists } from './minio.js'
 import config from './config.js'
+import { emptyBucket, ensureBucketExists } from './minio.js'
 
 export async function clearStoredData() {
   if (config.minio.automaticallyCreateBuckets) {

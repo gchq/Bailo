@@ -1,9 +1,10 @@
-import axios from 'axios'
-import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
+import axios from 'axios'
+import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
+
 import { EntityKind, Schema, User } from '../../lib/shared/types'
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import { useGetCurrentUser } from '../data/user'

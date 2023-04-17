@@ -28,14 +28,6 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: !config.registry.insecure,
 })
 
-export function serializedDeploymentFields(): SerializerOptions {
-  return {
-    mandatory: ['_id', 'uuid', 'name'],
-    optional: [],
-    serializable: [],
-  }
-}
-
 export async function filterDeploymentArray(user: UserDoc, unfiltered: Array<DeploymentDoc>) {
   return asyncFilter(unfiltered, (deployment: DeploymentDoc) => auth.canUserSeeDeployment(user, deployment))
 }

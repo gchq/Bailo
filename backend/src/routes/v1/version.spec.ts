@@ -1,16 +1,16 @@
+import '../../utils/mockMongo.js'
+
 import mongoose from 'mongoose'
-import { jest } from '@jest/globals'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
+
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
-import '../../utils/mockMongo.js'
-import { testUser, testManager, testReviewer, testVersion, testModel } from '../../utils/test/testModels.js'
+import { testManager, testModel, testReviewer, testUser, testVersion } from '../../utils/test/testModels.js'
 
-const approval = await import('../../services/approval.js')
-jest.unstable_mockModule('../../services/approval.js', () => {
+vi.mock('../../services/approval.js', () => {
   return {
-    ...approval,
-    createVersionApprovals: jest.fn(),
+    createVersionApprovals: vi.fn(),
   }
 })
 
@@ -105,8 +105,7 @@ describe('test version routes', () => {
   //   expect(deploymentService.emailDeploymentOwnersOnVersionDeletion).not.toBeCalled()
   // })
 
-  afterAll((done) => {
+  afterAll(() => {
     mongoose.connection.close()
-    done()
   })
 })

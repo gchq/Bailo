@@ -2,27 +2,26 @@
 
 # pylint: disable="line-too-long"
 
-import os
-import logging
 import getpass
-from typing import Union, List
+import json
+import logging
+import os
 from copy import deepcopy
+from typing import Union, List
 
 from dotenv import load_dotenv
 from pkg_resources import resource_filename
-import json
 
+from bailoclient.auth import CognitoSRPAuthenticator, Pkcs12Authenticator
+from bailoclient.client import Client
+from bailoclient.config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
+from bailoclient.model_handlers import Bundler, Loader
+from bailoclient.utils.enums import ModelFlavour
 from bailoclient.utils.exceptions import (
     IncompleteDotEnvFile,
     MissingDotEnvFile,
     UnableToCreateBailoClient,
 )
-
-from .auth import CognitoSRPAuthenticator, Pkcs12Authenticator
-from .client import Client
-from .config import APIConfig, BailoConfig, CognitoConfig, Pkcs12Config
-from .model_handlers import Bundler, Loader
-from .utils.enums import ModelFlavour
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +106,7 @@ class Bailo(Client):
             username, password = creds
             self.connect(username=username, password=password)
 
-        except ValueError:
+        except (NameError, ValueError):
             self.connect()
 
         with open(

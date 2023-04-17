@@ -1,15 +1,16 @@
-import config from './utils/config.js'
 import './utils/signals.js'
-import { registerSigTerminate } from './utils/signals.js'
-import { ensureBucketExists } from './utils/minio.js'
-import { createModelIndexes } from './models/Model.js'
-import processUploads from './processors/processUploads.js'
-import processDeployments from './processors/processDeployments.js'
-import { server } from './routes.js'
 
-import { runMigrations, connectToMongoose } from './utils/database.js'
 import shelljs from 'shelljs'
+
+import { createModelIndexes } from './models/Model.js'
 import { createSchemaIndexes } from './models/Schema.js'
+import processDeployments from './processors/processDeployments.js'
+import processUploads from './processors/processUploads.js'
+import { server } from './routes.js'
+import config from './utils/config.js'
+import { connectToMongoose, runMigrations } from './utils/database.js'
+import { ensureBucketExists } from './utils/minio.js'
+import { registerSigTerminate } from './utils/signals.js'
 
 // Update certificates based on mount
 shelljs.exec('update-ca-certificates', { fatal: false, async: false })

@@ -1,19 +1,17 @@
 import { NextFunction, Request, Response } from 'express'
 import { Readable } from 'stream'
-import { jest } from '@jest/globals'
+import { describe, expect, test, vi } from 'vitest'
+
 import { testApproval, testModel, testModelUpload, testUser, testVersion2 } from '../../utils/test/testModels.js'
 import { MulterFiles } from './upload.js'
 
 const userService = await import('../../services/user.js')
-jest.unstable_mockModule('../../services/user', () => ({
+vi.doMock('../../services/user', () => ({
   ...userService,
-  findAndUpdateUser: jest.fn(() => Promise.resolve(testUser)),
-  serializedUserFields: () => ({
-    mandatory: ['_id', 'id', 'email'],
-  }),
+  findAndUpdateUser: vi.fn(() => Promise.resolve(testUser)),
 }))
 
-jest.unstable_mockModule('multer', () => ({
+vi.doMock('multer', () => ({
   __esModule: true,
   default: () => ({
     fields: () => (req: Omit<Request, 'files'> & { files: MulterFiles }, res: Response, next: NextFunction) => {
@@ -58,78 +56,67 @@ jest.unstable_mockModule('multer', () => ({
 }))
 
 const schemaService = await import('../../services/schema.js')
-jest.unstable_mockModule('../../services/schema', () => ({
+vi.doMock('../../services/schema', () => ({
   ...schemaService,
-  findSchemaByRef: jest.fn(() => Promise.resolve({ irrelevant: 'content' })),
-  serializedSchemaFields: () => ({
-    mandatory: ['_id', 'reference', 'name', 'use'],
-  }),
+  findSchemaByRef: vi.fn(() => Promise.resolve({ irrelevant: 'content' })),
 }))
 
-jest.unstable_mockModule('../../utils/validateSchema', () => ({
-  validateSchema: jest.fn(),
+vi.doMock('../../utils/validateSchema', () => ({
+  validateSchema: vi.fn(),
 }))
 
 const minioUtils = await import('../../utils/minio.js')
 const mockMinioUtils = {
   ...minioUtils,
-  moveFile: jest.fn(),
+  moveFile: vi.fn(),
 }
-jest.unstable_mockModule('../../utils/minio', () => mockMinioUtils)
+vi.doMock('../../utils/minio', () => mockMinioUtils)
 
 const modelService = await import('../../services/model.js')
-const mockModel = { ...testModel, save: jest.fn(() => Promise.resolve()) }
+const mockModel = { ...testModel, save: vi.fn(() => Promise.resolve()) }
 const mockModelService = {
   ...modelService,
-  createModel: jest.fn(() => Promise.resolve()),
-  findModelByUuid: jest.fn(() => Promise.resolve(mockModel)),
-  serializedModelFields: () => ({
-    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
-  }),
+  createModel: vi.fn(() => Promise.resolve()),
+  findModelByUuid: vi.fn(() => Promise.resolve(mockModel)),
 }
-jest.unstable_mockModule('../../services/model', () => mockModelService)
+vi.doMock('../../services/model', () => mockModelService)
 
 const versionService = await import('../../services/version.js')
 const mockVersionService = {
   ...versionService,
-  createVersion: jest.fn(() =>
+  createVersion: vi.fn(() =>
     Promise.resolve({
       ...testVersion2,
-      save: jest.fn(() => Promise.resolve()),
-      populate: jest.fn(() => ({
-        execPopulate: jest.fn(() => Promise.resolve([])),
+      save: vi.fn(() => Promise.resolve()),
+      populate: vi.fn(() => ({
+        execPopulate: vi.fn(() => Promise.resolve([])),
       })),
     })
   ),
-  serializedVersionFields: () => ({
-    mandatory: [],
-    optional: [],
-    serializable: [],
-  }),
 }
-jest.unstable_mockModule('../../services/version', () => mockVersionService)
+vi.doMock('../../services/version', () => mockVersionService)
 
 const approvalService = await import('../../services/approval.js')
-jest.unstable_mockModule('../../services/approval', () => ({
+vi.doMock('../../services/approval', () => ({
   ...approvalService,
-  createVersionApprovals: jest.fn(() => Promise.all([Promise.resolve(testApproval), Promise.resolve(testApproval)])),
+  createVersionApprovals: vi.fn(() => Promise.all([Promise.resolve(testApproval), Promise.resolve(testApproval)])),
 }))
 
 const mockVersionModel = {
   default: {
-    findOneAndUpdate: jest.fn(),
+    findOneAndUpdate: vi.fn(),
   },
 }
 
-jest.unstable_mockModule('../../models/Version', () => mockVersionModel)
+vi.doMock('../../models/Version', () => mockVersionModel)
 
 const queuesUtils = await import('../../utils/queues.js')
 const mockUploadQueue = {
-  add: jest.fn(() => 'testJobId'),
+  add: vi.fn(() => 'testJobId'),
 }
-jest.unstable_mockModule('../../utils/queues', () => ({
+vi.doMock('../../utils/queues', () => ({
   ...queuesUtils,
-  getUploadQueue: jest.fn(() => Promise.resolve(mockUploadQueue)),
+  getUploadQueue: vi.fn(() => Promise.resolve(mockUploadQueue)),
 }))
 
 const { authenticatedPostRequest, validateTestRequest } = await import('../../utils/test/testUtils.js')
@@ -137,10 +124,6 @@ const { authenticatedPostRequest, validateTestRequest } = await import('../../ut
 describe('test upload routes', () => {
   const path = `/api/v1/model?mode=newVersion&modelUuid=a-kpx5ua`
   const contentType = 'multipart/form-data; boundary=----WebKitFormBoundary1ZWhiXR3eQRjufe3'
-
-  beforeEach(async () => {
-    jest.clearAllMocks()
-  })
 
   test('that we can upload a version of an existing model in zip format', async () => {
     const res = await authenticatedPostRequest(path).set('Content-Type', contentType)

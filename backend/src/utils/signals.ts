@@ -8,7 +8,7 @@ export function registerSigTerminate(httpServer: any) {
   process.on('SIGTERM', () => {
     console.info('SIGTERM signal received: closing HTTP server')
     httpServer.close(() => {
-      console.log('')
+      process.exit(0)
     })
   })
 }

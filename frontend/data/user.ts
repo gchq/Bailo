@@ -1,6 +1,7 @@
 import useSWR from 'swr'
+
 import { User } from '../../lib/shared/types'
-import { fetcher, ErrorInfo } from '../utils/fetcher'
+import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useListUsers() {
   const { data, error, mutate } = useSWR<

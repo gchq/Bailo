@@ -1,16 +1,16 @@
 /* eslint-disable no-param-reassign */
-import shelljs from 'shelljs'
-import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { tmpdir } from 'os'
-import { writeFile } from 'fs/promises'
 import dedent from 'dedent-js'
+import { writeFile } from 'fs/promises'
+import { tmpdir } from 'os'
+import { join } from 'path'
+import shelljs from 'shelljs'
+import { v4 as uuidv4 } from 'uuid'
 
 import { VersionDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
-import { BuildLogger } from './BuildLogger.js'
-import { logCommand } from './build.js'
 import config from '../config.js'
+import { logCommand } from './build.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 const { rm, mkdir } = shelljs
 

@@ -1,24 +1,25 @@
 import { Request, Response } from 'express'
+import { Types } from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
-import { Types } from 'mongoose'
-import { moveFile } from '../../utils/minio.js'
-import { createFileRef } from '../../utils/multer.js'
-import { createModel, findModelByUuid } from '../../services/model.js'
+
+import audit from '../../external/Audit.js'
+import VersionModel from '../../models/Version.js'
 import { createVersionApprovals } from '../../services/approval.js'
+import { createModel, findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { createVersion, markVersionBuilt } from '../../services/version.js'
+import { ModelUploadType, SeldonVersion, UploadModes } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { getPropertyFromEnumValue } from '../../utils/general.js'
+import { moveFile } from '../../utils/minio.js'
 import MinioStore from '../../utils/MinioStore.js'
+import { createFileRef } from '../../utils/multer.js'
 import { getUploadQueue } from '../../utils/queues.js'
-import { BadReq, Conflict, GenericError } from '../../utils/result.js'
+import { BadReq, Conflict, GenericError, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
-import VersionModel from '../../models/Version.js'
-import { ModelUploadType, SeldonVersion, UploadModes } from '../../types/types.js'
-import { getPropertyFromEnumValue } from '../../utils/general.js'
-import config from '../../utils/config.js'
-import audit from '../../external/Audit.js'
 
 export type MinioFile = Express.Multer.File & { bucket: string }
 export interface MulterFiles {
@@ -148,6 +149,10 @@ export const postUpload = [
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
       model = await findModelByUuid(req.user, modelUuid, { populate: true })
+
+      if (!model) {
+        throw NotFound({ modelUuid }, 'Tried to upload a new version for an unknown model')
+      }
     } else {
       // Save a new model, and add the uploaded version to its array
       model = await createModel(req.user, {

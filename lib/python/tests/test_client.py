@@ -123,7 +123,7 @@ def test_validate_metadata_raises_error_if_metadata_is_invalid(
     ):
         mock_client._Client__validate_metadata(
             metadata=metadata,
-            minimal_metadata_path="../../cypress/fixtures/minimal_metadata.json",
+            minimal_metadata_path="../../frontend/cypress/fixtures/minimal_metadata.json",
         )
 
 
@@ -143,10 +143,10 @@ def test_validate_filepaths_raises_error_if_a_directory_is_uploaded(mock_client)
 
     with pytest.raises(
         InvalidFilePath,
-        match=re.escape("../../cypress/fixtures is a directory"),
+        match=re.escape("../../frontend/cypress/fixtures is a directory"),
     ):
         mock_client._Client__validate_file_paths(
-            "../../cypress/fixtures",
+            "../../frontend/cypress/fixtures",
         )
 
 
@@ -154,8 +154,8 @@ def test_add_files_to_payload_adds_code_and_binary_files(mock_client):
     payloads = []
     mock_client._Client__add_files_to_payload(
         payloads=payloads,
-        binary_file="../../cypress/fixtures/minimal_binary.zip",
-        code_file="../../cypress/fixtures/minimal_code.zip",
+        binary_file="../../frontend/cypress/fixtures/minimal_binary.zip",
+        code_file="../../frontend/cypress/fixtures/minimal_code.zip",
     )
 
     assert len(payloads) == 2
@@ -209,8 +209,8 @@ def test_update_model_is_called_with_expected_params(
 ):
     mode = "newVersion"
     model_uuid = "model_abc"
-    binary_file = "../../cypress/fixtures/minimal_binary.zip"
-    code_file = "../../cypress/fixtures/minimal_code.zip"
+    binary_file = "../../frontend/cypress/fixtures/minimal_binary.zip"
+    code_file = "../../frontend/cypress/fixtures/minimal_code.zip"
     metadata = {"highLevelDetails": {"modelCardVersion": "2"}}
     metadata_json = json.dumps(metadata)
 
@@ -248,8 +248,8 @@ def test_update_model_raises_exception_if_model_files_too_large(
 ):
     with pytest.raises(ValueError):
         model_uuid = "model_abc"
-        binary_file = "../../cypress/fixtures/minimal_binary.zip"
-        code_file = "../../cypress/fixtures/minimal_code.zip"
+        binary_file = "../../frontend/cypress/fixtures/minimal_binary.zip"
+        code_file = "../../frontend/cypress/fixtures/minimal_code.zip"
         metadata = {"highLevelDetails": {"modelCardVersion": "2"}}
 
         mock_client.update_model(
@@ -271,8 +271,8 @@ def test_upload_model_is_called_with_expected_params(
     mock_generate_payload,
     mock_client,
 ):
-    binary_file = "../../cypress/fixtures/minimal_binary.zip"
-    code_file = "../../cypress/fixtures/minimal_code.zip"
+    binary_file = "../../frontend/cypress/fixtures/minimal_binary.zip"
+    code_file = "../../frontend/cypress/fixtures/minimal_code.zip"
     metadata = {"highLevelDetails": {"modelCardVersion": "2"}}
     metadata_json = json.dumps(metadata)
 
@@ -310,8 +310,8 @@ def test_upload_model_raises_exception_if_model_files_too_large(
 ):
     with pytest.raises(ValueError):
         model_uuid = "model_abc"
-        binary_file = "../../cypress/fixtures/minimal_binary.zip"
-        code_file = "../../cypress/fixtures/minimal_code.zip"
+        binary_file = "../../frontend/cypress/fixtures/minimal_binary.zip"
+        code_file = "../../frontend/cypress/fixtures/minimal_code.zip"
         metadata = {"highLevelDetails": {"modelCardVersion": "2"}}
 
         mock_client.upload_model(

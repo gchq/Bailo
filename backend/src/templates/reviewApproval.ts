@@ -1,11 +1,12 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
-import { VersionDoc, ApprovalCategory, ModelDoc, DeploymentDoc, UserDoc } from '../types/types.js'
+
 import VersionModel from '../models/Version.js'
-import createRequestUrl from '../utils/createRequestUrl.js'
-import { wrapper } from './partials.js'
-import { NotFound } from '../utils/result.js'
+import { ApprovalCategory, DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
 import config from '../utils/config.js'
+import createRequestUrl from '../utils/createRequestUrl.js'
+import { NotFound } from '../utils/result.js'
+import { wrapper } from './partials.js'
 
 export interface ReviewApprovalContext {
   document: VersionDoc | DeploymentDoc

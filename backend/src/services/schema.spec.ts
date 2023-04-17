@@ -1,8 +1,12 @@
-import { cloneDeep } from 'lodash-es'
-import SchemaModel from '../models/Schema.js'
 import '../utils/mockMongo'
+
+import { cloneDeep } from 'lodash-es'
+import { beforeEach, describe, expect, test } from 'vitest'
+
+import SchemaModel from '../models/Schema.js'
+import { serializedSchemaFields } from '../utils/serializers.js'
 import { deploymentSchema, uploadSchema, uploadSchema2 } from '../utils/test/testModels.js'
-import { createSchema, findSchemaByRef, findSchemasByUse, serializedSchemaFields } from './schema.js'
+import { createSchema, findSchemaByRef, findSchemasByUse } from './schema.js'
 
 describe('test schema service', () => {
   beforeEach(async () => {

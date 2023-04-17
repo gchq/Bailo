@@ -1,22 +1,16 @@
 import { Types } from 'mongoose'
-import { Model, ModelId, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
-import ModelModel from '../models/Model.js'
+
 import Authorisation from '../external/Authorisation.js'
-import { asyncFilter } from '../utils/general.js'
-import { SerializerOptions } from '../utils/serializers.js'
-import { Forbidden, NotFound } from '../utils/result.js'
+import ModelModel from '../models/Model.js'
+import { Model, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { isUserInEntityList } from '../utils/entity.js'
+import { asyncFilter } from '../utils/general.js'
+import { Forbidden, NotFound } from '../utils/result.js'
 
 const auth = new Authorisation()
 
 interface GetModelOptions {
   populate?: boolean
-}
-
-export function serializedModelFields(): SerializerOptions {
-  return {
-    mandatory: ['_id', 'uuid', 'latestVersion.metadata.highLevelDetails.name', 'schemaRef'],
-  }
 }
 
 export async function filterModelArray(user: UserDoc, unfiltered: Array<ModelDoc>) {

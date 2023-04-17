@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
+
 import { Model } from '../types/types.js'
 
 const ModelSchema = new Schema<Model>(

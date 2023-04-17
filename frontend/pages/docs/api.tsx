@@ -1,8 +1,10 @@
-import Box from '@mui/material/Box'
-import React from 'react'
-import dynamic from 'next/dynamic'
-import Wrapper from '../../src/Wrapper'
 import 'swagger-ui-react/swagger-ui.css'
+
+import Box from '@mui/material/Box'
+import dynamic from 'next/dynamic'
+import React from 'react'
+
+import Wrapper from '../../src/Wrapper'
 
 const SwaggerUI = dynamic(import('swagger-ui-react'), { ssr: false })
 

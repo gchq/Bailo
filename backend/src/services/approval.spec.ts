@@ -1,18 +1,26 @@
-import { Types } from 'mongoose'
-import { jest } from '@jest/globals'
-import { ApprovalStates, EntityKind, ApprovalCategory, VersionDoc, DeploymentDoc } from '../types/types.js'
-import ModelModel from '../models/Model.js'
-import ApprovalModel from '../models/Approval.js'
-import UserModel from '../models/User.js'
-import VersionModel from '../models/Version.js'
 import '../utils/mockMongo'
 
-jest.unstable_mockModule('../utils/smtp.js', () => ({
-  sendEmail: jest.fn(),
-}))
+import { Types } from 'mongoose'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const { createDeploymentApprovals, createVersionApprovals, getApproval, readNumApprovals, readApprovals } =
-  await import('./approval.js')
+import ApprovalModel from '../models/Approval.js'
+import ModelModel from '../models/Model.js'
+import UserModel from '../models/User.js'
+import VersionModel from '../models/Version.js'
+import { ApprovalCategory, ApprovalStates, DeploymentDoc, EntityKind, VersionDoc } from '../types/types.js'
+import {
+  createDeploymentApprovals,
+  createVersionApprovals,
+  getApproval,
+  readApprovals,
+  readNumApprovals,
+} from './approval.js'
+
+vi.mock('../utils/smtp.js', () => {
+  return {
+    sendEmail: vi.fn(),
+  }
+})
 
 const managerId = new Types.ObjectId()
 const modelId = new Types.ObjectId()

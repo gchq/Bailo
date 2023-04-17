@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
-import { ApprovalTypes, ApprovalStates, EntityKind, ApprovalCategory, Approval } from '../types/types.js'
+
+import { Approval, ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind } from '../types/types.js'
 
 const ApprovalSchema = new Schema<Approval>(
   {

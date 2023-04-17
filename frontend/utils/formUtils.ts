@@ -4,10 +4,12 @@ import get from 'lodash/get'
 import omit from 'lodash/omit'
 import remove from 'lodash/remove'
 import { Dispatch, SetStateAction } from 'react'
+
 import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
 import RenderForm from '../src/Form/RenderForm'
 import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
+import { cloneDeep } from 'lodash-es'
 
 export function createStep({
   schema,
@@ -150,7 +152,8 @@ export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
     data[step.section] = step.state
   })
 
-  return data
+  // Make sure not to return a weak reference to the underlying steps
+  return cloneDeep(data)
 }
 
 export function setStepsData(

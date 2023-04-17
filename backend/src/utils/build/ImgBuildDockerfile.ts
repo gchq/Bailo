@@ -1,16 +1,16 @@
 /* eslint-disable no-param-reassign */
-import { writeFile, readFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
+import { set } from 'lodash-es'
 import { homedir } from 'os'
 import { join } from 'path'
-import { set } from 'lodash-es'
 
-import { VersionDoc, ModelDoc } from '../../types/types.js'
-import { BuildOpts, BuildStep, Files } from './BuildStep.js'
-import { BuildLogger } from './BuildLogger.js'
-import { logCommand } from './build.js'
 import { getAdminToken } from '../../routes/v1/registryAuth.js'
-import { checkFileExists, ensurePathExists } from '../filesystem.js'
+import { ModelDoc, VersionDoc } from '../../types/types.js'
 import config from '../config.js'
+import { checkFileExists, ensurePathExists } from '../filesystem.js'
+import { logCommand } from './build.js'
+import { BuildLogger } from './BuildLogger.js'
+import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
 async function setRegistryLogin(registry: string, username: string, password: string) {
   const folder = join(homedir(), '.docker')
