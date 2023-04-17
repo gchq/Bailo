@@ -1,5 +1,11 @@
 import _config from 'config'
 
+interface DefaultSchema {
+  name: string
+  reference: string
+  schema: unknown
+}
+
 export interface Config {
   api: {
     port: number
@@ -94,6 +100,11 @@ export interface Config {
 
       interval: number
     }
+  }
+
+  defaultSchemas: {
+    upload: Array<DefaultSchema>
+    deployment: Array<DefaultSchema>
   }
 
   ui: {
@@ -196,6 +207,8 @@ const config: Config = {
     file: _config.get('logging.file'),
     stroom: _config.get('logging.stroom'),
   },
+
+  defaultSchemas: _config.get('defaultSchemas'),
 
   ui: _config.get('ui'),
 }
