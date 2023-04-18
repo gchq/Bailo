@@ -56,7 +56,7 @@ export const getModelById = [
   async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const model = await findModelById(req.user, id)
+    const model = await findModelById(req.user, id, { populate: true })
 
     if (!model) {
       throw NotFound({ code: 'model_not_found', id }, `Unable to find model '${id}'`)
