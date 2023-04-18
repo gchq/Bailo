@@ -220,7 +220,7 @@ class Bundler:
         try:
             return self.model_py_templates[model_flavour]
 
-        except:
+        except KeyError:
             raise ModelTemplateNotAvailable(
                 f"There is no model template available for {model_flavour}"
             )

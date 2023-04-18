@@ -1,99 +1,99 @@
-# import json
-# import os
+import json
+import os
 
-# import pytest
-# from dotenv import load_dotenv
+import pytest
+from dotenv import load_dotenv
 
-# from bailoclient import create_cognito_client
-# from bailoclient.auth import NullAuthenticator
-# from bailoclient.client import Client
-# from bailoclient.config import APIConfig, BailoConfig
+from bailoclient import create_cognito_client
+from bailoclient.auth import NullAuthenticator
+from bailoclient.client import Client
+from bailoclient.config import APIConfig, BailoConfig
 
-# os.environ["BAILO_URL"] = "http://localhost:8080/api/v1"
-
-
-# @pytest.fixture
-# def cognito_client():
-#     load_dotenv()
-
-#     ### Configure client based on local secrets
-#     client = create_cognito_client(
-#         user_pool_id=os.getenv("COGNITO_USERPOOL"),
-#         client_id=os.getenv("COGNITO_CLIENT_ID"),
-#         client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
-#         region=os.getenv("COGNITO_REGION"),
-#         url=os.getenv("BAILO_URL"),
-#     )
-#     username = os.getenv("COGNITO_USERNAME")
-#     password = os.getenv("COGNITO_PASSWORD")
-
-#     client.connect(username=username, password=password)
+os.environ["BAILO_URL"] = "http://localhost:8080/api/v1"
 
 
-# @pytest.fixture
-# def null_client():
-#     api_config = APIConfig(url=os.getenv("BAILO_URL"), ca_verify=True)
-#     config = BailoConfig(api=api_config)
-#     return Client(config, NullAuthenticator)
+@pytest.fixture
+def cognito_client():
+    load_dotenv()
+
+    ### Configure client based on local secrets
+    client = create_cognito_client(
+        user_pool_id=os.getenv("COGNITO_USERPOOL"),
+        client_id=os.getenv("COGNITO_CLIENT_ID"),
+        client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+        region=os.getenv("COGNITO_REGION"),
+        url=os.getenv("BAILO_URL"),
+    )
+    username = os.getenv("COGNITO_USERNAME")
+    password = os.getenv("COGNITO_PASSWORD")
+
+    client.connect(username=username, password=password)
 
 
-# def test_upload_and_update_model(null_client):
-#     client = null_client
+@pytest.fixture
+def null_client():
+    api_config = APIConfig(url=os.getenv("BAILO_URL"), ca_verify=True)
+    config = BailoConfig(api=api_config)
+    return Client(config, NullAuthenticator)
 
-#     # Upload model
-#     with open(
-#         os.path.join(
-#             os.path.dirname(__file__),
-#             "../../bailoclient/resources/minimal_metadata.json"
-#         )
-#     ) as json_file:
-#         metadata = json.load(json_file)
 
-#     uploaded_model = client.upload_model(
-#         metadata=metadata,
-#         binary_file=os.path.join(
-#             os.path.dirname(__file__), "../../bailoclient/resources/minimal_binary.zip"
-#         ),
-#         code_file=os.path.join(
-#             os.path.dirname(__file__), "../../bailoclient/resources/minimal_code.zip"
-#         ),
-#     )
+def test_upload_and_update_model(null_client):
+    client = null_client
 
-#     model_uuid = uploaded_model["uuid"]
-#     model_card = client.get_model_card(model_uuid)
+    # Upload model
+    with open(
+        os.path.join(
+            os.path.dirname(__file__),
+            "../../bailoclient/resources/minimal_metadata.json",
+        )
+    ) as json_file:
+        metadata = json.load(json_file)
 
-#     assert uploaded_model.get("uuid")
+    uploaded_model = client.upload_model(
+        metadata=metadata,
+        binary_file=os.path.join(
+            os.path.dirname(__file__), "../../bailoclient/resources/minimal_binary.zip"
+        ),
+        code_file=os.path.join(
+            os.path.dirname(__file__), "../../bailoclient/resources/minimal_code.zip"
+        ),
+    )
 
-#     # Check that current user is model card owner
-#     user = client.get_me()
+    model_uuid = uploaded_model["uuid"]
+    model_card = client.get_model_card(model_uuid)
 
-#     assert user.id == model_card.latestVersion.metadata.contacts.uploader[0].id
+    assert uploaded_model.get("uuid")
 
-#     # Check model schema
-#     model_schema = client.get_model_schema(model_uuid)
-#     assert model_schema["reference"] == "/Minimal/General/v10"
+    # Check that current user is model card owner
+    user = client.get_me()
 
-#     # update model card
-#     new_model_card = model_card.latestVersion.metadata.copy()
-#     new_model_card.highLevelDetails.name = "Updated Model"
-#     new_model_card.highLevelDetails.modelCardVersion = "v2.0"
+    assert user.id == model_card.latestVersion.metadata.contacts.uploader[0].id
 
-#     # Update the model
-#     updated_model = client.update_model(
-#         new_model_card,
-#         model_uuid,
-#         binary_file=os.path.join(
-#             os.path.dirname(__file__), "../../bailoclient/resources/minimal_binary.zip"
-#         ),
-#         code_file=os.path.join(
-#             os.path.dirname(__file__), "../../bailoclient/resources/minimal_code.zip"
-#         ),
-#     )
+    # Check model schema
+    model_schema = client.get_model_schema(model_uuid)
+    assert model_schema["reference"] == "/Minimal/General/v10"
 
-#     assert updated_model["uuid"] == model_uuid
+    # update model card
+    new_model_card = model_card.latestVersion.metadata.copy()
+    new_model_card.highLevelDetails.name = "Updated Model"
+    new_model_card.highLevelDetails.modelCardVersion = "v2.0"
 
-#     # Check a new version has been added
-#     updated_model_card = client.get_model_card(model_uuid)
+    # Update the model
+    updated_model = client.update_model(
+        new_model_card,
+        model_uuid,
+        binary_file=os.path.join(
+            os.path.dirname(__file__), "../../bailoclient/resources/minimal_binary.zip"
+        ),
+        code_file=os.path.join(
+            os.path.dirname(__file__), "../../bailoclient/resources/minimal_code.zip"
+        ),
+    )
 
-#     assert len(model_card.versions) == 1
-#     assert len(updated_model_card.versions) == 2
+    assert updated_model["uuid"] == model_uuid
+
+    # Check a new version has been added
+    updated_model_card = client.get_model_card(model_uuid)
+
+    assert len(model_card.versions) == 1
+    assert len(updated_model_card.versions) == 2
