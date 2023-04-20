@@ -2,24 +2,20 @@
 
 # pylint: disable=too-many-arguments
 
+import getpass
 import json
 import logging
 import os
 from datetime import datetime
 from functools import wraps
 from glob import glob
-from typing import Callable, Union
+from typing import Callable, Union, Dict, List
 
 from pkg_resources import resource_filename
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
-from bailoclient.api import AuthorisedAPI
-from bailoclient.auth import (
-    AuthenticationInterface,
-    CognitoSRPAuthenticator,
-    UnauthorizedException,
-)
-from bailoclient.config import BailoConfig, load_config
+from bailoclient.client.http import RequestsAdapter
+from bailoclient.client.auth import UnauthorizedException
 from bailoclient.models import Model, User
 from bailoclient.utils.exceptions import (
     CannotIncrementVersion,
@@ -34,6 +30,7 @@ from bailoclient.utils.utils import (
     get_filename_and_mimetype,
     minimal_keys_in_dictionary,
 )
+from bailoclient.config import CognitoConfig, Pkcs12Config, BailoConfig
 
 logger = logging.getLogger(__name__)
 
@@ -74,37 +71,13 @@ def handle_reconnect(fcn: Callable):
 class Client:
     """Client interface for interacting with API"""
 
-    def __init__(
-        self,
-        config: Union[os.PathLike, BailoConfig],
-        authenticator: AuthenticationInterface = CognitoSRPAuthenticator,
-        api: AuthorisedAPI = None,
-    ):
-        if isinstance(config, os.PathLike):
-            self.config = load_config(config)
-        elif isinstance(config, BailoConfig):
-            self.config = config
-        else:
-            raise TypeError(
-                "Config must be of type BailoConfig or path of a config file"
-            )
-
-        if callable(authenticator):
-            self.auth = authenticator(self.config)
-        else:
-            self.auth = authenticator
-
-        if api:
-            if callable(api):
-                self.api = api(self.config, self.auth)
-            else:
-                self.api = api
-
-        else:
-            self.api = AuthorisedAPI(self.config, self.auth)
-
+    def __init__(self, config: BailoConfig):
+        self.api = RequestsAdapter(config)
+        self.connect()
         self.connection_params = None
+        self.config = config
 
+    # TODO move to api
     def connect(self, **kwargs) -> bool:
         """Authenticate with the BailoAPI. Returns True if successful
 
@@ -115,10 +88,10 @@ class Client:
             bool: authenticated
         """
         self.connection_params = kwargs
-        return self.auth.authenticate_user(**kwargs)
+        return self.api._auth.authenticate_user(**kwargs)
 
     @handle_reconnect
-    def get_model_schema(self, model_uuid: str):
+    def get_model_schema(self, model_uuid: str) -> Dict:
         """Get schema for a model by its UUID
 
         Args:
@@ -127,11 +100,10 @@ class Client:
         Returns:
             dict: The schema associated with a given model
         """
-
         return self.api.get(f"/model/{model_uuid}/schema")
 
     @handle_reconnect
-    def get_upload_schemas(self):
+    def get_upload_schemas(self) -> List:
         """Get list of available model schemas
 
         Returns:
@@ -140,7 +112,7 @@ class Client:
         return self.api.get("/schemas?use=UPLOAD")
 
     @handle_reconnect
-    def get_deployment_schemas(self):
+    def get_deployment_schemas(self) -> List:
         """Get list of deployment schemas
 
         Returns:
@@ -149,7 +121,7 @@ class Client:
         return self.api.get("/schemas?use=DEPLOYMENT")
 
     @handle_reconnect
-    def get_users(self):
+    def get_users(self) -> List[User]:
         """Get list of users
 
         Returns:
@@ -158,7 +130,7 @@ class Client:
         return [User(user_data) for user_data in self.api.get("/users")["users"]]
 
     @handle_reconnect
-    def get_me(self):
+    def get_me(self) -> User:
         """Get current user
 
         Returns:
@@ -166,7 +138,7 @@ class Client:
         """
         return User(self.api.get("/user"))
 
-    def get_user_by_name(self, name: str):
+    def get_user_by_name(self, name: str) -> User:
         """Get particular user by name
 
         Args:
@@ -237,7 +209,7 @@ class Client:
         )
 
     @handle_reconnect
-    def get_deployment_by_uuid(self, deployment_uuid: str):
+    def get_deployment_by_uuid(self, deployment_uuid: str) -> Dict:
         """Get deployment by deployment UUID
 
         Args:
@@ -249,7 +221,7 @@ class Client:
         return self.api.get(f"/deployment/{deployment_uuid}")
 
     @handle_reconnect
-    def get_user_deployments(self, user_id: str):
+    def get_user_deployments(self, user_id: str) -> List[Dict]:
         """Get deployments for a given user
 
         Args:
@@ -261,7 +233,7 @@ class Client:
         return self.api.get(f"/deployment/user/{user_id}")
 
     @handle_reconnect
-    def get_my_deployments(self):
+    def get_my_deployments(self) -> List[Dict]:
         """Get deployments for the current user
 
         Returns:
@@ -274,7 +246,7 @@ class Client:
         deployment_name: str,
         model_uuid: str,
         model_version: str = None,
-    ):
+    ) -> Dict:
         """Find a particular deployment belonging to the current user. If multiple matching deployments are found, return the most recent deployment.
 
         Args:
@@ -323,7 +295,7 @@ class Client:
         deployment_name: str,
         model_uuid: str,
         model_version: str,
-    ):
+    ) -> bool:
         """Check whether a deployment matches the provided filters. Returns True if deployment is a match.
 
         Args:
@@ -362,7 +334,7 @@ class Client:
     def get_models(
         self,
         filter_str: str = "",
-    ):
+    ) -> List[Model]:
         """Get list of all models. Optional to filter by filter string
 
         Args:
@@ -383,7 +355,7 @@ class Client:
     def get_favourite_models(
         self,
         filter_str: str = "",
-    ):
+    ) -> List[Model]:
         """Get list of favourite models. Optional to filter by filter string
 
         Args:
@@ -404,7 +376,7 @@ class Client:
     def get_my_models(
         self,
         filter_str: str = "",
-    ):
+    ) -> List[Model]:
         """Get list of models for the current user. Optional to filter by filter string
 
         Args:
@@ -422,7 +394,7 @@ class Client:
         ]
 
     @handle_reconnect
-    def get_model_card(self, model_uuid: str, model_version: str = None):
+    def get_model_card(self, model_uuid: str, model_version: str = None) -> Dict:
         """Get a model by its UUID. Optionally retrieve a specific version of a model.
 
         Args:
@@ -441,7 +413,7 @@ class Client:
         return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
 
     @handle_reconnect
-    def _get_model_card_by_id(self, model_id: str):
+    def _get_model_card_by_id(self, model_id: str) -> Dict:
         """Internal method to retrieve model card by its internal ID (e.g. 62d9abb7e5eb14ee63823618)
 
         Args:
@@ -453,7 +425,7 @@ class Client:
         return self.__model(self.api.get(f"model/id/{model_id}"))
 
     @handle_reconnect
-    def get_model_versions(self, model_uuid: str):
+    def get_model_versions(self, model_uuid: str) -> List[Dict]:
         """Get all versions of a model
 
         Args:
@@ -465,7 +437,7 @@ class Client:
         return self.api.get(f"model/{model_uuid}/versions")
 
     @handle_reconnect
-    def get_model_deployments(self, model_uuid: str):
+    def get_model_deployments(self, model_uuid: str) -> List[Dict]:
         """Get all deployments of a model
 
         Args:
@@ -479,7 +451,7 @@ class Client:
     @handle_reconnect
     def upload_model(
         self, metadata: dict, binary_file: str, code_file: str, aws_gateway: bool = True
-    ):
+    ) -> str:
         """Upload a new model
 
         Args:
@@ -524,7 +496,7 @@ class Client:
         binary_file: str,
         code_file: str,
         aws_gateway: bool = True,
-    ):
+    ) -> str:
         """Update an existing model based on its UUID.
 
         Args:
@@ -631,7 +603,7 @@ class Client:
         if not validation.is_valid:
             logger.error(
                 """Submitted model card did not validate against model schema provided by %s""",
-                {self.config.api.url},
+                {self.config.bailo_url},
             )
 
             for err in validation.errors:
@@ -683,7 +655,7 @@ class Client:
         model_data,
         mode: str = "newModel",
         model_uuid: str = None,
-    ):
+    ) -> str:
         """Post a new model or an updated model
 
         Args:
@@ -763,7 +735,7 @@ class Client:
         """
         return bool(os.getenv("AWS_GATEWAY", aws_gateway)) and data.len > 10000000
 
-    def _increment_model_version(self, model_uuid: str):
+    def _increment_model_version(self, model_uuid: str) -> str:
         """Increment the latest version of a model by 1
 
         Args:
@@ -788,3 +760,79 @@ class Client:
         latest_version = max(model_versions)
 
         return str(latest_version + 1)
+
+
+def create_cognito_client(
+    bailo_url: str,
+    username: str,
+    password: str,
+    user_pool_id: str,
+    client_id: str,
+    client_secret: str,
+    region: str,
+    ca_verify: Union[bool, str] = True,
+) -> Client:
+    """Create an authorised Cognito client
+
+    Args:
+        username: Cognito username
+        password: Cognito password
+        user_pool_id: Cognito user pool ID
+        client_id: Cognito client ID
+        client_secret: Cognito client secret
+        region: Cognito region
+        bailo_url: Bailo URL
+
+    Returns:
+        Client: Authorised Bailo Client
+    """
+
+    cognito_config = CognitoConfig(
+        username=username,
+        password=password,
+        user_pool_id=user_pool_id,
+        client_id=client_id,
+        client_secret=client_secret,
+        region=region,
+    )
+
+    config = BailoConfig(auth=cognito_config, bailo_url=bailo_url, ca_verify=ca_verify)
+
+    return Client(config)
+
+
+def create_pki_client(
+    p12_file: str, url: str, ca_verify: Union[str, bool] = True
+) -> Client:
+    """Create an authorised PKI client
+
+    Args:
+        p12_file: Path to P12 file
+        ca_verify: Path to CA file
+        url: Bailo URL
+
+    Returns:
+        Client: Authorised Bailo Client
+    """
+    p12_pwd = getpass.getpass(
+        prompt=f"Enter your password for {os.getenv('p12_file')}: "
+    )
+
+    pki_config = Pkcs12Config(pkcs12_filename=p12_file, pkcs12_password=p12_pwd)
+    config = BailoConfig(auth=pki_config, bailo_url=url, ca_verify=ca_verify)
+
+    return Client(config)
+
+
+def create_null_client(url: str, ca_verify: Union[str, bool] = True):
+    """Create an unauthorised client
+
+    Args:
+        url: Bailo URL
+        ca_verify: Path to CA file
+
+    Returns:
+        Client: Bailo Client
+    """
+    config = BailoConfig(auth=None, bailo_url=url, ca_verify=ca_verify)
+    return Client(config)

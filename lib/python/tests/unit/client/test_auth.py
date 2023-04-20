@@ -3,14 +3,16 @@ from unittest.mock import MagicMock
 import pytest
 import os
 
-from bailoclient.auth import CognitoSRPAuthenticator
-from bailoclient.config import APIConfig, BailoConfig, CognitoConfig
+from bailoclient.client.auth import CognitoSRPAuthenticator
+from bailoclient.config import BailoConfig, CognitoConfig
 from bailoclient.utils.exceptions import UnauthorizedException
 
 
 @pytest.fixture()
 def cognito_authenticator():
     cognito_config = CognitoConfig(
+        username="COGNITO_USERNAME",
+        password="COGNITO_PASSWORD",
         user_pool_id="COGNITO_USERPOOL",
         client_id="COGNITO_CLIENT_ID",
         client_secret="COGNITO_CLIENT_SECRET",
@@ -18,8 +20,9 @@ def cognito_authenticator():
     )
 
     config = BailoConfig(
-        cognito=cognito_config,
-        api=APIConfig(url=os.environ["BAILO_URL"], ca_verify=True),
+        auth=cognito_config,
+        bailo_url=os.environ["BAILO_URL"],
+        ca_verify=True,
     )
 
     authenticator = CognitoSRPAuthenticator(config)

@@ -1,4 +1,4 @@
-from bailoclient.auth import AuthenticationInterface
+from lib.python.bailoclient.client.auth import AuthenticationInterface
 
 from typing import Optional, Dict
 

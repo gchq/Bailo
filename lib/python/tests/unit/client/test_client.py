@@ -6,7 +6,7 @@ from pkg_resources import resource_filename
 
 import pytest
 from bailoclient.client import Client
-from bailoclient.config import APIConfig, BailoConfig
+from bailoclient.config import BailoConfig
 from bailoclient.models import Model, User
 from bailoclient.models.model import ValidationError, ValidationResult
 from bailoclient.utils.exceptions import (
@@ -18,23 +18,22 @@ from bailoclient.utils.exceptions import (
     InvalidMetadata,
 )
 
-from tests.mocks.mock_api import MockAPI
-from tests.mocks.mock_auth import MockAuthentication
+# from tests.mocks.mock_api import MockAPI
+# from tests.mocks.mock_auth import MockAuthentication
 
 BAILO_URL = os.getenv("BAILO_URL")
 
 
 @pytest.fixture()
 def mock_client():
-    config = BailoConfig(
-        api=APIConfig(url=BAILO_URL, ca_verify=True),
-    )
-    auth = MockAuthentication()
-    api = MockAPI(config, auth, "tests/resources/responses/responses.json")
-    return Client(config, authenticator=auth, api=api)
+    config = BailoConfig(bailo_url=BAILO_URL, ca_verify=True, auth=None)
+    # auth = MockAuthentication()
+    # api = MockAPI(config, auth, "tests/resources/responses/responses.json")
+    return Client(config)
 
 
-@patch("bailoclient.client.Client.get_model_schema")
+# we want to mock the underlying api?
+@patch("bailoclient.client.Client.get_model_schema", autospec=True)
 def test_get_model_schema(mock_get_model_schema, mock_client):
     mock_get_model_schema.return_value = {"response": "this is a thing"}
 
@@ -90,7 +89,7 @@ def test_get_model_card_gets_model_if_no_version_provided(mock_model, mock_clien
     mock_client.api.get.assert_called_once_with(f"model/uuid/{model_uuid}")
 
 
-@patch("bailoclient.client.Model.validate")
+@patch("bailoclient.client.client.Model.validate")
 def test_validate_model_card_raises_error_if_model_card_is_invalid(
     mock_validate, mock_client
 ):
@@ -109,7 +108,7 @@ def test_validate_model_card_raises_error_if_model_card_is_invalid(
 
 
 @patch(
-    "bailoclient.client.minimal_keys_in_dictionary",
+    "bailoclient.client.client.minimal_keys_in_dictionary",
     return_value={"valid": False, "error_message": "error"},
 )
 def test_validate_metadata_raises_error_if_metadata_is_invalid(

@@ -2,39 +2,36 @@ import json
 import os
 
 import pytest
-from dotenv import load_dotenv
 
-from bailoclient import create_cognito_client
-from bailoclient.auth import NullAuthenticator
 from bailoclient.client import Client
-from bailoclient.config import APIConfig, BailoConfig
+from bailoclient.config import BailoConfig, CognitoConfig
 
 os.environ["BAILO_URL"] = "http://localhost:8080/api/v1"
 
 
 @pytest.fixture
 def cognito_client():
-    load_dotenv()
+    # load_dotenv()
 
     ### Configure client based on local secrets
-    client = create_cognito_client(
-        user_pool_id=os.getenv("COGNITO_USERPOOL"),
-        client_id=os.getenv("COGNITO_CLIENT_ID"),
-        client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
-        region=os.getenv("COGNITO_REGION"),
-        url=os.getenv("BAILO_URL"),
+    config = BailoConfig(
+        auth=CognitoConfig(
+            username=os.getenv("COGNITO_USERNAME"),
+            password=os.getenv("COGNITO_PASSWORD"),
+            user_pool_id=os.getenv("COGNITO_USERPOOL"),
+            client_id=os.getenv("COGNITO_CLIENT_ID"),
+            client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+            region=os.getenv("COGNITO_REGION"),
+        ),
+        bailo_url=os.getenv("BAILO_URL"),
     )
-    username = os.getenv("COGNITO_USERNAME")
-    password = os.getenv("COGNITO_PASSWORD")
-
-    client.connect(username=username, password=password)
+    return Client(config)
 
 
 @pytest.fixture
 def null_client():
-    api_config = APIConfig(url=os.getenv("BAILO_URL"), ca_verify=True)
-    config = BailoConfig(api=api_config)
-    return Client(config, NullAuthenticator)
+    config = BailoConfig(bailo_url=os.getenv("BAILO_URL"), ca_verify=True)
+    return Client(config)
 
 
 def test_upload_and_update_model(null_client):
