@@ -82,10 +82,16 @@ spec:
             - name: cache
               mountPath: /app/.next/cache
             - name: certs
-              mountPath: /app/certs/cert.pem 
+              mountPath: /app/certs/cert.pem
               subPath: cert.pem
             - name: certs
               mountPath: /app/certs/key.pem
+              subPath: key.pem
+            - name: certs
+              mountPath: /usr/local/share/ca-certificates/cert.pem 
+              subPath: cert.pem
+            - name: certs
+              mountPath: /usr/local/share/ca-certificates/key.pem
               subPath: key.pem
             - name: stroom
               mountPath: /app/logs

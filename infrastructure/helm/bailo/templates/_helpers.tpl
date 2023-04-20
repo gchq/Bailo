@@ -72,6 +72,16 @@ Create the mongo connection URI
 mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}
 {{- end }}
 
+{{/*
+Mail host defination
+*/}}
+{{- define "bailo.mail.host" -}}
+{{- if .Values.mail.enabled -}}
+{{ include "bailo.fullname" . }}-mail
+{{- else -}}
+{{ .Values.config.smtp.host }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Minio host defination
