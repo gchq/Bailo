@@ -14,6 +14,20 @@ vi.mock('../../services/approval.js', () => {
   }
 })
 
+vi.mock('../../utils/entity.js', () => {
+  return {
+    isUserInEntityList: vi.fn(() => Promise.resolve(true)),
+    parseEntityList: vi.fn((user) => Promise.resolve(
+      {
+        valid: true,
+        entities: [{
+          user
+        }]
+      }
+    )),
+  }
+})
+
 const { authenticatedGetRequest, authenticatedPostRequest, authenticatedPutRequest, validateTestRequest } =
   await import('../../utils/test/testUtils.js')
 

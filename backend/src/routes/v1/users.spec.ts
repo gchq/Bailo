@@ -9,15 +9,15 @@ import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
 import { server } from '../../routes.js'
-import * as user from '../../services/user.js'
-import { findAndUpdateUser } from '../../services/user.js'
+import * as userService from '../../services/user.js'
+import { testUser } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
 const request = supertest(server)
 
 const modelId = new Types.ObjectId()
 
-const testUser: any = {
+const localTestUser: any = {
   userId: 'user',
   email: 'user@email.com',
   data: { some: 'value' },
@@ -34,15 +34,14 @@ const testModel: any = {
   updatedAt: new Date(),
 }
 
-let userDoc: any
-
 describe('test user routes', () => {
   beforeEach(async () => {
-    userDoc = await findAndUpdateUser(testUser)
+    await userService.findAndUpdateUser(localTestUser)
     await ModelModel.create(testModel)
   })
 
   test('that we can fetch the correct UI config', async () => {
+    vi.spyOn(userService, 'findUsers').mockResolvedValueOnce([testUser])
     const res = await authenticatedGetRequest('/api/v1/users')
     const data = JSON.parse(res.text)
     validateTestRequest(res)
@@ -51,10 +50,10 @@ describe('test user routes', () => {
   })
 
   test('that we can get the logged in user', async () => {
-    vi.spyOn(user, 'getUserByInternalId').mockReturnValue(userDoc)
+    vi.spyOn(userService, 'getUserByInternalId').mockReturnValue(testUser)
     const res = await authenticatedGetRequest('/api/v1/user')
     validateTestRequest(res)
-    expect(res.body.id).toBe(testUser.userId)
+    expect(res.body.id).toBe(testUser.id)
   })
 
   test('that we can favourite a model', async () => {
