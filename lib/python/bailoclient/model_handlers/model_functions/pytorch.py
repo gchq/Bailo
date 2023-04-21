@@ -2,7 +2,7 @@ import os
 from typing import List
 from pkg_resources import resource_filename
 
-from bailoclient.utils.enums import ModelFlavour
+from bailoclient.enums import ModelFlavour
 from bailoclient.model_handlers import bundler, loader, template
 
 

@@ -1,5 +1,5 @@
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 import requests
@@ -39,38 +39,39 @@ def auth_mock(mock_auth_headers):
 
 
 @pytest.fixture
-def api_mock(null_config, auth_mock):
-    api = RequestsAdapter(null_config)
+def api_mock(null_bailo_config, auth_mock):
+    api = RequestsAdapter(null_bailo_config)
     api._requests_module = Mock(spec=requests)
     api._auth = auth_mock
     return api
 
 
 @pytest.fixture
-def pki_api_mock(pki_config, auth_mock):
-    api = RequestsAdapter(pki_config)
+def pki_api_mock(pki_bailo_config, auth_mock):
+    api = RequestsAdapter(pki_bailo_config)
     api._requests_module = Mock(spec=requests_pkcs12)
     api._auth = auth_mock
     return api
 
 
-def test_cognitio_uses_requests_module(cognito_config):
-    api = RequestsAdapter(cognito_config)
+@patch("bailoclient.client.http.RequestsAdapter._connect")
+def test_cognito_uses_requests_module(patch_connect, cognito_bailo_config):
+    api = RequestsAdapter(cognito_bailo_config)
     assert api._requests_module == requests
 
 
-def test_pki_uses_requests_pkcs12_module(pki_config):
-    api = RequestsAdapter(pki_config)
+def test_pki_uses_requests_pkcs12_module(pki_bailo_config):
+    api = RequestsAdapter(pki_bailo_config)
     assert api._requests_module == requests_pkcs12
 
 
-def test_null_uses_requests_module(null_config):
-    api = RequestsAdapter(null_config)
+def test_null_uses_requests_module(null_bailo_config):
+    api = RequestsAdapter(null_bailo_config)
     assert api._requests_module == requests
 
 
 def test_get_request_with_response(
-    api_mock, response_mock, mock_auth_headers, null_config
+    api_mock, response_mock, mock_auth_headers, null_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 200
@@ -78,16 +79,16 @@ def test_get_request_with_response(
 
     api_mock.get("/test/url")
     api_mock._requests_module.get.assert_called_once_with(
-        f"{null_config.bailo_url}/test/url",
+        f"{null_bailo_config.bailo_url}/test/url",
         headers=mock_auth_headers,
         params=None,
-        timeout=null_config.timeout_period,
-        verify=null_config.ca_verify,
+        timeout=null_bailo_config.timeout_period,
+        verify=null_bailo_config.ca_verify,
     )
 
 
 def test_get_pki_request_with_response(
-    pki_api_mock, response_mock, mock_auth_headers, pki_config
+    pki_api_mock, response_mock, mock_auth_headers, pki_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 201
@@ -95,18 +96,18 @@ def test_get_pki_request_with_response(
 
     pki_api_mock.get("/test/url")
     pki_api_mock._requests_module.get.assert_called_once_with(
-        f"{pki_config.bailo_url}/test/url",
-        pkcs12_filename=pki_config.auth.pkcs12_filename,
-        pkcs12_password=pki_config.auth.pkcs12_password,
+        f"{pki_bailo_config.bailo_url}/test/url",
+        pkcs12_filename=pki_bailo_config.auth.pkcs12_filename,
+        pkcs12_password=pki_bailo_config.auth.pkcs12_password,
         headers=mock_auth_headers,
         params=None,
-        timeout=pki_config.timeout_period,
-        verify=pki_config.ca_verify,
+        timeout=pki_bailo_config.timeout_period,
+        verify=pki_bailo_config.ca_verify,
     )
 
 
 def test_get_downloads_file_to_output_dir(
-    temp_dir, api_mock, null_config, response_mock, mock_auth_headers
+    temp_dir, api_mock, null_bailo_config, response_mock, mock_auth_headers
 ):
     with open(f"{MINIMAL_MODEL_PATH}/minimal_binary.zip", "rb") as zipfile:
         content = zipfile.read()
@@ -118,17 +119,17 @@ def test_get_downloads_file_to_output_dir(
 
     api_mock.get("/test/url", output_dir=temp_dir)
     api_mock._requests_module.get.assert_called_once_with(
-        f"{null_config.bailo_url}/test/url",
+        f"{null_bailo_config.bailo_url}/test/url",
         headers=mock_auth_headers,
         params=None,
-        timeout=null_config.timeout_period,
-        verify=null_config.ca_verify,
+        timeout=null_bailo_config.timeout_period,
+        verify=null_bailo_config.ca_verify,
     )
     assert os.listdir(temp_dir) == ["model.bin"]
 
 
 def test_post_request_with_response(
-    api_mock, response_mock, mock_auth_headers, pki_config
+    api_mock, response_mock, mock_auth_headers, pki_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 201
@@ -137,17 +138,17 @@ def test_post_request_with_response(
     request_body = {"data": "value"}
     api_mock.post("/test/url", request_body=request_body)
     api_mock._requests_module.post.assert_called_once_with(
-        f"{pki_config.bailo_url}/test/url",
+        f"{pki_bailo_config.bailo_url}/test/url",
         data=request_body,
         headers=mock_auth_headers,
         params=None,
-        timeout=pki_config.timeout_period,
-        verify=pki_config.ca_verify,
+        timeout=pki_bailo_config.timeout_period,
+        verify=pki_bailo_config.ca_verify,
     )
 
 
 def test_put_request_with_response(
-    api_mock, response_mock, mock_auth_headers, pki_config
+    api_mock, response_mock, mock_auth_headers, pki_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 201
@@ -156,17 +157,17 @@ def test_put_request_with_response(
     request_body = {"data": "value"}
     api_mock.put("/test/url", request_body=request_body)
     api_mock._requests_module.put.assert_called_once_with(
-        f"{pki_config.bailo_url}/test/url",
+        f"{pki_bailo_config.bailo_url}/test/url",
         data=request_body,
         headers=mock_auth_headers,
         params=None,
-        timeout=pki_config.timeout_period,
-        verify=pki_config.ca_verify,
+        timeout=pki_bailo_config.timeout_period,
+        verify=pki_bailo_config.ca_verify,
     )
 
 
 def test_post_pki_request_with_response(
-    pki_api_mock, response_mock, mock_auth_headers, pki_config
+    pki_api_mock, response_mock, mock_auth_headers, pki_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 201
@@ -175,19 +176,19 @@ def test_post_pki_request_with_response(
     request_body = {"data": "value"}
     pki_api_mock.post("/test/url", request_body=request_body)
     pki_api_mock._requests_module.post.assert_called_once_with(
-        f"{pki_config.bailo_url}/test/url",
-        pkcs12_filename=pki_config.auth.pkcs12_filename,
-        pkcs12_password=pki_config.auth.pkcs12_password,
+        f"{pki_bailo_config.bailo_url}/test/url",
+        pkcs12_filename=pki_bailo_config.auth.pkcs12_filename,
+        pkcs12_password=pki_bailo_config.auth.pkcs12_password,
         data=request_body,
         headers=mock_auth_headers,
         params=None,
-        timeout=pki_config.timeout_period,
-        verify=pki_config.ca_verify,
+        timeout=pki_bailo_config.timeout_period,
+        verify=pki_bailo_config.ca_verify,
     )
 
 
 def test_put_pki_request_with_response(
-    pki_api_mock, response_mock, mock_auth_headers, pki_config
+    pki_api_mock, response_mock, mock_auth_headers, pki_bailo_config
 ):
     response_mock.json.return_value = {"response": "success"}
     response_mock.status_code = 201
@@ -196,12 +197,12 @@ def test_put_pki_request_with_response(
     request_body = {"data": "value"}
     pki_api_mock.put("/test/url", request_body=request_body)
     pki_api_mock._requests_module.put.assert_called_once_with(
-        f"{pki_config.bailo_url}/test/url",
-        pkcs12_filename=pki_config.auth.pkcs12_filename,
-        pkcs12_password=pki_config.auth.pkcs12_password,
+        f"{pki_bailo_config.bailo_url}/test/url",
+        pkcs12_filename=pki_bailo_config.auth.pkcs12_filename,
+        pkcs12_password=pki_bailo_config.auth.pkcs12_password,
         data=request_body,
         headers=mock_auth_headers,
         params=None,
-        timeout=pki_config.timeout_period,
-        verify=pki_config.ca_verify,
+        timeout=pki_bailo_config.timeout_period,
+        verify=pki_bailo_config.ca_verify,
     )

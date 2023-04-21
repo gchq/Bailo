@@ -1,4 +1,4 @@
-"""Adapters for Client to use for communicating over HTTP"""
+"""Adapters for Client to use for communicating over HTTP to a Bailo instance"""
 
 import abc
 from typing import Dict, Optional
@@ -10,9 +10,13 @@ from bailoclient.client.auth import (
     Pkcs12Authenticator,
     CognitoSRPAuthenticator,
     NullAuthenticator,
-    AuthenticationInterface,
 )
-from bailoclient.client.utils import get_headers, handle_response, form_url
+from bailoclient.client.utils import (
+    get_headers,
+    handle_response,
+    form_url,
+    handle_reconnect,
+)
 from bailoclient.config import BailoConfig, Pkcs12Config, CognitoConfig
 
 
@@ -20,7 +24,15 @@ class HttpInterface(abc.ABC):
     """API interface"""
 
     @abc.abstractmethod
-    def __init__(self, config: BailoConfig, auth: AuthenticationInterface):
+    def __init__(self, config: BailoConfig):
+        raise NotImplementedError
+
+    def _connect(self) -> bool:
+        """Authenticate with the BailoAPI. Returns True if successful
+
+        Returns:
+            bool: authenticated
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -35,11 +47,10 @@ class HttpInterface(abc.ABC):
            This will not do any validation of parameters prior to sending.
 
         Args:
-            request_path (str): The requested path relative to the API (e.g. /model/summary)
-            request_body (Dict): The full request body as a dict
-            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
-                                                                 to the API. Defaults to None.
-            headers (Optional[Dict], optional): request headers. Defaults to None.
+            request_path: The requested path relative to the API (e.g. /model/summary)
+            request_params: Any query parameters to be passed to the API. Defaults to None.
+            headers: request headers. Defaults to None.
+            output_dir: path to directory to write output
 
         Raises:
             NotImplementedError: Abstract method must be implemented
@@ -62,11 +73,10 @@ class HttpInterface(abc.ABC):
            This will not do any validation of parameters prior to sending.
 
         Args:
-            request_path (str): The requested path relative to the API (e.g. /model/summary)
-            request_body (Dict): The full request body as a dict
-            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
-                                                                 to the API. Defaults to None.
-            headers (Optional[Dict], optional): request headers. Defaults to None.
+            request_path: The requested path relative to the API (e.g. /model/summary)
+            request_body: The full request body as a dict
+            request_params: Any query parameters to be passed to the API. Defaults to None.
+            headers: request headers. Defaults to None.
 
         Raises:
             NotImplementedError: Abstract method must be implemented
@@ -89,11 +99,10 @@ class HttpInterface(abc.ABC):
            This will not do any validation of parameters prior to sending.
 
         Args:
-            request_path (str): The requested path relative to the API (e.g. /model/summary)
-            request_body (Dict): The full request body as a dict
-            request_params (Optional[Dict[str, str]], optional): Any query parameters to be passed
-                                                                 to the API. Defaults to None.
-            headers (Optional[Dict], optional): request headers. Defaults to None.
+            request_path: The requested path relative to the API (e.g. /model/summary)
+            request_body: The full request body as a dict
+            request_params: Any query parameters to be passed to the API. Defaults to None.
+            headers: request headers. Defaults to None.
 
         Raises:
             NotImplementedError: Abstract method must be implemented
@@ -138,6 +147,12 @@ class RequestsAdapter(HttpInterface):
                 "Could not identify the authentication type from the config"
             )
 
+        self._connect()
+
+    def _connect(self) -> bool:
+        return self._auth.authenticate_user()
+
+    @handle_reconnect
     def get(
         self,
         request_path: str,
@@ -153,6 +168,7 @@ class RequestsAdapter(HttpInterface):
         )
         return handle_response(response, output_dir)
 
+    @handle_reconnect
     def post(
         self,
         request_path: str,
@@ -169,6 +185,7 @@ class RequestsAdapter(HttpInterface):
         )
         return handle_response(response)
 
+    @handle_reconnect
     def put(
         self,
         request_path: str,

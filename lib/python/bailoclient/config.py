@@ -1,36 +1,17 @@
-"""Config for API, auth and Bailo"""
+"""Config classes for Client and Auth"""
 
 import json
 import os
-from enum import Enum
 from typing import Optional, Union
 
 import yaml
 from pydantic import BaseSettings
 
+from bailoclient.enums import AuthType
+
 
 class AuthenticationConfig(BaseSettings):
     """Base class for authentication config"""
-
-
-class Pkcs12Config(AuthenticationConfig):
-    """Configuration for connecting using Pkcs12 certificate"""
-
-    pkcs12_filename: str
-    pkcs12_password: str
-
-    @classmethod
-    def from_env(cls) -> "Pkcs12Config":
-        """
-        Load PKI authentication config from environment variables
-
-        Returns:
-            Pkcs12Config: A cognito authentication configuration object
-        """
-        return cls(
-            pkcs12_filename=os.environ["PKI_CERT_PATH"],
-            pkcs12_password=os.environ["PKI_CERT_PASSWORD"],
-        )
 
 
 class CognitoConfig(AuthenticationConfig):
@@ -61,12 +42,24 @@ class CognitoConfig(AuthenticationConfig):
         )
 
 
-class AuthType(Enum):
-    """Enumeration of compatible authentication types"""
+class Pkcs12Config(AuthenticationConfig):
+    """Configuration for connecting using Pkcs12 certificate"""
 
-    COGNITO = "cognito"
-    PKI = "pki"
-    NULL = "null"
+    pkcs12_filename: str
+    pkcs12_password: str
+
+    @classmethod
+    def from_env(cls) -> "Pkcs12Config":
+        """
+        Load PKI authentication config from environment variables
+
+        Returns:
+            Pkcs12Config: A cognito authentication configuration object
+        """
+        return cls(
+            pkcs12_filename=os.environ["PKI_CERT_PATH"],
+            pkcs12_password=os.environ["PKI_CERT_PASSWORD"],
+        )
 
 
 class BailoConfig(BaseSettings):

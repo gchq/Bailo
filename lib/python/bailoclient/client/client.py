@@ -1,71 +1,30 @@
-""" Client provides methods for interacting with the API """
-
-# pylint: disable=too-many-arguments
+"""Client class for connecting and interacting with a Bailo instance"""
 
 import getpass
 import json
-import logging
 import os
 from datetime import datetime
-from functools import wraps
 from glob import glob
-from typing import Callable, Union, Dict, List
+from typing import Union, Dict, List
 
 from pkg_resources import resource_filename
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 from bailoclient.client.http import RequestsAdapter
-from bailoclient.client.auth import UnauthorizedException
 from bailoclient.models import Model, User
-from bailoclient.utils.exceptions import (
+from bailoclient.exceptions import (
     CannotIncrementVersion,
-    DataInvalid,
     DeploymentNotFound,
-    InvalidFilePath,
     InvalidFileRequested,
-    InvalidMetadata,
-    UnconnectedClient,
+    UserNotFound,
 )
-from bailoclient.utils.utils import (
-    get_filename_and_mimetype,
-    minimal_keys_in_dictionary,
+from bailoclient.client.utils import generate_payload
+from bailoclient.client.validation import (
+    too_large_for_gateway,
+    deployment_matches,
+    validate_uploads,
 )
 from bailoclient.config import CognitoConfig, Pkcs12Config, BailoConfig
-
-logger = logging.getLogger(__name__)
-
-
-def handle_reconnect(fcn: Callable):
-    """Reconnect the Client
-
-    Args:
-        fcn (Callable): Client function
-
-    Raises:
-        UnconnectedClient: Client has not previously been connected
-
-    Returns:
-        Callable: Function to handle reconnecting
-    """
-
-    @wraps(fcn)
-    def reconnect(*args, **kwargs):
-        fcn_self = args[0]
-        try:
-            return fcn(*args, **kwargs)
-
-        except UnauthorizedException as exc:
-            logger.debug("Not currently connected to Bailo")
-
-            if fcn_self.connection_params:
-                logger.debug("Reconnecting")
-                fcn_self.auth.authenticate_user(**fcn_self.connection_params)
-                return fcn(*args, **kwargs)
-
-            logger.error("Client has not previously connected")
-            raise UnconnectedClient("Client must call connect to authenticate") from exc
-
-    return reconnect
 
 
 class Client:
@@ -73,24 +32,9 @@ class Client:
 
     def __init__(self, config: BailoConfig):
         self.api = RequestsAdapter(config)
-        self.connect()
         self.connection_params = None
         self.config = config
 
-    # TODO move to api
-    def connect(self, **kwargs) -> bool:
-        """Authenticate with the BailoAPI. Returns True if successful
-
-        Args:
-            kwargs: Authentication parameters, varies based on the authentication method used
-
-        Returns:
-            bool: authenticated
-        """
-        self.connection_params = kwargs
-        return self.api._auth.authenticate_user(**kwargs)
-
-    @handle_reconnect
     def get_model_schema(self, model_uuid: str) -> Dict:
         """Get schema for a model by its UUID
 
@@ -102,7 +46,6 @@ class Client:
         """
         return self.api.get(f"/model/{model_uuid}/schema")
 
-    @handle_reconnect
     def get_upload_schemas(self) -> List:
         """Get list of available model schemas
 
@@ -111,7 +54,6 @@ class Client:
         """
         return self.api.get("/schemas?use=UPLOAD")
 
-    @handle_reconnect
     def get_deployment_schemas(self) -> List:
         """Get list of deployment schemas
 
@@ -120,7 +62,6 @@ class Client:
         """
         return self.api.get("/schemas?use=DEPLOYMENT")
 
-    @handle_reconnect
     def get_users(self) -> List[User]:
         """Get list of users
 
@@ -129,7 +70,6 @@ class Client:
         """
         return [User(user_data) for user_data in self.api.get("/users")["users"]]
 
-    @handle_reconnect
     def get_me(self) -> User:
         """Get current user
 
@@ -144,6 +84,9 @@ class Client:
         Args:
             name (str): Name of user
 
+        Raises:
+            UserNotFound: The user could not be found
+
         Returns:
             User: User with given name
         """
@@ -151,10 +94,8 @@ class Client:
         for user in users:
             if user.id == name:
                 return user
-        logger.warning("User with display name %s not found", name)
-        return None
+        raise UserNotFound(f"{name}")
 
-    @handle_reconnect
     def download_model_files(
         self,
         deployment_uuid: str,
@@ -208,7 +149,6 @@ class Client:
             output_dir=output_dir,
         )
 
-    @handle_reconnect
     def get_deployment_by_uuid(self, deployment_uuid: str) -> Dict:
         """Get deployment by deployment UUID
 
@@ -220,7 +160,6 @@ class Client:
         """
         return self.api.get(f"/deployment/{deployment_uuid}")
 
-    @handle_reconnect
     def get_user_deployments(self, user_id: str) -> List[Dict]:
         """Get deployments for a given user
 
@@ -232,7 +171,6 @@ class Client:
         """
         return self.api.get(f"/deployment/user/{user_id}")
 
-    @handle_reconnect
     def get_my_deployments(self) -> List[Dict]:
         """Get deployments for the current user
 
@@ -266,7 +204,7 @@ class Client:
         matching_deployments = [
             deployment
             for deployment in user_deployments
-            if self.__deployment_matches(
+            if deployment_matches(
                 deployment, deployment_name, model_uuid, model_version
             )
         ]
@@ -289,36 +227,6 @@ class Client:
 
         return matching_deployments[latest]
 
-    def __deployment_matches(
-        self,
-        deployment: dict,
-        deployment_name: str,
-        model_uuid: str,
-        model_version: str,
-    ) -> bool:
-        """Check whether a deployment matches the provided filters. Returns True if deployment is a match.
-
-        Args:
-            deployment (dict): The model deployment
-            deployment_name (str): The name of the requested deployment
-            model_uuid (str): The model UUID of the requested deployment
-            model_version (str): The model version of the requested deployment
-
-        Returns:
-            bool: True if deployment matches provided filters
-        """
-
-        deployment_details = deployment["metadata"]["highLevelDetails"]
-
-        return (
-            (deployment_details["name"] == deployment_name)
-            and (deployment_details["modelID"] == model_uuid)
-            and (
-                deployment_details["initialVersionRequested"] == model_version
-                or not model_version
-            )
-        )
-
     def __model(self, model: dict) -> Model:
         """Create Model with schema
 
@@ -330,7 +238,6 @@ class Client:
         """
         return Model(model, _schema=self.get_model_schema(model["uuid"]))
 
-    @handle_reconnect
     def get_models(
         self,
         filter_str: str = "",
@@ -351,7 +258,6 @@ class Client:
             ]
         ]
 
-    @handle_reconnect
     def get_favourite_models(
         self,
         filter_str: str = "",
@@ -372,7 +278,6 @@ class Client:
             )["models"]
         ]
 
-    @handle_reconnect
     def get_my_models(
         self,
         filter_str: str = "",
@@ -393,7 +298,6 @@ class Client:
             )["models"]
         ]
 
-    @handle_reconnect
     def get_model_card(self, model_uuid: str, model_version: str = None) -> Dict:
         """Get a model by its UUID. Optionally retrieve a specific version of a model.
 
@@ -412,7 +316,6 @@ class Client:
 
         return self.__model(self.api.get(f"model/uuid/{model_uuid}"))
 
-    @handle_reconnect
     def _get_model_card_by_id(self, model_id: str) -> Dict:
         """Internal method to retrieve model card by its internal ID (e.g. 62d9abb7e5eb14ee63823618)
 
@@ -424,7 +327,6 @@ class Client:
         """
         return self.__model(self.api.get(f"model/id/{model_id}"))
 
-    @handle_reconnect
     def get_model_versions(self, model_uuid: str) -> List[Dict]:
         """Get all versions of a model
 
@@ -436,7 +338,6 @@ class Client:
         """
         return self.api.get(f"model/{model_uuid}/versions")
 
-    @handle_reconnect
     def get_model_deployments(self, model_uuid: str) -> List[Dict]:
         """Get all deployments of a model
 
@@ -448,7 +349,6 @@ class Client:
         """
         return self.api.get(f"model/{model_uuid}/deployments")
 
-    @handle_reconnect
     def upload_model(
         self, metadata: dict, binary_file: str, code_file: str, aws_gateway: bool = True
     ) -> str:
@@ -470,7 +370,7 @@ class Client:
 
         metadata_json = json.dumps(metadata)
 
-        self._validate_uploads(
+        validate_uploads(
             binary_file=binary_file,
             code_file=code_file,
             metadata=metadata,
@@ -479,16 +379,15 @@ class Client:
             ),
         )
 
-        payload = self._generate_payload(metadata_json, binary_file, code_file)
+        payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if self._too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
 
         return self._post_model(payload)
 
-    @handle_reconnect
     def update_model(
         self,
         metadata: dict,
@@ -516,7 +415,7 @@ class Client:
 
         metadata_json = json.dumps(metadata)
 
-        self._validate_uploads(
+        validate_uploads(
             binary_file=binary_file,
             code_file=code_file,
             metadata=metadata,
@@ -525,9 +424,9 @@ class Client:
             ),
         )
 
-        payload = self._generate_payload(metadata_json, binary_file, code_file)
+        payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if self._too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
@@ -536,14 +435,13 @@ class Client:
             model_data=payload, mode="newVersion", model_uuid=model_uuid
         )
 
-    @handle_reconnect
     def request_deployment(self, metadata: dict):
         """Request a new deployment of a model
 
         Args:
             metadata (dict): Deployment metadata. See deployment.json for minimal metadata required.
         """
-        self._validate_uploads(
+        validate_uploads(
             metadata=metadata,
             minimal_metadata_path=resource_filename(
                 "bailoclient", "resources/minimal_deployment_metadata.json"
@@ -557,98 +455,6 @@ class Client:
             request_body=metadata_json,
             headers={"Content-Type": "application/json"},
         )
-
-    def _validate_uploads(
-        self,
-        model_card: Model = None,
-        metadata: dict = None,
-        minimal_metadata_path: str = None,
-        binary_file: str = None,
-        code_file: str = None,
-    ):
-        """Validate the model and files provided for upload
-
-        Args:
-            model_card (Model, optional): Model card of the model to update. Defaults to None.
-            metadata (dict, optional): Metadata required for uploading a new model. Must
-                                       match the minimal metadata. Defaults to None.
-            binary_file (str, optional): File path to model binary. Defaults to None.
-            code_file (str, optional): File path to model code. Defaults to None.
-
-        Raises:
-            DataInvalid: Invalid model
-            DataInvalid: Binary or code file does not exist
-            InvalidMetadata: Metadata does not meet the minimal metadata
-        """
-
-        if model_card:
-            self.__validate_model_card(model_card)
-
-        if metadata:
-            self.__validate_metadata(metadata, minimal_metadata_path)
-
-        if binary_file and code_file:
-            self.__validate_file_paths(binary_file, code_file)
-
-    def __validate_model_card(self, model_card: Model):
-        """Validate supplied model card
-
-        Args:
-            model_card (Model): Model
-
-        Raises:
-            DataInvalid: Model card is not valid
-        """
-        validation = model_card.validate()
-        if not validation.is_valid:
-            logger.error(
-                """Submitted model card did not validate against model schema provided by %s""",
-                {self.config.bailo_url},
-            )
-
-            for err in validation.errors:
-                logger.error(err)
-
-            raise DataInvalid(f"Model invalid: {validation.errors}")
-
-    def __validate_metadata(self, metadata: dict, minimal_metadata_path: str):
-        """Validate supplied metadata against a minimal metadata file
-
-        Args:
-            metadata (dict): Supplied metadata for model or deployment
-            minimal_metadata_path (str): Path to minimal model/deployment metadata for validation
-
-        Raises:
-            InvalidMetadata: Supplied metadata does not contain all the required parameters
-
-        Returns:
-            dict: Dictionary of validity and error messages
-        """
-        with open(minimal_metadata_path, encoding="utf-8") as json_file:
-            minimal_metadata = json.load(json_file)
-
-        result = minimal_keys_in_dictionary(minimal_metadata, metadata)
-
-        if not result["valid"]:
-            raise InvalidMetadata(
-                f"Metadata {result['error_message']} - refer to minimal_metadata"
-            )
-
-    def __validate_file_paths(self, *args):
-        """Validate any filepaths exist and are not directories. Takes any number of string filepaths
-
-        Raises:
-            InvalidFilePath: File path does not exist
-            InvalidFilePath: File path is a directory
-        """
-        for file_path in args:
-            # TODO check that it's some compressed format supported by Patool
-            # (used in workflow-extract-files-from-minio)
-            if file_path and not os.path.exists(file_path):
-                raise InvalidFilePath(f"{file_path} does not exist")
-
-            if file_path and os.path.isdir(file_path):
-                raise InvalidFilePath(f"{file_path} is a directory")
 
     def _post_model(
         self,
@@ -685,55 +491,6 @@ class Client:
             )
 
         raise ValueError("Invalid mode - must be either newVersion or newModel")
-
-    def _generate_payload(
-        self,
-        metadata: dict,
-        binary_file: str,
-        code_file: str,
-    ) -> MultipartEncoder:
-        """Generate payload for posting model or deployment
-
-        Args:
-            metadata (dict): Model metadata
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
-
-        Returns:
-            MultipartEncoder: Payload of model data
-        """
-        payloads = [("metadata", metadata)]
-        payloads = self.__add_files_to_payload(payloads, binary_file, code_file)
-
-        return MultipartEncoder(payloads)
-
-    def __add_files_to_payload(self, payloads: list, binary_file: str, code_file: str):
-        """Add code and binary files to the payload
-
-        Args:
-            payloads (list): List of payloads
-            binary_file (str): File path of binary
-            code_file (str): File path of code
-        """
-        for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
-            fname, mtype = get_filename_and_mimetype(full_filename)
-            with open(full_filename, "rb") as file:
-                payloads.append((tag, (fname, file.read(), mtype)))
-
-        return payloads
-
-    @staticmethod
-    def _too_large_for_gateway(data, aws_gateway: bool) -> bool:
-        """If there is an AWS gateway, check that data is not too large
-
-        Args:
-            data (MultipartEncoder): the data to be uploaded
-            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
-
-        Returns:
-            bool: True if data is too large to be uploaded
-        """
-        return bool(os.getenv("AWS_GATEWAY", aws_gateway)) and data.len > 10000000
 
     def _increment_model_version(self, model_uuid: str) -> str:
         """Increment the latest version of a model by 1
@@ -775,13 +532,14 @@ def create_cognito_client(
     """Create an authorised Cognito client
 
     Args:
+        bailo_url: Bailo URL
         username: Cognito username
         password: Cognito password
         user_pool_id: Cognito user pool ID
         client_id: Cognito client ID
         client_secret: Cognito client secret
         region: Cognito region
-        bailo_url: Bailo URL
+        ca_verify: Verify SSL certificates. Provide a path to use a custom cert
 
     Returns:
         Client: Authorised Bailo Client

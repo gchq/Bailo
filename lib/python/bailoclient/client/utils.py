@@ -1,16 +1,22 @@
-"""Utilities for use in the client module"""
+"""Utility functions for use in the client module"""
 
+import mimetypes
+from functools import wraps
 from json import JSONDecodeError
-from typing import Dict, Optional
+from typing import Dict, Optional, Callable, Union, List
 import io
+import logging
 import os
 import shutil
 import zipfile
 
 from requests.models import Response
+from requests_toolbelt import MultipartEncoder
 
-from bailoclient.utils.exceptions import UnauthorizedException
+from bailoclient.exceptions import UnauthorizedException, UnconnectedClient
 from bailoclient.client.auth import AuthenticationInterface
+
+logger = logging.getLogger(__name__)
 
 
 def get_headers(
@@ -48,7 +54,116 @@ def form_url(base_url, request_path: str) -> str:
     return f"{base_url}/{request_path}"
 
 
-def handle_response(response: Response, output_dir: str = None):
+def _decode_file_content(content: bytes, output_dir: str):
+    """Decode zipfile bytes from HttpResponse into model files
+
+    Args:
+        content: Content from the API response
+        output_dir: The directory to save the zip file to
+    """
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        archive.extractall(output_dir)
+
+    if os.path.exists(f"{output_dir}/__MACOSX"):
+        shutil.rmtree(f"{output_dir}/__MACOSX")
+
+
+def get_file_name(path: str):
+    """Get the filename from a path
+
+    Args:
+        path: path to the file to get name of
+
+    Returns:
+        str: name of the file
+    """
+    return os.path.basename(path)
+
+
+def get_mime_type(path: str) -> str:
+    """Get the mimetype of a file
+
+    Args:
+        path: path to file to get the mime type of
+
+    Returns:
+        str: mime type of the file
+    """
+    return mimetypes.guess_type(path)[0]
+
+
+def generate_payload(
+    metadata: dict, binary_file: str, code_file: str
+) -> MultipartEncoder:
+    """Generate payload for posting model or deployment
+
+    Args:
+        metadata (dict): Model metadata
+        binary_file (str): Path to model binary file
+        code_file (str): Path to model code file
+
+    Returns:
+        MultipartEncoder: Payload of model data
+    """
+    payloads = [("metadata", metadata)]
+    payloads = _add_files_to_payload(payloads, binary_file, code_file)
+
+    return MultipartEncoder(payloads)
+
+
+def _add_files_to_payload(payloads: list, binary_file: str, code_file: str) -> List:
+    """Add code and binary files to the payload
+
+    Args:
+        payloads (list): List of payloads
+        binary_file (str): File path of binary
+        code_file (str): File path of code
+    """
+    for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
+        f_name = get_file_name(full_filename)
+        mtype = get_mime_type(full_filename)
+        with open(full_filename, "rb") as file:
+            payloads.append((tag, (f_name, file.read(), mtype)))
+
+    return payloads
+
+
+def handle_reconnect(fcn: Callable) -> Callable:
+    """Reconnect the Client
+
+    Args:
+        fcn (Callable): Client function
+
+    Raises:
+        UnconnectedClient: Client has not previously been connected
+
+    Returns:
+        Callable: Function to handle reconnecting
+    """
+
+    @wraps(fcn)
+    def reconnect(*args, **kwargs):
+        self = args[0]
+        try:
+            return fcn(*args, **kwargs)
+
+        except UnauthorizedException as exc:
+            logger.debug("Not currently connected to Bailo")
+
+            if self.connection_params:
+                logger.debug("Reconnecting")
+                self._auth.authenticate_user()
+                return fcn(*args, **kwargs)
+
+            logger.error("Client has not previously connected")
+            raise UnconnectedClient("Client must call connect to authenticate") from exc
+
+    return reconnect
+
+
+def handle_response(
+    response: Response, output_dir: str = None
+) -> Optional[Union[str, Dict]]:
     """Handle the response from the server
 
     Args:
@@ -59,7 +174,7 @@ def handle_response(response: Response, output_dir: str = None):
         UnauthorizedException: Unathorised to access server
 
     Returns:
-        str: Response status or message
+        Union[str, dict, None]: Response status or message
     """
 
     if 200 <= response.status_code < 300:
@@ -82,17 +197,3 @@ def handle_response(response: Response, output_dir: str = None):
 
     except:
         response.raise_for_status()
-
-
-def _decode_file_content(content: bytes, output_dir: str):
-    """Decode zipfile bytes from HttpResponse into model files
-
-    Args:
-        content: Content from the API response
-        output_dir: The directory to save the zip file to
-    """
-    with zipfile.ZipFile(io.BytesIO(content)) as archive:
-        archive.extractall(output_dir)
-
-    if os.path.exists(f"{output_dir}/__MACOSX"):
-        shutil.rmtree(f"{output_dir}/__MACOSX")

@@ -1,14 +1,12 @@
 """All authenticators"""
 
-# pylint: disable=arguments-differ
-
 import abc
 from typing import Dict, Optional
 
 from pycognito.aws_srp import AWSSRP
 
 from bailoclient.config import AuthenticationConfig, CognitoConfig
-from bailoclient.utils.exceptions import UnauthorizedException
+from bailoclient.exceptions import UnauthorizedException
 
 
 class AuthenticationInterface(abc.ABC):
@@ -64,7 +62,6 @@ class NullAuthenticator(AuthenticationInterface):
 
     def __init__(self, config: AuthenticationConfig = None):
         """Initialise an authentication method from config"""
-        self.config = config
 
     def authenticate_user(self, *args, **kwargs) -> bool:
         """Authenticate the user. Returns False if the authentication fails
@@ -104,11 +101,14 @@ class CognitoSRPAuthenticator(AuthenticationInterface):
     """Authentication implementation for Cognito SRP using username/password"""
 
     def __init__(self, config: CognitoConfig):
+        if not isinstance(config, CognitoConfig):
+            raise ValueError("Cognito authentication requires a CognitoConfig instance")
+
         self.config = config
         self.authentication_result = None
         self._authenticated = False
 
-    def __try_authorise(self, username: str, password: str) -> Dict[str, str]:
+    def __try_authorise(self) -> Dict[str, str]:
         """
         Call the AWS Cognito API and try to authenticate with username and password.
         Returns the response object
@@ -131,9 +131,7 @@ class CognitoSRPAuthenticator(AuthenticationInterface):
             bool: True if authentication is successful
         """
 
-        response = self.__try_authorise(
-            self.config.auth.username, self.config.auth.password
-        )
+        response = self.__try_authorise(self.config.username, self.config.password)
 
         if (
             "AuthenticationResult" in response

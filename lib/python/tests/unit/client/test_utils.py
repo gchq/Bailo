@@ -1,36 +1,23 @@
 import os
 import re
 from json import JSONDecodeError
-from unittest.mock import Mock
 
-from requests import Response
 import pytest
 
-from bailoclient.client.utils import form_url, get_headers, handle_response
-from bailoclient.client.auth import NullAuthenticator
-from bailoclient.utils.exceptions import (
+from bailoclient.client.utils import (
+    form_url,
+    get_headers,
+    handle_response,
+    _add_files_to_payload,
+)
+from bailoclient.exceptions import (
     NoServerResponseMessage,
     UnauthorizedException,
 )
 
+from bailoclient.client.utils import get_file_name, get_mime_type
 
 MINIMAL_MODEL_PATH = os.getenv("MINIMAL_MODEL_PATH")
-
-
-@pytest.fixture
-def mock_response():
-    return Mock(spec=Response)
-
-
-@pytest.fixture
-def mock_auth():
-    class MockAuth(NullAuthenticator):
-        """Mock to test adding auth headers"""
-
-        def get_authorisation_headers(self):
-            return {"header": "value"}
-
-    return MockAuth()
 
 
 def test_form_url_prepends_slash(bailo_url):
@@ -89,3 +76,42 @@ def test_handle_response_calls_decode_file_content_if_an_output_dir_is_provided(
 
     handle_response(mock_response, output_dir=temp_dir)
     assert os.listdir(temp_dir) == ["model.bin"]
+
+
+def test_get_file_name_of_file_correctly():
+    assert "responses.json" == get_file_name("tests/data/responses.json")
+
+
+def test_get_file_name_of_dir_correctly():
+    assert "data" == get_file_name("data")
+
+
+def test_get_mime_type_json():
+    assert "application/json" == get_mime_type("tests/data/responses.json")
+
+
+def test_get_mime_type_json_file_does_not_exist():
+    assert "application/json" == get_mime_type("path/does/not/exist/responses.json")
+
+
+def test_get_mime_type_dir_is_none():
+    assert get_mime_type("tests/data") is None
+
+
+def test_add_files_to_payload_adds_code_and_binary_files():
+    payloads = []
+    _add_files_to_payload(
+        payloads=payloads,
+        binary_file="../../frontend/cypress/fixtures/minimal_binary.zip",
+        code_file="../../frontend/cypress/fixtures/minimal_code.zip",
+    )
+
+    assert len(payloads) == 2
+    assert "code" in payloads[0]
+    assert "binary" in payloads[1]
+    assert "minimal_code.zip" in payloads[0][1]
+    assert "minimal_binary.zip" in payloads[1][1]
+
+
+def test_generate_payload():
+    pass

@@ -5,11 +5,11 @@ import os
 
 from bailoclient.client.auth import CognitoSRPAuthenticator
 from bailoclient.config import BailoConfig, CognitoConfig
-from bailoclient.utils.exceptions import UnauthorizedException
+from bailoclient.exceptions import UnauthorizedException
 
 
 @pytest.fixture()
-def cognito_authenticator():
+def cognito_authenticator(bailo_url):
     cognito_config = CognitoConfig(
         username="COGNITO_USERNAME",
         password="COGNITO_PASSWORD",
@@ -21,11 +21,11 @@ def cognito_authenticator():
 
     config = BailoConfig(
         auth=cognito_config,
-        bailo_url=os.environ["BAILO_URL"],
+        bailo_url=bailo_url,
         ca_verify=True,
     )
 
-    authenticator = CognitoSRPAuthenticator(config)
+    authenticator = CognitoSRPAuthenticator(config.auth)
     aws_auth_response = {"AuthenticationResult": {"AccessToken": "token"}}
     authenticator._CognitoSRPAuthenticator__try_authorise = MagicMock(
         return_value=aws_auth_response
@@ -51,7 +51,7 @@ def test_auth_headers_raises_error_if_not_authenticated(cognito_authenticator):
         cognito_authenticator.get_authorisation_headers()
 
 
-def test_auth_headers_(cognito_authenticator):
+def test_auth_headers(cognito_authenticator):
     cognito_authenticator.authenticate_user("COGNITO_USERNAME", "COGNITO_PASSWORD")
 
     headers = cognito_authenticator.get_authorisation_headers()

@@ -1,24 +1,22 @@
-""" Facade for Bailo client """
+"""Bailo client"""
 
 import json
-import logging
 import os
 from copy import deepcopy
-from typing import Union, List
+from typing import Union, List, Optional, Any
 
 from pkg_resources import resource_filename
 
 from bailoclient.client import Client
 from bailoclient.config import BailoConfig
 from bailoclient.model_handlers import Bundler, Loader
-from bailoclient.utils.enums import ModelFlavour
-
-
-logger = logging.getLogger(__name__)
+from bailoclient.enums import ModelFlavour
 
 
 class Bailo(Client):
-    """Facade for Bailo client"""
+    """
+    Bailo class. This class provides some additional functionality to the Client class.
+    """
 
     def __init__(self, config: Union[os.PathLike, str, BailoConfig]):
         self.bundler = Bundler()
@@ -27,23 +25,22 @@ class Bailo(Client):
         if isinstance(config, (os.PathLike, str)):
             config = BailoConfig.load(config)
 
+        elif not isinstance(config, BailoConfig):
+            raise ValueError("The provided config is not valid")
+
         super().__init__(config=config)
 
         with open(
             resource_filename("bailoclient", "resources/minimal_metadata.json")
         ) as json_file:
-            metadata = json.load(json_file)
-
-        self._minimal_metadata = metadata
+            self._minimal_metadata = json.load(json_file)
 
         with open(
             resource_filename(
                 "bailoclient", "resources/minimal_deployment_metadata.json"
             )
         ) as json_file:
-            metadata = json.load(json_file)
-
-        self._minimal_deployment_metadata = metadata
+            self._minimal_deployment_metadata = json.load(json_file)
 
     @property
     def bundlers(self):
@@ -57,7 +54,7 @@ class Bailo(Client):
 
     @property
     def flavours(self):
-        """Get list of available modle flavours"""
+        """Get list of available model flavours"""
         return [flavour.value for flavour in ModelFlavour.__members__.values()]
 
     @property
@@ -73,13 +70,13 @@ class Bailo(Client):
     def bundle_model(
         self,
         output_path: str,
-        model=None,
-        model_binary: str = None,
-        model_py: str = None,
-        model_requirements: str = None,
-        requirements_files_path: str = None,
-        model_flavour: str = None,
-        additional_files: List[str] = None,
+        model: Optional[Any] = None,
+        model_binary: Optional[str] = None,
+        model_py: Optional[str] = None,
+        model_requirements: Optional[str] = None,
+        requirements_files_path: Optional[str] = None,
+        model_flavour: Optional[str] = None,
+        additional_files: Optional[List[str]] = None,
     ):
         """Bundle model files into the required structure for the code.zip and binary.zip
             for uploading to BAILO.
@@ -102,6 +99,7 @@ class Bailo(Client):
             model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
                                                 module or notebook from which to generate the
                                                 requirements.txt. Defaults to None.
+            requirements_files_path:
             model_flavour (str, optional): Name of the flavour of model. Supported flavours can be
                                             seen with the flavours property. Defaults to None.
             additional_files (list[str], optional): List of file paths of additional dependencies

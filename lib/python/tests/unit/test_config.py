@@ -4,7 +4,100 @@ from unittest.mock import patch
 from bailoclient.config import *
 
 
-def test_bailo_config_load_save_cognito(tmp_path):
+COGNITO_ENVIRON = {
+    "COGNITO_USERNAME": "username",
+    "COGNITO_PASSWORD": "password",
+    "COGNITO_USERPOOL": "userpool",
+    "COGNITO_CLIENT_ID": "client-id",
+    "COGNITO_CLIENT_SECRET": "client-secret",
+    "COGNITO_REGION": "region",
+    "BAILO_URL": "http://bailo",
+}
+PKI_ENVIRON = {
+    "PKI_CERT_PATH": "cert.pem",
+    "PKI_CERT_PASSWORD": "password",
+    "BAILO_URL": "http://bailo",
+}
+NULL_ENVIRON = {"BAILO_URL": "http://bailo", "CA_CERT": "False"}
+
+
+@patch.dict(os.environ, COGNITO_ENVIRON, clear=True)
+def test_create_cognito_config_from_env():
+    config = CognitoConfig.from_env()
+    assert config.username == "username"
+    assert config.password == "password"
+    assert config.user_pool_id == "userpool"
+    assert config.client_id == "client-id"
+    assert config.client_secret == "client-secret"
+    assert config.region == "region"
+
+
+@patch.dict(os.environ, {}, clear=True)
+def test_create_cognito_config_from_env_fails_missing_env():
+    with pytest.raises(KeyError):
+        CognitoConfig.from_env()
+
+
+@patch.dict(os.environ, COGNITO_ENVIRON, clear=True)
+def test_create_bailo_config_from_env_cognito():
+    config = BailoConfig.from_env(AuthType.COGNITO)
+    assert config.auth == CognitoConfig.from_env()
+    assert config.bailo_url == "http://bailo"
+
+
+@patch.dict(os.environ, {}, clear=True)
+def test_create_bailo_config_from_env_fails_missing_env_cognito():
+    with pytest.raises(KeyError):
+        BailoConfig.from_env(AuthType.COGNITO)
+
+
+@patch.dict(os.environ, COGNITO_ENVIRON, clear=True)
+def test_create_bailo_config_from_env_fails_wrong_auth_type_cognito():
+    with pytest.raises(KeyError):
+        BailoConfig.from_env(AuthType.PKI)
+
+
+@patch.dict(os.environ, PKI_ENVIRON, clear=True)
+def test_create_pki_config_from_env():
+    config = Pkcs12Config.from_env()
+    assert config.pkcs12_filename == "cert.pem"
+    assert config.pkcs12_password == "password"
+
+
+@patch.dict(os.environ, {}, clear=True)
+def test_create_pki_config_from_env_fails_missing_env():
+    with pytest.raises(KeyError):
+        Pkcs12Config.from_env()
+
+
+@patch.dict(os.environ, PKI_ENVIRON, clear=True)
+def test_create_bailo_config_with_pki_from_env():
+    config = BailoConfig.from_env(AuthType.PKI)
+    assert config.auth == Pkcs12Config.from_env()
+    assert config.bailo_url == "http://bailo"
+
+
+@patch.dict(os.environ, PKI_ENVIRON, clear=True)
+def test_create_bailo_config_from_env_fails_wrong_env_pki():
+    with pytest.raises(KeyError):
+        BailoConfig.from_env(AuthType.COGNITO)
+
+
+@patch.dict(os.environ, NULL_ENVIRON, clear=True)
+def test_create_bailo_config_from_env_null():
+    config = BailoConfig.from_env(AuthType.NULL)
+    assert config.auth is None
+    assert config.bailo_url == "http://bailo"
+    assert config.ca_verify is False
+
+
+@patch.dict(os.environ, {}, clear=True)
+def test_create_bailo_config_from_env_fails_missing_env_null():
+    with pytest.raises(KeyError):
+        BailoConfig.from_env(AuthType.NULL)
+
+
+def test_bailo_config_load_save_cognito(temp_dir):
     """Check we can save a configuration file and then reload it"""
 
     config = BailoConfig(
@@ -20,7 +113,7 @@ def test_bailo_config_load_save_cognito(tmp_path):
         ca_verify=False,
     )
 
-    config_path = os.path.join(tmp_path, "conf.yaml")
+    config_path = os.path.join(temp_dir, "conf.yaml")
 
     config.save(config_path)
     loaded_config = BailoConfig.load(config_path)
@@ -30,7 +123,7 @@ def test_bailo_config_load_save_cognito(tmp_path):
     assert config == loaded_config
 
 
-def test_bailo_config_load_save_pki(tmp_path):
+def test_bailo_config_load_save_pki(temp_dir):
     """Check we can save a configuration file and then reload it"""
 
     config = BailoConfig(
@@ -39,7 +132,7 @@ def test_bailo_config_load_save_pki(tmp_path):
         ca_verify=False,
     )
 
-    config_path = os.path.join(tmp_path, "conf.yaml")
+    config_path = os.path.join(temp_dir, "conf.yaml")
 
     config.save(config_path)
     loaded_config = BailoConfig.load(config_path)
@@ -49,7 +142,7 @@ def test_bailo_config_load_save_pki(tmp_path):
     assert config == loaded_config
 
 
-def test_bailo_config_load_save_null(tmp_path):
+def test_bailo_config_load_save_null(temp_dir):
     """Check we can save a configuration file and then reload it"""
 
     config = BailoConfig(
@@ -58,7 +151,7 @@ def test_bailo_config_load_save_null(tmp_path):
         ca_verify=False,
     )
 
-    config_path = os.path.join(tmp_path, "conf.yaml")
+    config_path = os.path.join(temp_dir, "conf.yaml")
 
     config.save(config_path)
     loaded_config = BailoConfig.load(config_path)
@@ -66,75 +159,3 @@ def test_bailo_config_load_save_null(tmp_path):
     assert isinstance(loaded_config, BailoConfig)
     assert loaded_config.auth is None
     assert config == loaded_config
-
-
-@patch.dict(
-    os.environ,
-    {
-        "PKI_CERT_PATH": "cert.pem",
-        "PKI_CERT_PASSWORD": "password",
-        "BAILO_URL": "http://bailo",
-    },
-    clear=True,
-)
-def test_create_bailo_config_from_env_pki():
-    config = BailoConfig.from_env(AuthType.PKI)
-    assert isinstance(config.auth, Pkcs12Config)
-    assert config.auth.pkcs12_filename == "cert.pem"
-    assert config.auth.pkcs12_password == "password"
-    assert config.bailo_url == "http://bailo"
-
-    with pytest.raises(KeyError):
-        BailoConfig.from_env(AuthType.COGNITO)
-
-
-def test_create_bailo_config_from_env_pki_fail():
-    with pytest.raises(KeyError):
-        BailoConfig.from_env(AuthType.PKI)
-
-
-@patch.dict(
-    os.environ,
-    {
-        "COGNITO_USERNAME": "username",
-        "COGNITO_PASSWORD": "password",
-        "COGNITO_USERPOOL": "userpool",
-        "COGNITO_CLIENT_ID": "client-id",
-        "COGNITO_CLIENT_SECRET": "client-secret",
-        "COGNITO_REGION": "region",
-        "BAILO_URL": "http://bailo",
-    },
-    clear=True,
-)
-def test_create_bailo_config_from_env_cognito():
-    config = BailoConfig.from_env(AuthType.COGNITO)
-    assert isinstance(config.auth, CognitoConfig)
-    assert config.auth.username == "username"
-    assert config.auth.password == "password"
-    assert config.auth.user_pool_id == "userpool"
-    assert config.auth.client_id == "client-id"
-    assert config.auth.client_secret == "client-secret"
-    assert config.auth.region == "region"
-    assert config.bailo_url == "http://bailo"
-
-    with pytest.raises(KeyError):
-        BailoConfig.from_env(AuthType.PKI)
-
-
-def test_create_bailo_config_from_env_cognito_fail():
-    with pytest.raises(KeyError):
-        BailoConfig.from_env(AuthType.COGNITO)
-
-
-@patch.dict(os.environ, {"BAILO_URL": "http://bailo", "CA_CERT": "False"}, clear=True)
-def test_create_bailo_config_from_env_null():
-    config = BailoConfig.from_env(AuthType.NULL)
-    assert config.auth is None
-    assert config.bailo_url == "http://bailo"
-    assert config.ca_verify is False
-
-
-@patch.dict(os.environ, {}, clear=True)
-def test_create_bailo_config_from_env_null_fail():
-    with pytest.raises(KeyError):
-        BailoConfig.from_env(AuthType.NULL)
