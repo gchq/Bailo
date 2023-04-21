@@ -22,7 +22,6 @@ RUN apk update
 WORKDIR /app
 
 # First install dependencies (as they change less often)
-COPY .gitignore .gitignore
 COPY --from=installer /app/out/json/ .
 COPY --from=installer /app/out/package-lock.json ./package-lock.json
 RUN npm install
