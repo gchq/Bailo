@@ -9,8 +9,8 @@ from shutil import copyfile
 from distutils.dir_util import copy_tree
 
 
-from ..utils.enums import ModelFlavour
-from bailoclient.utils.exceptions import (
+from bailoclient.enums import ModelFlavour
+from bailoclient.exceptions import (
     ModelFlavourNotFound,
     ModelTemplateNotAvailable,
     MissingFilesError,

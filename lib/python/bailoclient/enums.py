@@ -1,4 +1,14 @@
+"""Enum types for use in bailoclient"""
+
 from enum import Enum, EnumMeta
+
+
+class AuthType(Enum):
+    """Enumeration of compatible authentication types"""
+
+    COGNITO = "cognito"
+    PKI = "pki"
+    NULL = "null"
 
 
 class ModelFlavoursMeta(EnumMeta):

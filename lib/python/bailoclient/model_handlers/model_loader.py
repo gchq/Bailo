@@ -1,5 +1,5 @@
-from bailoclient.utils.enums import ModelFlavour
-from bailoclient.utils.exceptions import (
+from bailoclient.enums import ModelFlavour
+from bailoclient.exceptions import (
     ModelFlavourNotFound,
     ModelMethodNotAvailable,
 )

@@ -1,6 +1,6 @@
 from bailoclient.config import BailoConfig
-from bailoclient.auth import AuthenticationInterface
-from bailoclient.api import APIInterface
+from lib.python.bailoclient.client.auth import AuthenticationInterface
+from bailoclient.client import APIInterface
 
 from typing import Optional, Dict, Any
 import os
