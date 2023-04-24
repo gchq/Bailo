@@ -13,8 +13,8 @@ def prophet_bundler(model, output_path: str, code_paths: List[str]):
 
     Args:
         model (Prophet model): The Prophet model
-        output_path (str): Path to export the model to
-        code_paths (List[str]): List of additional code paths
+        output_path: Path to export the model to
+        code_paths: List of additional code paths
     """
     from mlflow.prophet import save_model
 

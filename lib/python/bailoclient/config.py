@@ -106,7 +106,7 @@ class BailoConfig(BaseSettings):
         Raises an exception if it is unable to save.
 
         Args:
-            config_path (os.PathLike): Target path to save as a yaml file
+            config_path: Target path to save as a yaml file
 
         Raises:
             IsADirectoryError: Path is a directory not a file
@@ -128,7 +128,7 @@ class BailoConfig(BaseSettings):
         Raises an exception if unable to read or load the file.
 
         Args:
-            config_path (os.PathLike): A path object pointing to a yaml configuration file
+            config_path: A path object pointing to a yaml configuration file
 
         Raises:
             FileNotFoundError: _description_
