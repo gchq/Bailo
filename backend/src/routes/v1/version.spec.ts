@@ -1,6 +1,5 @@
 import '../../utils/mockMongo.js'
 
-import { NextFunction, Request, Response } from 'express'
 import mongoose from 'mongoose'
 import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -8,21 +7,6 @@ import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
 import VersionModel from '../../models/Version.js'
 import { testManager, testModel, testReviewer, testUser, testVersion } from '../../utils/test/testModels.js'
-
-vi.mock('../../utils/user.js', () => {
-  return {
-    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
-      req.user = testUser
-      next()
-    }),
-    ensureUserRole: vi.fn(() => {
-      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
-        console.log('called')
-        next()
-      })
-    }),
-  }
-})
 
 vi.mock('../../services/approval.js', () => {
   return {

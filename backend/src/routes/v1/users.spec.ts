@@ -1,6 +1,5 @@
 import '../../utils/mockMongo'
 
-import { NextFunction, Request, Response } from 'express'
 import { ObjectId } from 'mongodb'
 import mongoose, { Types } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,21 +10,6 @@ import UserModel from '../../models/User.js'
 import * as userService from '../../services/user.js'
 import { testUser, userDoc } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
-
-vi.mock('../../utils/user.js', () => {
-  return {
-    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
-      req.user = testUser
-      next()
-    }),
-    ensureUserRole: vi.fn(() => {
-      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
-        console.log('called')
-        next()
-      })
-    }),
-  }
-})
 
 const modelId = new Types.ObjectId()
 
