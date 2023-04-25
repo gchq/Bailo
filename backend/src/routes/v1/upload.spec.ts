@@ -5,6 +5,21 @@ import { describe, expect, test, vi } from 'vitest'
 import { testApproval, testModel, testModelUpload, testUser, testVersion2 } from '../../utils/test/testModels.js'
 import { MulterFiles } from './upload.js'
 
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        console.log('called')
+        next()
+      })
+    }),
+  }
+})
+
 const userService = await import('../../services/user.js')
 vi.doMock('../../services/user', () => ({
   ...userService,

@@ -1,11 +1,27 @@
 import '../../utils/mockMongo'
 
+import { NextFunction, Request, Response } from 'express'
 import mongoose from 'mongoose'
-import { afterAll, beforeEach, describe, expect, test } from 'vitest'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import SchemaModel from '../../models/Schema.js'
-import { uploadSchema } from '../../utils/test/testModels.js'
+import { testUser, uploadSchema } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
+
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        console.log('called')
+        next()
+      })
+    }),
+  }
+})
 
 describe('test schema routes', () => {
   beforeEach(async () => {

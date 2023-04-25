@@ -1,19 +1,31 @@
 import '../../utils/mockMongo'
 
+import { NextFunction, Request, Response } from 'express'
 import { ObjectId } from 'mongodb'
 import mongoose, { Types } from 'mongoose'
-import supertest from 'supertest'
 import { v4 as uuidv4 } from 'uuid'
 import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import ModelModel from '../../models/Model.js'
 import UserModel from '../../models/User.js'
-import { server } from '../../routes.js'
 import * as userService from '../../services/user.js'
-import { testUser } from '../../utils/test/testModels.js'
+import { testUser, userDoc } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 
-const request = supertest(server)
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        console.log('called')
+        next()
+      })
+    }),
+  }
+})
 
 const modelId = new Types.ObjectId()
 
@@ -72,8 +84,10 @@ describe('test user routes', () => {
       favourites: [],
     }
     testUser2.favourites.push(modelId)
-    await UserModel.create(testUser2)
-    const res = await request.post(`/api/v1/user/favourite/${modelId}`).set('x-userid', 'user2').set('x-email', 'test')
+    const user2Doc = new UserModel(testUser2)
+    vi.spyOn(userService, 'getUserById').mockResolvedValueOnce(user2Doc)
+
+    const res = await authenticatedPostRequest(`/api/v1/user/favourite/${modelId}`)
     validateTestRequest(res)
     expect(res.body.favourites.length).toBe(1)
     expect(res.body.favourites[0]).toBe(modelId.toString())
@@ -88,16 +102,16 @@ describe('test user routes', () => {
       favourites: [],
     }
     testUser2.favourites.push(modelId)
-    await UserModel.create(testUser2)
-    const res = await request
-      .post(`/api/v1/user/unfavourite/${modelId}`)
-      .set('x-userid', 'user2')
-      .set('x-email', 'test')
+    const user2Doc = new UserModel(testUser2)
+    vi.spyOn(userService, 'getUserById').mockResolvedValueOnce(user2Doc)
+
+    const res = await authenticatedPostRequest(`/api/v1/user/unfavourite/${modelId}`)
     validateTestRequest(res)
     expect(res.body.favourites.length).toBe(0)
   })
 
   test('that unfavourite a model where the model is not favourited', async () => {
+    vi.spyOn(userService, 'getUserById').mockResolvedValueOnce(userDoc)
     const res = await authenticatedPostRequest(`/api/v1/user/unfavourite/${modelId}`)
     validateTestRequest(res)
     expect(res.body.favourites.length).toBe(0)

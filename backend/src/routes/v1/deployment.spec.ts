@@ -1,5 +1,6 @@
 import '../../utils/mockMongo.js'
 
+import { NextFunction, Request, Response } from 'express'
 import { ObjectId } from 'mongodb'
 import mongoose from 'mongoose'
 import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -26,6 +27,21 @@ import {
 } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 import * as validateSchema from '../../utils/validateSchema.js'
+
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        console.log('called')
+        next()
+      })
+    }),
+  }
+})
 
 let deploymentDoc: any
 let versionDoc: any

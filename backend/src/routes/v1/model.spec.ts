@@ -1,8 +1,9 @@
 import '../../utils/mockMongo'
 
+import { NextFunction, Request, Response } from 'express'
 import { cloneDeep } from 'lodash-es'
 import mongoose from 'mongoose'
-import { afterAll, beforeEach, describe, expect, test } from 'vitest'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DeploymentModel from '../../models/Deployment.js'
 import ModelModel from '../../models/Model.js'
@@ -19,6 +20,21 @@ import {
   uploadSchema,
 } from '../../utils/test/testModels.js'
 import { authenticatedGetRequest, validateTestRequest } from '../../utils/test/testUtils.js'
+
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        console.log('called')
+        next()
+      })
+    }),
+  }
+})
 
 describe('test model routes', () => {
   beforeEach(async () => {
