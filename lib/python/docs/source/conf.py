@@ -22,9 +22,10 @@ author = "GCHQ"
 
 master_doc = "index"
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
-    "m2r2",
+    "sphinx.ext.autodoc",  # extract docs from docstrings
+    "sphinx.ext.napoleon",  # google style docstring format
+    "m2r2",  # markdown support
+    # "nbsphinx",  # jupyter notebook support
 ]
 
 autodoc_typehints = "description"

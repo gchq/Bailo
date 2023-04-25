@@ -26,6 +26,8 @@ setup(
             "pylint",
             "pytest >= 6.2",
             "sphinx >= 6.2.0",
+            "m2r2 >= 0.3.1",
+            "nbsphinx >= 0.9.1",
         ],
         "bundling": ["mlflow"],
     },

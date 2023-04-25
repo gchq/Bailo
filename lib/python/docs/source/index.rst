@@ -11,6 +11,14 @@ getting Started
    readme
 
 
+Examples
+========
+
+.. toctree::
+   :maxdepth: 2
+
+   examples.rst
+
 API Documentation
 =================
 
