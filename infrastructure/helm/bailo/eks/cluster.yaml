@@ -4,7 +4,7 @@ kind: ClusterConfig
 
 metadata:
   name: bailo-eks
-  region: eu-west-2
+  region: <region>
 
 iam:
   withOIDC: true
