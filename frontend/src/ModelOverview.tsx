@@ -98,6 +98,3 @@ function ModelOverview({ version }: ModelOverviewProps) {
 }
 
 export default ModelOverview
-function BadReq(arg0: { [x: number]: import('@bailo/shared/types').Schema }, arg1: string) {
-  throw new Error('Function not implemented.')
-}
