@@ -1,4 +1,4 @@
-from bailoclient.utils.enums import ModelFlavour
+from bailoclient.enums import ModelFlavour
 from .model_bundler import Bundler
 from .model_loader import Loader
 

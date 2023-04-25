@@ -3,13 +3,13 @@ import dropRight from 'lodash/dropRight'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
 import remove from 'lodash/remove'
+import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 
 import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
 import RenderForm from '../src/Form/RenderForm'
 import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
-import { cloneDeep } from 'lodash-es'
 
 export function createStep({
   schema,

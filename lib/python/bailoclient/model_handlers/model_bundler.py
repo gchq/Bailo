@@ -9,8 +9,8 @@ from shutil import copyfile
 from distutils.dir_util import copy_tree
 
 
-from ..utils.enums import ModelFlavour
-from bailoclient.utils.exceptions import (
+from bailoclient.enums import ModelFlavour
+from bailoclient.exceptions import (
     ModelFlavourNotFound,
     ModelTemplateNotAvailable,
     MissingFilesError,
@@ -220,7 +220,7 @@ class Bundler:
         try:
             return self.model_py_templates[model_flavour]
 
-        except:
+        except KeyError:
             raise ModelTemplateNotAvailable(
                 f"There is no model template available for {model_flavour}"
             )

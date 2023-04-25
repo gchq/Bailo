@@ -1,4 +1,4 @@
-name: Python Test
+name: Python Unit Test
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
       - name: Test with pytest
         run: |
           cd lib/python
-          python -m pytest
+          python -m pytest tests/unit

@@ -15,6 +15,7 @@ class GluonModel(BaseModel):
                  as either a numpy.ndarray or a plain list for hybrid models.
         """
         import mxnet as mx
+        import numpy as np
         import pandas as pd
 
         if isinstance(data, pd.DataFrame):

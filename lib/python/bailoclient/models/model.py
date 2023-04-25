@@ -2,7 +2,7 @@
 from typing import List
 
 import jsonschema
-from bailoclient.utils.exceptions import ModelSchemaMissing
+from bailoclient.exceptions import ModelSchemaMissing
 
 from .base import BailoBase
 

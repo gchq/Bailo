@@ -2,8 +2,8 @@ from unittest.mock import patch, Mock
 import pytest
 
 from bailoclient.model_handlers.model_loader import Loader
-from bailoclient.utils.enums import ModelFlavoursMeta
-from bailoclient.utils.exceptions import (
+from bailoclient.enums import ModelFlavoursMeta
+from bailoclient.exceptions import (
     ModelMethodNotAvailable,
     ModelFlavourNotFound,
 )
