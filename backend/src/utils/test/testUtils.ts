@@ -13,7 +13,6 @@ vi.mock('../../utils/user.js', () => {
     }),
     ensureUserRole: vi.fn(() => {
       return vi.fn((req: Request, _res: Response, next: NextFunction) => {
-        console.log('called')
         next()
       })
     }),
