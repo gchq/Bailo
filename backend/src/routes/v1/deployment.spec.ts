@@ -12,6 +12,7 @@ import VersionModel from '../../models/Version.js'
 import * as approval from '../../services/approval.js'
 import * as deployment from '../../services/deployment.js'
 import * as version from '../../services/version.js'
+import * as entityUtils from '../../utils/entity.js'
 import {
   deploymentData,
   deploymentSchema,
@@ -49,7 +50,7 @@ describe('test deployment routes', () => {
 
   test('get user deployments', async () => {
     const deploymentArray = new Array(1).fill(testDeployment)
-    vi.spyOn(deployment, 'findDeployments').mockReturnValueOnce(Promise.resolve(deploymentArray))
+    vi.spyOn(deployment, 'findDeployments').mockResolvedValueOnce(deploymentArray)
 
     const res = await authenticatedGetRequest(`/api/v1/deployment/user/${testDeployment.metadata.contacts.owner.id}`)
     validateTestRequest(res)
@@ -59,7 +60,8 @@ describe('test deployment routes', () => {
 
   test('reset approvals for deployment with a given uuid', async () => {
     vi.spyOn(version, 'findVersionByName').mockReturnValueOnce(versionDoc)
-    vi.spyOn(approval, 'createDeploymentApprovals').mockReturnValueOnce(Promise.resolve(undefined as any))
+    vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(undefined as any)
+    vi.spyOn(entityUtils, 'isUserInEntityList').mockResolvedValueOnce(true)
     const res = await authenticatedPostRequest(`/api/v1/deployment/${deploymentUuid}/reset-approvals`)
     validateTestRequest(res)
     expect(res.body.uuid).toBe(deploymentUuid)
@@ -67,7 +69,7 @@ describe('test deployment routes', () => {
 
   test('that we can request a deployment', async () => {
     vi.spyOn(validateSchema, 'validateSchema').mockReturnValueOnce(null)
-    vi.spyOn(approval, 'createDeploymentApprovals').mockReturnValueOnce(Promise.resolve(managerApproval))
+    vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(managerApproval)
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
 
     validateTestRequest(res)
