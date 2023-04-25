@@ -22,34 +22,22 @@ vi.mock('../../utils/user.js', () => {
 
 export function authenticatedGetRequest(path: string) {
   const request = supertest(server)
-  return request
-    .get(path)
-    .set('Content-Type', 'application/json')
-    .set('Accept', 'application/json')
+  return request.get(path).set('Content-Type', 'application/json').set('Accept', 'application/json')
 }
 
 export function authenticatedPostRequest(path: string) {
   const request = supertest(server)
-  return request
-    .post(path)
-    .set('Content-Type', 'application/json')
-    .set('Accept', 'application/json')
+  return request.post(path).set('Content-Type', 'application/json').set('Accept', 'application/json')
 }
 
 export function authenticatedPutRequest(path: string) {
   const request = supertest(server)
-  return request
-    .put(path)
-    .set('Content-Type', 'application/json')
-    .set('Accept', 'application/json')
+  return request.put(path).set('Content-Type', 'application/json').set('Accept', 'application/json')
 }
 
 export function authenticatedDeleteRequest(path: string) {
   const request = supertest(server)
-  return request
-    .delete(path)
-    .set('Content-Type', 'application/json')
-    .set('Accept', 'application/json')
+  return request.delete(path).set('Content-Type', 'application/json').set('Accept', 'application/json')
 }
 
 export function validateTestRequest(res: any) {
