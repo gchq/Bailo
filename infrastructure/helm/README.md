@@ -36,17 +36,20 @@ This image can be built with `docker build -t bailo .` in the root directory. Th
 called `local.yaml` in the `helm/bailo` folder.
 
 ### Generate certs
+
 Basic certs can be in `backend/certs`
+
 1. `openssl genrsa -out key.pem 2048 && openssl req -new -x509 -key key.pem -out cert.pem -config san.cnf -extensions 'v3_req' -days 360`
 
 ### minimal .local.yaml for OpenShift
+
 ```yaml
-image:  
+image:
   frontendRepository: "image-registry-openshift-imagestreams"
   frontendTag: tag
   backendRepository: "image-registry-openshift-imagestreams"
   backendTag: tag
- 
+
 route:
   enabled: true
   appPublicRoute: openshift-route-url
@@ -57,14 +60,15 @@ mongodb:
       - mongodb-password
     usernames:
       - mongodb-user
- 
+
 openshift:
   namespace: project-name
 ```
 
 ### minimal .local.yaml for AWS
+
 ```yaml
-image:  
+image:
   frontendRepository: "aws-elastic-container-registry"
   frontendTag: tag
   backendRepository: "aws-elastic-container-registry"
@@ -99,7 +103,9 @@ minio:
     enabled: false
     existingClaim: bailo-minio
 ```
+
 ### EKS Build
+
 1. https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html
 2. vim eks/cluster.yaml. Update name and region.
 3. `eksctl create cluster -f eks/cluster.yaml`
