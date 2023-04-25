@@ -349,17 +349,13 @@ class Client:
         """
         return self.api.get(f"model/{model_uuid}/deployments")
 
-    def upload_model(
-        self, metadata: dict, binary_file: str, code_file: str, aws_gateway: bool = True
-    ) -> str:
+    def upload_model(self, metadata: dict, binary_file: str, code_file: str) -> str:
         """Upload a new model
 
         Args:
             metadata: Required metadata for upload
             binary_file: Path to model binary file
             code_file: Path to model code file
-            aws_gateway: Whether or not the data will be uploaded via AWS gateway.
-                                Defaults to True.
 
         Returns:
             str: UUID of the new model
@@ -381,7 +377,7 @@ class Client:
 
         payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, self.config.aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
@@ -394,7 +390,6 @@ class Client:
         model_uuid: str,
         binary_file: str,
         code_file: str,
-        aws_gateway: bool = True,
     ) -> str:
         """Update an existing model based on its UUID.
 
@@ -403,8 +398,6 @@ class Client:
             model_uuid: UUID of model to update
             binary_file: Path to the model binary file
             code_file: Path to the model code file
-            aws_gateway: Whether or not the data will be uploaded via AWS gateway.
-                                Defaults to True.
 
         Returns:
             str: UUID of the updated model
@@ -426,7 +419,7 @@ class Client:
 
         payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, self.config.aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
@@ -528,11 +521,12 @@ def create_cognito_client(
     client_secret: str,
     region: str,
     ca_verify: Union[bool, str] = True,
+    aws_gateway: bool = True,
 ) -> Client:
     """Create an authorised Cognito client
 
     Args:
-        bailo_url: Bailo URL
+        bailo_url: URL of the Bailo instance
         username: Cognito username
         password: Cognito password
         user_pool_id: Cognito user pool ID
@@ -540,6 +534,7 @@ def create_cognito_client(
         client_secret: Cognito client secret
         region: Cognito region
         ca_verify: Verify SSL certificates. Provide a path to use a custom cert
+        aws_gateway: Is Bailo load balanced with an aws gateway
 
     Returns:
         Client: Authorised Bailo Client
@@ -554,20 +549,30 @@ def create_cognito_client(
         region=region,
     )
 
-    config = BailoConfig(auth=cognito_config, bailo_url=bailo_url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=cognito_config,
+        bailo_url=bailo_url,
+        ca_verify=ca_verify,
+        aws_gateway=aws_gateway,
+    )
 
     return Client(config)
 
 
 def create_pki_client(
-    p12_file: str, url: str, ca_verify: Union[str, bool] = True
+    p12_file: str,
+    bailo_url: str,
+    ca_verify: Union[str, bool] = True,
+    aws_gateway: bool = True,
 ) -> Client:
     """Create an authorised PKI client
 
     Args:
         p12_file: Path to P12 file
         ca_verify: Path to CA file
-        url: Bailo URL
+        bailo_url: URL of the Bailo instance
+        aws_gateway: Is Bailo load balanced with an aws gateway
+
 
     Returns:
         Client: Authorised Bailo Client
@@ -577,20 +582,27 @@ def create_pki_client(
     )
 
     pki_config = Pkcs12Config(pkcs12_filename=p12_file, pkcs12_password=p12_pwd)
-    config = BailoConfig(auth=pki_config, bailo_url=url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=pki_config, bailo_url=url, ca_verify=ca_verify, aws_gateway=aws_gateway
+    )
 
     return Client(config)
 
 
-def create_null_client(url: str, ca_verify: Union[str, bool] = True):
+def create_null_client(
+    bailo_url: str, ca_verify: Union[str, bool] = True, aws_gateway: bool = True
+):
     """Create an unauthorised client
 
     Args:
-        url: Bailo URL
+        bailo_url: URL of the Bailo instance
         ca_verify: Path to CA file
+        aws_gateway: Is Bailo load balanced with an aws gateway
 
     Returns:
         Client: Bailo Client
     """
-    config = BailoConfig(auth=None, bailo_url=url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=None, bailo_url=bailo_url, ca_verify=ca_verify, aws_gateway=aws_gateway
+    )
     return Client(config)

@@ -15,23 +15,7 @@ Bailo
 Client
 ------
 
-.. automodule:: bailoclient.client
-   :members:
-   :inherited-members:
-
-
-API
----
-
-.. automodule:: bailoclient.api
-   :members:
-   :inherited-members:
-
-
-Auth
-----
-
-.. automodule:: bailoclient.auth
+.. autoclass:: bailoclient.Client
    :members:
    :inherited-members:
 
@@ -39,7 +23,11 @@ Auth
 Config
 ------
 
-.. automodule:: bailoclient.config
+.. autoclass:: bailoclient.config.BailoConfig
    :members:
-   :inherited-members:
 
+.. autoclass:: bailoclient.config.CognitoConfig
+   :members:
+
+.. autoclass:: bailoclient.config.Pkcs12Config
+   :members:

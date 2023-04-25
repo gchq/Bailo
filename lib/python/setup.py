@@ -25,6 +25,7 @@ setup(
             "pre-commit",
             "pylint",
             "pytest >= 6.2",
+            "sphinx >= 6.2.0",
         ],
         "bundling": ["mlflow"],
     },
