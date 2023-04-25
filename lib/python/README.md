@@ -4,6 +4,18 @@
 
 ---
 
+### Dependencies
+
+This library requires some additional requirements to build [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html).
+
+```bash
+# RPM / Fedora Based
+sudo yum install gcc gmp python3-devel
+
+# Ubuntu
+sudo apt-get install build-essential python3-dev
+```
+
 ### Developers
 
 ```bash
@@ -16,15 +28,6 @@ pre-commit install
 ```bash
 python3 -m pip install -e .
 ```
-
-> #### Note
->
-> You may need to install some additional requirements for
-> [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html) e.g. on Linux:
->
-> ```bash
-> sudo yum install gcc gmp python3-devel
-> ```
 
 ## Environment
 

@@ -1,4 +1,4 @@
-name: Python Test
+name: Python Unit Test
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
         run: |
           cd lib/python
           black --check --verbose .
-      # - name: Test with pytest
-      #   run: |
-      #     cd lib/python
-      #     pytest
+      - name: Test with pytest
+        run: |
+          cd lib/python
+          python -m pytest tests/unit
