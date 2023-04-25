@@ -101,8 +101,9 @@ minio:
 ```
 ### EKS Build
 1. https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html
-2. `eksctl create cluster -f eks/cluster.yaml`
-3. https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+2. vim eks/cluster.yaml. Update name and region.
+3. `eksctl create cluster -f eks/cluster.yaml`
+4. https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
 
 #### Install Bailo
 
