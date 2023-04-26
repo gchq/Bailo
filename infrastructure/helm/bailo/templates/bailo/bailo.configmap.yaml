@@ -30,7 +30,7 @@ data:
         },
       },
       mongo: {
-        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ .Values.mongodb.host }}',
+        uri: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}',
         connectionOptions: {
           useFindAndModify: false,
           useNewUrlParser: true,
@@ -45,7 +45,7 @@ data:
           endPoint: '{{ include "bailo.minio.host" . }}',
           port: {{ .Values.minio.service.ports.api }},
           useSSL: {{ .Values.minio.useSSL }},
-          region: '',
+          region: '{{ .Values.minio.region }}',
           },
           automaticallyCreateBuckets: {{ .Values.minio.createBuckets }},
           buckets: {
@@ -57,7 +57,7 @@ data:
         connection:{ 
           host: '{{ include "bailo.registry.host" . }}:{{ .Values.registry.port }}',
           port: '{{ .Values.registry.port }}',
-          protocol: 'https',
+          protocol: '{{ .Values.registry.protocol }}',
         },
         service: 'RegistryAuth',
         issuer: 'RegistryIssuer',
@@ -66,7 +66,7 @@ data:
       smtp: {
         enabled: true,
         connection: {
-          host: '{{ include "bailo.fullname" . }}-mail',
+          host: '{{ include "bailo.mail.host" . }}',
           port: {{ .Values.config.smtp.port }},
           secure: {{ .Values.config.smtp.secure }},
           auth: { 

@@ -20,6 +20,7 @@ keyUsage = digitalSignature, keyEncipherment
 IP.1 = 127.0.0.1
 DNS.1 = localhost
 DNS.2 = registry
+DNS.3 = bailo-registry
 
 [CA_default]
 copy_extensions = copy

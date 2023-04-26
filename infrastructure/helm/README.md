@@ -35,6 +35,80 @@ image:
 This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is
 called `local.yaml` in the `helm/bailo` folder.
 
+### Generate certs
+
+Basic certs can be in `backend/certs`
+
+1. `openssl genrsa -out key.pem 2048 && openssl req -new -x509 -key key.pem -out cert.pem -config san.cnf -extensions 'v3_req' -days 360`
+
+### minimal .local.yaml for OpenShift
+
+```yaml
+image:
+  frontendRepository: "image-registry-openshift-imagestreams"
+  frontendTag: tag
+  backendRepository: "image-registry-openshift-imagestreams"
+  backendTag: tag
+
+route:
+  enabled: true
+  appPublicRoute: openshift-route-url
+
+mongodb:
+  auth:
+    passwords:
+      - mongodb-password
+    usernames:
+      - mongodb-user
+
+openshift:
+  namespace: project-name
+```
+
+### minimal .local.yaml for AWS
+
+```yaml
+image:
+  frontendRepository: "aws-elastic-container-registry"
+  frontendTag: tag
+  backendRepository: "aws-elastic-container-registry"
+  backendTag: tag
+
+ingress:
+  enabled: true
+  name: "bailo-ingress"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
+  fqdn: "*.amazonaws.com"
+
+aws:
+  enabled: true
+
+mongodb:
+  persistence:
+    enabled: false
+    existingClaim: bailo-mongodb
+  auth:
+    passwords:
+      - mongodb-password
+    usernames:
+      - mongodb-user
+
+minio:
+  persistence:
+    enabled: false
+    existingClaim: bailo-minio
+```
+
+### EKS Build
+
+1. https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html
+2. vim eks/cluster.yaml. Update name and region.
+3. `eksctl create cluster -f infrastructure/eks/cluster.yaml`
+4. https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+
 #### Install Bailo
 
 1. `helm dependency update`

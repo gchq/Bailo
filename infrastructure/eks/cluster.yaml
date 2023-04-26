@@ -1,0 +1,22 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: bailo-eks
+  region: <region>
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+
+managedNodeGroups:
+  - name: bailo-node
+    instanceType: t3.medium
+    minSize: 1
+    maxSize: 2
