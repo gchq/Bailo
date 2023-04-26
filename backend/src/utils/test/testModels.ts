@@ -58,6 +58,7 @@ export const deploymentData: any = {
 }
 
 export const testUser: any = {
+  _id: new ObjectId(),
   id: 'user',
   email: 'test@example.com',
   roles: ['user'],
