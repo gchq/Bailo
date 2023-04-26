@@ -113,6 +113,7 @@ mongodb:
     port: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
+    #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Stoage is not removed when deployed mongodb is removed.
     size: 10Gi
   containerSecurityContext:
     enabled: false
@@ -142,6 +143,7 @@ minio:
       api: 31111 # default 9000
   useSSL: false
   persistence:
+    #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Stoage is not removed when deployed minio is removed.
     size: 20Gi
   containerSecurityContext:
     enabled: false
