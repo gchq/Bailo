@@ -24,6 +24,8 @@ import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { withTheme } from '@rjsf/core'
+import Form from '@rjsf/mui'
+import validator from '@rjsf/validator-ajv8'
 import _ from 'lodash-es'
 import React, { Fragment, useEffect, useState } from 'react'
 import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided } from 'react-beautiful-dnd'
@@ -31,10 +33,7 @@ import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProv
 import { Schema, SchemaQuestion, SchemaType } from '../../../lib/shared/types'
 import { SplitSchema, Step } from '../../types/interfaces'
 import { getStepsFromSchema } from '../../utils/formUtils'
-import { Theme as MaterialUITheme } from '../MuiForms/index'
 import QuestionPicker from './QuestionPicker'
-
-const SchemaForm = withTheme(MaterialUITheme)
 
 export default function SchemaDesigner() {
   const [questionPickerOpen, setQuestionPickerOpen] = useState(false)
@@ -321,7 +320,8 @@ export default function SchemaDesigner() {
               <Typography>Nothing to preview!</Typography>
             )}
             {showForm && splitSchema?.steps[stepIndex]?.schema !== undefined && (
-              <SchemaForm
+              <Form
+                validator={validator}
                 schema={splitSchema.steps[stepIndex].schema}
                 formData={splitSchema.steps[stepIndex].state}
                 uiSchema={splitSchema.steps[stepIndex].uiSchema}

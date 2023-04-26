@@ -1,5 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
+import isDocker from 'is-docker'
 import removeImports from 'next-remove-imports'
 import path from 'path'
 import rehypeHighlight from 'rehype-highlight'
@@ -22,7 +23,9 @@ const withMDX = nextMDX({
 })
 
 const isDevelopment = process.env.NODE_ENV === 'development'
-const backend = process.env.BACKEND_SERVICE ?? 'http://backend:3001'
+
+const defaultBackend = isDocker() ? 'http://backend:3001' : 'http://localhost:3001'
+const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

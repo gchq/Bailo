@@ -1,25 +1,12 @@
 import { TextField } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { WidgetProps } from '@rjsf/utils'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 import { SeldonVersion } from '../../../lib/shared/types'
 import { useGetUiConfig } from '../../data/uiConfig'
 
-type SeldonVersionSelectorProps = {
-  label: string
-  value: string
-  required: boolean
-  readonly: boolean
-  onChange: (value: string) => void
-}
-
-export default function SeldonVersionSelector({
-  label,
-  value,
-  required,
-  readonly,
-  onChange,
-}: SeldonVersionSelectorProps) {
+export default function SeldonVersionSelector({ label, value, required, readonly, onChange }: WidgetProps) {
   const { uiConfig } = useGetUiConfig()
   const [seldonVersions, setSeldonVersions] = useState<Array<SeldonVersion>>([])
 
