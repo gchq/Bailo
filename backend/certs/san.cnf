@@ -19,7 +19,7 @@ keyUsage = digitalSignature, keyEncipherment
 [alt_names]
 IP.1 = 127.0.0.1
 DNS.1 = localhost
-DNS.2 = Registry
+DNS.2 = registry
 DNS.3 = bailo-registry
 
 [CA_default]

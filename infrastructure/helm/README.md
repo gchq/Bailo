@@ -99,8 +99,6 @@ mongodb:
 minio:
   persistence:
     enabled: false
-  persistence:
-    enabled: false
     existingClaim: bailo-minio
 ```
 
