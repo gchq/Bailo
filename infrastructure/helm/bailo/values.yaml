@@ -226,6 +226,8 @@ config:
 stroom:
   enabled: false
   url: 'http://localhost:8090/stroom/datafeed'
+  folder: './logs/stroom'
+  system: 'bailo'
   feed: 'bailo'
   environment: 'Development'
   insecure: true
