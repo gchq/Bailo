@@ -27,7 +27,7 @@ setup(
             "pytest >= 6.2",
             "sphinx >= 6.2.0",
             "m2r2 >= 0.3.1",
-            "nbsphinx >= 0.9.1",
+            "myst-nb >= 0.17.2",
         ],
         "bundling": ["mlflow"],
     },

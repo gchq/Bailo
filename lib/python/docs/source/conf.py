@@ -25,13 +25,13 @@ extensions = [
     "sphinx.ext.autodoc",  # extract docs from docstrings
     "sphinx.ext.napoleon",  # google style docstring format
     "m2r2",  # markdown support
-    # "nbsphinx",  # jupyter notebook support
+    "myst_nb",  # notebook support
 ]
 
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "all"
-# typehints_defaults = 'comma'
-# always_document_param_types = True
+nb_execution_mode = "off"
+
 
 templates_path = ["_templates"]
 exclude_patterns = []

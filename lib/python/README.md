@@ -62,11 +62,11 @@ config = Pkcs12Config(
 )
 ```
 
-> If you don't want to expose your password use `bailoclient.create_pki_client`
+> To avoid exposing the certificate's password use `bailoclient.create_pki_client` to be promted to enter the password
 
 ### Null auth
 
-If your Bailo instance is not configured with access control (not recommended), simply use `None`
+If the Bailo instance is not configured with access control (not recommended), simply use `None`
 
 ```python
 config = None
@@ -90,7 +90,7 @@ There are two ways to interact with a Bailo instance:
 
 ### `bailoclient.Client` Example
 
-This class makes available all the functionality to interact with your bailo instance. There are three client creation function available to quickly create a `bailoclient.Client` instance.
+This class makes available all the functionality to interact with a bailo instance. There are three client creation function available to quickly create a `bailoclient.Client` instance.
 
 ```python
 from bailoclient import create_pki_client
@@ -106,7 +106,7 @@ client.get_my_models()
 ### `bailoclient.Bailo` Example
 
 This class has all the functionality of `bailoclient.client` with additional functionality to improve the user experience for data scientists.
-Additional functionality includes making the model bundlers available and generating requirements files for your models.
+Additional functionality includes making the model bundlers available and generating requirements files from python files.
 
 ```python
 from bailoclient import Bailo, BailoConfig, Pkcs12Config
@@ -153,11 +153,24 @@ bailo = Bailo(config=BailoConfig.load("./bailo-config.yaml"))
 bailo.get_my_models()
 ```
 
-## Examples
+### Example Config
 
-There are example files for interacting directly with the BAILO library at:
+Example yaml configuration `config.yaml`
 
-- [bailo-demo.ipynb](./examples/bailo-demo.ipynb) (no authentication)
+```yaml
+api:
+  bailo_url: 'http://example.com'
+  ca_verify: 'path/to/ca/cert'
+  timeout_period: 5
+  aws_gateway: 'True'
+  auth:
+    username: username
+    password: password
+    user_pool_id: 'USER_POOL_ID'
+    client_id: 'APP_CLIENT_ID'
+    client_secret: 'APP_CLIENT_SECRET'
+    region: 'AWS_REGION'
+```
 
 ## Development
 
@@ -170,7 +183,7 @@ pre-commit install
 
 ### Creating an environment with conda
 
-If you have anaconda or miniconda installed an environment can be created by:
+This requires anaconda or miniconda to be installed. Create ann activate an environment by:
 
 ```bash
 conda create -n bailo python=3.10
@@ -180,7 +193,7 @@ pip install -r requirments.txt
 
 ### Creating an environment with venv
 
-This requires and existing python installation and pip installed:
+This requires and existing python installation and pip installed. Create and activate an environment by:
 
 ```bash
 python3 -m venv venv

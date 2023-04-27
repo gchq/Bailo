@@ -1,8 +1,4 @@
-
-
-
-
-getting Started
+Getting Started
 ===============
 
 .. toctree::
@@ -17,7 +13,8 @@ Examples
 .. toctree::
    :maxdepth: 2
 
-   examples.rst
+   bailo_demo.ipynb
+
 
 API Documentation
 =================
