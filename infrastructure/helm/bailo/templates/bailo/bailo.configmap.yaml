@@ -87,11 +87,11 @@ data:
         },
         stroom: {
           enabled: {{ .Values.stroom.enabled }},
-          folder: '/.logs/stroom',
+          folder: '{{ .Values.stroom.folder }},
           url: '{{ .Values.stroom.url }}',
           feed: '{{ .Values.stroom.feed }}',
           environment: '{{ .Values.stroom.environment }}',
-          system: 'bailo',
+          system: '{{ .Values.stroom.system }}',
           insecure: {{ .Values.stroom.insecure }},
           interval: {{ .Values.stroom.interval }},
         },
