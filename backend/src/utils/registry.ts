@@ -2,6 +2,7 @@ import axios, { AxiosResponse, Method } from 'axios'
 import https from 'https'
 
 import { Access, getAccessToken } from '../routes/v1/registryAuth.js'
+import { ImageManifest } from '../types/types.js'
 import config from './config.js'
 import logger from './logger.js'
 
@@ -62,6 +63,61 @@ export async function getAdminAuthorisation(scope: Array<Access>): Promise<strin
   const authorisation = `Bearer ${token}`
 
   return authorisation
+}
+
+export async function getImageManifest(registry: Registry, image: ImageRef): Promise<ImageManifest | undefined> {
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${image.namespace}/${image.model}`, actions: ['pull'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${image.namespace}/${image.model}/manifests/${image.version}`,
+    method: 'GET',
+    authorisation,
+  })
+
+  if (res.status === 404) {
+    return undefined
+  }
+
+  if (res.status !== 200) {
+    logger.error({ status: res.status, image }, 'Invalid registry request response when getting image manifest')
+    throw new Error('Invalid registry request response')
+  }
+
+  const manifest = res.data
+  logger.info({ image, manifest }, 'Found image manifest')
+
+  return manifest
+}
+
+export async function getBlobFile(blobSum: string, registry: Registry, image: ImageRef): Promise<Blob | undefined> {
+  const authorisation = await getAdminAuthorisation([
+    { type: 'repository', name: `${image.namespace}/${image.model}`, actions: ['pull'] },
+  ])
+
+  const res = await makeRegistryRequest<any>(registry, {
+    path: `/${image.namespace}/${image.model}/blobs/${blobSum}`,
+    method: 'GET',
+    authorisation,
+    headers: {
+      Accept: ContentTypes.APPLICATION_OCTET_STREAM,
+    },
+  })
+
+  if (res.status === 404) {
+    return undefined
+  }
+
+  if (res.status !== 200) {
+    logger.error({ status: res.status, image }, 'Invalid registry request response when getting fsLayer blob')
+    throw new Error('Invalid registry request response')
+  }
+
+  const blob = res.data
+  logger.info(blobSum, 'Found image blob')
+
+  return blob
 }
 
 export async function getImageDigest(registry: Registry, image: ImageRef): Promise<string | undefined> {

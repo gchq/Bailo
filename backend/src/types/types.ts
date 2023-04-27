@@ -357,3 +357,16 @@ export interface Version {
 }
 
 export type VersionDoc = Version & Document<any, any, Version>
+
+export interface fsLayer {
+  blobSum: string
+}
+
+export interface ImageManifest {
+  schemaVersion: number
+  name: string
+  tag: string
+  architecture: string
+  fsLayers: fsLayer[]
+  history?: object[]
+}

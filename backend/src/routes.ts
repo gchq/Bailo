@@ -11,6 +11,7 @@ import {
   postUngovernedDeployment,
   resetDeploymentApprovals,
 } from './routes/v1/deployment.js'
+import { exportModel } from './routes/v1/export.js'
 import {
   getModelAccess,
   getModelById,
@@ -99,5 +100,7 @@ server.get('/api/v1/specification', ...getSpecification)
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
 server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
+
+server.get('/api/v1/export/:uuid/:deploymentId/version/:version', ...exportModel)
 
 server.use('/api', expressErrorHandler)
