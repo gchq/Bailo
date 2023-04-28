@@ -119,7 +119,7 @@ describe('test approval service', () => {
   })
 
   test('that we can create a deployment approval object', async () => {
-    const approval = await createDeploymentApprovals({ deployment, user: testUser })
+    const approval = await createDeploymentApprovals({ deployment, user: testUser, version })
     expect(approval).not.toBe(undefined)
     expect(approval.approvalType).toBe('Manager')
     expect(approval.approvalCategory).toBe('Deployment')
