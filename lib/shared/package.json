@@ -21,7 +21,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "bunyan": "^1.8.15",
-    "mongoose": "^6.9.0",
+    "mongoose": "^7.1.0",
     "mongoose-delete": "^0.5.4",
     "uuid": "^9.0.0"
   },
