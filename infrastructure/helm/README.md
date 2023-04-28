@@ -35,13 +35,13 @@ image:
 This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is
 called `local.yaml` in the `helm/bailo` folder.
 
-### Generate certs
+#### Generate certs
 
 Basic certs can be in `backend/certs`
 
 1. `openssl genrsa -out key.pem 2048 && openssl req -new -x509 -key key.pem -out cert.pem -config san.cnf -extensions 'v3_req' -days 360`
 
-### minimal .local.yaml for OpenShift
+#### Minimal local.yaml for OpenShift
 
 ```yaml
 image:
@@ -65,7 +65,7 @@ openshift:
   namespace: project-name
 ```
 
-### minimal .local.yaml for AWS
+#### Minimal local.yaml for AWS
 
 ```yaml
 image:
@@ -102,7 +102,7 @@ minio:
     existingClaim: bailo-minio
 ```
 
-### EKS Build
+#### EKS Build
 
 1. https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html
 2. vim eks/cluster.yaml. Update name and region.
