@@ -6,7 +6,7 @@
 image:
   frontendRepository: "frontend-image-registry.location"
   frontendTag: imageTag
-  backendRepository: "backend-image-registry.loccation"
+  backendRepository: "backend-image-registry.location"
   backendTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
@@ -44,7 +44,7 @@ service:
   backendPort: 3001
 
 
-# k8s config
+# k8s | aws config
 ingress:
   enabled: false
   name: "nginx"
@@ -60,9 +60,19 @@ ingress:
 
 # Used for OpenShift 
 route:
-  enabled: false
-  appPublicRoute: 'route-url'
+  enabled: false # false for k8s | aws
+  appPublicRoute: 'route-url' # can also be used for aws loadbalancer url 
 
+# Used for aws storage
+aws:
+  enabled: false
+  storageName: "sc-gp2"
+  pvcMinioName: "bailo-minio"
+  pvcMinioStorage: 20Gi
+  pvcMongoName: "bailo-mongodb"
+  pvcMongoStorage: 10Gi
+
+# Pod resource
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -103,6 +113,7 @@ mongodb:
     port: 27017
   collectionName: bailo # Collection name in Mongo
   persistence:
+    #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Stoage is not removed when deployed mongodb is removed.
     size: 10Gi
   containerSecurityContext:
     enabled: false
@@ -111,7 +122,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 4.4.13-debian-10-r0
+    tag: 6.0.5-debian-11-r9
 
 # MinIO Dependencies
 minio:
@@ -132,6 +143,7 @@ minio:
       api: 31111 # default 9000
   useSSL: false
   persistence:
+    #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Stoage is not removed when deployed minio is removed.
     size: 20Gi
   containerSecurityContext:
     enabled: false
@@ -149,6 +161,7 @@ registry:
   repository: registry
   tag: 2
   enabled: true
+  protocol: "https"
   #host: "bailo-registry" # service name
   port: 5000 # default 5000
   insecure: "true"
@@ -200,7 +213,7 @@ config:
     from: 'bailo@example.com'
 
   build:
-    environment: openshift # or img for aws
+    environment: openshift # or img for k8s | aws
 
   app:
     protocol: 'https'
@@ -209,9 +222,12 @@ config:
   schema:
     script: 'dist/server/scripts/exampleSetAllSchemas.js'
 
+# logging https://github.com/gchq/stroom
 stroom:
   enabled: false
   url: 'http://localhost:8090/stroom/datafeed'
+  folder: './logs/stroom'
+  system: 'bailo'
   feed: 'bailo'
   environment: 'Development'
   insecure: true

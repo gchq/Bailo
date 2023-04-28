@@ -10,8 +10,8 @@ export function createUiSchema(schema: any, customSchema: any) {
 export function createBaseSchema(schema: any) {
   const uiSchema = {}
 
-  if (schema.maxLength) {
-    uiSchema['ui:widget'] = 'textArea'
+  if (schema.maxLength > 140) {
+    uiSchema['ui:widget'] = 'textarea'
   }
 
   if (schema.widget) {
