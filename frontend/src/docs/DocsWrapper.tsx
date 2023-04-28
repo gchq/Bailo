@@ -12,7 +12,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import Stack from '@mui/system/Stack'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { Fragment, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react'
+import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Copyright from '../Copyright'

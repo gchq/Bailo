@@ -1,5 +1,6 @@
-import { ListItemButton, Tooltip, Badge, ListItemText, ListItemIcon } from '@mui/material'
-import Link from '../Link'
+import { Badge, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
+
+import Link from '../../src/Link'
 
 interface Props {
   selected: boolean

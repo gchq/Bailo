@@ -5,9 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { testApproval, testModel, testModelUpload, testUser, testVersion2 } from '../../utils/test/testModels.js'
 import { MulterFiles } from './upload.js'
 
-const userService = await import('../../services/user.js')
 vi.doMock('../../services/user', () => ({
-  ...userService,
   findAndUpdateUser: vi.fn(() => Promise.resolve(testUser)),
 }))
 
@@ -55,9 +53,7 @@ vi.doMock('multer', () => ({
   }),
 }))
 
-const schemaService = await import('../../services/schema.js')
 vi.doMock('../../services/schema', () => ({
-  ...schemaService,
   findSchemaByRef: vi.fn(() => Promise.resolve({ irrelevant: 'content' })),
 }))
 
@@ -65,25 +61,19 @@ vi.doMock('../../utils/validateSchema', () => ({
   validateSchema: vi.fn(),
 }))
 
-const minioUtils = await import('../../utils/minio.js')
 const mockMinioUtils = {
-  ...minioUtils,
   moveFile: vi.fn(),
 }
 vi.doMock('../../utils/minio', () => mockMinioUtils)
 
-const modelService = await import('../../services/model.js')
 const mockModel = { ...testModel, save: vi.fn(() => Promise.resolve()) }
 const mockModelService = {
-  ...modelService,
   createModel: vi.fn(() => Promise.resolve()),
   findModelByUuid: vi.fn(() => Promise.resolve(mockModel)),
 }
 vi.doMock('../../services/model', () => mockModelService)
 
-const versionService = await import('../../services/version.js')
 const mockVersionService = {
-  ...versionService,
   createVersion: vi.fn(() =>
     Promise.resolve({
       ...testVersion2,
@@ -96,9 +86,7 @@ const mockVersionService = {
 }
 vi.doMock('../../services/version', () => mockVersionService)
 
-const approvalService = await import('../../services/approval.js')
 vi.doMock('../../services/approval', () => ({
-  ...approvalService,
   createVersionApprovals: vi.fn(() => Promise.all([Promise.resolve(testApproval), Promise.resolve(testApproval)])),
 }))
 
@@ -107,15 +95,12 @@ const mockVersionModel = {
     findOneAndUpdate: vi.fn(),
   },
 }
-
 vi.doMock('../../models/Version', () => mockVersionModel)
 
-const queuesUtils = await import('../../utils/queues.js')
 const mockUploadQueue = {
   add: vi.fn(() => 'testJobId'),
 }
 vi.doMock('../../utils/queues', () => ({
-  ...queuesUtils,
   getUploadQueue: vi.fn(() => Promise.resolve(mockUploadQueue)),
 }))
 

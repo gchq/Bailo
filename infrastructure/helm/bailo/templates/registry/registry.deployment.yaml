@@ -48,7 +48,7 @@ spec:
           value: "token"
         - name: REGISTRY_AUTH_TOKEN_REALM
           #value: "https://{{ .Values.route.appPublicRoute }}/api/v1/registry_auth"
-          value: 'https://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort}}/api/v1/registry_auth'
+          value: 'http://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort}}/api/v1/registry_auth'
         - name: REGISTRY_AUTH_TOKEN_SERVICE
           value: "RegistryAuth"
         - name: REGISTRY_AUTH_TOKEN_ISSUER

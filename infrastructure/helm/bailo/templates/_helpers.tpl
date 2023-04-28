@@ -56,14 +56,14 @@ Create the name of the service account to use
 Mongo host defination
 */}}
 {{- define "bailo.mongo.host" -}}
-{{- if and (.Values.mongodb.enabled) (eq .Values.mongodb.architecture "standalone") }}
+{{- if and (.Values.mongodb.enabled) (eq .Values.mongodb.architecture "standalone") -}}
 {{ include "bailo.fullname" . }}-mongodb:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}
-{{- else if and (.Values.mongodb.enabled) (eq .Values.mongodb.architecture "replicaset") }}
+{{- else if and (.Values.mongodb.enabled) (eq .Values.mongodb.architecture "replicaset") -}}
 {{ include "bailo.fullname" . }}-mongodb-headless:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.collectionName }}
-{{- else }}
+{{- else -}}
 {{ .Values.mongodb.host }}
-{{- end }}
-{{- end }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Create the mongo connection URI
@@ -72,6 +72,16 @@ Create the mongo connection URI
 mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}
 {{- end }}
 
+{{/*
+Mail host defination
+*/}}
+{{- define "bailo.mail.host" -}}
+{{- if .Values.mail.enabled -}}
+{{ include "bailo.fullname" . }}-mail
+{{- else -}}
+{{ .Values.config.smtp.host }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Minio host defination

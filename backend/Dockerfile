@@ -1,7 +1,7 @@
 # This Dockerfile expects to be called from the root context (`bailo-upload/`).
 # E.g. `docker build -t "backend" -f ./backend/Dockerfile .`
 
-FROM node:16-alpine as installer
+FROM node:20-alpine as installer
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
@@ -16,13 +16,12 @@ RUN npm install --global turbo
 COPY . .
 RUN turbo prune --scope=@bailo/backend --docker
 
-FROM node:16-alpine as builder
+FROM node:20-alpine as builder
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
 
 # First install dependencies (as they change less often)
-COPY .gitignore .gitignore
 COPY --from=installer /app/out/json/ .
 COPY --from=installer /app/out/package-lock.json ./package-lock.json
 RUN npm install
@@ -34,7 +33,7 @@ COPY turbo.json turbo.json
 # Run build
 RUN npx turbo run build --filter=@bailo/backend...
 
-FROM node:16-alpine as runner
+FROM node:20-alpine as runner
 RUN apk add --no-cache libc6-compat img docker
 RUN apk update
 WORKDIR /app

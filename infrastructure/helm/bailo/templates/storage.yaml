@@ -1,0 +1,43 @@
+{{- if .Values.aws.enabled }}
+---
+#01-storage-class.yml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.aws.storageName }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+  #volumeBindingMode: Immediate
+ 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.aws.pvcMinioName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.aws.storageName }}
+  resources:
+    requests:
+      storage: {{ .Values.aws.pvcMinioStorage }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.aws.pvcMongoName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.aws.storageName }}
+  resources:
+    requests:
+      storage: {{ .Values.aws.pvcMongoStorage }}
+{{- end }}

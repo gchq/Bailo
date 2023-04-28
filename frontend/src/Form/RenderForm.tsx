@@ -1,17 +1,13 @@
-import { withTheme } from '@rjsf/core'
-import React, { Dispatch, SetStateAction } from 'react'
+import Form from '@rjsf/mui'
+import validator from '@rjsf/validator-ajv8'
+import { Dispatch, SetStateAction } from 'react'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
 import EntitySelector from '../MuiForms/EntitySelector'
-import { Theme as MaterialUITheme } from '../MuiForms/index'
-import ModelVersionSelector from '../MuiForms/ModelVersionSelector'
 import Nothing from '../MuiForms/Nothing'
 import SeldonVersionSelector from '../MuiForms/SeldonVersionSelector'
-import TextareaWidget from '../MuiForms/TextareaWidget'
 import UserSelector from '../MuiForms/UserSelector'
-
-const SchemaForm = withTheme(MaterialUITheme)
 
 export default function RenderForm({
   step,
@@ -31,16 +27,15 @@ export default function RenderForm({
   }
 
   return (
-    <SchemaForm
+    <Form
       schema={step.schema}
       formData={step.state}
       onChange={onFormChange}
+      validator={validator}
       widgets={{
         userSelector: UserSelector,
         entitySelector: EntitySelector,
         seldonVersionSelector: SeldonVersionSelector,
-        modelVersionSelector: ModelVersionSelector,
-        textArea: TextareaWidget,
         nothing: Nothing,
       }}
       uiSchema={step.uiSchema}
@@ -50,6 +45,6 @@ export default function RenderForm({
     >
       {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
       <></>
-    </SchemaForm>
+    </Form>
   )
 }
