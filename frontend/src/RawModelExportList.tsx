@@ -41,6 +41,14 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   >
                     Download binary file
                   </Button>
+                  <Button
+                    variant='contained'
+                    href={`/api/v1/export/${model?.uuid}/${deployment.uuid}/version/${version.version}`}
+                    target='_blank'
+                    data-test='exportFullModel'
+                  >
+                    Export Model
+                  </Button>
                 </Stack>
               )}
               {version.metadata.buildOptions?.uploadType !== ModelUploadType.Zip && (
