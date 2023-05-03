@@ -25,7 +25,7 @@ setup(
             "pre-commit",
             "pylint",
             "pytest >= 6.2",
-            "sphinx >= 6.2.0",
+            "sphinx >= 5.3.0",
             "m2r2 >= 0.3.1",
             "myst-nb >= 0.17.2",
         ],

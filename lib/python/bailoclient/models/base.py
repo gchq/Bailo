@@ -33,7 +33,7 @@ class BailoBase(munch.AutoMunch):
         vals.add("list_fields")
         return list(vals)
 
-    def display(self, to_screen: Optional[bool] = True):
+    def display(self, to_screen: bool = True):
         """Display the pretty JSON of the class details
 
         Args:

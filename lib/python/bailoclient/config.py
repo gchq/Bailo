@@ -83,7 +83,7 @@ class BailoConfig(BaseSettings):
     bailo_url: str
     ca_verify: Union[bool, str] = True
     timeout_period: int = 5  # timeout periods in seconds
-    aws_gateway: bool = False  # Is Bailo load balanced with an AWS gateway
+    aws_gateway: bool = True  # Is Bailo load balanced with an AWS gateway
 
     @classmethod
     def from_env(cls, auth_type: AuthType):
@@ -122,7 +122,7 @@ class BailoConfig(BaseSettings):
             bailo_url=os.environ["BAILO_URL"],
             ca_verify=os.getenv("BAILO_CA_CERT") or True,
             aws_gateway=os.getenv("BAILO_AWS_GATEWAY") or True,
-            timeout=os.getenv("BAILO_CONNECTION_TIMEOUT") or 5,
+            timeout_period=os.getenv("BAILO_CONNECTION_TIMEOUT") or 5,
         )
 
     def save(self, config_path: Union[os.PathLike, str]) -> None:

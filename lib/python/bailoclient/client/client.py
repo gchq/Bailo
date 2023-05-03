@@ -101,7 +101,7 @@ class Client:
         deployment_uuid: str,
         model_version: str,
         file_type: Optional[str] = None,
-        output_dir: Optional[str] = "./model/",
+        output_dir: str = "./model/",
         overwrite: bool = False,
     ):
         """Download the code or binary for a model. file_type can either be 'binary' or 'code'.

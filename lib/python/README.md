@@ -1,5 +1,12 @@
 # Bailo Python Client
 
+## Table of Contents
+1. [Installation](#installation)
+2. [Documentation](#documentation)
+3. [Authentication](#authentication)
+4. [Client](#client-usage)
+5. [Development Setup](#development-setup)
+
 ## Installation
 
 ### Dependencies
@@ -14,7 +21,7 @@ sudo yum install gcc gmp python3-devel
 sudo apt-get install build-essential python3-dev
 ```
 
-### Installation
+### Client Installation
 
 ```bash
 python3 -m pip install .
@@ -84,7 +91,7 @@ config = Pkcs12Config.from_env()
 Please refer to the documentation for environment variables needed by each config type.
 
 
-## Client
+## Client Usage
 
 There are two ways to interact with a Bailo instance:
 
@@ -123,7 +130,7 @@ bailo = Bailo(
 bailo.get_my_models()
 ```
 
-### Loading a config from environment variables:
+### Loading Bailo config from environment variables:
 
 Please refer to the documentation for environment variables needed by each config type.
 
@@ -172,18 +179,11 @@ api:
     region: 'AWS_REGION'
 ```
 
-## Development
-
-### Install dependencies
-
-```bash
-python3 -m pip install -r requirements.txt
-pre-commit install
-```
+## Development setup
 
 ### Creating an environment with conda
 
-This requires anaconda or miniconda to be installed. Create ann activate an environment by:
+This requires anaconda or miniconda to be installed. Create and activate an environment by:
 
 ```bash
 conda create -n bailo python=3.10
@@ -197,8 +197,15 @@ This requires and existing python installation and pip installed. Create and act
 
 ```bash
 python3 -m venv venv
-venv/bin/activate
+source venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Install dependencies
+
+```bash
+python3 -m pip install -r requirements.txt
+pre-commit install
 ```
 
 ### Running Tests
