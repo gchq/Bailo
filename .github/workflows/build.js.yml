@@ -22,7 +22,7 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: backend
           file: backend/Dockerfile
           tags: bailo_backend:latest
           cache-from: type=gha
@@ -50,7 +50,7 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: frontend
           file: frontend/Dockerfile
           tags: bailo_frontend:latest
           cache-from: type=gha
