@@ -4,7 +4,7 @@ import { findDeploymentByUuid } from '../services/deployment.js'
 import { findModelByUuid } from '../services/model.js'
 import { findSchemaByRef } from '../services/schema.js'
 import { findVersionById, findVersionByName } from '../services/version.js'
-import { UserDoc } from '../types/types.js'
+import { UserDoc, VersionDoc } from '../types/types.js'
 import { createRegistryClient, getBlobFile, getImageManifest } from '../utils/registry.js'
 import config from './config.js'
 import logger from './logger.js'
@@ -37,7 +37,7 @@ export const getModelMetadata = async (
   uuid: string,
   versionName: string,
   archive: archiver.Archiver
-) => {
+): Promise<VersionDoc> => {
   const model = await findModelByUuid(user, uuid)
 
   if (!model) {
@@ -55,7 +55,7 @@ export const getModelMetadata = async (
     throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
   }
 
-  archive.append(JSON.stringify(version, null, '\t'), { name: 'metadata.json' })
+  archive.append(JSON.stringify(version.metadata, null, '\t'), { name: 'metadata.json' })
   return version
 }
 
