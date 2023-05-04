@@ -1,4 +1,4 @@
-import { LogLevel, LogLevelLabel } from '../../lib/shared/types'
+import { LogLevel, LogLevelLabel } from '../types/types'
 
 const getLogLevelLabel = (level: LogLevel): LogLevelLabel => {
   const label: LogLevelLabel | undefined = LogLevelLabel[LogLevel[level]]

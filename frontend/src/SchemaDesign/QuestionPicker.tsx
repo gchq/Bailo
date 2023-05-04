@@ -14,7 +14,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import React, { useState } from 'react'
 
-import { SchemaQuestion } from '../../../lib/shared/types'
+import { SchemaQuestion } from '../../types/types'
 import SchemaDesignerQuestion, { DesignerQuestion } from './SchemaDesignerQuestion'
 
 const questionList: DesignerQuestion[] = [

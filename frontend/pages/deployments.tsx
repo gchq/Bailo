@@ -17,12 +17,12 @@ import _ from 'lodash-es'
 import Link from 'next/link'
 import React, { ChangeEvent } from 'react'
 
-import { Deployment, Version } from '../../lib/shared/types'
 import { useGetUserDeployments } from '../data/deployment'
 import { useGetModelById } from '../data/model'
 import { useGetCurrentUser } from '../data/user'
 import EmptyBlob from '../src/common/EmptyBlob'
 import Wrapper from '../src/Wrapper'
+import { Deployment, Version } from '../types/types'
 
 function ModelNameFromKey({ modelId }: { modelId: string }) {
   const { model, isModelError } = useGetModelById(modelId)

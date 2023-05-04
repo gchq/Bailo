@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { Deployment, Model, Schema, Version } from '../../lib/shared/types'
+import { Deployment, Model, Schema, Version } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export type ListModelType = 'favourites' | 'user' | 'all'

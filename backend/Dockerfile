@@ -1,9 +1,8 @@
-# This Dockerfile expects to be called from the root context (`bailo-upload/`).
-# E.g. `docker build -t "backend" -f ./backend/Dockerfile .`
+FROM node:16-alpine as installer
 
-FROM node:20-alpine as installer
 RUN apk add --no-cache libc6-compat
 RUN apk update
+
 WORKDIR /app
 
 RUN mkdir /s2i && \
@@ -11,31 +10,19 @@ RUN mkdir /s2i && \
     tar -xvf s2i.tar.gz -C /s2i && \
     rm -rf s2i.tar.gz
 
-# Install Turbo
-RUN npm install --global turbo
-COPY . .
-RUN turbo prune --scope=@bailo/backend --docker
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-FROM node:20-alpine as builder
-RUN apk add --no-cache libc6-compat
-RUN apk update
-WORKDIR /app
-
-# First install dependencies (as they change less often)
-COPY --from=installer /app/out/json/ .
-COPY --from=installer /app/out/package-lock.json ./package-lock.json
 RUN npm install
 
-# Build the project and its dependencies
-COPY --from=installer /app/out/full/ .
-COPY turbo.json turbo.json
+COPY . .
+RUN npm run build
 
-# Run build
-RUN npx turbo run build --filter=@bailo/backend...
+FROM node:16-alpine as runner
 
-FROM node:20-alpine as runner
 RUN apk add --no-cache libc6-compat img docker
 RUN apk update
+
 WORKDIR /app
 
 ARG user_id=1001
@@ -53,16 +40,15 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
     && echo builder:100000:65536 | tee /etc/subuid | tee /etc/subgid
 
 COPY --from=installer /s2i /s2i
+RUN chmod -R o+x /s2i
 
-COPY --from=builder /app/backend/config backend/config
-COPY --from=builder /app/backend/dist backend/dist
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-COPY --from=builder /app/lib/shared lib/shared
+RUN npm install --omit=dev
 
-COPY --from=installer /app/out/package-lock.json package-lock.json
-COPY --from=installer /app/out/json/backend/package.json package.json
-
-RUN npm install --production
+COPY --from=installer /app/config config
+COPY --from=installer /app/dist .
 
 USER $user_id
 
@@ -73,5 +59,4 @@ ENV USER builder
 
 EXPOSE 3001
 
-WORKDIR /app/backend
-CMD [ "node", "dist/backend/src/index.js" ]
+CMD ["npm", "run", "start"]

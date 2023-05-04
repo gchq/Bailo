@@ -1,5 +1,6 @@
-import { UiConfig } from '../../lib/shared/types'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+
+import { UiConfig } from '../types/types'
 
 interface DefaultProps {
   config: UiConfig

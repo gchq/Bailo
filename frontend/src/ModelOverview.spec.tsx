@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 
-import { EntityKind } from '../../lib/shared/types'
+import { EntityKind } from '../types/types'
 import ModelOverview from './ModelOverview'
 import { lightTheme } from './theme'
 

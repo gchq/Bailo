@@ -20,7 +20,6 @@
     "useTabs": false
   },
   "dependencies": {
-    "@bailo/shared": "*",
     "@emotion/cache": "^11.10.7",
     "@emotion/react": "^11.10.6",
     "@emotion/server": "^11.10.0",
@@ -42,6 +41,7 @@
     "is-docker": "^3.0.0",
     "jsonschema": "^1.4.1",
     "lodash-es": "^4.17.21",
+    "mongoose": "^7.1.0",
     "next": "13.3.0",
     "next-remove-imports": "^1.0.11",
     "notistack": "^3.0.1",

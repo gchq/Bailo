@@ -1,4 +1,4 @@
-import { MinimalEntry } from '../../lib/shared/types'
+import { MinimalEntry } from '../types/types'
 
 export interface RenderTree {
   id: string

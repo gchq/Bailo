@@ -1,4 +1,4 @@
-import Bailo from '@bailo/node'
+import Bailo from '../external/BailoClient.js'
 
 import logger from '../utils/logger.js'
 

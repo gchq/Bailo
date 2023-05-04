@@ -74,11 +74,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Install dependencies
       - run: npm ci
@@ -97,7 +97,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Install dependencies
       - run: npm ci
@@ -117,7 +117,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -149,7 +149,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Add bailo NodePort
       - name: Create NodePort Config
@@ -268,7 +268,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -297,7 +297,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Configure application
       - name: Configure Bailo
@@ -343,7 +343,7 @@ jobs:
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
       # Add schemas
-      - run: npm run --workspace=backend script -- exampleSetAllSchemas
+      - run: npm run script -- exampleSetAllSchemas
 
       - uses: cypress-io/github-action@v5
         with:
@@ -386,7 +386,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -415,7 +415,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Configure application
       - name: Configure Bailo
@@ -461,13 +461,13 @@ jobs:
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
       # Add schemas
-      - run: npm run --workspace=backend script -- exampleSetAllSchemas
+      - run: npm run script -- exampleSetAllSchemas
 
       # Setup python
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       # Install dependencies
       - name: Install dependencies

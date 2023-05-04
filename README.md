@@ -91,11 +91,11 @@ To run in development mode (modified files on your host machine will be reloaded
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
 npm install
-npm run --workspace=backend certs
+npm run certs
 docker-compose up --force-recreate --build -d
 
 # Wait for service to start, then add some schemas.
-npm run --workspace=backend script -- exampleSetAllSchemas
+npm run script -- exampleSetAllSchemas
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript
@@ -109,8 +109,8 @@ Some example schemas are installed by default. More schemas can be added by alte
 `addDeploymentSchema.ts` and `addUploadSchema.ts` files.
 
 ```bash
-npm run --workspace=backend script -- addDeploymentSchema
-npm run --workspace=backend script -- addUploadSchema
+npm run script -- addDeploymentSchema
+npm run script -- addUploadSchema
 ```
 
 > NOTE: Scripts are also written in Typescript. In production, run them using `node`, in development, run them using `ts-node` or `npm run script`.
