@@ -22,9 +22,11 @@ COPY --from=builder /app/frontend/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=1001:1001 /app/frontend/.next/standalone/app ./
-COPY --from=builder --chown=1001:1001 /app/frontend/.next/static ./frontend/.next/static
-COPY --from=builder --chown=1001:1001 /app/frontend/public ./frontend/public
+COPY --from=builder --chown=nextjs:0 /app/frontend/.next/standalone/app ./
+COPY --from=builder --chown=nextjs:0 /app/frontend/.next/static ./frontend/.next/static
+COPY --from=builder --chown=nextjs:0 /app/frontend/public ./frontend/public
+
+RUN chmod -R g=u /app/frontend
 
 USER 1001
 
