@@ -36,7 +36,7 @@ COPY --from=installer --chown=nextjs:0 /app/.next/standalone ./
 COPY --from=installer --chown=nextjs:0 /app/.next/static ./.next/static
 COPY --from=installer --chown=nextjs:0 /app/public ./public
 
-RUN chmod -R g=u /app/frontend
+RUN chmod -R g=u /app
 
 USER 1001
 
