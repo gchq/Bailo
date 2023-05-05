@@ -346,8 +346,8 @@ jobs:
       - run: npm run script -- exampleSetAllSchemas
 
       - uses: cypress-io/github-action@v5
-        working-directory: ./frontend
         with:
+          working-directory: ./frontend
           install: false
 
       - uses: actions/upload-artifact@v3
