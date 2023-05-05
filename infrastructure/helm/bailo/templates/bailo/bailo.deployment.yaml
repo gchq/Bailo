@@ -178,6 +178,8 @@ spec:
               port: {{ .Values.service.frontendPort }}
             initialDelaySeconds: 15
             periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
