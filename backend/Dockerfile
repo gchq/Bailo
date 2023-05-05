@@ -59,4 +59,4 @@ ENV USER builder
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start"]
+CMD ["node", "src/index.js"]
