@@ -79,8 +79,6 @@ spec:
               subPath: custom-environment-variables.cjs
             - name: temp
               mountPath: /tmp
-            - name: cache
-              mountPath: /app/.next/cache
             - name: certs
               mountPath: /app/certs/cert.pem
               subPath: cert.pem
@@ -122,8 +120,6 @@ spec:
               - key: key.pem
                 path: key.pem
         - name: temp
-          emptyDir: {}
-        - name: cache
           emptyDir: {}
         - name: stroom
           emptyDir: {}
