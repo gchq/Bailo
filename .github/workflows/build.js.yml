@@ -348,6 +348,7 @@ jobs:
       - uses: cypress-io/github-action@v5
         with:
           project: ./frontend
+          install: false
 
       - uses: actions/upload-artifact@v3
         if: failure()
