@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -32,7 +32,7 @@ COPY --from=installer /app/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer --chown=1001:1001 /app/.next/standalone/app ./
+COPY --from=installer --chown=1001:1001 /app/.next/standalone ./
 COPY --from=installer --chown=1001:1001 /app/.next/static ./.next/static
 COPY --from=installer --chown=1001:1001 /app/public ./public
 
