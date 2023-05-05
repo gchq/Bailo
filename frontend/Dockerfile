@@ -32,9 +32,11 @@ COPY --from=installer /app/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer --chown=1001:1001 /app/.next/standalone ./
-COPY --from=installer --chown=1001:1001 /app/.next/static ./.next/static
-COPY --from=installer --chown=1001:1001 /app/public ./public
+COPY --from=installer --chown=nextjs:0 /app/.next/standalone ./
+COPY --from=installer --chown=nextjs:0 /app/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:0 /app/public ./public
+
+RUN chmod -R g=u /app/frontend
 
 USER 1001
 
