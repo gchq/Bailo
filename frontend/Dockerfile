@@ -25,7 +25,6 @@ WORKDIR /app
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
 
 COPY --from=installer /app/next.config.mjs .
 COPY --from=installer /app/package.json .
@@ -38,7 +37,7 @@ COPY --from=installer --chown=nextjs:0 /app/public ./public
 
 RUN chmod -R g=u /app
 
-USER 1001
+USER nextjs
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
