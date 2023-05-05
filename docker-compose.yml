@@ -61,7 +61,6 @@ services:
       dockerfile: ./Dockerfile.dev
     volumes:
       - ./frontend:/app
-      - ./frontend/node_modules
     depends_on:
       - backend
     ports:
@@ -73,7 +72,6 @@ services:
       dockerfile: ./Dockerfile.dev
     volumes:
       - ./backend:/app
-      - ./backend/node_modules
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
     ports:
