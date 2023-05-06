@@ -2,10 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
 import { createSchema, findSchemaByName, findSchemaByRef, findSchemasByUse } from '../../services/schema.js'
+import federate from '../../utils/federation.js'
 import { BadReq, Conflict, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 
 export const getSchemas = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     if (!req.query.use) {
@@ -37,6 +39,7 @@ export const getDefaultSchema = [
 ]
 
 export const getSchema = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { ref } = req.params

@@ -5,8 +5,8 @@ import { Model } from '../types/types.js'
 
 export default class AuthorisationBase {
   async getUserFromReq(req: Request) {
-    const userId = 'user'
-    const email = 'user@example.com'
+    const userId = req.query.userId || 'user'
+    const email = req.query.email || 'user@example.com'
     const data = JSON.parse(req.get('x-user') ?? '{}')
     const roles = JSON.parse(req.get('x-roles') ?? '["user", "admin"]')
 

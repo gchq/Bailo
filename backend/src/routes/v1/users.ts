@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { findModelById } from '../../services/model.js'
 import { findUsers, getUserById, getUserByInternalId } from '../../services/user.js'
 import { isObjectId } from '../../utils/database.js'
+import federate from '../../utils/federation.js'
 import { BadReq, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 
@@ -19,6 +20,7 @@ export const getUsers = [
 ]
 
 export const getLoggedInUser = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { _id } = req.user

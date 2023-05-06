@@ -25,6 +25,7 @@ import { ensureUserRole } from '../../utils/user.js'
 import { getFileStream, MinioRandomAccessReader } from '../../utils/zip.js'
 
 export const getVersion = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -43,6 +44,7 @@ export const getVersion = [
 ]
 
 export const getVersionFileList = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id, file } = req.params
@@ -66,6 +68,7 @@ export const getVersionFileList = [
 ]
 
 export const getVersionFile = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id, file } = req.params
@@ -352,6 +355,7 @@ export const deleteVersion = [
 ]
 
 export const getVersionAccess = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { user } = req

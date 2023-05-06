@@ -6,10 +6,12 @@ import { findSchemaByRef } from '../../services/schema.js'
 import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
 import { VersionDoc } from '../../types/types.js'
 import { isUserInEntityList } from '../../utils/entity.js'
+import federate from '../../utils/federation.js'
 import { BadReq, NotFound, NotImplemented } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 
 export const getModels = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     let { type, filter } = req.query
@@ -36,6 +38,7 @@ export const getModels = [
 ]
 
 export const getModelByUuid = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -52,6 +55,7 @@ export const getModelByUuid = [
 ]
 
 export const getModelById = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -68,6 +72,7 @@ export const getModelById = [
 ]
 
 export const getModelDeployments = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -89,6 +94,7 @@ export const getModelDeployments = [
 ]
 
 export const getModelSchema = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -113,6 +119,7 @@ export const getModelSchema = [
 ]
 
 export const getModelVersions = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -136,6 +143,7 @@ export const getModelVersions = [
 ]
 
 export const getModelVersion = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid, version: versionName } = req.params
@@ -168,6 +176,7 @@ export const getModelVersion = [
 ]
 
 export const getModelAccess = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { user } = req

@@ -170,5 +170,16 @@ module.exports = {
         image: 'seldonio/seldon-core-s2i-python37:1.10.0',
       },
     ],
+
+    federation: {
+      enabled: false,
+
+      local: {
+        name: '',
+        id: '',
+      },
+
+      remotes: [],
+    },
   },
 }

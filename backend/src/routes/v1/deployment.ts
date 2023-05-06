@@ -1,4 +1,3 @@
-import { ModelDoc } from '../../types/types.js'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
@@ -8,6 +7,7 @@ import { createDeployment, findDeploymentByUuid, findDeployments } from '../../s
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
@@ -19,6 +19,7 @@ import { validateSchema } from '../../utils/validateSchema.js'
 const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
 
 export const getDeployment = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { uuid } = req.params
@@ -37,6 +38,7 @@ export const getDeployment = [
 ]
 
 export const getUserDeployments = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { id } = req.params
@@ -236,6 +238,7 @@ export const resetDeploymentApprovals = [
 ]
 
 export const fetchRawModelFiles = [
+  federate(),
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
@@ -305,6 +308,7 @@ export const fetchRawModelFiles = [
 ]
 
 export const getDeploymentAccess = [
+  federate(),
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
     const { user } = req

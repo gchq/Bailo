@@ -1,5 +1,11 @@
 import _config from 'config'
 
+interface FederationTarget {
+  name: string
+  id: string
+  host: string
+}
+
 export interface Config {
   api: {
     port: number
@@ -125,6 +131,16 @@ export interface Config {
       name: string
       image: string
     }>
+    federation: {
+      enabled: boolean
+
+      local: {
+        name: string
+        id: string
+      }
+
+      remotes: Array<FederationTarget>
+    }
   }
 }
 
