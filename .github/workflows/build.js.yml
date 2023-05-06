@@ -25,8 +25,8 @@ jobs:
           context: backend
           file: backend/Dockerfile
           tags: bailo_backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
           outputs: type=docker,dest=/tmp/bailo_backend.tar
 
       - name: Upload artifact
@@ -53,8 +53,8 @@ jobs:
           context: frontend
           file: frontend/Dockerfile
           tags: bailo_frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
           outputs: type=docker,dest=/tmp/bailo_frontend.tar
 
       - name: Upload artifact
