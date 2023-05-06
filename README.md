@@ -92,7 +92,12 @@ To run in development mode (modified files on your host machine will be reloaded
 git clone https://github.com/gchq/Bailo.git && cd Bailo
 npm install
 npm run certs
-docker-compose up --force-recreate --build -d
+
+# This builds all the Bailo images, rerun it when you update dependencies.
+DOCKER_BUILDKIT=1 docker-compose build --parallel
+
+# Then run the development instance of Bailo.
+docker-compose up -d
 
 # Wait for service to start, then add some schemas.
 npm run script -- exampleSetAllSchemas
