@@ -109,8 +109,12 @@ class Writer extends WritableStream {
   }
 }
 
-function redactUnsafeSymbols(obj: unknown, redactedSymbols = /[\$\.\{\}]/g) {
+function redactUnsafeSymbols(obj: unknown, depth = 0, redactedSymbols = /[$.{}]/g) {
   if (Array.isArray(obj) || obj === null || typeof obj !== 'object') {
+    return obj
+  }
+
+  if (depth > 4) {
     return obj
   }
 
@@ -118,7 +122,7 @@ function redactUnsafeSymbols(obj: unknown, redactedSymbols = /[\$\.\{\}]/g) {
 
   for (const key of Object.keys(obj)) {
     const redactedKey = key.replace(redactedSymbols, '')
-    safeObj[redactedKey] = redactUnsafeSymbols(obj[key], redactedSymbols)
+    safeObj[redactedKey] = redactUnsafeSymbols(obj[key], depth + 1, redactedSymbols)
   }
 
   return safeObj
