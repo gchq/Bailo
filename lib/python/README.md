@@ -1,6 +1,7 @@
 # Bailo Python Client
 
 ## Table of Contents
+
 1. [Installation](#installation)
 2. [Documentation](#documentation)
 3. [Authentication](#authentication)
@@ -90,7 +91,6 @@ config = Pkcs12Config.from_env()
 
 Please refer to the documentation for environment variables needed by each config type.
 
-
 ## Client Usage
 
 There are two ways to interact with a Bailo instance:
@@ -166,17 +166,17 @@ Example yaml configuration `config.yaml`
 
 ```yaml
 api:
-  bailo_url: 'http://example.com'
-  ca_verify: 'path/to/ca/cert'
+  bailo_url: "http://example.com"
+  ca_verify: "path/to/ca/cert"
   timeout_period: 5
-  aws_gateway: 'True'
+  aws_gateway: "True"
   auth:
     username: username
     password: password
-    user_pool_id: 'USER_POOL_ID'
-    client_id: 'APP_CLIENT_ID'
-    client_secret: 'APP_CLIENT_SECRET'
-    region: 'AWS_REGION'
+    user_pool_id: "USER_POOL_ID"
+    client_id: "APP_CLIENT_ID"
+    client_secret: "APP_CLIENT_SECRET"
+    region: "AWS_REGION"
 ```
 
 ## Development setup
