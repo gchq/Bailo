@@ -18,6 +18,7 @@ import { ApprovalStates, ApprovalTypes, ModelUploadType, SeldonVersion } from '.
 import { FileRef } from '../../utils/build/build.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
+import federate from '../../utils/federation.js'
 import { getClient } from '../../utils/minio.js'
 import { getUploadQueue } from '../../utils/queues.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
