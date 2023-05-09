@@ -13,7 +13,7 @@ describe('Banner', () => {
     const mockedConfig: any = {
       uiConfig: {
         banner: {
-          enable: true,
+          enabled: true,
           text: 'TEST',
           colour: 'blue',
         },
