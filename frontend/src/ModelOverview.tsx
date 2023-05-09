@@ -1,4 +1,3 @@
-import { ModelDoc, Version } from '@bailo/shared/types'
 import { SchemaSharp } from '@mui/icons-material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
@@ -8,6 +7,7 @@ import Typography from '@mui/material/Typography'
 
 import EntitiesDisplay from '../components/EntitiesDisplay'
 import { useGetSchema } from '../data/schema'
+import { ModelDoc, Version } from '../types/types'
 import { printProperty } from '../utils/propertyUtils'
 import ErrorWrapper from './errors/ErrorWrapper'
 import MetadataDisplay from './MetadataDisplay'
