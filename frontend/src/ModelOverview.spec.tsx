@@ -1,9 +1,19 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
+import { useGetSchema } from '../data/schema'
 import { EntityKind } from '../types/types'
 import ModelOverview from './ModelOverview'
 import { lightTheme } from './theme'
+
+vi.mock('../data/schema', async () => {
+  const actual = await vi.importActual('../data/schema')
+  return {
+    ...(actual as any),
+    useGetSchema: vi.fn(),
+  }
+})
 
 describe('ModelOverview', () => {
   const version: any = {
@@ -22,6 +32,39 @@ describe('ModelOverview', () => {
   }
 
   it('renders a ModelOverview component', async () => {
+    const mockedSchema: any = {
+      schema: {
+        name: 'upload-schema',
+        reference: 'test-schema',
+        use: 'UPLOAD',
+        schema: {
+          type: 'object',
+          properties: {
+            contacts: {
+              title: 'Contacts',
+              type: 'object',
+              properties: {
+                uploader: {
+                  title: 'Model Developer',
+                },
+                reviewer: {
+                  title: 'Model Technical Reviewer',
+                },
+                manager: {
+                  title: 'Senior Responsible Officer',
+                },
+              },
+            },
+          },
+        },
+      },
+
+      isSchemaLoading: false,
+      isSchemaError: false,
+    }
+
+    vi.mocked(useGetSchema).mockReturnValue(mockedSchema)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ModelOverview version={version} />
