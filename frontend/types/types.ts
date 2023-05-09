@@ -107,7 +107,7 @@ export interface StatusError extends Error {
 
 export interface UiConfig {
   banner: {
-    enable: boolean
+    enabled: boolean
     text: string
     colour: string
   }

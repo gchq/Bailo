@@ -52,8 +52,6 @@ spec:
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
               value: {{ include "bailo.mongoConnectionURI" . | quote }}
-            - name: SCHEMA_SETUP_SCRIPT
-              value: {{ .Values.config.schema.script }}
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}

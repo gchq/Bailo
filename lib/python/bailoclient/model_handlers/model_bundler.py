@@ -3,7 +3,7 @@ import subprocess
 import os
 from pathlib import Path
 from zipfile import ZipFile
-from typing import List
+from typing import List, Any, Optional
 from pkg_resources import resource_filename
 from shutil import copyfile
 from distutils.dir_util import copy_tree
@@ -27,13 +27,13 @@ class Bundler:
     def bundle_model(
         self,
         output_path: str,
-        model=None,
-        model_binary: str = None,
-        model_py: str = None,
-        model_requirements: str = None,
-        requirements_files_path: str = None,
-        model_flavour: str = None,
-        additional_files: List[str] = None,
+        model: Any = None,
+        model_binary: Optional[str] = None,
+        model_py: Optional[str] = None,
+        model_requirements: Optional[str] = None,
+        requirements_files_path: Optional[str] = None,
+        model_flavour: Optional[str] = None,
+        additional_files: Optional[List[str]] = None,
     ):
         """Bundle model files into the required structure for the code.zip and binary.zip
             for uploading to BAILO.
@@ -43,18 +43,18 @@ class Bundler:
             Files are zipped into the expected formats.
 
         Args:
-            output_path (str): Output path for code and binary zips
-            model (any, optional): Model object to save. Must be a bundler available.
-            model_binary (str, optional): Path to model binary. Can be a file or directory. Defaults to None.
-            model_py (str, optional): Path to model.py file. Must have model_flavour if not provided. Defaults to None.
-            model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
+            output_path: Output path for code and binary zips
+            model: Model object to save. Must be a bundler available.
+            model_binary : Path to model binary. Can be a file or directory. Defaults to None.
+            model_py: Path to model.py file. Must have model_flavour if not provided. Defaults to None.
+            model_requirements: Path to requirements.txt file OR path to a Python file,
                                                 module or notebook from which to generate the
                                                 requirements.txt. Defaults to None.
-            requirements_files_path (str, optional): File path to file/folder of files from
+            requirements_files_path: File path to file/folder of files from
                                                       which to generate requirements file.
                                                       Defaults to None.
-            model_flavour (str, optional): Name of the flavour of model. Defaults to None.
-            additional_files (list[str], optional): List or tuple of file paths of additional dependencies
+            model_flavour: Name of the flavour of model. Defaults to None.
+            additional_files: List or tuple of file paths of additional dependencies
                                                     or directories of dependencies for the model.
                                                     Defaults to None.
         """
@@ -94,27 +94,23 @@ class Bundler:
         self,
         output_path: str,
         model_binary: str,
-        model_py: str,
-        model_requirements: str,
-        requirements_files_path: str,
         model_flavour: str,
-        additional_files: List[str],
+        model_py: Optional[str] = None,
+        model_requirements: Optional[str] = None,
+        requirements_files_path: Optional[str] = None,
+        additional_files: Optional[List[str]] = None,
     ):
         """Bundle model files into the appropriate file structure where the model binary
         has been provided by the user
 
         Args:
-            output_path (str): Output path to save model files to
-            model_binary (str): Path to the model binary file
-            model_py (str, optional): Path to model.py file. Will use the template for the
-                                        model flavour if not provided. Defaults to None.
-            model_requirements (str, optional): Model requirements.txt file. Defaults to None.
-            requirements_files_path (str, optional): File path to file/folder of files from
-                                                      which to generate requirements file.
-                                                      Defaults to None.
-            model_flavour (str): Model flavour.
-            additional_files (List[str], optional): List of additional files to include as
-                                                    dependencies. Defaults to None.
+            output_path: Output path to save model files to
+            model_binary: Path to the model binary file
+            model_flavour: Model flavour.
+            model_py: Path to model.py file. Will use the template for the model flavour if not provided. Defaults to None.
+            model_requirements: Model requirements.txt file. Defaults to None.
+            requirements_files_path: File path to file/folder of files from which to generate requirements file. Defaults to None.
+            additional_files: List of additional files to include as dependencies. Defaults to None.
 
         Raises:
             MissingFilesError: Missing model binary files
@@ -152,28 +148,23 @@ class Bundler:
     def _save_and_bundle_model_files(
         self,
         output_path: str,
-        model,
-        model_py: str = None,
-        model_flavour: str = None,
-        additional_files: List[str] = None,
-        model_requirements: str = None,
-        requirements_files_path: str = None,
+        model: Any,
+        model_py: Optional[str] = None,
+        model_flavour: Optional[str] = None,
+        model_requirements: Optional[str] = None,
+        requirements_files_path: Optional[str] = None,
+        additional_files: List[Optional[str]] = None,
     ):
         """Bundle model files via bundler.
 
         Args:
-            output_path (str): Output path to save model files to
-            model (any): Model object
-            model_py (str, optional): Path to model.py file. Will use the template for the
-                                        model flavour if not provided. Defaults to None.
-            model_flavour (str, optional): Model flavour. Defaults to None.
-            model_requirements (str, optional): Model requirements.txt file. Generated based on requirements_files_path
-                                                if model_requirements not provided. Defaults to None.
-            requirements_files_path (str, optional): File path to file/folder of files from
-                                                      which to generate requirements file.
-                                                      Defaults to None.
-            additional_files (List[str], optional): List of additional files to include as
-                                                    dependencies. Defaults to None.
+            output_path: Output path to save model files to
+            model: Model object
+            model_py: Path to model.py file. Will use the template for the model flavour if not provided. Defaults to None.
+            model_flavour: Model flavour. Defaults to None.
+            model_requirements: Model requirements.txt file. Generated based on requirements_files_path if model_requirements not provided. Defaults to None.
+            requirements_files_path: File path to file/folder of files from which to generate requirements file. Defaults to None.
+            additional_files: List of additional files to include as dependencies. Defaults to None.
 
         Raises:
             ModelFlavourNotRecognised: The provided model flavour was not recognised
@@ -209,7 +200,7 @@ class Bundler:
         """Get the model.py template file by model flavour
 
         Args:
-            model_flavour (str): Model flavour
+            model_flavour: Model flavour
 
         Raises:
             ModelTemplateNotAvailable: No model template available for model_flavour
@@ -228,18 +219,17 @@ class Bundler:
     def _bundle_model(
         self,
         output_path: str,
-        model,
+        model: Any,
         model_flavour: str,
-        additional_files: List[str] = None,
+        additional_files: Optional[List[str]] = None,
     ):
         """Save model via model bundler
 
         Args:
-            output_path (str): Path to save the model to (should be a temp location)
-            model (Model object): The model object to save
-            model_flavour (str): Model flavour to identify corresponding bundler
-            additional_files (List[str], optional): Additional files required with the model.
-                                                    Defaults to None.
+            output_path: Path to save the model to (should be a temp location)
+            model: The model object to save
+            model_flavour: Model flavour to identify corresponding bundler
+            additional_files: Additional files required with the model. Defaults to None.
 
         Raises:
             ModelMethodNotAvailable: There is no bundler function associated with the given
@@ -272,24 +262,21 @@ class Bundler:
         model_binary: str,
         model_py: str,
         model_requirements: str,
-        requirements_files_path: str,
-        additional_files: str,
-        optional_files: str = None,
+        requirements_files_path: Optional[str] = None,
+        additional_files: Optional[List[str]] = None,
+        optional_files: Optional[List[str]] = None,
     ):
         """Create code.zip and binary.zip of provoded model files at output path.
             Copies all files to a tempdir in the format expected by BAILO.
 
         Args:
-            output_path (str): Path to create the code.zip and binary.zip files
-            model_binary (str): Path of model binary
-            model_py (str): Path to model.py file
-            model_requirements (str): Path of requirements.txt file
-            requirements_files_path (str, optional): File path to file/folder of files from
-                                                      which to generate requirements file.
-                                                      Defaults to None.
-            additional_files (List[str]): List of paths of any additional required files
-            optional_files (List[str]): List of optional files which have been output from
-                                        automatic model bundling (e.g. MLflow file, conda requirements)
+            output_path: Path to create the code.zip and binary.zip files
+            model_binary: Path of model binary
+            model_py: Path to model.py file
+            model_requirements: Path of requirements.txt file
+            requirements_files_path: File path to file/folder of files from which to generate requirements file. Defaults to None.
+            additional_files: List of paths of any additional required files
+            optional_files: List of optional files which have been output from automatic model bundling (e.g. MLflow file, conda requirements)
         """
 
         with tempfile.TemporaryDirectory() as tmpdir_name:
@@ -320,8 +307,8 @@ class Bundler:
         """Copy model.py file over to the code folder
 
         Args:
-            model_code (str): Path to model.py code file
-            code_path (str): Path to code folder
+            model_code: Path to model.py code file
+            code_path: Path to code folder
         """
         copyfile(model_code, os.path.join(code_path, "model.py"))
 
@@ -330,7 +317,7 @@ class Bundler:
         basemodel folder in code directory)
 
         Args:
-            base_model_output_path (str): Path to move the basemodel folder to
+            base_model_output_path: Path to move the basemodel folder to
         """
         Path(base_model_output_path).mkdir()
 
@@ -343,17 +330,21 @@ class Bundler:
         )
 
     def _copy_or_generate_requirements(
-        self, model_requirements, requirements_files_path, model_code, output_path
+        self,
+        model_requirements: str,
+        requirements_files_path: str,
+        model_code: str,
+        output_path: str,
     ):
         """If model_requirements is provided, copy the file to the output code_path.
         Otherwise, if requirements_files_path is given, generate the requirements from
         this file. If no paths are provided, use the model.py file to generate requirements
 
         Args:
-            model_requirements (str): Path to requirements.txt
-            requirements_files_path (str): Path to files from which to generate requirements.txt
-            model_code (str): Path to model.py file
-            output_path (str): Output path for model files
+            model_requirements: Path to requirements.txt
+            requirements_files_path: Path to files from which to generate requirements.txt
+            model_code: Path to model.py file
+            output_path: Output path for model files
         """
         if model_requirements:
             copyfile(model_requirements, os.path.join(output_path, "requirements.txt"))
@@ -375,8 +366,8 @@ class Bundler:
         assumed relative path in the new directory.
 
         Args:
-            optional_files (List[str]): List of optional files to copy
-            output_path (str): Output path for model files
+            optional_files: List of optional files to copy
+            output_path: Output path for model files
         """
         for file_path in optional_files:
             # remove /tmp/tmpxyz/ from path
@@ -401,10 +392,10 @@ class Bundler:
         or in a temp directory
 
         Args:
-            additional_files (List[str]): List of additional file paths
-            model_binary (str): Model binary file path
-            temp_dir (str): Temp directory file path
-            output_path (str): Output path for model code files
+            additional_files: List of additional file paths
+            model_binary: Model binary file path
+            temp_dir: Temp directory file path
+            output_path: Output path for model code files
         """
         if os.path.commonpath([model_binary, temp_dir]) == temp_dir:
             self.__copy_additional_files_from_tempdir(
@@ -425,8 +416,8 @@ class Bundler:
         for additional files in the output path.
 
         Args:
-            additional_files (List[str]): List of additional file paths
-            output_path (str): Output path for model files
+            additional_files: List of additional file paths
+            output_path: Output path for model files
         """
         Path(output_path).mkdir(parents=True)
 
@@ -441,10 +432,9 @@ class Bundler:
         files relative to the parent directory
 
         Args:
-            additional_files (List[str]): List of additional file paths
-            output_path (str): Output path for model files
-            model_parent_path (str): Parent path of the additional files to be
-                            stripped from the additional files path when copied
+            additional_files: List of additional file paths
+            output_path: Output path for model files
+            model_parent_path: Parent path of the additional files to be stripped from the additional files path when copied
         """
 
         ## TODO update to copy tree
@@ -454,17 +444,14 @@ class Bundler:
             )
             os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-            copyfile(
-                file_path,
-                output_file_path,
-            )
+            copyfile(file_path, output_file_path)
 
     def zip_files(self, file_path: str, zip_path: str):
         """Create zip file at the specified zip path from a file or folder path
 
         Args:
-            file_path (str): The file or folder to zip
-            zip_path (str): Path to create the new zip at
+            file_path: The file or folder to zip
+            zip_path: Path to create the new zip at
         """
         if os.path.isdir(file_path):
             self.__zip_directory(file_path, zip_path)
@@ -476,8 +463,8 @@ class Bundler:
         """Zip a single file into new zip created at zip_path
 
         Args:
-            file_path (str): Path to file to zip
-            zip_path (str): Output path for zip
+            file_path: Path to file to zip
+            zip_path: Output path for zip
         """
         file_name = os.path.basename(file_path)
 
@@ -488,8 +475,8 @@ class Bundler:
         """Zip a directory of files into new zip created at the zip_path
 
         Args:
-            dir_path (str): Path to code or binary folder
-            zip_path (str): Output path for zip
+            dir_path: Path to code or binary folder
+            zip_path: Output path for zip
         """
         with ZipFile(zip_path, "w") as zf:
             for sub_file_path, _, files in os.walk(dir_path):
@@ -505,8 +492,8 @@ class Bundler:
         """Remove top level folder to get the output dir required for the zip files
 
         Args:
-            dir_path (str): Path to code or binary directory
-            sub_dir_path (str): Directory path within dir_path (i.e. within code or binary folder)
+            dir_path: Path to code or binary directory
+            sub_dir_path: Directory path within dir_path (i.e. within code or binary folder)
 
         Returns:
             str: Output directory with top level folder removed
@@ -521,8 +508,8 @@ class Bundler:
             Python file, or Python project
 
         Args:
-            module_path (str): Path to the Python file used to generate requirements.txt
-            output_path (str): Output path in format output/path/requirements.txt
+            module_path: Path to the Python file used to generate requirements.txt
+            output_path: Output path in format output/path/requirements.txt
 
         Raises:
             Exception: Unable to create requirements.txt from specified file at specified location

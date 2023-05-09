@@ -1,8 +1,14 @@
-# Python client
+# Bailo Python Client
+
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Documentation](#documentation)
+3. [Authentication](#authentication)
+4. [Client](#client-usage)
+5. [Development Setup](#development-setup)
 
 ## Installation
-
----
 
 ### Dependencies
 
@@ -16,95 +22,195 @@ sudo yum install gcc gmp python3-devel
 sudo apt-get install build-essential python3-dev
 ```
 
-### Developers
+### Client Installation
+
+```bash
+python3 -m pip install .
+```
+
+## Documentation
+
+Install dev dependencies and build the documentation
+
+```bash
+python3 -m pip install -r requirements.txt
+cd docs
+make html
+```
+
+To view the docs open `docs/build/html/index.html` in your browser.
+
+## Authentication
+
+Multiple types of authentication are supported, each needing a config object:
+
+### Cognito
+
+```python
+from bailoclient import CognitoConfig
+
+config = CognitoConfig(
+    username="username",
+    password="password",
+    user_pool_id="user-pool-id",
+    client_id="client-id",
+    client_secret="secret",
+    region="region",
+)
+```
+
+### PKI
+
+```python
+from bailoclient import Pkcs12Config
+
+config = Pkcs12Config(
+    pkcs12_filename="path/to/file.pem",
+    pkcs12_password="password"
+)
+```
+
+> To avoid exposing the certificate's password use `bailoclient.create_pki_client` to be promted to enter the password
+
+### Null auth
+
+If the Bailo instance is not configured with access control (not recommended), simply use `None`
+
+```python
+config = None
+```
+
+### Loading Authentication config from environment variables
+
+```python
+from bailoclient import CognitoConfig, Pkcs12Config
+
+config = CognitoConfig.from_env()
+config = Pkcs12Config.from_env()
+```
+
+Please refer to the documentation for environment variables needed by each config type.
+
+## Client Usage
+
+There are two ways to interact with a Bailo instance:
+
+### `bailoclient.Client` Example
+
+This class makes available all the functionality to interact with a bailo instance. There are three client creation function available to quickly create a `bailoclient.Client` instance.
+
+```python
+from bailoclient import create_pki_client
+
+client = create_pki_client(
+    p12_file="path/p12/file.pem",
+    bailo_url="https://bailo.io"
+)
+
+client.get_my_models()
+```
+
+### `bailoclient.Bailo` Example
+
+This class has all the functionality of `bailoclient.client` with additional functionality to improve the user experience for data scientists.
+Additional functionality includes making the model bundlers available and generating requirements files from python files.
+
+```python
+from bailoclient import Bailo, BailoConfig, Pkcs12Config
+
+auth = Pkcs12Config(...)
+bailo = Bailo(
+    config=BailoConfig(
+        auth=auth,
+        bailo_url="https://bailo.io",
+        ca_cert="path/to/ca",
+    )
+)
+
+bailo.get_my_models()
+```
+
+### Loading Bailo config from environment variables:
+
+Please refer to the documentation for environment variables needed by each config type.
+
+```python
+from bailoclient import Bailo, BailoConfig, AuthType
+
+config = BailoConfig.from_env(auth_type=AuthType.PKI) # or AuthType.PKI, AuthType.NULL
+bailo = Bailo(config)
+
+bailo.get_my_models()
+```
+
+### Saving and Loading Bailo Config
+
+```python
+from bailoclient import Bailo, BailoConfig, Pkcs12Config
+
+auth = Pkcs12Config(...)
+config=BailoConfig(
+    auth=auth,
+    bailo_url="https://bailo.io",
+    ca_cert="path/to/ca",
+)
+config.save(config_path="./bailo-config.yaml")
+
+bailo = Bailo(config=BailoConfig.load("./bailo-config.yaml"))
+bailo.get_my_models()
+```
+
+### Example Config
+
+Example yaml configuration `config.yaml`
+
+```yaml
+api:
+  bailo_url: "http://example.com"
+  ca_verify: "path/to/ca/cert"
+  timeout_period: 5
+  aws_gateway: "True"
+  auth:
+    username: username
+    password: password
+    user_pool_id: "USER_POOL_ID"
+    client_id: "APP_CLIENT_ID"
+    client_secret: "APP_CLIENT_SECRET"
+    region: "AWS_REGION"
+```
+
+## Development setup
+
+### Creating an environment with conda
+
+This requires anaconda or miniconda to be installed. Create and activate an environment by:
+
+```bash
+conda create -n bailo python=3.10
+conda activate bailo
+pip install -r requirments.txt
+```
+
+### Creating an environment with venv
+
+This requires and existing python installation and pip installed. Create and activate an environment by:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Install dependencies
 
 ```bash
 python3 -m pip install -r requirements.txt
 pre-commit install
 ```
 
-### Users
+### Running Tests
 
-```bash
-python3 -m pip install -e .
-```
-
-## Environment
-
-You will need to create a [.env](https://pypi.org/project/python-dotenv/#getting-started) file at the root of the
-project as per the [example.env](./examples/resources/example.env) with the following parameters:
-
-**AWS_GATEWAY**
-
-> TRUE if you are running on AWS as there is a size limit to the data upload
-
-Add the authentication credentials if you are using Cognito for authentication.
-
-## Authentication
-
----
-
-There are three different types of authentication:
-
-### Cognito
-
----
-
-You will need to add the additional authentication credentials in your .env file. Parameters should be as follows:
-
-**COGNITO_USERPOOL**
-
-> The Cognito userpool ID
->
-> Cognito -> user pools -> user pool ID
-
-**COGNITO_CLIENT_ID and COGNITO_CLIENT_SECRET**
-
-> The app client ID and secret
->
-> Cognito -> user pools -> pool name -> app integration -> app client name -> app client ID / show client secret
-
-**COGNITO_REGION**
-
-> eu-west-2
-
-**BAILO_URL**
-
-> Bailo API URL, e.g. http://localhost:8080/api/v1
-
-**COGNITO_USERNAME and COGNITO_PASSWORD**
-
-> Your Cognito credentials
-
-### PKI
-
----
-
-This example assumes the user will enter the certificate password manually so that the password is not stored on disk.
-
-You will need a CA file and a P12 file for authentication. The filepaths should be passed to the client.
-
-**P12_FILE**
-
-> Path to p12 file
-
-**CA_FILE**
-
-> Path to CA file
-
-**BAILO_URL**
-
-> URL of BAILO instance
-
-### Null auth
-
----
-
-If authentication is not required you can use MockAuthentication()
-
-## Testing
-
-To run the tests, run the following from the top-level directory of the Bailo Client (Bailo/lib/python):
+To run the tests, run the following from the top-level directory of the Bailo Client `Bailo/lib/python`:
 
 ```bash
 make test
@@ -115,61 +221,3 @@ To run the end-to-end tests:
 ```bash
 make e2e-test
 ```
-
-## Example usage
-
-It is recommended that you use the BAILO interface for interacting with the BAILO client.
-
-### Using PKI
-
-```python
-from bailoclient import Bailo
-
-bailo = Bailo(pki_p12='path/to/p12',
-                pki_ca='path/to/ca',
-                bailo_url='http://localhost:8080/api/v1'
-            )
-
-bailo.get_my_models()
-```
-
-You will be prompted for your certificate password before you can connect.
-
-### Using Cognito
-
-```python
-from bailoclient import Bailo
-
-bailo = Bailo(cognito_user_pool_id="eu-west-2_xx1xxx1xx",
-                cognito_client_id="1xx1x1x111xxxxxx1xxxxxx1xx",
-                cognito_client_secret="1xx1x1xxxxxx111x1xx111xxxxxxxx111xxx1xxx1xx111xx11x",
-                cognito_region="eu-west-2",
-                bailo_url="http://localhost:8080/api/v1",
-                cognito_username="username",
-                cognito_pwd="password"
-            )
-
-bailo.get_my_models()
-
-```
-
-### Using a .env file
-
-With a .env file configured you can create your bailo instance with no config.
-
-```python
-from bailoclient import Bailo
-
-bailo = Bailo()
-
-bailo.get_my_models()
-
-```
-
-There are example files for interacting directly with the BAILO library at:
-
-- [bailo-demo.ipynb](./examples/bailo-demo.ipynb) (no authentication)
-
-- [cognito_auth](./examples/cognito_client.py)
-
-- [pki_auth](./examples/pki_client.py)

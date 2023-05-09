@@ -1,3 +1,5 @@
+import { ModelDoc, Version } from '@bailo/shared/types'
+import { SchemaSharp } from '@mui/icons-material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
@@ -5,12 +7,27 @@ import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 
 import EntitiesDisplay from '../components/EntitiesDisplay'
+import { useGetSchema } from '../data/schema'
 import { printProperty } from '../utils/propertyUtils'
+import ErrorWrapper from './errors/ErrorWrapper'
 import MetadataDisplay from './MetadataDisplay'
 
-function ModelOverview(props: any) {
-  const { version } = props
+type ModelOverviewProps = {
+  version: Version
+}
+
+function ModelOverview({ version }: ModelOverviewProps) {
   const theme = useTheme()
+
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema((version.model as ModelDoc)?.schemaRef)
+
+  if (isSchemaError) {
+    return <ErrorWrapper message={isSchemaError.info.message} />
+  }
+
+  if (isSchemaLoading) {
+    return null
+  }
 
   return (
     <Grid container spacing={2}>
@@ -52,19 +69,21 @@ function ModelOverview(props: any) {
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Uploaders</Typography>
+            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
+
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.uploader} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Reviewers</Typography>
+            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.reviewer.title}</Typography>
+
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.reviewer} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>Managers</Typography>
+            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.manager.title}</Typography>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.manager} />
             </Typography>

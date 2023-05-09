@@ -67,7 +67,9 @@ class OnnxModel(BaseModel):
 
     def predict(self, data):
         """
-        :param data: Either a pandas DataFrame, numpy.ndarray or a dictionary.
+
+        Args:
+            data: Either a pandas DataFrame, numpy.ndarray or a dictionary.
 
                      Dictionary input is expected to be a valid ONNX model feed dictionary.
 
@@ -85,7 +87,8 @@ class OnnxModel(BaseModel):
 
                       For more information about the ONNX Runtime, see
                       `<https://github.com/microsoft/onnxruntime>`_.
-        :return: Model predictions. If the input is a pandas.DataFrame, the predictions are returned
+        Returns:
+            Model predictions. If the input is a pandas.DataFrame, the predictions are returned
                  in a pandas.DataFrame. If the input is a numpy array or a dictionary the
                  predictions are returned in a dictionary.
         """
