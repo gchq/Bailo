@@ -66,7 +66,7 @@ module.exports = {
   },
 
   registry: {
-    // Registry connection information should be the internal connectino to the registry.
+    // Registry connection information should be the internal connection to the registry.
     connection: {
       host: 'localhost:5000',
       port: 5000,
@@ -122,6 +122,23 @@ module.exports = {
       system: 'bailo',
       interval: 1000 * 60 * 5,
     },
+  },
+
+  defaultSchemas: {
+    upload: [
+      {
+        name: 'Minimal Schema v10',
+        reference: '/Minimal/General/v10',
+        schema: require('../src/scripts/example_schemas/minimal_upload_schema.json'),
+      },
+    ],
+    deployment: [
+      {
+        name: 'Minimal Deployment Schema v6',
+        reference: '/Minimal/Deployment/v6',
+        schema: require('../src/scripts/example_schemas/minimal_deployment_schema.json'),
+      },
+    ],
   },
 
   // These settings are PUBLIC and shared with the UI

@@ -342,9 +342,6 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
-      # Add schemas
-      - run: npm run script -- exampleSetAllSchemas
-
       - uses: cypress-io/github-action@v5
         with:
           working-directory: ./frontend
@@ -460,9 +457,6 @@ jobs:
       - run: |
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
-
-      # Add schemas
-      - run: npm run script -- exampleSetAllSchemas
 
       # Setup python
       - name: Set up Python 3.10

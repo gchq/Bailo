@@ -14,8 +14,8 @@ class Loader:
         """Load a model
 
         Args:
-            model_path (str): Path to the actual model file (e.g. './model.pth')
-            model_flavour (str): Flavour of the model (e.g. 'torch')
+            model_path: Path to the actual model file (e.g. './model.pth')
+            model_flavour: Flavour of the model (e.g. 'torch')
 
 
         Raises:

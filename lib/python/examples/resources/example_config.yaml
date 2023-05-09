@@ -1,7 +1,0 @@
-cognito:
-  user_pool_id: 'USER_POOL_ID'
-  client_id: 'APP_CLIENT_ID'
-  client_secret: 'APP_CLIENT_SECRET'
-  region: 'AWS_REGION'
-api:
-  url: 'http://example.com'

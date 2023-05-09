@@ -98,9 +98,6 @@ DOCKER_BUILDKIT=1 docker-compose build --parallel
 
 # Then run the development instance of Bailo.
 docker-compose up -d
-
-# Wait for service to start, then add some schemas.
-npm run script -- exampleSetAllSchemas
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript
