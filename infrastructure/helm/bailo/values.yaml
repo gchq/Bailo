@@ -217,9 +217,6 @@ config:
     protocol: "https"
     port: 443
 
-  schema:
-    script: "dist/server/scripts/exampleSetAllSchemas.js"
-
 # logging https://github.com/gchq/stroom
 stroom:
   enabled: false
