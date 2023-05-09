@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect } from 'vitest'
 
-import { Deployment, EntityKind } from '../../lib/shared/types'
+import { Deployment, EntityKind } from '../types/types'
 import DeploymentOverview from './DeploymentOverview'
 import { lightTheme } from './theme'
 

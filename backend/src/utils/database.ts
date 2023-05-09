@@ -30,14 +30,18 @@ export async function disconnectFromMongoose() {
 }
 
 export async function runMigrations() {
-  const path =
-    process.env.NODE_ENV === 'production' ? './backend/dist/backend/src/migrations/' : './backend/src/migrations/'
-  const base = join(getAppRoot.toString(), path)
+  const base = join(getAppRoot.toString(), './src/migrations/')
   const files = await readdir(base)
   files.sort()
 
   for (const file of files) {
+    // Don't process non code files
     if (!file.endsWith('.js') && !file.endsWith('.ts')) {
+      continue
+    }
+
+    // Don't process declaration files
+    if (file.endsWith('.d.ts')) {
       continue
     }
 

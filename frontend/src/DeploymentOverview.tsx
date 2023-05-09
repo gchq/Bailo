@@ -3,8 +3,8 @@ import Grid from '@mui/material/Grid'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 
-import { Deployment } from '../../lib/shared/types'
 import EntitiesDisplay from '../components/EntitiesDisplay'
+import { Deployment } from '../types/types'
 import MetadataDisplay from './MetadataDisplay'
 
 type DeploymentOverviewProps = {

@@ -2,11 +2,9 @@ import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
 import isDocker from 'is-docker'
 import removeImports from 'next-remove-imports'
-import path from 'path'
 import rehypeHighlight from 'rehype-highlight'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
-import { fileURLToPath } from 'url'
 
 const withRemoveImports = removeImports()
 
@@ -31,7 +29,7 @@ const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  transpilePackages: ['@bailo/shared', 'nanoid', 'lodash-es', '@uiw/react-textarea-code-editor'],
+  transpilePackages: ['nanoid', 'lodash-es', '@uiw/react-textarea-code-editor'],
 
   modularizeImports: {
     '@mui/material': {
@@ -59,11 +57,6 @@ const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   eslint: {
     dirs: ['__tests__', 'data', 'lib', 'pages', 'server', 'src', 'types', 'utils'],
-  },
-
-  experimental: {
-    swcTraceProfiling: true,
-    outputFileTracingRoot: path.join(fileURLToPath(new URL('.', import.meta.url)), '../../'),
   },
 }
 

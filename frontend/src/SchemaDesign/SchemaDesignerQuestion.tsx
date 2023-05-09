@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import React, { BaseSyntheticEvent, ReactElement, useState } from 'react'
 
-import { SchemaQuestion } from '../../../lib/shared/types'
+import { SchemaQuestion } from '../../types/types'
 
 export type DesignerQuestion = {
   title: string

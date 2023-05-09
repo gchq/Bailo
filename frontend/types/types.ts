@@ -1,19 +1,4 @@
-import Logger from 'bunyan'
 import { Document, Types } from 'mongoose'
-
-declare global {
-  namespace Express {
-    interface Request {
-      user: UserDoc
-      reqId: string
-      log: Logger
-    }
-
-    interface Response {
-      error: (code: number, error: any) => void
-    }
-  }
-}
 
 export enum ModelUploadType {
   Zip = 'Code and binaries',
@@ -107,6 +92,7 @@ export enum EntityKind {
 export interface Entity {
   kind: EntityKind
   id: string
+  data?: unknown
 }
 
 export interface ParsedEntity {

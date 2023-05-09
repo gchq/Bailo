@@ -1,4 +1,4 @@
-import { ModelDoc } from '@bailo/shared'
+import { ModelDoc } from '../../types/types.js'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'

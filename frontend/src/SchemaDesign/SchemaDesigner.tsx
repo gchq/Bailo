@@ -30,8 +30,8 @@ import _ from 'lodash-es'
 import React, { Fragment, useEffect, useState } from 'react'
 import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided } from 'react-beautiful-dnd'
 
-import { Schema, SchemaQuestion, SchemaType } from '../../../lib/shared/types'
 import { SplitSchema, Step } from '../../types/interfaces'
+import { Schema, SchemaQuestion, SchemaType } from '../../types/types'
 import { getStepsFromSchema } from '../../utils/formUtils'
 import QuestionPicker from './QuestionPicker'
 

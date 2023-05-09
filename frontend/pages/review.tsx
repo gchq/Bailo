@@ -18,12 +18,12 @@ import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { Approval } from '../../lib/shared/types'
 import { postEndpoint } from '../data/api'
 import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
+import { Approval } from '../types/types'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (

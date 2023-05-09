@@ -5,8 +5,8 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import React, { ChangeEvent, useMemo } from 'react'
 
-import { ModelUploadType } from '../../../lib/shared/types'
 import { RenderInterface, Step } from '../../types/interfaces'
+import { ModelUploadType } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
 

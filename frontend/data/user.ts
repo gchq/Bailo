@@ -1,6 +1,6 @@
 import useSWR from 'swr'
 
-import { User } from '../../lib/shared/types'
+import { User } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useListUsers() {

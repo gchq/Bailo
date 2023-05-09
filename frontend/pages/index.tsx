@@ -13,11 +13,11 @@ import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { Model, Version } from '../../lib/shared/types'
 import { ListModelType, useListModels } from '../data/model'
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
+import { Model, Version } from '../types/types'
 import useDebounce from '../utils/hooks/useDebounce'
 
 export default function ExploreModels() {

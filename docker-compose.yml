@@ -57,13 +57,10 @@ services:
 
   frontend:
     build:
-      context: ./
-      dockerfile: ./frontend/Dockerfile.dev
+      context: ./frontend/
+      dockerfile: ./Dockerfile.dev
     volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/frontend/node_modules
-      - /app/backend/node_modules
+      - ./frontend:/app
     depends_on:
       - backend
     ports:
@@ -71,15 +68,12 @@ services:
 
   backend:
     build:
-      context: ./
-      dockerfile: ./backend/Dockerfile.dev
+      context: ./backend/
+      dockerfile: ./Dockerfile.dev
     volumes:
-      - ./:/app
+      - ./backend:/app
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
-      - /app/node_modules
-      - /app/frontend/node_modules
-      - /app/backend/node_modules
     ports:
       - 3001:3001
       - 9229:9229

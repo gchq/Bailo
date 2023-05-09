@@ -1,4 +1,4 @@
-import Bailo from '@bailo/node'
+import Bailo from '../external/BailoClient.js'
 import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'

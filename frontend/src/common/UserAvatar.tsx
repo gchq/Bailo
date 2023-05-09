@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
 import React, { useEffect, useState } from 'react'
 
-import { Entity } from '../../../lib/shared/types'
+import { Entity } from '../../types/types'
 
 export default function UserAvatar({
   entity,

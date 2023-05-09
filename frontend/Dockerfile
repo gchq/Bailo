@@ -1,38 +1,45 @@
-FROM node:20-alpine AS builder
+FROM node:16-alpine as installer
+
 RUN apk add --no-cache libc6-compat
 RUN apk update
+
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm ci
+
 COPY . .
-RUN npm install
 
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN npx turbo run build --filter=@bailo/frontend...
+RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:16-alpine AS runner
+
+RUN apk add --no-cache libc6-compat
+RUN apk update
+
 WORKDIR /app
 
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
 
-COPY --from=builder /app/frontend/next.config.mjs .
-COPY --from=builder /app/frontend/package.json .
+COPY --from=installer /app/next.config.mjs .
+COPY --from=installer /app/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:0 /app/frontend/.next/standalone/app ./
-COPY --from=builder --chown=nextjs:0 /app/frontend/.next/static ./frontend/.next/static
-COPY --from=builder --chown=nextjs:0 /app/frontend/public ./frontend/public
+COPY --from=installer --chown=nextjs:0 /app/.next/standalone ./
+COPY --from=installer --chown=nextjs:0 /app/.next/static ./.next/static
+COPY --from=installer --chown=nextjs:0 /app/public ./public
 
-RUN chmod -R g=u /app/frontend
+RUN chmod -R g=u /app
 
-USER 1001
+USER nextjs
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["node", "frontend/server.js"]
+CMD ["node", "server.js"]

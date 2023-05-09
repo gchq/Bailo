@@ -57,8 +57,8 @@ services:
   frontend:
     image: bailo_frontend:latest
     build:
-      context: ./
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend/
+      dockerfile: ./Dockerfile
     depends_on:
       - backend
     ports:
@@ -67,8 +67,8 @@ services:
   backend:
     image: bailo_backend:latest
     build:
-      context: ./
-      dockerfile: ./backend/Dockerfile
+      context: ./backend/
+      dockerfile: ./Dockerfile
     ports:
       - 3001:3001
     volumes:

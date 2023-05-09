@@ -1,4 +1,4 @@
-import { Entity } from '@bailo/shared/types'
+import { Entity } from '../src/MuiForms/EntitySelector'
 import EntityDisplay from './EntityDisplay'
 
 interface Props {
