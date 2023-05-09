@@ -60,7 +60,7 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^2.0.2",
+    "@eslint/eslintrc": "^2.0.3",
     "@next/bundle-analyzer": "^13.3.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
