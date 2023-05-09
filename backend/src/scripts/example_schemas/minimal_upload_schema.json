@@ -86,7 +86,7 @@
       "type": "object",
       "properties": {
         "uploader": {
-          "title": "Model Developer.",
+          "title": "Model Developer",
           "description": "The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.",
           "type": "array",
           "items": { "$ref": "#/definitions/entity" },
@@ -94,7 +94,7 @@
           "widget": "entitySelector"
         },
         "reviewer": {
-          "title": "Model Technical Reviewer.",
+          "title": "Model Technical Reviewer",
           "description": "An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.",
           "type": "array",
           "items": { "$ref": "#/definitions/entity" },
@@ -102,7 +102,7 @@
           "widget": "entitySelector"
         },
         "manager": {
-          "title": "Senior Responsible Officer.",
+          "title": "Senior Responsible Officer",
           "description": "A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.",
           "type": "array",
           "items": { "$ref": "#/definitions/entity" },
