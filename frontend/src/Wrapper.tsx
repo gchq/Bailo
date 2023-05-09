@@ -122,7 +122,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   useEffect(() => {
     if (!isUiConfigLoading) {
-      if (uiConfig && uiConfig.banner.enable) {
+      if (uiConfig && uiConfig.banner.enabled) {
         setPageTopStyling({
           mt: 4,
         })
@@ -183,7 +183,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
+        {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
           <Toolbar
             sx={{
