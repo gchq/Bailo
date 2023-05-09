@@ -13,8 +13,8 @@ def gluon_bundler(model, output_path: str, code_paths: List[str]):
 
     Args:
         model (Gluon model): The Gluon model
-        output_path (str): Path to export the model to
-        code_paths (List[str]): List of additional code paths
+        output_path: Path to export the model to
+        code_paths: List of additional code paths
 
     Returns:
         Tuple(str, List[str]): Path to saved model binary, paths to additional MLflow files to

@@ -9,8 +9,9 @@ class TensorflowModel(BaseModel):
 
     def __init__(self, model, infer):
         """
-        :param model: A Tensorflow SavedModel.
-        :param infer: Tensorflow function returned by a saved model that is used for inference.
+        Args:
+            model: A Tensorflow SavedModel.
+            infer: Tensorflow function returned by a saved model that is used for inference.
         """
         # Note: we need to retain the model reference in TF2Wrapper object, because the infer
         #  function in tensorflow will be `ConcreteFunction` which only retains WeakRefs to the

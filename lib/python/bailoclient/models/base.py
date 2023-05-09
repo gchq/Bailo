@@ -1,6 +1,7 @@
 """ Bailo base class """
 import json
 from copy import deepcopy
+from typing import Optional
 
 import munch
 
@@ -32,11 +33,11 @@ class BailoBase(munch.AutoMunch):
         vals.add("list_fields")
         return list(vals)
 
-    def display(self, to_screen=True):
+    def display(self, to_screen: bool = True):
         """Display the pretty JSON of the class details
 
         Args:
-            to_screen (bool, optional): Print prettified JSON if True. Defaults to True.
+            to_screen: Print prettified JSON if True. Defaults to True.
 
         Returns:
             str: prettified JSON

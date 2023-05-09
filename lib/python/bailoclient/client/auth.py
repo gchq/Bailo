@@ -151,7 +151,7 @@ class CognitoSRPAuthenticator(AuthenticationInterface):
         """
         return self._authenticated
 
-    def get_authorisation_headers(self) -> Optional[str]:
+    def get_authorisation_headers(self) -> Optional[Dict[str, str]]:
         """Authenticate and get a secure token than can be used to send an API request.
            Return None if the authentication fails
            Note that this interface will definitely change once more auth types are explored.

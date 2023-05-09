@@ -22,9 +22,13 @@ class BaseModel(ABC):
     def predict(self, input, features_names):
         """
         Provides a model prediction for a given input and set of feature names
-        :param input: Prediction input containing a data component
-        :param feature_names: Optional set of feature names
-        :return: JSON serialisable numpy array, list of values, string or bytes
+
+        Args:
+            input: Prediction input containing a data component
+            feature_names: Optional set of feature names
+
+        Returns:
+            JSON serialisable numpy array, list of values, string or bytes
 
         Example:
             data = input["data"]
