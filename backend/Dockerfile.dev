@@ -25,9 +25,7 @@ RUN if [[ $user_id -eq 1000 ]]; then groupmod -g 1001 node && usermod -u 1001 -g
   && echo user:100000:65536 | tee /etc/subuid | tee /etc/subgid \
   && chmod -R 775 /usr/share/ca-certificates
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-
+COPY package*.json ./
 RUN npm install
 
 COPY . .
