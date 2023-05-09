@@ -109,6 +109,25 @@ class Writer extends WritableStream {
   }
 }
 
+function redactUnsafeSymbols(obj: unknown, depth = 0, redactedSymbols = /[$.{}]/g) {
+  if (Array.isArray(obj) || obj === null || typeof obj !== 'object') {
+    return obj
+  }
+
+  if (depth > 4) {
+    return obj
+  }
+
+  const safeObj = {}
+
+  for (const key of Object.keys(obj)) {
+    const redactedKey = key.replace(redactedSymbols, '')
+    safeObj[redactedKey] = redactUnsafeSymbols(obj[key], depth + 1, redactedSymbols)
+  }
+
+  return safeObj
+}
+
 class MongoWriter {
   async write(data: any) {
     // sometimes we are unable to write log messages to the database
@@ -116,9 +135,8 @@ class MongoWriter {
       return
     }
 
-    return
-
-    const log = new LogModel(data)
+    const safeData = redactUnsafeSymbols(data)
+    const log = new LogModel(safeData)
     await log.save()
   }
 }

@@ -13,8 +13,8 @@ def tensorflow_bundler(model, output_path: str, code_paths: List[str]):
 
     Args:
         model (TensorFlow model): The TensorFlow model
-        output_path (str): Path to export the model to
-        code_paths (List[str]): List of additional code paths
+        output_path: Path to export the model to
+        code_paths: List of additional code paths
     """
     from mlflow.tensorflow import save_model
 

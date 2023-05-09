@@ -3,3 +3,4 @@ bailoclient.egg-info
 settings.json
 .env
 venv
+docs/build

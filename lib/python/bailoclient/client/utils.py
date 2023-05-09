@@ -98,9 +98,9 @@ def generate_payload(
     """Generate payload for posting model or deployment
 
     Args:
-        metadata (dict): Model metadata
-        binary_file (str): Path to model binary file
-        code_file (str): Path to model code file
+        metadata: Model metadata
+        binary_file: Path to model binary file
+        code_file: Path to model code file
 
     Returns:
         MultipartEncoder: Payload of model data
@@ -111,13 +111,13 @@ def generate_payload(
     return MultipartEncoder(payloads)
 
 
-def _add_files_to_payload(payloads: list, binary_file: str, code_file: str) -> List:
+def _add_files_to_payload(payloads: List, binary_file: str, code_file: str) -> List:
     """Add code and binary files to the payload
 
     Args:
-        payloads (list): List of payloads
-        binary_file (str): File path of binary
-        code_file (str): File path of code
+        payloads: List of payloads
+        binary_file: File path of binary
+        code_file: File path of code
     """
     for tag, full_filename in zip(["code", "binary"], [code_file, binary_file]):
         f_name = get_file_name(full_filename)
@@ -128,11 +128,11 @@ def _add_files_to_payload(payloads: list, binary_file: str, code_file: str) -> L
     return payloads
 
 
-def handle_reconnect(fcn: Callable) -> Callable:
+def handle_reconnect(func: Callable) -> Callable:
     """Reconnect the Client
 
     Args:
-        fcn (Callable): Client function
+        func: Client function
 
     Raises:
         UnconnectedClient: Client has not previously been connected
@@ -141,11 +141,11 @@ def handle_reconnect(fcn: Callable) -> Callable:
         Callable: Function to handle reconnecting
     """
 
-    @wraps(fcn)
+    @wraps(func)
     def reconnect(*args, **kwargs):
         self = args[0]
         try:
-            return fcn(*args, **kwargs)
+            return func(*args, **kwargs)
 
         except UnauthorizedException as exc:
             logger.debug("Not currently connected to Bailo")
@@ -153,7 +153,7 @@ def handle_reconnect(fcn: Callable) -> Callable:
             if self.connection_params:
                 logger.debug("Reconnecting")
                 self._auth.authenticate_user()
-                return fcn(*args, **kwargs)
+                return func(*args, **kwargs)
 
             logger.error("Client has not previously connected")
             raise UnconnectedClient("Client must call connect to authenticate") from exc
