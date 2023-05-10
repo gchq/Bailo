@@ -89,5 +89,13 @@ export const importModel = [
         return res.json({
             model: filename,
         })
+
+        //Upload all manifests and blob to docker
+
+
+        const metadata = // minio get metadata file
+        const schemaRef = // minio get schema file
+        const code = // path to code file (local)
+        const binary = // path to binary file (local)
     },
 ]
