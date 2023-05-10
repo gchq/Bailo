@@ -17,7 +17,7 @@ interface Registry {
   agent: https.Agent
 }
 
-interface ImageRef {
+export interface ImageRef {
   namespace: string
   model: string
   version: string

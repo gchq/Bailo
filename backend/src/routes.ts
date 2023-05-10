@@ -38,6 +38,7 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { importModel } from './routes/v1/importModel.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 
@@ -99,5 +100,7 @@ server.get('/api/v1/specification', ...getSpecification)
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
 server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
+
+server.post('/api/v1/import', ...importModel)
 
 server.use('/api', expressErrorHandler)

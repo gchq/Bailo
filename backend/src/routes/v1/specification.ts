@@ -570,6 +570,25 @@ export function generateSpecification() {
       },
     ],
     paths: {
+      '/import': {
+        post: {
+          tags: ['importModel'],
+          description: 'Import a full model version',
+          parameters: [
+            {
+              name: 'model',
+              in: 'formData',
+              description: 'Imported Model to Upload',
+              type: 'file',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The Success of The Model Upload. - ModelUUid',
+            },
+          },
+        },
+      },
       '/model': {
         post: {
           tags: ['model'],
