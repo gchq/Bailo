@@ -2,6 +2,7 @@ import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { Version } from '../../../../lib/shared/types'
 import { useGetModel, useGetModelVersions } from '../../../data/model'
@@ -183,7 +184,12 @@ function Upload() {
 
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-      <SubmissionError error={error} />
+      <MessageAlert
+        message={error}
+        severity='error'
+        linkText='More info'
+        href='/docs/users/upload-a-model/updating-a-model'
+      />
       <Form
         splitSchema={splitSchema}
         setSplitSchema={setSplitSchema}
