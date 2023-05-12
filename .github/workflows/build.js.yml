@@ -22,11 +22,11 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: backend
           file: backend/Dockerfile
           tags: bailo_backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
           outputs: type=docker,dest=/tmp/bailo_backend.tar
 
       - name: Upload artifact
@@ -50,11 +50,11 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: frontend
           file: frontend/Dockerfile
           tags: bailo_frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
           outputs: type=docker,dest=/tmp/bailo_frontend.tar
 
       - name: Upload artifact
@@ -74,11 +74,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Install dependencies
       - run: npm ci
@@ -97,7 +97,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Install dependencies
       - run: npm ci
@@ -117,7 +117,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -149,7 +149,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Add bailo NodePort
       - name: Create NodePort Config
@@ -268,7 +268,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -297,7 +297,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Configure application
       - name: Configure Bailo
@@ -342,12 +342,10 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
-      # Add schemas
-      - run: npm run --workspace=backend script -- exampleSetAllSchemas
-
       - uses: cypress-io/github-action@v5
         with:
-          project: ./frontend
+          working-directory: ./frontend
+          install: false
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -386,7 +384,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -415,7 +413,7 @@ jobs:
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
-      - run: npm run --workspace=backend certs
+      - run: npm run certs
 
       # Configure application
       - name: Configure Bailo
@@ -460,14 +458,11 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
-      # Add schemas
-      - run: npm run --workspace=backend script -- exampleSetAllSchemas
-
       # Setup python
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       # Install dependencies
       - name: Install dependencies

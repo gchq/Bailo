@@ -1,4 +1,4 @@
-import { DocFileOrHeading, DocHeading } from '../../../lib/shared/types'
+import { DocFileOrHeading, DocHeading } from '../../types/types'
 
 const isDocHeading = (obj: DocFileOrHeading): obj is DocHeading => !!(obj as DocHeading).children
 

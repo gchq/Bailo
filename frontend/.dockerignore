@@ -1,6 +1,5 @@
-Dockerfile
-.dockerignore
-npm-debug.log
-README.md
-.git
+.next
+.swc
+.turbo
+coverage
 node_modules

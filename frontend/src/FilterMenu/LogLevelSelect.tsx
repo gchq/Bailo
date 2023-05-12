@@ -4,7 +4,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import React, { ReactElement } from 'react'
 
-import { LogLevel, LogLevelLabel } from '../../../lib/shared/types'
+import { LogLevel, LogLevelLabel } from '../../types/types'
 
 type LogLevelSelectProps = {
   value: LogLevel

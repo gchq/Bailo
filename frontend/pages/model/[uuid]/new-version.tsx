@@ -4,7 +4,6 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
-import { Version } from '../../../../lib/shared/types'
 import { useGetModel, useGetModelVersions } from '../../../data/model'
 import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
@@ -16,6 +15,7 @@ import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../src
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
+import { Version } from '../../../types/types'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import useCacheVariable from '../../../utils/hooks/useCacheVariable'
 

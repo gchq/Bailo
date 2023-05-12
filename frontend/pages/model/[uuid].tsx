@@ -45,7 +45,6 @@ import { Edge, Node } from 'reactflow'
 import CodeExplorer from 'src/model/CodeExplorer'
 import createComplianceFlow from 'utils/complianceFlow'
 
-import { DateString, Deployment, Entity, ModelUploadType, User, Version } from '../../../lib/shared/types'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
@@ -56,6 +55,7 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import ModelOverview from '../../src/ModelOverview'
 import TerminalLog from '../../src/TerminalLog'
 import Wrapper from '../../src/Wrapper'
+import { DateString, Deployment, Entity, ModelUploadType, User, Version } from '../../types/types'
 import { getErrorMessage } from '../../utils/fetcher'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))

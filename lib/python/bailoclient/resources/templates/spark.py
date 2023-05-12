@@ -26,9 +26,12 @@ class SparkModel(BaseModel):
         A valid scenario is if the auto-logged input example is directly used
         for prediction, which would otherwise fail without this transformation.
 
-        :param spark_df: Input dataframe that contains `featuresCol`
-        :param spark_model: A pipeline model or a single transformer that contains `featuresCol` param
-        :return: A spark dataframe that contains features column of `vector` type.
+        Args:
+            spark_df: Input dataframe that contains `featuresCol`
+            spark_model: A pipeline model or a single transformer that contains `featuresCol` param
+
+        Returns:
+            A spark dataframe that contains features column of `vector` type.
         """
         from pyspark.sql.functions import udf
         from pyspark.ml.linalg import Vectors, VectorUDT
@@ -66,8 +69,12 @@ class SparkModel(BaseModel):
     def predict(self, pandas_df):
         """
         Generate predictions given input data in a pandas DataFrame.
-        :param pandas_df: pandas DataFrame containing input data.
-        :return: List with model predictions.
+
+        Args:
+            pandas_df: pandas DataFrame containing input data.
+
+        Returns:
+            List with model predictions.
         """
         from pyspark.ml import PipelineModel
 

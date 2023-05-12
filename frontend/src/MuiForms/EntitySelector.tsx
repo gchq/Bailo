@@ -3,13 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
 
-import { EntityKind } from '../../../lib/shared/types'
 import { useListUsers } from '../../data/user'
+import { EntityKind } from '../../types/types'
 
-interface Entity {
+export interface Entity {
   kind: string
   id: string
-  data: unknown
+  data?: unknown
 }
 
 type MinimalEntity = Omit<Entity, 'data'>

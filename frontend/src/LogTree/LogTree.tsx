@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react'
 
-import { LogEntry, LogType } from '../../../lib/shared/types'
 import { useGetAppLogs } from '../../data/admin'
 import { useGetUiConfig } from '../../data/uiConfig'
+import { LogEntry, LogType } from '../../types/types'
 import { LogFilters } from '../FilterMenu/FilterMenu'
 import ChildLogDetails from './ChildLogDetails'
 

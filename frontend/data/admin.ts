@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { LogEntry } from '../../lib/shared/types'
+import { LogEntry } from '../types/types'
 import { fetcher } from '../utils/fetcher'
 
 interface GetAppLogsArgs {

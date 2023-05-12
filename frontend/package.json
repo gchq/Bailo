@@ -2,7 +2,7 @@
   "name": "@bailo/frontend",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -- --turbo",
     "build": "next build",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
@@ -20,9 +20,8 @@
     "useTabs": false
   },
   "dependencies": {
-    "@bailo/shared": "*",
     "@emotion/cache": "^11.10.7",
-    "@emotion/react": "^11.10.6",
+    "@emotion/react": "^11.11.0",
     "@emotion/server": "^11.10.0",
     "@emotion/styled": "^11.10.6",
     "@mdx-js/loader": "^2.3.0",
@@ -42,7 +41,8 @@
     "is-docker": "^3.0.0",
     "jsonschema": "^1.4.1",
     "lodash-es": "^4.17.21",
-    "next": "13.3.0",
+    "mongoose": "^7.1.0",
+    "next": "13.4.0",
     "next-remove-imports": "^1.0.11",
     "notistack": "^3.0.1",
     "randomcolor": "^0.6.2",
@@ -60,7 +60,7 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^2.0.2",
+    "@eslint/eslintrc": "^2.0.3",
     "@next/bundle-analyzer": "^13.3.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
@@ -72,7 +72,7 @@
     "@vitejs/plugin-react": "^3.1.0",
     "@vitest/coverage-c8": "^0.30.1",
     "cypress": "^12.10.0",
-    "eslint": "8.38.0",
+    "eslint": "8.39.0",
     "eslint-config-next": "13.3.1",
     "eslint-plugin-cypress": "^2.13.2",
     "eslint-plugin-simple-import-sort": "^10.0.0",

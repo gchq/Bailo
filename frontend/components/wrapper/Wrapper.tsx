@@ -1,12 +1,13 @@
-import * as React from 'react'
-import { styled, createTheme, ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
+import { ChevronLeft, DashboardTwoTone, Menu, Notifications, ViewListTwoTone } from '@mui/icons-material'
+import { Badge, Box, Divider, Drawer as MuiDrawer, IconButton, List, Toolbar, Typography } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
-import { Badge, IconButton, Divider, Typography, List, Toolbar, Box, Drawer as MuiDrawer } from '@mui/material'
-import { DashboardTwoTone, ViewListTwoTone, ChevronLeft, Notifications, Menu } from '@mui/icons-material'
+import CssBaseline from '@mui/material/CssBaseline'
+import { createTheme, styled, ThemeProvider } from '@mui/material/styles'
 import Head from 'next/head'
+import * as React from 'react'
+
+import { UiConfig } from '../../types/types'
 import WrapperIcon from './WrapperIcon'
-import { UiConfig } from '../../../lib/shared/types'
 
 const drawerWidth: number = 240
 

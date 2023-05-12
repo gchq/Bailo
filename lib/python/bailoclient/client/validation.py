@@ -3,6 +3,9 @@
 import json
 import logging
 import os
+from typing import Optional
+
+from requests_toolbelt import MultipartEncoder
 
 from bailoclient.exceptions import DataInvalid, InvalidMetadata, InvalidFilePath
 from bailoclient.models import Model
@@ -14,8 +17,9 @@ def minimal_keys_in_dictionary(minimal_dict: dict, test_dict: dict):
     """Check that a dictionary contains all the keys within a minimal dictionary
 
     Args:
-        minimal_dict (dict): Minimal dictionary for checking against
-        test_dict (dict): Dictionary for checking keys
+        minimal_dict: Minimal dictionary for checking against
+        test_dict: Dictionary for checking keys
+
     Returns:
         dict: Result dictionary containing 'valid' and 'error_message' if valid = False
     """
@@ -46,7 +50,7 @@ def validate_model_card(model_card: Model):
     """Validate supplied model card
 
     Args:
-        model_card (Model): Model
+        model_card: Model
 
     Raises:
         DataInvalid: Model card is not valid
@@ -64,8 +68,8 @@ def validate_metadata(metadata: dict, minimal_metadata_path: str):
     """Validate supplied metadata against a minimal metadata file
 
     Args:
-        metadata (dict): Supplied metadata for model or deployment
-        minimal_metadata_path (str): Path to minimal model/deployment metadata for validation
+        metadata: Supplied metadata for model or deployment
+        minimal_metadata_path: Path to minimal model/deployment metadata for validation
 
     Raises:
         InvalidMetadata: Supplied metadata does not contain all the required parameters
@@ -99,12 +103,12 @@ def validate_file_paths(*args):
             raise InvalidFilePath(f"{file_path} is a directory")
 
 
-def too_large_for_gateway(data, aws_gateway: bool) -> bool:
+def too_large_for_gateway(data: MultipartEncoder, aws_gateway: bool) -> bool:
     """If there is an AWS gateway, check that data is not too large
 
     Args:
-        data (MultipartEncoder): the data to be uploaded
-        aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
+        data: the data to be uploaded
+        aws_gateway: Whether or not the data will be uploaded via AWS gateway.
 
     Returns:
         bool: True if data is too large to be uploaded
@@ -121,10 +125,10 @@ def deployment_matches(
     """Check whether a deployment matches the provided filters. Returns True if deployment is a match.
 
     Args:
-        deployment (dict): The model deployment
-        deployment_name (str): The name of the requested deployment
-        model_uuid (str): The model UUID of the requested deployment
-        model_version (str): The model version of the requested deployment
+        deployment: The model deployment
+        deployment_name: The name of the requested deployment
+        model_uuid: The model UUID of the requested deployment
+        model_version: The model version of the requested deployment
 
     Returns:
         bool: True if deployment matches provided filters
@@ -143,21 +147,21 @@ def deployment_matches(
 
 
 def validate_uploads(
-    model_card: Model = None,
-    metadata: dict = None,
-    minimal_metadata_path: str = None,
-    binary_file: str = None,
-    code_file: str = None,
+    model_card: Optional[Model] = None,
+    metadata: Optional[dict] = None,
+    minimal_metadata_path: Optional[str] = None,
+    binary_file: Optional[str] = None,
+    code_file: Optional[str] = None,
 ):
     """Validate the model and files provided for upload
 
     Args:
-        model_card (Model, optional): Model card of the model to update. Defaults to None.
-        metadata (dict, optional): Metadata required for uploading a new model. Must
+        model_card: Model card of the model to update. Defaults to None.
+        metadata: Metadata required for uploading a new model. Must
                                    match the minimal metadata. Defaults to None.
         minimal_metadata_path: something
-        binary_file (str, optional): File path to model binary. Defaults to None.
-        code_file (str, optional): File path to model code. Defaults to None.
+        binary_file: File path to model binary. Defaults to None.
+        code_file: File path to model code. Defaults to None.
 
     Raises:
         DataInvalid: Invalid model

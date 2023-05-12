@@ -9,9 +9,10 @@
     "skipLibCheck": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "composite": true,
   },
-  "include": ["global.d.ts", "src/**/*"],
+  "include": ["global.d.ts", "src/**/*", "src/**/*.json", "package.json", "package-lock.json"],
   "ts-node": {
     "esm": true,
     "swc": true

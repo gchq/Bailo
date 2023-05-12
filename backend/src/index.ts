@@ -7,6 +7,7 @@ import { createSchemaIndexes } from './models/Schema.js'
 import processDeployments from './processors/processDeployments.js'
 import processUploads from './processors/processUploads.js'
 import { server } from './routes.js'
+import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
 import { ensureBucketExists } from './utils/minio.js'
@@ -30,6 +31,9 @@ await runMigrations()
 // lazily create indexes for full text search
 createModelIndexes()
 createSchemaIndexes()
+
+// lazily add default schemas
+addDefaultSchemas()
 
 await Promise.all([processUploads(), processDeployments()])
 

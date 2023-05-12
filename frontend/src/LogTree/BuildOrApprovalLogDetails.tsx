@@ -1,6 +1,6 @@
 import React, { ReactElement, useMemo } from 'react'
 
-import { LogEntry, LogType, UiConfig } from '../../../lib/shared/types'
+import { LogEntry, LogType, UiConfig } from '../../types/types'
 import { LogFilters } from '../FilterMenu/FilterMenu'
 import ChildLogDetails from './ChildLogDetails'
 import MiscLogDetails from './MiscLogDetails'
