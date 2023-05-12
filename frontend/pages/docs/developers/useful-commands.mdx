@@ -1,0 +1,96 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Useful Commands
+
+## For your .bashrc file
+
+```bash
+# Aliases for Docker Compose (dc = docker compose)
+alias dc=DOCKER_BUILDKIT=1 docker compose
+alias dcp=DOCKER_BUILDKIT=1 docker compose -f docker-compose-prod.yml
+
+
+# Running scripts (rs = run script)
+alias rs=npm run script --
+```
+
+### Starting Bailo
+
+Build images:
+
+_You should only need to do this when dependencies have updated, e.g. changing branch / altering `package.json` /
+running `npm install`._
+
+```bash
+dc build --parallel
+```
+
+Start up Bailo:
+
+```bash
+dc up -d
+```
+
+### Style Issues on GitHub Actions
+
+```bash
+npm run style
+```
+
+### Out of Space
+
+_--volumes will also remove the contents of any volumes, e.g. Mongo / Minio. Removing it will remove all just remove
+containers_
+
+```bash
+docker system prune -af --volumes
+```
+
+### Check Backend Logs
+
+```bash
+dc logs backend
+```
+
+Or to **F**ollow the logs
+
+```bash
+dc logs -f backend
+```
+
+### Registry Won't Start
+
+You probably don't have certificates, the registry is the fastest to break with no certificates. Verify with:
+
+```bash
+dc logs registry
+```
+
+You should see a panic that includes some terms like 'ssl', 'certificates', or similar.
+
+```bash
+npm run certs
+```
+
+### PANIC
+
+When all is lost and you just want to start over again... This command takes ~3 minutes to run, but resets everything
+about your Bailo environment.
+
+> _Run this from the root Bailo directory (e.g. `/home/ec2-user/git/Bailo`)_
+
+**This will remove ALL data from Bailo.**
+
+```bash
+dc down --remove-orphans
+rm -rf frontend/.next
+rm -rf frontend/node_modules
+rm -rf backend/node_modules
+rm -rf node_modules
+docker system prune -af --volumes
+npm install
+dc build --parallel
+dc up -d
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

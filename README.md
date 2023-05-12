@@ -129,6 +129,7 @@ npm run script -- addUploadSchema
 | Registry   | 5000  | HTTPS only, no UI     |
 | Minio UI   | 9001  | minioadmin:minioadmin |
 | Minio      | 9000  | minioadmin:minioadmin |
+| MailCrab   | 1080  | Fake email server     |
 
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to
 something more secure.

@@ -2,7 +2,7 @@
   "name": "@bailo/frontend",
   "private": true,
   "scripts": {
-    "dev": "next dev -- --turbo",
+    "dev": "next dev",
     "build": "next build",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
