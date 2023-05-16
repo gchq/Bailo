@@ -1,4 +1,5 @@
 import _config from 'config'
+import { GrantConfig, GrantOptions } from 'grant'
 
 interface DefaultSchema {
   name: string
@@ -107,7 +108,11 @@ export interface Config {
     deployment: Array<DefaultSchema>
   }
 
-  oauth: unknown & { enabled: boolean }
+  oauth: {
+    enabled: boolean
+    provider: string
+    grant: GrantOptions | GrantConfig
+  }
 
   session: {
     secret: string

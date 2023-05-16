@@ -2,9 +2,7 @@ import parser from 'body-parser'
 import MongoStore from 'connect-mongo'
 import express from 'express'
 import session from 'express-session'
-import fs from 'fs'
 import grant from 'grant'
-import { omit } from 'lodash-es'
 
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
@@ -69,14 +67,16 @@ server.use(expressLogger)
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
-  server.use(grant.default.express(omit(config.oauth, 'enabled')))
+  server.use(grant.default.express(config.oauth.grant))
 
   server.get('/api/login', (req, res) => {
-    res.redirect('/api/connect/cognito/login')
+    res.redirect(`/api/connect/${config.oauth.provider}/login`)
   })
 
-  server.get('/api/grant', (req, res) => {
-    res.end(JSON.stringify(req.session.grant.response, null, 2))
+  server.get('/api/logout', (req, res) => {
+    req.session.destroy(function (err) {
+      res.redirect('/')
+    })
   })
 }
 

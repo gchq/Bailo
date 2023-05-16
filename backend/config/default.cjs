@@ -147,20 +147,25 @@ module.exports = {
 
   oauth: {
     enabled: false,
+    provider: 'cognito',
 
-    defaults: {
-      origin: '',
-      prefix: '/api/connect',
-      transport: 'session',
-    },
+    grant: {
+      // Grant configuration options, provide any option from:
+      // https://www.npmjs.com/package/grant
+      defaults: {
+        origin: '',
+        prefix: '/api/connect',
+        transport: 'session',
+      },
 
-    cognito: {
-      key: '',
-      secret: '',
-      dynamic: ['scope'],
-      response: ['tokens', 'raw', 'jwt'],
-      callback: '/',
-      subdomain: '',
+      cognito: {
+        key: '',
+        secret: '',
+        dynamic: ['scope'],
+        response: ['tokens', 'raw', 'jwt'],
+        callback: '/',
+        subdomain: '',
+      },
     },
   },
 
