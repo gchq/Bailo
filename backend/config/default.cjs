@@ -141,6 +141,29 @@ module.exports = {
     ],
   },
 
+  session: {
+    secret: '',
+  },
+
+  oauth: {
+    enabled: false,
+
+    defaults: {
+      origin: '',
+      prefix: '/api/connect',
+      transport: 'session',
+    },
+
+    cognito: {
+      key: '',
+      secret: '',
+      dynamic: ['scope'],
+      response: ['tokens', 'raw', 'jwt'],
+      callback: '/',
+      subdomain: '',
+    },
+  },
+
   // These settings are PUBLIC and shared with the UI
   ui: {
     // Show a banner at the top of the screen on all pages

@@ -1,4 +1,10 @@
+import parser from 'body-parser'
+import MongoStore from 'connect-mongo'
 import express from 'express'
+import session from 'express-session'
+import fs from 'fs'
+import grant from 'grant'
+import { omit } from 'lodash-es'
 
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
@@ -38,6 +44,7 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 
@@ -45,6 +52,35 @@ export const server = express()
 
 server.use(getUser)
 server.use(expressLogger)
+
+if (config.oauth.enabled) {
+  server.use(
+    session({
+      secret: config.session.secret,
+      resave: true,
+      saveUninitialized: true,
+      cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
+      // store: MongoStore.create({
+      //   mongoUrl: config.mongo.uri,
+      // }),
+    })
+  )
+
+  server.use(parser.urlencoded({ extended: true }))
+
+  console.log(omit(config.oauth, 'enabled'))
+
+  server.use(grant.default.express(omit(config.oauth, 'enabled')))
+
+  server.get('/api/login', (req, res) => {
+    res.writeHead(200, { 'content-type': 'text/html' })
+    res.end(fs.readFileSync('./form.html', 'utf8'))
+  })
+
+  server.get('/api/hello', (req, res) => {
+    res.end(JSON.stringify((req as any).session.grant.response, null, 2))
+  })
+}
 
 server.post('/api/v1/model', ...postUpload)
 
