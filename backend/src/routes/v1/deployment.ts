@@ -1,4 +1,3 @@
-import { ModelDoc } from '../../types/types.js'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
@@ -8,11 +7,12 @@ import { createDeployment, findDeploymentByUuid, findDeployments } from '../../s
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
 import { getClient } from '../../utils/minio.js'
-import { BadReq, Forbidden, NotFound, Unauthorised } from '../../utils/result.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -248,7 +248,7 @@ export const fetchRawModelFiles = [
 
     if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
       const owners = deployment.metadata.contacts.owner.map((owner: any) => owner.id).join(', ')
-      throw Unauthorised(
+      throw Forbidden(
         { deploymentOwner: deployment.metadata.contacts.owner },
         `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`
       )
@@ -261,7 +261,7 @@ export const fetchRawModelFiles = [
     }
 
     if (deployment.managerApproved !== 'Accepted') {
-      throw Unauthorised(
+      throw Forbidden(
         { approvalStatus: deployment.managerApproved },
         'User is not authorised to download this file as it has not been approved.'
       )

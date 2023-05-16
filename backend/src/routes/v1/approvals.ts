@@ -18,7 +18,7 @@ import { reviewedApproval } from '../../templates/reviewedApproval.js'
 import { ApprovalCategory, ApprovalStates, DeploymentDoc, Entity, ModelDoc, VersionDoc } from '../../types/types.js'
 import { getUserListFromEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
-import { BadReq, Unauthorised } from '../../utils/result.js'
+import { BadReq, Forbidden } from '../../utils/result.js'
 import { sendEmail } from '../../utils/smtp.js'
 import { ensureUserRole, hasRole } from '../../utils/user.js'
 
@@ -37,10 +37,10 @@ export const getApprovals = [
 
     if (filter === 'all') {
       if (!hasRole(['admin'], req.user)) {
-        return res.error(401, [
+        throw Forbidden(
           { code: 'unauthorised_admin_role_missing', roles: req.user.roles },
-          'Forbidden.  Your user does not have the "admin" role',
-        ])
+          'Forbidden.  Your user does not have the "admin" role'
+        )
       }
     } else {
       req.log.info({ code: 'fetching_user_approvals' }, 'Getting approvals for user')
@@ -83,7 +83,7 @@ export const postApprovalResponse = [
     const approval = await getApproval({ approvalId: id })
 
     if (!(await isUserInEntityList(req.user, approval.approvers)) && !hasRole(['admin'], req.user)) {
-      throw Unauthorised(
+      throw Forbidden(
         {
           code: 'unauthorised_to_approve',
           approvalId: id,

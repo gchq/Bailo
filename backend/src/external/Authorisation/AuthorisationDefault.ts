@@ -1,9 +1,9 @@
 import { Request } from 'express'
 
-import { DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
-import { Model } from '../types/types.js'
+import { DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../../types/types.js'
+import { Model } from '../../types/types.js'
 
-export default class AuthorisationBase {
+export default class AuthorisationDefault {
   async getUserFromReq(req: Request) {
     const userId = 'user'
     const email = 'user@example.com'

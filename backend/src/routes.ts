@@ -50,9 +50,6 @@ import { getUser } from './utils/user.js'
 
 export const server = express()
 
-server.use(getUser)
-server.use(expressLogger)
-
 if (config.oauth.enabled) {
   server.use(
     session({
@@ -60,25 +57,26 @@ if (config.oauth.enabled) {
       resave: true,
       saveUninitialized: true,
       cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
-      // store: MongoStore.create({
-      //   mongoUrl: config.mongo.uri,
-      // }),
+      store: MongoStore.create({
+        mongoUrl: config.mongo.uri,
+      }),
     })
   )
+}
 
+server.use(getUser)
+server.use(expressLogger)
+
+if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
-
-  console.log(omit(config.oauth, 'enabled'))
-
   server.use(grant.default.express(omit(config.oauth, 'enabled')))
 
   server.get('/api/login', (req, res) => {
-    res.writeHead(200, { 'content-type': 'text/html' })
-    res.end(fs.readFileSync('./form.html', 'utf8'))
+    res.redirect('/api/connect/cognito/login')
   })
 
-  server.get('/api/hello', (req, res) => {
-    res.end(JSON.stringify((req as any).session.grant.response, null, 2))
+  server.get('/api/grant', (req, res) => {
+    res.end(JSON.stringify(req.session.grant.response, null, 2))
   })
 }
 

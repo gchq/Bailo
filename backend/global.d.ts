@@ -6,6 +6,10 @@ declare namespace Express {
 
     reqId: string
     log: Logger
+
+    session: {
+      grant: any
+    }
   }
 
   interface Response {
