@@ -6,6 +6,7 @@ import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
 import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
 import LinkIcon from '@mui/icons-material/LinkTwoTone'
 import ListAltIcon from '@mui/icons-material/ListAlt'
+import LogoutIcon from '@mui/icons-material/LogoutTwoTone'
 import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
@@ -242,6 +243,14 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                           <Settings fontSize='small' />
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                    </Link>
+                    <Link href='/api/logout' color='inherit' underline='none'>
+                      <MenuItem data-test='logoutLink'>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Sign Out</ListItemText>
                       </MenuItem>
                     </Link>
                   </MenuList>

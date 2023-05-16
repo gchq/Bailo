@@ -1,5 +1,7 @@
+import { redirectToLoginPage } from 'utils/loginUtils'
+
 export async function fetchEndpoint(url: string, method: string, data?: unknown) {
-  return fetch(url, {
+  const response = await fetch(url, {
     method,
     headers: {
       ...(!data && data !== 0 && { 'Content-Length': '0' }),
@@ -7,6 +9,12 @@ export async function fetchEndpoint(url: string, method: string, data?: unknown)
     },
     ...(data !== undefined && { body: JSON.stringify(data) }),
   })
+
+  if (response.status === 401) {
+    redirectToLoginPage()
+  }
+
+  return response
 }
 
 export async function getEndpoint(url: string) {
