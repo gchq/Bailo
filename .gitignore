@@ -5,6 +5,8 @@ node_modules
 
 # misc
 .DS_Store
+dist
+.next
 
 # debug logs
 npm-debug.log*
