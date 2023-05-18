@@ -6,7 +6,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react'
 import { SplitSchema } from '../../types/interfaces'
 import FormDesigner from './FormDesigner'
 import FormUpload from './FormUpload'
-import FormImport from './FormUpload'
+import FormImport from './FormImport'
 
 export default function Form({
   splitSchema,
