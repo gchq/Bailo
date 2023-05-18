@@ -131,3 +131,34 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     </Box>
   )
 }
+
+export function RenderSelectModelFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
+  const { state } = step
+  const { binary, code, docker, zip } = state
+
+  if (!step.steps) {
+    return null
+  }
+
+  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
+
+  const handleZipChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, zip: event.target.files[0] })
+  }
+
+  const hasUploadType = !!buildOptionsStep?.state?.uploadType
+
+  return (
+    <Box sx={{ py: 4 }}>
+      {(!hasUploadType ||
+        (buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip)) && (
+        <Stack direction='row' spacing={2} alignItems='center'>
+          <FileInput label='Model Select' file={zip} onChange={handleZipChange} accepts='.zip' />
+        </Stack>
+      )}
+      {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
+        <Typography sx={{ py: 2 }}>Uploading a model card without any code or binary files</Typography>
+      )}
+    </Box>
+  )
+}
