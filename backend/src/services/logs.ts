@@ -58,7 +58,7 @@ export interface GetLogsArgs {
   buildId?: string
   approvalId?: string
 }
-export async function getLogs({ after, before, level, types, search, isRegex, buildId, approvalId }: GetLogsArgs) {
+export async function getLogs({ after, before, level, types, search, isRegex, buildId, approvalId }: GetLogsArgs): Promise<any> {
   await connectToMongoose()
 
   const { db } = mongoose.connection

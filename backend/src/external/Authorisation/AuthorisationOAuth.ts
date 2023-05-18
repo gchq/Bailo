@@ -8,7 +8,12 @@ export default class AuthorisationOAuth {
     console.log(req.session)
 
     if (!req.session?.grant?.response?.jwt) {
-      return {}
+      return {
+      userId: undefined,
+      email: undefined ,
+      data: undefined,
+      roles: undefined,
+      }
     }
 
     const userId = req.session.grant.response.jwt.id_token.payload['identities'][0].userId
