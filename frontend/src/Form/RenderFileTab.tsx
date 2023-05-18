@@ -86,7 +86,7 @@ export function fileTabComplete(step: Step) {
 
 export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker, zip } = state
+  const { binary, code, docker } = state
 
   if (!step.steps) {
     return null
@@ -106,10 +106,6 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
   }
 
-  const handleZipChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, zip: event.target.files[0] })
-  }
-
   const hasUploadType = !!buildOptionsStep?.state?.uploadType
 
   return (
@@ -117,9 +113,8 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
       {(!hasUploadType ||
         (buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip)) && (
         <Stack direction='row' spacing={2} alignItems='center'>
-          <FileInput label='Select test Code' file={code} onChange={handleCodeChange} accepts='.zip' />
+          <FileInput label='Select Code' file={code} onChange={handleCodeChange} accepts='.zip' />
           <FileInput label='Select Binary' file={binary} onChange={handleBinaryChange} accepts='.zip' />
-          <FileInput label='Model Select' file={zip} onChange={handleZipChange} accepts='.zip' />
         </Stack>
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
@@ -132,33 +127,3 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
   )
 }
 
-export function RenderSelectModelFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
-  const { state } = step
-  const { binary, code, docker, zip } = state
-
-  if (!step.steps) {
-    return null
-  }
-
-  const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
-
-  const handleZipChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, zip: event.target.files[0] })
-  }
-
-  const hasUploadType = !!buildOptionsStep?.state?.uploadType
-
-  return (
-    <Box sx={{ py: 4 }}>
-      {(!hasUploadType ||
-        (buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Zip)) && (
-        <Stack direction='row' spacing={2} alignItems='center'>
-          <FileInput label='Model Select' file={zip} onChange={handleZipChange} accepts='.zip' />
-        </Stack>
-      )}
-      {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
-        <Typography sx={{ py: 2 }}>Uploading a model card without any code or binary files</Typography>
-      )}
-    </Box>
-  )
-}
