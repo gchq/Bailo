@@ -43,7 +43,7 @@ export default function Form({
         />
       )}
       {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
-      {tab === 'import' && <FormImport splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
+      {tab === 'import' && <FormImport onSubmit={onSubmit} />}
 
     </>
   )

@@ -3,47 +3,37 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import TextField from '@mui/material/TextField'
+import { Stack } from '@mui/system'
 import React, { Dispatch, SetStateAction, useState } from 'react'
+import FileInput from 'src/common/FileInput'
 
 import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
 import { getStepsData, setStepsData } from '../../utils/formUtils'
 
+
 export default function FormImport({
-  splitSchema,
-  setSplitSchema,
   onSubmit,
 }: {
-  splitSchema: SplitSchema
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: any
 }) {
-  const dataSteps = splitSchema.steps.filter((step) => step.type === 'Data')
-  const [metadata, setMetadata] = useState(JSON.stringify(getStepsData(splitSchema), null, 4))
   const [validationErrorText, setValidationErrorText] = useState<string>('')
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [warningCheckboxVal, setWarningCheckboxVal] = useState<boolean>(false)
+  const [uploadModel, setUploadModel] = useState<any>()
 
   const handleCheckboxChange = (e) => {
     setWarningCheckboxVal(e.target.checked)
   }
 
-  const handleMetadataChange = (event: any) => {
-    setMetadata(event.target.value)
+  const handleModelChange = (e) => {
+        console.log(e.target.files[0])
+        setUploadModel(e.target.files[0])
+  }
 
-    try {
-      setValidationErrorText('')
-      const parsed = JSON.parse(event.target.value)
-
-      if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
-        setValidationErrorText('Invalid metadata')
-        return
-      }
-
-      setStepsData(splitSchema, setSplitSchema, parsed)
-    } catch (error) {
-      setValidationErrorText('Invalid JSON')
-    }
+  const uploadModelToAPI = () => {
+    // Axios request to backend importModel endpoint
+    console.log(`Submit button pressed. File ${uploadModel.name} - sent to API`)
   }
 
   if (isUiConfigError || isUiConfigLoading) {
@@ -52,33 +42,15 @@ export default function FormImport({
 
   return (
     <>
-      {dataSteps.map((step) => {
-        if (!step.renderBasic) {
-          return null
-        }
-
-        const RenderBasic = step.renderBasic
-        return (
-          <Box key={step.section}>
-            // this line gats the buttons
-            <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
+     
+          <Box key={'import'}>
+            <Button>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                    <FileInput label='Select Model' file={uploadModel} onChange={(event) => handleModelChange(event)} accepts='.zip' />
+                 </Stack>
+            </Button>
           </Box>
-        )
-      })}
-      <TextField
-        fullWidth
-        multiline
-        maxRows={20}
-        minRows={4}
-        label='test'
-        value={metadata}
-        onChange={handleMetadataChange}
-        error={validationErrorText !== ''}
-        helperText={validationErrorText}
-        inputProps={{
-          'data-test': 'metadataTextarea',
-        }}
-      />
+
       {uiConfig?.uploadWarning?.showWarning && (
         <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>
           <Checkbox
@@ -94,7 +66,7 @@ export default function FormImport({
       <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
         <Button
           variant='contained'
-          onClick={onSubmit}
+          onClick={uploadModelToAPI}
           sx={{ mt: 3 }}
           data-test='submitButton'
           disabled={uiConfig?.uploadWarning.showWarning && !warningCheckboxVal}
