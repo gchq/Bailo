@@ -60,7 +60,8 @@ export default function FormImport({
         const RenderBasic = step.renderBasic
         return (
           <Box key={step.section}>
-            {/* <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} /> */}
+            // this line gats the buttons
+            <RenderBasic step={step} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
           </Box>
         )
       })}
