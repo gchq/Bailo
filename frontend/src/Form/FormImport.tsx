@@ -32,8 +32,14 @@ export default function FormImport({
   }
 
   const uploadModelToAPI = () => {
-    // Axios request to backend importModel endpoint
-    console.log(`Submit button pressed. File ${uploadModel.name} - sent to API`)
+    // if (uploadModel === !null && uploadModel.name.endsWith('.zip')) {
+    // if (uploadModel === !null) {
+    // if (uploadModel.name.endsWith('.zip')) {
+        // Axios request to backend importModel endpoint
+        console.log(`Submit button pressed. File ${uploadModel.name} - sent to API`)
+    } else { 
+        console.log('Ensure you select a .zip file using Select Model');
+    }
   }
 
   if (isUiConfigError || isUiConfigLoading) {
