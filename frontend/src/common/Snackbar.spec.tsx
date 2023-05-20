@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import { render, screen, waitFor } from '@testing-library/react'
 import { SnackbarProvider } from 'notistack'
 import React from 'react'
+import { describe, expect, it } from 'vitest'
 
 import useNotification from './Snackbar'
 

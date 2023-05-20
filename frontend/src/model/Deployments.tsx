@@ -1,7 +1,7 @@
-import { useTheme } from '@emotion/react'
 import { Alert, Box, Chip, CircularProgress } from '@mui/material'
 import MuiLink from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
+import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { useGetModelDeployments } from 'data/model'
 import Link from 'next/link'

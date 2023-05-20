@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 
 import { doNothing } from '../../utils/testUtils'
 import ConfirmationDialogue from './ConfirmationDialogue'

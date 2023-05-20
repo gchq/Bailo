@@ -422,7 +422,7 @@ function Model() {
 
         {group === 'compliance' && <Compliance version={version} />}
 
-        {group === 'build' && <Build version={version} mutateVersion={mutateVersion} />}
+        {group === 'build' && <Build version={version} />}
 
         {group === 'deployments' && <Deployments version={version} />}
 
