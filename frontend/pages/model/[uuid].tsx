@@ -4,20 +4,16 @@ import Favorite from '@mui/icons-material/FavoriteTwoTone'
 import DownArrow from '@mui/icons-material/KeyboardArrowDownTwoTone'
 import UpArrow from '@mui/icons-material/KeyboardArrowUpTwoTone'
 import PostAddIcon from '@mui/icons-material/PostAddTwoTone'
-import ReplayIcon from '@mui/icons-material/Replay'
-import RestartAlt from '@mui/icons-material/RestartAltTwoTone'
 import UploadIcon from '@mui/icons-material/UploadTwoTone'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
 import InputLabel from '@mui/material/InputLabel'
-import MuiLink from '@mui/material/Link'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
@@ -31,34 +27,26 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import copy from 'copy-to-clipboard'
-import { deleteEndpoint, postEndpoint, putEndpoint } from 'data/api'
-import { useGetModelDeployments, useGetModelVersion, useGetModelVersions } from 'data/model'
+import { postEndpoint, putEndpoint } from 'data/api'
+import { useGetModelVersion, useGetModelVersions } from 'data/model'
 import { useGetCurrentUser } from 'data/user'
 import { useGetVersionAccess } from 'data/version'
 import { Types } from 'mongoose'
-import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Edge, Node } from 'reactflow'
+import Build from 'src/model/Build'
 import CodeExplorer from 'src/model/CodeExplorer'
-import createComplianceFlow from 'utils/complianceFlow'
+import Compliance from 'src/model/Compliance'
+import Deployments from 'src/model/Deployments'
+import Overview from 'src/model/Overview'
+import Settings from 'src/model/Settings'
 
 import ApprovalsChip from '../../src/common/ApprovalsChip'
-import ConfirmationDialogue from '../../src/common/ConfirmationDialogue'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import EmptyBlob from '../../src/common/EmptyBlob'
 import useNotification from '../../src/common/Snackbar'
-import UserAvatar from '../../src/common/UserAvatar'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import ModelOverview from '../../src/ModelOverview'
-import TerminalLog from '../../src/TerminalLog'
 import Wrapper from '../../src/Wrapper'
-import { DateString, Deployment, Entity, ModelUploadType, User, Version } from '../../types/types'
-import { getErrorMessage } from '../../utils/fetcher'
-
-const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
+import { DateString, ModelUploadType, User, Version } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -83,22 +71,19 @@ function Model() {
   const [modelFavourited, setModelFavourited] = useState<boolean>(false)
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
-  const [complianceFlow, setComplianceFlow] = useState<{ edges: Edge[]; nodes: Node[] }>({ edges: [], nodes: [] })
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
   const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
   const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
+
   const [ungovernedDialogOpen, setUngovernedDialogOpen] = useState(false)
   const [ungovernedDeploymentName, setUngovernedDeploymentName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
-  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, true)
-  const { deployments, isDeploymentsLoading, isDeploymentsError } = useGetModelDeployments(uuid)
+  const { version, isVersionLoading, isVersionError, mutateVersion } = useGetModelVersion(uuid, selectedVersion, false)
   const { versionAccess } = useGetVersionAccess(version?._id)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
@@ -107,17 +92,6 @@ function Model() {
   // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
   // It defaults to true, until it hears false from the network access check.
   const isPotentialUploader = useMemo(() => versionAccess?.uploader !== false, [versionAccess])
-
-  const onRebuildModelClick = useCallback(async () => {
-    const response = await postEndpoint(`/api/v1/version/${version?._id}/rebuild`, {})
-
-    if (response.ok) {
-      sendNotification({ variant: 'success', msg: 'Requested model rebuild' })
-      mutateVersion()
-    } else {
-      sendNotification({ variant: 'error', msg: await getErrorMessage(response) })
-    }
-  }, [sendNotification, version, mutateVersion])
 
   const addQueryParameter = (key: string, value: string) => {
     const routerParameters = router.query
@@ -145,11 +119,6 @@ function Model() {
 
   const requestDeployment = () => {
     if (version) router.push(`/model/${uuid}/deploy`)
-  }
-
-  const copyModelCardToClipboard = () => {
-    copy(JSON.stringify(version?.metadata, null, 2))
-    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
   }
 
   useEffect(() => {
@@ -197,12 +166,6 @@ function Model() {
   }, [version, reviewerLastViewed, managerLastViewed])
 
   useEffect(() => {
-    if (version) {
-      setComplianceFlow(createComplianceFlow(version))
-    }
-  }, [version, setComplianceFlow])
-
-  useEffect(() => {
     if (tab !== undefined && isTabOption(tab)) {
       setGroup(tab)
     }
@@ -222,7 +185,6 @@ function Model() {
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isVersionsError,
     isVersionError,
-    isDeploymentsError,
     isCurrentUserError,
   })
   if (error) return error
@@ -231,7 +193,6 @@ function Model() {
 
   if (isVersionsLoading || !versions) return Loading
   if (isVersionLoading || !version) return Loading
-  if (isDeploymentsLoading || !deployments) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
   const uploadNewVersion = () => {
@@ -255,25 +216,6 @@ function Model() {
           setFavouriteButtonDisabled(false)
           mutateCurrentUser(user)
         })
-    }
-  }
-
-  const handleDelete = () => {
-    setDeleteModelErrorMessage('')
-    setDeleteConfirmOpen(true)
-  }
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false)
-  }
-
-  const handleDeleteConfirm = async () => {
-    const response = await deleteEndpoint(`/api/v1/version/${version._id}`)
-
-    if (response.ok) {
-      router.push('/')
-    } else {
-      setDeleteModelErrorMessage(await getErrorMessage(response))
     }
   }
 
@@ -476,128 +418,17 @@ function Model() {
         </Box>
         <Box sx={{ marginBottom: 3 }} />
 
-        {group === 'overview' && (
-          <>
-            {version.state?.build?.state === 'failed' && (
-              <Alert sx={{ mb: 3 }} severity='error'>
-                Build Status: Failed
-              </Alert>
-            )}
-            {version.state?.build?.state === 'retrying' && (
-              <Alert sx={{ mb: 3 }} severity='warning'>
-                Build Status: Retrying
-              </Alert>
-            )}
-            <ModelOverview version={version} />
-          </>
-        )}
+        {group === 'overview' && <Overview version={version} />}
 
-        {group === 'compliance' && (
-          <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
-        )}
+        {group === 'compliance' && <Compliance version={version} />}
 
-        {group === 'build' && (
-          <>
-            <Grid container justifyContent='flex-end' sx={{ pb: 2 }}>
-              <DisabledElementTooltip
-                conditions={[version.state?.build?.state === 'retrying' ? 'Model is already retrying' : '']}
-              >
-                <Button
-                  disabled={version.state?.build?.state === 'retrying'}
-                  onClick={onRebuildModelClick}
-                  variant='outlined'
-                  startIcon={<ReplayIcon />}
-                >
-                  Rebuild Model
-                </Button>
-              </DisabledElementTooltip>
-            </Grid>
-            <TerminalLog logs={version.logs} title='Model Build Logs' />
-          </>
-        )}
+        {group === 'build' && <Build version={version} mutateVersion={mutateVersion} />}
 
-        {group === 'deployments' && (
-          <>
-            {deployments.length === 0 && <EmptyBlob text='No deployments here' />}
-            {deployments.map((deployment: Deployment) => (
-              <Box key={`deployment-${deployment.uuid}`}>
-                <Link href={`/deployment/${deployment.uuid}`} passHref legacyBehavior>
-                  <MuiLink
-                    variant='h5'
-                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                  >
-                    {deployment.metadata.highLevelDetails.name}
-                  </MuiLink>
-                </Link>
-
-                <Box sx={{ mb: 1 }}>
-                  <Stack direction='row'>
-                    <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
-                      Contacts:
-                    </Typography>
-                    {deployment.metadata.contacts.owner.map((owner: Entity) => (
-                      <Chip
-                        key={owner.id}
-                        color='primary'
-                        avatar={<UserAvatar entity={owner} size='chip' />}
-                        label={owner.id}
-                      />
-                    ))}
-                  </Stack>
-                </Box>
-
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 1 }} />
-              </Box>
-            ))}
-          </>
-        )}
+        {group === 'deployments' && <Deployments version={version} />}
 
         {group === 'code' && <CodeExplorer id={version._id} addQueryParameter={addQueryParameter} />}
 
-        {group === 'settings' && (
-          <Box data-test='modelSettingsPage'>
-            <Typography variant='h6' sx={{ mb: 1 }}>
-              General
-            </Typography>
-
-            <Box mb={2}>
-              <Button variant='outlined' onClick={copyModelCardToClipboard}>
-                Copy model card to clipboard
-              </Button>
-            </Box>
-
-            <Box sx={{ mb: 4 }} />
-            <ConfirmationDialogue
-              open={deleteConfirmOpen}
-              title='Delete version'
-              onConfirm={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-              errorMessage={deleteModelErrorMessage}
-            />
-            <Typography variant='h6' sx={{ mb: 1 }}>
-              Danger Zone
-            </Typography>
-            <Stack direction='row' spacing={2}>
-              <DisabledElementTooltip
-                conditions={[!isPotentialUploader ? 'You do not have permission to delete this version' : '']}
-                placement='bottom'
-              >
-                <Button
-                  variant='contained'
-                  disabled={!isPotentialUploader}
-                  color='error'
-                  onClick={handleDelete}
-                  data-test='deleteVersionButton'
-                >
-                  Delete version
-                </Button>
-              </DisabledElementTooltip>
-              <Button variant='contained' color='error' disabled data-test='deleteModelButton'>
-                Delete model
-              </Button>
-            </Stack>
-          </Box>
-        )}
+        {group === 'settings' && <Settings version={version} isPotentialUploader={isPotentialUploader} />}
       </Paper>
       <Dialog open={ungovernedDialogOpen} onClose={handleUngovernedDialogClose}>
         <DialogContent>
