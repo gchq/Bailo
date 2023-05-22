@@ -38,7 +38,6 @@ export default function FormImport({
         // Axios request to backend importModel endpoint
         console.log(`Submit button pressed. File ${uploadModel.name} - sent to API`)
     } else { 
-        // console.log('Ensure you select a .zip file using Select Model');
         return setError('Ensure you select a .zip file using Select Model');
     }
   }
