@@ -9,11 +9,13 @@ import FormUpload from './FormUpload'
 import FormImport from './FormImport'
 
 export default function Form({
+  setError,
   splitSchema,
   setSplitSchema,
   onSubmit,
   modelUploading = false,
 }: {
+  setError: (error: string) => void
   splitSchema: SplitSchema
   onSubmit: () => void
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
@@ -43,7 +45,7 @@ export default function Form({
         />
       )}
       {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
-      {tab === 'import' && <FormImport onSubmit={onSubmit} />}
+      {tab === 'import' && <FormImport onSubmit={onSubmit} setError={setError} />}
 
     </>
   )
