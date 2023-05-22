@@ -47,7 +47,7 @@ export default function FormImport({
   return (
     <>
      
-          <Box key={'import'}>
+          <Box sx={{ py: 4 }} key={'import'}>
             <Button>
                 <Stack direction='row' spacing={2} alignItems='center'>
                     <FileInput label='Select Model' file={uploadModel} onChange={(event) => handleModelChange(event)} accepts='.zip' />
