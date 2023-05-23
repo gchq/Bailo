@@ -54,7 +54,7 @@ export function isValidFilter(filter: unknown): filter is string {
   return typeof filter === 'string'
 }
 
-export async function findModels(user: UserDoc, { filter, type }: ModelFilter, opts?: GetModelOptions) {
+export async function findModels(user: UserDoc, { filter, type }: ModelFilter) {
   const query: any = {}
 
   if (filter) query.$text = { $search: filter as string }
@@ -76,9 +76,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
 
     return filterModelArray(user, userModels)
   }
-
-  let models = ModelModel.find(query).sort({ updatedAt: -1 })
-  if (opts?.populate) models = models.populate('latestVersion')
+  const models = await ModelModel.find(query).populate('latestVersion').sort({ updatedAt: -1 })
   return filterModelArray(user, await models)
 }
 
