@@ -45,14 +45,15 @@ export default function FormImport({
 }
   
 const uploadModelToAPI = async (e) => {
-        // Axios request to backend importModel endpoint
         e.preventDefault()
+        const form = new FormData()
+        form.append('zip', uploadModel)
         if (uploadModel && uploadModel.name.endsWith('.zip')) {
             await axios({
                 method: 'post',
                 url: '/api/v1/importModel',
-                headers: { 'Content-Type': 'application/zip' },
-                data: uploadModel
+                headers: { 'Content-Type': 'multipart/form-data' },
+                data: form
             })
             .then(data => console.log(data))
             .catch(error => console.error(error))
