@@ -10,7 +10,7 @@ describe('DisabledElementTooltip', () => {
   it('renders an DisabledElementTooltip component when a button is hovered over', async () => {
     render(
       <DisabledElementTooltip conditions={[testMessage]}>
-        <Button data-testid='trigger'>Button</Button>
+        <Button data-test='trigger'>Button</Button>
       </DisabledElementTooltip>
     )
 
