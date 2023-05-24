@@ -25,7 +25,7 @@ export const getModels = [
       throw BadReq({ code: 'model_invalid_filter', filter }, `Provided invalid filter '${filter}'`)
     }
 
-    const models = await findModels(req.user, { filter: filter as string, type }, { populate: true })
+    const models = await findModels(req.user, { filter: filter as string, type })
 
     req.log.info({ code: 'fetching_models', models }, 'User fetching all models')
 
