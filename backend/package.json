@@ -30,7 +30,7 @@
   "dependencies": {
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
-    "axios": "^1.3.5",
+    "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "bunyan": "^1.8.15",
     "chalk": "^5.2.0",
@@ -83,7 +83,7 @@
     "@types/mjml": "^4.7.1",
     "@types/morgan": "^1.9.4",
     "@types/multer": "^1.4.7",
-    "@types/node": "^18.16.1",
+    "@types/node": "^20.2.1",
     "@types/nodemailer": "^6.4.7",
     "@types/pako": "^2.0.0",
     "@types/shelljs": "^0.8.12",
@@ -108,6 +108,6 @@
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
-    "vitest": "^0.30.1"
+    "vitest": "^0.31.1"
   }
 }
