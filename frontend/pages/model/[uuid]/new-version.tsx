@@ -181,15 +181,10 @@ function Upload() {
       })
     return null
   }
-
+  const url = '/docs/users/upload-a-model/duplicate-version'
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-      <MessageAlert
-        message={error}
-        severity='error'
-        linkText='More info'
-        href='/docs/users/upload-a-model/updating-a-model'
-      />
+      <MessageAlert message={error} severity='error' linkText='More info' href={url} />
       <Form
         splitSchema={splitSchema}
         setSplitSchema={setSplitSchema}

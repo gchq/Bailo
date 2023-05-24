@@ -27,6 +27,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Preparing The Code', slug: 'users/upload-a-model/preparing-the-code' },
   { title: 'Upload To Bailo', slug: 'users/upload-a-model/upload-to-bailo' },
   { title: 'Updating A Model', slug: 'users/upload-a-model/updating-a-model' },
+  { title: 'Duplicate Version', slug: 'users/upload-a-model/duplicate-version' },
 
   { title: 'Deployments', slug: 'users/deployments', header: true },
   { title: 'Requesting A Deployment', slug: 'users/deployments/requesting-a-deployment' },
