@@ -147,6 +147,8 @@ describe('Model with code and binary files', () => {
               cy.fixture('minimal_metadata.json').then((modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
+                // eslint-disable-next-line cypress/no-unnecessary-waiting
+                cy.wait(5000)
                 cy.exec(`docker pull ${imageName}`)
                 cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
                 // eslint-disable-next-line cypress/no-unnecessary-waiting
