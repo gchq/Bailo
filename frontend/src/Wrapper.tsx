@@ -20,7 +20,6 @@ import Divider from '@mui/material/Divider'
 import MuiDrawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
@@ -35,10 +34,10 @@ import Head from 'next/head'
 import Image from 'next/legacy/image'
 import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 
-import { EntityKind } from '../../lib/shared/types'
 import { useGetNumApprovals } from '../data/approvals'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
+import { EntityKind } from '../types/types'
 import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
 import ThemeModeContext from './contexts/themeModeContext'
@@ -122,7 +121,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   useEffect(() => {
     if (!isUiConfigLoading) {
-      if (uiConfig && uiConfig.banner.enable) {
+      if (uiConfig && uiConfig.banner.enabled) {
         setPageTopStyling({
           mt: 4,
         })
@@ -183,7 +182,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Banner />
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {!isUiConfigLoading && uiConfig && uiConfig.banner.enable && <Box sx={{ mt: 20 }} />}
+        {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
           <Toolbar
             sx={{

@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { MinimalEntry } from '../../lib/shared/types'
+import { MinimalEntry } from '../types/types'
 import { ErrorInfo, fetcher, textFetcher } from '../utils/fetcher'
 
 interface VersionAccess {

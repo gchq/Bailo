@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { EntityKind } from '../../../lib/shared/types'
+import { EntityKind } from '../../types/types'
 import UserAvatar from './UserAvatar'
 
 describe('UserAvatar', () => {

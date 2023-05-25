@@ -6,8 +6,8 @@ import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import React, { useState } from 'react'
 
-import { Schema } from '../../../lib/shared/types'
 import { useGetSchemas } from '../../data/schema'
+import { Schema } from '../../types/types'
 import SchemaUploadDialog from './SchemaUploadDialog'
 
 export default function SchemaList() {

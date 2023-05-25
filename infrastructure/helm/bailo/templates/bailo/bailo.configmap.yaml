@@ -87,7 +87,7 @@ data:
         },
         stroom: {
           enabled: {{ .Values.stroom.enabled }},
-          folder: '{{ .Values.stroom.folder }},
+          folder: '{{ .Values.stroom.folder }}',
           url: '{{ .Values.stroom.url }}',
           feed: '{{ .Values.stroom.feed }}',
           environment: '{{ .Values.stroom.environment }}',

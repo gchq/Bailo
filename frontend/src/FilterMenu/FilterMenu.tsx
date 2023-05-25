@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import React, { ReactElement, useState } from 'react'
 
-import { LogLevel } from '../../../lib/shared/types'
+import { LogLevel } from '../../types/types'
 import getLogLevelLabel from '../../utils/getLogLevelLabel'
 import isLogLevel, { isLogLevelString } from '../../utils/type-guards/isLogLevel'
 import LogLevelSelect from './LogLevelSelect'

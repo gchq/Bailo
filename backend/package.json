@@ -15,9 +15,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "eslintConfig": {
-    "extends": "next/core-web-vitals"
-  },
   "prettier": {
     "jsxSingleQuote": true,
     "printWidth": 120,
@@ -28,19 +25,19 @@
     "useTabs": false
   },
   "dependencies": {
-    "@bailo/node": "*",
-    "@bailo/shared": "*",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
     "archiver": "^5.3.1",
-    "axios": "^1.3.5",
+    "axios": "^1.4.0",
+    "bcryptjs": "^2.4.3",
     "bunyan": "^1.8.15",
     "chalk": "^5.2.0",
     "config": "^3.3.9",
+    "cross-fetch": "^3.1.5",
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
-    "eslint-plugin-prettier": "^4.2.1",
     "express": "^5.0.0-beta.1",
+    "form-data-encoder": "^2.1.4",
     "formdata-node": "^5.0.0",
     "indent-string": "^5.0.0",
     "jsonschema": "^1.4.1",
@@ -51,6 +48,7 @@
     "minio": "^7.0.33",
     "mjml": "^4.14.1",
     "mongoose": "^6.10.5",
+    "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^4.0.2",
@@ -69,7 +67,7 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@swc/core": "^1.3.50",
+    "@swc/core": "^1.3.56",
     "@types/adm-zip": "^0.5.0",
     "@types/archiver": "^5.3.1",
     "@types/bunyan": "^1.8.8",
@@ -83,7 +81,7 @@
     "@types/mjml": "^4.7.1",
     "@types/morgan": "^1.9.4",
     "@types/multer": "^1.4.7",
-    "@types/node": "^18.16.1",
+    "@types/node": "^20.2.1",
     "@types/nodemailer": "^6.4.7",
     "@types/pako": "^2.0.0",
     "@types/shelljs": "^0.8.12",
@@ -92,13 +90,14 @@
     "@types/unzipper": "^0.10.5",
     "@types/uuid": "^9.0.1",
     "@types/yauzl": "^2.10.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
     "@typescript-eslint/parser": "^5.59.1",
     "@vitest/coverage-c8": "^0.30.1",
     "cross-env": "^7.0.3",
-    "eslint": "^8.38.0",
-    "esmock": "^2.2.1",
+    "eslint": "^8.39.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
+    "esmock": "^2.2.1",
     "jest": "^29.5.0",
     "jest-light-runner": "^0.4.1",
     "mongodb-memory-server": "^8.12.2",
@@ -108,6 +107,6 @@
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
-    "vitest": "^0.30.1"
+    "vitest": "^0.31.1"
   }
 }

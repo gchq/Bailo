@@ -7,10 +7,12 @@ class GluonModel(BaseModel):
 
     def predict(self, data):
         """
-        :param data: Either a pandas DataFrame or a numpy array containing input array values.
+        Args:
+            data: Either a pandas DataFrame or a numpy array containing input array values.
                      If the input is a DataFrame, it will be converted to an array first by a
                      `ndarray = df.values`.
-        :return: Model predictions. If the input is a pandas.DataFrame, the predictions are returned
+        Returns:
+             Model predictions. If the input is a pandas.DataFrame, the predictions are returned
                  in a pandas.DataFrame. If the input is a numpy array, the predictions are returned
                  as either a numpy.ndarray or a plain list for hybrid models.
         """

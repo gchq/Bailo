@@ -61,7 +61,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Contributing', slug: 'developers/contributing' },
   { title: 'Dev Setup', slug: 'developers/dev-setup' },
   { title: 'Project Layout', slug: 'developers/project-layout' },
-  { title: 'Dev Notes', slug: 'developers/dev-notes' },
 
   { title: 'Main Concepts', slug: 'developers/main-concepts', header: true },
   { title: 'Logical Flow', slug: 'developers/main-concepts/logical-flow' },
@@ -76,6 +75,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Unit Testing', slug: 'developers/testing/unit-testing' },
   { title: 'E2e Testing', slug: 'developers/testing/e2e-testing' },
   { title: 'Manual Testing', slug: 'developers/testing/manual-testing' },
+
+  { title: 'Useful Commands', slug: 'developers/useful-commands' },
+  { title: 'Dev Notes', slug: 'developers/dev-notes' },
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },

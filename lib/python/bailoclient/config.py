@@ -29,6 +29,14 @@ class CognitoConfig(AuthenticationConfig):
         """
         Load Cognito authentication config from environment variables
 
+        The following environment variable are supported:
+            * COGNITO_USERNAME
+            * COGNITO_PASSWORD
+            * COGNITO_USERPOOL
+            * COGNITO_CLIENT_ID
+            * COGNITO_CLIENT_SECRET
+            * COGNITO_REGION
+
         Returns:
             CognitoConfig: A cognito authentication configuration object
         """
@@ -50,8 +58,14 @@ class Pkcs12Config(AuthenticationConfig):
 
     @classmethod
     def from_env(cls) -> "Pkcs12Config":
-        """
-        Load PKI authentication config from environment variables
+        """Load PKI authentication config from environment variables.
+
+        The following environment variable are supported:
+            * PKI_CERT_PATH: the path to your PKI certificate
+            * PKI_CERT_PASSWORD: the password for your PKI certificate.
+
+        If you don't want to expose your password as an environment variable
+        please use bailoclient.create_pki_client and you will be prompted for your password.
 
         Returns:
             Pkcs12Config: A cognito authentication configuration object
@@ -63,17 +77,26 @@ class Pkcs12Config(AuthenticationConfig):
 
 
 class BailoConfig(BaseSettings):
-    """Master configuration object"""
+    """Bailo configuration object"""
 
     auth: Optional[Union[CognitoConfig, Pkcs12Config]] = None
     bailo_url: str
     ca_verify: Union[bool, str] = True
     timeout_period: int = 5  # timeout periods in seconds
+    aws_gateway: bool = True  # Is Bailo load balanced with an AWS gateway
 
     @classmethod
     def from_env(cls, auth_type: AuthType):
         """
-        Load Bailo config from environment variables
+        Load Bailo config from environment variables.
+
+        The following environment variable are supported:
+            * BAILO_URL: the url of the bailo instance to connect to
+            * BAILO_CA_CERT: path to a CA certificate to use for HTTPS connections. Set to "false" to disable TLS verification
+            * BAILO_CONNECTION_TIMEOUT: Connection timeout period, defaults to 5
+            * BAILO_AWS_GATEWAY: Set to True is Bailo is load-balanced with an AWS gateway.
+
+        Refer to your specific authentication config documentations for its supported environment variables.
 
         Args:
             auth_type: The type of authentication needed to authorise to the bailo instance
@@ -97,7 +120,9 @@ class BailoConfig(BaseSettings):
         return BailoConfig(
             auth=auth,
             bailo_url=os.environ["BAILO_URL"],
-            ca_verify=os.getenv("CA_CERT") or True,
+            ca_verify=os.getenv("BAILO_CA_CERT") or True,
+            aws_gateway=os.getenv("BAILO_AWS_GATEWAY") or True,
+            timeout_period=os.getenv("BAILO_CONNECTION_TIMEOUT") or 5,
         )
 
     def save(self, config_path: Union[os.PathLike, str]) -> None:
@@ -106,7 +131,7 @@ class BailoConfig(BaseSettings):
         Raises an exception if it is unable to save.
 
         Args:
-            config_path (os.PathLike): Target path to save as a yaml file
+            config_path: Target path to save as a yaml file
 
         Raises:
             IsADirectoryError: Path is a directory not a file
@@ -128,7 +153,7 @@ class BailoConfig(BaseSettings):
         Raises an exception if unable to read or load the file.
 
         Args:
-            config_path (os.PathLike): A path object pointing to a yaml configuration file
+            config_path: A path object pointing to a yaml configuration file
 
         Raises:
             FileNotFoundError: _description_

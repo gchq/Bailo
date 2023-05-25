@@ -5,8 +5,8 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/system/Box'
 import React from 'react'
 
-import { Deployment, Model, ModelUploadType } from '../../lib/shared/types'
 import { useGetModelById, useGetModelVersions } from '../data/model'
+import { Deployment, Model, ModelUploadType } from '../types/types'
 import EmptyBlob from './common/EmptyBlob'
 
 function RawModelExportList({ deployment }: { deployment: Deployment }) {

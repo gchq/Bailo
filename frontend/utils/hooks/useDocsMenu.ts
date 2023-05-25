@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios'
 import { useCallback, useEffect, useState } from 'react'
 
-import { DocsMenuContent } from '../../../lib/shared/types'
+import { DocsMenuContent } from '../../types/types'
 
 export type DocsMenuHook = {
   docsMenuContent: DocsMenuContent

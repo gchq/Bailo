@@ -23,15 +23,14 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { withTheme } from '@rjsf/core'
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import _ from 'lodash-es'
 import React, { Fragment, useEffect, useState } from 'react'
 import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided } from 'react-beautiful-dnd'
 
-import { Schema, SchemaQuestion, SchemaType } from '../../../lib/shared/types'
 import { SplitSchema, Step } from '../../types/interfaces'
+import { Schema, SchemaQuestion, SchemaType } from '../../types/types'
 import { getStepsFromSchema } from '../../utils/formUtils'
 import QuestionPicker from './QuestionPicker'
 
@@ -163,7 +162,7 @@ export default function SchemaDesigner() {
   }
 
   const submitSchema = () => {
-    const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
+    // const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
     if (schema) {
       // todo - implemented schema submission
       //const userSchema = { ...schema, name: schemaName, reference, use: schemaUse }

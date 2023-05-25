@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { Schema } from '../../lib/shared/types'
+import { Schema } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetDefaultSchema(use = 'UPLOAD') {

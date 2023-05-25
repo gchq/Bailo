@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { Approval } from '../../lib/shared/types'
+import { Approval } from '../types/types'
 import { fetcher } from '../utils/fetcher'
 
 export type ApprovalCategory = 'Upload' | 'Deployment'

@@ -1,7 +1,7 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { Deployment, Model, Schema, Version } from '../../lib/shared/types'
+import { Deployment, Model, Schema, Version } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export type ListModelType = 'favourites' | 'user' | 'all'
@@ -72,10 +72,10 @@ export function useGetModelVersions(uuid?: string) {
 }
 
 export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs = false) {
-  const getVersion = selectedVersion || 'latest'
+  const versionName = selectedVersion || 'latest'
 
   const { data, error, mutate } = useSWR<Version, ErrorInfo>(
-    uuid ? `/api/v1/model/${uuid}/version/${getVersion}?logs=${logs}` : null,
+    uuid ? `/api/v1/model/${uuid}/version/${versionName}?logs=${logs}` : null,
     fetcher,
     {
       refreshInterval: 1000,

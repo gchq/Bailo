@@ -6,7 +6,8 @@ import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '.
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
-import { findVersionByName } from '../../services/version.js'
+import { findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
@@ -111,10 +112,22 @@ export const postDeployment = [
 
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
+    await deployment.populate('model')
+    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
+
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+
     const managerApproval = await createDeploymentApprovals({
-      deployment: await deployment.populate('model'),
+      deployment,
+      version,
       user: req.user,
     })
+
     req.log.info(
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
       'Successfully created deployment'
@@ -209,7 +222,14 @@ export const resetDeploymentApprovals = [
     deployment.managerApproved = ApprovalStates.NoResponse
     await deployment.save()
     req.log.info({ code: 'reset_deployment_approvals', deployment }, 'User resetting deployment approvals')
-    await createDeploymentApprovals({ deployment: await deployment.populate('model'), user: req.user })
+    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+    await createDeploymentApprovals({ deployment, version, user: req.user })
 
     return res.json(deployment)
   },

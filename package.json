@@ -2,25 +2,17 @@
   "name": "bailo",
   "version": "0.4.0",
   "scripts": {
-    "build": "turbo run build",
-    "clean": "turbo run clean",
     "cy:open": "npm --prefix ./frontend/ run cy:open",
     "cy:run": "npm --prefix ./frontend/ run cy:run",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
+    "certs": "npm --prefix ./backend/ run certs",
+    "script": "npm --prefix ./backend/ run script",
+    "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
+    "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
     "style": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-style": "prettier --check \"**/*.{ts,tsx,md}\""
+    "check-style": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/"
   },
-  "workspaces": [
-    "lib/shared",
-    "lib/node",
-    "frontend",
-    "backend"
-  ],
   "devDependencies": {
-    "prettier": "^2.8.7",
-    "turbo": "^1.9.1",
-    "turbo-linux-64": "^1.9.1"
+    "prettier": "^2.8.8"
   }
 }

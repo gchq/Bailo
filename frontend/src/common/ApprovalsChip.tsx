@@ -13,7 +13,7 @@ import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import React, { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 
-import { ApprovalStates, Entity } from '../../../lib/shared/types'
+import { ApprovalStates, Entity } from '../../types/types'
 
 type Approval = {
   reviewers: Array<Entity>

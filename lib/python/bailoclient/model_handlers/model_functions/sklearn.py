@@ -12,8 +12,8 @@ def sklearn_bundler(model, output_path: str, code_paths: List[str]):
 
     Args:
         model (sklearn model): The sklearn model
-        output_path (str): Path to export the model to
-        code_paths (List[str]): List of additional code paths
+        output_path: Path to export the model to
+        code_paths: List of additional code paths
     """
     model_binary = os.path.join(output_path, "model.pkl")
 

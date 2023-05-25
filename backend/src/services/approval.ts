@@ -20,15 +20,23 @@ import { findModelById } from './model.js'
 import { getUserByInternalId } from './user.js'
 import { findVersionById } from './version.js'
 
-export async function createDeploymentApprovals({ deployment, user }: { deployment: DeploymentDoc; user: UserDoc }) {
-  const managers = await parseEntityList(deployment.metadata.contacts.owner)
+export async function createDeploymentApprovals({
+  deployment,
+  version,
+  user,
+}: {
+  deployment: DeploymentDoc
+  version: VersionDoc
+  user: UserDoc
+}) {
+  const managers = await parseEntityList(version.metadata.contacts.manager)
 
   if (!managers.valid) {
-    throw BadReq({ managers: deployment.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
+    throw BadReq({ managers: version.metadata.contacts.owner }, `Invalid manager: ${managers.reason}`)
   }
 
   return createDeploymentApproval({
-    approvers: deployment.metadata.contacts.owner,
+    approvers: version.metadata.contacts.manager,
     deployment,
     approvalType: ApprovalTypes.Manager,
     user,

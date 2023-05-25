@@ -52,8 +52,6 @@ spec:
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
               value: {{ include "bailo.mongoConnectionURI" . | quote }}
-            - name: SCHEMA_SETUP_SCRIPT
-              value: {{ .Values.config.schema.script }}
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}
@@ -72,15 +70,13 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /app/backend/config/production.cjs
+              mountPath: /app/config/production.cjs
               subPath: production.cjs
             - name: config
-              mountPath: /app/backend/config/custom-environment-variables.cjs
+              mountPath: /app/config/custom-environment-variables.cjs
               subPath: custom-environment-variables.cjs
             - name: temp
               mountPath: /tmp
-            - name: cache
-              mountPath: /app/.next/cache
             - name: certs
               mountPath: /app/certs/cert.pem
               subPath: cert.pem
@@ -122,8 +118,6 @@ spec:
               - key: key.pem
                 path: key.pem
         - name: temp
-          emptyDir: {}
-        - name: cache
           emptyDir: {}
         - name: stroom
           emptyDir: {}
@@ -178,6 +172,8 @@ spec:
               port: {{ .Values.service.frontendPort }}
             initialDelaySeconds: 15
             periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

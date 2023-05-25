@@ -5,7 +5,6 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 
-import { EntityKind, Schema, User } from '../../lib/shared/types'
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import { useGetCurrentUser } from '../data/user'
 import LoadingBar from '../src/common/LoadingBar'
@@ -19,6 +18,7 @@ import SchemaSelector from '../src/Form/SchemaSelector'
 import SubmissionError from '../src/Form/SubmissionError'
 import Wrapper from '../src/Wrapper'
 import { SplitSchema } from '../types/interfaces'
+import { EntityKind, Schema, User } from '../types/types'
 import { createStep, getStepsData, getStepsFromSchema } from '../utils/formUtils'
 
 function renderSubmissionTab({

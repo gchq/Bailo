@@ -89,22 +89,14 @@ class Bailo(Client):
             model_flavour is used to get the appropriate model template to bundle with your model.
 
         Args:
-            output_path (str): Path to output code.zip and binary.zip files to
-            model (any, optional): Model object to save via bundler function. To see available
-                                    bundlers, see bundlers property Defaults to None.
-            model_binary (str, optional): Path to model binary. Can be a file or directory. Defaults to None.
-            model_py (str, optional): Path to model.py file. If not provided, you must provide
-                                        a model flavour. To see available templates, use templates
-                                        property. Defaults to None.
-            model_requirements (str, optional): Path to requirements.txt file OR path to a Python file,
-                                                module or notebook from which to generate the
-                                                requirements.txt. Defaults to None.
+            output_path: Path to output code.zip and binary.zip files to
+            model: Model object to save via bundler function. To see available bundlers, see bundlers property Defaults to None.
+            model_binary: Path to model binary. Can be a file or directory. Defaults to None.
+            model_py: Path to model.py file. If not provided, you must provide a model flavour. To see available templates, use templates property. Defaults to None.
+            model_requirements: Path to requirements.txt file OR path to a Python file, module or notebook from which to generate the requirements.txt. Defaults to None.
             requirements_files_path:
-            model_flavour (str, optional): Name of the flavour of model. Supported flavours can be
-                                            seen with the flavours property. Defaults to None.
-            additional_files (list[str], optional): List of file paths of additional dependencies
-                                                    or directories of dependencies for the model.
-                                                    Defaults to None.
+            model_flavour: Name of the flavour of model. Supported flavours can be seen with the flavours property. Defaults to None.
+            additional_files: List of file paths of additional dependencies or directories of dependencies for the model. Defaults to None.
         """
 
         output_path = os.path.abspath(output_path)
@@ -141,8 +133,8 @@ class Bailo(Client):
         that the appropriate loader function can be used.
 
         Args:
-            model_path (str): Path to the actual model file (e.g. './model.pth')
-            model_flavour (str): Flavour of the model (e.g. 'torch')
+            model_path: Path to the actual model file (e.g. './model.pth')
+            model_flavour: Flavour of the model (e.g. 'torch')
 
         Returns:
             Model: The loaded model
@@ -154,8 +146,8 @@ class Bailo(Client):
             or Python project. Output_dir must be a directory.
 
         Args:
-            module_path (str): Path to the Python file used to generate requirements.txt
-            output_path (str): Output path in format output/path
+            module_path: Path to the Python file used to generate requirements.txt
+            output_path: Output path in format output/path
         """
 
         module_path = os.path.normpath(module_path)

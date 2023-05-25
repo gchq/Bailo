@@ -3,8 +3,8 @@ import MenuItem from '@mui/material/MenuItem'
 import { WidgetProps } from '@rjsf/utils'
 import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
-import { SeldonVersion } from '../../../lib/shared/types'
 import { useGetUiConfig } from '../../data/uiConfig'
+import { SeldonVersion } from '../../types/types'
 
 export default function SeldonVersionSelector({ label, value, required, readonly, onChange }: WidgetProps) {
   const { uiConfig } = useGetUiConfig()

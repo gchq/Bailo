@@ -1,4 +1,4 @@
-import { LogLevel } from '../../../lib/shared/types'
+import { LogLevel } from '../../types/types'
 
 type LogLevelString = `${LogLevel}`
 

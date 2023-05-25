@@ -1,20 +1,4 @@
-import Logger from 'bunyan'
 import { Document, Types } from 'mongoose'
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    interface Request {
-      user: UserDoc
-      reqId: string
-      log: Logger
-    }
-
-    interface Response {
-      error: (code: number, error: any) => void
-    }
-  }
-}
 
 export enum ModelUploadType {
   Zip = 'Code and binaries',
@@ -122,7 +106,7 @@ export interface StatusError extends Error {
 
 export interface UiConfig {
   banner: {
-    enable: boolean
+    enabled: boolean
     text: string
     colour: string
   }

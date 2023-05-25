@@ -9,9 +9,13 @@ class SpacyModel(BaseModel):
         """
         Only works for predicting using text categorizer.
         Not suitable for other pipeline components (e.g: parser)
-        :param dataframe: pandas dataframe containing texts to be categorized
+
+        Args:
+            dataframe: pandas dataframe containing texts to be categorized
                           expected shape is (n_rows,1 column)
-        :return: dataframe with predictions
+
+        Returns:
+            dataframe: predictions
         """
         import pandas as pd
 

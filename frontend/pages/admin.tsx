@@ -5,11 +5,11 @@ import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import React, { ReactElement, useState } from 'react'
 
-import { LogLevel } from '../../lib/shared/types'
 import { useGetCurrentUser } from '../data/user'
 import FilterMenu, { LogFilters } from '../src/FilterMenu/FilterMenu'
 import LogTree from '../src/LogTree/LogTree'
 import Wrapper from '../src/Wrapper'
+import { LogLevel } from '../types/types'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()

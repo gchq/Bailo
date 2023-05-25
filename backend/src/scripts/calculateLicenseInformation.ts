@@ -1,7 +1,7 @@
 import shelljs from 'shelljs'
 
-import packageLock from '../../../package-lock.json'
 import packageInfo from '../../package.json'
+import packageLock from '../../package-lock.json'
 import { consoleLog } from '../utils/logger.js'
 
 const { exec } = shelljs
