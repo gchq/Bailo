@@ -5,7 +5,7 @@ import { describe, expect } from 'vitest'
 import { doNothing } from '../../utils/testUtils'
 import HelpPopover from './/HelpPopover'
 
-describe.only('HelpPopover', () => {
+describe('HelpPopover', () => {
   const testMessage = 'This is a test message'
 
   it('the popover should initially be closed', async () => {
