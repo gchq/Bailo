@@ -2,8 +2,8 @@
   "name": "@bailo/frontend",
   "private": true,
   "scripts": {
-    "dev": "next dev -- --turbo",
-    "build": "next build",
+    "dev": "next dev",
+    "build": "next dev",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "start": "next start",
