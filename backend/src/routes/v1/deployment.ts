@@ -1,4 +1,3 @@
-import { ModelDoc } from '../../types/types.js'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
@@ -8,6 +7,7 @@ import { createDeployment, findDeploymentByUuid, findDeployments } from '../../s
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
