@@ -36,7 +36,8 @@ describe('CodeExplorer', () => {
     const getVersionFileSpy = vi.spyOn(versionData, 'useGetVersionFile')
     getVersionFileSpy.mockReturnValue(fileContentsData)
 
-    const { container } = render(
+    // TODO: update this when uncommenting the assertions below
+    const { container: _container } = render(
       <ThemeProvider theme={lightTheme}>
         <CodeExplorer
           id=''
