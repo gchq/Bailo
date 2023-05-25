@@ -228,7 +228,8 @@ export const postRebuildModel = [
       )
     }
 
-    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
+    const uploadType = version.metadata?.buildOptions?.uploadType
+    if (!uploadType || ![ModelUploadType.Zip, ModelUploadType.Docker].includes(uploadType)) {
       throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
     }
 

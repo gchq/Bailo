@@ -2,6 +2,7 @@ import archiver from 'archiver'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
+import { ModelUploadType } from '../../types/types.js'
 import {
   getBinaryFiles,
   getCodeFiles,
@@ -9,9 +10,8 @@ import {
   getModelMetadata as getModelVersion,
   getModelSchema,
 } from '../../utils/exportModel.js'
-import logger from '../../utils/logger.js'
+import { InternalServer } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
-import { ModelUploadType } from '@bailo/shared'
 
 export const exportModel = [
   ensureUserRole('user'),
@@ -23,41 +23,41 @@ export const exportModel = [
     // Set .zip extension to request header
     res.set('Content-disposition', `attachment; filename=${uuid}.zip`)
     res.set('Content-Type', 'application/zip')
-    res.set('Cache-Control', 'private, max-age=604800, immutable')
+    // res.set('Cache-Control', 'private, max-age=604800, immutable')
     const archive = archiver('zip')
-    // Look into an actual tar.gz (node-tar)
-    const dockerTar = archiver('tar', {
-      gzip: true,
-      gzipOptions: {
-        level: 1
-      }
-    })
-
-    dockerTar.on('error', (err) => {
-      logger.error(err, `Errored during archiving.`)
-      throw err
-    })
 
     archive.on('error', (err) => {
-      logger.error(err, `Errored during archiving.`)
-      throw err
+      throw InternalServer(
+        {
+          err,
+          uuid,
+          version,
+          deploymentId,
+        },
+        'Errored during artefact bundling'
+      )
     })
+
     archive.pipe(res)
-    archive.append(dockerTar, { name: `${uuid}.tar.gz` })
 
     const modelVersion = await getModelVersion(req.user, uuid, version, archive)
     await getModelSchema(modelVersion.metadata.schemaRef, archive)
 
-    if (modelVersion.metadata.buildOptions?.uploadType === ModelUploadType.Zip) {
+    const uploadType = modelVersion.metadata.buildOptions?.uploadType
+
+    if (uploadType === ModelUploadType.Zip) {
       await getCodeFiles(deploymentId, version, req.user, archive)
       await getBinaryFiles(deploymentId, version, req.user, archive)
     }
 
-    if (ModelUploadType.Docker || (ModelUploadType.ModelCard && modelVersion.built)) {
-      await getDockerFiles(uuid, version, dockerTar)
+    if (uploadType === ModelUploadType.Docker || (uploadType === ModelUploadType.Zip && modelVersion.built)) {
+      const tidyUp = await getDockerFiles(uuid, version, archive)
+
+      archive.on('end', async () => {
+        await tidyUp()
+      })
     }
 
-    dockerTar.finalize()
-    archive.finalize()
+    await archive.finalize()
   },
 ]

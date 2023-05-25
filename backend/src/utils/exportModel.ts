@@ -1,34 +1,33 @@
 import archiver from 'archiver'
+import { rm } from 'fs/promises'
+import { v4 as uuidv4 } from 'uuid'
 
 import { findDeploymentByUuid } from '../services/deployment.js'
 import { findModelByUuid } from '../services/model.js'
 import { findSchemaByRef } from '../services/schema.js'
 import { findVersionById, findVersionByName } from '../services/version.js'
 import { UserDoc, VersionDoc } from '../types/types.js'
-import { createRegistryClient, getBlobFile, getImageManifest } from '../utils/registry.js'
 import config from './config.js'
 import logger from './logger.js'
 import { getClient } from './minio.js'
 import { NotFound } from './result.js'
+import { downloadDockerExport, ImageRef } from './skopeo.js'
 
 export const getDockerFiles = async (uuid: string, version: string, archive: archiver.Archiver) => {
-  const registry = await createRegistryClient()
-  const image = {
+  const image: ImageRef = {
     namespace: 'internal',
     model: uuid,
     version,
   }
 
-  const manifest = await getImageManifest(registry, image)
-  archive.append(JSON.stringify(manifest), { name: 'manifest' })
+  const filepath = `/tmp/${uuidv4()}`
+  await downloadDockerExport(image, filepath, (level, msg) => logger[level](msg))
 
-  const layers = manifest ? manifest.fsLayers : []
+  console.log('archiving tar file...')
+  archive.file(`${filepath}.tar.gz`, { name: `${uuid}.tar.gz` })
 
-  for (const { blobSum } of layers) {
-    logger.info(blobSum, 'Getting blob file')
-    const blobFile = await getBlobFile(blobSum, registry, image)
-    logger.info(uuid, 'Blob downloaded successfully')
-    archive.append(JSON.stringify(blobFile), { name: `${blobSum}` })
+  return async () => {
+    await rm(`${filepath}.tar.gz`)
   }
 }
 
@@ -55,7 +54,7 @@ export const getModelMetadata = async (
     throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
   }
 
-  archive.append(JSON.stringify(version.metadata, null, '\t'), { name: 'metadata.json' })
+  archive.append(JSON.stringify(version, null, '\t'), { name: 'version.json' })
   return version
 }
 
@@ -127,7 +126,7 @@ export const getBinaryFiles = async (uuid: string, version: string, user: UserDo
       throw NotFound({ code: 'object_fetch_failed', bucketName, filePath }, 'Failed to fetch object from storage')
     }
     logger.info(`binary file fetched from storage - size: ${size}`)
-    archive.append(binaryFile, { name: 'binary.bin' })
+    archive.append(binaryFile, { name: 'binary.zip' })
   } else {
     throw NotFound({ filePath }, 'Unknown file type specified')
   }
