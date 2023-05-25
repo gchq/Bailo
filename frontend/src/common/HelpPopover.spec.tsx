@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect } from 'vitest'
 
 import { doNothing } from '../../utils/testUtils'
-import HelpPopover from './/HelpPopover'
+import HelpPopover from './HelpPopover'
 
 describe('HelpPopover', () => {
   const testMessage = 'This is a test message'

@@ -1,7 +1,7 @@
-import { Stack } from '@mui/material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 
@@ -9,7 +9,7 @@ import EntitiesDisplay from '../components/EntitiesDisplay'
 import { useGetSchema } from '../data/schema'
 import { ModelDoc, Version } from '../types/types'
 import { printProperty } from '../utils/propertyUtils'
-import HelpPopover from './/common/HelpPopover'
+import HelpPopover from './common/HelpPopover'
 import ErrorWrapper from './errors/ErrorWrapper'
 import MetadataDisplay from './MetadataDisplay'
 
@@ -71,19 +71,17 @@ function ModelOverview({ version }: ModelOverviewProps) {
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Stack direction='row'>
-              <Typography variant='h6'>
-                {schema?.schema.properties.contacts.properties.uploader.title}
+            <Stack spacing={0.5} direction='row'>
+              <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
 
-                <HelpPopover
-                  anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'center', horizontal: 'left' }}
-                >
-                  <Typography sx={{ p: 1 }}>
-                    {schema?.schema.properties.contacts.properties.uploader.description}
-                  </Typography>
-                </HelpPopover>
-              </Typography>
+              <HelpPopover
+                anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'center', horizontal: 'left' }}
+              >
+                <Typography sx={{ p: 1 }}>
+                  {schema?.schema.properties.contacts.properties.uploader.description}
+                </Typography>
+              </HelpPopover>
             </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.uploader} />
