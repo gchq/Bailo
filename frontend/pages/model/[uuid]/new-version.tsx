@@ -150,7 +150,7 @@ function Upload() {
       return setError({
         name: 'duplicate_version',
         message: 'This model already has a version with the same name',
-        documentationUrl: '/docs/users/upload-a-model/duplicate-version',
+        documentationUrl: '/docs/errors/duplicate-version',
       })
     }
 
