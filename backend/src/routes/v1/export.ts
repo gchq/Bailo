@@ -23,7 +23,7 @@ export const exportModel = [
     // Set .zip extension to request header
     res.set('Content-disposition', `attachment; filename=${uuid}.zip`)
     res.set('Content-Type', 'application/zip')
-    // res.set('Cache-Control', 'private, max-age=604800, immutable')
+
     const archive = archiver('zip')
 
     archive.on('error', (err) => {
