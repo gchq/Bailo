@@ -31,7 +31,7 @@
     "@mui/material": "^5.13.2",
     "@next/mdx": "^13.3.0",
     "@rjsf/core": "5.6.0",
-    "@rjsf/mui": "^5.6.0",
+    "@rjsf/mui": "^5.7.0",
     "@rjsf/utils": "^5.6.0",
     "@rjsf/validator-ajv8": "^5.6.0",
     "@uiw/react-textarea-code-editor": "^2.1.1",
