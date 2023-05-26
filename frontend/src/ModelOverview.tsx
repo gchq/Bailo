@@ -71,50 +71,29 @@ function ModelOverview({ version }: ModelOverviewProps) {
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Stack spacing={0.5} direction='row'>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
               <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
 
-              <HelpPopover
-                anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'center', horizontal: 'left' }}
-              >
-                <Typography sx={{ p: 1 }}>
-                  {schema?.schema.properties.contacts.properties.uploader.description}
-                </Typography>
-              </HelpPopover>
+              <HelpPopover>{schema?.schema.properties.contacts.properties.uploader.description}</HelpPopover>
             </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.uploader} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Stack spacing={0.5} direction='row'>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
               <Typography variant='h6'>{schema?.schema.properties.contacts.properties.reviewer.title}</Typography>
 
-              <HelpPopover
-                anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'center', horizontal: 'left' }}
-              >
-                <Typography sx={{ p: 1 }}>
-                  {schema?.schema.properties.contacts.properties.reviewer.description}
-                </Typography>
-              </HelpPopover>
+              <HelpPopover>{schema?.schema.properties.contacts.properties.reviewer.description}</HelpPopover>
             </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.reviewer} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Stack spacing={0.5} direction='row'>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
               <Typography variant='h6'>{schema?.schema.properties.contacts.properties.manager.title}</Typography>
-              <HelpPopover
-                anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'center', horizontal: 'left' }}
-              >
-                <Typography sx={{ p: 1 }}>
-                  {schema?.schema.properties.contacts.properties.manager.description}
-                </Typography>
-              </HelpPopover>
+              <HelpPopover>{schema?.schema.properties.contacts.properties.manager.description}</HelpPopover>
             </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.manager} />

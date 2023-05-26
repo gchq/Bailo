@@ -1,24 +1,11 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import Popover from '@mui/material/Popover'
+import { Typography } from '@mui/material'
+import Popover, { PopoverProps } from '@mui/material/Popover'
 import React, { ReactNode } from 'react'
 
-type AnchorPosition = {
-  anchorPositionTop: number
-  anchorPositionLeft: number
-}
-type AnchorOrigin = {
-  vertical: 'top' | 'center' | 'bottom'
-  horizontal: 'left' | 'center' | 'right'
-}
-type TransformOrigin = {
-  vertical: 'top' | 'center' | 'bottom'
-  horizontal: 'left' | 'center' | 'right'
-}
 type Props = {
-  anchorOrigin?: AnchorOrigin
-  transformOrigin?: TransformOrigin
-  anchorPosition?: AnchorPosition
-  onClose?: () => void
+  anchorOrigin?: PopoverProps['anchorOrigin']
+  transformOrigin?: PopoverProps['transformOrigin']
   children: ReactNode
 }
 
@@ -49,11 +36,21 @@ function HelpPopover({ anchorOrigin, transformOrigin, children }: Props) {
         sx={{ pointerEvents: 'none', maxWidth: '65%' }}
         open={open}
         anchorEl={anchorEl}
-        anchorOrigin={anchorOrigin}
-        transformOrigin={transformOrigin}
+        anchorOrigin={
+          anchorOrigin || {
+            vertical: 'bottom',
+            horizontal: 'center',
+          }
+        }
+        transformOrigin={
+          transformOrigin || {
+            vertical: 'top',
+            horizontal: 'center',
+          }
+        }
         onClose={handlePopoverClose}
       >
-        {children}
+        <Typography sx={{ p: 1 }}>{children}</Typography>
       </Popover>
     </>
   )
