@@ -135,3 +135,6 @@ certs/cert.pem
 certs/key.pem
 
 config/local.cjs
+
+src/scripts/tar
+src/scripts/temp

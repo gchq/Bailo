@@ -162,6 +162,20 @@ export default class API {
     }).then((res: any) => res.json())
   }
 
+  async postDockerTar(docker: File, metadata: any) {
+    const form = new FormData()
+
+    form.append('docker', docker)
+    form.append('metadata', JSON.stringify(metadata))
+
+    const encoder = new FormDataEncoder(form)
+    return await fetch(`${this.base}/model`, {
+      method: 'POST',
+      headers: encoder.headers,
+      body: Readable.from(encoder) as any,
+    }).then((res: any) => res.json())
+  }
+
   async getDeployment(uuid: string) {
     const deployment = await this.apiGet(`/deployment/${uuid}`)
 
