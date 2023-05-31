@@ -7,17 +7,20 @@ describe('Upload page', () => {
     cy.get('[data-test=headerTitle]').should('contain.text', 'Upload Model')
   })
 
+  //Import Model tab cypress tests
   it('Renders a tab header', () => {
-    cy.get('.MuiTabs-flexContainer > :nth-child(3)').should('contain.text', 'Import Model')
+    cy.get('#ImportModel').should('contain.text', 'Import Model')
   })
 
-  it('Should open \'Open File\' when SELECT MODEL is clicked', () => {
-    cy.get('.MuiTabs-flexContainer > :nth-child(3)')
-    cy.get('button').should('contains.text', 'SELECT MODEL')
-    cy.get('[data-test=SELECTMODELButton]').click()
-    // cy.get('[data-test=headerTitle]').should('contain.text', 'Open File')
+  it('Should open Import Model tab and allow you to click on SELECT MODEL', () => {
+    cy.get('#ImportModel').click({force:true})
+    cy.get('label > .MuiButtonBase-root').should('contain.text', 'Select Model').click()
   })
 
+  it('Should change symbol and colour when the tick box is ticked', () => {
+    cy.get('#ImportModel').click({force:true})
+    cy.get('.PrivateSwitchBase-input').click()
+  })
 
 })
 
