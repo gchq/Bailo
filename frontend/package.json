@@ -30,7 +30,7 @@
     "@mui/lab": "^5.0.0-alpha.128",
     "@mui/material": "^5.13.2",
     "@next/mdx": "^13.3.0",
-    "@rjsf/core": "5.6.0",
+    "@rjsf/core": "5.7.3",
     "@rjsf/mui": "^5.7.0",
     "@rjsf/utils": "^5.6.0",
     "@rjsf/validator-ajv8": "^5.7.3",
