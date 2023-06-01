@@ -13,14 +13,7 @@ import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
 import { getStepsData, setStepsData } from '../../utils/formUtils'
 
-
-export default function FormImport({
-  onSubmit,
-  setError,
-}: {
-  onSubmit: any
-  setError: (error: string) => void
-}) {
+export default function FormImport({ onSubmit, setError }: { onSubmit: any; setError: (error: string) => void }) {
   const [validationErrorText, setValidationErrorText] = useState<string>('')
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [warningCheckboxVal, setWarningCheckboxVal] = useState<boolean>(false)
@@ -30,39 +23,39 @@ export default function FormImport({
   const handleCheckboxChange = (e) => {
     setWarningCheckboxVal(e.target.checked)
   }
-  
+
   const handleModelChange = (e) => {
     const uploadFile = e.target.files[0]
     if (uploadFile && uploadFile.name.endsWith('.zip')) {
-        setUploadModel(uploadFile)
-        setError('')
-        setUploadError(false)
-    } else { 
-        setError('Ensure you select a .zip file using Select Model');
-        setUploadModel(null)
-        setUploadError(true)
+      setUploadModel(uploadFile)
+      setError('')
+      setUploadError(false)
+    } else {
+      setError('Ensure you select a .zip file using Select Model')
+      setUploadModel(null)
+      setUploadError(true)
     }
-}
-  
-const uploadModelToAPI = async (e) => {
-        e.preventDefault()
-        const form = new FormData()
-        form.append('zip', uploadModel)
-        if (uploadModel && uploadModel.name.endsWith('.zip')) {
-            await axios({
-                method: 'post',
-                url: '/api/v1/importModel',
-                headers: { 'Content-Type': 'multipart/form-data' },
-                data: form
-            })
-            .then(data => console.log(data))
-            .catch(error => console.error(error))
-            setUploadModel(null)
-        } else { 
-            setError('Ensure you select a .zip file using Select Model');
-            setUploadModel(null)
-            setUploadError(true)
-        }
+  }
+
+  const uploadModelToAPI = async (e) => {
+    e.preventDefault()
+    const form = new FormData()
+    form.append('zip', uploadModel)
+    if (uploadModel && uploadModel.name.endsWith('.zip')) {
+      await axios({
+        method: 'post',
+        url: '/api/v1/importModel',
+        headers: { 'Content-Type': 'multipart/form-data' },
+        data: form,
+      })
+        .then((data) => console.log(data))
+        .catch((error) => console.error(error))
+      setUploadModel(null)
+    } else {
+      setError('Ensure you select a .zip file using Select Model')
+      setUploadModel(null)
+      setUploadError(true)
+    }
   }
 
   if (isUiConfigError || isUiConfigLoading) {
@@ -71,14 +64,18 @@ const uploadModelToAPI = async (e) => {
 
   return (
     <>
-     
-          <Box sx={{ py: 4 }} key={'import'}>
-            <Button>
-                <Stack direction='row' spacing={2} alignItems='center'>
-                    <FileInput label='Select Model' file={uploadModel} onChange={(event) => handleModelChange(event)} accepts='.zip' />
-                 </Stack>
-            </Button>
-          </Box>
+      <Box sx={{ py: 4 }} key={'import'}>
+        <Button>
+          <Stack direction='row' spacing={2} alignItems='center'>
+            <FileInput
+              label='Select Model'
+              file={uploadModel}
+              onChange={(event) => handleModelChange(event)}
+              accepts='.zip'
+            />
+          </Stack>
+        </Button>
+      </Box>
 
       {uiConfig?.uploadWarning?.showWarning && (
         <Alert sx={{ width: '100%', mt: 3 }} severity={warningCheckboxVal ? 'success' : 'warning'}>

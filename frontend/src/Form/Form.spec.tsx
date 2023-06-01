@@ -52,4 +52,12 @@ describe('Form', () => {
       expect(await screen.findByText('Upload Existing')).not.toBeUndefined()
     })
   })
+
+  it('Should have a Form Import tab', async () => {
+    render(<Form onSubmit={doNothing} setSplitSchema={doNothing} setError={doNothing} splitSchema={splitSchema} />)
+
+    await waitFor(async () => {
+      expect(await screen.findByText('Import Model')).toBeDefined()
+    })
+  })
 })
