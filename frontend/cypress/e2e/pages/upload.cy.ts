@@ -9,19 +9,18 @@ describe('Upload page', () => {
 
   //Import Model tab cypress tests
   it('Renders a tab header', () => {
-    cy.get('#ImportModel').should('contain.text', 'Import Model')
+    cy.get('[data-test=importModel]').should('contain.text', 'Import Model')
   })
 
   it('Should open Import Model tab and allow you to click on SELECT MODEL', () => {
-    cy.get('#ImportModel').click({force:true})
+    cy.get('[data-test=importModel]').click({ force: true })
     cy.get('label > .MuiButtonBase-root').should('contain.text', 'Select Model').click()
   })
 
   it('Should change symbol and colour when the tick box is ticked', () => {
-    cy.get('#ImportModel').click({force:true})
+    cy.get('[data-test=importModel]').click({ force: true })
     cy.get('.PrivateSwitchBase-input').click()
   })
-
 })
 
 export {}
