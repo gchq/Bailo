@@ -1,10 +1,10 @@
-import Bailo from '../external/BailoClient.js'
 import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'
 import { join } from 'path'
 import { fileURLToPath } from 'url'
 
+import Bailo from '../external/BailoClient.js'
 import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {

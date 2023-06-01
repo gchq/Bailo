@@ -1,7 +1,7 @@
-import { SchemaSharp } from '@mui/icons-material'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 
@@ -9,6 +9,7 @@ import EntitiesDisplay from '../components/EntitiesDisplay'
 import { useGetSchema } from '../data/schema'
 import { ModelDoc, Version } from '../types/types'
 import { printProperty } from '../utils/propertyUtils'
+import HelpPopover from './common/HelpPopover'
 import ErrorWrapper from './errors/ErrorWrapper'
 import MetadataDisplay from './MetadataDisplay'
 
@@ -45,6 +46,7 @@ function ModelOverview({ version }: ModelOverviewProps) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
+
             <Typography variant='body1' style={{ whiteSpace: 'pre-wrap' }}>
               {printProperty(version.metadata.highLevelDetails.modelOverview)}
             </Typography>
@@ -69,21 +71,30 @@ function ModelOverview({ version }: ModelOverviewProps) {
             </Box>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
+              <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
 
+              <HelpPopover>{schema?.schema.properties.contacts.properties.uploader.description}</HelpPopover>
+            </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.uploader} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.reviewer.title}</Typography>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
+              <Typography variant='h6'>{schema?.schema.properties.contacts.properties.reviewer.title}</Typography>
 
+              <HelpPopover>{schema?.schema.properties.contacts.properties.reviewer.description}</HelpPopover>
+            </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.reviewer} />
             </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
-            <Typography variant='h6'>{schema?.schema.properties.contacts.properties.manager.title}</Typography>
+            <Stack spacing={0.5} direction='row' alignItems='center'>
+              <Typography variant='h6'>{schema?.schema.properties.contacts.properties.manager.title}</Typography>
+              <HelpPopover>{schema?.schema.properties.contacts.properties.manager.description}</HelpPopover>
+            </Stack>
             <Typography variant='body1'>
               <EntitiesDisplay entities={version.metadata.contacts.manager} />
             </Typography>

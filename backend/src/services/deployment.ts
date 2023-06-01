@@ -11,7 +11,6 @@ import { asyncFilter } from '../utils/general.js'
 import logger from '../utils/logger.js'
 import { deleteImageTag } from '../utils/registry.js'
 import { Forbidden } from '../utils/result.js'
-import { SerializerOptions } from '../utils/serializers.js'
 import { sendEmail } from '../utils/smtp.js'
 import { getUserByInternalId } from './user.js'
 
