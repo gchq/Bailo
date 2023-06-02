@@ -8,6 +8,7 @@ import createWorkingDirectory from '../utils/build/CreateWorkingDirectory.js'
 import extractFiles from '../utils/build/ExtractFiles.js'
 import getRawFiles from '../utils/build/GetRawFiles.js'
 import getSeldonDockerfile from '../utils/build/GetSeldonDockerfile.js'
+import getMlflowDockerfile from '../utils/build/GetMlflowDockerfile.js'
 import imgBuildDockerfile from '../utils/build/ImgBuildDockerfile.js'
 import openshiftBuildDockerfile from '../utils/build/OpenShiftBuildDockerfile.js'
 import pushDockerTar from '../utils/build/PushDockerTar.js'
@@ -58,6 +59,26 @@ export default async function processUploads() {
           tasks.push({ construct: imgBuildDockerfile() })
         }
         break
+      case ModelUploadType.Mlflow:
+        tasks = tasks.concat([
+          {
+            construct: getRawFiles(),
+            props: {
+              files: [
+                { path: 'mlflow.zip', file: 'mlflow' },
+              ],
+            },
+          },
+          { construct: extractFiles() },
+          { construct: getMlflowDockerfile() },
+        ])
+
+        if (config.build.environment === 'openshift') {
+          tasks.push({ construct: openshiftBuildDockerfile() })
+        } else {
+          tasks.push({ construct: imgBuildDockerfile() })
+        }
+        break
       case ModelUploadType.Docker:
         tasks = tasks.concat([
           { construct: getRawFiles(), props: { files: [{ path: 'docker.tar', file: 'docker' }] } },
@@ -73,6 +94,7 @@ export default async function processUploads() {
       binary: msg.payload.binary,
       code: msg.payload.code,
       docker: msg.payload.docker,
+      mlflow: msg.payload.mlflow,
     })
 
     await markVersionBuilt(version._id)

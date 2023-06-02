@@ -126,7 +126,8 @@ export default function Deployment() {
       .filter(
         (version) =>
           version.metadata?.buildOptions?.uploadType === ModelUploadType.Docker ||
-          version.metadata?.buildOptions?.uploadType === ModelUploadType.Zip
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Zip ||
+          version.metadata?.buildOptions?.uploadType === ModelUploadType.Mlflow
       )
       .map((version) => (
         <MenuItem value={version.version} key={`version-${version.version}`}>
@@ -225,7 +226,7 @@ export default function Deployment() {
               Back to model
             </Button>
             {versions &&
-              versions.filter((version) => version.metadata.buildOptions?.uploadType === ModelUploadType.Zip).length >
+              versions.filter((version) => [ModelUploadType.Zip, ModelUploadType.Mlflow].includes(version.metadata.buildOptions?.uploadType)).length >
                 0 && (
                 <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
                   Show download commands

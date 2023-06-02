@@ -43,7 +43,19 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   </Button>
                 </Stack>
               )}
-              {version.metadata.buildOptions?.uploadType !== ModelUploadType.Zip && (
+              {version.metadata.buildOptions?.uploadType === ModelUploadType.Mlflow && (
+                <Stack spacing={2} direction='row' sx={{ p: 1 }}>
+                  <Button
+                    variant='contained'
+                    href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/raw/mlflow`}
+                    target='_blank'
+                    data-test='downloadMlflowFile'
+                  >
+                    Download mlflow file
+                  </Button>
+                </Stack>
+              )}
+              {(version.metadata.buildOptions?.uploadType !== ModelUploadType.Zip && version.metadata.buildOptions?.uploadType !== ModelUploadType.Mlflow) && (
                 <Typography sx={{ p: 1 }}>
                   This is a {version.metadata.buildOptions.uploadType.toLowerCase()} version and does not have any
                   associated code/binary files available

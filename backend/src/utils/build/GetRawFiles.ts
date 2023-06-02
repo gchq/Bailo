@@ -34,7 +34,6 @@ class GetRawFiles extends BuildStep {
       const file = files[fileRef.file]
       this.logger.info({ fileRef, file, files }, `Processing file: ${JSON.stringify(file)}`)
       state[`${fileRef.file}Path`] = path
-
       downloads.push(minio.fGetObject(file.bucket, file.path, path))
     }
 

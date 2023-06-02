@@ -123,7 +123,7 @@
           "title": "Upload type",
           "default": "Code and binaries",
           "description": "Select the type of model upload that you want",
-          "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"]
+          "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image", "Mlflow archive"]
         },
         "seldonVersion": {
           "title": "Seldon version",
@@ -137,7 +137,7 @@
             {
               "properties": {
                 "uploadType": {
-                  "enum": ["Model card only", "Prebuilt Docker image"],
+                  "enum": ["Model card only", "Prebuilt Docker image", "Mlflow archive"],
                   "readOnly": false
                 },
                 "seldonVersion": {

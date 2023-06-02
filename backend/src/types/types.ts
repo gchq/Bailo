@@ -4,6 +4,7 @@ export enum ModelUploadType {
   Zip = 'Code and binaries',
   ModelCard = 'Model card only',
   Docker = 'Prebuilt Docker image',
+  Mlflow = 'Mlflow archive'
 }
 
 export enum UploadModes {
@@ -325,6 +326,11 @@ export interface Version {
 
     rawCodePath?: string
     code?: {
+      fileList?: Array<MinimalEntry>
+    }
+
+    rawMlflowPath?: string
+    mlflow?: {
       fileList?: Array<MinimalEntry>
     }
 

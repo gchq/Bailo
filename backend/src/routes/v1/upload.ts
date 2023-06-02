@@ -94,7 +94,7 @@ function checkSeldonVersion(seldonVersion: string) {
 
 export const postUpload = [
   ensureUserRole('user'),
-  upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }]),
+  upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }, {name: 'mlflow'}]),
   async (req: Request, res: Response) => {
     const metadata = parseMetadata(req.body.metadata)
     metadata.timeStamp = new Date().toISOString()
@@ -117,6 +117,9 @@ export const postUpload = [
         break
       case ModelUploadType.ModelCard:
         // No files to check here!
+        break
+      case ModelUploadType.Mlflow:
+        checkZipFile('mlflow', files.mlflow)
         break
       default:
         throw BadReq({ uploadType }, 'Unknown upload type')
@@ -209,6 +212,24 @@ export const postUpload = [
       case ModelUploadType.ModelCard:
         await markVersionBuilt(version._id)
         break
+      case ModelUploadType.Mlflow:
+        try {
+
+          const bucket = config.minio.buckets.uploads
+          const mlflowFrom = `${files.mlflow[0].bucket}/${files.mlflow[0].path}`
+          const rawMlflowPath = `model/${model._id}/version/${version._id}/raw/mlflow/${files.mlflow[0].path}`
+
+          await moveFile(bucket, mlflowFrom, rawMlflowPath)
+
+          await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawMlflowPath } })
+          req.log.info(
+            { code: 'adding_file_paths', rawMlflowPath },
+            `Adding paths for raw model exports of files to version.`
+          )
+        } catch (e: any) {
+          throw GenericError({ e }, 'Error uploading raw mlflow to Minio', 500)
+        }
+        break      
       case ModelUploadType.Zip:
         try {
           const bucket = config.minio.buckets.uploads
@@ -262,6 +283,19 @@ export const postUpload = [
       })
 
       req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created zip job in upload queue')
+    }
+
+    if (uploadType === ModelUploadType.Mlflow) {
+      const jobId = await (
+        await getUploadQueue()
+      ).add({
+        versionId: version._id,
+        userId: req.user._id,
+        mlflow: createFileRef(files.mlflow[0], 'mlflow', version),
+        uploadType,
+      })
+
+      req.log.info({ code: 'created_upload_job', jobId }, 'Successfully created mlflow job in upload queue')
     }
 
     if (uploadType === ModelUploadType.Docker) {

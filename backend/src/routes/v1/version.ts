@@ -20,7 +20,7 @@ import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
 import { getClient } from '../../utils/minio.js'
 import { getUploadQueue } from '../../utils/queues.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
+import { BadReq, Forbidden, GenericError, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { getFileStream, MinioRandomAccessReader } from '../../utils/zip.js'
 
@@ -228,35 +228,59 @@ export const postRebuildModel = [
       )
     }
 
-    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
-      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
+    const uploadType = version.metadata?.buildOptions?.uploadType as ModelUploadType
+    if (uploadType === ModelUploadType.ModelCard) {
+      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary or mlflow file')
+    }
+    if (uploadType === ModelUploadType.Docker) {
+      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary or mlflow file')
     }
 
     if (version.state.build.state === 'retrying') {
       throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
     }
 
-    const binaryRef = {
-      name: 'binary.zip',
-      bucket: config.minio.buckets.uploads,
-      path: version.files.rawBinaryPath,
+    let jobId: string = ""
+    if (uploadType == ModelUploadType.Zip){
+      const binaryRef = {
+        name: 'binary.zip',
+        bucket: config.minio.buckets.uploads,
+        path: version.files.rawBinaryPath,
+      }
+  
+      const codeRef = {
+        name: 'code.zip',
+        bucket: config.minio.buckets.uploads,
+        path: version.files.rawCodePath,
+      }
+
+      jobId = await (
+        await getUploadQueue()
+      ).add({
+        versionId: version._id,
+        userId: req.user._id,
+        binary: binaryRef,
+        code: codeRef,
+        uploadType: ModelUploadType.Zip,
+      })
+    }
+    else if (uploadType == ModelUploadType.Mlflow){
+      const mlflowRef = {
+        name: 'mlflow.zip',
+        bucket: config.minio.buckets.uploads,
+        path: version.files.rawMlflowPath,
+      }
+
+      jobId = await (
+        await getUploadQueue()
+      ).add({
+        versionId: version._id,
+        userId: req.user._id,
+        mlflow: mlflowRef,
+        uploadType: ModelUploadType.Mlflow,
+      })
     }
 
-    const codeRef = {
-      name: 'code.zip',
-      bucket: config.minio.buckets.uploads,
-      path: version.files.rawCodePath,
-    }
-
-    const jobId = await (
-      await getUploadQueue()
-    ).add({
-      versionId: version._id,
-      userId: req.user._id,
-      binary: binaryRef,
-      code: codeRef,
-      uploadType: ModelUploadType.Zip,
-    })
 
     version.state.build = {
       ...(version.state.build || {}),

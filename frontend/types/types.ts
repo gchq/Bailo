@@ -4,6 +4,7 @@ export enum ModelUploadType {
   Zip = 'Code and binaries',
   ModelCard = 'Model card only',
   Docker = 'Prebuilt Docker image',
+  Mlflow = 'Mlflow archive'
 }
 
 export enum UploadModes {

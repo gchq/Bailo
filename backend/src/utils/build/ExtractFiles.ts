@@ -11,6 +11,7 @@ import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 const { rm } = shelljs
 
 async function unzipFile(zipPath: string) {
+  console.log("Extract", zipPath)
   const outputDir = dirname(zipPath)
 
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
@@ -40,18 +41,34 @@ class ExtractFiles extends BuildStep {
   }
 
   async build(_version: VersionDoc, _files: Files, state: any): Promise<void> {
-    if (!state.binaryPath || !state.codePath) {
-      throw new Error('Extract files requires a binary and code path')
+    if ((!state.binaryPath || !state.codePath) && !state.mlflowPath) {
+      throw new Error('Extract files requires a binary and code or mlflow path')
     }
 
     // extract bundles
     this.logger.info({ ...state }, 'Extracting zip bundles')
 
-    await Promise.all([unzipFile(state.binaryPath), unzipFile(state.codePath)])
+    // TODO: is there a better way to do this?
+    let filesToUnzip: string[] = []
+    if (state.binaryPath) {
+      filesToUnzip.push(state.binaryPath)
+    }
+    if (state.codePath){
+      filesToUnzip.push(state.codePath)
+    }
+    if (state.mlflowPath) {
+      filesToUnzip.push(state.mlflowPath)
+    }
+
+    let unzips: Promise<void>[] = []
+    for (const file of filesToUnzip) {
+      unzips.push(unzipFile(file))
+    }
+    await Promise.all(unzips)
 
     // delete old bundles
     this.logger.info({ ...state }, 'Removing zip bundles')
-    rm(state.binaryPath, state.codePath)
+    rm(...filesToUnzip)
 
     this.logger.info({}, '== Directory Tree')
     this.logger.info({}, 'model/')

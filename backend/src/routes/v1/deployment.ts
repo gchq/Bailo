@@ -267,7 +267,7 @@ export const fetchRawModelFiles = [
       )
     }
 
-    if (fileType !== 'code' && fileType !== 'binary') {
+    if (fileType !== 'code' && fileType !== 'binary' && fileType !== 'mlflow') {
       throw NotFound({ fileType }, 'Unknown file type specified')
     }
 
@@ -280,6 +280,8 @@ export const fetchRawModelFiles = [
       filePath = versionDocument.files.rawCodePath
     } else if (fileType === 'binary') {
       filePath = versionDocument.files.rawBinaryPath
+    } else if (fileType === 'mlflow') {
+      filePath = versionDocument.files.rawMlflowPath
     } else {
       throw BadReq({ fileType }, 'Invalid file type')
     }

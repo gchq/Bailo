@@ -12,7 +12,7 @@ import FileInput from '../common/FileInput'
 
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker } = state
+  const { binary, code, docker, mlflow } = state
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
@@ -29,6 +29,10 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 
   const handleDockerChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
+  }
+
+  const handleMlflowChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, mlflow: event.target.files[0] })
   }
 
   return (
@@ -57,6 +61,14 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
           <FileInput label='Select Docker Image' onChange={handleDockerChange} file={docker} accepts='.tar' />
         </Box>
       )}
+      {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.Mlflow && (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{ p: 1 }} variant='h5'>
+            Upload a mlflow model archive (.zip)
+          </Typography>
+          <FileInput label='Select mlflow archive' onChange={handleMlflowChange} file={mlflow} accepts='.zip' />
+        </Box>
+      )}
     </Grid>
   )
 }
@@ -79,6 +91,8 @@ export function fileTabComplete(step: Step) {
       return step.state.binary && step.state.code
     case ModelUploadType.Docker:
       return !!step.state.docker
+    case ModelUploadType.Mlflow:
+      return step.state.mlflow
     default:
       return false
   }
@@ -86,7 +100,7 @@ export function fileTabComplete(step: Step) {
 
 export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
-  const { binary, code, docker } = state
+  const { binary, code, docker, mlflow } = state
 
   if (!step.steps) {
     return null
@@ -106,6 +120,10 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
     if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, docker: event.target.files[0] })
   }
 
+  const handleMlflowChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setStepState(splitSchema, setSplitSchema, step, { ...state, mlflow: event.target.files[0] })
+  }
+
   const hasUploadType = !!buildOptionsStep?.state?.uploadType
 
   return (
@@ -122,6 +140,9 @@ export function RenderBasicFileTab({ step, splitSchema, setSplitSchema }: Render
       )}
       {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.Docker && (
         <FileInput label='Select Docker Tar' file={docker} onChange={handleDockerChange} accepts='.tar' />
+      )}
+      {hasUploadType && buildOptionsStep.state.uploadType === ModelUploadType.Mlflow && (
+        <FileInput label='Select mlflow model archive' file={mlflow} onChange={handleMlflowChange} accepts='.zip' />
       )}
     </Box>
   )
