@@ -8,7 +8,7 @@ declare namespace Express {
     log: Logger
 
     session: {
-      destroy: Function
+      destroy: () => void
       grant: any
     }
   }
