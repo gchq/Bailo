@@ -34,14 +34,13 @@ class GetMlflowDockerfile extends BuildStep {
       throw new Error('Get dockerfile requires a working directory')
     }
 
-    
     this.logger.info({}, 'Generate build folder')
     const buildDir = state.workingDirectory
     state.buildDir = buildDir
-    
+
     // generate model-settings.json
     // this sets the v2 api model path
-    const modelName = "model"
+    const modelName = 'model'
     const modelSettings = `{
       "name": "${modelName}",
       "implementation": "mlserver_mlflow.MLflowRuntime",
@@ -49,9 +48,9 @@ class GetMlflowDockerfile extends BuildStep {
         "uri": "."
       }
     }`
-    
+
     // Todo: get python version from MLmodel files
-    const pythonVersion = "3.10"
+    const pythonVersion = '3.10'
     // Todo: get from MLmodel file
     const mlflowVersion = '2.3'
     const mlserverVersion = '1.3.2'
@@ -64,12 +63,12 @@ class GetMlflowDockerfile extends BuildStep {
     COPY . .
     RUN pip install --no-cache-dir -r ./requirements.txt
     CMD ["mlserver", "start", "."]
-    `    
-    
+    `
+
     writeFile(`${buildDir}/model-settings.json`, modelSettings)
     writeFile(`${buildDir}/Dockerfile`, dockerfile)
 
-    state.dockerfilePath = join(buildDir, "Dockerfile")
+    state.dockerfilePath = join(buildDir, 'Dockerfile')
   }
 
   async rollback(_version: VersionDoc, _files: Files, state: any): Promise<void> {

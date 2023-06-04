@@ -230,24 +230,30 @@ export const postRebuildModel = [
 
     const uploadType = version.metadata?.buildOptions?.uploadType as ModelUploadType
     if (uploadType === ModelUploadType.ModelCard) {
-      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary or mlflow file')
+      throw BadReq(
+        { version: version._id },
+        'Unable to rebuild a model that was not uploaded as a binary or mlflow file'
+      )
     }
     if (uploadType === ModelUploadType.Docker) {
-      throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary or mlflow file')
+      throw BadReq(
+        { version: version._id },
+        'Unable to rebuild a model that was not uploaded as a binary or mlflow file'
+      )
     }
 
     if (version.state.build.state === 'retrying') {
       throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
     }
 
-    let jobId: string = ""
-    if (uploadType == ModelUploadType.Zip){
+    let jobId: string = ''
+    if (uploadType == ModelUploadType.Zip) {
       const binaryRef = {
         name: 'binary.zip',
         bucket: config.minio.buckets.uploads,
         path: version.files.rawBinaryPath,
       }
-  
+
       const codeRef = {
         name: 'code.zip',
         bucket: config.minio.buckets.uploads,
@@ -263,8 +269,7 @@ export const postRebuildModel = [
         code: codeRef,
         uploadType: ModelUploadType.Zip,
       })
-    }
-    else if (uploadType == ModelUploadType.Mlflow){
+    } else if (uploadType == ModelUploadType.Mlflow) {
       const mlflowRef = {
         name: 'mlflow.zip',
         bucket: config.minio.buckets.uploads,
@@ -280,7 +285,6 @@ export const postRebuildModel = [
         uploadType: ModelUploadType.Mlflow,
       })
     }
-
 
     version.state.build = {
       ...(version.state.build || {}),

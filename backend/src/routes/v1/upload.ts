@@ -94,7 +94,7 @@ function checkSeldonVersion(seldonVersion: string) {
 
 export const postUpload = [
   ensureUserRole('user'),
-  upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }, {name: 'mlflow'}]),
+  upload.fields([{ name: 'binary' }, { name: 'code' }, { name: 'docker' }, { name: 'mlflow' }]),
   async (req: Request, res: Response) => {
     const metadata = parseMetadata(req.body.metadata)
     metadata.timeStamp = new Date().toISOString()
@@ -214,7 +214,6 @@ export const postUpload = [
         break
       case ModelUploadType.Mlflow:
         try {
-
           const bucket = config.minio.buckets.uploads
           const mlflowFrom = `${files.mlflow[0].bucket}/${files.mlflow[0].path}`
           const rawMlflowPath = `model/${model._id}/version/${version._id}/raw/mlflow/${files.mlflow[0].path}`
@@ -229,7 +228,7 @@ export const postUpload = [
         } catch (e: any) {
           throw GenericError({ e }, 'Error uploading raw mlflow to Minio', 500)
         }
-        break      
+        break
       case ModelUploadType.Zip:
         try {
           const bucket = config.minio.buckets.uploads

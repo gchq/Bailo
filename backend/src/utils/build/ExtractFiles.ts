@@ -11,7 +11,7 @@ import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 const { rm } = shelljs
 
 async function unzipFile(zipPath: string) {
-  console.log("Extract", zipPath)
+  console.log('Extract', zipPath)
   const outputDir = dirname(zipPath)
 
   await unzip.Open.file(zipPath).then((d) => d.extract({ path: outputDir, concurrency: 5 }))
@@ -53,7 +53,7 @@ class ExtractFiles extends BuildStep {
     if (state.binaryPath) {
       filesToUnzip.push(state.binaryPath)
     }
-    if (state.codePath){
+    if (state.codePath) {
       filesToUnzip.push(state.codePath)
     }
     if (state.mlflowPath) {

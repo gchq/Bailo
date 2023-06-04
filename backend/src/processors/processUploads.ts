@@ -64,9 +64,7 @@ export default async function processUploads() {
           {
             construct: getRawFiles(),
             props: {
-              files: [
-                { path: 'mlflow.zip', file: 'mlflow' },
-              ],
+              files: [{ path: 'mlflow.zip', file: 'mlflow' }],
             },
           },
           { construct: extractFiles() },
