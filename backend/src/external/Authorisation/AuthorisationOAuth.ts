@@ -9,10 +9,10 @@ export default class AuthorisationOAuth {
 
     if (!req.session?.grant?.response?.jwt) {
       return {
-      userId: undefined,
-      email: undefined ,
-      data: undefined,
-      roles: undefined,
+        userId: undefined,
+        email: undefined,
+        data: undefined,
+        roles: undefined,
       }
     }
 
