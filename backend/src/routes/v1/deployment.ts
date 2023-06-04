@@ -247,7 +247,7 @@ export const fetchRawModelFiles = [
     }
 
     if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
-      const owners = deployment.metadata.contacts.owner.map((owner: any) => owner.id).join(', ')
+      const owners = deployment.metadata.contacts.owner.map((owner) => owner.id).join(', ')
       throw Unauthorised(
         { deploymentOwner: deployment.metadata.contacts.owner },
         `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`

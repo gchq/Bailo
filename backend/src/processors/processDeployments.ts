@@ -59,11 +59,11 @@ export default async function processDeployments() {
           Authorization: authorisation,
         },
         agent: httpsAgent,
-      }).then((res: any) => {
+      }).then((res) => {
         logger.info({
           status: res.status,
         })
-        return res.json()
+        return res.json() as any
       })
 
       deployment.log('info', `Received manifest with ${manifest.layers.length} layers`)

@@ -1,17 +1,19 @@
 import { model, Schema as MongooseSchema } from 'mongoose'
 
+import { SchemaType } from '../types/types.js'
+
 export interface Schema {
   name: string
   reference: string
-  schema: any
-  use: string
+  schema: unknown
+  use: SchemaType
 }
 
-function getSchema(schema: any) {
+function getSchema(schema: string) {
   return JSON.parse(schema)
 }
 
-function setSchema(schema: any) {
+function setSchema(schema: unknown) {
   return JSON.stringify(schema)
 }
 
@@ -25,7 +27,7 @@ const SchemaSchema = new MongooseSchema<Schema>(
       get: getSchema,
       set: setSchema,
     },
-    use: { type: String, required: true, enum: ['UPLOAD', 'DEPLOYMENT'] },
+    use: { type: String, required: true, enum: [SchemaType.UPLOAD, SchemaType.DEPLOYMENT] },
   },
   {
     timestamps: true,
