@@ -23,7 +23,6 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { withTheme } from '@rjsf/core'
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import _ from 'lodash-es'
@@ -163,7 +162,7 @@ export default function SchemaDesigner() {
   }
 
   const submitSchema = () => {
-    const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
+    // const reference = schemaReference === '' ? _.camelCase(schemaName) : _.camelCase(schemaReference)
     if (schema) {
       // todo - implemented schema submission
       //const userSchema = { ...schema, name: schemaName, reference, use: schemaUse }

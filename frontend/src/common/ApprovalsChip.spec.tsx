@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 
 import { ApprovalStates, EntityKind } from '../../types/types'
 import { lightTheme } from '../theme'
