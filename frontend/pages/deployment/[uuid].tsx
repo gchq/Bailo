@@ -226,8 +226,11 @@ export default function Deployment() {
               Back to model
             </Button>
             {versions &&
-              versions.filter((version) => [ModelUploadType.Zip, ModelUploadType.Mlflow].includes(version.metadata.buildOptions?.uploadType)).length >
-                0 && (
+              versions.filter((version) =>
+                [ModelUploadType.Zip, ModelUploadType.Mlflow, undefined].includes(
+                  version.metadata.buildOptions?.uploadType
+                )
+              ).length > 0 && (
                 <Button variant='outlined' color='primary' startIcon={<Info />} onClick={handleClickOpen}>
                   Show download commands
                 </Button>
