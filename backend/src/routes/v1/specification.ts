@@ -574,7 +574,7 @@ export function generateSpecification() {
       },
     ],
     paths: {
-      '/export/{uuid}/{deploymentId}/version/{version}': {
+      '/api/v1/deployment/:uuid/version/:version/export': {
         get: {
           tags: ['export'],
           description: 'Export a full model version',
@@ -582,19 +582,13 @@ export function generateSpecification() {
             {
               name: 'uuid',
               in: 'path',
-              description: 'UUID of the Model.',
-              type: 'string',
-            },
-            {
-              name: 'deploymentId',
-              in: 'path',
-              description: 'UUID of the deployment',
+              description: 'UUID of the Deployment.',
               type: 'string',
             },
             {
               name: 'version',
               in: 'path',
-              description: 'The name of the specific version.',
+              description: 'The name of the specific version to export',
               type: 'string',
             },
           ],

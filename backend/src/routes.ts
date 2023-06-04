@@ -6,12 +6,12 @@ import {
   fetchRawModelFiles,
   getDeployment,
   getDeploymentAccess,
+  getExportModelVersion,
   getUserDeployments,
   postDeployment,
   postUngovernedDeployment,
   resetDeploymentApprovals,
 } from './routes/v1/deployment.js'
-import { exportModel } from './routes/v1/export.js'
 import {
   getModelAccess,
   getModelById,
@@ -63,8 +63,9 @@ server.post('/api/v1/deployment/ungoverned', ...postUngovernedDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
-server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
+server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
+server.get('/api/v1/deployment/:uuid/version/:version/export', ...getExportModelVersion)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)
@@ -100,7 +101,5 @@ server.get('/api/v1/specification', ...getSpecification)
 server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
 server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
-
-server.get('/api/v1/export/:uuid/:deploymentId/version/:version', ...exportModel)
 
 server.use('/api', expressErrorHandler)

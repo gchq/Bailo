@@ -43,7 +43,7 @@ function RawModelExportList({ deployment }: { deployment: Deployment }) {
                   </Button>
                   <Button
                     variant='contained'
-                    href={`/api/v1/export/${model?.uuid}/${deployment.uuid}/version/${version.version}`}
+                    href={`/api/v1/deployment/${deployment.uuid}/version/${version.version}/export`}
                     target='_blank'
                     data-test='exportFullModel'
                   >

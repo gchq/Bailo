@@ -144,12 +144,11 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+              cy.fixture('minimal_metadata.json').then(async (modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
-                // eslint-disable-next-line cypress/no-unnecessary-waiting
-                cy.wait(30000)
-                cy.exec(`docker pull ${imageName}`)
+
+                await runUntilSuccess(`docker pull ${imageName}`)
                 cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
                 // eslint-disable-next-line cypress/no-unnecessary-waiting
                 cy.wait(5000)
@@ -165,5 +164,23 @@ describe('Model with code and binary files', () => {
     })
   })
 })
+
+function runUntilSuccess(command: string, retries = 20, delay = 500) {
+  return new Promise((resolve, reject) => {
+    cy.exec(command, { failOnNonZeroExit: false }).then(async (result) => {
+      if (result.code === 0) {
+        return resolve(result)
+      }
+
+      if (retries === 0) {
+        return reject(result)
+      }
+
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(delay)
+      resolve(await runUntilSuccess(command, retries - 1))
+    })
+  })
+}
 
 export {}
