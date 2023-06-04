@@ -10,7 +10,7 @@
     "outDir": "dist",
     "resolveJsonModule": true,
     "noImplicitAny": false,
-    "composite": true,
+    "composite": true
   },
   "include": ["global.d.ts", "src/**/*", "src/**/*.json", "package.json", "package-lock.json"],
   "ts-node": {
