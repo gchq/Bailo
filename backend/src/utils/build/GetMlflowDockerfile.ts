@@ -1,18 +1,13 @@
 /* eslint-disable no-param-reassign */
-import dedent from 'dedent-js'
 import { writeFile } from 'fs/promises'
-import { tmpdir } from 'os'
 import { join } from 'path'
 import shelljs from 'shelljs'
-import { v4 as uuidv4 } from 'uuid'
 
 import { VersionDoc } from '../../types/types.js'
-import config from '../config.js'
-import { logCommand } from './build.js'
 import { BuildLogger } from './BuildLogger.js'
 import { BuildOpts, BuildStep, Files } from './BuildStep.js'
 
-const { rm, mkdir } = shelljs
+const { rm } = shelljs
 
 interface GetMlflowDockerfileProps {
   mlflowDockerfile: string

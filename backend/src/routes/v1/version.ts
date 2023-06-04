@@ -20,7 +20,7 @@ import config from '../../utils/config.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
 import { getClient } from '../../utils/minio.js'
 import { getUploadQueue } from '../../utils/queues.js'
-import { BadReq, Forbidden, GenericError, NotFound } from '../../utils/result.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { getFileStream, MinioRandomAccessReader } from '../../utils/zip.js'
 
@@ -246,7 +246,7 @@ export const postRebuildModel = [
       throw BadReq({ version: version._id }, 'This model is already being rebuilt automatically.')
     }
 
-    let jobId: string = ''
+    let jobId = ''
     if (uploadType == ModelUploadType.Zip) {
       const binaryRef = {
         name: 'binary.zip',

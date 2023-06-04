@@ -49,7 +49,7 @@ class ExtractFiles extends BuildStep {
     this.logger.info({ ...state }, 'Extracting zip bundles')
 
     // TODO: is there a better way to do this?
-    let filesToUnzip: string[] = []
+    const filesToUnzip: string[] = []
     if (state.binaryPath) {
       filesToUnzip.push(state.binaryPath)
     }
@@ -60,7 +60,7 @@ class ExtractFiles extends BuildStep {
       filesToUnzip.push(state.mlflowPath)
     }
 
-    let unzips: Promise<void>[] = []
+    const unzips: Promise<void>[] = []
     for (const file of filesToUnzip) {
       unzips.push(unzipFile(file))
     }
