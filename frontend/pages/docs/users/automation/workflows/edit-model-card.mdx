@@ -1,0 +1,63 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## Edit Model Card
+
+This updates an existing model card. This endpoint cannot be used to update artefacts attached to the model card (code,
+docker files, etc). It will reset any existing approvals on the model card.
+
+### Update Latest Version
+
+```python
+# If you have an existing model, the easiest way to grab this is from the URL
+# when you visit the model.  It's also available under the '.uuid' field on
+# any model object and returned when uploading a new model.
+model_uuid = "fasttext-language-identification-p8xwvz"
+
+# Fetch information about the model
+model = requests.get(f"{BASE_URL}/api/v1/model/uuid/{model_uuid}").json()
+
+# This request gets more information than we need, filter down to just the latest versions metadata.
+version = model["latestVersion"]
+model_card = version["metadata"]
+
+# Update the metadata as required
+model_card["highLevelDetails"]["modelInASentence"] = "New Description"
+
+response = requests.put(
+    f"{BASE_URL}/api/v1/version/{version['_id']}",
+    json=model_card,
+)
+
+print(response.json())
+```
+
+### Update Specific Version
+
+```python
+# If you have an existing model, the easiest way to grab this is from the URL
+# when you visit the model.  It's also available under the '.uuid' field on
+# any model object and returned when uploading a new model.
+model_uuid = "fasttext-language-identification-p8xwvz"
+
+# This should be version "name" for a model card.  Do not use the internal
+# identifier, which will be a MongoID (e.g. 647cbd2b29ba31090e9423c3)
+version = "v1.0"
+
+# Fetch information about the version
+version = requests.get(f"{BASE_URL}/api/v1/model/{model_uuid}/version/{version}").json()
+
+# This request gets more information than we need, filter down to just the latest versions metadata.
+model_card = version["metadata"]
+
+# Update the metadata as required
+model_card["highLevelDetails"]["modelInASentence"] = "New aa 2a"
+
+response = requests.put(
+    f"{BASE_URL}/api/v1/version/{version['_id']}",
+    json=model_card,
+)
+
+print(response.json())
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
