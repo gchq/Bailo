@@ -1,5 +1,7 @@
 declare module 'dev-null'
 
+type callback = (err: string | undefined) => void
+
 declare namespace Express {
   interface Request {
     user: UserDoc
@@ -8,7 +10,7 @@ declare namespace Express {
     log: Logger
 
     session: {
-      destroy: () => void
+      destroy: (callback) => void
       grant: any
     }
   }
