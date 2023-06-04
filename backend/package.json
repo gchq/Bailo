@@ -39,7 +39,7 @@
     "express": "^5.0.0-beta.1",
     "express-session": "^1.17.3",
     "form-data-encoder": "^3.0.0",
-    "formdata-node": "^5.0.0",
+    "formdata-node": "^5.0.1",
     "grant": "^5.4.21",
     "indent-string": "^5.0.0",
     "jsonschema": "^1.4.1",
