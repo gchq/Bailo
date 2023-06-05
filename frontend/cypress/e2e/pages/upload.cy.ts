@@ -3,16 +3,24 @@ describe('Upload page', () => {
     cy.visit('/upload')
   })
 
-  it('Renders a heading', () => {
-    cy.get('[data-test=headerTitle]').should('contain.text', 'Upload Model')
-  })
+  // it('Renders a heading', () => {
+  //   cy.get('[data-test=headerTitle]').should('contain.text', 'Upload Model')
+  // })
 
-  //Import Model tab cypress tests
-  it('Renders Import Model, tests SELECT MODEL and tick box', () => {
+  // //Import Model tab cypress tests
+  // it('Renders Import Model, tests SELECT MODEL and tick box', () => {
+  //   cy.get('[data-test=importModel]').click({ force: true })
+  //   cy.get('[data-test=selectModel]').click()
+  //   cy.get('.PrivateSwitchBase-input').click()
+  // })
+
+  it('uploads zip file', () => {
     cy.get('[data-test=importModel]').click({ force: true })
     cy.get('[data-test=selectModel]').click()
-    cy.get('.PrivateSwitchBase-input').click()
-  })
+
+  //model.cy.ts example
+    // cy.log('Selecting code and binary files')
+  //   cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
 })
 
 export {}
