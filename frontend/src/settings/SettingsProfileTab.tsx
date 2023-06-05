@@ -8,9 +8,10 @@ import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { User } from 'types/types'
 
-function SettingsProfileTab({ user }: { user: any }) {
+function SettingsProfileTab({ user }: { user: User }) {
   const theme = useTheme()
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
@@ -44,7 +45,7 @@ function SettingsProfileTab({ user }: { user: any }) {
         </Typography>
         <Divider sx={{ pt: 1, mb: 1 }} />
         <Stack direction='row' spacing={1} sx={{ p: 1 }}>
-          {user.roles.map((role: any) => (
+          {user.roles.map((role) => (
             <Chip color='primary' key={`chip-role-${role}`} label={role} />
           ))}
         </Stack>

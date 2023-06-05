@@ -6,7 +6,7 @@ import { lightTheme } from '../theme'
 import SettingsProfileTab from './SettingsProfileTab'
 
 describe('SettingsProfileTab', () => {
-  const user = {
+  const user: any = {
     id: 'test user',
     roles: ['user'],
   }
