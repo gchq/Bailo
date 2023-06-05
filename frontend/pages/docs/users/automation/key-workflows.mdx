@@ -1,0 +1,56 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Key Workflows
+
+Here we document some key workflows for interacting with Bailo, and how to implement them in various languages. This is
+to supplement the API Documentation pages, which describe each API call. Code examples will be given in Python, but
+should be able to be converted into other languages.
+
+## General Notes
+
+- Any endpoint that may take in files will have a request encoded as a `multipart/form-data` stream.
+- Any endpoint that is a 'get' request will take in parameters as query strings.
+- Any endpoint that is a 'put' or 'post' request will take in data as 'application/json'.
+
+All scripts rely on the following setup:
+
+```python
+import requests
+import json
+
+BASE_URL = "http://localhost:8080"
+
+# The model card for your instance of Bailo may have extra fields.  These are the key fields that every
+# instance of Bailo will support.
+model_card = {
+  "highLevelDetails": {
+    "tags": ["facebook", "fasttext", "NLP", "language", "language_identification", "multilingual"],
+    "name": "FastText Language Identification",
+    "modelInASentence": "Performs language identification of words",
+    "modelOverview": "Performs language identification of words in utf-8, capable of recognizing up to 176 languages.",
+    "modelCardVersion": "v1.0"
+  },
+  "contacts": {
+    "uploader": [{ "kind": "user", "id": "user" }],
+    "reviewer": [{ "kind": "user", "id": "user" }],
+    "manager": [{ "kind": "user", "id": "user" }]
+  },
+  "buildOptions": {
+    "uploadType": "Model card only"
+  }
+}
+```
+
+We also assume there are files called 'docker.tar', 'code.zip' and 'binary.zip' in the current directory when working
+with calls that require the uploading of one of these files.
+
+### List of Guides:
+
+- [Upload a new model to Bailo (Docker, Code / Binaries, Model Card Only)](./workflows/create-a-model)
+- [Edit an existing model card](./workflows/edit-model-card)
+- [Upload a new version for an existing model](./workflows/upload-new-version)
+
+Do none of these guides match your requirements? [Request a new one here](https://github.com/gchq/Bailo/issues) or write
+your own.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
