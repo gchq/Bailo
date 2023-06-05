@@ -69,7 +69,6 @@ export default function FormImport({ onSubmit, setError }: { onSubmit: any; setE
           <Stack direction='row' spacing={2} alignItems='center'>
             <FileInput
               label='Select Model'
-              // data-test='selectModel'
               file={uploadModel}
               onChange={(event) => handleModelChange(event)}
               accepts='.zip'
