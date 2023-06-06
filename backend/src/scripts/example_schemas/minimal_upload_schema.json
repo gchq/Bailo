@@ -59,6 +59,18 @@
           "minLength": 1,
           "maxLength": 5000
         },
+        "modelCardVersionNumber": {
+          "type": "string",
+          "title": "Model version tag",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
+        },
+        "modelCardVersionTag": {
+          "type": "string",
+          "title": "Model version number",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
+        },
         "modelCardVersion": {
           "type": "string",
           "title": "Model version",

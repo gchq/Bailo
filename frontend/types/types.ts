@@ -22,6 +22,13 @@ export enum ApprovalCategory {
   Deployment = 'Deployment',
 }
 
+export enum VersionUploadType {
+  UPDATE = 'update',
+  SIBLING = 'sibling',
+  UPDATE_AND_SIBLING = 'updateAndSibling',
+  CHILD = 'child',
+}
+
 export interface DeploymentMetadata {
   highLevelDetails: {
     name: string
@@ -307,7 +314,11 @@ export type UserDoc = User & Document<any, any, User>
 export interface Version {
   _id: any
   model: ModelDoc | Types.ObjectId
-  version: string
+  versionNumber: string
+  versionTag: string
+
+  // Computed value comprising versionName and versionTag
+  version?: string
 
   metadata: ModelMetadata
 

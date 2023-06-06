@@ -7,7 +7,8 @@ import logger from '../utils/logger.js'
 const VersionSchema = new Schema<Version>(
   {
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
-    version: { type: String, required: true },
+    versionTag: { type: String, required: true },
+    versionNumber: { type: String, required: true },
 
     metadata: { type: Schema.Types.Mixed },
 
@@ -37,6 +38,10 @@ const VersionSchema = new Schema<Version>(
     toJSON: { virtuals: true },
   }
 )
+
+VersionSchema.virtual('version').get(function () {
+  return `${versionNumber}-${versionTag}}`
+})
 
 VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 

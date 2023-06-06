@@ -1,9 +1,9 @@
 import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { useGetModel, useGetModelVersions } from '../../../data/model'
+import { useGetModel, useGetModelVersion, useGetModelVersions } from '../../../data/model'
 import { useGetSchema } from '../../../data/schema'
 import LoadingBar from '../../../src/common/LoadingBar'
 import MultipleErrorWrapper from '../../../src/errors/MultipleErrorWrapper'
@@ -14,7 +14,7 @@ import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../src
 import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
-import { Version } from '../../../types/types'
+import { Version, VersionUploadType } from '../../../types/types'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import useCacheVariable from '../../../utils/hooks/useCacheVariable'
 
@@ -42,9 +42,20 @@ function renderSubmissionTab({
 
 function Upload() {
   const router = useRouter()
-  const { uuid: modelUuid }: { uuid?: string } = router.query
+  const {
+    uuid: modelUuid,
+    versionNumber,
+    versionTag,
+    uploadType,
+  }: { uuid?: string; versionNumber?: string; versionTag?: string; uploadType?: string } = router.query
 
   const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelUuid)
+  const {
+    version: selectedVersion,
+    isVersionLoading,
+    isVersionError,
+    mutateVersion,
+  } = useGetModelVersion(modelUuid, `${versionNumber}-${versionTag}`)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
   const { versions } = useGetModelVersions(modelUuid)
 
@@ -53,8 +64,8 @@ function Upload() {
 
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
-  const [modelUploading, setModelUploading] = useState<boolean>(false)
-  const [loadingPercentage, setUploadPercentage] = useState<number>(0)
+  const [modelUploading, setModelUploading] = useState(false)
+  const [loadingPercentage, setUploadPercentage] = useState(0)
 
   useEffect(() => {
     if (!cSchema || !cModel) return
@@ -62,6 +73,10 @@ function Upload() {
     const steps = getStepsFromSchema(
       cSchema,
       {
+        highLevelDetails: {
+          versionNumber: { 'ui:widget': uploadType === VersionUploadType.SIBLING ? 'nothing' : 'text' },
+          versionTag: { 'ui:widget': uploadType === VersionUploadType.SIBLING ? 'nothing' : 'text' },
+        },
         buildOptions: {
           seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
         },
@@ -115,19 +130,20 @@ function Upload() {
     }
 
     setSplitSchema({ reference: cSchema.reference, steps })
-  }, [cModel, cSchema])
+  }, [cModel, cSchema, uploadType])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
+    isVersionError,
     isSchemaError,
   })
   if (errorWrapper) return errorWrapper
 
-  if (isModelLoading || isSchemaLoading) {
+  if (isModelLoading || isVersionLoading || isSchemaLoading) {
     return null
   }
 
-  if (!model || !schema) {
+  if (!model || !selectedVersion || !schema) {
     return null
   }
 
@@ -148,6 +164,16 @@ function Upload() {
     // This might need revisiting when models have lots of versions
     if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
       return setError('This model already has a version with the same name')
+    }
+
+    // Handle versionNumber/versionTag
+    switch (uploadType) {
+      case VersionUploadType.UPDATE:
+        data.highLevelDetails.versionTag = selectedVersion.versionTag
+        break
+      case VersionUploadType.SIBLING:
+        data.highLevelDetails.versionTag = selectedVersion.versionNumber
+        break
     }
 
     data.schemaRef = model?.schemaRef

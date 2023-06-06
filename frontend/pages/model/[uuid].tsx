@@ -40,6 +40,7 @@ import Compliance from 'src/model/Compliance'
 import Deployments from 'src/model/Deployments'
 import Overview from 'src/model/Overview'
 import Settings from 'src/model/Settings'
+import NewVersionDialog from 'src/NewVersionDialog'
 
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
@@ -80,6 +81,8 @@ function Model() {
   const [ungovernedDialogOpen, setUngovernedDialogOpen] = useState(false)
   const [ungovernedDeploymentName, setUngovernedDeploymentName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+
+  const [newVersionWizardOpen, setNewVersionWizardOpen] = useState(false)
 
   const { currentUser, isCurrentUserLoading, mutateCurrentUser, isCurrentUserError } = useGetCurrentUser()
   const { versions, isVersionsLoading, isVersionsError } = useGetModelVersions(uuid)
@@ -195,8 +198,10 @@ function Model() {
   if (isVersionLoading || !version) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
 
-  const uploadNewVersion = () => {
-    router.push(`/model/${uuid}/new-version`)
+  // todo rename
+  const uploadNewVersionClicked = () => {
+    //router.push(`/model/${uuid}/new-version`)
+    setNewVersionWizardOpen(true)
   }
 
   const actionMenuClicked = (event: MouseEvent) => {
@@ -221,6 +226,10 @@ function Model() {
 
   const handleUngovernedDialogClose = () => {
     setUngovernedDialogOpen(false)
+  }
+
+  const handleNewVersionWizardClose = () => {
+    setNewVersionWizardOpen(false)
   }
 
   const requestUngovernedDeployment = async () => {
@@ -370,7 +379,11 @@ function Model() {
                   </MenuItem>
                 </DisabledElementTooltip>
 
-                <MenuItem onClick={uploadNewVersion} disabled={!isPotentialUploader} data-test='newVersionButton'>
+                <MenuItem
+                  onClick={uploadNewVersionClicked}
+                  disabled={!isPotentialUploader}
+                  data-test='newVersionButton'
+                >
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
                   </ListItemIcon>
@@ -455,6 +468,12 @@ function Model() {
           </Stack>
         </DialogContent>
       </Dialog>
+      <NewVersionDialog
+        open={newVersionWizardOpen}
+        versionNumber={version.versionNumber}
+        versionTag={version.versionTag}
+        onClose={handleNewVersionWizardClose}
+      />
     </Wrapper>
   )
 }
