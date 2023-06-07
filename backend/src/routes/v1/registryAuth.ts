@@ -227,7 +227,10 @@ export const getDockerRegistryAuth = [
     }
 
     if (!scope) {
-      throw Forbidden({}, 'Undefined scope', rlog)
+      // User requesting no scope, they're just trying to login
+      // Because this token has no permissions, it is safe to
+      // provide.
+      return res.json({ token: await getAccessToken(user, []) })
     }
 
     let scopes: Array<string> = []

@@ -570,8 +570,37 @@ export function generateSpecification() {
         name: 'config',
         description: 'Get and update the server configuration',
       },
+      {
+        name: 'export',
+        description: 'Export a specific version of a deployed model',
+      },
     ],
     paths: {
+      '/api/v1/deployment/:uuid/version/:version/export': {
+        get: {
+          tags: ['export'],
+          description: 'Export a full model version',
+          parameters: [
+            {
+              name: 'uuid',
+              in: 'path',
+              description: 'UUID of the Deployment.',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              in: 'path',
+              description: 'The name of the specific version to export',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'An archived file containing the full model of the version specified.',
+            },
+          },
+        },
+      },
       '/model': {
         post: {
           tags: ['model'],

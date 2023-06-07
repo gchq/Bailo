@@ -144,10 +144,12 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
             .then((dockerPassword) => {
-              cy.fixture('minimal_metadata.json').then((modelMetadata) => {
+              cy.fixture('minimal_metadata.json').then(async (modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
-                cy.exec(`docker pull ${imageName}`)
+
+                cy.exec(`cypress/scripts/pullContainer.sh "${imageName}"`)
+
                 cy.exec(`cypress/scripts/startContainer.sh "${imageName}"`)
                 // eslint-disable-next-line cypress/no-unnecessary-waiting
                 cy.wait(5000)
