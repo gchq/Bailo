@@ -13,7 +13,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -41,7 +41,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -68,10 +68,10 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use Node.js 18
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
@@ -91,10 +91,10 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use Node.js 18
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
@@ -112,9 +112,9 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
@@ -263,9 +263,9 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
@@ -367,7 +367,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: logs
@@ -379,9 +379,9 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: "npm"
@@ -486,7 +486,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: logs

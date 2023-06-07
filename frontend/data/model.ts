@@ -76,10 +76,7 @@ export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs
 
   const { data, error, mutate } = useSWR<Version, ErrorInfo>(
     uuid ? `/api/v1/model/${uuid}/version/${versionName}?logs=${logs}` : null,
-    fetcher,
-    {
-      refreshInterval: 1000,
-    }
+    fetcher
   )
 
   return {

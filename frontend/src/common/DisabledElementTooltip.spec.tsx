@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { describe, expect, it } from 'vitest'
 
 import DisabledElementTooltip from './DisabledElementTooltip'
 
@@ -10,7 +11,7 @@ describe('DisabledElementTooltip', () => {
   it('renders an DisabledElementTooltip component when a button is hovered over', async () => {
     render(
       <DisabledElementTooltip conditions={[testMessage]}>
-        <Button data-testid='trigger'>Button</Button>
+        <Button data-test='trigger'>Button</Button>
       </DisabledElementTooltip>
     )
 

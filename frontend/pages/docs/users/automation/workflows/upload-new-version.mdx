@@ -1,0 +1,122 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## Upload New Version
+
+Upload a new version to an existing model card. This allows you to upload a new machine learning image version. Most
+settings can change between model uploads (e.g. upload type and binaries). Currently, the schema must be identical to
+the initial upload schema, but this is not intended to be a limitation in the final product.
+
+### Using Latest Version as Base
+
+The below examples all assume you have your `model_card` already within your Python script. Most automated tools are
+likely to only wish to upload specific fields (e.g. a CI platform may want to update the test scores for a model). In
+any of the below instances, the following script can be used to fetch the latest model card for a given model.
+
+```python
+def latest_model_card(model_uuid: str):
+    # Fetch information about the model
+    model = requests.get(f"{BASE_URL}/api/v1/model/uuid/{model_uuid}").json()
+    return model["latestVersion"]["metadata"]
+```
+
+### With Docker Tar
+
+```python
+# If you have an existing model, the easiest way to grab this is from the URL
+# when you visit the model.  It's also available under the '.uuid' field on
+# any model object and returned when uploading a new model.
+model_uuid = "fasttext-language-identification-p8xwvz"
+
+# A new version for this model.  If this version already exists the request
+# will fail.
+new_version = "v1.2"
+
+# Change the request type to upload code and binaries.
+model_card["buildOptions"]["uploadType"] = "Prebuilt Docker image"
+
+# Make sure to update the schema to the desired version.
+model_card["schemaRef"] = "/Minimal/General/v10"
+
+model_card["highLevelDetails"]["modelCardVersion"] = new_version
+
+# Usage of 'files' to set the request to a multipart form upload.
+response = requests.post(
+    f"{BASE_URL}/api/v1/model",
+    params={"mode": "newVersion", "modelUuid": model_uuid},
+    files={
+        "docker": open("docker.tar", "rb"),
+        "metadata": (None, json.dumps(model_card), 'application/json'),
+    },
+)
+
+print(response.json())
+```
+
+### With Code / Binary
+
+```python
+# If you have an existing model, the easiest way to grab this is from the URL
+# when you visit the model.  It's also available under the '.uuid' field on
+# any model object and returned when uploading a new model.
+model_uuid = "fasttext-language-identification-p8xwvz"
+
+# A new version for this model.  If this version already exists the request
+# will fail.
+new_version = "v1.2"
+
+# Change the request type to upload code and binaries.
+model_card["buildOptions"]["uploadType"] = "Code and binaries"
+model_card["buildOptions"]["seldonVersion"] = "seldonio/seldon-core-s2i-python37:1.10.0"
+
+# Make sure to update the schema to the desired version.
+model_card["schemaRef"] = "/Minimal/General/v10"
+
+model_card["highLevelDetails"]["modelCardVersion"] = new_version
+
+# Usage of 'files' to set the request to a multipart form upload.
+response = requests.post(
+    f"{BASE_URL}/api/v1/model",
+    params={"mode": "newVersion", "modelUuid": model_uuid},
+    files={
+        "code": open("code.zip", "rb"),
+        "binary": open("binary.zip", "rb"),
+        "metadata": (None, json.dumps(model_card), 'application/json'),
+    },
+)
+
+print(response.json())
+```
+
+### Model Card Only
+
+```python
+# If you have an existing model, the easiest way to grab this is from the URL
+# when you visit the model.  It's also available under the '.uuid' field on
+# any model object and returned when uploading a new model.
+model_uuid = "fasttext-language-identification-p8xwvz"
+
+# A new version for this model.  If this version already exists the request
+# will fail.
+new_version = "v1.2"
+
+# Change the request type to upload code and binaries.
+model_card["buildOptions"]["uploadType"] = "Model card only"
+
+# Make sure to update the schema to the desired version.
+model_card["schemaRef"] = "/Minimal/General/v10"
+
+model_card["highLevelDetails"]["modelCardVersion"] = new_version
+
+# Usage of 'files' to set the request to a multipart form upload.
+response = requests.post(
+    f"{BASE_URL}/api/v1/model",
+    params={"mode": "newVersion", "modelUuid": model_uuid},
+    files={
+        "metadata": (None, json.dumps(model_card), 'application/json')
+    },
+)
+
+print(response.json())
+```
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
