@@ -1,4 +1,8 @@
+import parser from 'body-parser'
+import MongoStore from 'connect-mongo'
 import express from 'express'
+import session from 'express-session'
+import grant from 'grant'
 
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
@@ -39,13 +43,43 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 
 export const server = express()
 
+if (config.oauth.enabled) {
+  server.use(
+    session({
+      secret: config.session.secret,
+      resave: true,
+      saveUninitialized: true,
+      cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
+      store: MongoStore.create({
+        mongoUrl: config.mongo.uri,
+      }),
+    })
+  )
+}
+
 server.use(getUser)
 server.use(expressLogger)
+
+if (config.oauth.enabled) {
+  server.use(parser.urlencoded({ extended: true }))
+  server.use(grant.default.express(config.oauth.grant))
+
+  server.get('/api/login', (req, res) => {
+    res.redirect(`/api/connect/${config.oauth.provider}/login`)
+  })
+
+  server.get('/api/logout', (req, res) => {
+    req.session.destroy(function (err) {
+      res.redirect('/')
+    })
+  })
+}
 
 server.post('/api/v1/model', ...postUpload)
 

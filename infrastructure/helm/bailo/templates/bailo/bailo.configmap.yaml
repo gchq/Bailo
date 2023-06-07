@@ -22,6 +22,25 @@ data:
       s2i: {
         path: '/s2i/s2i',
       },
+      session: {
+        secret: '{{ .Values.cookie.secret }}',
+      },
+      oauth: {
+        enabled: {{ .Values.oauth.enabled }},
+        grant: {
+          defaults: {
+            origin: '{{ .Values.oauth.origin }}',
+          },
+        cognito: {
+          key: '{{ .Values.oauth.cognito.key }}',
+          secret: '{{ .Values.oauth.cognito.secret }}',
+          dynamic: {{ .Values.oauth.cognito.dynamic }},
+          response: {{ .Values.oauth.cognito.response }},
+          callback: '{{ .Values.oauth.cognito.callback }}',
+          subdomain: '{{ .Values.oauth.cognito.subdomain }}',
+        },
+        },
+      },
       build: {
         environment: '{{ .Values.config.build.environment }}',
         openshift: {
