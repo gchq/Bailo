@@ -44,7 +44,7 @@ export default function Settings() {
           <Tab label='Profile' {...a11yProps(0)} />
         </Tabs>
         <TabPanel value={tab} index={0}>
-          {!isCurrentUserLoading && <SettingsProfileTab user={currentUser} />}
+          {currentUser && !isCurrentUserLoading && <SettingsProfileTab user={currentUser} />}
         </TabPanel>
       </Box>
     </Wrapper>
