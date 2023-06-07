@@ -13,7 +13,7 @@ export default async function runScript() {
   const licenses = JSON.parse(stdout)
 
   const packages = Object.keys(packageInfo.dependencies).concat(Object.keys(packageInfo.devDependencies))
-  const dependencies: any = {}
+  const dependencies: Record<string, string> = {}
 
   for (const license of Object.keys(licenses)) {
     const name = license.split('@')[0]

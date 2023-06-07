@@ -1,4 +1,6 @@
-export function createFileRef(file: any, type: string, version: any) {
+import { VersionDoc } from '../types/types.js'
+
+export function createFileRef(file: any, type: string, version: VersionDoc) {
   return {
     name: file.originalname,
     bucket: file.bucket,

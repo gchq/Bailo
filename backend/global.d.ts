@@ -9,6 +9,6 @@ declare namespace Express {
   }
 
   interface Response {
-    error: (code: number, error: any) => void
+    error: (code: number, error: unknown) => void
   }
 }
