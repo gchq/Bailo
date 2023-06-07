@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
-import { Types } from 'mongoose'
+import { MongooseError, Types } from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
+import { isNativeError } from 'util/types'
 import { v4 as uuidv4 } from 'uuid'
 
 import audit from '../../external/Audit.js'
@@ -10,7 +11,9 @@ import { createVersionApprovals } from '../../services/approval.js'
 import { createModel, findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { createVersion, markVersionBuilt } from '../../services/version.js'
-import { ModelUploadType, SeldonVersion, UploadModes } from '../../types/types.js'
+import { ModelDoc, ModelUploadType, SeldonVersion, UploadModes } from '../../types/types.js'
+import { ModelMetadata } from '../../types/types.js'
+import { Schema } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { getPropertyFromEnumValue } from '../../utils/general.js'
 import { moveFile } from '../../utils/minio.js'
@@ -49,7 +52,7 @@ function parseMetadata(stringMetadata: string) {
   return metadata
 }
 
-async function getMetadataSchema(metadata: any) {
+async function getMetadataSchema(metadata: ModelMetadata) {
   const schema = await findSchemaByRef(metadata.schemaRef)
   if (!schema) {
     throw BadReq({ code: 'schema_not_found', schemaRef: metadata.schemaRef }, 'Schema not found')
@@ -58,7 +61,7 @@ async function getMetadataSchema(metadata: any) {
   return schema
 }
 
-function validateMetadata(metadata: any, schema: any) {
+function validateMetadata(metadata: ModelMetadata, schema: Schema) {
   const schemaIsInvalid = validateSchema(metadata, schema.schema)
   if (schemaIsInvalid) {
     throw BadReq({ code: 'metadata_did_not_validate', errors: schemaIsInvalid }, 'Metadata did not validate correctly')
@@ -144,7 +147,7 @@ export const postUpload = [
       .replace(/ /g, '-')
 
     /** Saving the model */
-    let model: any
+    let model: ModelDoc | null
 
     if (mode === UploadModes.NewVersion) {
       // Update an existing model's version array
@@ -229,7 +232,7 @@ export const postUpload = [
             { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
             `Adding paths for raw model exports of files to version.`
           )
-        } catch (e: any) {
+        } catch (e: unknown) {
           throw GenericError({ e }, 'Error uploading raw code and binary to Minio', 500)
         }
 

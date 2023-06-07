@@ -1,3 +1,5 @@
+import Logger from 'bunyan'
+
 type ErrorDetails =
   | string
   | {
@@ -14,7 +16,7 @@ export interface BailoError extends Error {
   logger: any
 }
 
-export function GenericError(data: any, details: ErrorDetails, code: number, logger?: any) {
+export function GenericError(data: unknown, details: ErrorDetails, code: number, logger?: Logger) {
   const message = typeof details === 'string' ? details : details.message
 
   const err = Error(message) as BailoError
@@ -34,26 +36,26 @@ export function GenericError(data: any, details: ErrorDetails, code: number, log
   return err
 }
 
-export function BadReq(data: any, details: ErrorDetails, logger?: any) {
+export function BadReq(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 400, logger)
 }
 
-export function Unauthorised(data: any, details: ErrorDetails, logger?: any) {
+export function Unauthorised(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 401, logger)
 }
 
-export function Forbidden(data: any, details: ErrorDetails, logger?: any) {
+export function Forbidden(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 403, logger)
 }
 
-export function NotFound(data: any, details: ErrorDetails, logger?: any) {
+export function NotFound(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 404, logger)
 }
 
-export function Conflict(data: any, details: ErrorDetails, logger?: any) {
+export function Conflict(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 409, logger)
 }
 
-export function NotImplemented(data: any, details: ErrorDetails, logger?: any) {
+export function NotImplemented(data: unknown, details: ErrorDetails, logger?: Logger) {
   return GenericError(data, details, 501, logger)
 }

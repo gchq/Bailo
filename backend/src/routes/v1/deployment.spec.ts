@@ -12,6 +12,7 @@ import VersionModel from '../../models/Version.js'
 import * as approval from '../../services/approval.js'
 import * as deployment from '../../services/deployment.js'
 import * as version from '../../services/version.js'
+import { DeploymentDoc, VersionDoc } from '../../types/types.js'
 import * as entityUtils from '../../utils/entity.js'
 import {
   deploymentData,
@@ -27,8 +28,8 @@ import {
 import { authenticatedGetRequest, authenticatedPostRequest, validateTestRequest } from '../../utils/test/testUtils.js'
 import * as validateSchema from '../../utils/validateSchema.js'
 
-let deploymentDoc: any
-let versionDoc: any
+let deploymentDoc: DeploymentDoc
+let versionDoc: VersionDoc
 
 describe('test deployment routes', () => {
   beforeEach(async () => {
@@ -59,7 +60,7 @@ describe('test deployment routes', () => {
   })
 
   test('reset approvals for deployment with a given uuid', async () => {
-    vi.spyOn(version, 'findVersionByName').mockReturnValueOnce(versionDoc)
+    vi.spyOn(version, 'findVersionByName').mockReturnValueOnce(Promise.resolve(versionDoc))
     vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(undefined as any)
     vi.spyOn(entityUtils, 'isUserInEntityList').mockResolvedValueOnce(true)
     const res = await authenticatedPostRequest(`/api/v1/deployment/${deploymentUuid}/reset-approvals`)

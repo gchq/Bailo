@@ -13,7 +13,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -41,7 +41,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -68,7 +68,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
@@ -112,7 +112,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -263,7 +263,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -379,7 +379,7 @@ jobs:
 
     steps:
       # Clone repository
-      - actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:

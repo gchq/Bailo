@@ -37,6 +37,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Approvals', slug: 'users/approvals' },
 
   { title: 'Automation', slug: 'users/automation', header: true },
+  { title: 'Key Workflows', slug: 'users/automation/key-workflows' },
   { title: 'Python Client', slug: 'users/automation/python-client' },
 
   { title: 'Marketplace', slug: 'users/marketplace' },
