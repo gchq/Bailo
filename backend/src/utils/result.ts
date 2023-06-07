@@ -35,6 +35,10 @@ export function Conflict(data: unknown, message: string, logger?: Logger) {
   return GenericError(data, message, 409, logger)
 }
 
+export function InternalServer(data: unknown, message: string, logger?: Logger) {
+  return GenericError(data, message, 500, logger)
+}
+
 export function NotImplemented(data: unknown, message: string, logger?: Logger) {
   return GenericError(data, message, 501, logger)
 }

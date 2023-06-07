@@ -19,7 +19,7 @@ RUN npm run build
 FROM node:16-alpine as runner
 
 RUN apk update
-RUN apk add --no-cache libc6-compat img docker
+RUN apk add --no-cache libc6-compat img docker skopeo
 
 WORKDIR /app
 

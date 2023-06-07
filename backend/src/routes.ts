@@ -10,6 +10,7 @@ import {
   fetchRawModelFiles,
   getDeployment,
   getDeploymentAccess,
+  getExportModelVersion,
   getUserDeployments,
   postDeployment,
   postUngovernedDeployment,
@@ -96,8 +97,9 @@ server.post('/api/v1/deployment/ungoverned', ...postUngovernedDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
 server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
-server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
+server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
+server.get('/api/v1/deployment/:uuid/version/:version/export', ...getExportModelVersion)
 
 server.get('/api/v1/version/:id', ...getVersion)
 server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)

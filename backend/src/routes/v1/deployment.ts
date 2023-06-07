@@ -1,3 +1,4 @@
+import archiver from 'archiver'
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
@@ -7,12 +8,20 @@ import { createDeployment, findDeploymentByUuid, findDeployments } from '../../s
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
 import { findVersionById, findVersionByName } from '../../services/version.js'
-import { ModelDoc } from '../../types/types.js'
+import { ModelDoc, ModelUploadType } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
+import { isObjectId } from '../../utils/database.js'
 import { isUserInEntityList, parseEntityList } from '../../utils/entity.js'
+import {
+  getBinaryFiles,
+  getCodeFiles,
+  getDockerFiles,
+  getModelMetadata,
+  getModelSchema,
+} from '../../utils/exportModel.js'
 import { getClient } from '../../utils/minio.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/result.js'
+import { BadReq, Forbidden, InternalServer, NotFound, Unauthorised } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -321,5 +330,75 @@ export const getDeploymentAccess = [
     return res.json({
       owner,
     })
+  },
+]
+
+export const getExportModelVersion = [
+  ensureUserRole('user'),
+  bodyParser.json(),
+  async (req: Request, res: Response) => {
+    // Get model params
+    const { uuid: deploymentUuid, version: versionName } = req.params
+
+    const deployment = await findDeploymentByUuid(req.user, deploymentUuid)
+    if (!deployment) {
+      throw NotFound(
+        { code: 'deployment_not_found', deploymentUuid },
+        `Unable to find requested deployment: '${deploymentUuid}'`
+      )
+    }
+
+    if (!(await isUserInEntityList(req.user, deployment.metadata.contacts.owner))) {
+      throw Forbidden({ code: 'user_unauthorised' }, 'User is not authorised to do this operation.')
+    }
+
+    if (isObjectId(deployment.model)) {
+      return InternalServer({ deploymentUuid }, 'A deployment was found without a corresponding model.')
+    }
+
+    const version = await findVersionByName(req.user, deployment.model, versionName)
+
+    if (!version) {
+      throw NotFound({ deployment, versionName }, `Version ${versionName} not found for deployment ${deployment.uuid}.`)
+    }
+
+    // Set .zip extension to request header
+    res.set('Content-disposition', `attachment; filename=${deployment.model.uuid}.zip`)
+    res.set('Content-Type', 'application/zip')
+
+    const archive = archiver('zip')
+
+    archive.on('error', (err) => {
+      throw InternalServer(
+        {
+          err,
+          deploymentUuid,
+          versionName,
+        },
+        'Errored during artefact bundling'
+      )
+    })
+
+    archive.pipe(res)
+
+    const modelVersion = await getModelMetadata(version, archive)
+    await getModelSchema(modelVersion.metadata.schemaRef, archive)
+
+    const uploadType = modelVersion.metadata.buildOptions?.uploadType
+
+    if (uploadType === ModelUploadType.Zip) {
+      await getCodeFiles(version, archive)
+      await getBinaryFiles(version, archive)
+    }
+
+    if (uploadType === ModelUploadType.Docker || (uploadType === ModelUploadType.Zip && modelVersion.built)) {
+      const tidyUp = await getDockerFiles(deployment.model.uuid, version, archive)
+
+      archive.on('end', async () => {
+        await tidyUp()
+      })
+    }
+
+    await archive.finalize()
   },
 ]
