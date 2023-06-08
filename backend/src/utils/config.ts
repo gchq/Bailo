@@ -1,4 +1,11 @@
 import _config from 'config'
+import { GrantConfig, GrantOptions } from 'grant'
+
+interface DefaultSchema {
+  name: string
+  reference: string
+  schema: unknown
+}
 
 interface FederationTarget {
   name: string
@@ -100,6 +107,21 @@ export interface Config {
 
       interval: number
     }
+  }
+
+  defaultSchemas: {
+    upload: Array<DefaultSchema>
+    deployment: Array<DefaultSchema>
+  }
+
+  oauth: {
+    enabled: boolean
+    provider: string
+    grant: GrantOptions | GrantConfig
+  }
+
+  session: {
+    secret: string
   }
 
   ui: {
@@ -212,6 +234,11 @@ const config: Config = {
     file: _config.get('logging.file'),
     stroom: _config.get('logging.stroom'),
   },
+
+  defaultSchemas: _config.get('defaultSchemas'),
+
+  oauth: _config.get('oauth'),
+  session: _config.get('session'),
 
   ui: _config.get('ui'),
 }

@@ -18,7 +18,7 @@ PKI_ENVIRON = {
     "PKI_CERT_PASSWORD": "password",
     "BAILO_URL": "http://bailo",
 }
-NULL_ENVIRON = {"BAILO_URL": "http://bailo", "CA_CERT": "False"}
+NULL_ENVIRON = {"BAILO_URL": "http://bailo", "BAILO_CA_CERT": "False"}
 
 
 @patch.dict(os.environ, COGNITO_ENVIRON, clear=True)

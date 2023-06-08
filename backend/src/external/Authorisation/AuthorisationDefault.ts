@@ -4,7 +4,7 @@ import { DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../types/types.js'
 import { Model } from '../types/types.js'
 import { BadReq } from './result.js'
 
-export default class AuthorisationBase {
+export default class AuthorisationDefault {
   async getUserFromReq(req: Request) {
     if (req.query.userId && typeof req.query.userId !== 'string') {
       throw BadReq({ userId: req.query.userId }, 'Bad type for userId')

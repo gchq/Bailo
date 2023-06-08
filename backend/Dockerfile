@@ -10,9 +10,7 @@ RUN mkdir /s2i && \
     tar -xvf s2i.tar.gz -C /s2i && \
     rm -rf s2i.tar.gz
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-
+COPY package*.json ./
 RUN npm install
 
 COPY . .
@@ -20,8 +18,8 @@ RUN npm run build
 
 FROM node:16-alpine as runner
 
-RUN apk add --no-cache libc6-compat img docker
 RUN apk update
+RUN apk add --no-cache libc6-compat img docker skopeo
 
 WORKDIR /app
 
@@ -42,9 +40,7 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
 COPY --from=installer /s2i /s2i
 RUN chmod -R o+x /s2i
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-
+COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=installer /app/config config

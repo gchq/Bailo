@@ -158,9 +158,9 @@ export const getModelVersion = [
 
     let version
     if (versionName === 'latest') {
-      version = await findVersionById(req.user, model.versions[model.versions.length - 1], { showLogs })
+      version = await findVersionById(req.user, model.versions[model.versions.length - 1], { showLogs, populate: true })
     } else {
-      version = await findVersionByName(req.user, model._id, versionName, { showLogs })
+      version = await findVersionByName(req.user, model._id, versionName, { showLogs, populate: true })
     }
 
     if (!version) {

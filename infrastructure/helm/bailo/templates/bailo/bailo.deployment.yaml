@@ -51,9 +51,7 @@ spec:
                   name: {{ include "bailo.fullname" . }}-mongodb
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
-              value: {{ include "bailo.mongoConnectionURI" . | quote }}
-            - name: SCHEMA_SETUP_SCRIPT
-              value: {{ .Values.config.schema.script }}
+              value: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}'
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}
@@ -72,10 +70,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /app/backend/config/production.cjs
+              mountPath: /app/config/production.cjs
               subPath: production.cjs
             - name: config
-              mountPath: /app/backend/config/custom-environment-variables.cjs
+              mountPath: /app/config/custom-environment-variables.cjs
               subPath: custom-environment-variables.cjs
             - name: temp
               mountPath: /tmp

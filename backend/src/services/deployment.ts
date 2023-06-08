@@ -1,5 +1,3 @@
-import https from 'https'
-
 import Authorisation from '../external/Authorisation.js'
 import DeploymentModel from '../models/Deployment.js'
 import VersionModel from '../models/Version.js'
@@ -9,9 +7,8 @@ import config from '../utils/config.js'
 import { getEntitiesForUser, getUserListFromEntityList } from '../utils/entity.js'
 import { asyncFilter } from '../utils/general.js'
 import logger from '../utils/logger.js'
-import { deleteImageTag } from '../utils/registry.js'
 import { Forbidden } from '../utils/result.js'
-import { SerializerOptions } from '../utils/serializers.js'
+import { deleteImageTag } from '../utils/skopeo.js'
 import { sendEmail } from '../utils/smtp.js'
 import { getUserByInternalId } from './user.js'
 
@@ -23,10 +20,6 @@ interface GetDeploymentOptions {
   showLogs?: boolean
   overrideFilter?: boolean
 }
-
-const httpsAgent = new https.Agent({
-  rejectUnauthorized: !config.registry.insecure,
-})
 
 export async function filterDeploymentArray(user: UserDoc, unfiltered: Array<DeploymentDoc>) {
   return asyncFilter(unfiltered, (deployment: DeploymentDoc) => auth.canUserSeeDeployment(user, deployment))
@@ -130,8 +123,6 @@ export async function createDeployment(user: UserDoc, data: CreateDeployment) {
 }
 
 export async function removeModelDeploymentsFromRegistry(model: ModelDoc, deployment: DeploymentDoc) {
-  const registry = `${config.registry.connection.protocol}://${config.registry.connection.host}/v2`
-
   const { versions } = model
 
   versions.forEach(async (version: any) => {
@@ -139,9 +130,8 @@ export async function removeModelDeploymentsFromRegistry(model: ModelDoc, deploy
     if (!versionDoc) {
       return
     }
-    deleteImageTag(
-      { address: registry, agent: httpsAgent },
-      { namespace: deployment.uuid, model: model.uuid, version: versionDoc.version }
+    deleteImageTag({ namespace: deployment.uuid, model: model.uuid, version: versionDoc.version }, (level, msg) =>
+      logger[level](msg)
     )
   })
 }

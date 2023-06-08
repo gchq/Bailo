@@ -8,7 +8,7 @@ function getMongoID() {
   return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => Math.floor(Math.random() * 16).toString(16)).toLowerCase()
 }
 
-function getVersionDefinition(populated: boolean): any {
+function getVersionDefinition(populated: boolean) {
   if (!populated) {
     return {
       type: 'string',
@@ -500,7 +500,7 @@ function getUiConfigDefinition() {
   return parseValue(uiConfig)
 }
 
-function parseValue(value: any) {
+function parseValue(value: unknown) {
   if (typeof value === 'string') {
     return {
       type: 'string',
@@ -519,8 +519,10 @@ function parseValue(value: any) {
       properties: {},
     }
 
-    for (const [key, child] of Object.entries(value)) {
-      parent.properties[key] = parseValue(child)
+    if (value !== null) {
+      for (const [key, child] of Object.entries(value)) {
+        parent.properties[key] = parseValue(child)
+      }
     }
 
     return parent
@@ -568,8 +570,37 @@ export function generateSpecification() {
         name: 'config',
         description: 'Get and update the server configuration',
       },
+      {
+        name: 'export',
+        description: 'Export a specific version of a deployed model',
+      },
     ],
     paths: {
+      '/api/v1/deployment/:uuid/version/:version/export': {
+        get: {
+          tags: ['export'],
+          description: 'Export a full model version',
+          parameters: [
+            {
+              name: 'uuid',
+              in: 'path',
+              description: 'UUID of the Deployment.',
+              type: 'string',
+            },
+            {
+              name: 'version',
+              in: 'path',
+              description: 'The name of the specific version to export',
+              type: 'string',
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'An archived file containing the full model of the version specified.',
+            },
+          },
+        },
+      },
       '/model': {
         post: {
           tags: ['model'],

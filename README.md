@@ -98,9 +98,6 @@ DOCKER_BUILDKIT=1 docker-compose build --parallel
 
 # Then run the development instance of Bailo.
 docker-compose up -d
-
-# Wait for service to start, then add some schemas.
-npm run script -- exampleSetAllSchemas
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript
@@ -132,6 +129,7 @@ npm run script -- addUploadSchema
 | Registry   | 5000  | HTTPS only, no UI     |
 | Minio UI   | 9001  | minioadmin:minioadmin |
 | Minio      | 9000  | minioadmin:minioadmin |
+| MailCrab   | 1080  | Fake email server     |
 
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to
 something more secure.

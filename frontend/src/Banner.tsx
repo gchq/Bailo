@@ -22,7 +22,7 @@ function Banner() {
     return <Card sx={style}>Unable to load uiConfig</Card>
   }
 
-  if (isUiConfigLoading || !uiConfig?.banner?.enable) {
+  if (isUiConfigLoading || !uiConfig?.banner?.enabled) {
     return null
   }
 

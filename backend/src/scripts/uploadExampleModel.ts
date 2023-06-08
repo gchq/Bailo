@@ -1,10 +1,10 @@
-import Bailo from '../external/BailoClient.js'
 import { fileFromPath } from 'formdata-node/file-from-path'
 import fs from 'fs'
 import open from 'open'
 import { join } from 'path'
 import { fileURLToPath } from 'url'
 
+import Bailo from '../external/BailoClient.js'
 import logger from '../utils/logger.js'
 
 async function uploadExampleModel() {
@@ -13,12 +13,14 @@ async function uploadExampleModel() {
 
   const defaultSchema = await api.getDefaultSchema('UPLOAD')
 
-  const metadata = JSON.parse(fs.readFileSync(join(__dirname, '../../cypress/fixtures/minimal_metadata.json'), 'utf-8'))
+  const metadata = JSON.parse(
+    fs.readFileSync(join(__dirname, '../../../frontend/cypress/fixtures/minimal_metadata.json'), 'utf-8')
+  )
   metadata.schemaRef = defaultSchema.schema.reference
 
   const { uuid } = await api.postModel(
-    await fileFromPath(join(__dirname, '../../cypress/fixtures/minimal_code.zip')),
-    await fileFromPath(join(__dirname, '../../cypress/fixtures/minimal_binary.zip')),
+    await fileFromPath(join(__dirname, '../../../frontend/cypress/fixtures/minimal_code.zip')),
+    await fileFromPath(join(__dirname, '../../../frontend/cypress/fixtures/minimal_binary.zip')),
     metadata
   )
 

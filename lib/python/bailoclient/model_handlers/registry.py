@@ -7,7 +7,7 @@ def bundler(flavour: ModelFlavour):
     """Bundler decorator for registering a model bundler
 
     Args:
-        flavour (ModelFlavour): Model flavour
+        flavour: Model flavour
     """
 
     def register_bundler(func):

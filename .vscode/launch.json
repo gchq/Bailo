@@ -8,7 +8,7 @@
       "port": 9229,
       "address": "localhost",
       "localRoot": "${workspaceRoot}/backend",
-      "remoteRoot": "/app/backend",
+      "remoteRoot": "/app",
       "restart": true
     }
   ]

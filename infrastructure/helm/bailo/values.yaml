@@ -24,9 +24,9 @@ autoscaling:
   targetCPUUtilizationPercentage: 80 # hpa configuration
   targetMemoryUtilizationPercentage: 80 # hpa configuration
 
-
 # Pod Security settings
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 securityContext:
   # capabilities:
@@ -37,18 +37,18 @@ securityContext:
   # runAsUser: 1002380001
 
 # Networking
-# Ingress/route implementation. Also, see appPublicRoute below. 
+# Ingress/route implementation. Also, see appPublicRoute below.
 service:
   type: ClusterIP
   frontendPort: 3000
   backendPort: 3001
 
-
 # k8s | aws config
 ingress:
   enabled: false
   name: "nginx"
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true
   fqdn: "example.com"
@@ -58,10 +58,26 @@ ingress:
     name: "node-port"
     port: 8080
 
-# Used for OpenShift 
+# Used for OpenShift
 route:
   enabled: false # false for k8s | aws
-  appPublicRoute: 'route-url' # can also be used for aws loadbalancer url 
+  appPublicRoute: "route-url" # can also be used for aws loadbalancer url
+
+# Oauth | Congnito
+# using bash for generating cookie secret example
+# dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_'; echo
+cookie:
+    secret: 'somerandomstring12341234567890AB'
+oauth:
+  enabled: false
+  origin: 'bailo fqdn'
+  cognito: 
+    key: 'cognito app client id'
+    secret: 'cognito app client secret'
+    dynamic: [] # example 'scope'
+    response: [] #example 'tokens', 'raw', 'jwt'
+    callback: '' # exmaple /
+    subdomain: 'cognito domain'
 
 # Used for aws storage
 aws:
@@ -85,7 +101,6 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
 
-
 # Pod placement
 nodeSelector: {}
 tolerations: []
@@ -106,9 +121,9 @@ mongodb:
     rootPassword: ""
     replicaSetKey: ""
     #existingSecret: "bailo-mongodb" # HELM generated Secret name. Uncomment Mongo Secret details from bailo.secret.yaml for dynamic password configuration.
-    usernames: [ bailo_user ] # defined user for database connection. required for ConfigMap bailo-config
-    passwords: [ ] # required for ConfigMap bailo-config
-    databases: [ bailo ] # defined database for Mongo
+    usernames: [bailo_user] # defined user for database connection. required for ConfigMap bailo-config
+    passwords: [] # required for ConfigMap bailo-config
+    databases: [bailo] # defined database for Mongo
   service:
     port: 27017
   collectionName: bailo # Collection name in Mongo
@@ -166,13 +181,12 @@ registry:
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
-  certFile: cert.pem  #use san.cnf to create certs
+  certFile: cert.pem #use san.cnf to create certs
   keyFile: key.pem
-
 
 # Nginx Dependencies
 nginxAuth:
-  repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user. 
+  repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unrivileged user.
   tag: latest
   #host: "bailo-nginx" # service name
   port: 8080
@@ -184,10 +198,10 @@ nginxAuth:
 mail:
   enabled: true
 
-# Openshift specific configuration   
+# Openshift specific configuration
 openshift:
   namespace: openshift-project
-  dockerPushSecretName: 'registry-push-secret'
+  dockerPushSecretName: "registry-push-secret"
   termination: edge
 
 # Instance Settings
@@ -201,35 +215,32 @@ config:
     banner:
       enabled: false
       text: "BAILO"
-      colour: '#047a06'
+      colour: "#047a06"
 
   smtp:
     #host: 'mail' #service name
     port: 1025
     secure: false
     rejectUnauthorized: false
-    user: 'mailuser'
-    pass: 'mailpass'
-    from: 'bailo@example.com'
+    user: "mailuser"
+    pass: "mailpass"
+    from: "bailo@example.com"
 
   build:
     environment: openshift # or img for k8s | aws
 
   app:
-    protocol: 'https'
+    protocol: "https"
     port: 443
-
-  schema:
-    script: 'dist/server/scripts/exampleSetAllSchemas.js'
 
 # logging https://github.com/gchq/stroom
 stroom:
   enabled: false
-  url: 'http://localhost:8090/stroom/datafeed'
-  folder: './logs/stroom'
-  system: 'bailo'
-  feed: 'bailo'
-  environment: 'Development'
+  url: "http://localhost:8090/stroom/datafeed"
+  folder: "./logs/stroom"
+  system: "bailo"
+  feed: "bailo"
+  environment: "Development"
   insecure: true
   interval: 300000
 

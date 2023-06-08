@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 from glob import glob
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Optional
 
 from pkg_resources import resource_filename
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -39,7 +39,7 @@ class Client:
         """Get schema for a model by its UUID
 
         Args:
-            model_uuid (str): the external UUID of a model.
+            model_uuid: the external UUID of a model.
 
         Returns:
             dict: The schema associated with a given model
@@ -82,7 +82,7 @@ class Client:
         """Get particular user by name
 
         Args:
-            name (str): Name of user
+            name: Name of user
 
         Raises:
             UserNotFound: The user could not be found
@@ -100,18 +100,18 @@ class Client:
         self,
         deployment_uuid: str,
         model_version: str,
-        file_type: str = None,
+        file_type: Optional[str] = None,
         output_dir: str = "./model/",
         overwrite: bool = False,
     ):
         """Download the code or binary for a model. file_type can either be 'binary' or 'code'.
 
         Args:
-            deployment_uuid (str): UUID of the deployment
-            model_version (str): Version of the model
-            file_type (str, optional): Model files to download. Either 'code' or 'binary'. Defaults to "binary".
-            output_dir (str, optional): Output directory for file downloads. Defaults to "./model/".
-            overwrite (bool, optional): Whether to overwrite an existing folder with download. Defaults to False.
+            deployment_uuid: UUID of the deployment
+            model_version: Version of the model
+            file_type: Model files to download. Either 'code' or 'binary'.
+            output_dir: Output directory for file downloads. Defaults to "./model/".
+            overwrite: Whether to overwrite an existing folder with download. Defaults to False.
 
         Raises:
             InvalidFileRequested: Invalid file type - must be 'code' or 'binary'
@@ -153,7 +153,7 @@ class Client:
         """Get deployment by deployment UUID
 
         Args:
-            deployment_uuid (str): Deployment UUID
+            deployment_uuid: Deployment UUID
 
         Returns:
             dict: Deployment
@@ -164,7 +164,7 @@ class Client:
         """Get deployments for a given user
 
         Args:
-            user_id (str): ID of the user
+            user_id: ID of the user
 
         Returns:
             list[dict]: Deployments for user
@@ -188,9 +188,9 @@ class Client:
         """Find a particular deployment belonging to the current user. If multiple matching deployments are found, return the most recent deployment.
 
         Args:
-            deployment_name (str): Name of the deployment
-            model_uuid (str): UUID of the model associated with the deployment
-            model_version (str, optional): Version of the model that the deployment was created for. Defaults to None.
+            deployment_name: Name of the deployment
+            model_uuid: UUID of the model associated with the deployment
+            model_version: Version of the model that the deployment was created for. Defaults to None.
 
         Returns:
             dict: Matching deployment
@@ -231,7 +231,7 @@ class Client:
         """Create Model with schema
 
         Args:
-            model (dict): Model data returned from API
+            model: Model data returned from API
 
         Returns:
             Model: Model class object
@@ -245,7 +245,7 @@ class Client:
         """Get list of all models. Optional to filter by filter string
 
         Args:
-            filter_str (str, optional): String to filter models. Defaults to "".
+            filter_str: String to filter models. Defaults to "".
 
         Returns:
             List: List of Models
@@ -265,7 +265,7 @@ class Client:
         """Get list of favourite models. Optional to filter by filter string
 
         Args:
-            filter_str (str, optional): String to filter models. Defaults to "".
+            filter_str: String to filter models. Defaults to "".
 
         Returns:
             List: List of Models
@@ -285,7 +285,7 @@ class Client:
         """Get list of models for the current user. Optional to filter by filter string
 
         Args:
-            filter_str (str, optional): String to filter models. Defaults to "".
+            filter_str: String to filter models. Defaults to "".
 
         Returns:
             List: List of Models
@@ -302,8 +302,8 @@ class Client:
         """Get a model by its UUID. Optionally retrieve a specific version of a model.
 
         Args:
-            model_uuid (str): Model UUID
-            model_version (str, optional): Model version name/number. Defaults to None.
+            model_uuid: Model UUID
+            model_version: Model version name/number. Defaults to None.
 
         Returns:
             dict: Requested model
@@ -320,7 +320,7 @@ class Client:
         """Internal method to retrieve model card by its internal ID (e.g. 62d9abb7e5eb14ee63823618)
 
         Args:
-            model_id (str): Internal model ID
+            model_id: Internal model ID
 
         Returns:
             dict: Requested model
@@ -331,7 +331,7 @@ class Client:
         """Get all versions of a model
 
         Args:
-            model_uuid (str): Model UUID
+            model_uuid: Model UUID
 
         Returns:
             List[dict]: List of versions
@@ -342,24 +342,20 @@ class Client:
         """Get all deployments of a model
 
         Args:
-            model_uuid (str): Model UUID
+            model_uuid: Model UUID
 
         Returns:
             List[dict]: List of deployments of the model
         """
         return self.api.get(f"model/{model_uuid}/deployments")
 
-    def upload_model(
-        self, metadata: dict, binary_file: str, code_file: str, aws_gateway: bool = True
-    ) -> str:
+    def upload_model(self, metadata: dict, binary_file: str, code_file: str) -> str:
         """Upload a new model
 
         Args:
-            metadata (dict): Required metadata for upload
-            binary_file (str): Path to model binary file
-            code_file (str): Path to model code file
-            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
-                                Defaults to True.
+            metadata: Required metadata for upload
+            binary_file: Path to model binary file
+            code_file: Path to model code file
 
         Returns:
             str: UUID of the new model
@@ -381,7 +377,7 @@ class Client:
 
         payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, self.config.aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
@@ -394,17 +390,14 @@ class Client:
         model_uuid: str,
         binary_file: str,
         code_file: str,
-        aws_gateway: bool = True,
     ) -> str:
         """Update an existing model based on its UUID.
 
         Args:
-            metadata (dict): Updated model metadata
-            model_uuid (str): UUID of model to update
-            binary_file (str): Path to the model binary file
-            code_file (str): Path to the model code file
-            aws_gateway (bool): Whether or not the data will be uploaded via AWS gateway.
-                                Defaults to True.
+            metadata: Updated model metadata
+            model_uuid: UUID of model to update
+            binary_file: Path to the model binary file
+            code_file: Path to the model code file
 
         Returns:
             str: UUID of the updated model
@@ -426,7 +419,7 @@ class Client:
 
         payload = generate_payload(metadata_json, binary_file, code_file)
 
-        if too_large_for_gateway(payload, aws_gateway):
+        if too_large_for_gateway(payload, self.config.aws_gateway):
             raise ValueError(
                 "Payload too large; JWT Auth running through AWS Gateway (10M limit)"
             )
@@ -439,7 +432,7 @@ class Client:
         """Request a new deployment of a model
 
         Args:
-            metadata (dict): Deployment metadata. See deployment.json for minimal metadata required.
+            metadata: Deployment metadata. See deployment.json for minimal metadata required.
         """
         validate_uploads(
             metadata=metadata,
@@ -458,16 +451,16 @@ class Client:
 
     def _post_model(
         self,
-        model_data,
+        model_data: MultipartEncoder,
         mode: str = "newModel",
-        model_uuid: str = None,
+        model_uuid: Optional[str] = None,
     ) -> str:
         """Post a new model or an updated model
 
         Args:
-            model_data (MultipartEncoder): encoded payload for uploading
-            mode (str, optional): newModel or newVersion. Defaults to "newModel".
-            model_uuid (str, optional): Model UUID if updating an existing model. Defaults to None.
+            model_data: encoded payload for uploading
+            mode: newModel or newVersion. Defaults to "newModel".
+            model_uuid: Model UUID if updating an existing model. Defaults to None.
 
         Raises:
             ValueError: Invalid mode
@@ -496,7 +489,7 @@ class Client:
         """Increment the latest version of a model by 1
 
         Args:
-            model_uuid (str): UUID of the model
+            model_uuid: UUID of the model
 
         Returns:
             str: incremented version number
@@ -528,11 +521,12 @@ def create_cognito_client(
     client_secret: str,
     region: str,
     ca_verify: Union[bool, str] = True,
+    aws_gateway: bool = True,
 ) -> Client:
     """Create an authorised Cognito client
 
     Args:
-        bailo_url: Bailo URL
+        bailo_url: URL of the Bailo instance
         username: Cognito username
         password: Cognito password
         user_pool_id: Cognito user pool ID
@@ -540,6 +534,7 @@ def create_cognito_client(
         client_secret: Cognito client secret
         region: Cognito region
         ca_verify: Verify SSL certificates. Provide a path to use a custom cert
+        aws_gateway: Is Bailo load balanced with an aws gateway
 
     Returns:
         Client: Authorised Bailo Client
@@ -554,20 +549,30 @@ def create_cognito_client(
         region=region,
     )
 
-    config = BailoConfig(auth=cognito_config, bailo_url=bailo_url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=cognito_config,
+        bailo_url=bailo_url,
+        ca_verify=ca_verify,
+        aws_gateway=aws_gateway,
+    )
 
     return Client(config)
 
 
 def create_pki_client(
-    p12_file: str, url: str, ca_verify: Union[str, bool] = True
+    p12_file: str,
+    bailo_url: str,
+    ca_verify: Union[str, bool] = True,
+    aws_gateway: bool = True,
 ) -> Client:
     """Create an authorised PKI client
 
     Args:
         p12_file: Path to P12 file
         ca_verify: Path to CA file
-        url: Bailo URL
+        bailo_url: URL of the Bailo instance
+        aws_gateway: Is Bailo load balanced with an aws gateway
+
 
     Returns:
         Client: Authorised Bailo Client
@@ -577,20 +582,27 @@ def create_pki_client(
     )
 
     pki_config = Pkcs12Config(pkcs12_filename=p12_file, pkcs12_password=p12_pwd)
-    config = BailoConfig(auth=pki_config, bailo_url=url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=pki_config, bailo_url=url, ca_verify=ca_verify, aws_gateway=aws_gateway
+    )
 
     return Client(config)
 
 
-def create_null_client(url: str, ca_verify: Union[str, bool] = True):
+def create_null_client(
+    bailo_url: str, ca_verify: Union[str, bool] = True, aws_gateway: bool = True
+):
     """Create an unauthorised client
 
     Args:
-        url: Bailo URL
+        bailo_url: URL of the Bailo instance
         ca_verify: Path to CA file
+        aws_gateway: Is Bailo load balanced with an aws gateway
 
     Returns:
         Client: Bailo Client
     """
-    config = BailoConfig(auth=None, bailo_url=url, ca_verify=ca_verify)
+    config = BailoConfig(
+        auth=None, bailo_url=bailo_url, ca_verify=ca_verify, aws_gateway=aws_gateway
+    )
     return Client(config)

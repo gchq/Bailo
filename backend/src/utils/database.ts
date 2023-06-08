@@ -35,7 +35,13 @@ export async function runMigrations() {
   files.sort()
 
   for (const file of files) {
+    // Don't process non code files
     if (!file.endsWith('.js') && !file.endsWith('.ts')) {
+      continue
+    }
+
+    // Don't process declaration files
+    if (file.endsWith('.d.ts')) {
       continue
     }
 
