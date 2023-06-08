@@ -19,8 +19,7 @@ describe('Upload page', () => {
     cy.get('[data-test=selectModel]').click()
     //model.cy.ts example
     cy.log('Selecting minimal_code.zip file')
-    // cy.get('[for=select-code-file]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
-    cy.get('[data-test=selectModel]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
+    cy.get('input[type="file"]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
   })
 })
 
