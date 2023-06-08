@@ -20,6 +20,8 @@ describe('Upload page', () => {
     //model.cy.ts example
     cy.log('Selecting minimal_code.zip file')
     cy.get('input[type="file"]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
+    cy.get('.PrivateSwitchBase-input').click()
+    cy.get('[data-test=submitButton]').click()
   })
 })
 
