@@ -5,14 +5,17 @@ import React, { Dispatch, SetStateAction, useState } from 'react'
 
 import { SplitSchema } from '../../types/interfaces'
 import FormDesigner from './FormDesigner'
+import FormImport from './FormImport'
 import FormUpload from './FormUpload'
 
 export default function Form({
+  setError,
   splitSchema,
   setSplitSchema,
   onSubmit,
   modelUploading = false,
 }: {
+  setError: (error: string) => void
   splitSchema: SplitSchema
   onSubmit: () => void
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
@@ -29,6 +32,7 @@ export default function Form({
         <Tabs value={tab} onChange={onTabChange}>
           <Tab label='Designer' value='designer' />
           <Tab label='Upload Existing' value='upload' data-test='uploadJsonTab' />
+          <Tab label='Import Model' value='import' data-test='importModelTab' />
         </Tabs>
       </Box>
 
@@ -41,6 +45,7 @@ export default function Form({
         />
       )}
       {tab === 'upload' && <FormUpload splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />}
+      {tab === 'import' && <FormImport setError={setError} />}
     </>
   )
 }

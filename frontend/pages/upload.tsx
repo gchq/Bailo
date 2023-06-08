@@ -204,6 +204,7 @@ function Upload() {
 
       <SubmissionError error={error} />
       <Form
+        setError={setError}
         splitSchema={splitSchema}
         setSplitSchema={setSplitSchema}
         onSubmit={onSubmit}
