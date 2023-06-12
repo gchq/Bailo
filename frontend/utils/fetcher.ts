@@ -1,3 +1,5 @@
+import { redirectToLoginPage } from 'utils/loginUtils'
+
 export type ErrorInfo = Error & {
   info: {
     message: string
@@ -12,6 +14,9 @@ export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!res.ok) {
+    if (res.status === 401) {
+      redirectToLoginPage()
+    }
     const error: ErrorInfo = {
       ...new Error('An error occurred while fetching the data.'),
       info: await res.json(),
@@ -29,6 +34,9 @@ export const fetcher = async (input: RequestInfo, init: RequestInit) => {
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!res.ok) {
+    if (res.status === 401) {
+      redirectToLoginPage()
+    }
     const error: ErrorInfo = {
       ...new Error('An error occurred while fetching the data.'),
       info: await res.json(),

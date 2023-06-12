@@ -4,6 +4,7 @@ import { join } from 'path'
 import { fileURLToPath } from 'url'
 
 import Bailo from '../external/BailoClient.js'
+import { EntityKind, ModelMetadata, ModelUploadType } from '../types/types.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import logger from '../utils/logger.js'
 
@@ -17,7 +18,7 @@ async function uploadTarModel() {
 
   const defaultSchema = await api.getDefaultSchema('UPLOAD')
 
-  const metadata: any = {
+  const metadata: ModelMetadata = {
     highLevelDetails: {
       tags: ['NLP', 'Natural Language Processing', 'BERT', 'Google', 'context'],
       name: 'BERT Language',
@@ -28,25 +29,25 @@ async function uploadTarModel() {
     contacts: {
       uploader: [
         {
-          kind: 'user',
+          kind: EntityKind.USER,
           id: 'user',
         },
       ],
       reviewer: [
         {
-          kind: 'user',
+          kind: EntityKind.USER,
           id: 'user',
         },
       ],
       manager: [
         {
-          kind: 'user',
+          kind: EntityKind.USER,
           id: 'user',
         },
       ],
     },
     buildOptions: {
-      uploadType: 'Prebuilt Docker image',
+      uploadType: ModelUploadType.Docker,
       seldonVersion: 'seldonio/seldon-core-s2i-python37:1.10.0',
     },
   }

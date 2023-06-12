@@ -1,10 +1,8 @@
-import shelljs from 'shelljs'
+import { execaCommand } from 'execa'
 
 import config from '../config.js'
 import logger from '../logger.js'
 import { BuildLogger } from './BuildLogger.js'
-
-const { exec } = shelljs
 
 export async function pullBuilderImage() {
   if (config.build.environment === 'openshift') {
@@ -14,8 +12,8 @@ export async function pullBuilderImage() {
 
   await runCommand(
     `img pull ${config.ui.seldonVersions[0].image}`,
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.info({}, msg)),
-    (data: string) => data.split(/\r?\n/).map((msg: string) => logger.error({}, msg))
+    (data: string) => data.split(/\r?\\?\n/).map((msg: string) => logger.info({}, msg)),
+    (data: string) => data.split(/\r?\\?\n/).map((msg: string) => logger.error({}, msg))
   )
 }
 
@@ -28,8 +26,8 @@ export interface FileRef {
 export function logCommand(command: string, buildLogger: BuildLogger) {
   return runCommand(
     command,
-    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.info({}, msg)),
-    (data: string) => data.split(/\r?\n/).map((msg: string) => buildLogger.error({}, msg))
+    (data: string) => data.split(/(\r?\n)|(\\n)/g).map((msg: string) => buildLogger.info({}, msg)),
+    (data: string) => data.split(/(\r?\n)|(\\n)/g).map((msg: string) => buildLogger.error({}, msg))
   )
 }
 
@@ -44,13 +42,21 @@ export async function runCommand(
   onStderr: (data: string) => void,
   opts: RunCommandOptions = {}
 ) {
-  const childProcess = exec(command, { async: true, silent: true })
+  const childProcess = execaCommand(command)
   childProcess.stdout?.on('data', (data) => {
-    onStdout(data.trim())
+    data
+      .toString('utf-8')
+      .split(/(\r?\n)|(\\n)/g)
+      .filter((msg) => msg && msg !== '\\n' && msg !== '\n')
+      .forEach((msg: string) => onStdout(msg))
   })
 
   childProcess.stderr?.on('data', (data) => {
-    onStderr(data.trim())
+    data
+      .toString('utf-8')
+      .split(/(\r?\n)|(\\n)/g)
+      .filter((msg) => msg && msg !== '\\n' && msg !== '\n')
+      .forEach((msg: string) => onStderr(msg))
   })
 
   await new Promise((resolve, reject) => {

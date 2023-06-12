@@ -63,6 +63,22 @@ route:
   enabled: false # false for k8s | aws
   appPublicRoute: "route-url" # can also be used for aws loadbalancer url
 
+# Oauth | Congnito
+# using bash for generating cookie secret example
+# dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_'; echo
+cookie:
+    secret: 'somerandomstring12341234567890AB'
+oauth:
+  enabled: false
+  origin: 'bailo fqdn'
+  cognito: 
+    key: 'cognito app client id'
+    secret: 'cognito app client secret'
+    dynamic: [] # example 'scope'
+    response: [] #example 'tokens', 'raw', 'jwt'
+    callback: '' # exmaple /
+    subdomain: 'cognito domain'
+
 # Used for aws storage
 aws:
   enabled: false
