@@ -2,7 +2,7 @@ import DeploymentModel from '../models/Deployment.js'
 import ModelModel from '../models/Model.js'
 import VersionModel from '../models/Version.js'
 import logger from '../utils/logger.js'
-import { copyDockerImage, createRegistryClient } from '../utils/registry.js'
+import { copyDockerImage } from '../utils/skopeo.js'
 
 export async function up() {
   const deployments = await DeploymentModel.find({})
@@ -16,9 +16,7 @@ export async function up() {
         const version = await VersionModel.findById(versionId)
         if (!version) throw new Error('Version not found')
 
-        const registry = await createRegistryClient()
         await copyDockerImage(
-          registry,
           { namespace: 'internal', model: model.uuid, version: version.version },
           { namespace: deployment.uuid, model: model.uuid, version: version.version },
           (level: 'info' | 'error', message: string) => {

@@ -13,12 +13,14 @@ async function uploadExampleModel() {
 
   const defaultSchema = await api.getDefaultSchema('UPLOAD')
 
-  const metadata = JSON.parse(fs.readFileSync('/home/ec2-user/git/Bailo/frontend/cypress/fixtures/minimal_metadata.json', 'utf-8'))
+  const metadata = JSON.parse(
+    fs.readFileSync(join(__dirname, '../../../frontend/cypress/fixtures/minimal_metadata.json'), 'utf-8')
+  )
   metadata.schemaRef = defaultSchema.schema.reference
 
   const { uuid } = await api.postModel(
-    await fileFromPath('/home/ec2-user/git/Bailo/frontend/cypress/fixtures/minimal_code.zip'),
-    await fileFromPath('/home/ec2-user/git/Bailo/frontend/cypress/fixtures/minimal_binary.zip'),
+    await fileFromPath(join(__dirname, '../../../frontend/cypress/fixtures/minimal_code.zip')),
+    await fileFromPath(join(__dirname, '../../../frontend/cypress/fixtures/minimal_binary.zip')),
     metadata
   )
 

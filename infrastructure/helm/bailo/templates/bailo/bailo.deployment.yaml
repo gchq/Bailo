@@ -51,7 +51,7 @@ spec:
                   name: {{ include "bailo.fullname" . }}-mongodb
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
-              value: {{ include "bailo.mongoConnectionURI" . | quote }}
+              value: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}'
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}

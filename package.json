@@ -1,18 +1,18 @@
 {
-    "name": "bailo",
-    "version": "0.4.0",
-    "scripts": {
-        "cy:open": "npm --prefix ./frontend/ run cy:open",
-        "cy:run": "npm --prefix ./frontend/ run cy:run",
-        "certs": "npm --prefix ./backend/ run certs",
-        "script": "npm --prefix ./backend/ run script",
-        "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
-        "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
-        "style": "prettier --write \"**/*.{ts,tsx,md}\"",
-        "check-style": "prettier --check \"**/*.{ts,tsx,md}\"",
-        "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/"
-    },
-    "devDependencies": {
-        "prettier": "^2.8.7"
-    }
+  "name": "bailo",
+  "version": "0.4.0",
+  "scripts": {
+    "cy:open": "npm --prefix ./frontend/ run cy:open",
+    "cy:run": "npm --prefix ./frontend/ run cy:run",
+    "certs": "npm --prefix ./backend/ run certs",
+    "script": "npm --prefix ./backend/ run script",
+    "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
+    "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
+    "style": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-style": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.8"
+  }
 }

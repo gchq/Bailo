@@ -7,7 +7,7 @@ import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import { findDeploymentByUuid } from '../../services/deployment.js'
-import { ModelId } from '../../types/types.js'
+import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList } from '../../utils/entity.js'
 import logger from '../../utils/logger.js'
@@ -83,7 +83,7 @@ async function getKid() {
   return formatKid(hash)
 }
 
-async function encodeToken(data: any, { expiresIn }: { expiresIn: string }) {
+async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: string }) {
   const privateKey = await getPrivateKey()
 
   return jwt.sign(
@@ -107,7 +107,7 @@ async function encodeToken(data: any, { expiresIn }: { expiresIn: string }) {
   )
 }
 
-export function getRefreshToken(user: any) {
+export function getRefreshToken(user: UserDoc) {
   return encodeToken(
     {
       sub: user.id,
@@ -158,7 +158,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: any) {
+async function checkAccess(access: Access, user: UserDoc) {
   if (access.type !== 'repository') {
     // not a repository request
     return false
@@ -227,7 +227,10 @@ export const getDockerRegistryAuth = [
     }
 
     if (!scope) {
-      throw Forbidden({}, 'Undefined scope', rlog)
+      // User requesting no scope, they're just trying to login
+      // Because this token has no permissions, it is safe to
+      // provide.
+      return res.json({ token: await getAccessToken(user, []) })
     }
 
     let scopes: Array<string> = []

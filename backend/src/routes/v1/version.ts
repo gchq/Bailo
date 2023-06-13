@@ -90,7 +90,7 @@ export const getVersionFile = [
     }
 
     const fileList = await findVersionFileList(version)
-    const entry = fileList.find((item: any) => item.fileName === path)
+    const entry = fileList.find((item) => item.fileName === path)
 
     if (!entry) {
       throw NotFound({ code: 'version_not_found', versionId: id, path }, 'Unable to find version file')
@@ -228,7 +228,8 @@ export const postRebuildModel = [
       )
     }
 
-    if (version.metadata?.buildOptions?.uploadType !== ModelUploadType.Zip) {
+    const uploadType = version.metadata?.buildOptions?.uploadType
+    if (!uploadType || ![ModelUploadType.Zip, ModelUploadType.Docker].includes(uploadType)) {
       throw BadReq({ version: version._id }, 'Unable to rebuild a model that was not uploaded as a binary file')
     }
 

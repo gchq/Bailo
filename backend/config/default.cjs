@@ -141,6 +141,34 @@ module.exports = {
     ],
   },
 
+  session: {
+    secret: '',
+  },
+
+  oauth: {
+    enabled: false,
+    provider: 'cognito',
+
+    grant: {
+      // Grant configuration options, provide any option from:
+      // https://www.npmjs.com/package/grant
+      defaults: {
+        origin: '',
+        prefix: '/api/connect',
+        transport: 'session',
+      },
+
+      cognito: {
+        key: '',
+        secret: '',
+        dynamic: ['scope'],
+        response: ['tokens', 'raw', 'jwt'],
+        callback: '/',
+        subdomain: '',
+      },
+    },
+  },
+
   // These settings are PUBLIC and shared with the UI
   ui: {
     // Show a banner at the top of the screen on all pages
