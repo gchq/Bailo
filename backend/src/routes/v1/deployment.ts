@@ -21,7 +21,7 @@ import {
   getModelSchema,
 } from '../../utils/exportModel.js'
 import { getClient } from '../../utils/minio.js'
-import { BadReq, Forbidden, InternalServer, NotFound, Unauthorised } from '../../utils/result.js'
+import { BadReq, Forbidden, InternalServer, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -94,6 +94,24 @@ export const postDeployment = [
         `Unable to find model with name: '${body.highLevelDetails.modelID}'`
       )
     }
+    const approvedVersion: (string | boolean)[] = []
+
+    const version = await findVersionById(req.user, (model as ModelDoc).latestVersion)
+
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+
+    if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
+      approvedVersion.push(version.managerApproved === ApprovalStates.Accepted)
+      approvedVersion.push(version.reviewerApproved === ApprovalStates.Accepted)
+    }
+    if (approvedVersion.length === 0) {
+      throw BadReq({}, 'Latest version of this model must be fully approved before making a deployment')
+    }
 
     const name = body.highLevelDetails.name
       .toLowerCase()
@@ -122,14 +140,6 @@ export const postDeployment = [
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
     await deployment.populate('model')
-    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
-
-    if (!version) {
-      throw NotFound(
-        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
-        'Unable to find version'
-      )
-    }
 
     const managerApproval = await createDeploymentApprovals({
       deployment,
