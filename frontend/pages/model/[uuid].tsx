@@ -43,7 +43,6 @@ import Settings from 'src/model/Settings'
 
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import useNotification from '../../src/common/Snackbar'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
 import { DateString, ModelUploadType, User, Version } from '../../types/types'
@@ -87,7 +86,6 @@ function Model() {
   const { versionAccess } = useGetVersionAccess(version?._id)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
-  const sendNotification = useNotification()
 
   // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
   // It defaults to true, until it hears false from the network access check.
