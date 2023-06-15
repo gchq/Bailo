@@ -27,8 +27,11 @@ export const getDockerFiles = async (modelUuid: string, version: VersionDoc, arc
   }
 }
 
-export const getModelMetadata = async (version: VersionDoc, archive: archiver.Archiver): Promise<VersionDoc> => {
-  archive.append(JSON.stringify(version, null, '\t'), { name: 'version.json' })
+export const getModelMetadata = async (version: VersionDoc, modelUuid: string, archive: archiver.Archiver): Promise<VersionDoc> => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore 
+  const newVersion = {...version._doc, uuid: modelUuid}
+  archive.append(JSON.stringify(newVersion, null, '\t'), { name: 'version.json' })
 
   return version
 }

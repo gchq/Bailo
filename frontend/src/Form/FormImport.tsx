@@ -27,7 +27,6 @@ export default function FormImport({ setError }: { setError: (error: string) => 
 
   const handleModelChange = (e) => {
     const uploadFile = e.target.files[0]
-    console.log(uploadFile)
     if (uploadFile && uploadFile.type === 'application/zip') {
       setUploadModel(uploadFile)
       setError('')

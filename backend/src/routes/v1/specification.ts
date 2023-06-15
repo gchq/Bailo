@@ -596,7 +596,7 @@ export function generateSpecification() {
           },
         },
 
-      '/api/v1/deployment/:uuid/version/:version/export': {
+      '/deployment/{uuid}/version/{version}/export': {
         get: {
           tags: ['export'],
           description: 'Export a full model version',

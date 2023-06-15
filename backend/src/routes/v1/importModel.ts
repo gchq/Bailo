@@ -163,6 +163,14 @@ export const importModel = [
         await version.save()
     }
 
+    if(versionJson.logs) {
+      await VersionModel.findByIdAndUpdate({_id: version._id}, {logs: versionJson.logs})
+      req.log.info(
+        {}, `Adding build logs from previous instance`
+      )
+      await version.save()
+    }
+
     // Upload Docker file to Registry
 
     return res.json({

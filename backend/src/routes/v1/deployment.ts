@@ -356,7 +356,7 @@ export const getExportModelVersion = [
       return InternalServer({ deploymentUuid }, 'A deployment was found without a corresponding model.')
     }
 
-    const version = await findVersionByName(req.user, deployment.model, versionName)
+    const version = await findVersionByName(req.user, deployment.model, versionName, {showLogs: true})
 
     if (!version) {
       throw NotFound({ deployment, versionName }, `Version ${versionName} not found for deployment ${deployment.uuid}.`)
@@ -381,7 +381,7 @@ export const getExportModelVersion = [
 
     archive.pipe(res)
 
-    const modelVersion = await getModelMetadata(version, archive)
+    const modelVersion = await getModelMetadata(version, deployment.model.uuid, archive)
     await getModelSchema(modelVersion.metadata.schemaRef, archive)
 
     const uploadType = modelVersion.metadata.buildOptions?.uploadType
