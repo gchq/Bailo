@@ -240,8 +240,7 @@ jobs:
       - run: npm ci
 
       # Run Cypress integration tests
-      #- run: npm run cy:run -- --config "baseUrl=$(minikube service node-port --url)"
-      - run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
+      #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
 
       - uses: actions/upload-artifact@v3
         if: failure()

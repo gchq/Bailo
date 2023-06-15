@@ -61,7 +61,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > span', { timeout: 6000000 }).should('contain', 'Successfully completed build')
+    cy.get('[data-test=terminalLog] > span', { timeout: 600000 }).should('contain', 'Successfully completed build')
   })
 
   it('Can review, deploy and test a model', () => {
