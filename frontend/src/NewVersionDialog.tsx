@@ -28,9 +28,9 @@ export default function NewVersionDialog({ open, modelUuid, versionNumber, versi
     router.push(getNewVersionPath(VersionUploadType.SIBLING))
   }
 
-  const handleVersionUpdateAndSibling = (): void => {
-    router.push(getNewVersionPath(VersionUploadType.UPDATE_AND_SIBLING))
-  }
+  // const handleVersionUpdateAndSibling = (): void => {
+  //   router.push(getNewVersionPath(VersionUploadType.UPDATE_AND_SIBLING))
+  // }
 
   const handleChild = (): void => {
     router.push(getNewVersionPath(VersionUploadType.CHILD))
@@ -40,16 +40,16 @@ export default function NewVersionDialog({ open, modelUuid, versionNumber, versi
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
         <Stack spacing={1}>
-          <Stack direction='row' spacing={2}>
+          <Stack direction='column' spacing={2}>
             <Button variant='contained' onClick={handleVersionUpdate}>
               Version Update
             </Button>
             <Button variant='contained' onClick={handleSibling}>
               Sibling
             </Button>
-            <Button variant='contained' onClick={handleVersionUpdateAndSibling}>
+            {/* <Button variant='contained' onClick={handleVersionUpdateAndSibling}>
               Version Update + Sibling
-            </Button>
+            </Button> */}
             <Button variant='contained' onClick={handleChild}>
               Child
             </Button>

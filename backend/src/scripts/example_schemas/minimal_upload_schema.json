@@ -59,23 +59,20 @@
           "minLength": 1,
           "maxLength": 5000
         },
-        "modelCardVersionNumber": {
-          "type": "string",
-          "title": "Model version tag",
-          "maxLength": 100,
-          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
-        },
-        "modelCardVersionTag": {
-          "type": "string",
+        "versionNumber": {
           "title": "Model version number",
-          "maxLength": 100,
-          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
-        },
-        "modelCardVersion": {
           "type": "string",
-          "title": "Model version",
-          "maxLength": 100,
-          "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$"
+          "description": "This should be in format #.#.#.",
+          "minLength": 1,
+          "maxLength": 140,
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "versionTag": {
+          "title": "Model version tag",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140,
+          "default": "core"
         },
         "tags": {
           "title": "Descriptive tags for the model.",
@@ -89,7 +86,7 @@
           "uniqueItems": true
         }
       },
-      "required": ["name", "modelInASentence", "modelOverview", "modelCardVersion", "tags"],
+      "required": ["name", "modelInASentence", "modelOverview", "versionNumber", "versionTag", "tags"],
       "additionalProperties": false
     },
     "contacts": {

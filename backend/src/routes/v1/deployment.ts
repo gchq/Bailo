@@ -6,7 +6,7 @@ import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '.
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
-import { findVersionById, findVersionByName } from '../../services/version.js'
+import { findVersionById, findVersionByNumberAndTag } from '../../services/version.js'
 import { ModelDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -239,7 +239,7 @@ export const fetchRawModelFiles = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    const { uuid, version, fileType } = req.params
+    const { uuid, versionNumber, versionTag, fileType } = req.params
     const deployment = await findDeploymentByUuid(req.user, uuid)
 
     if (deployment === null) {
@@ -254,10 +254,14 @@ export const fetchRawModelFiles = [
       )
     }
 
-    const versionDocument = await findVersionByName(req.user, deployment.model, version)
+    // TODO
+    const versionDocument = await findVersionByNumberAndTag(req.user, deployment.model, versionNumber, versionTag)
 
     if (!versionDocument) {
-      throw NotFound({ deployment, version }, `Version ${version} not found for deployment ${deployment.uuid}.`)
+      throw NotFound(
+        { deployment, versionNumber, versionTag },
+        `Version ${versionNumber}-${versionTag} not found for deployment ${deployment.uuid}.`
+      )
     }
 
     if (deployment.managerApproved !== 'Accepted') {

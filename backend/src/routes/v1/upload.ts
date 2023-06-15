@@ -168,8 +168,9 @@ export const postUpload = [
     let version
     try {
       version = await createVersion(req.user, {
-        version: metadata.highLevelDetails.modelCardVersion,
         model: model._id,
+        versionNumber: metadata.highLevelDetails.versionNumber,
+        versionTag: metadata.highLevelDetails.versionTag,
         metadata,
         files: {},
       })
@@ -177,10 +178,11 @@ export const postUpload = [
       if (err.code === 11000) {
         throw Conflict(
           {
-            version: metadata.highLevelDetails.modelCardVersion,
+            versionNumber: metadata.highLevelDetails.versionNumber,
+            versionTag: metadata.highLevelDetails.versionTag,
             model: modelUuid,
           },
-          'This model already has a version with the same name'
+          'This model already has a version with the same number and tag'
         )
       }
 

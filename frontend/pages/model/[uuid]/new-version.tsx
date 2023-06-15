@@ -74,8 +74,8 @@ function Upload() {
       cSchema,
       {
         highLevelDetails: {
-          versionNumber: { 'ui:widget': uploadType === VersionUploadType.SIBLING ? 'nothing' : 'text' },
-          versionTag: { 'ui:widget': uploadType === VersionUploadType.SIBLING ? 'nothing' : 'text' },
+          versionNumber: { 'ui:disabled': uploadType === VersionUploadType.SIBLING },
+          versionTag: { 'ui:disabled': uploadType === VersionUploadType.UPDATE },
         },
         buildOptions: {
           seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
@@ -162,9 +162,9 @@ function Upload() {
     }
 
     // This might need revisiting when models have lots of versions
-    if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
-      return setError('This model already has a version with the same name')
-    }
+    // if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
+    //   return setError('This model already has a version with the same name')
+    // }
 
     // Handle versionNumber/versionTag
     switch (uploadType) {
@@ -172,7 +172,7 @@ function Upload() {
         data.highLevelDetails.versionTag = selectedVersion.versionTag
         break
       case VersionUploadType.SIBLING:
-        data.highLevelDetails.versionTag = selectedVersion.versionNumber
+        data.highLevelDetails.versionNumber = selectedVersion.versionNumber
         break
     }
 

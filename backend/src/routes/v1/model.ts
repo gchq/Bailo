@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { findDeployments } from '../../services/deployment.js'
 import { findModelById, findModelByUuid, findModels, isValidFilter, isValidType } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
-import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
+import { findModelVersions, findVersionById, findVersionByNumberAndTag } from '../../services/version.js'
 import { VersionDoc } from '../../types/types.js'
 import { isUserInEntityList } from '../../utils/entity.js'
 import { BadReq, NotFound, NotImplemented } from '../../utils/result.js'
@@ -138,7 +138,7 @@ export const getModelVersions = [
 export const getModelVersion = [
   ensureUserRole('user'),
   async (req: Request, res: Response) => {
-    const { uuid, version: versionName } = req.params
+    const { uuid, versionNumber, versionTag } = req.params
     const { logs } = req.query
     const showLogs = logs === 'true'
 
@@ -149,14 +149,20 @@ export const getModelVersion = [
     }
 
     let version
-    if (versionName === 'latest') {
+    if (!versionNumber || !versionTag) {
       version = await findVersionById(req.user, model.versions[model.versions.length - 1], { showLogs, populate: true })
     } else {
-      version = await findVersionByName(req.user, model._id, versionName, { showLogs, populate: true })
+      version = await findVersionByNumberAndTag(req.user, model._id, versionNumber, versionTag, {
+        showLogs,
+        populate: true,
+      })
     }
 
     if (!version) {
-      throw NotFound({ code: 'version_not_found', versionName }, `Unable to find version '${versionName}'`)
+      throw NotFound(
+        { code: 'version_not_found', versionNumber, versionTag },
+        `Unable to find version '${versionNumber}-${versionTag}'`
+      )
     }
 
     req.log.info(

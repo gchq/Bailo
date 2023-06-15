@@ -34,6 +34,7 @@ import { useGetVersionAccess } from 'data/version'
 import { Types } from 'mongoose'
 import { useRouter } from 'next/router'
 import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import SubmissionError from 'src/Form/SubmissionError'
 import Build from 'src/model/Build'
 import CodeExplorer from 'src/model/CodeExplorer'
 import Compliance from 'src/model/Compliance'
@@ -197,6 +198,7 @@ function Model() {
   if (isVersionsLoading || !versions) return Loading
   if (isVersionLoading || !version) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
+  if (!uuid) return <SubmissionError error='Missing model uuid' />
 
   // todo rename
   const uploadNewVersionClicked = () => {
@@ -470,6 +472,7 @@ function Model() {
       </Dialog>
       <NewVersionDialog
         open={newVersionWizardOpen}
+        modelUuid={uuid}
         versionNumber={version.versionNumber}
         versionTag={version.versionTag}
         onClose={handleNewVersionWizardClose}

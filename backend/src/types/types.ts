@@ -307,6 +307,8 @@ export interface Version {
   _id: any
   model: ModelDoc | Types.ObjectId
   version: string
+  versionNumber: string
+  versionTag: string
 
   metadata: ModelMetadata
 

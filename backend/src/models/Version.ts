@@ -1,4 +1,4 @@
-import { IndexOptions, model, Schema } from 'mongoose'
+import { model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
 import { ApprovalStates, Version } from '../types/types.js'
@@ -7,8 +7,8 @@ import logger from '../utils/logger.js'
 const VersionSchema = new Schema<Version>(
   {
     model: { type: Schema.Types.ObjectId, ref: 'Model' },
-    versionTag: { type: String, required: true },
     versionNumber: { type: String, required: true },
+    versionTag: { type: String, required: true },
 
     metadata: { type: Schema.Types.Mixed },
 
@@ -40,12 +40,12 @@ const VersionSchema = new Schema<Version>(
 )
 
 VersionSchema.virtual('version').get(function () {
-  return `${versionNumber}-${versionTag}}`
+  return `${this.versionNumber}-${this.versionTag}`
 })
 
 VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
-VersionSchema.index({ model: 1, version: 1 }, { unique: true } as unknown as IndexOptions)
+VersionSchema.index({ model: 1, versionNumber: 1, versionTag: 1 }, { unique: true })
 
 type Level = 'info' | 'error'
 VersionSchema.methods.log = async function log(level: Level, msg: string) {

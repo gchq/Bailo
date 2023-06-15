@@ -37,6 +37,7 @@ export async function filterVersion(user: UserDoc, unfiltered: VersionDoc | null
 }
 
 export async function findVersionById(user: UserDoc, id: ModelId | VersionDoc, opts?: GetVersionOptions) {
+  //let version = VersionModel.findById(id)
   let version = VersionModel.findById(id)
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
@@ -46,13 +47,14 @@ export async function findVersionById(user: UserDoc, id: ModelId | VersionDoc, o
   return filterVersion(user, await version)
 }
 
-export async function findVersionByName(
+export async function findVersionByNumberAndTag(
   user: UserDoc,
   model: ModelId | ModelDoc,
-  name: string,
+  versionNumber: VersionDoc['versionNumber'],
+  versionTag: VersionDoc['versionTag'],
   opts?: GetVersionOptions
 ) {
-  let version = VersionModel.findOne({ model, version: name })
+  let version = VersionModel.findOne({ model, versionNumber, versionTag })
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
   if (!opts?.showLogs) version = version.select({ logs: 0 })
   if (!opts?.showFiles) version = version.select({ 'files.code': 0, 'files.binary': 0 })
@@ -96,7 +98,8 @@ export async function markVersionState(user: UserDoc, _id: ModelId, state: strin
 }
 
 interface CreateVersion {
-  version: string
+  versionNumber: string
+  versionTag: string
   metadata: any
   files: any
   model: ModelId
