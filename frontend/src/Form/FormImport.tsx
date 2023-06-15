@@ -44,6 +44,7 @@ export default function FormImport({ setError }: { setError: (error: string) => 
     const form = new FormData()
     form.append('model', uploadModel)
     if (uploadModel && uploadModel.type === 'application/zip') {
+      setModelUploading(true)
       await axios({
         method: 'post',
         url: '/api/v1/import',
@@ -61,6 +62,7 @@ export default function FormImport({ setError }: { setError: (error: string) => 
             setUploadModel(null)
             setUploadError(true)
             setWarningCheckboxVal(false)
+            setModelUploading(false)
         })
       setUploadModel(null)
     } else {
