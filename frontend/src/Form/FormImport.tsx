@@ -7,6 +7,7 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import FileInput from 'src/common/FileInput'
+import LoadingBar from 'src/common/LoadingBar'
 
 import { useGetUiConfig } from '../../data/uiConfig'
 
@@ -15,6 +16,8 @@ export default function FormImport({ setError }: { setError: (error: string) => 
   const [warningCheckboxVal, setWarningCheckboxVal] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(true)
   const [uploadModel, setUploadModel] = useState<any>()
+  const [modelUploading, setModelUploading] = useState<boolean>(false)
+  const [loadingPercentage, setUploadPercentage] = useState<number>(0)
 
   const handleCheckboxChange = (e) => {
     setWarningCheckboxVal(e.target.checked)
@@ -24,7 +27,8 @@ export default function FormImport({ setError }: { setError: (error: string) => 
 
   const handleModelChange = (e) => {
     const uploadFile = e.target.files[0]
-    if (uploadFile && uploadFile.name.endsWith('.zip')) {
+    console.log(uploadFile)
+    if (uploadFile && uploadFile.type === 'application/zip') {
       setUploadModel(uploadFile)
       setError('')
       setUploadError(false)
@@ -39,12 +43,15 @@ export default function FormImport({ setError }: { setError: (error: string) => 
     e.preventDefault()
     const form = new FormData()
     form.append('model', uploadModel)
-    if (uploadModel && uploadModel.name.endsWith('.zip')) {
+    if (uploadModel && uploadModel.type === 'application/zip') {
       await axios({
         method: 'post',
         url: '/api/v1/import',
         headers: { 'Content-Type': 'multipart/form-data' },
         data: form,
+        onUploadProgress: (progressEvent) => {
+          setUploadPercentage(progressEvent.total ? (progressEvent.loaded * 100) / progressEvent.total : 0)
+        },
       })
         .then(({data}) => {
             router.push(`/model/${data.model.uuid}`)
@@ -105,6 +112,8 @@ export default function FormImport({ setError }: { setError: (error: string) => 
           Submit
         </Button>
       </Box>
+      <LoadingBar showLoadingBar={modelUploading} loadingPercentage={loadingPercentage} />
+
     </>
   )
 }

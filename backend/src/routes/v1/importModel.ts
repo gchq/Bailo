@@ -18,7 +18,7 @@ import { getClient } from '../../utils/minio.js'
 import MinioStore from '../../utils/MinioStore.js'
 import { createFileRef } from '../../utils/multer.js'
 import { getUploadQueue } from '../../utils/queues.js'
-import { BadReq, Conflict } from '../../utils/result.js'
+import { BadReq, Conflict, InternalServer } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { getFileStream, listZipFiles, MinioRandomAccessReader } from '../../utils/zip.js'
 import { MulterFiles } from './upload.js'
@@ -172,23 +172,29 @@ export const importModel = [
 ]
 
 async function streamFileToJSON(fileRef: {bucket: string, path: string, name: string}, documentName: string) {
-    const reader = new MinioRandomAccessReader(minio,fileRef)
+   try {
+     const reader = new MinioRandomAccessReader(minio,fileRef)
+ 
+     const fileList: Array<MinimalEntry> = await listZipFiles(reader)
+ 
+     const documentRef: MinimalEntry | undefined = fileList.find((file) => file.fileName === documentName)
+ 
+     if (!documentRef) {
+         throw BadReq({documentName},`No document found in ${fileRef.name} that matches ${documentName}`)
+     }
+ 
+     const documentText = await (await streamToBuffer( await getFileStream(reader, documentRef))).toString('utf-8')
+     const document = JSON.parse(documentText)
+ 
+     return document
 
-    const fileList: Array<MinimalEntry> = await listZipFiles(reader)
-
-    const documentRef: MinimalEntry | undefined = fileList.find((file) => file.fileName === documentName)
-
-    if (!documentRef) {
-        throw BadReq({documentName},`No document found in ${fileRef.name} that matches ${documentName}`)
-    }
-
-    const documentText = await (await streamToBuffer( await getFileStream(reader, documentRef))).toString('utf-8')
-    const document = JSON.parse(documentText)
-
-    return document
+   } catch (error) {
+    throw InternalServer({fileRef}, `Internal server occured when reading uploaded document`)
+   }
 }
 
 async function streamFileFromMinio(fileRef: {bucket: string, path: string, name: string}, fileName: string) {
+  try {  
     const reader = new MinioRandomAccessReader(minio,fileRef)
 
     const fileList: Array<MinimalEntry> = await listZipFiles(reader)
@@ -202,6 +208,9 @@ async function streamFileFromMinio(fileRef: {bucket: string, path: string, name:
     const fileStream = await getFileStream(reader, fileEntry)
 
     return {fileReference: fileEntry, fileStream}
+  } catch (error) {
+    throw InternalServer({fileRef}, `Internal server occured when reading uploaded document`)
+   }
 }
 
 
