@@ -10,23 +10,27 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
+const removeElevation = {
+  MuiPaper: {
+    defaultProps: {
+      elevation: 0,
+    },
+  },
+  MuiCard: {
+    defaultProps: {
+      elevation: 0,
+    },
+  },
+  MuiAppBar: {
+    defaultProps: {
+      elevation: 0,
+    },
+  },
+}
+
 export const lightTheme = createTheme({
   components: {
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
-    MuiCard: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
-    MuiAppBar: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
+    ...removeElevation,
   },
   palette: {
     mode: 'light',
@@ -81,21 +85,7 @@ export const darkTheme = createTheme({
     },
   },
   components: {
-    MuiCard: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
-    MuiAppBar: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
-      },
-    },
+    ...removeElevation,
     MuiMenuItem: {
       styleOverrides: {
         root: {
