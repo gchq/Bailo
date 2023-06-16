@@ -13,14 +13,14 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
-import TagSelector from 'src/common/TagSelector'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from 'src/types'
 
 import { ListModelType, useListModels } from '../../data/model'
 import EmptyBlob from '../../src/common/EmptyBlob'
+import TagSelector from '../../src/common/TagSelector'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
 import { Model, Version } from '../../types/types'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
