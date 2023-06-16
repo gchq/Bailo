@@ -12,8 +12,9 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import TagSelector from 'src/common/TagSelector'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from 'src/types'
 
 import { ListModelType, useListModels } from '../../data/model'
 import EmptyBlob from '../../src/common/EmptyBlob'
@@ -45,20 +46,21 @@ export default function ExploreModels() {
   }
 
   const updateSelectedTags = (selectedTags: string[]) => {
+    // TODO - When tags are selected, filter the array of models based on the selection
     console.log(selectedTags)
   }
 
   const updateSelectedType = (selectedType: string) => {
     if (selectedType) {
       switch (selectedType) {
-        case 'My models':
-          setGroup('user')
+        case MarketPlaceModelSelectType.MY_MODELS:
+          setGroup(MarketPlaceModelGroup.MY_MODELS)
           break
-        case 'Favourites':
-          setGroup('favourites')
+        case MarketPlaceModelSelectType.FAVOURITES:
+          setGroup(MarketPlaceModelGroup.FAVOURITES)
           break
         default:
-          setGroup('all')
+          setGroup(MarketPlaceModelGroup.ALL)
       }
       mutateModels()
     }
@@ -73,7 +75,6 @@ export default function ExploreModels() {
           p: '2px 4px',
           display: 'flex',
           alignItems: 'center',
-          width: '70%',
           maxWidth: '400px',
           marginBottom: 3,
         }}
@@ -91,12 +92,13 @@ export default function ExploreModels() {
                 <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
               </Tabs>
             </Box>
-            <Box data-test='modelListBox'>
+            <div data-test='modelListBox'>
+              {models === undefined && <EmptyBlob data-test='emptyModelListBlob' text='Error fetching models' />}
               {models &&
                 models.map((model: Model, index: number) => {
                   const latestVersion = model.latestVersion as Version
                   return (
-                    <Box key={model.uuid}>
+                    <Fragment key={model.uuid}>
                       <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
                         <MuiLink
                           variant='h5'
@@ -116,42 +118,23 @@ export default function ExploreModels() {
                       {index !== models.length - 1 && (
                         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                       )}
-                    </Box>
+                    </Fragment>
                   )
                 })}
 
               {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-            </Box>
+            </div>
           </Paper>
         </Grid>
         <Grid sm={4} xs={12}>
           <Stack>
             <Box sx={{ px: 2 }}>
-              <TagSelector
-                label='Tags'
-                multiple
-                tags={[
-                  'tesft123',
-                  '1232g32323',
-                  'ab111hc',
-                  'test12k3',
-                  '123232323',
-                  'asb111c',
-                  'tefgst123',
-                  '1232as32323',
-                  'ab11asfas1c',
-                  'test1asf23',
-                  '123232asf323',
-                  'ab11asfasfasf1c',
-                ]}
-                onChange={updateSelectedTags}
-                size='small'
-              />
+              <TagSelector label='Tags' multiple tags={['test', 'lol']} onChange={updateSelectedTags} size='small' />
             </Box>
             <Box sx={{ p: 2 }}>
               <TagSelector
                 label='Other'
-                tags={['My models', 'Favourites']}
+                tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
                 onChange={updateSelectedType}
                 size='small'
               />

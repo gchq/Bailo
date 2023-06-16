@@ -1,7 +1,7 @@
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 
 type PartialTagSelectorProps =
   | {
@@ -27,7 +27,7 @@ export default function TagSelector({
   multiple,
   size = 'medium',
   expandThreshold = 5,
-}: TagSelectorProps) {
+}: TagSelectorProps): ReactElement {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [expanded, setExpanded] = useState(false)
 
@@ -47,11 +47,11 @@ export default function TagSelector({
         setSelectedTags([...selectedTags, selectedTag])
       }
     } else {
-      setSelectedTags([selectedTag])
+      setSelectedTags(selectedTags[0] !== selectedTag ? [selectedTag] : [])
     }
   }
 
-  function toggleExpansion() {
+  function toggleExpansion(): void {
     setExpanded(!expanded)
   }
 
@@ -59,9 +59,13 @@ export default function TagSelector({
     <Tag key={tag} tag={tag} size={size} active={selectedTags.includes(tag)} handleChange={handleChange} />
   ))
 
+  function displaySelectedTagCount(): string {
+    return multiple && selectedTags.length > 0 ? `(${selectedTags.length} selected)` : ''
+  }
+
   return (
     <>
-      <Typography variant='h6'>{label}</Typography>
+      <Typography variant='h6'>{`${label} ${displaySelectedTagCount()}`}</Typography>
       {!expanded && allTags.slice(0, expandThreshold)}
       {expanded && allTags}
       {tags.length > expandThreshold && (
@@ -74,7 +78,7 @@ export default function TagSelector({
 type TagProps = {
   tag: string
   handleChange: (value: string) => void
-  size?: 'small' | 'medium'
+  size?: TagSelectorProps['size']
   active: boolean
 }
 

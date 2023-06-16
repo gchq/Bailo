@@ -178,9 +178,11 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     },
   })
 
-  function displayBetaTag() {
-    return router.asPath.includes('/beta') ? 'beta' : ''
-  }
+  const betaAdornment = (
+    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
+      beta
+    </Box>
+  )
 
   return (
     <ThemeProvider theme={theme}>
@@ -221,7 +223,8 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 underline='none'
                 style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
               >
-                Bailo <span style={{ color: '#cecece', fontSize: 15 }}>{displayBetaTag()}</span>
+                Bailo
+                {router.asPath.includes('/beta') && betaAdornment}
               </Link>
             </Box>
             {headerTitle}
