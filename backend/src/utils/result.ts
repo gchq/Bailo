@@ -9,11 +9,11 @@ type ErrorDetails =
     }
 
 export interface BailoError extends Error {
-  data: any
+  data: unknown
   code: number
   id?: string
   documentationUrl?: string
-  logger: any
+  logger: Logger
 }
 
 export function GenericError(data: unknown, details: ErrorDetails, code: number, logger?: Logger) {
