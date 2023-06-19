@@ -56,6 +56,10 @@ export function Conflict(data: unknown, details: ErrorDetails, logger?: Logger) 
   return GenericError(data, details, 409, logger)
 }
 
-export function NotImplemented(data: unknown, details: ErrorDetails, logger?: Logger) {
-  return GenericError(data, details, 501, logger)
+export function InternalServer(data: unknown, message: string, logger?: Logger) {
+  return GenericError(data, message, 500, logger)
+}
+
+export function NotImplemented(data: unknown, message: string, logger?: Logger) {
+  return GenericError(data, message, 501, logger)
 }

@@ -89,14 +89,14 @@ export function hasRole(roles: Array<string> | string, user: UserDoc) {
 export function ensureUserRole(roles: Array<string> | string) {
   return function ensureUserRoleMiddleware(req: Request, _res: Response, next: NextFunction) {
     if (!req.user) {
-      throw Forbidden({}, `Unable to authenticate request`)
+      throw Unauthorised({}, `Unable to authenticate request`)
     }
 
     const arrayRoles = typeof roles === 'string' ? [roles] : roles
 
     for (const role of arrayRoles) {
       if (!req.user.roles.includes(role)) {
-        throw Unauthorised({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
+        throw Forbidden({ requestedRole: role, currentRoles: req.user.roles }, `You do not have the '${role}' role`)
       }
     }
 

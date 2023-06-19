@@ -30,7 +30,7 @@ interface FindAndUpdateUserArgs {
   userId?: string
   email?: string
   data?: any
-  roles: Array<string>
+  roles?: Array<string>
 }
 
 export async function findAndUpdateUser({ userId, email, data, roles }: FindAndUpdateUserArgs) {

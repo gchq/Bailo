@@ -25,6 +25,8 @@ export enum ApprovalCategory {
 export interface DeploymentMetadata {
   highLevelDetails: {
     name: string
+    modelID: string
+
     [x: string]: unknown
   }
 
