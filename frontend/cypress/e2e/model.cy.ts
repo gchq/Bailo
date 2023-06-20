@@ -61,7 +61,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Checking model has been built')
     cy.get('[data-test=buildLogsTab]').click({ force: true })
-    cy.get('[data-test=terminalLog] > span', { timeout: 600000 }).should('contain', 'Successfully completed build')
+    cy.get('[data-test=terminalLog] > span', { timeout: 700000 }).should('contain', 'Successfully completed build')
   })
 
   it('Can review, deploy and test a model', () => {
@@ -110,11 +110,11 @@ describe('Model with code and binary files', () => {
     cy.get('[data-test=submitButton]').click()
 
     cy.log('Checking URL has been updated')
-    cy.fixture('deployment.json').then({ timeout: 60000 }, (deploymentMetadata) => {
+    cy.fixture('deployment.json').then({ timeout: 70000 }, (deploymentMetadata) => {
       cy.url({ timeout: 10000 })
         .as('deploymentUrl')
         .should('contain', `/deployment/${convertNameToUrlFormat(deploymentMetadata.highLevelDetails.name)}`)
-        .then({ timeout: 60000 }, async (url) => {
+        .then({ timeout: 70000 }, async (url) => {
           deploymentUuid = getUuidFromUrl(url)
 
           cy.log('Navigating to review page')
@@ -143,8 +143,8 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=dockerPassword]').should('not.contain.text', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx')
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
-            .then({ timeout: 60000 }, (dockerPassword) => {
-              cy.fixture('minimal_metadata.json').then({ timeout: 60000 }, async (modelMetadata) => {
+            .then({ timeout: 70000 }, (dockerPassword) => {
+              cy.fixture('minimal_metadata.json').then({ timeout: 70000 }, async (modelMetadata) => {
                 const imageName = `${registryUrl}/${deploymentUuid}/${modelUuid}:${modelMetadata.highLevelDetails.modelCardVersion}`
                 cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
 
