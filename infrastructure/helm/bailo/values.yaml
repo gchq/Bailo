@@ -4,9 +4,9 @@
 
 # Bailo image location
 image:
-  frontendRepository: "frontend-image-registry.location"
+  frontendRepository: 'frontend-image-registry.location'
   frontendTag: imageTag
-  backendRepository: "backend-image-registry.location"
+  backendRepository: 'backend-image-registry.location'
   backendTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
@@ -46,32 +46,32 @@ service:
 # k8s | aws config
 ingress:
   enabled: false
-  name: "nginx"
+  name: 'nginx'
   annotations:
     {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true
-  fqdn: "example.com"
-  path: "/"
-  pathType: "Prefix"
+  fqdn: 'example.com'
+  path: '/'
+  pathType: 'Prefix'
   service:
-    name: "node-port"
+    name: 'node-port'
     port: 8080
 
 # Used for OpenShift
 route:
   enabled: false # false for k8s | aws
-  appPublicRoute: "route-url" # can also be used for aws loadbalancer url
+  appPublicRoute: 'route-url' # can also be used for aws loadbalancer url
 
 # Oauth | Congnito
 # using bash for generating cookie secret example
 # dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_'; echo
 cookie:
-    secret: 'somerandomstring12341234567890AB'
+  secret: 'somerandomstring12341234567890AB'
 oauth:
   enabled: false
   origin: 'bailo fqdn'
-  cognito: 
+  cognito:
     key: 'cognito app client id'
     secret: 'cognito app client secret'
     dynamic: [] # example 'scope'
@@ -82,10 +82,10 @@ oauth:
 # Used for aws storage
 aws:
   enabled: false
-  storageName: "sc-gp2"
-  pvcMinioName: "bailo-minio"
+  storageName: 'sc-gp2'
+  pvcMinioName: 'bailo-minio'
   pvcMinioStorage: 20Gi
-  pvcMongoName: "bailo-mongodb"
+  pvcMongoName: 'bailo-mongodb'
   pvcMongoStorage: 10Gi
 
 # Pod resource
@@ -111,15 +111,15 @@ mongodb:
   enabled: true
   ssl: false
   sslValidate: false
-  host: "" # serviceName:mongoport/collectioname or serviceName-headless:mongoport/collectionname for mongodb replicaset. see template/_helper.tpl and templates/bailo/bailo.configmap.yaml.
+  host: '' # serviceName:mongoport/collectioname or serviceName-headless:mongoport/collectionname for mongodb replicaset. see template/_helper.tpl and templates/bailo/bailo.configmap.yaml.
   livenessProbe:
     enabled: false
   readinessProbe:
     enabled: false #Rediness probe failed: /bitnami/scripts/readiness-probe.sh: line 9: mongosh: command not found
   auth:
-    rootUser: ""
-    rootPassword: ""
-    replicaSetKey: ""
+    rootUser: ''
+    rootPassword: ''
+    replicaSetKey: ''
     #existingSecret: "bailo-mongodb" # HELM generated Secret name. Uncomment Mongo Secret details from bailo.secret.yaml for dynamic password configuration.
     usernames: [bailo_user] # defined user for database connection. required for ConfigMap bailo-config
     passwords: [] # required for ConfigMap bailo-config
@@ -145,11 +145,11 @@ minio:
   mode: standalone
   auth:
     enable: true
-    rootUser: ""
-    rootPassword: ""
-    existingSecret: "bailo-minio" # Helm generated Secret
-  defaultBuckets: "uploads,registry"
-  createBuckets: "false" # attempt to create buckets
+    rootUser: ''
+    rootPassword: ''
+    existingSecret: 'bailo-minio' # Helm generated Secret
+  defaultBuckets: 'uploads,registry'
+  createBuckets: 'false' # attempt to create buckets
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
   #host: "bailo-minio" # service name
@@ -159,7 +159,7 @@ minio:
   useSSL: false
   persistence:
     #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Stoage is not removed when deployed minio is removed.
-    size: 20Gi
+    size: 30Gi
   containerSecurityContext:
     enabled: false
   podSecurityContext:
@@ -176,11 +176,11 @@ registry:
   repository: registry
   tag: 2
   enabled: true
-  protocol: "https"
+  protocol: 'https'
   #host: "bailo-registry" # service name
   port: 5000 # default 5000
-  insecure: "true"
-  certDir: "/certs"
+  insecure: 'true'
+  certDir: '/certs'
   certFile: cert.pem #use san.cnf to create certs
   keyFile: key.pem
 
@@ -201,46 +201,46 @@ mail:
 # Openshift specific configuration
 openshift:
   namespace: openshift-project
-  dockerPushSecretName: "registry-push-secret"
+  dockerPushSecretName: 'registry-push-secret'
   termination: edge
 
 # Instance Settings
 config:
   s2i:
-    name: "seldonio - 1.10.0"
+    name: 'seldonio - 1.10.0'
     image: seldonio/seldon-core-s2i-python37:1.10.0
-  supportEmail: "support@example.com"
+  supportEmail: 'support@example.com'
 
   ui:
     banner:
       enabled: false
-      text: "BAILO"
-      colour: "#047a06"
+      text: 'BAILO'
+      colour: '#047a06'
 
   smtp:
     #host: 'mail' #service name
     port: 1025
     secure: false
     rejectUnauthorized: false
-    user: "mailuser"
-    pass: "mailpass"
-    from: "bailo@example.com"
+    user: 'mailuser'
+    pass: 'mailpass'
+    from: 'bailo@example.com'
 
   build:
     environment: openshift # or img for k8s | aws
 
   app:
-    protocol: "https"
+    protocol: 'https'
     port: 443
 
 # logging https://github.com/gchq/stroom
 stroom:
   enabled: false
-  url: "http://localhost:8090/stroom/datafeed"
-  folder: "./logs/stroom"
-  system: "bailo"
-  feed: "bailo"
-  environment: "Development"
+  url: 'http://localhost:8090/stroom/datafeed'
+  folder: './logs/stroom'
+  system: 'bailo'
+  feed: 'bailo'
+  environment: 'Development'
   insecure: true
   interval: 300000
 
