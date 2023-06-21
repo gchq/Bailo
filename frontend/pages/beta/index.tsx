@@ -2,23 +2,23 @@ import SearchIcon from '@mui/icons-material/Search'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
-import IconButton from '@mui/material/IconButton'
-import InputBase from '@mui/material/InputBase'
+import InputAdornment from '@mui/material/InputAdornment'
 import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
-import ChipSelector from '../../src/common/ChipSelector'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../src/types'
 
 import { ListModelType, useListModels } from '../../data/model'
+import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../src/types'
 import Wrapper from '../../src/Wrapper'
 import { Model, Version } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
@@ -70,22 +70,25 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <Paper
-        component='form'
-        onSubmit={onFilterSubmit}
+      <TextField
+        color='primary'
+        onClick={onFilterSubmit}
         sx={{
-          p: '2px 4px',
-          display: 'flex',
-          alignItems: 'center',
           maxWidth: '400px',
           marginBottom: 3,
         }}
-      >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
-        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-          <SearchIcon />
-        </IconButton>
-      </Paper>
+        focused
+        placeholder='Filter Models'
+        value={filter}
+        onChange={handleFilterChange}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
       <Grid container>
         <Grid item sm={8} xs={12}>
           <Paper sx={{ py: 2, px: 4 }}>
@@ -95,7 +98,7 @@ export default function ExploreModels() {
               </Tabs>
             </Box>
             <div data-test='modelListBox'>
-              {models === undefined && <EmptyBlob data-test='emptyModelListBlob' text='Error fetching models' />}
+              {(!models || models.length === 0) && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
               {models &&
                 models.map((model: Model, index: number) => {
                   const latestVersion = model.latestVersion as Version
@@ -123,8 +126,6 @@ export default function ExploreModels() {
                     </Fragment>
                   )
                 })}
-
-              {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
             </div>
           </Paper>
         </Grid>
