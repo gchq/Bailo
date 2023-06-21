@@ -3,9 +3,9 @@ describe('Upload page', () => {
     cy.visit('/upload')
   })
 
-  // it('Renders a heading', () => {
-  //   cy.get('[data-test=headerTitle]').should('contain.text', 'Upload Model')
-  // })
+  it('Renders a heading', () => {
+    cy.get('[data-test=headerTitle]').should('contain.text', 'Upload Model')
+  })
 
   it('uploads zip file, but not on duplicate zip', () => {
     cy.get('[data-test=importModelTab]').click({ force: true })
@@ -13,13 +13,16 @@ describe('Upload page', () => {
     //model.cy.ts example
     cy.log('Selecting minimal_code.zip file')
     cy.get('input[type="file"]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
-    cy.get('.PrivateSwitchBase-input').click()
+    cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
+    // add section that navigates to newly imported page: marketplace/model/overview model page
+    // cy.url().should('include', '/minimal_code')
 
     cy.get('[data-test=selectModel]').click()
     cy.log('Selecting minimal_code.zip file')
     cy.get('input[type="file"]').selectFile('cypress/fixtures/minimal_code.zip', { force: true })
-    cy.get('.PrivateSwitchBase-input').click()
+    // delete - cy.get('.PrivateSwitchBase-input').click()
+    cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
     cy.get('.MuiAlert-standardError')
   })
