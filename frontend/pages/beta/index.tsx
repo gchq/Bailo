@@ -13,7 +13,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
-import TagSelector from 'src/common/TagSelector'
+import ChipSelector from 'src/common/ChipSelector'
 import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from 'src/types'
 
 import { ListModelType, useListModels } from '../../data/model'
@@ -131,10 +131,10 @@ export default function ExploreModels() {
         <Grid sm={4} xs={12}>
           <Stack>
             <Box sx={{ px: 2 }}>
-              <TagSelector label='Tags' multiple tags={modelTags} onChange={updateSelectedTags} size='small' />
+              <ChipSelector label='Tags' multiple tags={modelTags} onChange={updateSelectedTags} size='small' />
             </Box>
             <Box sx={{ p: 2 }}>
-              <TagSelector
+              <ChipSelector
                 label='Other'
                 tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
                 onChange={updateSelectedType}
