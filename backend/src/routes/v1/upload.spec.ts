@@ -127,7 +127,13 @@ describe('test upload routes', () => {
     const res = await authenticatedPostRequest(path).set('Content-Type', contentType)
     expect(mockModelService.findModelByUuid).toBeCalledTimes(1)
     expect(mockVersionService.createVersion).toBeCalledTimes(1)
-    expect(res.body).toEqual({ message: 'This model already has a version with the same name' })
+    expect(res.body).toEqual({
+      error: {
+        documentationUrl: '/docs/errors/duplicate-version',
+        message: 'This model already has a version with the same name',
+      },
+    })
+
     expect(res.statusCode).toEqual(409)
     expect(res.header['content-type']).toBe('application/json; charset=utf-8')
   })
