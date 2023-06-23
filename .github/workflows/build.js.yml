@@ -175,6 +175,8 @@ jobs:
           cat << EOT >> infrastructure/helm/bailo/local.yaml
           ---
           # Instance Settings
+          securityContext:
+            runAsUser: 1002
           config:
             ui:
               banner:
@@ -201,7 +203,6 @@ jobs:
                 - MongoDBPassword
               usernames:
                 - bailo_user
-            host: 'bailo-mongodb:27017/bailo'
           EOT
 
       - name: Set Bailo image pull policy to Never
@@ -239,7 +240,7 @@ jobs:
       - run: npm ci
 
       # Run Cypress integration tests
-      # - run: npm run cy:run -- --config baseUrl=$(minikube service node-port --url)
+      #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
 
       - uses: actions/upload-artifact@v3
         if: failure()
