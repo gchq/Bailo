@@ -208,7 +208,21 @@ export const testVersion: any = {
   updatedAt: new Date(),
 }
 
-export const testApprovedVersion = { ...testVersion, reviewerApproved: ApprovalStates.Accepted }
+export const testApprovedVersion = {
+  ...testVersion,
+  reviewerApproved: ApprovalStates.Accepted,
+  managerApproved: ApprovalStates.Accepted,
+}
+
+export const testManagerApprovedVersion = {
+  ...testApprovedVersion,
+  reviewerApproved: ApprovalStates.NoResponse,
+}
+
+export const testReviewerApprovedVersion = {
+  ...testApprovedVersion,
+  managerApproved: ApprovalStates.NoResponse,
+}
 
 export const testVersion2: any = {
   _id: version2Id,

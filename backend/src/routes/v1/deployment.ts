@@ -94,7 +94,6 @@ export const postDeployment = [
         `Unable to find model with name: '${body.highLevelDetails.modelID}'`
       )
     }
-    const approvedVersion: (string | boolean)[] = []
 
     const version = await findVersionById(req.user, (model as ModelDoc).latestVersion)
 
@@ -105,11 +104,7 @@ export const postDeployment = [
       )
     }
 
-    if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
-      approvedVersion.push(version.managerApproved === ApprovalStates.Accepted)
-      approvedVersion.push(version.reviewerApproved === ApprovalStates.Accepted)
-    }
-    if (approvedVersion.length === 0) {
+    if (version.managerApproved !== ApprovalStates.Accepted || version.reviewerApproved !== ApprovalStates.Accepted) {
       throw BadReq({}, 'Latest version of this model must be fully approved before making a deployment')
     }
 

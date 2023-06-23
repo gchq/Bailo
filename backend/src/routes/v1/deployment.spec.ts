@@ -21,7 +21,9 @@ import {
   testApprovedVersion,
   testDeployment,
   testManager,
+  testManagerApprovedVersion,
   testModel,
+  testReviewerApprovedVersion,
   testUser,
   testVersion,
 } from '../../utils/test/testModels.js'
@@ -80,8 +82,24 @@ describe('test deployment routes', () => {
     expect(Object.keys(res.body)[0]).toBe('uuid')
   })
 
+  test('that we cannot request a deployment given the version does not have reviewer approval', async () => {
+    // Given
+    vi.spyOn(validateSchema, 'validateSchema').mockReturnValueOnce(null)
+    vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(managerApproval)
+    vi.spyOn(version, 'findVersionById').mockResolvedValueOnce(testManagerApprovedVersion)
+
+    // When
+    const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
+
+    // Then
+    expect(res.status).toBe(400)
+  })
+
   test('that we cannot request a deployment given the version does not have manager approval', async () => {
     // Given
+    vi.spyOn(validateSchema, 'validateSchema').mockReturnValueOnce(null)
+    vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(managerApproval)
+    vi.spyOn(version, 'findVersionById').mockResolvedValueOnce(testReviewerApprovedVersion)
 
     // When
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
