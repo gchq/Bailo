@@ -302,7 +302,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItemButton>
             </Link>
-            <Link href='/upload' color='inherit' underline='none'>
+            <Link href='/upload' color='inherit' underline='none' data-test='fileUpload'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
                   {!open ? (

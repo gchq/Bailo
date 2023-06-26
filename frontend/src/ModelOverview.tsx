@@ -42,7 +42,9 @@ function ModelOverview({ version }: ModelOverviewProps) {
         >
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model name</Typography>
-            <Typography variant='body1'>{version.metadata.highLevelDetails.name}</Typography>
+            <Typography data-test='modelName' variant='body1'>
+              {version.metadata.highLevelDetails.name}
+            </Typography>
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
