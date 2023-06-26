@@ -1,3 +1,7 @@
+//NOTE* Before each test run clear BAILO of saved model fullImportModel.zip (Minimal Model for Testing).
+//To clear BAILO of all models using Studio 3T:
+//BAILO/bailo/collection, then right click the following files (approvals, deployments, models, versions) and click 'clear collection'.
+
 describe('Upload page', () => {
   beforeEach(() => {
     cy.visit('/upload')
@@ -29,7 +33,7 @@ describe('Upload page', () => {
     cy.get('[data-test=submissionError]').should('contain.text', 'This model already has a version with the same name')
   })
 
-  it.only('errors when importing a zip file without a version.json file', () => {
+  it('errors when importing a zip file without a version.json file', () => {
     //importing model without version.json
     cy.get('[data-test=importModelTab]').click({ force: true })
     cy.get('[data-test=selectModel]').click()
