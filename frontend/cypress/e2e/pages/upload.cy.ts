@@ -42,7 +42,7 @@ describe('Upload page', () => {
     cy.get('[data-test=submitButton]').click()
     cy.get('[data-test=submissionError]').should(
       'contain.text',
-      'Internal server occured when reading uploaded document'
+      'Internal server occurred when reading uploaded document'
     )
   })
 
