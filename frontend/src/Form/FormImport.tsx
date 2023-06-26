@@ -53,15 +53,15 @@ export default function FormImport({ setError }: { setError: (error: string) => 
           setUploadPercentage(progressEvent.total ? (progressEvent.loaded * 100) / progressEvent.total : 0)
         },
       })
-        .then(({data}) => {
-            router.push(`/model/${data.model.uuid}`)
-    })
+        .then(({ data }) => {
+          router.push(`/model/${data.model.uuid}`)
+        })
         .catch((error) => {
-            setError(error.response.data.message)
-            setUploadModel(null)
-            setUploadError(true)
-            setWarningCheckboxVal(false)
-            setModelUploading(false)
+          setError(error.response.data.message)
+          setUploadModel(null)
+          setUploadError(true)
+          setWarningCheckboxVal(false)
+          setModelUploading(false)
         })
       setUploadModel(null)
     } else {
@@ -114,7 +114,6 @@ export default function FormImport({ setError }: { setError: (error: string) => 
         </Button>
       </Box>
       <LoadingBar showLoadingBar={modelUploading} loadingPercentage={loadingPercentage} />
-
     </>
   )
 }
