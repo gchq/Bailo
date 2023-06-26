@@ -8,7 +8,7 @@ describe('Upload page', () => {
   })
 
   it('uploads zip file navigating to the model card page, but errors on duplicate zip uploads', () => {
-    //initial model import
+    //model import
     cy.get('[data-test=importModelTab]').click({ force: true })
     cy.get('[data-test=selectModel]').click()
     cy.get('input[type="file"]').selectFile('cypress/fixtures/fullImportModel.zip', { force: true })
@@ -16,8 +16,10 @@ describe('Upload page', () => {
     cy.get('[data-test=submitButton]').click()
     cy.url().should('include', '/minimal-model-for-testing-pjwi8a')
     cy.get('[data-test=modelName]').should('contain.text', 'Minimal Model for Testing')
+  })
 
-    //importing initial model again
+  it('errors on duplicate zip uploads', () => {
+    //importing duplicate model
     cy.get('[data-test=fileUpload]').click()
     cy.get('[data-test=importModelTab]').click({ force: true })
     cy.get('[data-test=selectModel]').click()
@@ -25,6 +27,19 @@ describe('Upload page', () => {
     cy.get('[data-test=warningCheckbox]').click()
     cy.get('[data-test=submitButton]').click()
     cy.get('[data-test=submissionError]').should('contain.text', 'This model already has a version with the same name')
+  })
+
+  it.only('errors when importing a zip file without a version.json file', () => {
+    //importing model without version.json
+    cy.get('[data-test=importModelTab]').click({ force: true })
+    cy.get('[data-test=selectModel]').click()
+    cy.get('input[type="file"]').selectFile('cypress/fixtures/partImportModel.zip', { force: true })
+    cy.get('[data-test=warningCheckbox]').click()
+    cy.get('[data-test=submitButton]').click()
+    cy.get('[data-test=submissionError]').should(
+      'contain.text',
+      'Internal server occured when reading uploaded document'
+    )
   })
 
   it('errors when uploading non zip file, but error message disappears when a zip file is then uploaded', () => {
