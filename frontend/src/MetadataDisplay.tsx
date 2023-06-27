@@ -17,7 +17,7 @@ function MetadataDisplay({
   tabsDisplaySequentially: boolean
   use: any
 }) {
-  const {schema, isSchemaLoading, isSchemaError } = useGetSchema(item.schemaRef)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(item.schemaRef)
 
   const [currentSchema, setCurrentSchema] = useState<any | undefined>(undefined)
   const [sectionKeys, setSectionKeys] = useState<string[]>([])

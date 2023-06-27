@@ -19,20 +19,20 @@ describe('MetadataDisplay', () => {
     }
 
     const mockedSchema: any = {
-      schema:         {
-          name: 'upload-schema',
-          reference: 'test-schema',
-          use: 'UPLOAD',
-          schema: {
-            type: 'object',
-            properties: {
-              question: {
-                type: 'string',
-                title: 'This is a test question',
-              },
+      schema: {
+        name: 'upload-schema',
+        reference: 'test-schema',
+        use: 'UPLOAD',
+        schema: {
+          type: 'object',
+          properties: {
+            question: {
+              type: 'string',
+              title: 'This is a test question',
             },
           },
         },
+      },
       isSchemaLoading: false,
       isSchemaError: false,
     }
