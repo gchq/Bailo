@@ -43,10 +43,9 @@ import Settings from 'src/model/Settings'
 
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import useNotification from '../../src/common/Snackbar'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import { DateString, ModelUploadType, User, Version } from '../../types/types'
+import { ApprovalCategory, DateString, ModelUploadType, User, Version } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -87,7 +86,6 @@ function Model() {
   const { versionAccess } = useGetVersionAccess(version?._id)
 
   const hasUploadType = useMemo(() => version !== undefined && !!version.metadata.buildOptions?.uploadType, [version])
-  const sendNotification = useNotification()
 
   // isPotentialUploader stores whether an uploader could plausibly have access to privileged functions.
   // It defaults to true, until it hears false from the network access check.
@@ -272,10 +270,9 @@ function Model() {
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
               <ApprovalsChip
-                approvals={[
-                  { reviewers: version.metadata.contacts.manager, status: version.managerApproved },
-                  { reviewers: version.metadata.contacts.reviewer, status: version.reviewerApproved },
-                ]}
+                versionOrDeploymentId={version._id}
+                approvalCategory={ApprovalCategory.Upload}
+                currentUser={currentUser}
               />
               <Divider orientation='vertical' flexItem />
               <Button

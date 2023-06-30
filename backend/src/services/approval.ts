@@ -200,14 +200,19 @@ export async function readApprovals({
   approvalCategory,
   filter,
   archived,
+  versionOrDeploymentId,
 }: {
   approvalCategory: ApprovalCategory
   filter: ApprovalFilter
   archived: boolean
+  versionOrDeploymentId?: string
 }) {
   const query: any = {
     status: 'No Response',
     approvalCategory,
+    ...(versionOrDeploymentId && approvalCategory === ApprovalCategory.Upload && { version: versionOrDeploymentId }),
+    ...(versionOrDeploymentId &&
+      approvalCategory === ApprovalCategory.Deployment && { deployment: versionOrDeploymentId }),
   }
 
   if (filter) {
