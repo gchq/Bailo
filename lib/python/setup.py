@@ -12,7 +12,7 @@ setup(
         "pipreqs >= 0.4.13",
         "pipreqsnb >= 0.2.4",
         "pycognito >= 2022.12.0",
-        "pydantic >= 1.8",
+        "pydantic == 1.8",
         "python-dotenv >= 0.20.0",
         "PyYAML >= 5.4.1",
         "requests >= 2.25.1",
