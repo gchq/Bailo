@@ -296,6 +296,8 @@ jobs:
           docker load --input /tmp/bailo_backend.tar
           docker image ls -a
 
+          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+
       # Create logs directory
       - run: mkdir logs
 
