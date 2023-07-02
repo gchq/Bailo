@@ -346,10 +346,14 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
+      - run: df -h
+
       - uses: cypress-io/github-action@v5
         with:
           working-directory: ./frontend
           install: false
+
+      - run: df -h
 
       - uses: actions/upload-artifact@v3
         if: failure()
@@ -370,6 +374,8 @@ jobs:
       - name: Docker Compose Logs
         if: always()
         run: cat logs/stack.log
+
+      - run: df -h
 
       - uses: actions/upload-artifact@v3
         if: always()
