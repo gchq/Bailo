@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import React, { useEffect, useState } from 'react'
 
-import { useGetSchemas } from '../data/schema'
+import { useGetSchema } from '../data/schema'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 
@@ -17,29 +17,29 @@ function MetadataDisplay({
   tabsDisplaySequentially: boolean
   use: any
 }) {
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(use)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(item.schemaRef)
 
-  const [schema, setSchema] = useState<any | undefined>(undefined)
+  const [currentSchema, setCurrentSchema] = useState<any | undefined>(undefined)
   const [sectionKeys, setSectionKeys] = useState<string[]>([])
 
   const theme = useTheme()
 
   useEffect(() => {
-    if (!schemas) return
+    if (!schema) return
 
     const propertiesToIgnore = ['id', 'timeStamp', 'schemaRef', 'schemaVersion', 'user', 'contacts']
 
-    const currentSchema = schemas.filter(({ reference }) => reference === item.schemaRef)[0].schema
+    const currentSchema = schema.schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) =>
         !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false
     )
 
-    setSchema(currentSchema)
+    setCurrentSchema(currentSchema)
     setSectionKeys(keys)
-  }, [schemas, setSchema, setSectionKeys, item])
+  }, [schema, setCurrentSchema, setSectionKeys, item])
 
-  if (isSchemasLoading) {
+  if (isSchemaLoading) {
     return (
       <Typography variant='body1' component='p'>
         Loading Schemas
@@ -47,7 +47,7 @@ function MetadataDisplay({
     )
   }
 
-  if (isSchemasError) {
+  if (isSchemaError) {
     return (
       <Typography variant='body1' component='p'>
         Error Loading Schemas
@@ -135,18 +135,18 @@ function MetadataDisplay({
   }
 
   const printSections = () => {
-    if (!schema || !schema.properties || !item) {
+    if (!currentSchema || !currentSchema.properties || !item) {
       return null
     }
 
     return sectionKeys.map((key, i) => {
       const divider = i + 1 < sectionKeys.length ? <Divider variant='middle' sx={{ mt: 2, mb: 4 }} /> : null
 
-      return schema.properties[key] ? (
+      return currentSchema.properties[key] ? (
         <div key={key}>
           <div id={`${key}-section-id`}>
-            {heading(`${schema.properties[key].title}`)}
-            {printProps(schema.properties[key], item[key])}
+            {heading(`${currentSchema.properties[key].title}`)}
+            {printProps(currentSchema.properties[key], item[key])}
           </div>
           {divider}
         </div>
