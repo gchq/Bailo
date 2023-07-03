@@ -175,6 +175,12 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     },
   })
 
+  const betaAdornment = (
+    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
+      beta
+    </Box>
+  )
+
   return (
     <ThemeProvider theme={theme}>
       <Head>
@@ -203,18 +209,19 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' color='inherit' underline='none'>
+              <Link href='/beta' color='inherit' underline='none'>
                 <Image src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
               <Link
-                href='/'
+                href='/beta'
                 color='inherit'
                 underline='none'
                 style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
               >
                 Bailo
+                {betaAdornment}
               </Link>
             </Box>
             {headerTitle}
@@ -274,7 +281,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
           </Toolbar>
           <StyledList>
-            <Link href='/' color='inherit' underline='none'>
+            <Link href='/beta' color='inherit' underline='none'>
               <ListItemButton selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
@@ -302,7 +309,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItemButton>
             </Link>
-            <Link href='/upload' color='inherit' underline='none'>
+            <Link href='/beta/create-new-model' color='inherit' underline='none'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
                   {!open ? (

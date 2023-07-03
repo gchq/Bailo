@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 
-import Wrapper from '../../src/Wrapper'
+import Wrapper from '../../src/Wrapper.beta'
 
 type NewModelData = {
   teamName: string
