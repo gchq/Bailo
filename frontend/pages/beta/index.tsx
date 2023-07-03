@@ -77,7 +77,6 @@ export default function ExploreModels() {
           maxWidth: '400px',
           marginBottom: 3,
         }}
-        focused
         placeholder='Filter Models'
         value={filter}
         onChange={handleFilterChange}
