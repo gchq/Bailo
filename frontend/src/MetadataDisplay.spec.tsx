@@ -2,12 +2,12 @@ import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useGetSchemas } from '../data/schema'
+import { useGetSchema } from '../data/schema'
 import MetadataDisplay from './MetadataDisplay'
 import { lightTheme } from './theme'
 
 vi.mock('../data/schema', () => ({
-  useGetSchemas: vi.fn(),
+  useGetSchema: vi.fn(),
 }))
 
 describe('MetadataDisplay', () => {
@@ -19,27 +19,25 @@ describe('MetadataDisplay', () => {
     }
 
     const mockedSchema: any = {
-      schemas: [
-        {
-          name: 'upload-schema',
-          reference: 'test-schema',
-          use: 'UPLOAD',
-          schema: {
-            type: 'object',
-            properties: {
-              question: {
-                type: 'string',
-                title: 'This is a test question',
-              },
+      schema: {
+        name: 'upload-schema',
+        reference: 'test-schema',
+        use: 'UPLOAD',
+        schema: {
+          type: 'object',
+          properties: {
+            question: {
+              type: 'string',
+              title: 'This is a test question',
             },
           },
         },
-      ],
-      isSchemasLoading: false,
-      isSchemasError: false,
+      },
+      isSchemaLoading: false,
+      isSchemaError: false,
     }
 
-    vi.mocked(useGetSchemas).mockReturnValueOnce(mockedSchema).mockReturnValueOnce(mockedSchema)
+    vi.mocked(useGetSchema).mockReturnValueOnce(mockedSchema).mockReturnValueOnce(mockedSchema)
 
     render(
       <ThemeProvider theme={lightTheme}>
