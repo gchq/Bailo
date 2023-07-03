@@ -16,7 +16,7 @@ export default class AuthorisationOAuth {
       }
     }
 
-    const userId = req.session.grant.response.jwt.id_token.payload['identities'][0].userId
+    const userId = req.session.grant.response.jwt.id_token.payload.email
     const email = userId
 
     const data = {}
