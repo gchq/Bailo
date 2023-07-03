@@ -356,7 +356,7 @@ export const getExportModelVersion = [
       return InternalServer({ deploymentUuid }, 'A deployment was found without a corresponding model.')
     }
 
-    const version = await findVersionByName(req.user, deployment.model, versionName, {showLogs: true})
+    const version = await findVersionByName(req.user, deployment.model, versionName, { showLogs: true })
 
     if (!version) {
       throw NotFound({ deployment, versionName }, `Version ${versionName} not found for deployment ${deployment.uuid}.`)

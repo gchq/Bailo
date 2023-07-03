@@ -27,8 +27,12 @@ export const getDockerFiles = async (modelUuid: string, version: VersionDoc, arc
   }
 }
 
-export const getModelMetadata = async (version: VersionDoc, modelUuid: string, archive: archiver.Archiver): Promise<VersionDoc> => {
-  const newVersion = {...version.toJSON(), uuid: modelUuid}
+export const getModelMetadata = async (
+  version: VersionDoc,
+  modelUuid: string,
+  archive: archiver.Archiver
+): Promise<VersionDoc> => {
+  const newVersion = { ...version.toJSON(), uuid: modelUuid }
   archive.append(JSON.stringify(newVersion, null, '\t'), { name: 'version.json' })
 
   return version

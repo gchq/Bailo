@@ -587,14 +587,15 @@ export function generateSpecification() {
               in: 'formData',
               description: 'Imported Model to Upload',
               type: 'file',
-            }],
-            responses: {
-              '200': {
-                description: 'The Success of The Model import. - ModelUUid',
-              }
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'The Success of The Model import. - ModelUUid',
             },
           },
         },
+      },
 
       '/deployment/{uuid}/version/{version}/export': {
         get: {
