@@ -26,7 +26,6 @@ import useDebounce from '../../utils/hooks/useDebounce'
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
   // TODO - fetch model tags from API
-  const [modelTags, _setModelTags] = useState<string[]>(['Example tag', 'And another'])
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
 
@@ -47,8 +46,13 @@ export default function ExploreModels() {
     e.preventDefault()
   }
 
-  const updateSelectedTags = (selectedTags: string[]) => {
-    // TODO - When tags are selected, filter the array of models based on the selection
+  const updateSelectedTasks = (selectedTags: string) => {
+    // TODO - When tasks are selected, filter the array of models based on the selection
+    console.log(selectedTags)
+  }
+
+  const updateSelectedLibraries = (selectedTags: string) => {
+    // TODO - When libraries are selected, filter the array of models based on the selection
     console.log(selectedTags)
   }
 
@@ -131,7 +135,15 @@ export default function ExploreModels() {
         <Grid sm={4} xs={12}>
           <Stack>
             <Box sx={{ px: 2 }}>
-              <ChipSelector label='Tags' multiple tags={modelTags} onChange={updateSelectedTags} size='small' />
+              <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
+            </Box>
+            <Box sx={{ px: 2 }}>
+              <ChipSelector
+                label='Libraries'
+                tags={['Library 1', 'Library 2']}
+                onChange={updateSelectedLibraries}
+                size='small'
+              />
             </Box>
             <Box sx={{ p: 2 }}>
               <ChipSelector
