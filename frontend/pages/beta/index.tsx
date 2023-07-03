@@ -1,16 +1,9 @@
 import SearchIcon from '@mui/icons-material/Search'
+import { IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid'
-import InputAdornment from '@mui/material/InputAdornment'
-import MuiLink from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
 
@@ -74,24 +67,23 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <TextField
-        color='primary'
-        onClick={onFilterSubmit}
+      <Paper
+        component='form'
+        onSubmit={onFilterSubmit}
         sx={{
+          p: '2px 4px',
+          display: 'flex',
+          alignItems: 'center',
+          width: '70%',
           maxWidth: '400px',
           marginBottom: 3,
         }}
-        placeholder='Filter Models'
-        value={filter}
-        onChange={handleFilterChange}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+      >
+        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
+        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+          <SearchIcon />
+        </IconButton>
+      </Paper>
       <Grid container>
         <Grid item sm={8} xs={12}>
           <Paper sx={{ py: 2, px: 4 }}>
@@ -107,7 +99,7 @@ export default function ExploreModels() {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
+                      <Link href={`/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
                           sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
