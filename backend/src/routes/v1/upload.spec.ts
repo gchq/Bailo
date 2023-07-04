@@ -104,6 +104,17 @@ vi.doMock('../../utils/queues', () => ({
   getUploadQueue: vi.fn(() => Promise.resolve(mockUploadQueue)),
 }))
 
+const mockAudit = {
+  onModelVersionUpload: vi.fn(() => Promise.resolve()),
+}
+
+vi.mock('../../external/Audit.js', () => {
+  return {
+    __esModule: true,
+    default: mockAudit,
+  }
+})
+
 const { authenticatedPostRequest, validateTestRequest } = await import('../../utils/test/testUtils.js')
 
 describe('test upload routes', () => {
@@ -119,6 +130,7 @@ describe('test upload routes', () => {
     expect(mockMinioUtils.moveFile).toBeCalledTimes(2)
     expect(mockVersionModel.default.findOneAndUpdate).toBeCalledTimes(1)
     expect(mockUploadQueue.add).toBeCalledTimes(1)
+    expect(mockAudit.onModelVersionUpload).toBeCalledTimes(1)
     expect(res.body).toEqual({ uuid: testModel.uuid })
   })
 
@@ -129,6 +141,7 @@ describe('test upload routes', () => {
     expect(mockVersionService.createVersion).toBeCalledTimes(1)
     expect(res.body).toEqual({ message: 'This model already has a version with the same name' })
     expect(res.statusCode).toEqual(409)
+    expect(mockAudit.onModelVersionUpload).not.toBeCalled()
     expect(res.header['content-type']).toBe('application/json; charset=utf-8')
   })
 })
