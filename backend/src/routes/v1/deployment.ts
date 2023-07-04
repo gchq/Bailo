@@ -3,7 +3,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
 
-import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
+import {
+  createDeploymentApprovals,
+  findApprovalsByDeploymentId,
+  requestDeploymentsForModelVersions,
+} from '../../services/approval.js'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
@@ -21,7 +25,7 @@ import {
   getModelSchema,
 } from '../../utils/exportModel.js'
 import { getClient } from '../../utils/minio.js'
-import { BadReq, Forbidden, InternalServer, NotFound, Unauthorised } from '../../utils/result.js'
+import { BadReq, Forbidden, InternalServer, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -329,6 +333,22 @@ export const getDeploymentAccess = [
 
     return res.json({
       owner,
+    })
+  },
+]
+
+export const getDeploymentApprovals = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    // TODO: Update translations
+    req.log.info({ code: 'fetching_deployment_approvals', id }, 'Getting approvals for deployment')
+
+    const approvals = await findApprovalsByDeploymentId(id)
+
+    return res.json({
+      approvals,
     })
   },
 ]

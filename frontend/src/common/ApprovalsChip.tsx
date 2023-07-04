@@ -1,11 +1,14 @@
 import AccessTime from '@mui/icons-material/AccessTime'
+import Cancel from '@mui/icons-material/CancelOutlined'
+import CheckCircle from '@mui/icons-material/CheckCircleOutlined'
 import Close from '@mui/icons-material/CloseTwoTone'
 import Done from '@mui/icons-material/DoneTwoTone'
 import DownArrow from '@mui/icons-material/KeyboardArrowDown'
 import UpArrow from '@mui/icons-material/KeyboardArrowUp'
-import { Badge, IconButton, Tooltip } from '@mui/material'
+import Badge from '@mui/material/Badge'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
@@ -13,23 +16,15 @@ import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
+import { lighten } from '@mui/material/styles'
+import Tooltip from '@mui/material/Tooltip'
 import { postEndpoint } from 'data/api'
-import { useListApprovals } from 'data/approvals'
-import React, { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+import { useGetVersionOrDeploymentApprovals } from 'data/approvals'
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { Approval, ApprovalCategory, ApprovalStates, Deployment, User, Version } from '../../types/types'
-
-/*
-- If current user is in approval.reviewers array AND approval.status === ApprovalStates.NoResponse -> Show approve/decline buttons 
-  - Show badge with number for number of times the above is true
-  - Will require user to be passed in via props
-
-- When user clicks approve/decline call:
-  await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
-
-- Assumption: Once POST approval has succeeded, call onChange prop from ApprovalsChip
-  - In the model (frontend/pages/model/[uuid].tsx) and deployment (frontend/pages/deployment/[uuid].tsx) overviews, call mutate when this onChange prop is called
-*/
+import useNotification from './Snackbar'
 
 type ApprovalsChipProps = {
   versionOrDeploymentId: Version['_id'] | Deployment['_id']
@@ -44,13 +39,14 @@ export default function ApprovalsChip({
 }: ApprovalsChipProps): ReactElement {
   const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
-  // TODO use loading, error and mutate
+  const sendNotification = useNotification()
+
   const {
     approvals: foundApprovals,
     isApprovalsLoading,
     isApprovalsError,
     mutateApprovals,
-  } = useListApprovals(approvalCategory, 'user', versionOrDeploymentId)
+  } = useGetVersionOrDeploymentApprovals(approvalCategory, versionOrDeploymentId)
   const approvals = useMemo(() => foundApprovals || [], [foundApprovals])
 
   const open = useMemo(() => !!anchorEl, [anchorEl])
@@ -75,10 +71,14 @@ export default function ApprovalsChip({
       return theme.palette.error.main
     }
     if (numAcceptedApprovals < totalApprovals) {
-      return '#dc851b'
+      return theme.palette.warning.main
     }
-    return '#4c8a4c'
+    return theme.palette.success.main
   }, [numAcceptedApprovals, totalApprovals, theme])
+
+  useEffect(() => {
+    if (isApprovalsError) sendNotification({ variant: 'error', msg: isApprovalsError.message })
+  }, [isApprovalsError, sendNotification])
 
   const getApprovalResponses = useCallback(
     (approval: Pick<Approval, '_id' | 'approvers' | 'status'>, index: number) => {
@@ -90,10 +90,10 @@ export default function ApprovalsChip({
         approval.approvers.some((reviewer) => reviewer.id === currentUser.id)
 
       if (approval.status === ApprovalStates.Accepted) {
-        Icon = Done
+        Icon = CheckCircle
         secondaryText = 'Approved'
       } else if (approval.status === ApprovalStates.Declined) {
-        Icon = Close
+        Icon = Cancel
         secondaryText = 'Declined'
       } else if (approval.status === ApprovalStates.NoResponse) {
         Icon = AccessTime
@@ -101,9 +101,14 @@ export default function ApprovalsChip({
       }
 
       const updateApprovalState = async (newState: Exclude<ApprovalStates, ApprovalStates.NoResponse>) => {
-        // TODO: Error handling
         const approvalResponse = await postEndpoint(`/api/v1/approval/${approval._id}/respond`, { choice: newState })
-        mutateApprovals()
+
+        if (approvalResponse.status >= 200 && approvalResponse.status < 400) {
+          mutateApprovals()
+          mutate()
+        } else {
+          sendNotification({ variant: 'error', msg: await getErrorMessage(approvalResponse) })
+        }
       }
 
       return (
@@ -120,12 +125,12 @@ export default function ApprovalsChip({
                 <Stack direction='row' alignItems='center'>
                   <Tooltip title='Approve'>
                     <IconButton onClick={() => updateApprovalState(ApprovalStates.Accepted)}>
-                      <Done />
+                      <Done color='success' />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title='Reject'>
                     <IconButton onClick={() => updateApprovalState(ApprovalStates.Declined)}>
-                      <Close />
+                      <Close color='error' />
                     </IconButton>
                   </Tooltip>
                 </Stack>
@@ -135,7 +140,7 @@ export default function ApprovalsChip({
         </ListItem>
       )
     },
-    [currentUser, mutateApprovals]
+    [currentUser, mutateApprovals, sendNotification]
   )
 
   const approvalResponseListItems = useMemo(
@@ -161,16 +166,18 @@ export default function ApprovalsChip({
     <Stack direction='row'>
       <Badge badgeContent={numCurrentUserApprovals} color='primary'>
         <Chip
-          sx={{ borderRadius: 1, color: 'white', height: 'auto', backgroundColor }}
-          label={`Approvals ${numAcceptedApprovals}/${totalApprovals}`}
+          sx={{
+            borderRadius: 1,
+            color: 'white',
+            height: 'auto',
+            backgroundColor,
+            '&:hover': {
+              backgroundColor: lighten(backgroundColor, 0.2),
+            },
+          }}
+          label={isApprovalsLoading ? 'Loading approvals...' : `Approvals ${numAcceptedApprovals}/${totalApprovals}`}
           onClick={handleApprovalsClicked}
-          icon={
-            open ? (
-              <UpArrow sx={{ color: 'white !important', pl: 1 }} />
-            ) : (
-              <DownArrow sx={{ color: 'white !important', pl: 1 }} />
-            )
-          }
+          icon={open ? <UpArrow sx={{ fill: 'white', pl: 1 }} /> : <DownArrow sx={{ fill: 'white', pl: 1 }} />}
           aria-controls='model-approvals-menu'
           aria-haspopup='true'
           aria-expanded={open ? 'true' : undefined}

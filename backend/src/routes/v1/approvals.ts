@@ -27,6 +27,7 @@ export const getApprovals = [
   async (req: Request, res: Response) => {
     const approvalCategory = req.query.approvalCategory as string
     const filter = req.query.filter as string
+    // TODO - Remove this ID from backend getApprovals logic
     const versionOrDeploymentId = req.query.versionOrDeploymentId as string | undefined
 
     if (!['Upload', 'Deployment'].includes(approvalCategory)) {
