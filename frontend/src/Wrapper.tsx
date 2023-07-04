@@ -415,7 +415,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           }}
         >
           <Toolbar />
-          <Box sx={{ ...contentTopStyling, height: 'calc(100vh - 100px)', overflow: 'auto' }}>
+          <Box sx={{ ...contentTopStyling, height: 'calc(100vh - 98px)', overflow: 'auto' }}>
             {isDocsPage ? (
               children
             ) : (
