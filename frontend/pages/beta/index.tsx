@@ -2,7 +2,6 @@ import SearchIcon from '@mui/icons-material/Search'
 import { IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
-import Grid from '@mui/material/Grid'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
@@ -67,25 +66,50 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <Paper
-        component='form'
-        onSubmit={onFilterSubmit}
-        sx={{
-          p: '2px 4px',
-          display: 'flex',
-          alignItems: 'center',
-          width: '70%',
-          maxWidth: '400px',
-          marginBottom: 3,
-        }}
-      >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
-        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-          <SearchIcon />
-        </IconButton>
-      </Paper>
-      <Grid container>
-        <Grid item sm={8} xs={12}>
+      <Stack direction='row' spacing={2}>
+        <Stack>
+          <Paper
+            component='form'
+            onSubmit={onFilterSubmit}
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              maxWidth: '400px',
+              marginBottom: 3,
+            }}
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder='Filter Models'
+              value={filter}
+              onChange={handleFilterChange}
+            />
+            <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+          <Box>
+            <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Libraries'
+              tags={['Library 1', 'Library 2']}
+              onChange={updateSelectedLibraries}
+              size='small'
+            />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Other'
+              tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
+              onChange={updateSelectedType}
+              size='small'
+            />
+          </Box>
+        </Stack>
+        <Box sx={{ width: '100%' }}>
           <Paper sx={{ py: 2, px: 4 }}>
             <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
               <Tabs value={'bailo'}>
@@ -123,31 +147,8 @@ export default function ExploreModels() {
                 })}
             </div>
           </Paper>
-        </Grid>
-        <Grid sm={4} xs={12}>
-          <Stack>
-            <Box sx={{ px: 2 }}>
-              <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
-            </Box>
-            <Box sx={{ px: 2 }}>
-              <ChipSelector
-                label='Libraries'
-                tags={['Library 1', 'Library 2']}
-                onChange={updateSelectedLibraries}
-                size='small'
-              />
-            </Box>
-            <Box sx={{ p: 2 }}>
-              <ChipSelector
-                label='Other'
-                tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-                onChange={updateSelectedType}
-                size='small'
-              />
-            </Box>
-          </Stack>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
     </Wrapper>
   )
 }
