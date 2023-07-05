@@ -20,7 +20,7 @@ type TagSelectorProps = {
   expandThreshold?: number
 } & PartialTagSelectorProps
 
-export default function TagSelector({
+export default function ChipSelector({
   label,
   tags,
   onChange,
@@ -56,7 +56,7 @@ export default function TagSelector({
   }
 
   const allTags = tags.map((tag) => (
-    <Tag key={tag} tag={tag} size={size} active={selectedTags.includes(tag)} handleChange={handleChange} />
+    <Tag key={tag} tag={tag} size={size} activeChip={selectedTags.includes(tag)} handleChange={handleChange} />
   ))
 
   function displaySelectedTagCount(): string {
@@ -79,13 +79,13 @@ type TagProps = {
   tag: string
   handleChange: (value: string) => void
   size?: TagSelectorProps['size']
-  active: boolean
+  activeChip: boolean
 }
 
-function Tag({ tag, handleChange, size, active }: TagProps) {
+function Tag({ tag, handleChange, size, activeChip }: TagProps) {
   return (
     <Chip
-      color={active ? 'primary' : 'default'}
+      color={activeChip ? 'primary' : 'default'}
       size={size}
       key={tag}
       sx={{ mr: 1, mb: 1 }}

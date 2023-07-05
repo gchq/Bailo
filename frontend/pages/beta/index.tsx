@@ -1,23 +1,15 @@
 import SearchIcon from '@mui/icons-material/Search'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Grid from '@mui/material/Grid'
-import IconButton from '@mui/material/IconButton'
-import InputBase from '@mui/material/InputBase'
-import MuiLink from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
+import { Box, Chip, IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
 
 import { ListModelType, useListModels } from '../../data/model'
+import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import TagSelector from '../../src/common/TagSelector'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../src/types'
 import Wrapper from '../../src/Wrapper'
 import { Model, Version } from '../../types/types'
 import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
@@ -26,7 +18,6 @@ import useDebounce from '../../utils/hooks/useDebounce'
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
   // TODO - fetch model tags from API
-  const [modelTags, _setModelTags] = useState<string[]>(['Example tag', 'And another'])
   const [filter, setFilter] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
 
@@ -47,8 +38,13 @@ export default function ExploreModels() {
     e.preventDefault()
   }
 
-  const updateSelectedTags = (selectedTags: string[]) => {
-    // TODO - When tags are selected, filter the array of models based on the selection
+  const updateSelectedTasks = (selectedTags: string) => {
+    // TODO - When tasks are selected, filter the array of models based on the selection
+    console.log(selectedTags)
+  }
+
+  const updateSelectedLibraries = (selectedTags: string) => {
+    // TODO - When libraries are selected, filter the array of models based on the selection
     console.log(selectedTags)
   }
 
@@ -70,24 +66,50 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <Paper
-        component='form'
-        onSubmit={onFilterSubmit}
-        sx={{
-          p: '2px 4px',
-          display: 'flex',
-          alignItems: 'center',
-          maxWidth: '400px',
-          marginBottom: 3,
-        }}
-      >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
-        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-          <SearchIcon />
-        </IconButton>
-      </Paper>
-      <Grid container>
-        <Grid item sm={8} xs={12}>
+      <Stack direction='row' spacing={2}>
+        <Stack>
+          <Paper
+            component='form'
+            onSubmit={onFilterSubmit}
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              maxWidth: '400px',
+              marginBottom: 3,
+            }}
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder='Filter Models'
+              value={filter}
+              onChange={handleFilterChange}
+            />
+            <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+          <Box>
+            <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Libraries'
+              tags={['Library 1', 'Library 2']}
+              onChange={updateSelectedLibraries}
+              size='small'
+            />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Other'
+              tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
+              onChange={updateSelectedType}
+              size='small'
+            />
+          </Box>
+        </Stack>
+        <Box sx={{ width: '100%' }}>
           <Paper sx={{ py: 2, px: 4 }}>
             <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
               <Tabs value={'bailo'}>
@@ -95,13 +117,13 @@ export default function ExploreModels() {
               </Tabs>
             </Box>
             <div data-test='modelListBox'>
-              {models === undefined && <EmptyBlob data-test='emptyModelListBlob' text='Error fetching models' />}
+              {(!models || models.length === 0) && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
               {models &&
                 models.map((model: Model, index: number) => {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
+                      <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
                           sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
@@ -123,27 +145,10 @@ export default function ExploreModels() {
                     </Fragment>
                   )
                 })}
-
-              {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
             </div>
           </Paper>
-        </Grid>
-        <Grid sm={4} xs={12}>
-          <Stack>
-            <Box sx={{ px: 2 }}>
-              <TagSelector label='Tags' multiple tags={modelTags} onChange={updateSelectedTags} size='small' />
-            </Box>
-            <Box sx={{ p: 2 }}>
-              <TagSelector
-                label='Other'
-                tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-                onChange={updateSelectedType}
-                size='small'
-              />
-            </Box>
-          </Stack>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
     </Wrapper>
   )
 }
