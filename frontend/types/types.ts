@@ -353,3 +353,10 @@ export enum MarketPlaceModelGroup {
   FAVOURITES = 'favourites',
   ALL = 'all',
 }
+
+export type NewModelData = {
+  teamName: string
+  modelName: string
+  description: string
+  accessibility: 'public' | 'private'
+}

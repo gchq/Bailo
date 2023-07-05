@@ -1,16 +1,6 @@
 import SearchIcon from '@mui/icons-material/Search'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Grid from '@mui/material/Grid'
-import InputAdornment from '@mui/material/InputAdornment'
-import MuiLink from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
+import { Box, Chip, IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
 
@@ -18,9 +8,8 @@ import { ListModelType, useListModels } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import Wrapper from '../../src/Wrapper.beta'
-import { Model, Version } from '../../types/types'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
+import Wrapper from '../../src/Wrapper'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType, Model, Version } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
@@ -74,26 +63,50 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <TextField
-        color='primary'
-        onClick={onFilterSubmit}
-        sx={{
-          maxWidth: '400px',
-          marginBottom: 3,
-        }}
-        placeholder='Filter Models'
-        value={filter}
-        onChange={handleFilterChange}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
+      <Stack direction='row' spacing={2}>
+        <Stack>
+          <Paper
+            component='form'
+            onSubmit={onFilterSubmit}
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              maxWidth: '400px',
+              marginBottom: 3,
+            }}
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder='Filter Models'
+              value={filter}
+              onChange={handleFilterChange}
+            />
+            <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
               <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Grid container>
-        <Grid item sm={8} xs={12}>
+            </IconButton>
+          </Paper>
+          <Box>
+            <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Libraries'
+              tags={['Library 1', 'Library 2']}
+              onChange={updateSelectedLibraries}
+              size='small'
+            />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Other'
+              tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
+              onChange={updateSelectedType}
+              size='small'
+            />
+          </Box>
+        </Stack>
+        <Box sx={{ width: '100%' }}>
           <Paper sx={{ py: 2, px: 4 }}>
             <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
               <Tabs value={'bailo'}>
@@ -107,10 +120,10 @@ export default function ExploreModels() {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
+                      <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
-                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                         >
                           {latestVersion.metadata.highLevelDetails.name}
                         </MuiLink>
@@ -120,7 +133,7 @@ export default function ExploreModels() {
                       </Typography>
                       <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                         {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
-                          <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                         ))}
                       </Stack>
                       {index !== models.length - 1 && (
@@ -131,31 +144,8 @@ export default function ExploreModels() {
                 })}
             </div>
           </Paper>
-        </Grid>
-        <Grid sm={4} xs={12}>
-          <Stack>
-            <Box sx={{ px: 2 }}>
-              <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
-            </Box>
-            <Box sx={{ px: 2 }}>
-              <ChipSelector
-                label='Libraries'
-                tags={['Library 1', 'Library 2']}
-                onChange={updateSelectedLibraries}
-                size='small'
-              />
-            </Box>
-            <Box sx={{ p: 2 }}>
-              <ChipSelector
-                label='Other'
-                tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-                onChange={updateSelectedType}
-                size='small'
-              />
-            </Box>
-          </Stack>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
     </Wrapper>
   )
 }

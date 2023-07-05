@@ -15,7 +15,6 @@ import { ListItemButton } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
 import CssBaseline from '@mui/material/CssBaseline'
 import Divider from '@mui/material/Divider'
 import MuiDrawer from '@mui/material/Drawer'
@@ -127,7 +126,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           mt: 4,
         })
         setContentTopStyling({
-          mt: isDocsPage ? 4 : 8,
+          mt: isDocsPage ? 4 : 4,
         })
       }
     }
@@ -184,7 +183,19 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
+        <AppBar
+          open={open}
+          position='absolute'
+          data-test='appBar'
+          sx={{
+            ...pageTopStyling,
+            top: 'unset',
+            background:
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(276deg, rgba(223,71,156,1) 0%, rgba(84,39,142,1) 100%)'
+                : '#242424',
+          }}
+        >
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -403,18 +414,15 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
-            overflow: 'auto',
           }}
         >
           <Toolbar />
-          <Box sx={contentTopStyling}>
+          <Box sx={{ ...contentTopStyling, height: 'calc(100vh - 98px)', overflow: 'auto' }}>
             {isDocsPage ? (
               children
             ) : (
               <>
-                <Container maxWidth='xl' sx={{ mt: 4, mb: 4 }}>
-                  {children}
-                </Container>
+                <Box sx={{ m: 4 }}>{children}</Box>
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}
