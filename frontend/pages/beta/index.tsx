@@ -1,7 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
+import { Box, Chip, IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import React, { Fragment, useState } from 'react'
@@ -123,7 +121,7 @@ export default function ExploreModels() {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link href={`/model/${model.uuid}`} passHref>
+                      <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
                           sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
