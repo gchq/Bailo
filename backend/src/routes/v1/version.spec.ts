@@ -30,6 +30,17 @@ vi.mock('../../utils/entity.js', () => {
   }
 })
 
+const mockAudit = {
+  onModelVersionUpdate: vi.fn(() => Promise.resolve()),
+}
+
+vi.mock('../../external/Audit.js', () => {
+  return {
+    __esModule: true,
+    default: mockAudit,
+  }
+})
+
 const { authenticatedGetRequest, authenticatedPostRequest, authenticatedPutRequest, validateTestRequest } =
   await import('../../utils/test/testUtils.js')
 
@@ -55,6 +66,7 @@ describe('test version routes', () => {
     editedVersion.metadata.highLevelDetails.name = 'test2'
     const res = await authenticatedPutRequest(`/api/v1/version/${testVersion._id}`).send(editedVersion.metadata)
     validateTestRequest(res)
+    expect(mockAudit.onModelVersionUpdate).toBeCalledTimes(1)
     expect(res.body.metadata.highLevelDetails.name).toBe('test2')
   })
 
