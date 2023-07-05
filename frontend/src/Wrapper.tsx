@@ -192,7 +192,19 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
+        <AppBar
+          open={open}
+          position='absolute'
+          data-test='appBar'
+          sx={{
+            ...pageTopStyling,
+            top: 'unset',
+            background:
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(276deg, rgba(223,71,156,1) 0%, rgba(84,39,142,1) 100%)'
+                : '#242424',
+          }}
+        >
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed

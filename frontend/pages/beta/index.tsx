@@ -7,12 +7,9 @@ import React, { Fragment, useState } from 'react'
 import { ListModelType, useListModels } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
-import TagSelector from '../../src/common/TagSelector'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../src/types'
 import Wrapper from '../../src/Wrapper'
-import { Model, Version } from '../../types/types'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType, Model, Version } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
@@ -126,7 +123,7 @@ export default function ExploreModels() {
                       <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
-                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                         >
                           {latestVersion.metadata.highLevelDetails.name}
                         </MuiLink>
@@ -136,7 +133,7 @@ export default function ExploreModels() {
                       </Typography>
                       <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                         {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
-                          <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                         ))}
                       </Stack>
                       {index !== models.length - 1 && (
