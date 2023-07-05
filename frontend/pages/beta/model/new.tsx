@@ -15,7 +15,7 @@ import {
 import { useState } from 'react'
 import { NewModelData } from 'types/types'
 
-import Wrapper from '../../../src/Wrapper'
+import Wrapper from '../../../src/Wrapper.beta'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')

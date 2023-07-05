@@ -190,7 +190,16 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
+        <AppBar
+          open={open}
+          position='absolute'
+          data-test='appBar'
+          sx={{
+            ...pageTopStyling,
+            top: 'unset',
+            background: 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)',
+          }}
+        >
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -309,7 +318,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItemButton>
             </Link>
-            <Link href='/beta/create-new-model' color='inherit' underline='none'>
+            <Link href='/beta/model/new' color='inherit' underline='none'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
                   {!open ? (

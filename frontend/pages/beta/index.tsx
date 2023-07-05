@@ -8,7 +8,7 @@ import { ListModelType, useListModels } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import Wrapper from '../../src/Wrapper'
+import Wrapper from '../../src/Wrapper.beta'
 import { MarketPlaceModelGroup, MarketPlaceModelSelectType, Model, Version } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
