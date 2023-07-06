@@ -197,7 +197,10 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           sx={{
             ...pageTopStyling,
             top: 'unset',
-            background: 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)',
+            background:
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
+                : '#242424',
           }}
         >
           <Toolbar

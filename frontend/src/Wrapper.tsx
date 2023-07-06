@@ -192,7 +192,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             top: 'unset',
             background:
               theme.palette.mode === 'light'
-                ? 'linear-gradient(276deg, rgba(223,71,156,1) 0%, rgba(84,39,142,1) 100%)'
+                ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
                 : '#242424',
           }}
         >
