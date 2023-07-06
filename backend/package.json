@@ -85,7 +85,7 @@
     "@types/mjml": "^4.7.1",
     "@types/morgan": "^1.9.4",
     "@types/multer": "^1.4.7",
-    "@types/node": "^20.2.5",
+    "@types/node": "^20.4.0",
     "@types/nodemailer": "^6.4.8",
     "@types/pako": "^2.0.0",
     "@types/shelljs": "^0.8.12",
