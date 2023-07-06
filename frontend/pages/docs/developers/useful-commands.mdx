@@ -14,6 +14,12 @@ alias dcp="DOCKER_BUILDKIT=1 docker compose -f docker-compose-prod.yml"
 alias rs="npm run script --"
 ```
 
+**Note** check your version of **`docker compose`**. If **`docker compose`** doesn't work for you then you may have
+**`docker-compose`** installed instead, simply replace **`docker compose`** with **`docker-compose`**.
+
+Once you've made these changes to your **`.bashrc`** file you'll need to run **`source ~/.bashrc`** to load in these
+changes to the terminal
+
 ### Starting Bailo
 
 Build images:
@@ -80,6 +86,9 @@ about your Bailo environment.
 > _Run this from the root Bailo directory (e.g. `/home/ec2-user/git/Bailo`)_
 
 **This will remove ALL data from Bailo.**
+
+**Note** **`dc`** stands for docker compose. Please make sure you've completed the steps at the beginning of this file
+before running these commands.
 
 ```bash
 dc down --remove-orphans

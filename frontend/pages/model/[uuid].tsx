@@ -231,7 +231,7 @@ function Model() {
     if (response.status >= 400) {
       let responseError = response.statusText
       try {
-        responseError = `${response.statusText}: ${(await response.json()).message}`
+        responseError = `${response.statusText}: ${(await response.json()).error.message}`
       } catch (e) {
         setErrorMessage('No response from server')
         return
