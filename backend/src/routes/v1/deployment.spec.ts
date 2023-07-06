@@ -11,7 +11,7 @@ import UserModel from '../../models/User.js'
 import * as approval from '../../services/approval.js'
 import * as deployment from '../../services/deployment.js'
 import * as version from '../../services/version.js'
-import { DeploymentDoc } from '../../types/types.js'
+import { DeploymentDoc, VersionDoc } from '../../types/types.js'
 import * as entityUtils from '../../utils/entity.js'
 import {
   deploymentData,
@@ -69,15 +69,14 @@ describe('test deployment routes', () => {
   })
 
   test('that we can request a deployment given the version has manager and reviewer approvals', async () => {
-    // Given
     vi.spyOn(validateSchema, 'validateSchema').mockReturnValueOnce(null)
     vi.spyOn(approval, 'createDeploymentApprovals').mockResolvedValueOnce(managerApproval)
-    vi.spyOn(version, 'findVersionById').mockResolvedValueOnce(testApprovedVersion)
+    vi.spyOn(version, 'findVersionById').mockResolvedValueOnce(testVersion)
+    const approvedVersion = testApprovedVersion as VersionDoc
+    vi.spyOn(version, 'findModelVersions').mockResolvedValueOnce([approvedVersion])
 
-    // When
     const res = await authenticatedPostRequest('/api/v1/deployment').send(deploymentData)
 
-    // Then
     validateTestRequest(res)
     expect(Object.keys(res.body)[0]).toBe('uuid')
   })

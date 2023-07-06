@@ -7,8 +7,8 @@ import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '.
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
-import { findVersionById, findVersionByName } from '../../services/version.js'
-import { ModelDoc, ModelUploadType } from '../../types/types.js'
+import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc, ModelUploadType, VersionDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isObjectId } from '../../utils/database.js'
@@ -104,8 +104,16 @@ export const postDeployment = [
       )
     }
 
-    if (version.managerApproved !== ApprovalStates.Accepted || version.reviewerApproved !== ApprovalStates.Accepted) {
-      throw BadReq({}, 'Latest version of this model must be fully approved before making a deployment')
+    const versions = await findModelVersions(req.user, model._id)
+
+    const approvedVersions = versions.filter(
+      (modelVersion) =>
+        (modelVersion as VersionDoc).managerApproved === ApprovalStates.Accepted &&
+        (modelVersion as VersionDoc).reviewerApproved === ApprovalStates.Accepted
+    )
+
+    if (approvedVersions.length === 0) {
+      throw BadReq({}, 'At least one version of this model must be fully approved before requesting a deployment')
     }
 
     const name = body.highLevelDetails.name
