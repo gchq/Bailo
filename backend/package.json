@@ -59,7 +59,7 @@
     "node-fetch": "3.3.1",
     "nodemailer": "^6.9.3",
     "open": "^9.1.0",
-    "openshift-rest-client": "^7.1.1",
+    "openshift-rest-client": "^8.0.0",
     "p-mongo-queue": "^8.4.0",
     "pako": "^2.1.0",
     "pretty-ms": "^8.0.0",
