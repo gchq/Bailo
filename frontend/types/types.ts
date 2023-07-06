@@ -100,9 +100,9 @@ export interface ParsedEntity {
   entity: UserDoc
 }
 
-export interface StatusError extends Error {
-  data: any
-  code: number
+export interface BailoError extends Error {
+  id?: string
+  documentationUrl?: string
 }
 
 export interface UiConfig {

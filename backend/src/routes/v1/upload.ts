@@ -182,7 +182,10 @@ export const postUpload = [
             version: metadata.highLevelDetails.modelCardVersion,
             model: modelUuid,
           },
-          'This model already has a version with the same name'
+          {
+            message: 'This model already has a version with the same name',
+            documentationUrl: '/docs/errors/duplicate-version',
+          }
         )
       }
 

@@ -2,6 +2,7 @@ import Paper from '@mui/material/Paper'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetModel, useGetModelVersions } from '../../../data/model'
 import { useGetSchema } from '../../../data/schema'
@@ -11,10 +12,9 @@ import Form from '../../../src/Form/Form'
 import ModelExportAndSubmission from '../../../src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '../../../src/Form/RenderButtons'
 import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../src/Form/RenderFileTab'
-import SubmissionError from '../../../src/Form/SubmissionError'
 import Wrapper from '../../../src/Wrapper'
 import { SplitSchema } from '../../../types/interfaces'
-import { Version } from '../../../types/types'
+import { BailoError, Version } from '../../../types/types'
 import { createStep, getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import useCacheVariable from '../../../utils/hooks/useCacheVariable'
 
@@ -52,7 +52,7 @@ function Upload() {
   const cSchema = useCacheVariable(schema)
 
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<BailoError | undefined>(undefined)
   const [modelUploading, setModelUploading] = useState<boolean>(false)
   const [loadingPercentage, setUploadPercentage] = useState<number>(0)
 
@@ -135,19 +135,23 @@ function Upload() {
     setError(undefined)
 
     if (!splitSchema.steps.every((e) => e.isComplete(e))) {
-      return setError('Ensure that all steps are complete before submitting')
+      return setError({ name: 'not_complete', message: 'Ensure that all steps are complete before submitting' })
     }
 
     const data = getStepsData(splitSchema, true)
     const form = new FormData()
 
     if (!versions) {
-      return setError('Problem loading versions')
+      return setError({ name: 'cannot_load_versions', message: 'Problem loading versions' })
     }
 
     // This might need revisiting when models have lots of versions
     if (versions.filter((version) => version.version === data.highLevelDetails.modelCardVersion).length > 0) {
-      return setError('This model already has a version with the same name')
+      return setError({
+        name: 'duplicate_version',
+        message: 'This model already has a version with the same name',
+        documentationUrl: '/docs/errors/duplicate-version',
+      })
     }
 
     data.schemaRef = model?.schemaRef
@@ -175,7 +179,7 @@ function Upload() {
       })
       .catch((e) => {
         setModelUploading(false)
-        setError(e.response.data.message)
+        setError(e.response.data.error)
         return null
       })
     return null
@@ -183,7 +187,7 @@ function Upload() {
 
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-      <SubmissionError error={error} />
+      <MessageAlert message={error?.message} severity='error' linkText='More info' href={error?.documentationUrl} />
       <Form
         splitSchema={splitSchema}
         setSplitSchema={setSplitSchema}

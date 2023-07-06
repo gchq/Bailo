@@ -95,7 +95,7 @@ export default function Deploy() {
     if (deploy.status >= 400) {
       let errorMessage = deploy.statusText
       try {
-        errorMessage = `${deploy.statusText}: ${(await deploy.json()).message}`
+        errorMessage = `${deploy.statusText}: ${(await deploy.json()).error.message}`
       } catch (e) {
         // failed to get json from server
       }

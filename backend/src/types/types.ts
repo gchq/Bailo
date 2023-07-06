@@ -101,11 +101,6 @@ export interface ParsedEntity {
   entity: UserDoc
 }
 
-export interface StatusError extends Error {
-  data: any
-  code: number
-}
-
 export interface UiConfig {
   banner: {
     enabled: boolean
