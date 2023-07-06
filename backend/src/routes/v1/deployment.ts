@@ -7,8 +7,8 @@ import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '.
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
-import { findVersionById, findVersionByName } from '../../services/version.js'
-import { ModelDoc, ModelUploadType } from '../../types/types.js'
+import { findModelVersions, findVersionById, findVersionByName } from '../../services/version.js'
+import { ModelDoc, ModelUploadType, VersionDoc } from '../../types/types.js'
 import { ApprovalStates, EntityKind } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isObjectId } from '../../utils/database.js'
@@ -21,7 +21,7 @@ import {
   getModelSchema,
 } from '../../utils/exportModel.js'
 import { getClient } from '../../utils/minio.js'
-import { BadReq, Forbidden, InternalServer, NotFound, Unauthorised } from '../../utils/result.js'
+import { BadReq, Forbidden, InternalServer, NotFound } from '../../utils/result.js'
 import { ensureUserRole } from '../../utils/user.js'
 import { validateSchema } from '../../utils/validateSchema.js'
 
@@ -95,6 +95,27 @@ export const postDeployment = [
       )
     }
 
+    const version = await findVersionById(req.user, (model as ModelDoc).latestVersion)
+
+    if (!version) {
+      throw NotFound(
+        { code: 'version_not_found', versionId: (model as ModelDoc).latestVersion },
+        'Unable to find version'
+      )
+    }
+
+    const versions = await findModelVersions(req.user, model._id)
+
+    const approvedVersions = versions.filter(
+      (modelVersion) =>
+        (modelVersion as VersionDoc).managerApproved === ApprovalStates.Accepted &&
+        (modelVersion as VersionDoc).reviewerApproved === ApprovalStates.Accepted
+    )
+
+    if (approvedVersions.length === 0) {
+      throw BadReq({}, 'At least one version of this model must be fully approved before requesting a deployment')
+    }
+
     const name = body.highLevelDetails.name
       .toLowerCase()
       .replace(/[^a-z 0-9]/g, '')
@@ -122,14 +143,6 @@ export const postDeployment = [
     req.log.info({ code: 'named_deployment', deploymentId: deployment._id }, `Named deployment '${uuid}'`)
 
     await deployment.populate('model')
-    const version = await findVersionById(req.user, (deployment.model as ModelDoc).latestVersion)
-
-    if (!version) {
-      throw NotFound(
-        { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
-        'Unable to find version'
-      )
-    }
 
     const managerApproval = await createDeploymentApprovals({
       deployment,

@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
-import { MongooseError, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import multer from 'multer'
 import { customAlphabet } from 'nanoid'
-import { isNativeError } from 'util/types'
 import { v4 as uuidv4 } from 'uuid'
 
 import audit from '../../external/Audit.js'
@@ -183,7 +182,10 @@ export const postUpload = [
             version: metadata.highLevelDetails.modelCardVersion,
             model: modelUuid,
           },
-          'This model already has a version with the same name'
+          {
+            message: 'This model already has a version with the same name',
+            documentationUrl: '/docs/errors/duplicate-version',
+          }
         )
       }
 

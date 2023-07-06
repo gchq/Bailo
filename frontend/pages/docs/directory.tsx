@@ -80,6 +80,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Useful Commands', slug: 'developers/useful-commands' },
   { title: 'Dev Notes', slug: 'developers/dev-notes' },
 
+  // Errors
+  { title: 'Common Errors', slug: 'errors', header: true },
+  { title: 'Duplicate Version', slug: 'errors/duplicate-version' },
+
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
 ]
