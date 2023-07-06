@@ -45,7 +45,7 @@
     "grant": "^5.4.21",
     "indent-string": "^5.0.0",
     "jsonschema": "^1.4.1",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.1",
     "lodash-es": "^4.17.21",
     "memoizee": "^0.4.15",
     "minio": "^7.0.33",
