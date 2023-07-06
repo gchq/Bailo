@@ -39,7 +39,11 @@ export default function RenderButtons({
 
     if (!isValid) {
       setStepValidate(splitSchema, setSplitSchema, step, true)
-      sendNotification({ variant: 'error', msg: 'This tab is not complete.' })
+      sendNotification({
+        variant: 'error',
+        msg: 'This tab is not complete.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
       return
     }
     document.getElementById('form-page-stepper')?.scrollIntoView({ behavior: 'smooth' })
