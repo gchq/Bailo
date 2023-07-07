@@ -17,7 +17,7 @@ export const uploadData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
     name: 'test-deployment',
-    modelID: 'test-model',
+    modelID: modelUuid,
   },
   contacts: {
     uploader: [
@@ -45,7 +45,7 @@ export const deploymentData: any = {
   schemaRef: 'test-schema3',
   highLevelDetails: {
     name: 'test-deployment',
-    modelID: 'test-model',
+    modelID: modelUuid,
   },
   contacts: {
     owner: [
@@ -165,7 +165,7 @@ export const testModel2: any = {
 
 export const testVersion: any = {
   _id: versionId,
-  model: testModel,
+  model: modelId,
   version: '1',
   metadata: {
     highLevelDetails: {
@@ -201,11 +201,27 @@ export const testVersion: any = {
   },
   built: false,
   managerApproved: ApprovalStates.Accepted,
-  reviewerApproved: ApprovalStates.NoResponse,
+  reviewerApproved: ApprovalStates.Accepted,
   state: {},
   logs: [],
   createdAt: new Date(),
   updatedAt: new Date(),
+}
+
+export const testApprovedVersion = {
+  ...testVersion,
+  reviewerApproved: ApprovalStates.Accepted,
+  managerApproved: ApprovalStates.Accepted,
+}
+
+export const testManagerApprovedVersion = {
+  ...testApprovedVersion,
+  reviewerApproved: ApprovalStates.NoResponse,
+}
+
+export const testReviewerApprovedVersion = {
+  ...testApprovedVersion,
+  managerApproved: ApprovalStates.NoResponse,
 }
 
 export const testVersion2: any = {

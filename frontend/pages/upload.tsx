@@ -185,7 +185,7 @@ function Upload() {
       .then((res) => router.push(`/model/${res.data.uuid}`))
       .catch((e) => {
         setModelUploading(false)
-        setError(e.response.data.message)
+        setError(e.response.data.error.message)
         return null
       })
     return null

@@ -105,7 +105,7 @@ function Upload() {
     if (edit.status >= 400) {
       let errorMessage = edit.statusText
       try {
-        errorMessage = `${edit.statusText}: ${(await edit.json()).message}`
+        errorMessage = `${edit.statusText}: ${(await edit.json()).error.message}`
       } catch (e) {
         errorMessage = 'There was a problem making the request.'
       }

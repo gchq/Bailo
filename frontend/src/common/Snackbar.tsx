@@ -8,12 +8,13 @@
 
 import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/material/IconButton'
-import { SnackbarKey, useSnackbar, VariantType } from 'notistack'
+import { SnackbarKey, SnackbarOrigin, useSnackbar, VariantType } from 'notistack'
 import React, { useEffect, useState } from 'react'
 
 interface SnackbarConfig {
   msg: string
   variant?: VariantType
+  anchorOrigin?: SnackbarOrigin
 }
 
 const useNotification = () => {
@@ -35,6 +36,7 @@ const useNotification = () => {
         variant: conf.variant ?? 'info',
         autoHideDuration: 5000,
         action,
+        anchorOrigin: conf.anchorOrigin,
       })
     }
   }, [conf, enqueueSnackbar, closeSnackbar])

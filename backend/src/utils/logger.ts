@@ -16,9 +16,9 @@ import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
 
 import LogModel from '../models/Log.js'
-import { StatusError } from '../types/types.js'
 import config from './config.js'
 import { ensurePathExists, getFilesInDir } from './filesystem.js'
+import { BailoError } from './result.js'
 import serializers from './serializers.js'
 
 const appRoot = getAppRoot.toString()
@@ -321,12 +321,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
   next()
 }
 
-export async function expressErrorHandler(
-  err: StatusError & { logger: any },
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) {
+export async function expressErrorHandler(err: BailoError, req: Request, res: Response, _next: NextFunction) {
   if (!err.code) {
     console.log('no error code found')
     console.log('error', err)
@@ -343,7 +338,11 @@ export async function expressErrorHandler(
   if (code >= 600) code = 500
 
   return res.status(code).json({
-    message: err.message,
+    error: {
+      message: err.message,
+      id: err.id,
+      documentationUrl: err.documentationUrl,
+    },
   })
 }
 

@@ -3,7 +3,8 @@ import { redirectToLoginPage } from 'utils/loginUtils'
 export type ErrorInfo = Error & {
   info: {
     message: string
-    [x: string]: unknown
+    id?: string
+    documentationUrl?: string
   }
   status: number
 }
@@ -19,7 +20,7 @@ export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
     }
     const error: ErrorInfo = {
       ...new Error('An error occurred while fetching the data.'),
-      info: await res.json(),
+      info: (await res.json()).error,
       status: res.status,
     }
     throw error
@@ -51,7 +52,7 @@ export const fetcher = async (input: RequestInfo, init: RequestInit) => {
 export const getErrorMessage = async (res: Response) => {
   let messageError = res.statusText
   try {
-    messageError = `${res.statusText}: ${(await res.json()).message}`
+    messageError = `${res.statusText}: ${(await res.json()).error.message}`
   } catch (e) {
     // unable to identify error message, possibly a network failure
   }
