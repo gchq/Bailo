@@ -105,7 +105,7 @@ export default function ApprovalsChip({
 
         if (approvalResponse.status >= 200 && approvalResponse.status < 400) {
           mutateApprovals()
-          // Mutate approvals on review page to update Badge in navigation menu
+          // Update number of approvals for Badge in navigation menu
           mutateNumApprovals()
         } else {
           sendNotification({ variant: 'error', msg: await getErrorMessage(approvalResponse) })
