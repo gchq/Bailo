@@ -27,8 +27,6 @@ export const getApprovals = [
   async (req: Request, res: Response) => {
     const approvalCategory = req.query.approvalCategory as string
     const filter = req.query.filter as string
-    // TODO - Remove this ID from backend getApprovals logic
-    const versionOrDeploymentId = req.query.versionOrDeploymentId as string | undefined
 
     if (!['Upload', 'Deployment'].includes(approvalCategory)) {
       return res.error(400, [
@@ -46,14 +44,13 @@ export const getApprovals = [
       }
     } else {
       // TODO: Update translations
-      req.log.info({ code: 'fetching_user_approvals', versionOrDeploymentId }, 'Getting approvals for user')
+      req.log.info({ code: 'fetching_user_approvals' }, 'Getting approvals for user')
     }
 
     const approvals = await readApprovals({
       approvalCategory: approvalCategory as ApprovalCategory,
       filter: filter === 'all' ? undefined : req.user._id,
       archived: filter === 'archived',
-      versionOrDeploymentId,
     })
 
     req.log.info({ code: 'fetching_approvals', approvals }, 'User fetching approvals')
