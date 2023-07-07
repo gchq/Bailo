@@ -43,7 +43,6 @@ export const getApprovals = [
         )
       }
     } else {
-      // TODO: Update translations
       req.log.info({ code: 'fetching_user_approvals' }, 'Getting approvals for user')
     }
 
