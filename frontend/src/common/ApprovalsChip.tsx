@@ -19,8 +19,8 @@ import { useTheme } from '@mui/material/styles'
 import { lighten } from '@mui/material/styles'
 import Tooltip from '@mui/material/Tooltip'
 import { postEndpoint } from 'data/api'
-import { useGetVersionOrDeploymentApprovals } from 'data/approvals'
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { useGetNumApprovals, useGetVersionOrDeploymentApprovals } from 'data/approvals'
+import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { Approval, ApprovalCategory, ApprovalStates, Deployment, User, Version } from '../../types/types'
@@ -40,7 +40,7 @@ export default function ApprovalsChip({
   const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const sendNotification = useNotification()
-
+  const { mutateNumApprovals } = useGetNumApprovals()
   const {
     approvals: foundApprovals,
     isApprovalsLoading,
@@ -105,7 +105,8 @@ export default function ApprovalsChip({
 
         if (approvalResponse.status >= 200 && approvalResponse.status < 400) {
           mutateApprovals()
-          mutate()
+          // Mutate approvals on review page to update Badge in navigation menu
+          mutateNumApprovals()
         } else {
           sendNotification({ variant: 'error', msg: await getErrorMessage(approvalResponse) })
         }
@@ -140,16 +141,16 @@ export default function ApprovalsChip({
         </ListItem>
       )
     },
-    [currentUser, mutateApprovals, sendNotification]
+    [currentUser.id, mutateApprovals, mutateNumApprovals, sendNotification]
   )
 
   const approvalResponseListItems = useMemo(
     () =>
       approvals.map((approval, index) => (
-        <>
+        <Fragment key={`approvalResponse-${approval._id}`}>
           {getApprovalResponses(approval, index)}
           {index < approvals.length - 1 && <Divider variant='middle' />}
-        </>
+        </Fragment>
       )),
     [approvals, getApprovalResponses]
   )
