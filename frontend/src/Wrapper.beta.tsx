@@ -97,9 +97,10 @@ type WrapperProps = {
   title: string
   page: string
   children?: ReactNode
+  fullWidth?: boolean
 }
 
-export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
+export default function Wrapper({ title, page, children, fullWidth = false }: WrapperProps): ReactElement {
   const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
 
   const [open, setOpen] = useState(false)
@@ -431,9 +432,12 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               children
             ) : (
               <>
-                <Container maxWidth='xl' sx={{ mt: 4, mb: 4 }}>
-                  {children}
-                </Container>
+                {!fullWidth && (
+                  <Container maxWidth={fullWidth ? false : 'xl'} sx={{ mt: 4, mb: 4 }}>
+                    {children}
+                  </Container>
+                )}
+                {fullWidth && <Box>{children}</Box>}
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}

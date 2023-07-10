@@ -120,7 +120,7 @@ export default function ExploreModels() {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
+                      <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
                           sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
