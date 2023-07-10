@@ -39,7 +39,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   const [approval, setApproval] = useState<Approval | undefined>(undefined)
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
-
+  const [showAlert, setShowAlert] = useState(false)
   const theme = useTheme()
 
   const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
@@ -72,6 +72,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
     mutateApprovals()
     mutateNumApprovals()
     setOpen(false)
+    setShowAlert(true)
   }
 
   const error = MultipleErrorWrapper(
@@ -94,6 +95,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       setApprovalModalTitle(`Reject ${category}`)
       setApprovalModalText(`The ${category.toLowerCase()} does not meet the necessary requirements for approval.`)
     }
+    setShowAlert(true)
   }
 
   const getUploadCategory = (approvalCategory: ApprovalCategory) =>
@@ -201,6 +203,12 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
           </Grid>
         </Box>
       ))}
+      {showAlert && (
+        <Alert severity='error' onClose={() => setShowAlert(false)}>
+          Error: Unable to approve or reject
+        </Alert>
+      )}
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle id='alert-dialog-title'>{approvalModalTitle}</DialogTitle>
         <DialogContent>
