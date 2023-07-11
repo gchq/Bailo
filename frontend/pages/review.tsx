@@ -40,6 +40,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
   const [showAlert, setShowAlert] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const theme = useTheme()
 
   const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
@@ -67,12 +68,15 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
-
-    mutateApprovals()
-    mutateNumApprovals()
-    setOpen(false)
-    setShowAlert(true)
+    const res = await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
+    if (res.status !== 200) {
+      setShowAlert(true)
+      setErrorMessage(res.message)
+    } else {
+      mutateApprovals()
+      mutateNumApprovals()
+      setOpen(false)
+    }
   }
 
   const error = MultipleErrorWrapper(
@@ -88,6 +92,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
     setOpen(true)
     setApproval(changeStateApproval)
     setChoice(changeStateChoice)
+    setShowAlert(false)
     if (changeStateChoice === 'Accepted') {
       setApprovalModalTitle(`Approve ${category}`)
       setApprovalModalText(`I can confirm that the ${category.toLowerCase()} meets all necessary requirements.`)
@@ -95,7 +100,6 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       setApprovalModalTitle(`Reject ${category}`)
       setApprovalModalText(`The ${category.toLowerCase()} does not meet the necessary requirements for approval.`)
     }
-    setShowAlert(true)
   }
 
   const getUploadCategory = (approvalCategory: ApprovalCategory) =>
@@ -203,11 +207,6 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
           </Grid>
         </Box>
       ))}
-      {showAlert && (
-        <Alert severity='error' onClose={() => setShowAlert(false)}>
-          Error: Unable to approve or reject
-        </Alert>
-      )}
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle id='alert-dialog-title'>{approvalModalTitle}</DialogTitle>
@@ -226,6 +225,11 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       {approvals.length === 0 && (
         <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
       )}
+      {/* {showAlert && (
+        <Alert severity='error' onClose={() => setShowAlert(false)}>
+          {errorMessage}
+        </Alert>
+      )} */}
     </Paper>
   )
 }
