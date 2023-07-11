@@ -32,7 +32,7 @@ export default function PageWithTabs({
           <Typography color='primary' variant='h6'>
             {title}
           </Typography>
-          <Button hidden={!displayActionButton} onClick={actionButtonOnClick}>
+          <Button variant='contained' hidden={!displayActionButton} onClick={actionButtonOnClick}>
             {actionButtonTitle}
           </Button>
         </Stack>
