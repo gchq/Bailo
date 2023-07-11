@@ -1,7 +1,9 @@
 import { useRouter } from 'next/router'
 import { ReactElement } from 'react'
-import PageWithTabs from 'src/common/PageWithTabs'
-import Wrapper from 'src/Wrapper.beta'
+
+import PageWithTabs from '../../../src/common/PageWithTabs'
+import Overview from '../../../src/model/beta/Overview'
+import Wrapper from '../../../src/Wrapper.beta'
 
 export default function Model() {
   const router = useRouter()
@@ -23,4 +25,4 @@ export default function Model() {
   )
 }
 
-const OverviewTab: ReactElement = <>This is the overview for the model</>
+const OverviewTab: ReactElement = <Overview />
