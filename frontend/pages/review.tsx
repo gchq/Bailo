@@ -111,7 +111,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       {approvals.map((approvalObj: any) => (
         <Box sx={{ px: 3 }} key={approvalObj._id}>
           <Grid container spacing={1} sx={approvalObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} md={6} lg={7}>
+            <Grid item xs={9}>
               {category === 'Upload' && (
                 <>
                   <Link href={`/model/${approvalObj.version?.model?.uuid}`} passHref legacyBehavior>
