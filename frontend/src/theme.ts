@@ -35,6 +35,27 @@ export const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
+      main: '#27598e',
+    },
+    secondary: {
+      main: '#f37f58',
+    },
+    error: {
+      main: red.A400,
+    },
+    container: {
+      main: '#f3f1f1',
+    },
+  },
+})
+
+export const betaLightTheme = createTheme({
+  components: {
+    ...removeElevation,
+  },
+  palette: {
+    mode: 'light',
+    primary: {
       main: '#54278e',
     },
     secondary: {
