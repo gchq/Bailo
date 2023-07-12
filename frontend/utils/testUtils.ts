@@ -103,3 +103,30 @@ export const testApproval2: any = {
     },
   ],
 }
+
+export const testApproval3: any = {
+  _id: 'testApprovalId3',
+  version: testVersion,
+  approvers: [
+    {
+      kind: EntityKind.USER,
+      id: 'testUserId',
+    },
+  ],
+  status: ApprovalStates.Accepted,
+  approvalType: ApprovalTypes.Reviewer,
+  approvalCategory: ApprovalCategory.Upload,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const testApproval4: any = {
+  ...testApproval3,
+  _id: 'testApprovalId4',
+  approvers: [
+    {
+      kind: EntityKind.USER,
+      id: 'testUserId',
+    },
+  ],
+}
