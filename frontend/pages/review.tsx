@@ -65,18 +65,25 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
 
   const onCancel = () => {
     setOpen(false)
+    setShowAlert(false)
+    setErrorMessage('')
   }
 
   const onConfirm = async () => {
-    const res = await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
-    if (res.status !== 200) {
-      setShowAlert(true)
-      setErrorMessage(res.message)
-    } else {
-      mutateApprovals()
-      mutateNumApprovals()
-      setOpen(false)
-    }
+    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => {
+      if (res.status !== 200) {
+        console.log(res)
+        res.json().then((errorResponse) => {
+          console.log(errorResponse)
+          setShowAlert(true)
+          setErrorMessage(errorResponse.message)
+        })
+      } else {
+        mutateApprovals()
+        mutateNumApprovals()
+        setOpen(false)
+      }
+    })
   }
 
   const error = MultipleErrorWrapper(
@@ -221,15 +228,15 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
             Confirm
           </Button>
         </DialogActions>
+        {showAlert && (
+          <Alert sx={{ m: 1 }} severity='error' onClose={() => setShowAlert(false)}>
+            {errorMessage}
+          </Alert>
+        )}
       </Dialog>
       {approvals.length === 0 && (
         <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
       )}
-      {/* {showAlert && (
-        <Alert severity='error' onClose={() => setShowAlert(false)}>
-          {errorMessage}
-        </Alert>
-      )} */}
     </Paper>
   )
 }
