@@ -21,6 +21,10 @@ import Wrapper from '../Wrapper'
 type DocsWrapperProps = {
   children?: ReactNode
 }
+enum DirectionalNavigation {
+  FORWARD = 1,
+  BACKWARD = -1,
+}
 
 const paddingIncrement = 2
 
@@ -89,6 +93,19 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     push('/docs')
   }
 
+  function getNewIndex(currentIndex: number, direction: DirectionalNavigation) {
+    let increment = 0 + direction
+    let index: undefined | number = undefined
+    while (!index && currentIndex + increment >= 0 && currentIndex + increment < flatDirectory.length) {
+      if (!('header' in flatDirectory[currentIndex + increment])) {
+        index = currentIndex + increment
+      }
+      increment += direction
+    }
+
+    return index === undefined ? 0 : index
+  }
+
   return (
     <Wrapper title='Documentation' page='docs'>
       {/* Banner height + Toolbar height = 96px */}
@@ -130,13 +147,19 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                       </Button>
                     )}
                     {currentIndex > 0 && (
-                      <Button startIcon={<ArrowBack />} onClick={() => changePage(currentIndex - 1)}>
-                        {flatDirectory[currentIndex - 1].title}
+                      <Button
+                        startIcon={<ArrowBack />}
+                        onClick={() => changePage(getNewIndex(currentIndex, DirectionalNavigation.BACKWARD))}
+                      >
+                        {flatDirectory[getNewIndex(currentIndex, DirectionalNavigation.BACKWARD)].title}
                       </Button>
                     )}
                     {currentIndex < flatDirectory.length - 1 && (
-                      <Button endIcon={<ArrowForward />} onClick={() => changePage(currentIndex + 1)}>
-                        {flatDirectory[currentIndex + 1].title}
+                      <Button
+                        endIcon={<ArrowForward />}
+                        onClick={() => changePage(getNewIndex(currentIndex, DirectionalNavigation.FORWARD))}
+                      >
+                        {flatDirectory[getNewIndex(currentIndex, DirectionalNavigation.FORWARD)].title}
                       </Button>
                     )}
                   </Stack>

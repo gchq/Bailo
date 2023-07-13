@@ -61,13 +61,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Developers', slug: 'developers', header: true },
   { title: 'Contributing', slug: 'developers/contributing' },
   { title: 'Dev Setup', slug: 'developers/dev-setup' },
-  { title: 'Project Layout', slug: 'developers/project-layout' },
 
   { title: 'Main Concepts', slug: 'developers/main-concepts', header: true },
   { title: 'Logical Flow', slug: 'developers/main-concepts/logical-flow' },
   { title: 'Building Models', slug: 'developers/main-concepts/building-models' },
-
-  { title: 'Authentication', slug: 'developers/authentication' },
 
   { title: 'Processes', slug: 'developers/processes', header: true },
   { title: 'Adding An Endpoint', slug: 'developers/processes/adding-an-endpoint' },
