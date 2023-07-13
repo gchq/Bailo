@@ -93,10 +93,10 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     push('/docs')
   }
 
-  function returnNewIndex(currentIndex: number, direction: DirectionalNavigation) {
+  function getNewIndex(currentIndex: number, direction: DirectionalNavigation) {
     let increment = 0 + direction
     let index: undefined | number = undefined
-    while (index === undefined && currentIndex + increment >= 0 && currentIndex + increment < flatDirectory.length) {
+    while (!index && currentIndex + increment >= 0 && currentIndex + increment < flatDirectory.length) {
       if (!('header' in flatDirectory[currentIndex + increment])) {
         index = currentIndex + increment
       }
@@ -149,17 +149,17 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                     {currentIndex > 0 && (
                       <Button
                         startIcon={<ArrowBack />}
-                        onClick={() => changePage(returnNewIndex(currentIndex, DirectionalNavigation.BACKWARD))}
+                        onClick={() => changePage(getNewIndex(currentIndex, DirectionalNavigation.BACKWARD))}
                       >
-                        {flatDirectory[returnNewIndex(currentIndex, DirectionalNavigation.BACKWARD)].title}
+                        {flatDirectory[getNewIndex(currentIndex, DirectionalNavigation.BACKWARD)].title}
                       </Button>
                     )}
                     {currentIndex < flatDirectory.length - 1 && (
                       <Button
                         endIcon={<ArrowForward />}
-                        onClick={() => changePage(returnNewIndex(currentIndex, DirectionalNavigation.FORWARD))}
+                        onClick={() => changePage(getNewIndex(currentIndex, DirectionalNavigation.FORWARD))}
                       >
-                        {flatDirectory[returnNewIndex(currentIndex, DirectionalNavigation.FORWARD)].title}
+                        {flatDirectory[getNewIndex(currentIndex, DirectionalNavigation.FORWARD)].title}
                       </Button>
                     )}
                   </Stack>
