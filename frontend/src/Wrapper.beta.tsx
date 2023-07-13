@@ -322,7 +322,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 <ListItemText primary='Deployments' />
               </ListItemButton>
             </Link>
-            <Link href='/beta/model/new' color='inherit' underline='none'>
+            <Link href='/beta/model/new/model' color='inherit' underline='none'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
                   {!open ? (
