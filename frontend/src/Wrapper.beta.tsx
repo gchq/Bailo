@@ -15,6 +15,7 @@ import { ListItemButton } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import CssBaseline from '@mui/material/CssBaseline'
 import Divider from '@mui/material/Divider'
 import MuiDrawer from '@mui/material/Drawer'
@@ -126,7 +127,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           mt: 4,
         })
         setContentTopStyling({
-          mt: isDocsPage ? 4 : 4,
+          mt: isDocsPage ? 4 : 8,
         })
       }
     }
@@ -174,6 +175,12 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     },
   })
 
+  const betaAdornment = (
+    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
+      beta
+    </Box>
+  )
+
   return (
     <ThemeProvider theme={theme}>
       <Head>
@@ -190,6 +197,10 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           sx={{
             ...pageTopStyling,
             top: 'unset',
+            background:
+              theme.palette.mode === 'light'
+                ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
+                : '#242424',
           }}
         >
           <Toolbar
@@ -210,18 +221,19 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               <MenuIcon />
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' color='inherit' underline='none'>
+              <Link href='/beta' color='inherit' underline='none'>
                 <Image src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
               <Link
-                href='/'
+                href='/beta'
                 color='inherit'
                 underline='none'
                 style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
               >
                 Bailo
+                {betaAdornment}
               </Link>
             </Box>
             {headerTitle}
@@ -281,7 +293,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
           </Toolbar>
           <StyledList>
-            <Link href='/' color='inherit' underline='none'>
+            <Link href='/beta' color='inherit' underline='none'>
               <ListItemButton selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                 <ListItemIcon>
                   {!open ? (
@@ -309,7 +321,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemText primary='Deployments' />
               </ListItemButton>
             </Link>
-            <Link href='/upload' color='inherit' underline='none'>
+            <Link href='/beta/model/new' color='inherit' underline='none'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
                   {!open ? (
@@ -410,15 +422,18 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
+            overflow: 'auto',
           }}
         >
           <Toolbar />
-          <Box sx={{ ...contentTopStyling, height: 'calc(100vh - 98px)', overflow: 'auto' }}>
+          <Box sx={contentTopStyling}>
             {isDocsPage ? (
               children
             ) : (
               <>
-                <Box sx={{ m: 4 }}>{children}</Box>
+                <Container maxWidth='xl' sx={{ mt: 4, mb: 4 }}>
+                  {children}
+                </Container>
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}

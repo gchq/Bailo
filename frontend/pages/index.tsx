@@ -86,7 +86,7 @@ export default function ExploreModels() {
                     <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
                       <MuiLink
                         variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                       >
                         {latestVersion.metadata.highLevelDetails.name}
                       </MuiLink>
