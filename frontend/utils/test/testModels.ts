@@ -1,17 +1,4 @@
-import { configure } from '@testing-library/react'
-import { beforeAll, vi } from 'vitest'
-
-import { ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind } from '../types/types'
-
-configure({ testIdAttribute: 'data-test' })
-
-beforeAll(() => {
-  vi.mock('next/router', () => require('next-router-mock'))
-})
-
-export function doNothing() {
-  /* Do nothing */
-}
+import { ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind } from '../../types/types'
 
 export const testId = 'testId'
 
@@ -96,37 +83,17 @@ export const testApproval1: any = {
 export const testApproval2: any = {
   ...testApproval1,
   _id: 'testApprovalId2',
-  approvers: [
-    {
-      kind: EntityKind.USER,
-      id: 'testUserId',
-    },
-  ],
+  approvalType: ApprovalTypes.Manager,
 }
 
 export const testApproval3: any = {
+  ...testApproval1,
   _id: 'testApprovalId3',
-  version: testVersion,
-  approvers: [
-    {
-      kind: EntityKind.USER,
-      id: 'testUserId',
-    },
-  ],
   status: ApprovalStates.Accepted,
-  approvalType: ApprovalTypes.Reviewer,
-  approvalCategory: ApprovalCategory.Upload,
-  createdAt: new Date(),
-  updatedAt: new Date(),
 }
 
 export const testApproval4: any = {
-  ...testApproval3,
+  ...testApproval2,
   _id: 'testApprovalId4',
-  approvers: [
-    {
-      kind: EntityKind.USER,
-      id: 'testUserId',
-    },
-  ],
+  status: ApprovalStates.Accepted,
 }

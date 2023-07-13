@@ -4,7 +4,14 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { useGetVersionOrDeploymentApprovals } from '../../data/approvals'
 import { ApprovalCategory } from '../../types/types'
-import { testApproval1, testApproval2, testApproval3, testApproval4, testId, testUser } from '../../utils/testUtils'
+import {
+  testApproval1,
+  testApproval2,
+  testApproval3,
+  testApproval4,
+  testId,
+  testUser,
+} from '../../utils/test/testModels'
 import { lightTheme } from '../theme'
 import ApprovalsChip from './ApprovalsChip'
 
@@ -16,14 +23,6 @@ vi.mock('../../data/approvals', () => ({
     isNumApprovalsError: undefined,
     mutateNumApprovals: vi.fn(),
   }),
-}))
-
-vi.mock('../../utils/fetcher', () => ({
-  getErrorMessage: vi.fn().mockResolvedValue('Test error message'),
-}))
-
-vi.mock('../../data/api', () => ({
-  postEndpoint: vi.fn(),
 }))
 
 describe('ApprovalsChip', () => {
@@ -59,7 +58,9 @@ describe('ApprovalsChip', () => {
       isApprovalsError: undefined,
       mutateApprovals: vi.fn(),
     }
+
     vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
@@ -82,7 +83,9 @@ describe('ApprovalsChip', () => {
       isApprovalsError: undefined,
       mutateApprovals: vi.fn(),
     }
+
     vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
@@ -105,7 +108,9 @@ describe('ApprovalsChip', () => {
       isApprovalsError: undefined,
       mutateApprovals: vi.fn(),
     }
+
     vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
@@ -128,7 +133,9 @@ describe('ApprovalsChip', () => {
       isApprovalsError: undefined,
       mutateApprovals: vi.fn(),
     }
+
     vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
