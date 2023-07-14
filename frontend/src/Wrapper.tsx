@@ -328,7 +328,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='primary'>
                         <ListAltIcon />
                       </Badge>
                     </Tooltip>

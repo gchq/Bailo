@@ -1,20 +1,47 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import { ApprovalStates, EntityKind } from '../../types/types'
+import { useGetVersionOrDeploymentApprovals } from '../../data/approvals'
+import { ApprovalCategory } from '../../types/types'
+import {
+  testApproval1,
+  testApproval2,
+  testApproval3,
+  testApproval4,
+  testId,
+  testUser,
+} from '../../utils/test/testModels'
 import { lightTheme } from '../theme'
 import ApprovalsChip from './ApprovalsChip'
 
+vi.mock('../../data/approvals', () => ({
+  useGetVersionOrDeploymentApprovals: vi.fn(),
+  useGetNumApprovals: vi.fn().mockReturnValue({
+    numApprovals: 2,
+    isNumApprovalsLoading: false,
+    isNumApprovalsError: undefined,
+    mutateNumApprovals: vi.fn(),
+  }),
+}))
+
 describe('ApprovalsChip', () => {
   it('renders an ApprovalsChip component with 0/2 approvals', async () => {
+    const mockUseGetVersionOrDeploymentApprovals = {
+      approvals: [testApproval1, testApproval2],
+      isApprovalsLoading: false,
+      isApprovalsError: undefined,
+      mutateApprovals: vi.fn(),
+    }
+
+    vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[
-            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.NoResponse },
-            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.NoResponse },
-          ]}
+          versionOrDeploymentId={testId}
+          approvalCategory={ApprovalCategory.Upload}
+          currentUser={testUser}
         />
       </ThemeProvider>
     )
@@ -25,13 +52,21 @@ describe('ApprovalsChip', () => {
   })
 
   it('renders an ApprovalsChip component with 1/2 approvals', async () => {
+    const mockUseGetVersionOrDeploymentApprovals = {
+      approvals: [testApproval1, testApproval3],
+      isApprovalsLoading: false,
+      isApprovalsError: undefined,
+      mutateApprovals: vi.fn(),
+    }
+
+    vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[
-            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted },
-            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.NoResponse },
-          ]}
+          versionOrDeploymentId={testId}
+          approvalCategory={ApprovalCategory.Upload}
+          currentUser={testUser}
         />
       </ThemeProvider>
     )
@@ -42,13 +77,21 @@ describe('ApprovalsChip', () => {
   })
 
   it('renders an ApprovalsChip component with 2/2 approvals', async () => {
+    const mockUseGetVersionOrDeploymentApprovals = {
+      approvals: [testApproval3, testApproval4],
+      isApprovalsLoading: false,
+      isApprovalsError: undefined,
+      mutateApprovals: vi.fn(),
+    }
+
+    vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[
-            { reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted },
-            { reviewers: [{ kind: EntityKind.USER, id: 'Bob' }], status: ApprovalStates.Accepted },
-          ]}
+          versionOrDeploymentId={testId}
+          approvalCategory={ApprovalCategory.Upload}
+          currentUser={testUser}
         />
       </ThemeProvider>
     )
@@ -59,10 +102,21 @@ describe('ApprovalsChip', () => {
   })
 
   it('renders an ApprovalsChip component with 0/1 approvals', async () => {
+    const mockUseGetVersionOrDeploymentApprovals = {
+      approvals: [testApproval1],
+      isApprovalsLoading: false,
+      isApprovalsError: undefined,
+      mutateApprovals: vi.fn(),
+    }
+
+    vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[{ reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.NoResponse }]}
+          versionOrDeploymentId={testId}
+          approvalCategory={ApprovalCategory.Upload}
+          currentUser={testUser}
         />
       </ThemeProvider>
     )
@@ -73,10 +127,21 @@ describe('ApprovalsChip', () => {
   })
 
   it('renders an ApprovalsChip component with 1/1 approvals', async () => {
+    const mockUseGetVersionOrDeploymentApprovals = {
+      approvals: [testApproval3],
+      isApprovalsLoading: false,
+      isApprovalsError: undefined,
+      mutateApprovals: vi.fn(),
+    }
+
+    vi.mocked(useGetVersionOrDeploymentApprovals).mockReturnValue(mockUseGetVersionOrDeploymentApprovals)
+
     render(
       <ThemeProvider theme={lightTheme}>
         <ApprovalsChip
-          approvals={[{ reviewers: [{ kind: EntityKind.USER, id: 'Alice' }], status: ApprovalStates.Accepted }]}
+          versionOrDeploymentId={testId}
+          approvalCategory={ApprovalCategory.Upload}
+          currentUser={testUser}
         />
       </ThemeProvider>
     )

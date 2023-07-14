@@ -10,6 +10,7 @@ import {
   fetchRawModelFiles,
   getDeployment,
   getDeploymentAccess,
+  getDeploymentApprovals,
   getExportModelVersion,
   getUserDeployments,
   postDeployment,
@@ -36,6 +37,7 @@ import {
   deleteVersion,
   getVersion,
   getVersionAccess,
+  getVersionApprovals,
   getVersionFile,
   getVersionFileList,
   postRebuildModel,
@@ -95,6 +97,7 @@ server.get('/api/v1/model/:uuid/access', ...getModelAccess)
 server.post('/api/v1/deployment', ...postDeployment)
 server.post('/api/v1/deployment/ungoverned', ...postUngovernedDeployment)
 server.get('/api/v1/deployment/:uuid', ...getDeployment)
+server.get('/api/v1/deployment/:id/approvals', ...getDeploymentApprovals)
 server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
 server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
 server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
@@ -104,8 +107,9 @@ server.get('/api/v1/deployment/:uuid/version/:version/export', ...getExportModel
 server.get('/api/v1/version/:id', ...getVersion)
 server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)
 server.get('/api/v1/version/:id/contents/:file', ...getVersionFile)
-server.put('/api/v1/version/:id', ...putVersion)
 server.get('/api/v1/version/:id/access', ...getVersionAccess)
+server.get('/api/v1/version/:id/approvals', ...getVersionApprovals)
+server.put('/api/v1/version/:id', ...putVersion)
 server.delete('/api/v1/version/:id', ...deleteVersion)
 server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
 server.post('/api/v1/version/:id/rebuild', ...postRebuildModel)
