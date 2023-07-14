@@ -11,7 +11,7 @@ import MenuIcon from '@mui/icons-material/MenuTwoTone'
 import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
 import Settings from '@mui/icons-material/SettingsTwoTone'
 import ViewList from '@mui/icons-material/ViewListTwoTone'
-import { ListItemButton } from '@mui/material'
+import { Container, ListItemButton } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
@@ -418,7 +418,9 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               children
             ) : (
               <>
-                <Box sx={{ m: 4 }}>{children}</Box>
+                <Container maxWidth='xl' sx={{ mt: 4, mb: 4 }}>
+                  {children}
+                </Container>
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}
