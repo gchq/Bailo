@@ -26,7 +26,7 @@ vi.mock('../../data/approvals', () => ({
 }))
 
 describe('ApprovalsChip', () => {
-  it.only('renders an ApprovalsChip component with 0/2 approvals', async () => {
+  it('renders an ApprovalsChip component with 0/2 approvals', async () => {
     const mockUseGetVersionOrDeploymentApprovals = {
       approvals: [testApproval1, testApproval2],
       isApprovalsLoading: false,
