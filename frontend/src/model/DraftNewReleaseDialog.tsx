@@ -53,7 +53,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
         </Box>
         <DialogContent>
           <Stack spacing={2}>
-            <DesignServices color='primary' sx={{ margin: 'auto', fontSize: '40px' }} />
+            <DesignServices color='primary' fontSize='large' sx={{ margin: 'auto' }} />
             <DialogContentText>
               A release takes a snapshoot of the current state of the model code, artefacts and model card. Access
               requests will be able to select for any release of a model for deployment.
