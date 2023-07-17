@@ -64,10 +64,10 @@ export default function NewModel() {
   }
 
   const team = [
-    { value: 'teamOne', label: 'Team One' },
-    { value: 'teamTwo', label: 'Team Two' },
-    { value: 'teamThree', label: 'Team Three' },
-    { value: 'teamFour', label: 'Team Four' },
+    { value: 'team 1', label: 'teamOne' },
+    { value: 'team 2', label: 'teamTwo' },
+    { value: 'team 3', label: 'teamThree' },
+    { value: 'team 4', label: 'teamFour' },
   ]
 
   return (
@@ -86,26 +86,21 @@ export default function NewModel() {
                   <Typography sx={{ fontWeight: 'bold' }}>
                     Team <span style={{ color: 'red' }}>*</span>
                   </Typography>
-                  <TextField
-                    required
-                    size='small'
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                  //   select
-                  >
-                    <Stack>
-                    <Autocomplete 
-                    freeSolo
-                    options={team.map((option) => option.value)}
-                    renderInput={(params) => <TextField {...params} label='freeSolo' />}
+                  <Stack spacing={2} sx={{ width: 200 }}>
+                    <Autocomplete
+                      freeSolo
+                      options={team.map((option) => option.value)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          size='small'
+                          value={teamName}
+                          onChange={(e) => setTeamName(e.target.value)}
+                        />
+                      )}
                     />
-                    </Stack>
-                  //   {team.map((option) => (
-                  //     <MenuItem key={option.value} value={option.value}>
-                  //       {option.label}
-                  //     </MenuItem>
-                  //   ))}
-                  </TextField>
+                  </Stack>
                 </Stack>
                 <Stack>
                   <Typography sx={{ fontWeight: 'bold' }}>
