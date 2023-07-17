@@ -28,6 +28,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
     event.preventDefault()
     if (validSemver(semanticVersion)) {
       console.log('Release valid and created!')
+      handleClose()
     }
   }
 
@@ -45,7 +46,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
+      <Box component='form' onSubmit={onSubmit}>
         <DialogTitle color='primary'>Draft New Release</DialogTitle>
         <Box sx={{ mx: 3 }}>
           <Divider sx={{ margin: 'auto' }} />
@@ -59,7 +60,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
             </DialogContentText>
 
             <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-              <Stack>
+              <Stack sx={{ width: '100%' }}>
                 <Typography sx={{ fontWeight: 'bold' }}>
                   Release name <span style={{ color: 'red' }}>*</span>
                 </Typography>
