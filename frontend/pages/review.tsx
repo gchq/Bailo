@@ -70,12 +70,11 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => {
-      if (res.status !== 200) {
-        res.json().then((errorResponse) => {
-          setShowAlert(true)
-          setErrorMessage(errorResponse.message)
-        })
+    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then(async (res) => {
+      if (res.status >= 400) {
+        const errorResponse = await res.json()
+        setShowAlert(true)
+        setErrorMessage(errorResponse.message)
       } else {
         mutateApprovals()
         mutateNumApprovals()
