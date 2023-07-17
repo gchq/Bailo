@@ -1,10 +1,12 @@
 import { Lock, LockOpen } from '@mui/icons-material'
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
   Divider,
   FormControlLabel,
+  MenuItem,
   Radio,
   RadioGroup,
   Stack,
@@ -61,6 +63,13 @@ export default function NewModel() {
     )
   }
 
+  const team = [
+    { value: 'teamOne', label: 'Team One' },
+    { value: 'teamTwo', label: 'Team Two' },
+    { value: 'teamThree', label: 'Team Three' },
+    { value: 'teamFour', label: 'Team Four' },
+  ]
+
   return (
     <Wrapper title='Create a new Model' page='marketplace'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
@@ -77,7 +86,26 @@ export default function NewModel() {
                   <Typography sx={{ fontWeight: 'bold' }}>
                     Team <span style={{ color: 'red' }}>*</span>
                   </Typography>
-                  <TextField required size='small' value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+                  <TextField
+                    required
+                    size='small'
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                  //   select
+                  >
+                    <Stack>
+                    <Autocomplete 
+                    freeSolo
+                    options={team.map((option) => option.value)}
+                    renderInput={(params) => <TextField {...params} label='freeSolo' />}
+                    />
+                    </Stack>
+                  //   {team.map((option) => (
+                  //     <MenuItem key={option.value} value={option.value}>
+                  //       {option.label}
+                  //     </MenuItem>
+                  //   ))}
+                  </TextField>
                 </Stack>
                 <Stack>
                   <Typography sx={{ fontWeight: 'bold' }}>
