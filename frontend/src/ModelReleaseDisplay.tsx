@@ -19,7 +19,9 @@ export default function ModelReleaseDisplay({
 
   function formatDate(timestamp) {
     const date = new Date(timestamp)
-    return date.toLocaleDateString()
+    const year = date.getFullYear().toString()
+    const formattedYear = `'${year.substring(date.getFullYear().toString().length - 2)}`
+    return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} ${formattedYear}`
   }
 
   function approvalStatus(status: ApprovalStates, label: string) {
@@ -64,8 +66,18 @@ export default function ModelReleaseDisplay({
           }}
         >
           <Stack spacing={2}>
-            <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
-              <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={1}>
+            <Stack
+              direction={{ sm: 'row', xs: 'column' }}
+              justifyContent='space-between'
+              alignItems='center'
+              spacing={2}
+            >
+              <Stack
+                direction={{ sm: 'row', xs: 'column' }}
+                justifyContent='space-between'
+                alignItems='center'
+                spacing={1}
+              >
                 <Typography variant='h6' color='primary'>
                   {release.name}
                 </Typography>
@@ -73,7 +85,7 @@ export default function ModelReleaseDisplay({
                 <Typography color='secondary'>{release.semver}</Typography>
                 {latestVersionAdornment()}
                 <Divider orientation='vertical' flexItem />
-                <Stack direction='row'>
+                <Stack direction={{ sm: 'row', xs: 'column' }}>
                   {approvalStatus(release.managerApproved, 'Manager')}
                   {approvalStatus(release.reviewerApproved, 'Technical Reviewer')}
                 </Stack>
@@ -91,13 +103,25 @@ export default function ModelReleaseDisplay({
             <Divider />
             <Stack spacing={0}>
               {release.files.map((file) => (
-                <Stack key={file.name} direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
+                <Stack
+                  key={file.name}
+                  direction={{ sm: 'row', xs: 'column' }}
+                  justifyContent='space-between'
+                  alignItems='center'
+                  spacing={2}
+                >
                   <Link href='/beta'>{file.name}</Link>
                   <Typography variant='caption'>{file.size}</Typography>
                 </Stack>
               ))}
               {release.images.map((image) => (
-                <Stack key={image.ref} direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
+                <Stack
+                  key={image.ref}
+                  direction={{ sm: 'row', xs: 'column' }}
+                  justifyContent='space-between'
+                  alignItems='center'
+                  spacing={2}
+                >
                   <Link href='/beta'>{image.ref}</Link>
                   <Typography variant='caption'>{image.size}</Typography>
                 </Stack>

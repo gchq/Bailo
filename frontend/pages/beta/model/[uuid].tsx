@@ -14,7 +14,7 @@ export default function Model() {
     uuid: uuid,
     releases: [
       {
-        name: uuid,
+        name: 'test-model-123',
         semver: '1.0.1',
         timestamp: '2023-07-12T11:09:57.832+00:00',
         notes: 'This is another release',
@@ -24,7 +24,7 @@ export default function Model() {
         images: [{ ref: 'dockerimage.tar.gz', size: '45mb' }],
       },
       {
-        name: uuid,
+        name: 'test-model-123',
         semver: '1.0.0',
         timestamp: '2023-07-10T11:09:57.832+00:00',
         notes: 'This is an initial release',

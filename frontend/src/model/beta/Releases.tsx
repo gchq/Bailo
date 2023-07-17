@@ -18,14 +18,18 @@ export default function Releases({ model }: { model: any }) {
           <Button variant='outlined'>Draft new Release</Button>
         </Box>
 
-        {model.releases.map((release) => (
-          <ModelReleaseDisplay
-            key={release.name}
-            modelUuid={model.uuid}
-            release={release}
-            latestRelease={latestRelease}
-          />
-        ))}
+        {model.releases.map((release) => {
+          return (
+            release.name && (
+              <ModelReleaseDisplay
+                key={release.semver}
+                modelUuid={model.uuid}
+                release={release}
+                latestRelease={latestRelease}
+              />
+            )
+          )
+        })}
       </Stack>
     </Box>
   )
