@@ -4,7 +4,7 @@ import { green, orange, red } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { ApprovalStates } from 'types/types'
 
-import Link from './Link'
+import Link from '../Link'
 
 export default function ModelReleaseDisplay({
   modelUuid,
