@@ -77,7 +77,6 @@ export const postApprovalResponse = [
   ensureUserRole('user'),
   bodyParser.json(),
   async (req: Request, res: Response) => {
-    throw BadReq({}, 'Error')
     const { id } = req.params
     const choice = req.body.choice as string
 
