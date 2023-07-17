@@ -70,6 +70,13 @@ export default function NewModel() {
     { value: 'team 4', label: 'teamFour' },
   ]
 
+  const modelNames = [
+    { value: 'model 1', label: 'modelOne' },
+    { value: 'model 2', label: 'modelTwo' },
+    { value: 'model 3', label: 'modelThree' },
+    { value: 'model 4', label: 'modelFour' },
+  ]
+
   return (
     <Wrapper title='Create a new Model' page='marketplace'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
@@ -106,7 +113,21 @@ export default function NewModel() {
                   <Typography sx={{ fontWeight: 'bold' }}>
                     Model name <span style={{ color: 'red' }}>*</span>
                   </Typography>
-                  <TextField required size='small' value={modelName} onChange={(e) => setModelName(e.target.value)} />
+                  <Stack spacing={2} sx={{ width: 200 }}>
+                    <Autocomplete
+                      freeSolo
+                      options={modelNames.map((option) => option.value)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          size='small'
+                          value={modelName}
+                          onChange={(e) => setModelName(e.target.value)}
+                        />
+                      )}
+                    />
+                  </Stack>
                 </Stack>
               </Stack>
               <Stack>
