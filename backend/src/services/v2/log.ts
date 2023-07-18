@@ -6,6 +6,7 @@ import { omit } from 'lodash-es'
 import path, { join } from 'path'
 import util from 'util'
 
+import config from '../../utils/v2/config.js'
 import { getDirectory } from '../../utils/v2/fs.js'
 
 interface BunyanLog {
@@ -144,14 +145,14 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
   // In production environments output plain JSON logs
   streams.push({
-    level: 'trace',
+    level: config.log.level,
     stream: process.stdout,
   })
 }
 
 const log = bunyan.createLogger({
   name: 'bailo',
-  level: 'trace',
+  level: config.log.level,
   src: process.env.NODE_ENV !== 'production',
   streams: streams.length ? streams : undefined,
 })

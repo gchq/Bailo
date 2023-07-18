@@ -1,4 +1,4 @@
-/** @type {import('../src/utils/config.js').Config} */
+/** @type {import('../src/utils/v2/config.js').Config} */
 module.exports = {
   api: {
     // Port to listen on
@@ -225,5 +225,9 @@ module.exports = {
     authorisation: {
       kind: 'silly',
     },
+  },
+
+  log: {
+    level: 'trace',
   },
 }

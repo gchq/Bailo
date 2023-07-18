@@ -1,3 +1,4 @@
+import bunyan from 'bunyan'
 import _config from 'config'
 
 export interface Config {
@@ -9,6 +10,10 @@ export interface Config {
     authorisation: {
       kind: 'silly' | string
     }
+  }
+
+  log: {
+    level: bunyan.LogLevel
   }
 }
 

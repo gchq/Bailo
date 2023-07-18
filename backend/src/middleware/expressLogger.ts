@@ -73,6 +73,8 @@ export async function expressErrorHandler(err: unknown, req: Request, res: Respo
   const logger = err.logger || req.log
   logger.warn(err.context, err.message)
 
+  delete err.context?.internal
+
   return res.status(err.code).json({
     error: {
       name: err.name,
