@@ -13,7 +13,7 @@ export interface BailoError extends Error {
     documentationUrl?: string
 
     // Items in internal are not displayed to the user and may include sensitive information
-    internal: unknown
+    internal?: unknown
 
     [key: string]: unknown
   }
