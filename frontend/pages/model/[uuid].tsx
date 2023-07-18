@@ -45,7 +45,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import { DateString, ModelUploadType, User, Version } from '../../types/types'
+import { ApprovalStates, DateString, ModelUploadType, User, Version } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -102,6 +102,12 @@ function Model() {
     })
     path = path.substring(0, path.length - 1)
     router.push(path)
+  }
+
+  const accessRequestAllowed = (version) => {
+    if (version.built === true || (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted')) {
+      return true
+    }
   }
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
@@ -300,11 +306,7 @@ function Model() {
                 >
                   <MenuItem
                     onClick={requestDeployment}
-                    disabled={
-                      !version.built ||
-                      version.managerApproved !== 'Accepted' ||
-                      version.reviewerApproved !== 'Accepted'
-                    }
+                    disabled={accessRequestAllowed(false)}
                     data-test='submitDeployment'
                   >
                     <ListItemIcon>
