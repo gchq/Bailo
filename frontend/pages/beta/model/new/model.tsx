@@ -64,29 +64,29 @@ export default function NewModel() {
   }
 
   const team = [
-    { value: 'team 1', label: 'teamOne' },
-    { value: 'team 2', label: 'teamTwo' },
-    { value: 'team 3', label: 'teamThree' },
-    { value: 'team 4', label: 'teamFour' },
-    { value: 'team 5', label: 'teamFive' },
-    { value: 'team 6', label: 'teamSix' },
-    { value: 'team 7', label: 'teamSeven' },
-    { value: 'team 8', label: 'teamEight' },
-    { value: 'team 9', label: 'team9' },
-    { value: 'team 10', label: 'team10' },
-    { value: 'team 11', label: 'team11' },
-    { value: 'team 12', label: 'team12' },
-    { value: 'team 13', label: 'team13' },
-    { value: 'team 14', label: 'team14' },
-    { value: 'team 15', label: 'team15' },
-    { value: 'team 16', label: 'team16' },
+    { value: 'teamOne', label: 'team 1' },
+    { value: 'teamTwo', label: 'team 2' },
+    { value: 'teamThree', label: 'team 3' },
+    { value: 'teamFour', label: 'team 4' },
+    { value: 'teamFive', label: 'team 5' },
+    { value: 'teamSix', label: 'team 6' },
+    { value: 'teamSeven', label: 'team 7' },
+    { value: 'teamEight', label: 'team 8' },
+    { value: 'teamNine', label: 'team 9' },
+    { value: 'teamTen', label: 'team 10' },
+    { value: 'teamEleven', label: 'team 11' },
+    { value: 'teamTwelve', label: 'team 12' },
+    { value: 'teamThirteen', label: 'team 13' },
+    { value: 'teamFourteen', label: 'team 14' },
+    { value: 'teamFifteen', label: 'team 15' },
+    { value: 'teamSixteen', label: 'team 16' },
   ]
 
   const modelNames = [
-    { value: 'model 1', label: 'modelOne' },
-    { value: 'model 2', label: 'modelTwo' },
-    { value: 'model 3', label: 'modelThree' },
-    { value: 'model 4', label: 'modelFour' },
+    { value: 'modelOne', label: 'model 1' },
+    { value: 'modelTwo', label: 'model 2' },
+    { value: 'modelThree', label: 'model 3' },
+    { value: 'modelFour', label: 'model 4' },
   ]
 
   return (
@@ -108,7 +108,7 @@ export default function NewModel() {
                   <Stack spacing={2} sx={{ width: 200 }}>
                     <Autocomplete
                       freeSolo
-                      options={team.map((option) => option.value)}
+                      options={team.map((option) => option.label)}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -128,7 +128,7 @@ export default function NewModel() {
                   <Stack spacing={2} sx={{ width: 200 }}>
                     <Autocomplete
                       freeSolo
-                      options={modelNames.map((option) => option.value)}
+                      options={modelNames.map((option) => option.label)}
                       renderInput={(params) => (
                         <TextField
                           {...params}
