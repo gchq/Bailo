@@ -215,5 +215,6 @@ module.exports = {
         image: 'seldonio/seldon-core-s2i-python37:1.10.0',
       },
     ],
+    maxModelSizeGB: 50
   },
 }

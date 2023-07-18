@@ -137,6 +137,9 @@ export interface UiConfig {
   }
 
   seldonVersions: Array<SeldonVersion>
+
+  //max model size is calculated in gigabytes
+  maxModelSizeGB: number
 }
 
 export type SeldonVersion = {

@@ -4,10 +4,13 @@ import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { useGetUiConfig } from 'data/uiConfig'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
+import { convertGigabytesToBytes } from 'utils/byteUtils'
 
 import { RenderInterface, Step } from '../../types/interfaces'
-import { ModelUploadType } from '../../types/types'
+import { ModelUploadType, UiConfig } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
 import FileInput from '../common/FileInput'
 import SubmissionError from './SubmissionError'
@@ -15,22 +18,25 @@ import SubmissionError from './SubmissionError'
 export default function RenderFileTab({ step, splitSchema, setSplitSchema }: RenderInterface) {
   const { state } = step
   const { binary, code, docker } = state
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState('')
   const [totalFileSize, setTotalFileSize] = useState(0)
+
+  const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
 
   useEffect(() => {
     const codeSize = state.code ? state.code.size : 0
     const binarySize = state.binary ? state.binary.size : 0
     const dockerSize = state.docker ? state.docker.size : 0
     setTotalFileSize(codeSize + binarySize + dockerSize)
-  }, [])
+  }, [state.binary, state.code, state.docker])
 
   useEffect(() => {
-    setError(undefined)
-    //change in config
-    if (totalFileSize / 1024 > 1.9) setError('Model size exceeds maximum upload size')
-    console.log(totalFileSize)
-  }, [totalFileSize])
+    if (isUiConfigError) setError(isUiConfigError.message)
+    else if (!uiConfig) setError('Failed to load ui config')
+    else if (totalFileSize > convertGigabytesToBytes(uiConfig.maxModelSizeGB))
+      setError('Model size exceeds maximum upload size of')
+    else setError('')
+  }, [isUiConfigError, totalFileSize, uiConfig])
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
@@ -57,6 +63,8 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
       setTotalFileSize(totalFileSize + event.target.files[0].size)
     }
   }
+
+  if (isUiConfigLoading) return <Loading />
 
   return (
     <Paper>
@@ -92,9 +100,13 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
   )
 }
 
-export function fileTabComplete(step: Step) {
+export function fileTabComplete(step: Step, maxModelSizeGB: UiConfig['maxModelSizeGB']) {
   if (!step.steps) return false
 
+  const totalFileSize =
+    (step.state.binary ? step.state.binary.size : 0) +
+    (step.state.code ? step.state.code.size : 0) +
+    (step.state.docker ? step.state.docker.size : 0)
   const buildOptionsStep = step.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions')
 
   const hasUploadType = !!buildOptionsStep?.state?.uploadType
@@ -107,7 +119,7 @@ export function fileTabComplete(step: Step) {
     case ModelUploadType.ModelCard:
       return true
     case ModelUploadType.Zip:
-      return step.state.binary && step.state.code && step.state.binary.size / 1024 + step.state.code.size / 1024 <= 1.9
+      return step.state.binary && step.state.code && totalFileSize <= convertGigabytesToBytes(maxModelSizeGB)
     case ModelUploadType.Docker:
       return !!step.state.docker
     default:
