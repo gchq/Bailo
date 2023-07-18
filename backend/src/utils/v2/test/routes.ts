@@ -1,6 +1,5 @@
 import { generateMock, GenerateMockOptions } from '@anatine/zod-mock'
 import supertest from 'supertest'
-import { expect } from 'vitest'
 import z, { ZodSchema } from 'zod'
 
 import { server } from '../../../routes.js'
