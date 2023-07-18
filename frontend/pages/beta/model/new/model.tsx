@@ -68,6 +68,18 @@ export default function NewModel() {
     { value: 'team 2', label: 'teamTwo' },
     { value: 'team 3', label: 'teamThree' },
     { value: 'team 4', label: 'teamFour' },
+    { value: 'team 5', label: 'teamFive' },
+    { value: 'team 6', label: 'teamSix' },
+    { value: 'team 7', label: 'teamSeven' },
+    { value: 'team 8', label: 'teamEight' },
+    { value: 'team 9', label: 'team9' },
+    { value: 'team 10', label: 'team10' },
+    { value: 'team 11', label: 'team11' },
+    { value: 'team 12', label: 'team12' },
+    { value: 'team 13', label: 'team13' },
+    { value: 'team 14', label: 'team14' },
+    { value: 'team 15', label: 'team15' },
+    { value: 'team 16', label: 'team16' },
   ]
 
   const modelNames = [
