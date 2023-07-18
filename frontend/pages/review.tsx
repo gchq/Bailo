@@ -17,6 +17,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postEndpoint } from '../data/api'
 import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
@@ -72,9 +73,9 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   const onConfirm = async () => {
     await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then(async (res) => {
       if (res.status >= 400) {
-        const errorResponse = await res.json()
+        const errorResponse = await getErrorMessage(res)
         setShowAlert(true)
-        setErrorMessage(errorResponse.message)
+        setErrorMessage(errorResponse)
       } else {
         mutateApprovals()
         mutateNumApprovals()
