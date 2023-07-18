@@ -4,6 +4,8 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressLogger.js'
+import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -43,6 +45,8 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getModel } from './routes/v2/model/getModel.js'
+import { postModel } from './routes/v2/model/postModel.js'
 import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -64,7 +68,9 @@ if (config.oauth.enabled) {
 }
 
 server.use(getUser)
+
 server.use(expressLogger)
+server.use('/api/v2', expressLoggerV2)
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
@@ -136,4 +142,8 @@ server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
 server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
-server.use('/api', expressErrorHandler)
+server.post('/api/v2/model', ...postModel)
+server.get('/api/v2/model/:id', ...getModel)
+
+server.use('/api/v1', expressErrorHandler)
+server.use('/api/v2', expressErrorHandlerV2)

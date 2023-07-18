@@ -216,4 +216,14 @@ module.exports = {
       },
     ],
   },
+
+  connectors: {
+    user: {
+      kind: 'silly',
+    },
+
+    authorisation: {
+      kind: 'silly',
+    },
+  },
 }
