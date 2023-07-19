@@ -308,20 +308,20 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 <ListItemText primary='Marketplace' />
               </ListItemButton>
             </Link>
-            <Link href='/deployments' color='inherit' underline='none'>
-              <ListItemButton selected={page === 'deployments'}>
-                <ListItemIcon>
-                  {!open ? (
-                    <Tooltip title='My Deployments' arrow placement='right'>
-                      <ViewList />
-                    </Tooltip>
-                  ) : (
+            {/* <Link href='/deployments' color='inherit' underline='none'> */}
+            <ListItemButton disabled selected={page === 'deployments'}>
+              <ListItemIcon>
+                {!open ? (
+                  <Tooltip title='My Access Requests' arrow placement='right'>
                     <ViewList />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Deployments' />
-              </ListItemButton>
-            </Link>
+                  </Tooltip>
+                ) : (
+                  <ViewList />
+                )}
+              </ListItemIcon>
+              <ListItemText primary='Deployments' />
+            </ListItemButton>
+            {/* </Link> */}
             <Link href='/beta/model/new/model' color='inherit' underline='none'>
               <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
                 <ListItemIcon>
@@ -336,22 +336,22 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 <ListItemText primary='Upload' />
               </ListItemButton>
             </Link>
-            <Link href='/review' color='inherit' underline='none'>
-              <ListItemButton selected={page === 'review'} data-test='reviewLink'>
-                <ListItemIcon>
-                  {!open ? (
-                    <Tooltip title='Review' arrow placement='right'>
-                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
-                        <ListAltIcon />
-                      </Badge>
-                    </Tooltip>
-                  ) : (
-                    <ListAltIcon />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Reviews' />
-              </ListItemButton>
-            </Link>
+            {/* <Link href='/review' color='inherit' underline='none'> */}
+            <ListItemButton disabled selected={page === 'review'} data-test='reviewLink'>
+              <ListItemIcon>
+                {!open ? (
+                  <Tooltip title='Review' arrow placement='right'>
+                    <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                      <ListAltIcon />
+                    </Badge>
+                  </Tooltip>
+                ) : (
+                  <ListAltIcon />
+                )}
+              </ListItemIcon>
+              <ListItemText primary='Reviews' />
+            </ListItemButton>
+            {/* </Link> */}
             <Divider />
             <Link href='/docs/api'>
               <ListItemButton selected={page === 'api'} data-test='apiDocsLink'>
