@@ -1,4 +1,4 @@
-import { Autocomplete, Stack, TextField } from '@mui/material'
+import { Autocomplete, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function Selector() {
@@ -24,15 +24,18 @@ export default function Selector() {
     { value: 'teamSixteen', label: 'team 16' },
   ]
 
-  const modelNames = [
-    { value: 'modelOne', label: 'model 1' },
-    { value: 'modelTwo', label: 'model 2' },
-    { value: 'modelThree', label: 'model 3' },
-    { value: 'modelFour', label: 'model 4' },
-  ]
+  //   const modelNames = [
+  //     { value: 'modelOne', label: 'model 1' },
+  //     { value: 'modelTwo', label: 'model 2' },
+  //     { value: 'modelThree', label: 'model 3' },
+  //     { value: 'modelFour', label: 'model 4' },
+  //   ]
 
-  const teamNameSelector = () => {
-    return (
+  return (
+    <Stack>
+      <Typography sx={{ fontWeight: 'bold' }}>
+        Team <span style={{ color: 'red' }}>*</span>
+      </Typography>
       <Stack spacing={2} sx={{ width: 200 }}>
         <Autocomplete
           freeSolo
@@ -48,26 +51,29 @@ export default function Selector() {
           )}
         />
       </Stack>
-    )
-  }
+    </Stack>
+  )
 
-  const modelNameSelector = () => {
-    return (
-      <Stack spacing={2} sx={{ width: 200 }}>
-        <Autocomplete
-          freeSolo
-          options={modelNames.map((option) => option.label)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              required
-              size='small'
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-            />
-          )}
-        />
-      </Stack>
-    )
-  }
+  //   return (
+  //     <Stack>
+  //       <Typography sx={{ fontWeight: 'bold' }}>
+  //         Model name <span style={{ color: 'red' }}>*</span>
+  //       </Typography>
+  //       <Stack spacing={2} sx={{ width: 200 }}>
+  //         <Autocomplete
+  //           freeSolo
+  //           options={modelNames.map((option) => option.label)}
+  //           renderInput={(params) => (
+  //             <TextField
+  //               {...params}
+  //               required
+  //               size='small'
+  //               value={modelName}
+  //               onChange={(e) => setModelName(e.target.value)}
+  //             />
+  //           )}
+  //         />
+  //       </Stack>
+  //     </Stack>
+  //   )
 }

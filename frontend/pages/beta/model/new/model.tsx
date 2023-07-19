@@ -1,12 +1,12 @@
 import { Lock, LockOpen } from '@mui/icons-material'
 import {
-  // Autocomplete,
+  Autocomplete,
   Box,
   Button,
   Card,
   Divider,
   FormControlLabel,
-  // MenuItem,
+  MenuItem,
   Radio,
   RadioGroup,
   Stack,
@@ -21,8 +21,8 @@ import Selector from '../../../../src/common/Selector'
 import Wrapper from '../../../../src/Wrapper.beta'
 
 export default function NewModel() {
-  // const [teamName, setTeamName] = useState('')
-  // const [modelName, setModelName] = useState('')
+  const [teamName, setTeamName] = useState('')
+  const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [accessibility, setAccessibility] = useState<NewModelData['accessibility']>('public')
 
@@ -76,18 +76,7 @@ export default function NewModel() {
             <>
               <Typography variant='h6'>Overview</Typography>
               <Stack direction='row' spacing={2}>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    Team <span style={{ color: 'red' }}>*</span>
-                  </Typography>
-                  //team bits here
-                </Stack>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    Model name <span style={{ color: 'red' }}>*</span>
-                  </Typography>
-                  //model name bits here
-                </Stack>
+                //put teams and model name here
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
