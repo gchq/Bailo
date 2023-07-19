@@ -1,16 +1,16 @@
-import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
-import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
-import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
-import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
-import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
-import LinkIcon from '@mui/icons-material/LinkTwoTone'
+import AdminIcon from '@mui/icons-material/AdminPanelSettings'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ContactSupportIcon from '@mui/icons-material/ContactSupport'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import FileUploadIcon from '@mui/icons-material/FileUpload'
+import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import LogoutIcon from '@mui/icons-material/LogoutTwoTone'
-import MenuIcon from '@mui/icons-material/MenuTwoTone'
-import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
-import Settings from '@mui/icons-material/SettingsTwoTone'
-import ViewList from '@mui/icons-material/ViewListTwoTone'
+import LogoutIcon from '@mui/icons-material/Logout'
+import MenuIcon from '@mui/icons-material/Menu'
+import SchemaIcon from '@mui/icons-material/Schema'
+import Settings from '@mui/icons-material/Settings'
+import ViewList from '@mui/icons-material/ViewList'
 import { ListItemButton } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
@@ -169,6 +169,9 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
   const StyledList = styled(List)({
     paddingTop: 0,
     paddingBottom: 0,
+    '&, & .MuiListItemIcon-root': {
+      color: theme.palette.primary.main,
+    },
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
         color: theme.palette.secondary.main,
