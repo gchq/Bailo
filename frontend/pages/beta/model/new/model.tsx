@@ -1,12 +1,10 @@
 import { Lock, LockOpen } from '@mui/icons-material'
 import {
-  Autocomplete,
   Box,
   Button,
   Card,
   Divider,
   FormControlLabel,
-  MenuItem,
   Radio,
   RadioGroup,
   Stack,
@@ -21,8 +19,8 @@ import Selector from '../../../../src/common/TeamAndModelSelector'
 import Wrapper from '../../../../src/Wrapper.beta'
 
 export default function NewModel() {
-  const [teamName, setTeamName] = useState('')
-  const [modelName, setModelName] = useState('')
+  const [teamName, _setTeamName] = useState('')
+  const [modelName, _setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [accessibility, setAccessibility] = useState<NewModelData['accessibility']>('public')
 
