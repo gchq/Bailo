@@ -155,10 +155,40 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 // V2 APIs
 
 server.post('/api/v2/models', ...postModel)
+// server.post('/api/v2/models/import', ...postModelImport)
+
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+
+// server.post('/api/v2/model/:modelId/releases', ...postRelease)
+// server.get('/api/v2/model/:modelId/releases', ...getReleases)
+// server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
+// server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
+
+// server.get('/api/v2/model/:modelId/files', ...getFiles)
+// server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
+// server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+// server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
+// server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteModelFile)
+
+// server.get('/api/v2/model/:modelId/images', ...getImages)
+// server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+
+// server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
+// server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+
+// server.get('/api/v2/template/models', ...getModelTemplates)
+// server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+// server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+// server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+
+// server.get('/api/v2/schemas', ...getSchemas)
+// server.get('/api/v2/schema/:schemaId', ...getSchema)
+
+// server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
+// server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
 
 server.post('/api/v2/teams', ...postTeam)
 server.get('/api/v2/teams', ...getTeams)
@@ -166,6 +196,21 @@ server.get('/api/v2/teams/mine', ...getMyTeams)
 
 server.get('/api/v2/team/:teamId', ...getTeam)
 server.patch('/api/v2/team/:teamId', ...patchTeam)
+
+// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
+// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
+// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
+// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
+
+// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
+
+// server.get('/api/v2/users', ...getUsers)
+// server.get('/api/v2/users/me', ...getCurrentUser)
+
+// server.post('/api/v2/user/:userId/tokens', ...postUserToken)
+// server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
+// server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
+// server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
 
 server.use('/api/v1', expressErrorHandler)
 server.use('/api/v2', expressErrorHandlerV2)
