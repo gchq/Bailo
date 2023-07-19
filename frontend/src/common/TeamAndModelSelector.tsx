@@ -1,9 +1,9 @@
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+// import { useState } from 'react'
 
-export default function TeamAndModelSelector() {
-  const [_selectedTeam, setSelectedTeam] = useState('')
-  const [_selectedModel, setSelectedModel] = useState('')
+export default function TeamAndModelSelector(teamValue, setTeamValue, modelValue, setModelValue) {
+  // const [_selectedTeam, setSelectedTeam] = useState('')
+  // const [_selectedModel, setSelectedModel] = useState('')
 
   const teamNames = [
     { value: 'teamOne', label: 'team 1' },
@@ -33,8 +33,8 @@ export default function TeamAndModelSelector() {
 
   return (
     <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} divider={<Divider flexItem orientation='vertical' />}>
-      <Selector data={teamNames} setData={(value) => setSelectedTeam(value)} label='Team' />
-      <Selector data={modelNames} setData={(value) => setSelectedModel(value)} label='Model' />
+      <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' />
+      <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' />
     </Stack>
   )
 }
