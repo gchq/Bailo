@@ -17,7 +17,7 @@ import {
 import { useState } from 'react'
 import { NewModelData } from 'types/types'
 
-import Selector from '../../../../src/common/Selector'
+import Selector from '../../../../src/common/TeamAndModelSelector'
 import Wrapper from '../../../../src/Wrapper.beta'
 
 export default function NewModel() {
@@ -76,7 +76,7 @@ export default function NewModel() {
             <>
               <Typography variant='h6'>Overview</Typography>
               <Stack direction='row' spacing={2}>
-                //put teams and model name here
+                <Selector />
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
