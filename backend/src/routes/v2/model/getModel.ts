@@ -8,7 +8,7 @@ import { getModelById } from '../../../services/v2/model.js'
 
 export const getModelSchema = z.object({
   params: z.object({
-    id: z.string({
+    modelId: z.string({
       required_error: 'Must specify model id as param',
     }),
   }),
@@ -25,7 +25,7 @@ export const getModel = [
   async (req: Request, res: Response<GetModelResponse>) => {
     const { params } = parse(req, getModelSchema)
 
-    const model = await getModelById(req.user, params.id)
+    const model = await getModelById(req.user, params.modelId)
 
     return res.json({
       data: {

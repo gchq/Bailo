@@ -46,7 +46,14 @@ import {
   putVersion,
 } from './routes/v1/version.js'
 import { getModel } from './routes/v2/model/getModel.js'
+import { getModelCard } from './routes/v2/model/getModelCard.js'
+import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
+import { getMyTeams } from './routes/v2/team/getMyTeams.js'
+import { getTeam } from './routes/v2/team/getTeam.js'
+import { getTeams } from './routes/v2/team/getTeams.js'
+import { patchTeam } from './routes/v2/team/patchTeam.js'
+import { postTeam } from './routes/v2/team/postTeam.js'
 import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -82,10 +89,13 @@ if (config.oauth.enabled) {
 
   server.get('/api/logout', (req, res) => {
     req.session.destroy(function (err) {
+      if (err) throw err
       res.redirect('/')
     })
   })
 }
+
+// V1 APIs
 
 server.post('/api/v1/model', ...postUpload)
 
@@ -142,8 +152,20 @@ server.get('/api/v1/admin/logs', ...getApplicationLogs)
 server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
 server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
-server.post('/api/v2/model', ...postModel)
-server.get('/api/v2/model/:id', ...getModel)
+// V2 APIs
+
+server.post('/api/v2/models', ...postModel)
+server.get('/api/v2/model/:modelId', ...getModel)
+server.patch('/api/v2/model/:modelId', ...patchModel)
+
+server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+
+server.post('/api/v2/teams', ...postTeam)
+server.get('/api/v2/teams', ...getTeams)
+server.get('/api/v2/teams/mine', ...getMyTeams)
+
+server.get('/api/v2/team/:teamId', ...getTeam)
+server.patch('/api/v2/team/:teamId', ...patchTeam)
 
 server.use('/api/v1', expressErrorHandler)
 server.use('/api/v2', expressErrorHandlerV2)

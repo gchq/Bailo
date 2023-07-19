@@ -1,19 +1,19 @@
 // Some bad parts
-import '../../../utils/test/testUtils.js'
+import '../../../src/utils/test/testUtils.js'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { createFixture, testPost } from '../../../utils/v2/test/routes.js'
-import { postModelSchema } from './postModel.js'
+import { postModelSchema } from '../../../src/routes/v2/model/postModel.js'
+import { createFixture, testPost } from '../../../src/utils/v2/test/routes.js'
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../services/v2/model.js', () => ({
+    vi.mock('../../../src/services/v2/model.js', () => ({
       createModel: vi.fn(() => ({ _id: 'test' })),
     }))
 
     const fixture = createFixture(postModelSchema)
-    const res = await testPost('/api/v2/model', fixture)
+    const res = await testPost('/api/v2/models', fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -25,7 +25,7 @@ describe('routes > model > postModel', () => {
     // This model does not include a description.
     delete fixture.body.description
 
-    const res = await testPost('/api/v2/model', fixture)
+    const res = await testPost('/api/v2/models', fixture)
 
     expect(res.statusCode).toEqual(400)
     expect(res.body).matchSnapshot()

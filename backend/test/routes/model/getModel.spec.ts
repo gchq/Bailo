@@ -1,14 +1,14 @@
 // Some bad parts
-import '../../../utils/test/testUtils.js'
+import '../../../src/utils/test/testUtils.js'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { createFixture, testGet } from '../../../utils/v2/test/routes.js'
-import { getModelSchema } from './getModel.js'
+import { getModelSchema } from '../../../src/routes/v2/model/getModel.js'
+import { createFixture, testGet } from '../../../src/utils/v2/test/routes.js'
 
 describe('routes > model > getModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../services/v2/model.js', () => ({
+    vi.mock('../../../src/services/v2/model.js', () => ({
       getModelById: vi.fn(() => ({ _id: 'test' })),
     }))
 

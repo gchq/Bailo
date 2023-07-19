@@ -21,16 +21,9 @@ export function validate(schema: AnyZodObject) {
 
 export function parse<T extends AnyZodObject>(req: Request, schema: T): z.infer<T> {
   try {
-    return schema.parse({
-      body: req.body,
-      query: req.query,
-      params: req.params,
-    })
+    return schema.parse(req)
   } catch (err) {
     const error = err as ZodError
-
-    console.log(JSON.stringify(error, null, 4))
-
     throw BadReq(error.issues[0].message, { errors: error.issues })
   }
 }
