@@ -14,7 +14,7 @@ interface BunyanLog {
   src: { file: string; line: number }
   msg: string
 }
-function isBunyanLogGuard(data: unknown): data is BunyanLog {
+export function isBunyanLogGuard(data: unknown): data is BunyanLog {
   if (typeof data !== 'object' || data === null) {
     return false
   }
@@ -34,7 +34,7 @@ function isBunyanLogGuard(data: unknown): data is BunyanLog {
   return true
 }
 
-class Writer extends WritableStream {
+export class Writer extends WritableStream {
   basepath: string
 
   constructor({ basepath }: { basepath: string }) {
@@ -114,7 +114,7 @@ class Writer extends WritableStream {
 
   write(data: unknown) {
     if (!isBunyanLogGuard(data)) {
-      throw new Error('Received unknown value to the log writer: ' + data)
+      throw new Error('Received unknown value to the log writer: ' + util.inspect(data))
     }
 
     const level = Writer.getLevel(data.level)
