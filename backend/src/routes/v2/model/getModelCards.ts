@@ -12,7 +12,6 @@ interface GetModelCardResponse {
 export const getModelCard = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelCardResponse>) => {
-
     return res.json({
       data: {
         modelCard: {

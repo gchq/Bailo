@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 
 import { TeamInterface } from '../../../models/v2/Team.js'
 
-
 interface PostTeamResponse {
   data: {
     team: TeamInterface
@@ -13,7 +12,6 @@ interface PostTeamResponse {
 export const postTeam = [
   bodyParser.json(),
   async (req: Request, res: Response<PostTeamResponse>) => {
-
     return res.json({
       data: {
         team: {

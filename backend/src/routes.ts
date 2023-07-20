@@ -47,6 +47,7 @@ import {
 } from './routes/v1/version.js'
 import { getModelCard } from './routes/v2/model/getModelCards.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
+import { postModel } from './routes/v2/model/postModel.js'
 import { patchTeam } from './routes/v2/team/getMyTeam.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
@@ -148,9 +149,9 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
 /**
  ** V2 API **
-*/
+ */
 
-//server.post('/api/v2/models', ...postModel)
+server.post('/api/v2/models', ...postModel)
 // server.post('/api/v2/models/import', ...postModelImport)
 
 //server.get('/api/v2/model/:modelId', ...getModel)

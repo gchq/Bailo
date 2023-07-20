@@ -18,7 +18,6 @@ interface GetModelsResponse {
 export const getModels = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
-
     return res.json({
       data: {
         models: [

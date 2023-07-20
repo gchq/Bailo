@@ -12,7 +12,6 @@ interface GetTeamResponse {
 export const getTeam = [
   bodyParser.json(),
   async (req: Request, res: Response<GetTeamResponse>) => {
-
     return res.json({
       data: {
         team: {

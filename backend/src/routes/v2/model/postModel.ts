@@ -3,15 +3,15 @@ import { Request, Response } from 'express'
 
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 
-interface PatchModelResponse {
+interface PostModelResponse {
   data: {
     model: ModelInterface
   }
 }
 
-export const patchModel = [
+export const postModel = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchModelResponse>) => {
+  async (req: Request, res: Response<PostModelResponse>) => {
     return res.json({
       data: {
         model: {

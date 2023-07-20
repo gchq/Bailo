@@ -12,7 +12,6 @@ interface PatchTeamResponse {
 export const patchTeam = [
   bodyParser.json(),
   async (req: Request, res: Response<PatchTeamResponse>) => {
-
     return res.json({
       data: {
         team: {
