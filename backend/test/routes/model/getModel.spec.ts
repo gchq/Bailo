@@ -13,7 +13,7 @@ describe('routes > model > getModel', () => {
     }))
 
     const fixture = createFixture(getModelSchema)
-    const res = await testGet(`/api/v2/model/${fixture.params.id}`)
+    const res = await testGet(`/api/v2/model/${fixture.params.modelId}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
