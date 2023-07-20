@@ -12,7 +12,7 @@ export interface SchemaInterface {
 
   use: UseTypeKeys
   display: string
-  fields: Array<string>
+  fields: unknown
   metadata: unknown
 
   createdAt: Date
@@ -41,7 +41,7 @@ const SchemaSchema = new Schema<SchemaInterface>(
 
     use: { type: String, enum: Object.values(UseType), required: true },
     display: { type: String, required: true },
-    fields: [{ type: String, required: true }],
+    fields: { type: String, required: true, get: getSchema, set: setSchema },
     metadata: { type: String, required: true, get: getSchema, set: setSchema },
   },
   {

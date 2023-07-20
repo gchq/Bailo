@@ -23,7 +23,9 @@ export const getSchemas = [
             hidden: false,
             use: 'deployment',
             display: 'This is the display?',
-            fields: ['field 1', 'field 2'],
+            fields: {
+              'field 1': 'field 1 info',
+            },
             metadata: { example: true },
 
             createdAt: new Date(),
@@ -37,7 +39,9 @@ export const getSchemas = [
             hidden: false,
             use: 'model',
             display: 'This is the display?',
-            fields: ['field 1', 'field 2'],
+            fields: {
+              'field 1': 'field 1 info',
+            },
             metadata: { example: true },
 
             createdAt: new Date(),
