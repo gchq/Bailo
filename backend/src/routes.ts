@@ -45,9 +45,15 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCard } from './routes/v2/model/getModelCards.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
+import { getRelease } from './routes/v2/release/getRelease.js'
+import { getReleases } from './routes/v2/release/getReleases.js'
+import { postRelease } from './routes/v2/release/postRelease.js'
+import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
+import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { patchTeam } from './routes/v2/team/getMyTeam.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
@@ -154,14 +160,14 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 server.post('/api/v2/models', ...postModel)
 // server.post('/api/v2/models/import', ...postModelImport)
 
-//server.get('/api/v2/model/:modelId', ...getModel)
+server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
 
-// server.post('/api/v2/model/:modelId/releases', ...postRelease)
-// server.get('/api/v2/model/:modelId/releases', ...getReleases)
-// server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
+server.post('/api/v2/model/:modelId/releases', ...postRelease)
+server.get('/api/v2/model/:modelId/releases', ...getReleases)
+server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
 // server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
 
 // server.get('/api/v2/model/:modelId/files', ...getFiles)
@@ -181,8 +187,8 @@ server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
 // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
 // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
-// server.get('/api/v2/schemas', ...getSchemas)
-// server.get('/api/v2/schema/:schemaId', ...getSchema)
+server.get('/api/v2/schemas', ...getSchemasV2)
+server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
 
 // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
 // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
