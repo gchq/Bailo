@@ -46,6 +46,7 @@ import {
   putVersion,
 } from './routes/v1/version.js'
 import { getModel } from './routes/v2/model/getModel.js'
+import { postModel } from './routes/v2/model/postModel.js'
 import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -146,7 +147,7 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
 // V2 APIs
 
-// server.post('/api/v2/models', ...postModel)
+server.post('/api/v2/models', ...postModel)
 // server.post('/api/v2/models/import', ...postModelImport)
 
 server.get('/api/v2/model/:modelId', ...getModel)
