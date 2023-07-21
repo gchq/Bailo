@@ -32,7 +32,7 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 
   useEffect(() => {
     if (isUiConfigError) setError(isUiConfigError.message)
-    else if (!uiConfig) setError('Failed to load ui config')
+    else if (!uiConfig) setError('Failed to load UI config')
     else if (totalFileSize > convertGigabytesToBytes(uiConfig.maxModelSizeGB))
       setError('Model size exceeds maximum upload size of ' + uiConfig.maxModelSizeGB + 'GB')
     else setError('')
