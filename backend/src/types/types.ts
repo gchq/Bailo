@@ -133,6 +133,7 @@ export interface UiConfig {
   }
 
   seldonVersions: Array<SeldonVersion>
+  maxModelSizeGB: number
 }
 
 export type SeldonVersion = {

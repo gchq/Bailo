@@ -1,7 +1,9 @@
 import Paper from '@mui/material/Paper'
 import axios from 'axios'
+import { useGetUiConfig } from 'data/uiConfig'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
 import { useGetModel, useGetModelVersions } from '../../../data/model'
@@ -47,6 +49,7 @@ function Upload() {
   const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelUuid)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaRef)
   const { versions } = useGetModelVersions(modelUuid)
+  const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
 
   const cModel = useCacheVariable(model)
   const cSchema = useCacheVariable(schema)
@@ -88,7 +91,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: fileTabComplete,
+        isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
       })
     )
 
@@ -115,16 +118,17 @@ function Upload() {
     }
 
     setSplitSchema({ reference: cSchema.reference, steps })
-  }, [cModel, cSchema])
+  }, [cModel, cSchema, uiConfig])
 
   const errorWrapper = MultipleErrorWrapper(`Unable to load edit page`, {
     isModelError,
     isSchemaError,
+    isUiConfigError,
   })
   if (errorWrapper) return errorWrapper
 
-  if (isModelLoading || isSchemaLoading) {
-    return null
+  if (isModelLoading || isSchemaLoading || isUiConfigLoading) {
+    return <Loading />
   }
 
   if (!model || !schema) {
