@@ -1,7 +1,16 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import { z } from 'zod'
 
+import { parse } from '../../../middleware/validate.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+
+export const getReleaseSchema = z.object({
+  params: z.object({
+    modelId: z.string(),
+    semver: z.string(),
+  }),
+})
 
 interface getReleaseResponse {
   data: {
@@ -12,11 +21,13 @@ interface getReleaseResponse {
 export const getRelease = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleaseResponse>) => {
+    const _ = parse(req, getReleaseSchema)
+
     return res.json({
       data: {
         release: {
           modelId: 'example-model-1',
-          modelCardId: 'example-model-card',
+          modelCardVersion: 14,
 
           name: 'Example Release 1',
           semver: '123',
@@ -25,23 +36,8 @@ export const getRelease = [
           minor: true,
           draft: true,
 
-          files: [
-            {
-              modelId: 'example-model-1',
-              name: 'test.py',
-              category: 'code',
-              size: 100,
-              bucket: 'bucket',
-              path: 'code/url',
-            },
-          ],
-          images: [
-            {
-              modelId: 'example-model-1',
-              ref: 'reference',
-              size: 100,
-            },
-          ],
+          files: ['example-file-id'],
+          images: ['example-image-id'],
 
           deleted: false,
 

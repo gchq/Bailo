@@ -46,15 +46,18 @@ import {
   putVersion,
 } from './routes/v1/version.js'
 import { getModel } from './routes/v2/model/getModel.js'
-import { getModelCard } from './routes/v2/model/getModelCards.js'
+import { getModelCard } from './routes/v2/model/getModelCard.js'
+import { getModelFiles } from './routes/v2/model/getModelFiles.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
+import { postSimpleUpload } from './routes/v2/model/postSimpleUpload.js'
+import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
-import { patchTeam } from './routes/v2/team/getMyTeam.js'
+import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
@@ -168,10 +171,10 @@ server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
 server.post('/api/v2/model/:modelId/releases', ...postRelease)
 server.get('/api/v2/model/:modelId/releases', ...getReleases)
 server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
-// server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
+server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
 
-// server.get('/api/v2/model/:modelId/files', ...getFiles)
-// server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
+server.get('/api/v2/model/:modelId/files', ...getModelFiles)
+server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 // server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 // server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 // server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteModelFile)

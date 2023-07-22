@@ -1,7 +1,11 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import { z } from 'zod'
 
+import { parse } from '../../../middleware/validate.js'
 import { TeamInterface } from '../../../models/v2/Team.js'
+
+export const getTeamsSchema = z.object({})
 
 interface GetTeamsResponse {
   data: {
@@ -12,6 +16,8 @@ interface GetTeamsResponse {
 export const getTeams = [
   bodyParser.json(),
   async (req: Request, res: Response<GetTeamsResponse>) => {
+    const _ = parse(req, getTeamsSchema)
+
     return res.json({
       data: {
         teams: [

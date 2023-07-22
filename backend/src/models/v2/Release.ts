@@ -1,27 +1,12 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-export interface File {
-  modelId: string
-  name: string
-  category: string
-  size: number
-  bucket: string
-  path: string
-}
-
-export interface Image {
-  modelId: string
-  ref: string
-  size: number
-}
-
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ReleaseInterface {
   modelId: string
-  modelCardId: string
+  modelCardVersion: number
 
   name: string
   semver: string
@@ -30,8 +15,8 @@ export interface ReleaseInterface {
   minor: boolean
   draft: boolean
 
-  files: Array<File>
-  images: Array<Image>
+  files: Array<string>
+  images: Array<string>
 
   deleted: boolean
 
@@ -47,7 +32,7 @@ export type ReleaseDoc = ReleaseInterface & Document<any, any, ReleaseInterface>
 const ReleaseSchema = new Schema<ReleaseInterface>(
   {
     modelId: { type: String, required: true },
-    modelCardId: { type: String, required: true },
+    modelCardVersion: { type: Number, required: true },
 
     name: { type: String, required: true },
     semver: { type: String, required: true },
@@ -56,23 +41,8 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     minor: { type: Boolean, required: true },
     draft: { type: Boolean, required: true },
 
-    files: [
-      {
-        modelId: { type: String, required: true },
-        name: { type: String, required: true },
-        category: { type: String, required: true },
-        size: { type: Number, required: true },
-        bucket: { type: String, required: true },
-        path: { type: String, required: true },
-      },
-    ],
-    images: [
-      {
-        modelId: { type: String, required: true },
-        size: { type: Number, required: true },
-        ref: { type: String, required: true },
-      },
-    ],
+    files: [{ type: String }],
+    images: [{ type: String }],
   },
   {
     timestamps: true,

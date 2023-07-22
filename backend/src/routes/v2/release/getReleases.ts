@@ -1,7 +1,17 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import { z } from 'zod'
 
+import { parse } from '../../../middleware/validate.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+
+export const getReleasesSchema = z.object({
+  params: z.object({
+    modelId: z.string({
+      required_error: 'Must specify model id as URL parameter',
+    }),
+  }),
+})
 
 interface getReleasesResponse {
   data: {
@@ -12,12 +22,14 @@ interface getReleasesResponse {
 export const getReleases = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleasesResponse>) => {
+    const _ = parse(req, getReleasesSchema)
+
     return res.json({
       data: {
         releases: [
           {
             modelId: 'example-model-1',
-            modelCardId: 'example-model-card',
+            modelCardVersion: 14,
 
             name: 'Example Release 1',
             semver: '123',
@@ -26,23 +38,8 @@ export const getReleases = [
             minor: true,
             draft: true,
 
-            files: [
-              {
-                modelId: 'example-model-1',
-                name: 'test.py',
-                category: 'code',
-                size: 100,
-                bucket: 'bucket',
-                path: 'code/url',
-              },
-            ],
-            images: [
-              {
-                modelId: 'example-model-1',
-                ref: 'reference',
-                size: 100,
-              },
-            ],
+            files: ['example-file-id'],
+            images: ['example-image-id'],
 
             deleted: false,
 
@@ -51,32 +48,17 @@ export const getReleases = [
           },
           {
             modelId: 'example-model-1',
-            modelCardId: 'example-model-card',
+            modelCardVersion: 15,
 
             name: 'Example Release 2',
             semver: '123',
-            notes: 'This is another example release',
+            notes: 'This is an example release',
 
             minor: true,
             draft: true,
 
-            files: [
-              {
-                modelId: 'example-model-1',
-                name: 'test.py',
-                category: 'code',
-                size: 100,
-                bucket: 'bucket',
-                path: 'code/url',
-              },
-            ],
-            images: [
-              {
-                modelId: 'example-model-1',
-                ref: 'reference',
-                size: 100,
-              },
-            ],
+            files: ['example-file-id'],
+            images: ['example-image-id'],
 
             deleted: false,
 
