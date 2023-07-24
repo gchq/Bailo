@@ -33,28 +33,27 @@ export default function FormDesigner({
   const RenderButtons = currentStep.renderButtons
 
   return (
-    <Grid container >
+    <Grid container>
       <Grid item xs={3} lg={2} xl={1}>
-        <Stepper 
-          id='form-page-stepper' 
-          sx={{ mt: 2, mb: 2 }} 
-          activeStep={activeStep} 
-          nonLinear 
-          alternativeLabel 
+        <Stepper
+          id='form-page-stepper'
+          sx={{ mt: 2, mb: 2 }}
+          activeStep={activeStep}
+          nonLinear
+          alternativeLabel
           orientation='vertical'
-          connector={<Nothing/>}
+          connector={<Nothing />}
         >
           {splitSchema.steps.map((step, index) => (
-            <MaterialStep key={step.schema.title} >
-              <StepButton sx={{p: 0, m:0}} onClick={() => setActiveStep(index)} icon={<Nothing />} >
-                <StepLabel 
+            <MaterialStep key={step.schema.title}>
+              <StepButton sx={{ p: 0, m: 0 }} onClick={() => setActiveStep(index)} icon={<Nothing />}>
+                <StepLabel
                   sx={{
                     padding: 0,
                     '& .Mui-active': {
-                      borderBottomStyle: 'groove'
-                    }
+                      borderBottomStyle: 'groove',
+                    },
                   }}
-
                 >
                   {step.schema.title}
                 </StepLabel>
@@ -63,8 +62,8 @@ export default function FormDesigner({
           ))}
         </Stepper>
       </Grid>
-      
-      <Grid item xs={9} lg={10} xl={11} sx={{pt:2}}>
+
+      <Grid item xs={9} lg={10} xl={11} sx={{ pt: 2 }}>
         <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
         <RenderButtons
           step={currentStep}
