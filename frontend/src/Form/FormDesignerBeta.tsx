@@ -64,7 +64,7 @@ export default function FormDesigner({
         </Stepper>
       </Grid>
       
-      <Grid item xs={9} lg={10} xl={11}>
+      <Grid item xs={9} lg={10} xl={11} sx={{pt:2}}>
         <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
         <RenderButtons
           step={currentStep}
