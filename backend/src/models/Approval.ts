@@ -5,10 +5,9 @@ import { Approval, ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind }
 
 const ApprovalSchema = new Schema<Approval>(
   {
-    // ONE OF THESE TWO
+    //ONE OF THESE TWO
     version: { type: Schema.Types.ObjectId, ref: 'Version' },
     deployment: { type: Schema.Types.ObjectId, ref: 'Deployment' },
-
     approvers: [
       {
         kind: {
@@ -23,7 +22,6 @@ const ApprovalSchema = new Schema<Approval>(
       },
     ],
     status: { type: String, required: true, enum: Object.values(ApprovalStates), default: ApprovalStates.NoResponse },
-
     approvalType: { type: String, enum: Object.values(ApprovalTypes) },
     approvalCategory: { type: String, enum: Object.values(ApprovalCategory) },
   },

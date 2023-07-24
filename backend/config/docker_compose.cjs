@@ -40,10 +40,7 @@ module.exports = {
       host: 'mailcrab',
       port: 1025,
       secure: false,
-      auth: {
-        user: '',
-        pass: '',
-      },
+      auth: undefined,
       tls: {
         rejectUnauthorized: false,
       },
