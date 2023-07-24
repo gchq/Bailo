@@ -1,7 +1,20 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, Chip, IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  InputBase,
+  Link as MuiLink,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
 
 import { ListModelType, useListModels } from '../../data/model'
@@ -21,6 +34,7 @@ export default function ExploreModels() {
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const theme = useTheme()
+  const router = useRouter()
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -29,6 +43,10 @@ export default function ExploreModels() {
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
+  }
+
+  const handleNewModelClicked = () => {
+    router.push('/beta/model/new/model')
   }
 
   const onFilterSubmit = (e: React.FormEvent) => {
@@ -64,7 +82,10 @@ export default function ExploreModels() {
   return (
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction='row' spacing={2}>
-        <Stack>
+        <Stack spacing={2}>
+          <Button variant='contained' onClick={() => handleNewModelClicked()}>
+            Add new model
+          </Button>
           <Paper
             component='form'
             onSubmit={onFilterSubmit}
