@@ -76,7 +76,7 @@ export function fileTabComplete(step: Step) {
     case ModelUploadType.ModelCard:
       return true
     case ModelUploadType.Zip:
-      return step.state.binary && step.state.code
+      return Boolean(step.state.binary) && Boolean(step.state.code)
     case ModelUploadType.Docker:
       return !!step.state.docker
     default:
