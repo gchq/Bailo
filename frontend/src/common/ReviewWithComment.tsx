@@ -4,16 +4,18 @@ import { useState } from 'react'
 type ReviewWithCommentProps = {
   open: boolean
   onClose: () => void
-  onSubmit: (kind: string, reviewComment: string) => void
+  onSubmit: (kind: ResponseTypeKeys, reviewComment: string) => void
   title: string
   description: string
 }
 
-enum ResponseTypes {
-  APPROVE = 'approve',
-  REQUEST_CHANGES = 'request changes',
-  REJECT = 'reject',
-}
+export const ResponseTypes = {
+  Approve: 'approve',
+  RequestChanges: 'request changes',
+  Reject: 'reject',
+} as const
+
+type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
 export default function ReviewWithComment({ title, description, open, onClose, onSubmit }: ReviewWithCommentProps) {
   const [reviewComment, setReviewComment] = useState('')
@@ -23,12 +25,9 @@ export default function ReviewWithComment({ title, description, open, onClose, o
     return reviewComment.trim() === '' ? true : false
   }
 
-  function submitForm(kind: ResponseTypes) {
+  function submitForm(kind: ResponseTypeKeys) {
     setShowError(false)
-    if (
-      (kind === ResponseTypes.REJECT && invalidComment()) ||
-      (kind === ResponseTypes.REQUEST_CHANGES && invalidComment())
-    ) {
+    if (invalidComment() && (kind === ResponseTypes.Reject || kind === ResponseTypes.RequestChanges)) {
       setShowError(true)
     } else {
       onSubmit(kind, reviewComment)
@@ -64,13 +63,13 @@ export default function ReviewWithComment({ title, description, open, onClose, o
                 Cancel
               </Button>
               <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                <Button color='error' variant='contained' onClick={() => submitForm(ResponseTypes.REJECT)}>
+                <Button color='error' variant='contained' onClick={() => submitForm(ResponseTypes.Reject)}>
                   Reject
                 </Button>
-                <Button variant='contained' onClick={() => submitForm(ResponseTypes.REQUEST_CHANGES)}>
+                <Button variant='contained' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
                   Request Changes
                 </Button>
-                <Button variant='contained' onClick={() => submitForm(ResponseTypes.APPROVE)}>
+                <Button variant='contained' onClick={() => submitForm(ResponseTypes.Approve)}>
                   Approve
                 </Button>
               </Stack>
