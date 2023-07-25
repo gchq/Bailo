@@ -214,4 +214,8 @@ module.exports = {
     ],
     maxModelSizeGB: 50
   },
+
+  experimental: {
+    v2: false,
+  },
 }
