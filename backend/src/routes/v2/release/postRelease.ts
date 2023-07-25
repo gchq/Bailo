@@ -41,7 +41,7 @@ export const postRelease = [
       data: {
         release: {
           modelId: 'example-model-1',
-          modelCardId: 'example-model-card',
+          modelCardVersion: 55,
 
           name: 'Example Release 1',
           semver: '123',
@@ -50,23 +50,8 @@ export const postRelease = [
           minor: true,
           draft: true,
 
-          files: [
-            {
-              modelId: 'example-model-1',
-              name: 'test.py',
-              category: 'code',
-              size: 100,
-              bucket: 'bucket',
-              path: 'code/url',
-            },
-          ],
-          images: [
-            {
-              modelId: 'example-model-1',
-              ref: 'reference',
-              size: 100,
-            },
-          ],
+          files: ['file-id'],
+          images: ['image-id'],
 
           deleted: false,
 

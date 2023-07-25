@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { parse } from '../../../../middleware/validate.js'
+import { ImageInterface } from '../../../../models/v2/Image.js'
 
 export const getImagesSchema = z.object({
   params: z.object({
@@ -14,7 +15,7 @@ export const getImagesSchema = z.object({
 
 interface GetImagesResponse {
   data: {
-    images: Array<Image>
+    images: Array<ImageInterface>
   }
 }
 
@@ -25,7 +26,20 @@ export const getImages = [
 
     return res.json({
       data: {
-        images: [],
+        images: [
+          {
+            modelId: 'model-123',
+
+            namespace: 'abc',
+            model: 'model',
+            version: '1.2.3',
+
+            size: 4834382,
+
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       },
     })
   },

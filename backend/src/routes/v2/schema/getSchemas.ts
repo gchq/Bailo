@@ -2,11 +2,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { SchemaInterface, UseType } from '../../../models/v2/Schema.js'
+import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
 
 export const getSchemasSchema = z.object({
   params: z.object({
-    use: z.nativeEnum(UseType),
+    use: z.nativeEnum(SchemaKind),
   }),
 })
 

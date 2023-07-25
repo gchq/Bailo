@@ -39,7 +39,7 @@ const SchemaSchema = new Schema<SchemaInterface>(
     inactive: { type: Boolean, required: true, default: false },
     hidden: { type: Boolean, required: true, default: false },
 
-    use: { type: String, enum: Object.values(SchemaKind), required: true },
+    kind: { type: String, enum: Object.values(SchemaKind), required: true },
     display: { type: String, required: true },
     fields: { type: String, required: true, get: getSchema, set: setSchema },
     metadata: { type: String, required: true, get: getSchema, set: setSchema },

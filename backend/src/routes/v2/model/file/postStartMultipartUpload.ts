@@ -36,8 +36,7 @@ export const postStartMultipartUpload = [
 
     return res.json({
       data: {
-        filePath: '/internal/detail',
-        uploadId: 'random_hash',
+        fileId: 'random_hash',
         chunks: [
           {
             presignedUrl: 'https://example.com/',

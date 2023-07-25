@@ -37,6 +37,8 @@ export const getFiles = [
             bucket: 'uploads',
             path: '/example/upload/path',
 
+            complete: true,
+
             createdAt: new Date(),
             updatedAt: new Date(),
           },
