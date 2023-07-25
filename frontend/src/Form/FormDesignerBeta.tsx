@@ -1,9 +1,7 @@
 import { Grid, StepLabel } from '@mui/material'
-import Box from '@mui/material/Box'
 import MaterialStep from '@mui/material/Step'
 import StepButton from '@mui/material/StepButton'
 import Stepper from '@mui/material/Stepper'
-import Typography from '@mui/material/Typography'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import Nothing from 'src/MuiForms/Nothing'
 
