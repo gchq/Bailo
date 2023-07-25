@@ -1,10 +1,11 @@
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
-// import { useState } from 'react'
 
-export default function TeamAndModelSelector(teamValue, setTeamValue, modelValue, setModelValue) {
-  // const [_selectedTeam, setSelectedTeam] = useState('')
-  // const [_selectedModel, setSelectedModel] = useState('')
+export type TeamAndModelSelectorProps = {
+  setTeamValue: (string) => void
+  setModelValue: (string) => void
+}
 
+export default function TeamAndModelSelector({ setTeamValue, setModelValue }: TeamAndModelSelectorProps) {
   const teamNames = [
     { value: 'teamOne', label: 'team 1' },
     { value: 'teamTwo', label: 'team 2' },
@@ -54,10 +55,9 @@ function Selector({ data, setData, label }: SelectorProps) {
       <Stack spacing={2} sx={{ width: 200 }}>
         <Autocomplete
           freeSolo
+          onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
           options={data.map((option) => option.label)}
-          renderInput={(params) => (
-            <TextField {...params} required size='small' value={data} onChange={(e) => setData(e.target.value)} />
-          )}
+          renderInput={(params) => <TextField {...params} required size='small' value={data} />}
         />
       </Stack>
     </Stack>

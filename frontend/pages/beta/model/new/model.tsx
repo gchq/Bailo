@@ -15,12 +15,12 @@ import {
 import { useState } from 'react'
 import { NewModelData } from 'types/types'
 
-import Selector from '../../../../src/common/TeamAndModelSelector'
+import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
 import Wrapper from '../../../../src/Wrapper.beta'
 
 export default function NewModel() {
-  const [teamName, _setTeamName] = useState('')
-  const [modelName, _setModelName] = useState('')
+  const [teamName, setTeamName] = useState('')
+  const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [accessibility, setAccessibility] = useState<NewModelData['accessibility']>('public')
 
@@ -74,7 +74,10 @@ export default function NewModel() {
             <>
               <Typography variant='h6'>Overview</Typography>
               <Stack direction='row' spacing={2}>
-                <Selector />
+                <TeamAndModelSelector
+                  setTeamValue={(value) => setTeamName(value)}
+                  setModelValue={(value) => setModelName(value)}
+                />
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
