@@ -19,6 +19,8 @@ export interface FileInterface {
   bucket: string
   path: string
 
+  complete: boolean
+
   createdAt: Date
   updatedAt: Date
 }
@@ -38,6 +40,8 @@ const FileSchema = new Schema<FileInterface>(
 
     bucket: { type: String, required: true },
     path: { type: String, required: true },
+
+    complete: { type: Boolean, default: true, required: true },
   },
   {
     timestamps: true,

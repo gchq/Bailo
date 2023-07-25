@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
-import { FileCategory } from '../../../models/v2/File.js'
+import { parse } from '../../../../middleware/validate.js'
+import { FileCategory } from '../../../../models/v2/File.js'
 
 export const postSimpleUploadSchema = z.object({
   params: z.object({
@@ -10,6 +10,7 @@ export const postSimpleUploadSchema = z.object({
   }),
   query: z.object({
     name: z.string(),
+    mime: z.string().optional().default('application/octet-stream'),
     category: z.nativeEnum(FileCategory).optional().default(FileCategory.Other),
   }),
 })

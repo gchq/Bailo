@@ -7,30 +7,32 @@ import { TeamInterface } from '../../../models/v2/Team.js'
 
 export const getMyTeamsSchema = z.object({})
 
-interface PatchTeamResponse {
+interface GetMyTeamsResponse {
   data: {
-    team: TeamInterface
+    teams: Array<TeamInterface>
   }
 }
 
 export const patchTeam = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchTeamResponse>) => {
+  async (req: Request, res: Response<GetMyTeamsResponse>) => {
     const _ = parse(req, getMyTeamsSchema)
 
     return res.json({
       data: {
-        team: {
-          id: 'example-team',
+        teams: [
+          {
+            id: 'example-team',
 
-          name: 'Example Team',
-          description: 'An example Bailo team',
+            name: 'Example Team',
+            description: 'An example Bailo team',
 
-          deleted: false,
+            deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       },
     })
   },

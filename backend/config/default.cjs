@@ -213,4 +213,8 @@ module.exports = {
       },
     ],
   },
+
+  experimental: {
+    v2: false,
+  },
 }

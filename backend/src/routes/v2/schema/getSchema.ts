@@ -32,7 +32,7 @@ export const getSchema = [
 
           inactive: false,
           hidden: false,
-          use: 'deployment',
+          kind: 'deployment',
           display: 'This is the display?',
           fields: {
             'field 1': 'field 1 info',

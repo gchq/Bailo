@@ -45,12 +45,15 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { deleteFile } from './routes/v2/model/file/deleteFile.js'
+import { getFiles } from './routes/v2/model/file/getFiles.js'
+import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
+import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
+import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCard } from './routes/v2/model/getModelCard.js'
-import { getModelFiles } from './routes/v2/model/getModelFiles.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
-import { postSimpleUpload } from './routes/v2/model/postSimpleUpload.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -160,62 +163,64 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
  ** V2 API **
  */
 
-server.post('/api/v2/models', ...postModel)
-// server.post('/api/v2/models/import', ...postModelImport)
+if (config.experimental.v2) {
+  server.post('/api/v2/models', ...postModel)
+  // server.post('/api/v2/models/import', ...postModelImport)
 
-server.get('/api/v2/model/:modelId', ...getModel)
-server.patch('/api/v2/model/:modelId', ...patchModel)
+  server.get('/api/v2/model/:modelId', ...getModel)
+  server.patch('/api/v2/model/:modelId', ...patchModel)
 
-server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+  server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
 
-server.post('/api/v2/model/:modelId/releases', ...postRelease)
-server.get('/api/v2/model/:modelId/releases', ...getReleases)
-server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
-server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
+  server.post('/api/v2/model/:modelId/releases', ...postRelease)
+  server.get('/api/v2/model/:modelId/releases', ...getReleases)
+  server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
+  server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
 
-server.get('/api/v2/model/:modelId/files', ...getModelFiles)
-server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
-// server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
-// server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
-// server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteModelFile)
+  server.get('/api/v2/model/:modelId/files', ...getFiles)
+  server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
+  server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+  server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
+  server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteFile)
 
-// server.get('/api/v2/model/:modelId/images', ...getImages)
-// server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+  // server.get('/api/v2/model/:modelId/images', ...getImages)
+  // server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
-// server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
-// server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+  // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
+  // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
-// server.get('/api/v2/template/models', ...getModelTemplates)
-// server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-// server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-// server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+  // server.get('/api/v2/template/models', ...getModelTemplates)
+  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
-server.get('/api/v2/schemas', ...getSchemasV2)
-server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
+  server.get('/api/v2/schemas', ...getSchemasV2)
+  server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
 
-// server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
-// server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
+  // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
+  // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
 
-server.post('/api/v2/teams', ...postTeam)
-server.get('/api/v2/teams', ...getTeams)
-server.get('/api/v2/teams/mine', ...getTeams)
+  server.post('/api/v2/teams', ...postTeam)
+  server.get('/api/v2/teams', ...getTeams)
+  server.get('/api/v2/teams/mine', ...getTeams)
 
-server.get('/api/v2/team/:teamId', ...getTeam)
-server.patch('/api/v2/team/:teamId', ...patchTeam)
+  server.get('/api/v2/team/:teamId', ...getTeam)
+  server.patch('/api/v2/team/:teamId', ...patchTeam)
 
-// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
-// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
-// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
-// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
+  // server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
+  // server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
+  // server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
+  // server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
 
-// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
+  // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
-// server.get('/api/v2/users', ...getUsers)
-// server.get('/api/v2/users/me', ...getCurrentUser)
+  // server.get('/api/v2/users', ...getUsers)
+  // server.get('/api/v2/users/me', ...getCurrentUser)
 
-// server.post('/api/v2/user/:userId/tokens', ...postUserToken)
-// server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
-// server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
-// server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+  // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
+  // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
+  // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
+  // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+}
 
 server.use('/api', expressErrorHandler)

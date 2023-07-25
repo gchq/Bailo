@@ -28,7 +28,7 @@ export const getSchemas = [
 
             inactive: false,
             hidden: false,
-            use: 'deployment',
+            kind: 'deployment',
             display: 'This is the display?',
             fields: {
               'field 1': 'field 1 info',
@@ -44,7 +44,7 @@ export const getSchemas = [
 
             inactive: false,
             hidden: false,
-            use: 'model',
+            kind: 'model',
             display: 'This is the display?',
             fields: {
               'field 1': 'field 1 info',

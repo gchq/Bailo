@@ -10,7 +10,7 @@ export interface SchemaInterface {
   inactive: boolean
   hidden: boolean
 
-  use: UseTypeKeys
+  kind: SchemaKindKeys
   display: string
   fields: unknown
   metadata: unknown
@@ -19,12 +19,12 @@ export interface SchemaInterface {
   updatedAt: Date
 }
 
-export const UseType = {
+export const SchemaKind = {
   Model: 'model',
   Deployment: 'deployment',
 } as const
 
-export type UseTypeKeys = (typeof UseType)[keyof typeof UseType]
+export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
@@ -39,7 +39,7 @@ const SchemaSchema = new Schema<SchemaInterface>(
     inactive: { type: Boolean, required: true, default: false },
     hidden: { type: Boolean, required: true, default: false },
 
-    use: { type: String, enum: Object.values(UseType), required: true },
+    use: { type: String, enum: Object.values(SchemaKind), required: true },
     display: { type: String, required: true },
     fields: { type: String, required: true, get: getSchema, set: setSchema },
     metadata: { type: String, required: true, get: getSchema, set: setSchema },
