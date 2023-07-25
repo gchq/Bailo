@@ -361,5 +361,5 @@ export type NewModelData = {
   teamName: string
   modelName: string
   description: string
-  accessibility: 'public' | 'private'
+  visibility: 'public' | 'private'
 }

@@ -13,15 +13,15 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { NewModelData } from 'types/types'
 
 import Wrapper from '../../../../src/Wrapper.beta'
+import { NewModelData } from '../../../../types/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
-  const [accessibility, setAccessibility] = useState<NewModelData['accessibility']>('public')
+  const [visibility, setVisibility] = useState<NewModelData['visibility']>('public')
 
   const formValid = teamName && modelName && description
 
@@ -31,7 +31,7 @@ export default function NewModel() {
       teamName,
       modelName,
       description,
-      accessibility,
+      visibility,
     }
     // TODO - after new model page is implemented, forward this data
     console.log(formData)
@@ -62,7 +62,7 @@ export default function NewModel() {
   }
 
   return (
-    <Wrapper title='Create a new Model' page='marketplace'>
+    <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
         <Typography variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
           Create a new model
@@ -98,8 +98,8 @@ export default function NewModel() {
               <Typography variant='h6'>Access control</Typography>
               <RadioGroup
                 defaultValue='public'
-                value={accessibility}
-                onChange={(e) => setAccessibility(e.target.value as NewModelData['accessibility'])}
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as NewModelData['visibility'])}
               >
                 <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
                 <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
