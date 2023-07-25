@@ -147,6 +147,8 @@ export interface Config {
       name: string
       image: string
     }>
+    //max model size is calculated in gigabytes
+    maxModelSizeGB: number
   }
 }
 

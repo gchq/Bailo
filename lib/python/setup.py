@@ -14,7 +14,7 @@ setup(
         "pycognito <= 2022.12.0",
         "pydantic <= 1.8",
         "python-dotenv <= 0.20.0",
-        "PyYAML <= 5.4.1",
+        "PyYAML <= 6.0.1",
         "requests <= 2.25.1",
         "requests-pkcs12 <= 1.13",
         "requests-toolbelt <= 0.9.1",
