@@ -2,29 +2,9 @@ import axios from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
 
+import { ListModelType, ModelInterface } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export const ModelVisibility = {
-  Private: 'private',
-  Public: 'public',
-} as const
-
-export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
-
-export interface ModelInterface {
-  id: string
-
-  name: string
-  description: string
-
-  visibility: ModelVisibilityKeys
-  deleted: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type ListModelType = 'favourites' | 'user' | 'all'
 export function useListModels(type: ListModelType, filter?: string) {
   const { data, error, mutate } = useSWR<
     {

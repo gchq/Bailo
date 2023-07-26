@@ -1,29 +1,7 @@
 import useSWR from 'swr'
 
+import { SchemaInterface } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
-
-export interface SchemaInterface {
-  id: string
-  name: string
-
-  inactive: boolean
-  hidden: boolean
-
-  kind: SchemaKindKeys
-  display: string
-  fields: unknown
-  metadata: unknown
-
-  createdAt: Date
-  updatedAt: Date
-}
-
-export const SchemaKind = {
-  Model: 'model',
-  Deployment: 'deployment',
-} as const
-
-export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 export function useGetSchemas() {
   const { data, error, mutate } = useSWR<

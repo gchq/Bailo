@@ -362,3 +362,48 @@ export type NewModelData = {
   description: string
   visibility: 'public' | 'private'
 }
+
+export const ModelVisibility = {
+  Private: 'private',
+  Public: 'public',
+} as const
+
+export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+
+export interface ModelInterface {
+  id: string
+
+  name: string
+  description: string
+
+  visibility: ModelVisibilityKeys
+  deleted: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type ListModelType = 'favourites' | 'user' | 'all'
+
+export interface SchemaInterface {
+  id: string
+  name: string
+
+  inactive: boolean
+  hidden: boolean
+
+  kind: SchemaKindKeys
+  display: string
+  fields: unknown
+  metadata: unknown
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export const SchemaKind = {
+  Model: 'model',
+  Deployment: 'deployment',
+} as const
+
+export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
