@@ -45,7 +45,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import { ApprovalStates, DateString, ModelDoc, ModelUploadType, User, Version, VersionDoc } from '../../types/types'
+import { ApprovalStates, DateString, ModelUploadType, User, Version, VersionDoc } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
