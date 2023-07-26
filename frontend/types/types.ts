@@ -137,6 +137,9 @@ export interface UiConfig {
   }
 
   seldonVersions: Array<SeldonVersion>
+
+  //max model size is calculated in gigabytes
+  maxModelSizeGB: number
 }
 
 export type SeldonVersion = {
@@ -342,3 +345,21 @@ export interface Version {
 }
 
 export type VersionDoc = Version & Document<any, any, Version>
+
+export enum MarketPlaceModelSelectType {
+  MY_MODELS = 'My Models',
+  FAVOURITES = 'Favourites',
+}
+
+export enum MarketPlaceModelGroup {
+  MY_MODELS = 'user',
+  FAVOURITES = 'favourites',
+  ALL = 'all',
+}
+
+export type NewModelData = {
+  teamName: string
+  modelName: string
+  description: string
+  visibility: 'public' | 'private'
+}

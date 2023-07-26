@@ -1,7 +1,7 @@
 import { fireEvent, getByText, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect } from 'vitest'
 
-import { doNothing } from '../../utils/testUtils'
+import { doNothing } from '../../utils/test/testUtils'
 import Form from './Form'
 
 describe('Form', () => {

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { expect, vi } from 'vitest'
 
 import { useGetUiConfig } from '../../data/uiConfig'
-import { doNothing } from '../../utils/testUtils'
+import { doNothing } from '../../utils/test/testUtils'
 import ModelEditSubmission from './ModelEditSubmission'
 
 vi.mock('../../data/uiConfig', () => ({

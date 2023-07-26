@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect } from 'vitest'
 
-import { doNothing } from '../../utils/testUtils'
+import { doNothing } from '../../utils/test/testUtils'
 import FileInput from './FileInput'
 
 describe('FileInput', () => {

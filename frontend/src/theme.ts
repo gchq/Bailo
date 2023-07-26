@@ -49,6 +49,27 @@ export const lightTheme = createTheme({
   },
 })
 
+export const betaLightTheme = createTheme({
+  components: {
+    ...removeElevation,
+  },
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#54278e',
+    },
+    secondary: {
+      main: '#d62560',
+    },
+    error: {
+      main: red.A400,
+    },
+    container: {
+      main: '#f3f1f1',
+    },
+  },
+})
+
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',

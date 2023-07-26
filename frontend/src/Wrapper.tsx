@@ -32,7 +32,6 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
-import { useRouter } from 'next/router'
 import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 
 import { useGetNumApprovals } from '../data/approvals'
@@ -100,8 +99,6 @@ type WrapperProps = {
 }
 
 export default function Wrapper({ title, page, children }: WrapperProps): ReactElement {
-  const router = useRouter()
-
   const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
 
   const [open, setOpen] = useState(false)
@@ -177,12 +174,6 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     },
   })
 
-  const betaAdornment = (
-    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
-      beta
-    </Box>
-  )
-
   return (
     <ThemeProvider theme={theme}>
       <Head>
@@ -192,7 +183,15 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        <AppBar open={open} position='absolute' data-test='appBar' sx={{ ...pageTopStyling, top: 'unset' }}>
+        <AppBar
+          open={open}
+          position='absolute'
+          data-test='appBar'
+          sx={{
+            ...pageTopStyling,
+            top: 'unset',
+          }}
+        >
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -223,7 +222,6 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
               >
                 Bailo
-                {router.asPath.includes('/beta') && betaAdornment}
               </Link>
             </Box>
             {headerTitle}
@@ -330,7 +328,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 <ListItemIcon>
                   {!open ? (
                     <Tooltip title='Review' arrow placement='right'>
-                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='primary'>
                         <ListAltIcon />
                       </Badge>
                     </Tooltip>

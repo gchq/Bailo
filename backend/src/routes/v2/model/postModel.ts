@@ -2,9 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/ModelModel.js'
 import { createModel } from '../../../services/v2/model.js'
+import { parse } from '../../../utils/validate.js'
 
 export const postModelSchema = z.object({
   body: z.object({

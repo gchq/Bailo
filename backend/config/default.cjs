@@ -91,10 +91,7 @@ module.exports = {
       host: 'localhost',
       port: 1025,
       secure: false,
-      auth: {
-        user: '',
-        pass: '',
-      },
+      auth: undefined,
       tls: {
         rejectUnauthorized: false,
       },
@@ -215,6 +212,11 @@ module.exports = {
         image: 'seldonio/seldon-core-s2i-python37:1.10.0',
       },
     ],
+    maxModelSizeGB: 50
+  },
+
+  experimental: {
+    v2: false,
   },
 
   connectors: {

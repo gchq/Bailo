@@ -5,7 +5,7 @@ import { basename } from 'path'
 import audit from '../../external/Audit.js'
 import ApprovalModel from '../../models/Approval.js'
 import ModelModel from '../../models/Model.js'
-import { createVersionApprovals, deleteApprovalsByVersion } from '../../services/approval.js'
+import { createVersionApprovals, deleteApprovalsByVersion, findApprovalsByVersionId } from '../../services/approval.js'
 import { emailDeploymentOwnersOnVersionDeletion, findDeploymentsByModel } from '../../services/deployment.js'
 import { removeVersionFromModel } from '../../services/model.js'
 import {
@@ -374,6 +374,22 @@ export const getVersionAccess = [
       uploader,
       reviewer,
       manager,
+    })
+  },
+]
+
+export const getVersionApprovals = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    // TODO: Update translations
+    req.log.info({ code: 'fetching_version_approvals', id }, 'Getting approvals for version')
+
+    const approvals = await findApprovalsByVersionId(id)
+
+    return res.json({
+      approvals,
     })
   },
 ]

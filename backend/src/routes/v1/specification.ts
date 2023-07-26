@@ -507,6 +507,12 @@ function parseValue(value: unknown) {
       example: value,
     }
   }
+  if (typeof value === 'number') {
+    return {
+      type: 'number',
+      example: value,
+    }
+  }
   if (typeof value === 'boolean') {
     return {
       type: 'boolean',
