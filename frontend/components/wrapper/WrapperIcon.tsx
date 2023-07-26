@@ -16,7 +16,7 @@ interface Props {
 
 export default function WrapperIcon({ selected, expanded, href, title, badge, children }: Props) {
   const badgedIcon = badge ? (
-    <Badge badgeContent={badge} color='secondary'>
+    <Badge badgeContent={badge} color='primary'>
       {children}
     </Badge>
   ) : (

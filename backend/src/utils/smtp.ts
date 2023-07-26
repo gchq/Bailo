@@ -24,10 +24,7 @@ export async function sendEmail({
     host: config.smtp.connection.host,
     port: config.smtp.connection.port,
     secure: config.smtp.connection.secure,
-    auth: {
-      user: config.smtp.connection.auth.user,
-      pass: config.smtp.connection.auth.pass,
-    },
+    auth: config.smtp.connection.auth,
     tls: config.smtp.connection.tls,
   })
 

@@ -9,7 +9,7 @@ import * as React from 'react'
 import { UiConfig } from '../../types/types'
 import WrapperIcon from './WrapperIcon'
 
-const drawerWidth: number = 240
+const drawerWidth = 240
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean

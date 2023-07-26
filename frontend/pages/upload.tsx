@@ -2,8 +2,10 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import axios from 'axios'
+import { useGetUiConfig } from 'data/uiConfig'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
 
 import { useGetDefaultSchema, useGetSchemas } from '../data/schema'
 import { useGetCurrentUser } from '../data/user'
@@ -47,6 +49,7 @@ function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
 
   const router = useRouter()
 
@@ -104,7 +107,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: fileTabComplete,
+        isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
       })
     )
 
@@ -131,7 +134,7 @@ function Upload() {
     }
 
     setSplitSchema({ reference, steps })
-  }, [currentSchema, user])
+  }, [currentSchema, uiConfig, user])
 
   const errorWrapper = MultipleErrorWrapper(
     `Unable to load upload page`,
@@ -139,19 +142,16 @@ function Upload() {
       isDefaultSchemaError,
       isSchemasError,
       isCurrentUserError,
+      isUiConfigError,
     },
     MinimalErrorWrapper
   )
   if (errorWrapper) return errorWrapper
 
-  if (isDefaultSchemaLoading || isSchemasLoading || isCurrentUserLoading) {
-    return null
-  }
-  const Loading = <Wrapper title='Loading...' page='deployment' />
-
-  if (isDefaultSchemaLoading || !defaultSchema) return Loading
-  if (isSchemasLoading || !schemas) return Loading
-  if (isCurrentUserLoading || !currentUser) return Loading
+  if (isDefaultSchemaLoading || !defaultSchema) return <Loading />
+  if (isSchemasLoading || !schemas) return <Loading />
+  if (isCurrentUserLoading || !currentUser) return <Loading />
+  if (isUiConfigLoading || !uiConfig) return <Loading />
 
   const onSubmit = async () => {
     setError(undefined)

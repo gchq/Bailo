@@ -1,16 +1,28 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, Chip, IconButton, InputBase, Link as MuiLink, Paper, Stack, Tab, Tabs, Typography } from '@mui/material/'
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  InputBase,
+  Link as MuiLink,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
 
 import { ListModelType, useListModels } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../src/types'
-import Wrapper from '../../src/Wrapper'
-import { Model, Version } from '../../types/types'
+import Wrapper from '../../src/Wrapper.beta'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType, Model, Version } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
@@ -22,6 +34,7 @@ export default function ExploreModels() {
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const theme = useTheme()
+  const router = useRouter()
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -30,6 +43,10 @@ export default function ExploreModels() {
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
+  }
+
+  const handleNewModelClicked = () => {
+    router.push('/beta/model/new/model')
   }
 
   const onFilterSubmit = (e: React.FormEvent) => {
@@ -65,7 +82,10 @@ export default function ExploreModels() {
   return (
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction='row' spacing={2}>
-        <Stack>
+        <Stack spacing={2}>
+          <Button variant='contained' onClick={() => handleNewModelClicked()}>
+            Add new model
+          </Button>
           <Paper
             component='form'
             onSubmit={onFilterSubmit}
@@ -121,10 +141,10 @@ export default function ExploreModels() {
                   const latestVersion = model.latestVersion as Version
                   return (
                     <Fragment key={model.uuid}>
-                      <Link style={{ textDecoration: 'none' }} href={`/model/${model.uuid}`} passHref>
+                      <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.uuid}`} passHref>
                         <MuiLink
                           variant='h5'
-                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                         >
                           {latestVersion.metadata.highLevelDetails.name}
                         </MuiLink>
@@ -134,7 +154,7 @@ export default function ExploreModels() {
                       </Typography>
                       <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                         {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
-                          <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                         ))}
                       </Stack>
                       {index !== models.length - 1 && (

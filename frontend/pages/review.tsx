@@ -17,6 +17,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postEndpoint } from '../data/api'
 import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
@@ -39,7 +40,8 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
   const [approval, setApproval] = useState<Approval | undefined>(undefined)
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
-
+  const [showAlert, setShowAlert] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const theme = useTheme()
 
   const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
@@ -64,14 +66,22 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
 
   const onCancel = () => {
     setOpen(false)
+    setShowAlert(false)
+    setErrorMessage('')
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then((res) => res.json())
-
-    mutateApprovals()
-    mutateNumApprovals()
-    setOpen(false)
+    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then(async (res) => {
+      if (res.status >= 400) {
+        const errorResponse = await getErrorMessage(res)
+        setShowAlert(true)
+        setErrorMessage(errorResponse)
+      } else {
+        mutateApprovals()
+        mutateNumApprovals()
+        setOpen(false)
+      }
+    })
   }
 
   const error = MultipleErrorWrapper(
@@ -87,6 +97,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
     setOpen(true)
     setApproval(changeStateApproval)
     setChoice(changeStateChoice)
+    setShowAlert(false)
     if (changeStateChoice === 'Accepted') {
       setApprovalModalTitle(`Approve ${category}`)
       setApprovalModalText(`I can confirm that the ${category.toLowerCase()} meets all necessary requirements.`)
@@ -111,7 +122,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       {approvals.map((approvalObj: any) => (
         <Box sx={{ px: 3 }} key={approvalObj._id}>
           <Grid container spacing={1} sx={approvalObj.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-            <Grid item xs={12} md={6} lg={7}>
+            <Grid item xs={9}>
               {category === 'Upload' && (
                 <>
                   <Link href={`/model/${approvalObj.version?.model?.uuid}`} passHref legacyBehavior>
@@ -201,6 +212,7 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
           </Grid>
         </Box>
       ))}
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle id='alert-dialog-title'>{approvalModalTitle}</DialogTitle>
         <DialogContent>
@@ -214,6 +226,11 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
             Confirm
           </Button>
         </DialogActions>
+        {showAlert && (
+          <Alert sx={{ m: 1 }} severity='error' onClose={() => setShowAlert(false)}>
+            {errorMessage}
+          </Alert>
+        )}
       </Dialog>
       {approvals.length === 0 && (
         <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
