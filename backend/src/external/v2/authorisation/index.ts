@@ -1,5 +1,5 @@
-import { ModelDoc } from '../../../models/v2/ModelModel.js'
-import { UserDoc } from '../../../models/v2/UserModel.js'
+import { ModelDoc } from '../../../models/v2/Model.js'
+import { UserDoc } from '../../../models/v2/User.js'
 import config from '../../../utils/v2/config.js'
 import { SillyAuthorisationConnector } from './silly.js'
 

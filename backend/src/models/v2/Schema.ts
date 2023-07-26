@@ -59,6 +59,6 @@ function setSchema(schema: unknown) {
   return JSON.stringify(schema)
 }
 
-const ModelCardModel = model<SchemaInterface>('v2_Model_Card', SchemaSchema)
+const ModelCardModel = model<SchemaInterface>('v2_Schema', SchemaSchema)
 
 export default ModelCardModel

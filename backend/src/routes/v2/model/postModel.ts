@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ModelInterface, ModelVisibility } from '../../../models/v2/ModelModel.js'
+import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 import { createModel } from '../../../services/v2/model.js'
 import { parse } from '../../../utils/validate.js'
 

@@ -1,5 +1,5 @@
-import { ModelDoc } from '../../../models/v2/ModelModel.js'
-import { UserDoc } from '../../../models/v2/UserModel.js'
+import { ModelDoc } from '../../../models/v2/Model.js'
+import { UserDoc } from '../../../models/v2/User.js'
 import { BaseAuthorisationConnector, ModelActionKeys } from './index.js'
 
 export class SillyAuthorisationConnector implements BaseAuthorisationConnector {

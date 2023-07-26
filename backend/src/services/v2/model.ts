@@ -1,6 +1,6 @@
 import authorisation, { ModelAction } from '../../external/v2/authorisation/index.js'
-import Model, { ModelInterface } from '../../models/v2/ModelModel.js'
-import { UserDoc } from '../../models/v2/UserModel.js'
+import Model, { ModelInterface } from '../../models/v2/Model.js'
+import { UserDoc } from '../../models/v2/User.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 
@@ -23,6 +23,8 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
 }
 
 export async function getModelById(user: UserDoc, modelId: string) {
+  throw new Error('not being mocked')
+
   const model = await Model.findOne({
     id: modelId,
   })

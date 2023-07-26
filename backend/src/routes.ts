@@ -232,4 +232,5 @@ if (config.experimental.v2) {
   // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
 }
 
-server.use('/api', expressErrorHandler)
+server.use('/api/v1', expressErrorHandler)
+server.use('/api/v2', expressErrorHandlerV2)
