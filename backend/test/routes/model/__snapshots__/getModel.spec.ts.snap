@@ -9,3 +9,13 @@ exports[`routes > model > getModel > 200 > ok 1`] = `
   },
 }
 `;
+
+exports[`routes > model > getModel > 200 > ok 2`] = `
+{
+  "data": {
+    "model": {
+      "_id": "test",
+    },
+  },
+}
+`;
