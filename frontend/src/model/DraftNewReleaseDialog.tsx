@@ -13,20 +13,22 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import semver from 'semver'
-import FileInput from 'src/common/FileInput'
+
+import { Artefact } from '../../types/types'
+import FileInput from '../common/FileInput'
 
 export default function DraftNewReleaseDialog({ open, handleClose }: { open: boolean; handleClose: () => void }) {
   const [releaseName, setReleaseName] = useState('')
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefact, setArtefact] = useState<any>(undefined)
+  const [artefact, setArtefact] = useState<Artefact | undefined>()
 
-  function onSubmit(event) {
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (validSemver(semanticVersion)) {
+    if (isValidSemver(semanticVersion)) {
       console.log('Release valid and created!')
       handleClose()
     }
@@ -40,7 +42,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
     if (event.target.files) setArtefact(event.target.files[0])
   }
 
-  function validSemver(semverInput: string) {
+  function isValidSemver(semverInput: string) {
     return semver.valid(semverInput) ? true : false
   }
 
@@ -73,8 +75,10 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
                 <TextField
                   required
                   size='small'
-                  error={semanticVersion !== '' && !validSemver(semanticVersion)}
-                  helperText={semanticVersion !== '' && !validSemver(semanticVersion) ? 'Must follow format #.#.#' : ''}
+                  error={semanticVersion !== '' && !isValidSemver(semanticVersion)}
+                  helperText={
+                    semanticVersion !== '' && !isValidSemver(semanticVersion) ? 'Must follow format #.#.#' : ''
+                  }
                   value={semanticVersion}
                   onChange={(e) => setSemanticVersion(e.target.value)}
                 />
@@ -113,7 +117,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
           <Button
             variant='contained'
             type='submit'
-            disabled={!semanticVersion || !artefact || !releaseNotes || !releaseName || !validSemver(semanticVersion)}
+            disabled={!semanticVersion || !artefact || !releaseNotes || !releaseName || !isValidSemver(semanticVersion)}
           >
             Create Release
           </Button>

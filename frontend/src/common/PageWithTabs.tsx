@@ -1,4 +1,5 @@
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { ReactElement, useState } from 'react'
 
@@ -71,7 +72,7 @@ function CustomTabPanel(props: TabPanelProps) {
       {value === index && (
         <Box
           sx={{
-            backgroundColor: theme.palette.mode === 'light' ? 'white' : '#242424',
+            backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],
             p: 2,
             mb: 2,
           }}

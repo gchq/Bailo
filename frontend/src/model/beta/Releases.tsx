@@ -5,7 +5,7 @@ import DraftNewReleaseDialog from '../DraftNewReleaseDialog'
 import ModelReleaseDisplay from '../ModelReleaseDisplay'
 
 export default function Releases({ model }: { model: any }) {
-  const [latestRelease, setLatestRelease] = useState('')
+  const [latestRelease, setLatestRelease] = useState<string>('')
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function Releases({ model }: { model: any }) {
             release.name && (
               <ModelReleaseDisplay
                 key={release.semver}
-                modelUuid={model.uuid}
+                modelId={model.id}
                 release={release}
                 latestRelease={latestRelease}
               />

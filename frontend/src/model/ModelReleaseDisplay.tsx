@@ -1,23 +1,23 @@
 import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
-import { green, orange, red } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { ApprovalStates } from 'types/types'
 
+import { ApprovalStates, ReleaseInterface } from '../../types/types'
 import Link from '../Link'
 
 export default function ModelReleaseDisplay({
-  modelUuid,
+  modelId,
   release,
   latestRelease,
 }: {
-  modelUuid: string
-  release: any
+  modelId: string
+  release: ReleaseInterface
   latestRelease: string
 }) {
   const theme = useTheme()
 
-  function formatDate(timestamp) {
+  function formatDate(timestamp: string) {
+    console.log(timestamp)
     const date = new Date(timestamp)
     const year = date.getFullYear().toString()
     const formattedYear = `'${year.substring(date.getFullYear().toString().length - 2)}`
@@ -29,19 +29,19 @@ export default function ModelReleaseDisplay({
       case ApprovalStates.Accepted:
         return (
           <Tooltip title={`${label} has approved this release`}>
-            <Done htmlColor={green[500]} />
+            <Done color='success' />
           </Tooltip>
         )
       case ApprovalStates.NoResponse:
         return (
           <Tooltip title={`${label} has not reviewed this release`}>
-            <HourglassEmpty htmlColor={orange[500]} />
+            <HourglassEmpty color='warning' />
           </Tooltip>
         )
       case ApprovalStates.Declined:
         return (
           <Tooltip title={`${label} has declined this release`}>
-            <Close htmlColor={red[500]} />
+            <Close color='error' />
           </Tooltip>
         )
     }
@@ -86,16 +86,16 @@ export default function ModelReleaseDisplay({
                 {latestVersionAdornment()}
                 <Divider orientation='vertical' flexItem />
                 <Stack direction={{ sm: 'row', xs: 'column' }}>
-                  {approvalStatus(release.managerApproved, 'Manager')}
-                  {approvalStatus(release.reviewerApproved, 'Technical Reviewer')}
+                  {approvalStatus(ApprovalStates.Accepted, 'Manager')}
+                  {approvalStatus(ApprovalStates.Accepted, 'Technical Reviewer')}
                 </Stack>
               </Stack>
 
-              <Link href={`/beta/model/${modelUuid}?release=${release.semver}`}>Model Card</Link>
+              <Link href={`/beta/model/${modelId}?release=${release.semver}`}>Model Card</Link>
             </Stack>
             <Stack spacing={1} direction='row' sx={{ mt: '0px !important' }}>
               <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
-                {formatDate(release.timestamp)}
+                {formatDate(release.updatedAt)}
               </Typography>
               <Typography variant='caption'>Joe Blogs</Typography>
             </Stack>
@@ -104,26 +104,26 @@ export default function ModelReleaseDisplay({
             <Stack spacing={0}>
               {release.files.map((file) => (
                 <Stack
-                  key={file.name}
+                  key={file}
                   direction={{ sm: 'row', xs: 'column' }}
                   justifyContent='space-between'
                   alignItems='center'
                   spacing={2}
                 >
-                  <Link href='/beta'>{file.name}</Link>
-                  <Typography variant='caption'>{file.size}</Typography>
+                  <Link href='/beta'>{file}</Link>
+                  <Typography variant='caption'>123GB</Typography>
                 </Stack>
               ))}
               {release.images.map((image) => (
                 <Stack
-                  key={image.ref}
+                  key={image}
                   direction={{ sm: 'row', xs: 'column' }}
                   justifyContent='space-between'
                   alignItems='center'
                   spacing={2}
                 >
-                  <Link href='/beta'>{image.ref}</Link>
-                  <Typography variant='caption'>{image.size}</Typography>
+                  <Link href='/beta'>{image}</Link>
+                  <Typography variant='caption'>123GB</Typography>
                 </Stack>
               ))}
             </Stack>
