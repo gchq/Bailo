@@ -12,8 +12,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 
+import { postModel } from '../../../../actions/model'
+import useNotification from '../../../../src/common/Snackbar'
 import Wrapper from '../../../../src/Wrapper.beta'
 import { NewModelData } from '../../../../types/types'
 
@@ -23,18 +26,24 @@ export default function NewModel() {
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<NewModelData['visibility']>('public')
 
+  const sendNotification = useNotification()
+  const router = useRouter()
+
   const formValid = teamName && modelName && description
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault()
     const formData: NewModelData = {
-      teamName,
-      modelName,
+      name: `${teamName}/${modelName}`,
       description,
       visibility,
     }
-    // TODO - after new model page is implemented, forward this data
-    console.log(formData)
+    const response = await postModel(formData)
+    if (response.error) {
+      sendNotification({ variant: 'error', msg: response.error })
+    } else {
+      router.push(`/beta/model/${response.data.model.id}`)
+    }
   }
 
   const privateLabel = () => {

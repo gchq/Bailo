@@ -2,7 +2,6 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
-  Chip,
   IconButton,
   InputBase,
   Link as MuiLink,
@@ -17,12 +16,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
 
-import { ListModelType, useListModels } from '../../data/model'
+import { ModelInterface, useListModels } from '../../actions/model'
+import { ListModelType } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType, Model, Version } from '../../types/types'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
@@ -137,25 +137,24 @@ export default function ExploreModels() {
             <div data-test='modelListBox'>
               {(!models || models.length === 0) && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
               {models &&
-                models.map((model: Model, index: number) => {
-                  const latestVersion = model.latestVersion as Version
+                models.map((model: ModelInterface, index: number) => {
                   return (
-                    <Fragment key={model.uuid}>
-                      <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.uuid}`} passHref>
+                    <Fragment key={model.id}>
+                      <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>
                         <MuiLink
                           variant='h5'
                           sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                         >
-                          {latestVersion.metadata.highLevelDetails.name}
+                          {model.name}
                         </MuiLink>
                       </Link>
                       <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                        {latestVersion.metadata.highLevelDetails.modelInASentence}
+                        {model.description}
                       </Typography>
                       <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                        {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
+                        {/* {model.tags.map((tag: string) => (
                           <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                        ))}
+                        ))} */}
                       </Stack>
                       {index !== models.length - 1 && (
                         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />

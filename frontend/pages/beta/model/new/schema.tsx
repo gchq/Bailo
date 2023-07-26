@@ -1,42 +1,18 @@
 import { Schema } from '@mui/icons-material'
-import { Button, Card, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 
+import { SchemaInterface, useGetSchemas } from '../../../../actions/schema'
 import Wrapper from '../../../../src/Wrapper.beta'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
-  const { modelUuid }: { modelUuid?: string } = router.query
-  const [schemas, _setSchemas] = useState<any>([
-    {
-      id: 'minimal_schema_v1',
-      title: 'Minimal Schema V1',
-      description: 'This is a test schema',
-      inactive: false,
-    },
-    {
-      id: 'minimal_schema_v2',
-      title: 'Minimal Schema V2',
-      description: 'This is a test schema with an extra long description!',
-      inactive: false,
-    },
-    {
-      id: 'minimal_schema_v3',
-      title: 'Minimal Schema V3',
-      description: 'This is a third test schema',
-      inactive: false,
-    },
-    {
-      id: 'inactive_schema_v1',
-      title: 'Inactive Schema V1',
-      description: 'This schema is no longer active',
-      inactive: true,
-    },
-  ])
+  const { modelId }: { modelId?: string } = router.query
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
   function createModelUsingSchema(_schema: string) {
-    router.push(`/beta/model/${modelUuid}`)
+    router.push(`/beta/model/${modelId}`)
   }
 
   function schemaButton(schema: any) {
@@ -63,46 +39,55 @@ export default function NewSchemaSelection() {
 
   return (
     <Wrapper title='Select a schema' page='upload'>
-      <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
-        <Stack spacing={2} justifyContent='center' alignItems='center'>
-          <Typography variant='h6' color='primary'>
-            Choose a schema
-          </Typography>
-          <Schema fontSize='large' color='primary' />
-          <Typography variant='body1'>
-            Each organisation may have a different set of questions they require yoy to answer about any model you
-            create. Select from the list below:
-          </Typography>
-        </Stack>
-        <Stack sx={{ mt: 2 }} spacing={2}>
-          <Typography color='primary' variant='h6'>
-            Active Schemas
-          </Typography>
-          <Grid container spacing={2}>
-            {schemas
-              .filter((schema: any) => !schema.inactive)
-              .map((activeSchema) => {
-                return schemaButton({
-                  title: activeSchema.title,
-                  description: activeSchema.description,
-                })
-              })}
-          </Grid>
-          <Typography color='primary' variant='h6'>
-            Inactive Schemas
-          </Typography>
-          <Grid container spacing={2}>
-            {schemas
-              .filter((schema: any) => schema.inactive)
-              .map((activeSchema) => {
-                return schemaButton({
-                  title: activeSchema.title,
-                  description: activeSchema.description,
-                })
-              })}
-          </Grid>
-        </Stack>
-      </Card>
+      {isSchemasLoading && <Box>Loading schemas...</Box>}
+      {schemas && !isSchemasLoading && !isSchemasError && (
+        <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
+          <Stack spacing={2} justifyContent='center' alignItems='center'>
+            <Typography variant='h6' color='primary'>
+              Choose a schema
+            </Typography>
+            <Schema fontSize='large' color='primary' />
+            <Typography variant='body1'>
+              Each organisation may have a different set of questions they require yoy to answer about any model you
+              create. Select from the list below:
+            </Typography>
+          </Stack>
+          <Stack sx={{ mt: 2 }} spacing={2}>
+            <Typography color='primary' variant='h6'>
+              Active Schemas
+            </Typography>
+            <Grid container spacing={2}>
+              {schemas
+                .filter((schema: SchemaInterface) => !schema.inactive)
+                .map((activeSchema) => {
+                  return schemaButton({
+                    title: activeSchema.name,
+                    description: activeSchema.display,
+                  })
+                })}
+              {schemas.filter((schema: SchemaInterface) => !schema.inactive).length === 0 && (
+                <EmptyBlob text='Could not find any active schemas' />
+              )}
+            </Grid>
+            <Typography color='primary' variant='h6'>
+              Inactive Schemas
+            </Typography>
+            <Grid container spacing={2}>
+              {schemas
+                .filter((schema: SchemaInterface) => schema.inactive)
+                .map((activeSchema) => {
+                  return schemaButton({
+                    title: activeSchema.name,
+                    description: activeSchema.display,
+                  })
+                })}
+              {schemas.filter((schema: SchemaInterface) => schema.inactive).length === 0 && (
+                <EmptyBlob text='Could not find any inactive schemas' />
+              )}
+            </Grid>
+          </Stack>
+        </Card>
+      )}
     </Wrapper>
   )
 }

@@ -358,8 +358,7 @@ export enum MarketPlaceModelGroup {
 }
 
 export type NewModelData = {
-  teamName: string
-  modelName: string
+  name: string
   description: string
   visibility: 'public' | 'private'
 }
