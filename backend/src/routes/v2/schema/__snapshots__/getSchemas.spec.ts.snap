@@ -1,0 +1,124 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
+{
+  "data": {
+    "schemas": [
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-1",
+        "inactive": false,
+        "kind": "deployment",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 1",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-2",
+        "inactive": false,
+        "kind": "model",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 2",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+    ],
+  },
+}
+`;
+
+exports[`routes > schema > getSchemas > returns only deployment schemas with the deployment parameter 1`] = `
+{
+  "data": {
+    "schemas": [
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-1",
+        "inactive": false,
+        "kind": "deployment",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 1",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-2",
+        "inactive": false,
+        "kind": "model",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 2",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+    ],
+  },
+}
+`;
+
+exports[`routes > schema > getSchemas > returns only upload schemas with the upload parameter 1`] = `
+{
+  "data": {
+    "schemas": [
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-1",
+        "inactive": false,
+        "kind": "deployment",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 1",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+      {
+        "createdAt": "2023-07-25T14:26:45.121Z",
+        "display": "This is the display?",
+        "fields": {
+          "field 1": "field 1 info",
+        },
+        "hidden": false,
+        "id": "example-schema-2",
+        "inactive": false,
+        "kind": "model",
+        "metadata": {
+          "example": true,
+        },
+        "name": "Example Schema 2",
+        "updatedAt": "2023-07-25T14:26:45.121Z",
+      },
+    ],
+  },
+}
+`;

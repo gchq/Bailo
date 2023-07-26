@@ -6,7 +6,7 @@ import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
 
 export const getSchemasSchema = z.object({
   params: z.object({
-    use: z.nativeEnum(SchemaKind),
+    kind: z.nativeEnum(SchemaKind),
   }),
 })
 
@@ -35,8 +35,8 @@ export const getSchemas = [
             },
             metadata: { example: true },
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date('2023-07-25T14:26:45.121Z'),
+            updatedAt: new Date('2023-07-25T14:26:45.121Z'),
           },
           {
             id: 'example-schema-2',
@@ -51,8 +51,8 @@ export const getSchemas = [
             },
             metadata: { example: true },
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date('2023-07-25T14:26:45.121Z'),
+            updatedAt: new Date('2023-07-25T14:26:45.121Z'),
           },
         ],
       },
