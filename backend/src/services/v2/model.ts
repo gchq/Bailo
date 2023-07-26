@@ -23,8 +23,6 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
 }
 
 export async function getModelById(user: UserDoc, modelId: string) {
-  throw new Error('not being mocked')
-
   const model = await Model.findOne({
     id: modelId,
   })
