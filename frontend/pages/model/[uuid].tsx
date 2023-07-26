@@ -45,7 +45,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import { ApprovalStates, DateString, ModelUploadType, User, Version } from '../../types/types'
+import { ApprovalStates, DateString, ModelDoc, ModelUploadType, User, Version, VersionDoc } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -104,10 +104,19 @@ function Model() {
     router.push(path)
   }
 
-  const accessRequestAllowed = (version) => {
-    if (version.built === true || (version.managerApproved === 'Accepted' && version.reviewerApproved === 'Accepted')) {
-      return true
+  const accessRequestAllowed = () => {
+    if (!versions) {
+      return false
     }
+
+    const filteredVersions = versions.filter((version) => {
+      return (
+        (version as VersionDoc).built &&
+        (version as VersionDoc).managerApproved === ApprovalStates.Accepted &&
+        (version as VersionDoc).reviewerApproved === ApprovalStates.Accepted
+      )
+    })
+    return filteredVersions.length > 0 ? true : false
   }
 
   const onVersionChange = (event: SelectChangeEvent<string>) => {
@@ -300,15 +309,10 @@ function Model() {
                 <DisabledElementTooltip
                   conditions={[
                     !version.built ? 'Waiting on Version build' : '',
-                    version.managerApproved !== 'Accepted' ? 'Waiting on manager approval' : '',
-                    version.reviewerApproved !== 'Accepted' ? 'Waiting on technical reviewer approval' : '',
+                    !accessRequestAllowed ? 'Model must have one fully approved version' : '',
                   ]}
                 >
-                  <MenuItem
-                    onClick={requestDeployment}
-                    disabled={accessRequestAllowed(false)}
-                    data-test='submitDeployment'
-                  >
+                  <MenuItem onClick={requestDeployment} disabled={!accessRequestAllowed()} data-test='submitDeployment'>
                     <ListItemIcon>
                       <UploadIcon fontSize='small' />
                     </ListItemIcon>
