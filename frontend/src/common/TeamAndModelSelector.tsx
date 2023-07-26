@@ -2,10 +2,17 @@ import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/materi
 
 export type TeamAndModelSelectorProps = {
   setTeamValue: (string) => void
+  teamValue: string
   setModelValue: (string) => void
+  modelValue: string
 }
 
-export default function TeamAndModelSelector({ setTeamValue, setModelValue }: TeamAndModelSelectorProps) {
+export default function TeamAndModelSelector({
+  setTeamValue,
+  setModelValue,
+  teamValue,
+  modelValue,
+}: TeamAndModelSelectorProps) {
   const teamNames = [
     { value: 'teamOne', label: 'team 1' },
     { value: 'teamTwo', label: 'team 2' },
@@ -33,9 +40,13 @@ export default function TeamAndModelSelector({ setTeamValue, setModelValue }: Te
   ]
 
   return (
-    <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} divider={<Divider flexItem orientation='vertical' />}>
-      <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' />
-      <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' />
+    <Stack
+      spacing={2}
+      direction={{ xs: 'column', sm: 'row' }}
+      divider={<Divider variant='middle' flexItem orientation='vertical' />}
+    >
+      <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' value={teamValue} />
+      <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
     </Stack>
   )
 }
@@ -44,9 +55,10 @@ interface SelectorProps {
   data: any
   setData: (value: string) => void
   label: string
+  value: string
 }
 
-function Selector({ data, setData, label }: SelectorProps) {
+function Selector({ data, setData, label, value }: SelectorProps) {
   return (
     <Stack>
       <Typography sx={{ fontWeight: 'bold' }}>
@@ -57,6 +69,7 @@ function Selector({ data, setData, label }: SelectorProps) {
           freeSolo
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
           options={data.map((option) => option.label)}
+          value={value}
           renderInput={(params) => <TextField {...params} required size='small' value={data} />}
         />
       </Stack>

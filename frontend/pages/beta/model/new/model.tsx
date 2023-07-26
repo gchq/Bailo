@@ -75,8 +75,10 @@ export default function NewModel() {
               <Typography variant='h6'>Overview</Typography>
               <Stack direction='row' spacing={2}>
                 <TeamAndModelSelector
-                  setTeamValue={(value) => setTeamName(value)}
-                  setModelValue={(value) => setModelName(value)}
+                  setTeamValue={setTeamName}
+                  teamValue={teamName}
+                  setModelValue={setModelName}
+                  modelValue={modelName}
                 />
               </Stack>
               <Stack>
