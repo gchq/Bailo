@@ -379,8 +379,8 @@ export interface ModelInterface {
   visibility: ModelVisibilityKeys
   deleted: boolean
 
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export type ListModelType = 'favourites' | 'user' | 'all'
@@ -397,8 +397,8 @@ export interface SchemaInterface {
   fields: unknown
   metadata: unknown
 
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export const SchemaKind = {
