@@ -41,7 +41,7 @@
     "is-docker": "^3.0.0",
     "jsonschema": "^1.4.1",
     "lodash-es": "^4.17.21",
-    "mongoose": "^7.3.0",
+    "mongoose": "^7.3.3",
     "next": "13.4.5",
     "next-remove-imports": "^1.0.11",
     "notistack": "^3.0.1",
@@ -84,6 +84,7 @@
     "jest-environment-jsdom": "^29.5.0",
     "jsdom": "^22.0.0",
     "next-router-mock": "^0.9.3",
+    "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.30.1"
   }
 }

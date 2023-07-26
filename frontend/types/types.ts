@@ -137,6 +137,9 @@ export interface UiConfig {
   }
 
   seldonVersions: Array<SeldonVersion>
+
+  //max model size is calculated in gigabytes
+  maxModelSizeGB: number
 }
 
 export type SeldonVersion = {
@@ -358,5 +361,5 @@ export type NewModelData = {
   teamName: string
   modelName: string
   description: string
-  accessibility: 'public' | 'private'
+  visibility: 'public' | 'private'
 }

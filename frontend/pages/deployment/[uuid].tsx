@@ -46,7 +46,7 @@ import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import RawModelExportList from '../../src/RawModelExportList'
 import TerminalLog from '../../src/TerminalLog'
 import Wrapper from '../../src/Wrapper'
-import { Model, ModelUploadType } from '../../types/types'
+import { ApprovalCategory, Model, ModelUploadType } from '../../types/types'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { getErrorMessage } from '../../utils/fetcher'
 
@@ -236,7 +236,9 @@ export default function Deployment() {
         <Paper sx={{ p: 3 }}>
           <Stack direction='row' spacing={2}>
             <ApprovalsChip
-              approvals={[{ reviewers: deployment.metadata.contacts.owner, status: deployment.managerApproved }]}
+              versionOrDeploymentId={deployment._id}
+              approvalCategory={ApprovalCategory.Deployment}
+              currentUser={currentUser}
             />
             <Divider orientation='vertical' flexItem />
             <Button

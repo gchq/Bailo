@@ -250,6 +250,42 @@ export async function readApprovals({
     .sort({ updatedAt: -1 })
 }
 
+export async function findApprovalsByDeploymentId(deploymentId: DeploymentDoc['_id']) {
+  const approvals = await ApprovalModel.find({ deployment: deploymentId }).populate({
+    path: 'deployment',
+    populate: {
+      path: 'model',
+      populate: {
+        path: 'latestVersion',
+      },
+    },
+  })
+
+  if (!approvals) {
+    throw BadReq({ deploymentId }, `Unable to find approvals for deployment '${deploymentId}'`)
+  }
+
+  return approvals
+}
+
+export async function findApprovalsByVersionId(versionId: VersionDoc['_id']) {
+  const approvals = await ApprovalModel.find({ version: versionId }).populate({
+    path: 'version',
+    populate: {
+      path: 'model',
+      populate: {
+        path: 'latestVersion',
+      },
+    },
+  })
+
+  if (!approvals) {
+    throw BadReq({ versionId }, `Unable to find approvals for version '${versionId}'`)
+  }
+
+  return approvals
+}
+
 export async function getApproval({ approvalId }: { approvalId: string | Types.ObjectId }) {
   const approval = await ApprovalModel.findById(approvalId)
 

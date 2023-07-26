@@ -45,7 +45,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import { DateString, ModelUploadType, User, Version } from '../../types/types'
+import { ApprovalCategory, DateString, ModelUploadType, User, Version } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -270,10 +270,9 @@ function Model() {
           <Grid container justifyContent='space-between' alignItems='center'>
             <Stack direction='row' spacing={2}>
               <ApprovalsChip
-                approvals={[
-                  { reviewers: version.metadata.contacts.manager, status: version.managerApproved },
-                  { reviewers: version.metadata.contacts.reviewer, status: version.reviewerApproved },
-                ]}
+                versionOrDeploymentId={version._id}
+                approvalCategory={ApprovalCategory.Upload}
+                currentUser={currentUser}
               />
               <Divider orientation='vertical' flexItem />
               <Button

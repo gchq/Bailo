@@ -3,7 +3,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { customAlphabet } from 'nanoid'
 
-import { createDeploymentApprovals, requestDeploymentsForModelVersions } from '../../services/approval.js'
+import {
+  createDeploymentApprovals,
+  findApprovalsByDeploymentId,
+  requestDeploymentsForModelVersions,
+} from '../../services/approval.js'
 import { createDeployment, findDeploymentByUuid, findDeployments } from '../../services/deployment.js'
 import { findModelByUuid } from '../../services/model.js'
 import { findSchemaByRef } from '../../services/schema.js'
@@ -342,6 +346,22 @@ export const getDeploymentAccess = [
 
     return res.json({
       owner,
+    })
+  },
+]
+
+export const getDeploymentApprovals = [
+  ensureUserRole('user'),
+  async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    // TODO: Update translations
+    req.log.info({ code: 'fetching_deployment_approvals', id }, 'Getting approvals for deployment')
+
+    const approvals = await findApprovalsByDeploymentId(id)
+
+    return res.json({
+      approvals,
     })
   },
 ]
