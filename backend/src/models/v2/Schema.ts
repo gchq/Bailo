@@ -6,14 +6,16 @@ import { Document, model, Schema } from 'mongoose'
 export interface SchemaInterface {
   id: string
   name: string
+  description: string
 
-  inactive: boolean
+  active: boolean
   hidden: boolean
 
   kind: SchemaKindKeys
-  display: string
-  fields: unknown
-  metadata: unknown
+  meta: unknown
+
+  uiSchema: unknown
+  schema: unknown
 
   createdAt: Date
   updatedAt: Date
@@ -35,14 +37,16 @@ const SchemaSchema = new Schema<SchemaInterface>(
   {
     id: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
+    description: { type: String, required: false, default: '' },
 
-    inactive: { type: Boolean, required: true, default: false },
+    active: { type: Boolean, required: true, default: true },
     hidden: { type: Boolean, required: true, default: false },
 
     kind: { type: String, enum: Object.values(SchemaKind), required: true },
-    display: { type: String, required: true },
-    fields: { type: String, required: true, get: getSchema, set: setSchema },
-    metadata: { type: String, required: true, get: getSchema, set: setSchema },
+    meta: { type: String, required: true, get: getSchema, set: setSchema },
+
+    uiSchema: { type: String, required: true, get: getSchema, set: setSchema },
+    schema: { type: String, required: true, get: getSchema, set: setSchema },
   },
   {
     timestamps: true,
