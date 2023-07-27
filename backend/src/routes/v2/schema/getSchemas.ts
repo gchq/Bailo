@@ -3,11 +3,12 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getSchemasSchema = z.object({
-  params: z.object({
-    kind: z.nativeEnum(SchemaKind),
-  }),
+  query: z.object({
+    kind: z.nativeEnum(SchemaKind).optional(),
+  })
 })
 
 interface GetSchemaResponse {
@@ -19,6 +20,7 @@ interface GetSchemaResponse {
 export const getSchemas = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaResponse>) => {
+    parse(req, getSchemasSchema)
     return res.json({
       data: {
         schemas: [
