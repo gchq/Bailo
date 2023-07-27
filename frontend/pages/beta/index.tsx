@@ -14,27 +14,46 @@ import {
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
-import { ModelInterface, useListModels } from '../../actions/model'
+import { useListModels } from '../../actions/model'
 import { ListModelType } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType, ModelInterface } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
   const [group, setGroup] = useState<ListModelType>('all')
   // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
+  const [selectedLibrary, setSelectedLibrary] = useState('')
+  const [selectedTask, setSelectedTask] = useState('')
+  const [selectedType, setSelectedType] = useState('')
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const theme = useTheme()
   const router = useRouter()
+
+  useEffect(() => {
+    if (selectedType) {
+      switch (selectedType) {
+        case MarketPlaceModelSelectType.MY_MODELS:
+          setGroup(MarketPlaceModelGroup.MY_MODELS)
+          break
+        case MarketPlaceModelSelectType.FAVOURITES:
+          setGroup(MarketPlaceModelGroup.FAVOURITES)
+          break
+        default:
+          setGroup(MarketPlaceModelGroup.ALL)
+      }
+      mutateModels()
+    }
+  }, [selectedType, mutateModels])
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -51,32 +70,6 @@ export default function ExploreModels() {
 
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-  }
-
-  const updateSelectedTasks = (selectedTags: string) => {
-    // TODO - When tasks are selected, filter the array of models based on the selection
-    console.log(selectedTags)
-  }
-
-  const updateSelectedLibraries = (selectedTags: string) => {
-    // TODO - When libraries are selected, filter the array of models based on the selection
-    console.log(selectedTags)
-  }
-
-  const updateSelectedType = (selectedType: string) => {
-    if (selectedType) {
-      switch (selectedType) {
-        case MarketPlaceModelSelectType.MY_MODELS:
-          setGroup(MarketPlaceModelGroup.MY_MODELS)
-          break
-        case MarketPlaceModelSelectType.FAVOURITES:
-          setGroup(MarketPlaceModelGroup.FAVOURITES)
-          break
-        default:
-          setGroup(MarketPlaceModelGroup.ALL)
-      }
-      mutateModels()
-    }
   }
 
   return (
@@ -108,13 +101,20 @@ export default function ExploreModels() {
             </IconButton>
           </Paper>
           <Box>
-            <ChipSelector label='Tasks' tags={['Task 1', 'Task 2']} onChange={updateSelectedTasks} size='small' />
+            <ChipSelector
+              label='Tasks'
+              tags={['Task 1', 'Task 2']}
+              selectedTags={selectedTask}
+              setSelectedTags={setSelectedTask}
+              size='small'
+            />
           </Box>
           <Box>
             <ChipSelector
               label='Libraries'
               tags={['Library 1', 'Library 2']}
-              onChange={updateSelectedLibraries}
+              setSelectedTags={setSelectedLibrary}
+              selectedTags={selectedLibrary}
               size='small'
             />
           </Box>
@@ -122,7 +122,8 @@ export default function ExploreModels() {
             <ChipSelector
               label='Other'
               tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-              onChange={updateSelectedType}
+              setSelectedTags={setSelectedType}
+              selectedTags={selectedType}
               size='small'
             />
           </Box>

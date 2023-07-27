@@ -1,16 +1,20 @@
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useState } from 'react'
 
 type PartialTagSelectorProps =
   | {
       multiple: true
-      onChange: (value: string[]) => void
+
+      selectedTags: string[]
+      setSelectedTags: (value: string[]) => void
     }
   | {
       multiple?: false
-      onChange: (value: string) => void
+
+      selectedTags: string
+      setSelectedTags: (value: string) => void
     }
 
 type TagSelectorProps = {
@@ -23,21 +27,23 @@ type TagSelectorProps = {
 export default function ChipSelector({
   label,
   tags,
-  onChange,
+  setSelectedTags,
+  selectedTags,
   multiple,
   size = 'medium',
   expandThreshold = 5,
 }: TagSelectorProps): ReactElement {
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  //const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [expanded, setExpanded] = useState(false)
 
-  useEffect(() => {
-    if (multiple) {
-      onChange(selectedTags)
-    } else {
-      onChange(selectedTags[0])
-    }
-  }, [selectedTags, multiple, onChange])
+  // useEffect(() => {
+  //   console.log('here')
+  //   if (multiple) {
+  //     onChange(selectedTags)
+  //   } else {
+  //     onChange(selectedTags[0])
+  //   }
+  // }, [selectedTags, multiple])
 
   const handleChange = (selectedTag: string): void => {
     if (multiple) {
@@ -47,7 +53,7 @@ export default function ChipSelector({
         setSelectedTags([...selectedTags, selectedTag])
       }
     } else {
-      setSelectedTags(selectedTags[0] !== selectedTag ? [selectedTag] : [])
+      setSelectedTags(selectedTags !== selectedTag ? selectedTag : '')
     }
   }
 
