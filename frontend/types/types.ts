@@ -377,6 +377,24 @@ export interface ModelInterface {
   description: string
 
   visibility: ModelVisibilityKeys
+}
+
+export type Artefact = any
+
+export type ReleaseInterface = {
+  modelId: string
+  modelCardVersion: number
+
+  name: string
+  semver: string
+  notes: string
+
+  minor: boolean
+  draft: boolean
+
+  files: Array<string>
+  images: Array<string>
+
   deleted: boolean
 
   createdAt: string
