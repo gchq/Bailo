@@ -5,10 +5,10 @@ export type TeamAndModelSelectorProps = {
   teamValue: string
   setModelValue: (string) => void
   modelValue: string
-  teamReadOnly: boolean
-  modelReadOnly: boolean
-  teamOnly: boolean
-  modelOnly: boolean
+  teamReadOnly?: boolean
+  modelReadOnly?: boolean
+  teamOnly?: boolean
+  modelOnly?: boolean
 }
 
 export default function TeamAndModelSelector({
@@ -16,10 +16,10 @@ export default function TeamAndModelSelector({
   setModelValue,
   teamValue,
   modelValue,
-  teamReadOnly,
-  modelReadOnly,
-  teamOnly,
-  modelOnly,
+  teamReadOnly = false,
+  modelReadOnly = false,
+  teamOnly = false,
+  modelOnly = false,
 }: TeamAndModelSelectorProps) {
   const teamNames = [
     { value: 'teamOne', label: 'team 1' },
@@ -47,64 +47,32 @@ export default function TeamAndModelSelector({
     { value: 'modelFour', label: 'model 4' },
   ]
 
-  if (teamReadOnly == true) {
-    return (
-      <Stack
-        spacing={2}
-        direction={{ xs: 'column', sm: 'row' }}
-        divider={<Divider variant='middle' flexItem orientation='vertical' />}
-      >
+  return (
+    <Stack
+      spacing={2}
+      direction={{ xs: 'column', sm: 'row' }}
+      divider={<Divider variant='middle' flexItem orientation='vertical' />}
+    >
+      {!modelOnly && (
         <Selector
           data={teamNames}
           setData={(value) => setTeamValue(value)}
           label='Team'
           value={teamValue}
-          disabled={true}
+          disabled={teamReadOnly}
         />
-        <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
-      </Stack>
-    )
-  } else if (modelReadOnly == true) {
-    return (
-      <Stack
-        spacing={2}
-        direction={{ xs: 'column', sm: 'row' }}
-        divider={<Divider variant='middle' flexItem orientation='vertical' />}
-      >
-        <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' value={teamValue} />
+      )}
+      {!teamOnly && (
         <Selector
+          disabled={modelReadOnly}
           data={modelNames}
           setData={(value) => setModelValue(value)}
           label='Model'
           value={modelValue}
-          disabled={true}
         />
-      </Stack>
-    )
-  } else if (teamOnly == true) {
-    return (
-      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-        <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' value={teamValue} />
-      </Stack>
-    )
-  } else if (modelOnly == true) {
-    return (
-      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-        <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
-      </Stack>
-    )
-  } else {
-    return (
-      <Stack
-        spacing={2}
-        direction={{ xs: 'column', sm: 'row' }}
-        divider={<Divider variant='middle' flexItem orientation='vertical' />}
-      >
-        <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' value={teamValue} />
-        <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
-      </Stack>
-    )
-  }
+      )}
+    </Stack>
+  )
 }
 
 interface SelectorProps {
@@ -128,6 +96,7 @@ function Selector({ data, setData, label, value, disabled = false }: SelectorPro
           options={data.map((option) => option.label)}
           value={value}
           renderInput={(params) => <TextField {...params} required size='small' value={data} />}
+          disabled={disabled}
         />
       </Stack>
     </Stack>
