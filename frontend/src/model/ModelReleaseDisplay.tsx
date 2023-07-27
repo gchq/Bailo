@@ -17,7 +17,6 @@ export default function ModelReleaseDisplay({
   const theme = useTheme()
 
   function formatDate(timestamp: string) {
-    console.log(timestamp)
     const date = new Date(timestamp)
     const year = date.getFullYear().toString()
     const formattedYear = `'${year.substring(date.getFullYear().toString().length - 2)}`
