@@ -55,6 +55,7 @@ describe('routes > schema > getSchemas', () => {
     })
     const res = await testGet(`/api/v2/schemas?kind=notValid`)
 
+    expect(mockSchemaService.findSchemasByKind).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })
