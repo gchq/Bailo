@@ -3,7 +3,6 @@ import z, { AnyZodObject, ZodError } from 'zod'
 
 import { BadReq } from './error.js'
 
-
 export function parse<T extends AnyZodObject>(req: Request, schema: T): z.infer<T> {
   try {
     return schema.parse(req)
