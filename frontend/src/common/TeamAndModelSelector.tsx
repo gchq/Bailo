@@ -5,6 +5,10 @@ export type TeamAndModelSelectorProps = {
   teamValue: string
   setModelValue: (string) => void
   modelValue: string
+  teamReadOnly?: boolean
+  modelReadOnly?: boolean
+  teamOnly?: boolean
+  modelOnly?: boolean
 }
 
 export default function TeamAndModelSelector({
@@ -12,6 +16,10 @@ export default function TeamAndModelSelector({
   setModelValue,
   teamValue,
   modelValue,
+  teamReadOnly = false,
+  modelReadOnly = false,
+  teamOnly = false,
+  modelOnly = false,
 }: TeamAndModelSelectorProps) {
   const teamNames = [
     { value: 'teamOne', label: 'team 1' },
@@ -45,8 +53,24 @@ export default function TeamAndModelSelector({
       direction={{ xs: 'column', sm: 'row' }}
       divider={<Divider variant='middle' flexItem orientation='vertical' />}
     >
-      <Selector data={teamNames} setData={(value) => setTeamValue(value)} label='Team' value={teamValue} />
-      <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
+      {!modelOnly && (
+        <Selector
+          data={teamNames}
+          setData={(value) => setTeamValue(value)}
+          label='Team'
+          value={teamValue}
+          disabled={teamReadOnly}
+        />
+      )}
+      {!teamOnly && (
+        <Selector
+          disabled={modelReadOnly}
+          data={modelNames}
+          setData={(value) => setModelValue(value)}
+          label='Model'
+          value={modelValue}
+        />
+      )}
     </Stack>
   )
 }
@@ -56,9 +80,10 @@ interface SelectorProps {
   setData: (value: string) => void
   label: string
   value: string
+  disabled?: boolean
 }
 
-function Selector({ data, setData, label, value }: SelectorProps) {
+function Selector({ data, setData, label, value, disabled = false }: SelectorProps) {
   return (
     <Stack>
       <Typography sx={{ fontWeight: 'bold' }}>
@@ -71,6 +96,7 @@ function Selector({ data, setData, label, value }: SelectorProps) {
           options={data.map((option) => option.label)}
           value={value}
           renderInput={(params) => <TextField {...params} required size='small' value={data} />}
+          disabled={disabled}
         />
       </Stack>
     </Stack>
