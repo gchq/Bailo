@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 
+import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
 import Wrapper from '../../../../src/Wrapper.beta'
 import { NewModelData } from '../../../../types/types'
 
@@ -73,18 +74,12 @@ export default function NewModel() {
             <>
               <Typography variant='h6'>Overview</Typography>
               <Stack direction='row' spacing={2}>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    Team <span style={{ color: 'red' }}>*</span>
-                  </Typography>
-                  <TextField required size='small' value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-                </Stack>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    Model name <span style={{ color: 'red' }}>*</span>
-                  </Typography>
-                  <TextField required size='small' value={modelName} onChange={(e) => setModelName(e.target.value)} />
-                </Stack>
+                <TeamAndModelSelector
+                  setTeamValue={setTeamName}
+                  teamValue={teamName}
+                  setModelValue={setModelName}
+                  modelValue={modelName}
+                />
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
