@@ -1,5 +1,3 @@
-import '../../../utils/test/testUtils.js'
-
 import { describe, expect, test, vi } from 'vitest'
 
 import { BadReq } from '../../../utils/v2/error.js'
@@ -7,12 +5,21 @@ import { testGet } from '../../../utils/v2/test/routes.js'
 import { mockDeploymentSchema, mockModelSchema } from '../../../utils/v2/test/testModels.js'
 
 const mockSchemaService = vi.hoisted(() => {
-  return {findSchemasByUse: vi.fn(() => [mockDeploymentSchema, mockModelSchema]),}
+  return {
+    addDefaultSchemas: vi.fn(),
+    findSchemasByKind: vi.fn(() => [mockDeploymentSchema, mockModelSchema]),
+  }
 })
-vi.mock('../../../services/v2/schema.js', () => (mockSchemaService))
+vi.mock('../../../services/v2/schema.js', () => mockSchemaService)
 
 const mockValidate = vi.hoisted(() => {
-  return { parse: vi.fn() }
+  return {
+    parse: vi.fn(() => {
+      return {
+        query: {},
+      }
+    }),
+  }
 })
 vi.mock('../../../utils/v2/validate.js', () => mockValidate)
 
@@ -24,8 +31,9 @@ describe('routes > schema > getSchemas', () => {
     expect(res.body).matchSnapshot()
   })
 
-  test('returns only upload schemas with the upload parameter', async () => {
-    mockSchemaService.findSchemasByUse.mockReturnValueOnce([mockModelSchema])
+  test('returns only model schemas with the model parameter', async () => {
+    mockValidate.parse.mockReturnValueOnce({ query: { kind: 'model' } })
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([mockModelSchema])
     const res = await testGet(`/api/v2/schemas?kind=model`)
 
     expect(res.statusCode).toBe(200)
@@ -33,7 +41,8 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only deployment schemas with the deployment parameter', async () => {
-    mockSchemaService.findSchemasByUse.mockReturnValueOnce([mockDeploymentSchema])
+    mockValidate.parse.mockReturnValueOnce({ query: { kind: 'deployment' } })
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([mockDeploymentSchema])
     const res = await testGet(`/api/v2/schemas?kind=deployment`)
 
     expect(res.statusCode).toBe(200)

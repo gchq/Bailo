@@ -83,6 +83,34 @@ exports[`routes > schema > getSchemas > returns only deployment schemas with the
 }
 `;
 
+exports[`routes > schema > getSchemas > returns only model schemas with the model parameter 1`] = `
+{
+  "data": {
+    "schemas": [
+      {
+        "active": true,
+        "createdAt": "2023-07-28T10:50:00.928Z",
+        "description": "This is a description of the schema.",
+        "hidden": false,
+        "id": "example-schema-1",
+        "kind": "model",
+        "meta": {
+          "example": true,
+        },
+        "name": "Example Schema 1",
+        "schema": {
+          "Schema field 1": "field 1 info",
+        },
+        "uiSchema": {
+          "UI Schema field 1": "field 1 info",
+        },
+        "updatedAt": "2023-07-28T10:50:00.928Z",
+      },
+    ],
+  },
+}
+`;
+
 exports[`routes > schema > getSchemas > returns only upload schemas with the upload parameter 1`] = `
 {
   "data": {

@@ -1,8 +1,70 @@
 import { generateMock, GenerateMockOptions } from '@anatine/zod-mock'
+import { NextFunction, Request, Response } from 'express'
 import supertest from 'supertest'
+import { vi } from 'vitest'
 import z, { ZodSchema } from 'zod'
 
 import { server } from '../../../routes.js'
+import { testUser } from '../../test/testModels.js'
+
+vi.mock('../../user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        next()
+      })
+    }),
+  }
+})
+
+vi.mock('../../config.js', () => {
+  return {
+    __esModule: true,
+    default: {
+      app: {
+        app: {
+          protocol: '',
+        },
+      },
+      logging: {
+        stroom: {
+          enabled: false,
+        },
+        file: {
+          enabled: false,
+        },
+      },
+      minio: {
+        connection: {
+          endPoint: 'fake',
+        },
+        buckets: {
+          uploads: 'uploads',
+        },
+      },
+      experimental: {
+        v2: true,
+      },
+      oauth: {
+        enabled: false,
+      },
+      ui: {
+        seldonVersions: [
+          {
+            name: 'seldonio - 1.10.0',
+            image: 'seldonio/seldon-core-s2i-python37:1.10.0',
+          },
+        ],
+        banner: '',
+        registry: '',
+      },
+    },
+  }
+})
 
 export function createFixture<T extends ZodSchema>(schema: T, options?: GenerateMockOptions): z.infer<T> {
   return generateMock(schema, {

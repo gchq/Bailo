@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
-import { findSchemasByUse } from '../../../services/v2/schema.js'
+import { findSchemasByKind } from '../../../services/v2/schema.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const getSchemasSchema = z.object({
@@ -21,9 +21,9 @@ interface GetSchemaResponse {
 export const getSchemas = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaResponse>) => {
-    const schemas: Array<SchemaInterface> = await findSchemasByUse(SchemaKind.Deployment)
+    const { query } = parse(req, getSchemasSchema)
 
-    parse(req, getSchemasSchema)
+    const schemas: Array<SchemaInterface> = await findSchemasByKind(query.kind)
 
     return res.json({
       data: {
