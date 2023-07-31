@@ -34,11 +34,6 @@ export default function MultiFileInput({
   function handleDelete(fileToDelete: File) {
     if (files) {
       const updatedFileList = files.filter((file) => file.name !== fileToDelete.name)
-      //   files.forEach((file) => {
-      //     if (file.name !== fileToDelete.name) {
-      //       updatedFileList.push(file)
-      //     }
-      //   })
       setFiles(updatedFileList)
     }
   }

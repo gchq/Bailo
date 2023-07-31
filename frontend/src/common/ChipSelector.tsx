@@ -36,15 +36,6 @@ export default function ChipSelector({
   //const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [expanded, setExpanded] = useState(false)
 
-  // useEffect(() => {
-  //   console.log('here')
-  //   if (multiple) {
-  //     onChange(selectedTags)
-  //   } else {
-  //     onChange(selectedTags[0])
-  //   }
-  // }, [selectedTags, multiple])
-
   const handleChange = (selectedTag: string): void => {
     if (multiple) {
       if (selectedTags.includes(selectedTag)) {
