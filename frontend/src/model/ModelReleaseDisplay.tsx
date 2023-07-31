@@ -110,7 +110,7 @@ export default function ModelReleaseDisplay({
                   spacing={2}
                 >
                   <Link href='/beta'>{file}</Link>
-                  <Typography variant='caption'>123GB</Typography>
+                  {/* <Typography variant='caption'>123GB</Typography> */}
                 </Stack>
               ))}
               {release.images.map((image) => (
@@ -122,7 +122,7 @@ export default function ModelReleaseDisplay({
                   spacing={2}
                 >
                   <Link href='/beta'>{image}</Link>
-                  <Typography variant='caption'>123GB</Typography>
+                  {/* <Typography variant='caption'>123GB</Typography> */}
                 </Stack>
               ))}
             </Stack>

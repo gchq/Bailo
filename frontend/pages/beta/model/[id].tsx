@@ -14,7 +14,7 @@ export default function Model() {
   const { model, isModelLoading, isModelError } = useGetModel(id)
 
   function myFunction() {
-    console.log('Button clicked!')
+    console.log(model)
   }
   return (
     <Wrapper title='Model' page='marketplace' fullWidth>

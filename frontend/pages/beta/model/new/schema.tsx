@@ -3,8 +3,9 @@ import { Box, Button, Card, Grid, Stack, Tooltip, Typography } from '@mui/materi
 import { useRouter } from 'next/router'
 import EmptyBlob from 'src/common/EmptyBlob'
 
-import { SchemaInterface, useGetSchemas } from '../../../../actions/schema'
+import { useGetSchemas } from '../../../../actions/schema'
 import Wrapper from '../../../../src/Wrapper.beta'
+import { SchemaInterface } from '../../../../types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
@@ -58,14 +59,14 @@ export default function NewSchemaSelection() {
             </Typography>
             <Grid container spacing={2}>
               {schemas
-                .filter((schema: SchemaInterface) => !schema.inactive)
+                .filter((schema: SchemaInterface) => schema.active)
                 .map((activeSchema) => {
                   return schemaButton({
                     title: activeSchema.name,
                     description: activeSchema.display,
                   })
                 })}
-              {schemas.filter((schema: SchemaInterface) => !schema.inactive).length === 0 && (
+              {schemas.filter((schema: SchemaInterface) => schema.active).length === 0 && (
                 <EmptyBlob text='Could not find any active schemas' />
               )}
             </Grid>
@@ -74,14 +75,14 @@ export default function NewSchemaSelection() {
             </Typography>
             <Grid container spacing={2}>
               {schemas
-                .filter((schema: SchemaInterface) => schema.inactive)
+                .filter((schema: SchemaInterface) => !schema.active)
                 .map((activeSchema) => {
                   return schemaButton({
                     title: activeSchema.name,
                     description: activeSchema.display,
                   })
                 })}
-              {schemas.filter((schema: SchemaInterface) => schema.inactive).length === 0 && (
+              {schemas.filter((schema: SchemaInterface) => !schema.active).length === 0 && (
                 <EmptyBlob text='Could not find any inactive schemas' />
               )}
             </Grid>

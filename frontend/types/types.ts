@@ -379,8 +379,6 @@ export interface ModelInterface {
   visibility: ModelVisibilityKeys
 }
 
-export type Artefact = any
-
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
@@ -389,8 +387,8 @@ export type ReleaseInterface = {
   semver: string
   notes: string
 
-  minor: boolean
-  draft: boolean
+  minor?: boolean
+  draft?: boolean
 
   files: Array<string>
   images: Array<string>
@@ -407,7 +405,7 @@ export interface SchemaInterface {
   id: string
   name: string
 
-  inactive: boolean
+  active: boolean
   hidden: boolean
 
   kind: SchemaKindKeys
