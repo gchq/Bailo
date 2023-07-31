@@ -1,6 +1,6 @@
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
-import { useGetModels } from 'actions/model'
-import { useGetTeams } from 'actions/team'
+
+import { useGetTeams } from '../../actions/team'
 
 export type TeamAndModelSelectorProps = {
   setTeamValue: (string) => void
@@ -8,7 +8,6 @@ export type TeamAndModelSelectorProps = {
   setModelValue: (string) => void
   modelValue: string
   teamReadOnly?: boolean
-  modelReadOnly?: boolean
   teamOnly?: boolean
   modelOnly?: boolean
 }
@@ -19,51 +18,44 @@ export default function TeamAndModelSelector({
   teamValue,
   modelValue,
   teamReadOnly = false,
-  modelReadOnly = false,
   teamOnly = false,
   modelOnly = false,
 }: TeamAndModelSelectorProps) {
-  const { teams, isTeamsLoading, isTeamsError } = useGetTeams()
-  const { models, isModelLoading, isModelError } = useGetModels()
+  const { teams, isTeamsLoading } = useGetTeams()
+
   const teamNames = teams
     ? teams.map((team) => {
         return { value: team.id, label: team.name }
       })
-    : [
-        { value: 'teamOne', label: 'team 1' },
-        { value: 'teamTwo', label: 'team 2' },
-      ]
-  const modelNames = models
-    ? models.map((model) => {
-        return { value: model.id, label: model.name }
-      })
     : []
 
+  const modelNames = []
+
   return (
-    <Stack
-      spacing={2}
-      direction={{ xs: 'column', sm: 'row' }}
-      divider={<Divider variant='middle' flexItem orientation='vertical' />}
-    >
-      {!modelOnly && (
-        <Selector
-          data={teamNames}
-          setData={(value) => setTeamValue(value)}
-          label='Team'
-          value={teamValue}
-          disabled={teamReadOnly}
-        />
+    <>
+      {isTeamsLoading && <Typography>Fetching Teams</Typography>}{' '}
+      {!isTeamsLoading && (
+        <Stack
+          spacing={2}
+          direction={{ xs: 'column', sm: 'row' }}
+          divider={<Divider variant='middle' flexItem orientation='vertical' />}
+        >
+          {!modelOnly && (
+            <Selector
+              data={teamNames}
+              setData={(value) => setTeamValue(value)}
+              label='Team'
+              value={teamValue}
+              disabled={teamReadOnly}
+              loading={isTeamsLoading}
+            />
+          )}
+          {!teamOnly && (
+            <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
+          )}
+        </Stack>
       )}
-      {!teamOnly && (
-        <Selector
-          disabled={modelReadOnly}
-          data={modelNames}
-          setData={(value) => setModelValue(value)}
-          label='Model'
-          value={modelValue}
-        />
-      )}
-    </Stack>
+    </>
   )
 }
 
@@ -73,9 +65,10 @@ interface SelectorProps {
   label: string
   value: string
   disabled?: boolean
+  loading?: boolean
 }
 
-function Selector({ data, setData, label, value, disabled = false }: SelectorProps) {
+function Selector({ data, setData, label, value, disabled = false, loading = false }: SelectorProps) {
   return (
     <Stack>
       <Typography sx={{ fontWeight: 'bold' }}>
@@ -83,6 +76,7 @@ function Selector({ data, setData, label, value, disabled = false }: SelectorPro
       </Typography>
       <Stack spacing={2} sx={{ width: 200 }}>
         <Autocomplete
+          loading={loading}
           freeSolo
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
           options={data.map((option) => option.label)}
