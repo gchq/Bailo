@@ -1,4 +1,6 @@
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
+import { useGetModels } from 'actions/model'
+import { useGetTeams } from 'actions/team'
 
 export type TeamAndModelSelectorProps = {
   setTeamValue: (string) => void
@@ -13,31 +15,21 @@ export default function TeamAndModelSelector({
   teamValue,
   modelValue,
 }: TeamAndModelSelectorProps) {
-  const teamNames = [
-    { value: 'teamOne', label: 'team 1' },
-    { value: 'teamTwo', label: 'team 2' },
-    { value: 'teamThree', label: 'team 3' },
-    { value: 'teamFour', label: 'team 4' },
-    { value: 'teamFive', label: 'team 5' },
-    { value: 'teamSix', label: 'team 6' },
-    { value: 'teamSeven', label: 'team 7' },
-    { value: 'teamEight', label: 'team 8' },
-    { value: 'teamNine', label: 'team 9' },
-    { value: 'teamTen', label: 'team 10' },
-    { value: 'teamEleven', label: 'team 11' },
-    { value: 'teamTwelve', label: 'team 12' },
-    { value: 'teamThirteen', label: 'team 13' },
-    { value: 'teamFourteen', label: 'team 14' },
-    { value: 'teamFifteen', label: 'team 15' },
-    { value: 'teamSixteen', label: 'team 16' },
-  ]
-
-  const modelNames = [
-    { value: 'modelOne', label: 'model 1' },
-    { value: 'modelTwo', label: 'model 2' },
-    { value: 'modelThree', label: 'model 3' },
-    { value: 'modelFour', label: 'model 4' },
-  ]
+  const { teams, isTeamsLoading, isTeamsError } = useGetTeams()
+  const { models, isModelLoading, isModelError } = useGetModels()
+  const teamNames = teams
+    ? teams.map((team) => {
+        return { value: team.id, label: team.name }
+      })
+    : [
+        { value: 'teamOne', label: 'team 1' },
+        { value: 'teamTwo', label: 'team 2' },
+      ]
+  const modelNames = models
+    ? models.map((model) => {
+        return { value: model.id, label: model.name }
+      })
+    : []
 
   return (
     <Stack

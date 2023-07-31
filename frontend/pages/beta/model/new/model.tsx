@@ -12,6 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useGetTeams } from 'actions/team'
 import { useState } from 'react'
 
 import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
