@@ -109,9 +109,6 @@ export const postApprovalResponse = [
       )
     }
 
-    approval.status = choice as ApprovalStates
-    await approval.save()
-
     let field: 'managerApproved' | 'reviewerApproved'
     if (approval.approvalType === 'Manager') {
       field = 'managerApproved'
@@ -200,6 +197,9 @@ export const postApprovalResponse = [
     } else {
       throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
     }
+
+    approval.status = choice as ApprovalStates
+    await approval.save()
 
     const reviewingUser = req.user.id
     const userList = await getUserListFromEntityList(entities)
