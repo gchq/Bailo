@@ -50,7 +50,6 @@ function Upload() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
 
-
   const router = useRouter()
 
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
