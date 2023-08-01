@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 
 import { useGetDefaultSchema, useGetSchemas } from '../../../../data/schema'
+import { useGetUiConfig } from '../../../../data/uiConfig'
 import { useGetCurrentUser } from '../../../../data/user'
 import LoadingBar from '../../../../src/common/LoadingBar'
 import { MinimalErrorWrapper } from '../../../../src/errors/ErrorWrapper'
@@ -47,6 +48,8 @@ function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
+
 
   const router = useRouter()
 
@@ -104,7 +107,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: fileTabComplete,
+        isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
       })
     )
 
