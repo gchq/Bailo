@@ -13,7 +13,7 @@ export function useGetSchemas() {
 
   return {
     mutateSchemas: mutate,
-    schemas: data ? data.data.schemas : undefined,
+    schemas: data ? data.data.schemas : [],
     isSchemasLoading: !error && !data,
     isSchemasError: error,
   }

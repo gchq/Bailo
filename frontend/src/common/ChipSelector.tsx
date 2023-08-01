@@ -33,7 +33,6 @@ export default function ChipSelector({
   size = 'medium',
   expandThreshold = 5,
 }: TagSelectorProps): ReactElement {
-  //const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [expanded, setExpanded] = useState(false)
 
   const handleChange = (selectedTag: string): void => {

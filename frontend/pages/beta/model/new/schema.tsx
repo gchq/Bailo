@@ -1,16 +1,20 @@
 import { Schema } from '@mui/icons-material'
-import { Box, Button, Card, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Button, Card, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import EmptyBlob from 'src/common/EmptyBlob'
+import { useMemo } from 'react'
 
 import { useGetSchemas } from '../../../../actions/schema'
+import EmptyBlob from '../../../../src/common/EmptyBlob'
+import Loading from '../../../../src/common/Loading'
 import Wrapper from '../../../../src/Wrapper.beta'
-import { SchemaInterface } from '../../../../types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+
+  const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
+  const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
   function createModelUsingSchema(_schema: string) {
     router.push(`/beta/model/${modelId}`)
@@ -40,7 +44,7 @@ export default function NewSchemaSelection() {
 
   return (
     <Wrapper title='Select a schema' page='upload'>
-      {isSchemasLoading && <Box>Loading schemas...</Box>}
+      {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && !isSchemasError && (
         <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
           <Stack spacing={2} justifyContent='center' alignItems='center'>
@@ -58,33 +62,25 @@ export default function NewSchemaSelection() {
               Active Schemas
             </Typography>
             <Grid container spacing={2}>
-              {schemas
-                .filter((schema: SchemaInterface) => schema.active)
-                .map((activeSchema) => {
-                  return schemaButton({
-                    title: activeSchema.name,
-                    description: activeSchema.display,
-                  })
-                })}
-              {schemas.filter((schema: SchemaInterface) => schema.active).length === 0 && (
-                <EmptyBlob text='Could not find any active schemas' />
-              )}
+              {activeSchemas.map((activeSchema) => {
+                return schemaButton({
+                  title: activeSchema.name,
+                  description: activeSchema.display,
+                })
+              })}
+              {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
             </Grid>
             <Typography color='primary' variant='h6'>
               Inactive Schemas
             </Typography>
             <Grid container spacing={2}>
-              {schemas
-                .filter((schema: SchemaInterface) => !schema.active)
-                .map((activeSchema) => {
-                  return schemaButton({
-                    title: activeSchema.name,
-                    description: activeSchema.display,
-                  })
-                })}
-              {schemas.filter((schema: SchemaInterface) => !schema.active).length === 0 && (
-                <EmptyBlob text='Could not find any inactive schemas' />
-              )}
+              {inactiveSchemas.map((activeSchema) => {
+                return schemaButton({
+                  title: activeSchema.name,
+                  description: activeSchema.display,
+                })
+              })}
+              {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}
             </Grid>
           </Stack>
         </Card>

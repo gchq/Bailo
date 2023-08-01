@@ -40,7 +40,6 @@ export default function TeamAndModelSelector({
           direction={{ xs: 'column', sm: 'row' }}
           divider={<Divider variant='middle' flexItem orientation='vertical' />}
         >
-          <div>{`team value ${teamValue}`}</div>
           {!modelOnly && (
             <Selector
               data={teamNames}

@@ -14,7 +14,7 @@ export function useGetReleasesForModelId(id?: string) {
 
   return {
     mutateReleases: mutate,
-    releases: data ? data.data.releases : undefined,
+    releases: data ? data.data.releases : [],
     isReleasesLoading: !error && !data,
     isReleasesError: error,
   }

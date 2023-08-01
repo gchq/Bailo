@@ -1,9 +1,10 @@
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
-import EmptyBlob from 'src/common/EmptyBlob'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { ModelInterface } from '../../../types/types'
+import EmptyBlob from '../../common/EmptyBlob'
+import Loading from '../../common/Loading'
 import DraftNewReleaseDialog from '../DraftNewReleaseDialog'
 import ModelReleaseDisplay from '../ModelReleaseDisplay'
 
@@ -32,7 +33,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
             Draft new Release
           </Button>
         </Box>
-        {isReleasesLoading && <Typography sx={{ m: 4 }}>{`Fetching releases for model ${model.name}`}</Typography>}
+        {isReleasesLoading && <Loading />}
 
         {releases && releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
 

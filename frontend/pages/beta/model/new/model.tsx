@@ -16,32 +16,33 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { postModel } from '../../../../actions/model'
-import useNotification from '../../../../src/common/Snackbar'
 import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
+import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
-import { NewModelData } from '../../../../types/types'
+import { ModelForm } from '../../../../types/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
-  const [visibility, setVisibility] = useState<NewModelData['visibility']>('public')
+  const [visibility, setVisibility] = useState<ModelForm['visibility']>('public')
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const sendNotification = useNotification()
   const router = useRouter()
 
   const formValid = teamName && modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
-    const formData: NewModelData = {
+    setErrorMessage('')
+    const formData: ModelForm = {
       name: `${teamName}/${modelName}`,
       description,
       visibility,
     }
     const response = await postModel(formData)
     if (response.error) {
-      sendNotification({ variant: 'error', msg: response.error })
+      setErrorMessage(response.error)
     } else {
       router.push(`/beta/model/${response.data.model.id}`)
     }
@@ -103,7 +104,7 @@ export default function NewModel() {
               <RadioGroup
                 defaultValue='public'
                 value={visibility}
-                onChange={(e) => setVisibility(e.target.value as NewModelData['visibility'])}
+                onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
               >
                 <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
                 <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
@@ -118,6 +119,7 @@ export default function NewModel() {
                   </Button>
                 </span>
               </Tooltip>
+              <MessageAlert message={errorMessage} severity='error' linkText='More info' />
             </Box>
           </Stack>
         </Box>

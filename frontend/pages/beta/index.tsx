@@ -40,18 +40,16 @@ export default function ExploreModels() {
   const router = useRouter()
 
   useEffect(() => {
-    if (selectedType) {
-      switch (selectedType) {
-        case MarketPlaceModelSelectType.MY_MODELS:
-          setGroup(MarketPlaceModelGroup.MY_MODELS)
-          break
-        case MarketPlaceModelSelectType.FAVOURITES:
-          setGroup(MarketPlaceModelGroup.FAVOURITES)
-          break
-        default:
-          setGroup(MarketPlaceModelGroup.ALL)
-      }
-      mutateModels()
+    switch (selectedType) {
+      case MarketPlaceModelSelectType.MY_MODELS:
+        setGroup(MarketPlaceModelGroup.MY_MODELS)
+        break
+      case MarketPlaceModelSelectType.FAVOURITES:
+        setGroup(MarketPlaceModelGroup.FAVOURITES)
+        break
+      default:
+        setGroup(MarketPlaceModelGroup.ALL)
+        mutateModels()
     }
   }, [selectedType, mutateModels])
 
@@ -103,6 +101,7 @@ export default function ExploreModels() {
           <Box>
             <ChipSelector
               label='Tasks'
+              // TODO fetch all model tags
               tags={['Task 1', 'Task 2']}
               selectedTags={selectedTask}
               setSelectedTags={setSelectedTask}
@@ -112,6 +111,7 @@ export default function ExploreModels() {
           <Box>
             <ChipSelector
               label='Libraries'
+              // TODO fetch all model libraries
               tags={['Library 1', 'Library 2']}
               setSelectedTags={setSelectedLibrary}
               selectedTags={selectedLibrary}
@@ -153,6 +153,7 @@ export default function ExploreModels() {
                         {model.description}
                       </Typography>
                       <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                        {/* TODO Implement model tags */}
                         {/* {model.tags.map((tag: string) => (
                           <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                         ))} */}

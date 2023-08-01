@@ -2,7 +2,7 @@ import axios from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { ListModelType, ModelInterface } from '../types/types'
+import { ListModelType, ModelForm, ModelInterface } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useListModels(type: ListModelType, filter?: string) {
@@ -21,7 +21,7 @@ export function useListModels(type: ListModelType, filter?: string) {
 
   return {
     mutateModels: mutate,
-    models: data ? data.data.models : undefined,
+    models: data ? data.data.models : [],
     isModelsLoading: !error && !data,
     isModelsError: error,
   }
@@ -43,7 +43,7 @@ export function useGetModel(id?: string) {
   }
 }
 
-export async function postModel(form: unknown) {
+export async function postModel(form: ModelForm) {
   return await axios({
     method: 'post',
     url: '/api/v2/models',
