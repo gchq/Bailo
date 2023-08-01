@@ -17,6 +17,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import DisabledElementTooltip from 'src/common/DisabledElementTooltip'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { postEndpoint } from '../data/api'
@@ -24,7 +25,7 @@ import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprov
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
-import { Approval } from '../types/types'
+import { Approval, ApprovalStates, VersionDoc } from '../types/types'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (
@@ -109,6 +110,12 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
 
   const getUploadCategory = (approvalCategory: ApprovalCategory) =>
     approvalCategory === 'Upload' ? 'models' : 'deployments'
+
+  const hasReviewerApproved = (version: VersionDoc) => {
+    if ((version as VersionDoc).reviewerApproved === ApprovalStates.Accepted) {
+      return version.managerApproved === ApprovalStates.Declined
+    }
+  }
 
   if (isApprovalsLoading || !approvals) {
     return <Paper sx={{ mt: 2, mb: 2 }} />
@@ -197,16 +204,20 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
                 >
                   Reject
                 </Button>
-                <Button
-                  variant='contained'
-                  onClick={() => changeState('Accepted', approvalObj)}
-                  data-test={`approveButton${approvalObj.approvalType}${
-                    category === 'Upload' ? approvalObj.version?.model?.uuid : approvalObj.deployment?.uuid
-                  }`}
-                  disabled={approvalObj.status === 'Accepted'}
+                <DisabledElementTooltip
+                  conditions={[!hasReviewerApproved ? 'technical reviewer needs to appove this model first' : '']}
                 >
-                  Approve
-                </Button>
+                  <Button
+                    variant='contained'
+                    onClick={() => changeState('Accepted', approvalObj)}
+                    data-test={`approveButton${approvalObj.approvalType}${
+                      category === 'Upload' ? approvalObj.version?.model?.uuid : approvalObj.deployment?.uuid
+                    }`}
+                    disabled={approvalObj.status === 'Accepted'}
+                  >
+                    Approve
+                  </Button>
+                </DisabledElementTooltip>
               </Box>
             </Grid>
           </Grid>

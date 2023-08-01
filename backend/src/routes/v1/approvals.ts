@@ -15,7 +15,15 @@ import {
 } from '../../services/deployment.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
-import { ApprovalCategory, ApprovalStates, DeploymentDoc, Entity, ModelDoc, VersionDoc } from '../../types/types.js'
+import {
+  ApprovalCategory,
+  ApprovalStates,
+  ApprovalTypes,
+  DeploymentDoc,
+  Entity,
+  ModelDoc,
+  VersionDoc,
+} from '../../types/types.js'
 import { getUserListFromEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
 import { BadReq, Forbidden } from '../../utils/result.js'
@@ -132,6 +140,18 @@ export const postApprovalResponse = [
       version[field] = choice as ApprovalStates
       await version.save()
 
+      if (approval.approvalType === ApprovalTypes.Manager && choice === ApprovalStates.Accepted) {
+        if (version.reviewerApproved !== ApprovalStates.Accepted) {
+          throw BadReq(
+            {
+              code: 'bad_request_type',
+              version: versionDoc.managerApproved,
+            },
+            'Managers cannot approve model versions until it has been accepted by a technical reviewer'
+          )
+        }
+      }
+
       if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
         const deployments = await findDeploymentsByModel(req.user, version.model as ModelDoc)
         deployments.forEach(async (deployment) => {
@@ -212,3 +232,4 @@ export const postApprovalResponse = [
     })
   },
 ]
+export const reviwerModelApproval = []
