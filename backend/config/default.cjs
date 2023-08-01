@@ -216,6 +216,6 @@ module.exports = {
   },
 
   experimental: {
-    v2: false,
+    v2: true,
   },
 }
