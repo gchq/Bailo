@@ -41,10 +41,10 @@ export default function NewModel() {
       visibility,
     }
     const response = await postModel(formData)
-    if (response.error) {
-      setErrorMessage(response.error)
-    } else {
+    if (response.status === 200) {
       router.push(`/beta/model/${response.data.model.id}`)
+    } else {
+      setErrorMessage(response.data)
     }
   }
 

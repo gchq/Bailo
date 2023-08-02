@@ -1,7 +1,8 @@
 import axios from 'axios'
 import useSWR from 'swr'
-import { ReleaseInterface } from 'types/types'
 
+import { ReleaseInterface } from '../types/types'
+import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReleasesForModelId(id?: string) {
@@ -21,16 +22,15 @@ export function useGetReleasesForModelId(id?: string) {
 }
 
 export async function postRelease(release: Partial<ReleaseInterface>, modelId: string) {
-  return await axios({
-    method: 'post',
-    url: `/api/v2/model/${modelId}/releases`,
-    headers: { 'Content-Type': 'application/json' },
-    data: release,
-  })
-    .then((res) => {
-      return res.status < 400 ? { status: res.status, data: res.data.data } : { status: res.status, error: res.data }
+  try {
+    const response = await axios({
+      method: 'post',
+      url: `/api/v2/model/${modelId}/releases`,
+      headers: { 'Content-Type': 'application/json' },
+      data: release,
     })
-    .catch((e) => {
-      return { data: undefined, error: e }
-    })
+    return { status: response.status, data: response.data.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
 }

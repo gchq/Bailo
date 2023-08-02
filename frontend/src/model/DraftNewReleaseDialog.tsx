@@ -17,26 +17,23 @@ import { FormEvent, useState } from 'react'
 import semver from 'semver'
 
 import { postRelease } from '../../actions/release'
-import useNotification from '../../src/common/Snackbar'
 import { ReleaseInterface } from '../../types/types'
 import MultiFileInput from '../common/MultiFileInput'
+import MessageAlert from '../MessageAlert'
 
-export default function DraftNewReleaseDialog({
-  open,
-  handleClose,
-  modelId,
-}: {
+type DraftNewReleaseDialogProps = {
   open: boolean
   handleClose: () => void
   modelId: string
-}) {
+}
+
+export default function DraftNewReleaseDialog({ open, handleClose, modelId }: DraftNewReleaseDialogProps) {
   const [releaseName, setReleaseName] = useState('')
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefacts, setArtefacts] = useState<File[]>()
-
-  const sendNotification = useNotification()
+  const [artefacts, setArtefacts] = useState<File[]>([])
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -51,10 +48,10 @@ export default function DraftNewReleaseDialog({
         images: [],
       }
       const response = await postRelease(release, modelId)
-      if (response.error) {
-        sendNotification({ variant: 'error', msg: response.error })
-      } else {
+      if (response.status === 200) {
         handleClose()
+      } else {
+        setErrorMessage(response.data)
       }
     }
   }
@@ -139,6 +136,7 @@ export default function DraftNewReleaseDialog({
           >
             Create Release
           </Button>
+          <MessageAlert message={errorMessage} severity='error' linkText='More info' />
         </DialogActions>
       </Box>
     </Dialog>

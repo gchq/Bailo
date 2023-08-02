@@ -14,6 +14,15 @@ const displayFilename = (filename: string) => {
   return base.length > 12 ? `${base}...${ext}` : filename
 }
 
+type MultiFileInputProps = {
+  label: string
+  setFiles: Dispatch<SetStateAction<File[]>>
+  files?: File[]
+  accepts?: string
+  disabled?: boolean
+  fullWidth?: boolean
+}
+
 export default function MultiFileInput({
   label,
   setFiles,
@@ -21,14 +30,7 @@ export default function MultiFileInput({
   accepts,
   disabled,
   fullWidth = false,
-}: {
-  label: string
-  setFiles: Dispatch<SetStateAction<File[] | undefined>>
-  files?: File[]
-  accepts?: string
-  disabled?: boolean
-  fullWidth?: boolean
-}) {
+}: MultiFileInputProps) {
   const id = `${label.replace(/ /g, '-').toLowerCase()}-file`
 
   function handleDelete(fileToDelete: File) {
@@ -43,7 +45,7 @@ export default function MultiFileInput({
     if (newFiles) {
       if (files) {
         const updatedFiles = newFiles.concat(
-          files.filter((file) => newFiles.every((newFile) => newFile.name != file.name))
+          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name))
         )
         setFiles(updatedFiles)
       } else {
@@ -53,7 +55,7 @@ export default function MultiFileInput({
   }
 
   return (
-    <div style={{ width: fullWidth ? '100%' : 'unset' }}>
+    <Box sx={{ width: fullWidth ? '100%' : 'unset' }}>
       <label htmlFor={id}>
         <Input
           style={{ margin: '10px' }}
@@ -69,21 +71,19 @@ export default function MultiFileInput({
         </Button>
       </label>
       <Box sx={{ mt: 2 }}>
-        <Box>
-          {files &&
-            files.length > 0 &&
-            Array.from(files).map((file) => (
-              <span key={file.name}>
-                <Chip
-                  sx={{ mr: 1, mb: 1 }}
-                  color='primary'
-                  label={displayFilename(file.name)}
-                  onDelete={() => handleDelete(file)}
-                />
-              </span>
-            ))}
-        </Box>
+        {files &&
+          files.length > 0 &&
+          Array.from(files).map((file) => (
+            <span key={file.name}>
+              <Chip
+                sx={{ mr: 1, mb: 1 }}
+                color='primary'
+                label={displayFilename(file.name)}
+                onDelete={() => handleDelete(file)}
+              />
+            </span>
+          ))}
       </Box>
-    </div>
+    </Box>
   )
 }

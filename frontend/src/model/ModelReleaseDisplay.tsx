@@ -110,6 +110,7 @@ export default function ModelReleaseDisplay({
                   spacing={2}
                 >
                   <Link href='/beta'>{file}</Link>
+                  {/* TODO - Add file size here */}
                   {/* <Typography variant='caption'>123GB</Typography> */}
                 </Stack>
               ))}
@@ -122,6 +123,7 @@ export default function ModelReleaseDisplay({
                   spacing={2}
                 >
                   <Link href='/beta'>{image}</Link>
+                  {/* TODO - Add file size here */}
                   {/* <Typography variant='caption'>123GB</Typography> */}
                 </Stack>
               ))}

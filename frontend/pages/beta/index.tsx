@@ -31,7 +31,7 @@ export default function ExploreModels() {
   const [filter, setFilter] = useState('')
   const [selectedLibrary, setSelectedLibrary] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
-  const [selectedType, setSelectedType] = useState('')
+  const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | string>('')
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
@@ -136,34 +136,33 @@ export default function ExploreModels() {
               </Tabs>
             </Box>
             <div data-test='modelListBox'>
-              {(!models || models.length === 0) && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-              {models &&
-                models.map((model: ModelInterface, index: number) => {
-                  return (
-                    <Fragment key={model.id}>
-                      <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>
-                        <MuiLink
-                          variant='h5'
-                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-                        >
-                          {model.name}
-                        </MuiLink>
-                      </Link>
-                      <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                        {model.description}
-                      </Typography>
-                      <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                        {/* TODO Implement model tags */}
-                        {/* {model.tags.map((tag: string) => (
+              {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
+              {models.map((model: ModelInterface, index: number) => {
+                return (
+                  <Fragment key={model.id}>
+                    <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>
+                      <MuiLink
+                        variant='h5'
+                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+                      >
+                        {model.name}
+                      </MuiLink>
+                    </Link>
+                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                      {model.description}
+                    </Typography>
+                    <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                      {/* TODO Implement model tags */}
+                      {/* {model.tags.map((tag: string) => (
                           <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
                         ))} */}
-                      </Stack>
-                      {index !== models.length - 1 && (
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                      )}
-                    </Fragment>
-                  )
-                })}
+                    </Stack>
+                    {index !== models.length - 1 && (
+                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                    )}
+                  </Fragment>
+                )
+              })}
             </div>
           </Paper>
         </Box>

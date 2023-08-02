@@ -3,6 +3,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import { ListModelType, ModelForm, ModelInterface } from '../types/types'
+import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useListModels(type: ListModelType, filter?: string) {
@@ -44,16 +45,15 @@ export function useGetModel(id?: string) {
 }
 
 export async function postModel(form: ModelForm) {
-  return await axios({
-    method: 'post',
-    url: '/api/v2/models',
-    headers: { 'Content-Type': 'application/json' },
-    data: form,
-  })
-    .then((res) => {
-      return res.status < 400 ? { status: res.status, data: res.data.data } : { status: res.status, error: res.data }
+  try {
+    const response = await axios({
+      method: 'post',
+      url: '/api/v2/models',
+      headers: { 'Content-Type': 'application/json' },
+      data: form,
     })
-    .catch((e) => {
-      return { data: undefined, error: e }
-    })
+    return { status: response.status, data: response.data.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
 }
