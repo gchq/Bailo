@@ -67,9 +67,9 @@ export default function NewModel() {
   }
 
   return (
-    <Wrapper title='Create a new Model' page='upload' data-test='createModelPageTitle'>
+    <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography variant='h4' sx={{ fontWeight: 'bold' }} color='primary' data-test='createModelPageTitle'>
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
