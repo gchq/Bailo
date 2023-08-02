@@ -43,7 +43,9 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
+          <Typography sx={{ fontWeight: 'bold' }} data-test='privateModelSelector'>
+            Private
+          </Typography>
           <Typography variant='caption'>You choose who can access this model</Typography>
         </Stack>
       </Stack>
@@ -55,7 +57,9 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
+          <Typography sx={{ fontWeight: 'bold' }} data-test='publicModelSelector'>
+            Public
+          </Typography>
           <Typography variant='caption'>You choose who can access this model</Typography>
         </Stack>
       </Stack>
@@ -63,7 +67,7 @@ export default function NewModel() {
   }
 
   return (
-    <Wrapper title='Create a new Model' page='upload'>
+    <Wrapper title='Create a new Model' page='upload' data-test='createModelPageTitle'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
         <Typography variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
           Create a new model
@@ -85,7 +89,13 @@ export default function NewModel() {
                 <Typography sx={{ fontWeight: 'bold' }}>
                   Description <span style={{ color: 'red' }}>*</span>
                 </Typography>
-                <TextField required size='small' value={description} onChange={(e) => setDescription(e.target.value)} />
+                <TextField
+                  required
+                  size='small'
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  data-test='modelDescription'
+                />
               </Stack>
             </>
             <Divider />
@@ -104,7 +114,7 @@ export default function NewModel() {
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button variant='contained' disabled={!formValid} type='submit'>
+                  <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
                     Create Model
                   </Button>
                 </span>

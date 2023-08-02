@@ -48,10 +48,17 @@ export default function TeamAndModelSelector({
               value={teamValue}
               disabled={teamReadOnly}
               loading={isTeamsLoading}
+              data-test='teamSelector'
             />
           )}
           {!teamOnly && (
-            <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
+            <Selector
+              data={modelNames}
+              setData={(value) => setModelValue(value)}
+              label='Model'
+              value={modelValue}
+              data-test='modelSelector'
+            />
           )}
         </Stack>
       )}
