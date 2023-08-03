@@ -191,7 +191,14 @@ function Upload() {
 
   return (
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-      <MessageAlert message={error?.message} severity='error' linkText='More info' href={error?.documentationUrl} />
+      {error && (
+        <MessageAlert
+          message={error.message}
+          severity='error'
+          linkText={error.documentationUrl ? 'More info' : ''}
+          href={error.documentationUrl || ''}
+        />
+      )}
       <Form
         splitSchema={splitSchema}
         setSplitSchema={setSplitSchema}

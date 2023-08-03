@@ -136,7 +136,7 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
           >
             Create Release
           </Button>
-          <MessageAlert message={errorMessage} severity='error' linkText='More info' />
+          <MessageAlert message={errorMessage} severity='error' />
         </DialogActions>
       </Box>
     </Dialog>

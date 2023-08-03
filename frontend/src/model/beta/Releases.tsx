@@ -1,5 +1,5 @@
 import { Box, Button, Stack } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { ModelInterface, ReleaseInterface } from '../../../types/types'
@@ -20,7 +20,25 @@ export default function Releases({ model }: { model: ModelInterface }) {
     return 0
   }
 
-  const sortedReleases = releases.sort(sortByReleaseVersionDescending)
+  const sortedReleases = useMemo(() => releases.sort(sortByReleaseVersionDescending), [releases])
+
+  const modelReleaseDisplays = useMemo(
+    () =>
+      sortedReleases.reduce<ReactElement[]>((releaseDisplays, release) => {
+        if (release.name) {
+          releaseDisplays.push(
+            <ModelReleaseDisplay
+              key={release.semver}
+              modelId={model.id}
+              release={release}
+              latestRelease={latestRelease}
+            />
+          )
+        }
+        return releaseDisplays
+      }, []),
+    [latestRelease, model.id, sortedReleases]
+  )
 
   useEffect(() => {
     if (model && releases && sortedReleases.length > 0) {
@@ -41,22 +59,8 @@ export default function Releases({ model }: { model: ModelInterface }) {
           </Button>
         </Box>
         {isReleasesLoading && <Loading />}
-
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
-
-        {sortedReleases &&
-          sortedReleases.map((release) => {
-            return (
-              release.name && (
-                <ModelReleaseDisplay
-                  key={release.semver}
-                  modelId={model.id}
-                  release={release}
-                  latestRelease={latestRelease}
-                />
-              )
-            )
-          })}
+        {modelReleaseDisplays}
       </Stack>
       <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} modelId={model.id} />
     </Box>

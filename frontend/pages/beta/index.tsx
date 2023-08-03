@@ -31,7 +31,7 @@ export default function ExploreModels() {
   const [filter, setFilter] = useState('')
   const [selectedLibrary, setSelectedLibrary] = useState('')
   const [selectedTask, setSelectedTask] = useState('')
-  const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | string>('')
+  const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | ''>('')
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
@@ -119,7 +119,7 @@ export default function ExploreModels() {
             />
           </Box>
           <Box>
-            <ChipSelector
+            <ChipSelector<MarketPlaceModelSelectType>
               label='Other'
               tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
               setSelectedTags={setSelectedType}

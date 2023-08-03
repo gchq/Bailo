@@ -119,7 +119,7 @@ export default function NewModel() {
                   </Button>
                 </span>
               </Tooltip>
-              <MessageAlert message={errorMessage} severity='error' linkText='More info' />
+              <MessageAlert message={errorMessage} severity='error' />
             </Box>
           </Stack>
         </Box>
