@@ -1,7 +1,7 @@
 import { SchemaKind } from '../../src/models/v2/Schema.js'
 
 export const testModelSchema = {
-  id: 'example-schema-1',
+  id: 'example-model-schema-1',
   name: 'Example Schema 1',
   description: 'This is a description of the schema.',
 
@@ -23,7 +23,7 @@ export const testModelSchema = {
 }
 
 export const testDeploymentSchema = {
-  id: 'example-schema-1',
+  id: 'example-deployment-schema-1',
   name: 'Example Schema 1',
   description: 'This is a description of the schema.',
 

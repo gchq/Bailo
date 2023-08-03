@@ -65,7 +65,6 @@ import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
-import { addDefaultSchemas } from './services/v2/schema.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -167,8 +166,6 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 
 if (config.experimental.v2) {
   logger.info('Using experimental V2 endpoints')
-
-  await addDefaultSchemas()
 
   server.post('/api/v2/models', ...postModel)
   server.get('/api/v2/models', ...getModelsV2)

@@ -17,7 +17,7 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
         "createdAt": "2023-07-28T10:50:00.928Z",
         "description": "This is a description of the schema.",
         "hidden": false,
-        "id": "example-schema-1",
+        "id": "example-deployment-schema-1",
         "kind": "deployment",
         "meta": {
           "example": true,
@@ -36,7 +36,7 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
         "createdAt": "2023-07-28T10:50:00.928Z",
         "description": "This is a description of the schema.",
         "hidden": false,
-        "id": "example-schema-1",
+        "id": "example-model-schema-1",
         "kind": "model",
         "meta": {
           "example": true,
@@ -64,7 +64,7 @@ exports[`routes > schema > getSchemas > returns only deployment schemas with the
         "createdAt": "2023-07-28T10:50:00.928Z",
         "description": "This is a description of the schema.",
         "hidden": false,
-        "id": "example-schema-1",
+        "id": "example-deployment-schema-1",
         "kind": "deployment",
         "meta": {
           "example": true,
@@ -92,7 +92,7 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
         "createdAt": "2023-07-28T10:50:00.928Z",
         "description": "This is a description of the schema.",
         "hidden": false,
-        "id": "example-schema-1",
+        "id": "example-model-schema-1",
         "kind": "model",
         "meta": {
           "example": true,
