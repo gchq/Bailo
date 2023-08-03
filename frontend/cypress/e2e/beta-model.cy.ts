@@ -6,18 +6,38 @@ describe('Beta create new model', () => {
     cy.get('[data-test=createModelPageTitle]').contains('Create a new model')
   })
 
-  it('creates a new model', () => {
+  it('creates a public new model', () => {
     cy.visit(betaModelUrl)
+
     //typed team, model and description.
     cy.get('[data-test=team-selector]').type('test team')
     cy.get('[data-test=model-selector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
-    // cy.get('[data-test=publicButtonSelector]').click()
+    cy.get('[data-test=publicButtonSelector]').click()
+    cy.get('[data-test=createModelButton]').click()
+  })
+
+  it('creates a private new model', () => {
+    cy.visit(betaModelUrl)
+
+    //typed team, model and description.
+    cy.get('[data-test=team-selector]').type('test team')
+    cy.get('[data-test=model-selector]').type('test model')
+    cy.get('[data-test=modelDescription]').type('test description')
+
     cy.get('[data-test=privateButtonSelector]').click()
+    cy.get('[data-test=createModelButton]').click()
+  })
 
+  it('creates a public new model', () => {
+    cy.visit(betaModelUrl)
+    //selected team, model and description.
+    cy.get('[data-test=team-selector]').click('')
+    // cy.get('[data-test=model-selector]').type('test model')
+    // cy.get('[data-test=modelDescription]').type('test description')
+
+    // cy.get('[data-test=privateButtonSelector]').click()
     // cy.get('[data-test=createModelButton]').click()
-
-    //selected team, typed model and description.
   })
 })
