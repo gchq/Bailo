@@ -7,6 +7,7 @@ import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 
 export const GetModelFilters = {
   Mine: 'mine',
+  Favourites: 'favourites',
 } as const
 
 export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]

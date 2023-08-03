@@ -1,18 +1,45 @@
 import { Box, Button, Stack } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 
+import { useGetReleasesForModelId } from '../../../actions/release'
+import { ModelInterface } from '../../../types/types'
+import { sortByReleaseVersionDescending } from '../../../utils/arrayUtils'
+import EmptyBlob from '../../common/EmptyBlob'
+import Loading from '../../common/Loading'
 import DraftNewReleaseDialog from '../DraftNewReleaseDialog'
 import ModelReleaseDisplay from '../ModelReleaseDisplay'
 
-export default function Releases({ model }: { model: any }) {
+export default function Releases({ model }: { model: ModelInterface }) {
   const [latestRelease, setLatestRelease] = useState<string>('')
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
+  const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
+
+  const sortedReleases = useMemo(() => releases.sort(sortByReleaseVersionDescending), [releases])
+
+  const modelReleaseDisplays = useMemo(
+    () =>
+      sortedReleases.reduce<ReactElement[]>((releaseDisplays, release) => {
+        if (release.name) {
+          releaseDisplays.push(
+            <ModelReleaseDisplay
+              key={release.semver}
+              modelId={model.id}
+              release={release}
+              latestRelease={latestRelease}
+            />
+          )
+        }
+        return releaseDisplays
+      }, []),
+    [latestRelease, model.id, sortedReleases]
+  )
+
   useEffect(() => {
-    if (model && model.releases) {
-      setLatestRelease(model.releases.sort((a, b) => a.semver < b.semver)[0].semver)
+    if (model && releases && sortedReleases.length > 0) {
+      setLatestRelease(sortedReleases[0].semver)
     }
-  }, [model])
+  }, [model, releases, sortedReleases])
 
   function handleDraftNewReleaseClose() {
     setOpenDraftNewRelease(false)
@@ -26,21 +53,11 @@ export default function Releases({ model }: { model: any }) {
             Draft new Release
           </Button>
         </Box>
-
-        {model.releases.map((release) => {
-          return (
-            release.name && (
-              <ModelReleaseDisplay
-                key={release.semver}
-                modelId={model.id}
-                release={release}
-                latestRelease={latestRelease}
-              />
-            )
-          )
-        })}
+        {isReleasesLoading && <Loading />}
+        {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
+        {modelReleaseDisplays}
       </Stack>
-      <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} />
+      <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} modelId={model.id} />
     </Box>
   )
 }
