@@ -38,7 +38,7 @@ export default function Overview({ model }: { model: any }) {
       {showTemplatePage && (
         <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
           <Stack spacing={4} justifyContent='center' alignItems='center'>
-            <Typography variant='h6' color='primary'>
+            <Typography variant='h6' color='primary' data-test='createModelCardOverview'>
               Create a model card
             </Typography>
             <PostAdd fontSize='large' color='primary' />
