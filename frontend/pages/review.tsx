@@ -262,7 +262,7 @@ function ApprovalItem({ approvalObj, category, mutateApprovals }: ApprovalItemPr
               <Button color='secondary' variant='outlined' onClick={onCancel}>
                 Cancel
               </Button>
-              <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmButton'>
+              <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmReviewButton'>
                 Confirm
               </Button>
             </DialogActions>
