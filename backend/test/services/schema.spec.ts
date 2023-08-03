@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { testModelSchema } from '../../utils/v2/test/testModels.js'
-import { createSchema, findSchemasByKind } from './schema.js'
+import { createSchema, findSchemasByKind } from '../../src/services/v2/schema.js'
+import { testModelSchema } from '../../src/utils/v2/test/testModels.js'
 
 const mockSchema = vi.hoisted(() => {
   const mockedMethods = {
@@ -21,7 +21,7 @@ const mockSchema = vi.hoisted(() => {
     Schema,
   }
 })
-vi.mock('../../models/v2/Schema.js', () => ({
+vi.mock('../../src/models/v2/Schema.js', () => ({
   SchemaKind: {
     Model: 'model',
   },

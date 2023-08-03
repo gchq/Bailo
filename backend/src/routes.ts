@@ -168,7 +168,7 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 if (config.experimental.v2) {
   logger.info('Using experimental V2 endpoints')
 
-  addDefaultSchemas()
+  await addDefaultSchemas()
 
   server.post('/api/v2/models', ...postModel)
   server.get('/api/v2/models', ...getModelsV2)

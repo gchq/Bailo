@@ -1,27 +1,16 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { BadReq } from '../../../utils/v2/error.js'
-import { testGet } from '../../../utils/v2/test/routes.js'
-import { testDeploymentSchema, testModelSchema } from '../../../utils/v2/test/testModels.js'
+import { testDeploymentSchema, testModelSchema } from '../../../src/utils/v2/test/testModels.js'
 
 const mockSchemaService = vi.hoisted(() => {
   return {
-    addDefaultSchemas: vi.fn(),
+    addDefaultSchemas: vi.fn(() => Promise.resolve('mock return')),
     findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
-vi.mock('../../../services/v2/schema.js', () => mockSchemaService)
+vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 
-const mockValidate = vi.hoisted(() => {
-  return {
-    parse: vi.fn(() => {
-      return {
-        query: {},
-      }
-    }),
-  }
-})
-vi.mock('../../../utils/v2/validate.js', () => mockValidate)
+const { testGet } = await import('../../../src/utils/v2/test/routes.js')
 
 describe('routes > schema > getSchemas', () => {
   test('returns all schemas', async () => {
@@ -32,7 +21,6 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only model schemas with the model parameter', async () => {
-    mockValidate.parse.mockReturnValueOnce({ query: { kind: 'model' } })
     mockSchemaService.findSchemasByKind.mockReturnValueOnce([testModelSchema])
     const res = await testGet(`/api/v2/schemas?kind=model`)
 
@@ -41,7 +29,6 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only deployment schemas with the deployment parameter', async () => {
-    mockValidate.parse.mockReturnValueOnce({ query: { kind: 'deployment' } })
     mockSchemaService.findSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
     const res = await testGet(`/api/v2/schemas?kind=deployment`)
 
@@ -50,9 +37,6 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('rejects unknown query parameter', async () => {
-    mockValidate.parse.mockImplementationOnce(() => {
-      throw BadReq('Mock Error')
-    })
     const res = await testGet(`/api/v2/schemas?kind=notValid`)
 
     expect(mockSchemaService.findSchemasByKind).not.toBeCalled()

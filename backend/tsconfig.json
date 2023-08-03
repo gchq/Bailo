@@ -12,7 +12,14 @@
     "noImplicitAny": false,
     "composite": true
   },
-  "include": ["global.d.ts", "src/**/*", "src/**/*.json", "package.json", "package-lock.json"],
+  "include": [
+    "global.d.ts",
+    "src/**/*",
+    "src/**/*.json",
+    "package.json",
+    "package-lock.json",
+    "test/**/*",
+  ],
   "ts-node": {
     "esm": true,
     "swc": true
