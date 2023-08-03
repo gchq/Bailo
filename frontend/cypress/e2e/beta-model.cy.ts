@@ -32,8 +32,10 @@ describe('Beta create new model', () => {
 
   it('creates a public new model', () => {
     cy.visit(betaModelUrl)
-    //selected team, model and description.
-    cy.get('[data-test=team-selector]').click('')
+
+    //selected team, and typed model and description.
+    // eslint-disable-next-line cypress/unsafe-to-chain-command
+    cy.get('[data-test=team-selector]').click().select(0)
     // cy.get('[data-test=model-selector]').type('test model')
     // cy.get('[data-test=modelDescription]').type('test description')
 
