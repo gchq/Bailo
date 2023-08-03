@@ -53,9 +53,7 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }} data-test='privateModelSelector'>
-            Private
-          </Typography>
+          <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
           <Typography variant='caption'>You choose who can access this model</Typography>
         </Stack>
       </Stack>
@@ -67,9 +65,7 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }} data-test='publicModelSelector'>
-            Public
-          </Typography>
+          <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
           <Typography variant='caption'>You choose who can access this model</Typography>
         </Stack>
       </Stack>
@@ -116,8 +112,18 @@ export default function NewModel() {
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
               >
-                <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
-                <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
+                <FormControlLabel
+                  value='public'
+                  control={<Radio />}
+                  label={publicLabel()}
+                  data-test='publicButtonSelector'
+                />
+                <FormControlLabel
+                  value='private'
+                  control={<Radio />}
+                  label={privateLabel()}
+                  data-test='privateButtonSelector'
+                />
               </RadioGroup>
             </>
             <Divider />
