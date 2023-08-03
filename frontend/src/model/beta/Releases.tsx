@@ -2,7 +2,8 @@ import { Box, Button, Stack } from '@mui/material'
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
-import { ModelInterface, ReleaseInterface } from '../../../types/types'
+import { ModelInterface } from '../../../types/types'
+import { sortByReleaseVersionDescending } from '../../../utils/arrayUtils'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
 import DraftNewReleaseDialog from '../DraftNewReleaseDialog'
@@ -13,12 +14,6 @@ export default function Releases({ model }: { model: ModelInterface }) {
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
   const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
-
-  const sortByReleaseVersionDescending = (a: ReleaseInterface, b: ReleaseInterface) => {
-    if (a.semver < b.semver) return 1
-    if (b.semver > a.semver) return -1
-    return 0
-  }
 
   const sortedReleases = useMemo(() => releases.sort(sortByReleaseVersionDescending), [releases])
 

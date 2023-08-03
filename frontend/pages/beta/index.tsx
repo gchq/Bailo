@@ -104,7 +104,7 @@ export default function ExploreModels() {
               // TODO fetch all model tags
               tags={['Task 1', 'Task 2']}
               selectedTags={selectedTask}
-              setSelectedTags={setSelectedTask}
+              onChange={setSelectedTask}
               size='small'
             />
           </Box>
@@ -113,7 +113,7 @@ export default function ExploreModels() {
               label='Libraries'
               // TODO fetch all model libraries
               tags={['Library 1', 'Library 2']}
-              setSelectedTags={setSelectedLibrary}
+              onChange={setSelectedLibrary}
               selectedTags={selectedLibrary}
               size='small'
             />
@@ -122,7 +122,7 @@ export default function ExploreModels() {
             <ChipSelector<MarketPlaceModelSelectType>
               label='Other'
               tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-              setSelectedTags={setSelectedType}
+              onChange={setSelectedType}
               selectedTags={selectedType}
               size='small'
             />

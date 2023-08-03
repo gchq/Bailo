@@ -13,6 +13,7 @@ export default function Model() {
   const { id }: { id?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(id)
 
+  // TODO implement function
   function myFunction() {
     console.log('Button pressed')
   }

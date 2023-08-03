@@ -8,13 +8,13 @@ type PartialTagSelectorProps<T> =
       multiple: true
       tags: T[]
       selectedTags: T[]
-      setSelectedTags: (value: T[]) => void
+      onChange: (value: T[]) => void
     }
   | {
       multiple?: false
       tags: (T | '')[]
       selectedTags: T | ''
-      setSelectedTags: (value: T | '') => void
+      onChange: (value: T | '') => void
     }
 
 type TagSelectorProps<T> = {
@@ -26,7 +26,7 @@ type TagSelectorProps<T> = {
 export default function ChipSelector<T extends string = string>({
   label,
   tags,
-  setSelectedTags,
+  onChange,
   selectedTags,
   multiple,
   size = 'medium',
@@ -37,12 +37,12 @@ export default function ChipSelector<T extends string = string>({
   const handleChange = (selectedTag: T): void => {
     if (multiple) {
       if (selectedTags.includes(selectedTag)) {
-        setSelectedTags(selectedTags.filter((tag) => tag !== selectedTag))
+        onChange(selectedTags.filter((tag) => tag !== selectedTag))
       } else {
-        setSelectedTags([...selectedTags, selectedTag])
+        onChange([...selectedTags, selectedTag])
       }
     } else {
-      setSelectedTags(selectedTags !== selectedTag ? selectedTag : '')
+      onChange(selectedTags !== selectedTag ? selectedTag : '')
     }
   }
 
