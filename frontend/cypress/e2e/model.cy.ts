@@ -70,10 +70,10 @@ describe('Model with code and binary files', () => {
     cy.url().should('contain', '/review')
 
     cy.log('Approving model')
-    cy.get(`[data-test=approveButtonManager${modelUuid}]`).click({ force: true })
+    cy.get(`[data-test=approveButtonReviewer${modelUuid}]`).click({ force: true })
     cy.get('[data-test=confirmReviewButton]').click()
     cy.get('[data-test=confirmReviewButton]').should('not.exist')
-    cy.get(`[data-test=approveButtonReviewer${modelUuid}]`).click({ force: true })
+    cy.get(`[data-test=approveButtonManager${modelUuid}]`).click({ force: true })
     cy.get('[data-test=confirmReviewButton]').click()
 
     cy.log('Navigating to model page')
