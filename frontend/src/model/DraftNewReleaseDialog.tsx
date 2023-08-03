@@ -13,33 +13,51 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import semver from 'semver'
 
-import { Artefact } from '../../types/types'
-import FileInput from '../common/FileInput'
+import { postRelease } from '../../actions/release'
+import { ReleaseInterface } from '../../types/types'
+import MultiFileInput from '../common/MultiFileInput'
+import MessageAlert from '../MessageAlert'
 
-export default function DraftNewReleaseDialog({ open, handleClose }: { open: boolean; handleClose: () => void }) {
+type DraftNewReleaseDialogProps = {
+  open: boolean
+  handleClose: () => void
+  modelId: string
+}
+
+export default function DraftNewReleaseDialog({ open, handleClose, modelId }: DraftNewReleaseDialogProps) {
   const [releaseName, setReleaseName] = useState('')
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefact, setArtefact] = useState<Artefact | undefined>()
+  const [artefacts, setArtefacts] = useState<File[]>([])
+  const [errorMessage, setErrorMessage] = useState('')
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (isValidSemver(semanticVersion)) {
-      console.log('Release valid and created!')
-      handleClose()
+      const release: Partial<ReleaseInterface> = {
+        name: releaseName,
+        semver: semanticVersion,
+        notes: releaseNotes,
+        modelCardVersion: 1,
+        minor: isMinorRelease,
+        files: [],
+        images: [],
+      }
+      const response = await postRelease(release, modelId)
+      if (response.status === 200) {
+        handleClose()
+      } else {
+        setErrorMessage(response.data)
+      }
     }
   }
 
   function handleMinorReleaseChecked() {
     setIsMinorRelease(!isMinorRelease)
-  }
-
-  function handleArtefactChange(event: ChangeEvent<HTMLInputElement>) {
-    if (event.target.files) setArtefact(event.target.files[0])
   }
 
   function isValidSemver(semverInput: string) {
@@ -101,12 +119,7 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
               <Checkbox sx={{ pl: 0 }} size='small' checked={isMinorRelease} onChange={handleMinorReleaseChecked} />
               <Typography>Minor release - No significant changes, does not require release re-approval</Typography>
             </Stack>
-            <FileInput
-              label='Attach artefacts by dropping them here or upload a Docker image'
-              file={artefact}
-              onChange={handleArtefactChange}
-              accepts='.zip'
-            />
+            <MultiFileInput fullWidth label='Attach artefacts' files={artefacts} setFiles={setArtefacts} />
           </Stack>
         </DialogContent>
         <Box sx={{ mx: 3 }}>
@@ -117,10 +130,13 @@ export default function DraftNewReleaseDialog({ open, handleClose }: { open: boo
           <Button
             variant='contained'
             type='submit'
-            disabled={!semanticVersion || !artefact || !releaseNotes || !releaseName || !isValidSemver(semanticVersion)}
+            disabled={
+              !semanticVersion || !artefacts || !releaseNotes || !releaseName || !isValidSemver(semanticVersion)
+            }
           >
             Create Release
           </Button>
+          <MessageAlert message={errorMessage} severity='error' />
         </DialogActions>
       </Box>
     </Dialog>

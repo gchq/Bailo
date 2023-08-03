@@ -86,6 +86,7 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
         <Autocomplete
           loading={loading}
           freeSolo
+          autoSelect
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
           options={data.map((option) => option.label)}
           value={value}

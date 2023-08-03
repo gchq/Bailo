@@ -20,7 +20,7 @@ export default function Overview({ model }: { model: any }) {
   }, [model])
 
   function createFromScratchOnClick() {
-    router.push(`/beta/model/new/schema?modelUuid=${model.uuid}`)
+    router.push(`/beta/model/new/schema?modelId=${model.id}`)
   }
 
   function displayTemplatePage() {
