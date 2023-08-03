@@ -48,7 +48,7 @@ export default function TeamAndModelSelector({
               value={teamValue}
               disabled={teamReadOnly}
               loading={isTeamsLoading}
-              data-test='teamSelector'
+              dataTestKey='team-selector'
             />
           )}
           {!teamOnly && (
@@ -57,7 +57,7 @@ export default function TeamAndModelSelector({
               setData={(value) => setModelValue(value)}
               label='Model'
               value={modelValue}
-              data-test='modelSelector'
+              dataTestKey='model-selector'
             />
           )}
         </Stack>
@@ -73,9 +73,10 @@ interface SelectorProps {
   value: string
   disabled?: boolean
   loading?: boolean
+  dataTestKey: string
 }
 
-function Selector({ data, setData, label, value, disabled = false, loading = false }: SelectorProps) {
+function Selector({ data, setData, label, value, disabled = false, loading = false, dataTestKey }: SelectorProps) {
   return (
     <Stack>
       <Typography sx={{ fontWeight: 'bold' }}>
@@ -90,6 +91,7 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
           value={value}
           renderInput={(params) => <TextField {...params} required size='small' value={data} />}
           disabled={disabled}
+          data-test={dataTestKey}
         />
       </Stack>
     </Stack>
