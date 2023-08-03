@@ -5,7 +5,7 @@ import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModel
 
 const mockSchemaService = vi.hoisted(() => {
   return {
-    addDefaultSchemas: vi.fn(() => Promise.resolve('mock return')),
+    addDefaultSchemas: vi.fn(),
     findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
