@@ -1,4 +1,4 @@
-import { SchemaKind } from '../../../models/v2/Schema.js'
+import { SchemaKind } from '../../src/models/v2/Schema.js'
 
 export const testModelSchema = {
   id: 'example-schema-1',

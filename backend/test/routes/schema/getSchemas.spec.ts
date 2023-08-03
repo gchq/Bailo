@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { testDeploymentSchema, testModelSchema } from '../../../src/utils/v2/test/testModels.js'
+import { testGet } from '../../testUtils/routes.js'
+import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModels.js'
 
 const mockSchemaService = vi.hoisted(() => {
   return {
@@ -9,8 +10,6 @@ const mockSchemaService = vi.hoisted(() => {
   }
 })
 vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
-
-const { testGet } = await import('../../../src/utils/v2/test/routes.js')
 
 describe('routes > schema > getSchemas', () => {
   test('returns all schemas', async () => {

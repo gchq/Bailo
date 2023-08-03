@@ -4,10 +4,10 @@ import supertest from 'supertest'
 import { vi } from 'vitest'
 import z, { ZodSchema } from 'zod'
 
-import { server } from '../../../routes.js'
-import { testUser } from '../../test/testModels.js'
+import { server } from '../../src/routes.js'
+import { testUser } from '../../src/utils/test/testModels.js'
 
-vi.mock('../../user.js', () => {
+vi.mock('../../src/utils/user.js', () => {
   return {
     getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
       req.user = testUser
@@ -21,7 +21,7 @@ vi.mock('../../user.js', () => {
   }
 })
 
-vi.mock('../../config.js', () => {
+vi.mock('../../src/utils/config.js', () => {
   return {
     __esModule: true,
     default: {
