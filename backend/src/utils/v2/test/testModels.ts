@@ -1,4 +1,6 @@
-export const mockModelSchema = {
+import { SchemaKind } from '../../../models/v2/Schema.js'
+
+export const testModelSchema = {
   id: 'example-schema-1',
   name: 'Example Schema 1',
   description: 'This is a description of the schema.',
@@ -6,7 +8,7 @@ export const mockModelSchema = {
   active: true,
   hidden: false,
 
-  kind: 'model',
+  kind: SchemaKind.Model,
   meta: { example: true },
 
   uiSchema: {
@@ -16,11 +18,11 @@ export const mockModelSchema = {
     'Schema field 1': 'field 1 info',
   },
 
-  createdAt: '2023-07-28T10:50:00.928Z',
-  updatedAt: '2023-07-28T10:50:00.928Z',
+  createdAt: new Date('2023-07-28T10:50:00.928Z'),
+  updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
 
-export const mockDeploymentSchema = {
+export const testDeploymentSchema = {
   id: 'example-schema-1',
   name: 'Example Schema 1',
   description: 'This is a description of the schema.',
@@ -28,7 +30,7 @@ export const mockDeploymentSchema = {
   active: true,
   hidden: false,
 
-  kind: 'deployment',
+  kind: SchemaKind.Deployment,
   meta: { example: true },
 
   uiSchema: {
@@ -38,6 +40,6 @@ export const mockDeploymentSchema = {
     'Schema field 1': 'field 1 info',
   },
 
-  createdAt: '2023-07-28T10:50:00.928Z',
-  updatedAt: '2023-07-28T10:50:00.928Z',
+  createdAt: new Date('2023-07-28T10:50:00.928Z'),
+  updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }

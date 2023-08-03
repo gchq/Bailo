@@ -2,12 +2,12 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { BadReq } from '../../../utils/v2/error.js'
 import { testGet } from '../../../utils/v2/test/routes.js'
-import { mockDeploymentSchema, mockModelSchema } from '../../../utils/v2/test/testModels.js'
+import { testDeploymentSchema, testModelSchema } from '../../../utils/v2/test/testModels.js'
 
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    findSchemasByKind: vi.fn(() => [mockDeploymentSchema, mockModelSchema]),
+    findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
 vi.mock('../../../services/v2/schema.js', () => mockSchemaService)
@@ -33,7 +33,7 @@ describe('routes > schema > getSchemas', () => {
 
   test('returns only model schemas with the model parameter', async () => {
     mockValidate.parse.mockReturnValueOnce({ query: { kind: 'model' } })
-    mockSchemaService.findSchemasByKind.mockReturnValueOnce([mockModelSchema])
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testModelSchema])
     const res = await testGet(`/api/v2/schemas?kind=model`)
 
     expect(res.statusCode).toBe(200)
@@ -42,7 +42,7 @@ describe('routes > schema > getSchemas', () => {
 
   test('returns only deployment schemas with the deployment parameter', async () => {
     mockValidate.parse.mockReturnValueOnce({ query: { kind: 'deployment' } })
-    mockSchemaService.findSchemasByKind.mockReturnValueOnce([mockDeploymentSchema])
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
     const res = await testGet(`/api/v2/schemas?kind=deployment`)
 
     expect(res.statusCode).toBe(200)
