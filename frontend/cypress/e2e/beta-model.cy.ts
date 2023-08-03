@@ -8,7 +8,8 @@ describe('Beta create new model', () => {
 
   it('creates a new model', () => {
     cy.visit(betaModelUrl)
-    cy.get('[data-test=teamSelector]').click()
+    // eslint-disable-next-line cypress/unsafe-to-chain-command
+    cy.get('[data-test=team-selector]').click().select(0)
     // cy.get('[data-test=modelSelector]').select()
     // cy.get('[data-test=modelDescription]').type()
 
