@@ -8,14 +8,16 @@ describe('Beta create new model', () => {
 
   it('creates a new model', () => {
     cy.visit(betaModelUrl)
-    // eslint-disable-next-line cypress/unsafe-to-chain-command
-    cy.get('[data-test=team-selector]').click().select(0)
-    // cy.get('[data-test=modelSelector]').select()
-    // cy.get('[data-test=modelDescription]').type()
+    //typed team, model and description.
+    cy.get('[data-test=team-selector]').type('test team')
+    cy.get('[data-test=model-selector]').type('test model')
+    cy.get('[data-test=modelDescription]').type('test description')
 
     // cy.get('[data-test=publicButtonSelector]').click()
-    //   cy.get('[data-test=privateButtonSelector]').click()
+    cy.get('[data-test=privateButtonSelector]').click()
 
     // cy.get('[data-test=createModelButton]').click()
+
+    //selected team, typed model and description.
   })
 })
