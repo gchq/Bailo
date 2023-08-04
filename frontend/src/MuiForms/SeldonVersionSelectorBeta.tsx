@@ -6,8 +6,14 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { useGetUiConfig } from '../../data/uiConfig'
 import { SeldonVersion } from '../../types/types'
 
-
-export default function SeldonVersionSelector({ formContext, label, value, currentValue, readOnly, onChange }: WidgetProps) {
+export default function SeldonVersionSelector({
+  formContext,
+  label,
+  value,
+  currentValue,
+  readOnly,
+  onChange,
+}: WidgetProps) {
   const { uiConfig } = useGetUiConfig()
   const [seldonVersions, setSeldonVersions] = useState<Array<SeldonVersion>>([])
 
@@ -35,18 +41,22 @@ export default function SeldonVersionSelector({ formContext, label, value, curre
 
   return (
     <TextField
-      select
-      size = "small"
-      variant={!formContext.editMode? 'standard':'outlined'}
-      sx={!formContext.editMode? { label: {WebkitTextFillColor: "black"}}:{ "& .MuiInputBase-input.Mui-disabled": {WebkitTextFillColor: "black"}}}
+      select={!formContext.editMode ? false : true}
+      size='small'
+      variant={!formContext.editMode ? 'standard' : 'outlined'}
+      sx={
+        !formContext.editMode
+          ? { label: { WebkitTextFillColor: 'black' } }
+          : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
+      }
       label={label}
-      required={!formContext.editMode? false : true}
-      value={value || ""}
+      required={!formContext.editMode ? false : true}
+      value={value || ''}
       onChange={handleChange}
       id={'seldon-version-select'}
       disabled={!formContext.editMode}
       InputProps={{
-        disableUnderline: !formContext.editMode? true : false,
+        disableUnderline: !formContext.editMode ? true : false,
       }}
     >
       {options}
