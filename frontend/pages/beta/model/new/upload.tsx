@@ -1,3 +1,4 @@
+import { Switch } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
@@ -14,34 +15,33 @@ import Form from '../../../../src/Form/FormBeta'
 import ModelExportAndSubmission from '../../../../src/Form/ModelExportAndSubmission'
 import { RenderButtonsInterface } from '../../../../src/Form/RenderButtons'
 import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../../src/Form/RenderFileTab'
-import SchemaSelector from '../../../../src/Form/SchemaSelector'
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Wrapper from '../../../../src/Wrapper'
 import { SplitSchema } from '../../../../types/interfaces'
 import { EntityKind, Schema, User } from '../../../../types/types'
-import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtils'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtilsBeta'
 
-function renderSubmissionTab({
-  splitSchema,
-  activeStep,
-  setActiveStep,
-  onSubmit,
-  modelUploading,
-}: RenderButtonsInterface) {
-  const data = getStepsData(splitSchema)
+// function renderSubmissionTab({
+//   splitSchema,
+//   activeStep,
+//   setActiveStep,
+//   onSubmit,
+//   modelUploading,
+// }: RenderButtonsInterface) {
+//   const data = getStepsData(splitSchema)
 
-  return (
-    <ModelExportAndSubmission
-      formData={data}
-      splitSchema={splitSchema}
-      schemaRef={splitSchema.reference}
-      onSubmit={onSubmit}
-      setActiveStep={setActiveStep}
-      activeStep={activeStep}
-      modelUploading={modelUploading}
-    />
-  )
-}
+//   return (
+//     <ModelExportAndSubmission
+//       formData={data}
+//       splitSchema={splitSchema}
+//       schemaRef={splitSchema.reference}
+//       onSubmit={onSubmit}
+//       setActiveStep={setActiveStep}
+//       activeStep={activeStep}
+//       modelUploading={modelUploading}
+//     />
+//   )
+// }
 
 function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
@@ -51,11 +51,12 @@ function Upload() {
   const router = useRouter()
 
   const [currentSchema, setCurrentSchema] = useState<Schema | undefined>(undefined)
+  const [isEdit, setIsEdit] = useState(true)
   const [user, setUser] = useState<User | undefined>(undefined)
   const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [error, setError] = useState<string | undefined>(undefined)
-  const [modelUploading, setModelUploading] = useState<boolean>(false)
-  const [loadingPercentage, setUploadPercentage] = useState<number>(0)
+  const [modelUploading, setModelUploading] = useState(false)
+  const [loadingPercentage, setUploadPercentage] = useState(0)
 
   useEffect(() => {
     if (currentSchema) return
@@ -108,23 +109,23 @@ function Upload() {
       })
     )
 
-    steps.push(
-      createStep({
-        schema: {
-          title: 'Submission',
-        },
-        state: {},
-        schemaRef: reference,
+    // steps.push(
+    //   createStep({
+    //     schema: {
+    //       title: 'Submission',
+    //     },
+    //     state: {},
+    //     schemaRef: reference,
 
-        type: 'Message',
-        index: steps.length,
-        section: 'submission',
+    //     type: 'Message',
+    //     index: steps.length,
+    //     section: 'submission',
 
-        render: () => null,
-        renderButtons: renderSubmissionTab,
-        isComplete: () => true,
-      })
-    )
+    //     render: () => null,
+    //     renderButtons: renderSubmissionTab,
+    //     isComplete: () => true,
+    //   })
+    // )
 
     for (const step of steps) {
       step.steps = steps
@@ -195,11 +196,8 @@ function Upload() {
     <Paper variant='outlined' sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <Grid container justifyContent='space-between' alignItems='center'>
         <Box />
-        <SchemaSelector
-          currentSchema={currentSchema ?? defaultSchema}
-          setCurrentSchema={setCurrentSchema}
-          schemas={schemas}
-        />
+        <h3>{isEdit ? 'Edit Mode' : 'Read-only Mode'}</h3>
+        <Switch checked={isEdit} onChange={(e) => setIsEdit(e.target.checked)} />
       </Grid>
 
       <SubmissionError error={error} />
@@ -208,6 +206,7 @@ function Upload() {
         setSplitSchema={setSplitSchema}
         onSubmit={onSubmit}
         modelUploading={modelUploading}
+        canEdit={isEdit}
       />
       <LoadingBar showLoadingBar={modelUploading} loadingPercentage={loadingPercentage} />
     </Paper>
