@@ -51,7 +51,7 @@ export default function ExpandableButton({ label, icon, onClick }: ExpandableBut
         onMouseLeave={() => setHover(!hover)}
         onClick={() => onClick()}
         variant='outlined'
-        data-test='expandable-button'
+        data-test='expandableButton'
         sx={{ color: 'white', borderColor: 'white !important' }}
       >
         {icon}

@@ -48,7 +48,7 @@ export default function TeamAndModelSelector({
               value={teamValue}
               disabled={teamReadOnly}
               loading={isTeamsLoading}
-              dataTestKey='team-selector'
+              dataTestKey='teamSelector'
             />
           )}
           {!teamOnly && (
@@ -57,7 +57,7 @@ export default function TeamAndModelSelector({
               setData={(value) => setModelValue(value)}
               label='Model'
               value={modelValue}
-              dataTestKey='model-selector'
+              dataTestKey='modelSelector'
             />
           )}
         </Stack>

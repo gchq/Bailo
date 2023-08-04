@@ -10,9 +10,9 @@ describe('Beta create new model', () => {
     cy.visit(betaModelUrl)
 
     //team selected. model and description typed.
-    cy.get('[data-test=team-selector]').click()
+    cy.get('[data-test=teamSelector]').click()
     cy.get('[role=presentation]').click()
-    cy.get('[data-test=model-selector]').type('test model')
+    cy.get('[data-test=modelSelector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
@@ -24,8 +24,8 @@ describe('Beta create new model', () => {
     cy.visit(betaModelUrl)
 
     //team, model and description typed.
-    cy.get('[data-test=team-selector]').type('test team')
-    cy.get('[data-test=model-selector]').type('test model')
+    cy.get('[data-test=teamSelector]').type('test team')
+    cy.get('[data-test=modelSelector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
