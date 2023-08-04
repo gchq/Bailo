@@ -1,5 +1,6 @@
 import { testDeploymentSchema, testModelSchema } from '../../../test/testUtils/testModels.js'
-import Schema, { SchemaInterface, SchemaKindKeys } from '../../models/v2/Schema.js'
+import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
+import { SchemaKindKeys } from '../../types/v2/enums.js'
 
 export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })

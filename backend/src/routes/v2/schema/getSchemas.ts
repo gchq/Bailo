@@ -2,8 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
+import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { findSchemasByKind } from '../../../services/v2/schema.js'
+import { SchemaKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const getSchemasSchema = z.object({
@@ -23,7 +24,7 @@ export const getSchemas = [
   async (req: Request, res: Response<GetSchemaResponse>) => {
     const { query } = parse(req, getSchemasSchema)
 
-    const schemas: Array<SchemaInterface> = await findSchemasByKind(query.kind)
+    const schemas = await findSchemasByKind(query.kind)
 
     return res.json({
       data: {

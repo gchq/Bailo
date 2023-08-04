@@ -1,4 +1,4 @@
-import { SchemaKind } from '../../src/models/v2/Schema.js'
+import { SchemaKind } from '../../src/types/v2/enums.js'
 
 export const testModelSchema = {
   id: 'example-model-schema-1',

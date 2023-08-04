@@ -1,5 +1,7 @@
 import { Document, model, Schema } from 'mongoose'
 
+import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -20,13 +22,6 @@ export interface SchemaInterface {
   createdAt: Date
   updatedAt: Date
 }
-
-export const SchemaKind = {
-  Model: 'model',
-  Deployment: 'deployment',
-} as const
-
-export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an

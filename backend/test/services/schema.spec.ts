@@ -22,9 +22,6 @@ const mockSchema = vi.hoisted(() => {
   }
 })
 vi.mock('../../src/models/v2/Schema.js', () => ({
-  SchemaKind: {
-    Model: 'model',
-  },
   default: mockSchema.Schema,
 }))
 
