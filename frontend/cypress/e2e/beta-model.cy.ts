@@ -9,27 +9,27 @@ describe('Beta create new model', () => {
   it('creates a public new model', () => {
     cy.visit(betaModelUrl)
 
+    //team selected. model and description typed.
     cy.get('[data-test=team-selector]').click()
     cy.get('[role=presentation]').click()
     cy.get('[data-test=model-selector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
-    cy.get('[data-test=createModelButton]').click()
-    cy.wait(500)
+    cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
     cy.get('[data-test=createModelCardOverview]')
   })
 
   it('creates a private new model', () => {
     cy.visit(betaModelUrl)
 
+    //team, model and description typed.
     cy.get('[data-test=team-selector]').type('test team')
     cy.get('[data-test=model-selector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
-    cy.get('[data-test=createModelButton]').click()
-    cy.wait(500)
+    cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
     cy.get('[data-test=createModelCardOverview]')
   })
 })
