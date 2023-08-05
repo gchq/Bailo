@@ -25,17 +25,25 @@ const modelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks.Model }))
 
+const authorisationMocks = vi.hoisted(() => ({
+  userModelAction: vi.fn(() => true),
+}))
 vi.mock('../../src/external/v2/authorisation/index.js', async () => ({
   ...((await vi.importActual('../../src/external/v2/authorisation/index.js')) as object),
-  default: { userModelAction: vi.fn(() => true) },
+  default: { userModelAction: authorisationMocks.userModelAction },
 }))
 
 describe('services > model', () => {
-  test('createModel > good', async () => {
+  test('createModel > simple', async () => {
     await createModel({} as any, {} as any)
 
     expect(modelMocks.save).toBeCalled()
     expect(modelMocks.Model).toBeCalled()
+  })
+
+  test('createModel > bad authorisation', async () => {
+    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+    expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('getModelById > good', async () => {
@@ -45,5 +53,18 @@ describe('services > model', () => {
 
     expect(modelMocks.findOne).toBeCalled()
     expect(model).toBe('mocked')
+  })
+
+  test('getModelById > bad authorisation', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({})
+    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+
+    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+  })
+
+  test('getModelById > no model', async () => {
+    modelMocks.findOne.mockResolvedValueOnce(undefined)
+
+    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested model was not found/)
   })
 })
