@@ -357,9 +357,55 @@ export enum MarketPlaceModelGroup {
   ALL = 'all',
 }
 
-export type NewModelData = {
-  teamName: string
-  modelName: string
+export const ModelVisibility = {
+  Private: 'private',
+  Public: 'public',
+} as const
+
+export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+
+export interface ModelInterface {
+  id: string
+  name: string
   description: string
-  visibility: 'public' | 'private'
+  visibility: ModelVisibilityKeys
 }
+
+export type ModelForm = Omit<ModelInterface, 'id'>
+
+export type ReleaseInterface = {
+  modelId: string
+  modelCardVersion: number
+  name: string
+  semver: string
+  notes: string
+  minor?: boolean
+  draft?: boolean
+  files: Array<string>
+  images: Array<string>
+  deleted: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type ListModelType = 'favourites' | 'user' | 'all'
+
+export interface SchemaInterface {
+  id: string
+  name: string
+  active: boolean
+  hidden: boolean
+  kind: SchemaKindKeys
+  display: string
+  fields: unknown
+  metadata: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+export const SchemaKind = {
+  Model: 'model',
+  Deployment: 'deployment',
+} as const
+
+export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]

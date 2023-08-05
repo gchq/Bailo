@@ -1,4 +1,6 @@
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { grey } from '@mui/material/colors/'
+import { useTheme } from '@mui/material/styles'
 import { ReactElement, useState } from 'react'
 
 export interface PageTab {
@@ -63,10 +65,21 @@ interface TabPanelProps {
 
 function CustomTabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
+  const theme = useTheme()
 
   return (
     <div role='tabpanel' hidden={value !== index} {...other}>
-      {value === index && <Box sx={{ backgroundColor: 'white', p: 2, mb: 2 }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{
+            backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],
+            p: 2,
+            mb: 2,
+          }}
+        >
+          {children}
+        </Box>
+      )}
     </div>
   )
 }

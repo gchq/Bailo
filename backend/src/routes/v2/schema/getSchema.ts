@@ -29,15 +29,20 @@ export const getSchema = [
         schema: {
           id: 'example-schema-1',
           name: 'Example Schema 1',
+          description: 'This is a description of the schema.',
 
-          inactive: false,
+          active: true,
           hidden: false,
+
           kind: 'deployment',
-          display: 'This is the display?',
-          fields: {
-            'field 1': 'field 1 info',
+          meta: { example: true },
+
+          uiSchema: {
+            'UI Schema field 1': 'field 1 info',
           },
-          metadata: { example: true },
+          schema: {
+            'Schema field 1': 'field 1 info',
+          },
 
           createdAt: new Date(),
           updatedAt: new Date(),

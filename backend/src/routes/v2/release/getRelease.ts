@@ -30,7 +30,7 @@ export const getRelease = [
           modelCardVersion: 14,
 
           name: 'Example Release 1',
-          semver: '123',
+          semver: '1.2.3',
           notes: 'This is an example release',
 
           minor: true,

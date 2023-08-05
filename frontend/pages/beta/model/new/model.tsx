@@ -12,30 +12,40 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 
+import { postModel } from '../../../../actions/model'
 import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
+import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
-import { NewModelData } from '../../../../types/types'
+import { ModelForm } from '../../../../types/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
-  const [visibility, setVisibility] = useState<NewModelData['visibility']>('public')
+  const [visibility, setVisibility] = useState<ModelForm['visibility']>('public')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const router = useRouter()
 
   const formValid = teamName && modelName && description
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault()
-    const formData: NewModelData = {
-      teamName,
-      modelName,
+    setErrorMessage('')
+    const formData: ModelForm = {
+      name: `${teamName}/${modelName}`,
       description,
       visibility,
     }
-    // TODO - after new model page is implemented, forward this data
-    console.log(formData)
+    const response = await postModel(formData)
+    if (response.status === 200) {
+      router.push(`/beta/model/${response.data.model.id}`)
+    } else {
+      setErrorMessage(response.data)
+    }
   }
 
   const privateLabel = () => {
@@ -94,7 +104,7 @@ export default function NewModel() {
               <RadioGroup
                 defaultValue='public'
                 value={visibility}
-                onChange={(e) => setVisibility(e.target.value as NewModelData['visibility'])}
+                onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
               >
                 <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
                 <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
@@ -109,6 +119,7 @@ export default function NewModel() {
                   </Button>
                 </span>
               </Tooltip>
+              <MessageAlert message={errorMessage} severity='error' />
             </Box>
           </Stack>
         </Box>

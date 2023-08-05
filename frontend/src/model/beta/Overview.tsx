@@ -20,7 +20,7 @@ export default function Overview({ model }: { model: any }) {
   }, [model])
 
   function createFromScratchOnClick() {
-    router.push(`/beta/model/new/schema?modelUuid=${model.uuid}`)
+    router.push(`/beta/model/new/schema?modelId=${model.id}`)
   }
 
   function displayTemplatePage() {
@@ -36,7 +36,7 @@ export default function Overview({ model }: { model: any }) {
   return (
     <>
       {showTemplatePage && (
-        <Box sx={{ maxWidth: '750px', mx: 'auto', my: 4 }}>
+        <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
           <Stack spacing={4} justifyContent='center' alignItems='center'>
             <Typography variant='h6' color='primary'>
               Create a model card

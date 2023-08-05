@@ -1,53 +1,48 @@
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useState } from 'react'
 
-type PartialTagSelectorProps =
+type PartialTagSelectorProps<T> =
   | {
       multiple: true
-      onChange: (value: string[]) => void
+      tags: T[]
+      selectedTags: T[]
+      onChange: (value: T[]) => void
     }
   | {
       multiple?: false
-      onChange: (value: string) => void
+      tags: (T | '')[]
+      selectedTags: T | ''
+      onChange: (value: T | '') => void
     }
 
-type TagSelectorProps = {
+type TagSelectorProps<T> = {
   label: string
-  tags: string[]
   size?: 'small' | 'medium'
   expandThreshold?: number
-} & PartialTagSelectorProps
+} & PartialTagSelectorProps<T>
 
-export default function ChipSelector({
+export default function ChipSelector<T extends string = string>({
   label,
   tags,
   onChange,
+  selectedTags,
   multiple,
   size = 'medium',
   expandThreshold = 5,
-}: TagSelectorProps): ReactElement {
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+}: TagSelectorProps<T>): ReactElement {
   const [expanded, setExpanded] = useState(false)
 
-  useEffect(() => {
-    if (multiple) {
-      onChange(selectedTags)
-    } else {
-      onChange(selectedTags[0])
-    }
-  }, [selectedTags, multiple, onChange])
-
-  const handleChange = (selectedTag: string): void => {
+  const handleChange = (selectedTag: T): void => {
     if (multiple) {
       if (selectedTags.includes(selectedTag)) {
-        setSelectedTags(selectedTags.filter((tag) => tag !== selectedTag))
+        onChange(selectedTags.filter((tag) => tag !== selectedTag))
       } else {
-        setSelectedTags([...selectedTags, selectedTag])
+        onChange([...selectedTags, selectedTag])
       }
     } else {
-      setSelectedTags(selectedTags[0] !== selectedTag ? [selectedTag] : [])
+      onChange(selectedTags !== selectedTag ? selectedTag : '')
     }
   }
 
@@ -56,7 +51,7 @@ export default function ChipSelector({
   }
 
   const allTags = tags.map((tag) => (
-    <Tag key={tag} tag={tag} size={size} activeChip={selectedTags.includes(tag)} handleChange={handleChange} />
+    <Tag<T> key={tag} tag={tag} size={size} activeChip={selectedTags.includes(tag)} handleChange={handleChange} />
   ))
 
   function displaySelectedTagCount(): string {
@@ -75,14 +70,14 @@ export default function ChipSelector({
   )
 }
 
-type TagProps = {
-  tag: string
-  handleChange: (value: string) => void
-  size?: TagSelectorProps['size']
+type TagProps<T> = {
+  tag: T
+  handleChange: (value: T) => void
+  size?: TagSelectorProps<T>['size']
   activeChip: boolean
 }
 
-function Tag({ tag, handleChange, size, activeChip }: TagProps) {
+function Tag<T extends string = string>({ tag, handleChange, size, activeChip }: TagProps<T>) {
   return (
     <Chip
       color={activeChip ? 'primary' : 'default'}
