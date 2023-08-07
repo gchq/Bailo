@@ -1,4 +1,5 @@
-import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Divider, FormControl, Stack, TextField, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 import { useGetTeams } from '../../actions/team'
 
@@ -69,14 +70,17 @@ interface SelectorProps {
 }
 
 function Selector({ data, setData, label, value, disabled = false, loading = false }: SelectorProps) {
+  const theme = useTheme()
   return (
-    <Stack>
-      <Typography sx={{ fontWeight: 'bold' }}>
-        {label} <span style={{ color: 'red' }}>*</span>
-      </Typography>
-      <Stack spacing={2} sx={{ width: 200 }}>
+    <FormControl>
+      <Stack>
+        <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={`${label}-input`}>
+          {label} <span style={{ color: theme.palette.primary.main }}>*</span>
+        </Typography>
         <Autocomplete
           loading={loading}
+          id={`${label}-input`}
+          sx={{ width: 200 }}
           freeSolo
           autoSelect
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
@@ -86,6 +90,6 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
           disabled={disabled}
         />
       </Stack>
-    </Stack>
+    </FormControl>
   )
 }
