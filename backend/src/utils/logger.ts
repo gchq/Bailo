@@ -205,7 +205,7 @@ async function processStroomFiles() {
       await sendLogsToStroom(name)
     } catch (e) {
       // ironically we cannot use our logger here.
-      console.error('Unable to send logs to stroom', e)
+      log.error('Unable to send logs to stroom', e)
     }
   }
 }
