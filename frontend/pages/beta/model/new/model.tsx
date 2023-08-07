@@ -106,6 +106,7 @@ export default function NewModel() {
                     required
                     size='small'
                     value={description}
+                    tabIndex={0}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </FormControl>
@@ -129,7 +130,7 @@ export default function NewModel() {
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button variant='contained' disabled={!formValid} type='submit'>
+                  <Button tabIndex={0} variant='contained' disabled={!formValid} type='submit'>
                     Create Model
                   </Button>
                 </span>
