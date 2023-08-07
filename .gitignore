@@ -12,8 +12,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # certs
-backend/certs/cert.pem
-backend/certs/key.pem
+!backend/certs
+backend/certs/*
+!backend/certs/san.cnf
 
 # helm
 infrastructure/helm/bailo/charts
