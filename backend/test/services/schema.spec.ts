@@ -15,8 +15,7 @@ const mockSchema = vi.hoisted(() => {
     save: mockedMethods.save,
   }))
   Schema.find = mockedMethods.find
-  Schema.findOne = mockedMethods.findOne,
-  Schema.deleteOne = mockedMethods.deleteOne
+  ;(Schema.findOne = mockedMethods.findOne), (Schema.deleteOne = mockedMethods.deleteOne)
 
   return {
     ...mockedMethods,
