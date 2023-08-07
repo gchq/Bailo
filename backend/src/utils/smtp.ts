@@ -38,7 +38,7 @@ export async function sendEmail({
     })
     logger.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
-    console.log(err)
+    logger.error(err)
     throw GenericError(
       {
         to,

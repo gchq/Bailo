@@ -5,8 +5,6 @@ import { Model } from '../../types/types.js'
 
 export default class AuthorisationOAuth {
   async getUserFromReq(req: Request) {
-    console.log(req.session)
-
     if (!req.session?.grant?.response?.jwt) {
       return {
         userId: undefined,

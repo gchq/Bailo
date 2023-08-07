@@ -22,6 +22,6 @@ export async function createSchema(schema: SchemaInterface, overwrite = false) {
  * TODO - convert and use default schemas from V1
  */
 export async function addDefaultSchemas() {
-  await createSchema(testModelSchema)
-  await createSchema(testDeploymentSchema)
+  await createSchema(testModelSchema, true)
+  await createSchema(testDeploymentSchema, true)
 }
