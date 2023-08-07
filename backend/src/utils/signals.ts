@@ -1,4 +1,4 @@
-import logger from "./logger.js"
+import logger from './logger.js'
 
 process.on('SIGINT', () => {
   logger.info('SIGINT signal received: Interrupted')
