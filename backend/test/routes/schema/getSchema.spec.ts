@@ -7,14 +7,14 @@ import { testModelSchema } from '../../testUtils/testModels.js'
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    getSchemaById: vi.fn(),
+    findSchemaById: vi.fn(),
   }
 })
 vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 
 describe('routes > schema > getSchema', () => {
   test('returns the schema with the matching ID', async () => {
-    mockSchemaService.getSchemaById.mockReturnValueOnce(testModelSchema)
+    mockSchemaService.findSchemaById.mockReturnValueOnce(testModelSchema)
     const res = await testGet(`/api/v2/schema/${testModelSchema.id}`)
 
     expect(res.statusCode).toBe(200)
@@ -22,7 +22,7 @@ describe('routes > schema > getSchema', () => {
   })
 
   test('returns the schema with the matching ID', async () => {
-    mockSchemaService.getSchemaById.mockRejectedValueOnce(NotFound('Schema not found.'))
+    mockSchemaService.findSchemaById.mockRejectedValueOnce(NotFound('Schema not found.'))
     const res = await testGet(`/api/v2/schema/does-not-exist`)
 
     expect(res.statusCode).toBe(404)

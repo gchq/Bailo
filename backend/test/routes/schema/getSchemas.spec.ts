@@ -6,7 +6,7 @@ import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModel
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    getSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
+    findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
 vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
@@ -20,7 +20,7 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only model schemas with the model parameter', async () => {
-    mockSchemaService.getSchemasByKind.mockReturnValueOnce([testModelSchema])
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testModelSchema])
     const res = await testGet(`/api/v2/schemas?kind=model`)
 
     expect(res.statusCode).toBe(200)
@@ -28,7 +28,7 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only deployment schemas with the deployment parameter', async () => {
-    mockSchemaService.getSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
+    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
     const res = await testGet(`/api/v2/schemas?kind=deployment`)
 
     expect(res.statusCode).toBe(200)
@@ -38,7 +38,7 @@ describe('routes > schema > getSchemas', () => {
   test('rejects unknown query parameter', async () => {
     const res = await testGet(`/api/v2/schemas?kind=notValid`)
 
-    expect(mockSchemaService.getSchemasByKind).not.toBeCalled()
+    expect(mockSchemaService.findSchemasByKind).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })

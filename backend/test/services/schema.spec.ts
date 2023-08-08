@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { createSchema, getSchemaById, getSchemasByKind } from '../../src/services/v2/schema.js'
+import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 const mockSchema = vi.hoisted(() => {
@@ -15,7 +15,8 @@ const mockSchema = vi.hoisted(() => {
     save: mockedMethods.save,
   }))
   Schema.find = mockedMethods.find
-  ;(Schema.findOne = mockedMethods.findOne), (Schema.deleteOne = mockedMethods.deleteOne)
+  Schema.findOne = mockedMethods.findOne
+  Schema.deleteOne = mockedMethods.deleteOne
 
   return {
     ...mockedMethods,
@@ -28,7 +29,7 @@ vi.mock('../../src/models/v2/Schema.js', () => ({
 
 describe('services > schema', () => {
   test('that all schemas can be retrieved', async () => {
-    const result = await getSchemasByKind('model')
+    const result = await findSchemasByKind('model')
     expect(result).toEqual(['schema-1', 'schema-2'])
   })
 
@@ -50,11 +51,11 @@ describe('services > schema', () => {
 
   test('that a schema can be retrieved by ID', async () => {
     mockSchema.findOne.mockResolvedValueOnce(testModelSchema)
-    const result = await getSchemaById(testModelSchema.id)
+    const result = await findSchemaById(testModelSchema.id)
     expect(result).toEqual(testModelSchema)
   })
 
   test('that a schema cannot be retrieved by ID when schema does not exist', async () => {
-    expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
+    expect(() => findSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
   })
 })

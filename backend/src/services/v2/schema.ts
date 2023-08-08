@@ -3,12 +3,12 @@ import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import { SchemaKindKeys } from '../../types/v2/enums.js'
 import { NotFound } from '../../utils/v2/error.js'
 
-export async function getSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
+export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
   return baseSchemas
 }
 
-export async function getSchemaById(schemaId: string): Promise<SchemaInterface> {
+export async function findSchemaById(schemaId: string): Promise<SchemaInterface> {
   const schema = await Schema.findOne({
     id: schemaId,
   })
