@@ -1,26 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > getModel > 200 > ok > unit 1`] = `
-{
-  "data": {
-    "model": {
-      "_id": "test",
-    },
-  },
-}
-`;
-
 exports[`routes > model > getModel > 200 > ok 1`] = `
-{
-  "data": {
-    "model": {
-      "_id": "test",
-    },
-  },
-}
-`;
-
-exports[`routes > model > getModel > 200 > ok 2`] = `
 {
   "data": {
     "model": {
