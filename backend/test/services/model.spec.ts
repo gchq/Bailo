@@ -28,8 +28,8 @@ vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks.Model }))
 const authorisationMocks = vi.hoisted(() => ({
   userModelAction: vi.fn(() => true),
 }))
-vi.mock('../../src/external/v2/authorisation/index.js', async () => ({
-  ...((await vi.importActual('../../src/external/v2/authorisation/index.js')) as object),
+vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
+  ...((await vi.importActual('../../src/connectors/v2/authorisation/index.js')) as object),
   default: { userModelAction: authorisationMocks.userModelAction },
 }))
 

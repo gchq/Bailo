@@ -14,21 +14,23 @@ export abstract class BaseAuthorisationConnector {
   abstract userModelAction(user: UserDoc, model: ModelDoc, action: ModelActionKeys): Promise<boolean>
 }
 
-let authConnector: undefined | BaseAuthorisationConnector = undefined
+export let _authConnector: undefined | BaseAuthorisationConnector = undefined
 export function getAuthorisationConnector() {
-  if (authConnector) {
-    return authConnector
+  if (_authConnector) {
+    return _authConnector
   }
+
+  console.log('config', config)
 
   switch (config.connectors.authorisation.kind) {
     case 'silly':
-      authConnector = new SillyAuthorisationConnector()
+      _authConnector = new SillyAuthorisationConnector()
       break
     default:
       throw new Error('No valid authorisation connector provided.')
   }
 
-  return authConnector
+  return _authConnector
 }
 
 export default getAuthorisationConnector()

@@ -90,7 +90,10 @@ if (config.oauth.enabled) {
 server.use(getUser)
 
 server.use(expressLogger)
-server.use('/api/v2', expressLoggerV2)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressLoggerV2)
+}
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
@@ -236,4 +239,7 @@ if (config.experimental.v2) {
 }
 
 server.use('/api/v1', expressErrorHandler)
-server.use('/api/v2', expressErrorHandlerV2)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressErrorHandlerV2)
+}

@@ -1,4 +1,4 @@
-import authorisation, { ModelAction } from '../../external/v2/authorisation/index.js'
+import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
