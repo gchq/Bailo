@@ -24,7 +24,7 @@ import { CSSProperties } from 'react'
 
 import { useGetNumApprovals } from '../../data/approvals'
 import { User } from '../../types/types'
-import { drawerWidth } from '../../utils/constants'
+import { DRAWER_WIDTH } from '../../utils/constants'
 import Link from '../Link'
 
 const StyledList = styled(List)(({ theme }) => ({
@@ -44,7 +44,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   '& .MuiDrawer-paper': {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: drawerWidth,
+    width: DRAWER_WIDTH,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,

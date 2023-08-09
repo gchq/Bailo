@@ -22,7 +22,7 @@ import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 
 import { EntityKind, User } from '../../types/types'
-import { drawerWidth } from '../../utils/constants'
+import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
@@ -48,8 +48,8 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: DRAWER_WIDTH,
+    width: `calc(100% - ${DRAWER_WIDTH}px)`,
     transition: theme.transitions.create(['width', 'margin-left'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
