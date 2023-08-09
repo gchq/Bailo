@@ -6,15 +6,10 @@ interface ExpandableButtonProps {
   label: string
   icon: ReactElement
   onClick: () => void
-  ariaLabel?: string
+  ariaLabel: string
 }
 
-export default function ExpandableButton({
-  label,
-  icon,
-  onClick,
-  ariaLabel = 'Expandable button',
-}: ExpandableButtonProps) {
+export default function ExpandableButton({ label, icon, onClick, ariaLabel }: ExpandableButtonProps) {
   const [hover, setHover] = useState(false)
 
   const StyledHoverSpan = styled('span')({
