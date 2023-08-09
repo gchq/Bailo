@@ -13,6 +13,7 @@ import {
   findDeploymentsByModel,
   removeModelDeploymentsFromRegistry,
 } from '../../services/deployment.js'
+import { findSchemaByRef } from '../../services/schema.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
 import {
@@ -22,6 +23,7 @@ import {
   DeploymentDoc,
   Entity,
   ModelDoc,
+  ModelMetadata,
   VersionDoc,
 } from '../../types/types.js'
 import { getUserListFromEntityList, isUserInEntityList } from '../../utils/entity.js'
@@ -137,6 +139,8 @@ export const postApprovalResponse = [
       version[field] = choice as ApprovalStates
       await version.save()
 
+      const { managerTitle, reviewerTitle } = await getManagerAndReviewer(version.metadata)
+
       if (approval.approvalType === ApprovalTypes.Manager && choice === ApprovalStates.Accepted) {
         if (version.reviewerApproved !== ApprovalStates.Accepted) {
           throw BadReq(
@@ -144,7 +148,7 @@ export const postApprovalResponse = [
               code: 'bad_request_type',
               version: versionDoc.managerApproved,
             },
-            'Managers cannot approve model versions until it has been accepted by a technical reviewer'
+            `${managerTitle} cannot approve model versions until it has been accepted by a ${reviewerTitle}`
           )
         }
       }
@@ -232,4 +236,14 @@ export const postApprovalResponse = [
     })
   },
 ]
-export const reviwerModelApproval = []
+async function getManagerAndReviewer(metadata: ModelMetadata) {
+  const schema = await findSchemaByRef(metadata.schemaRef)
+
+  if (!schema) {
+    return { managerTitle: 'Managers', reviewerTitle: 'Technical Reviewer' }
+  }
+
+  const managerTitle = schema.schema.properties.contacts.properties.manager.title
+  const reviewerTitle = schema.schema.properties.contacts.properties.reviewer.title
+  return { managerTitle, reviewerTitle }
+}

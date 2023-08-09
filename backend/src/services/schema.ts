@@ -1,9 +1,9 @@
-import SchemaModel, { Schema } from '../models/Schema.js'
-import { SchemaType } from '../types/types.js'
+import SchemaModel from '../models/Schema.js'
+import { Schema, SchemaType } from '../types/types.js'
 import config from '../utils/config.js'
 import logger from '../utils/logger.js'
 
-export async function findSchemaByRef(ref: string) {
+export async function findSchemaByRef(ref: string): Promise<Schema | null> {
   const schema = await SchemaModel.findOne({
     reference: ref,
   })
