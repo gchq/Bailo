@@ -52,6 +52,7 @@ export default function ExpandableButton({ label, icon, onClick }: ExpandableBut
         onClick={() => onClick()}
         variant='outlined'
         data-test='expandable-button'
+        aria-label='Add a new model'
         sx={{ color: 'white', borderColor: 'white !important' }}
       >
         {icon}
