@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { parse } from '../../../middleware/validate.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { findSchemaById } from '../../../services/v2/schema.js'
 
 export const getSchemaSchema = z.object({
   params: z.object({
@@ -22,31 +23,13 @@ interface GetSchemaResponse {
 export const getSchema = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaResponse>) => {
-    const _ = parse(req, getSchemaSchema)
+    const { params } = parse(req, getSchemaSchema)
+
+    const schema = await findSchemaById(params.schemaId)
 
     return res.json({
       data: {
-        schema: {
-          id: 'example-schema-1',
-          name: 'Example Schema 1',
-          description: 'This is a description of the schema.',
-
-          active: true,
-          hidden: false,
-
-          kind: 'deployment',
-          meta: { example: true },
-
-          uiSchema: {
-            'UI Schema field 1': 'field 1 info',
-          },
-          schema: {
-            'Schema field 1': 'field 1 info',
-          },
-
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        schema,
       },
     })
   },
