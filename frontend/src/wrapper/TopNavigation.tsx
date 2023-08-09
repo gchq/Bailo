@@ -19,20 +19,19 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
 import Image from 'next/legacy/image'
 import { useRouter } from 'next/router'
-import { MouseEvent, useContext, useState } from 'react'
+import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 
 import { EntityKind, User } from '../../types/types'
+import { drawerWidth } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
-const drawerWidth = 240
-
 type TopNavigationProps = {
   drawerOpen?: boolean
   toggleDrawer: () => void
-  pageTopStyling?: any
+  pageTopStyling?: CSSProperties
   currentUser: User
 }
 
@@ -138,7 +137,12 @@ export default function TopNavigation({
           </Link>
         </Box>
         <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-          <ExpandableButton label='Add Model' icon={<Add />} onClick={() => handleNewModelClicked()} />
+          <ExpandableButton
+            label='Add Model'
+            icon={<Add />}
+            onClick={() => handleNewModelClicked()}
+            ariaLabel='Add a new model'
+          />
           {currentUser ? (
             <>
               <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>

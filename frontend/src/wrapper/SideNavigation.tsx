@@ -20,12 +20,12 @@ import {
 } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
+import { CSSProperties } from 'react'
 
 import { useGetNumApprovals } from '../../data/approvals'
 import { User } from '../../types/types'
+import { drawerWidth } from '../../utils/constants'
 import Link from '../Link'
-
-const drawerWidth = 240
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -67,7 +67,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 interface SideNavigationProps {
   page: string
   drawerOpen?: boolean
-  pageTopStyling?: any
+  pageTopStyling?: CSSProperties
   toggleDrawer: () => void
   currentUser: User
 }
