@@ -77,7 +77,7 @@ export default function ModelReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Typography variant='h6' color='primary'>
+                <Typography component='h2' variant='h6' color='primary'>
                   {release.name}
                 </Typography>
                 <Divider orientation='vertical' flexItem />

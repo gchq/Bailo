@@ -78,14 +78,14 @@ export default function NewModel() {
   return (
     <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography component='h2' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography component='h1' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
         <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
           <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
             <>
-              <Typography component='h3' variant='h6'>
+              <Typography component='h2' variant='h6'>
                 Overview
               </Typography>
               <Stack direction='row' spacing={2}>

@@ -123,7 +123,7 @@ export default function TopNavigation({
         </IconButton>
         <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
           <Link href='/beta' color='inherit' underline='none'>
-            <Image src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
+            <Image src='/bailo-logo.png' alt='Bailo Logo' width={35} height={45} priority />
           </Link>
         </Box>
         <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
