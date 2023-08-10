@@ -7,16 +7,16 @@ import z, { ZodSchema } from 'zod'
 import { server } from '../../src/routes.js'
 import { testUser } from '../../src/utils/test/testModels.js'
 
-vi.mock('../../src/utils/user.js', () => {
+// This mock will not any called from the route files like ensureUserHasRole
+// This is because the relative import paths declared here and in those files do not match
+vi.mock('../../src/utils/user.js', async () => {
+  const actual = (await vi.importActual('../../src/utils/user.js')) as object
   return {
+    ...actual,
     getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      console.log('fake getUser')
       req.user = testUser
       next()
-    }),
-    ensureUserRole: vi.fn(() => {
-      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
-        next()
-      })
     }),
   }
 })

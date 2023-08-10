@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > postSchema > rejects non-admin users 1`] = `
+{
+  "error": {
+    "message": "You do not have the 'admin' role",
+  },
+}
+`;
+
+exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
+{
+  "data": {},
+}
+`;
