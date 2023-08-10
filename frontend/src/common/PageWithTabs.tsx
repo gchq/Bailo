@@ -31,7 +31,7 @@ export default function PageWithTabs({
     <>
       <Box>
         <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2} sx={{ p: 2 }}>
-          <Typography color='primary' variant='h6'>
+          <Typography component='h1' color='primary' variant='h6'>
             {title}
           </Typography>
           <Button variant='contained' hidden={!displayActionButton} onClick={actionButtonOnClick}>
