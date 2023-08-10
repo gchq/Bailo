@@ -1,5 +1,1 @@
-module.exports = {
-  experimental: {
-    v2: true,
-  },
-}
+module.exports = {}

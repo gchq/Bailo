@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "cy:open": "cypress open",
-    "cy:run": "cypress run",
+    "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
+    "cy:run-beta": "cypress run --spec \"cypress/e2e/beta/**/*\"",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest"
