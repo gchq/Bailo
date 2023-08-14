@@ -54,11 +54,13 @@ describe('services > schema', () => {
     const mongoError = new MongoServerError({})
     mongoError.code = 11000
     mongoError.keyValue = {
-      "mockKey":"mockValue"
+      mockKey: 'mockValue',
     }
     mockSchema.save.mockRejectedValueOnce(mongoError)
 
-    expect(() => createSchema(testModelSchema)).rejects.toThrowError(/^The following is not unique: {"mockKey":"mockValue"}/)
+    expect(() => createSchema(testModelSchema)).rejects.toThrowError(
+      /^The following is not unique: {"mockKey":"mockValue"}/
+    )
   })
 
   test('that a schema can be retrieved by ID', async () => {

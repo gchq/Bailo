@@ -1,5 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`routes > schema > postSchema > blah > successfully stores the schema blah 1`] = `
+{
+  "data": {},
+}
+`;
+
 exports[`routes > schema > postSchema > rejects non-admin users 1`] = `
 {
   "error": {
@@ -9,6 +15,12 @@ exports[`routes > schema > postSchema > rejects non-admin users 1`] = `
 `;
 
 exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
+{
+  "data": {},
+}
+`;
+
+exports[`routes > schema > postSchema > successfully stores the schema 2`] = `
 {
   "data": {},
 }

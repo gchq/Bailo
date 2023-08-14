@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
 import { postSchemaSchema } from '../../../src/routes/v2/schema/postSchema.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
+
+vi.mock('../../../src/utils/user.js')
+vi.mock('../../../src/utils/config.js')
 
 const mockSchemaService = vi.hoisted(() => {
   return {
@@ -12,19 +14,7 @@ const mockSchemaService = vi.hoisted(() => {
 })
 vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 
-// Unable to update implementation using mockImplementation()
-const mockUserUtils = vi.hoisted(() => {
-  return {
-    ensureUserRole: vi.fn(() => {
-      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
-        next()
-      })
-    }),
-  }
-})
-vi.mock('../../../src/utils/user.js', () => mockUserUtils)
-
-describe('routes > schema > postSchema', () => {
+describe('routes > schema > postSchema', async () => {
   test('successfully stores the schema', async () => {
     const fixture = createFixture(postSchemaSchema)
     const res = await testPost(`/api/v2/schemas`, fixture)
