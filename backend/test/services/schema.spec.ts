@@ -28,6 +28,13 @@ vi.mock('../../src/models/v2/Schema.js', () => ({
   default: mockSchema.Schema,
 }))
 
+const mockMongoUtils = vi.hoisted(() => {
+  return {
+    isMongoServerError: vi.fn(),
+  }
+})
+vi.mock('../../utils/v2/mongo.js', () => mockMongoUtils)
+
 describe('services > schema', () => {
   test('that all schemas can be retrieved', async () => {
     const result = await findSchemasByKind('model')
@@ -57,6 +64,7 @@ describe('services > schema', () => {
       mockKey: 'mockValue',
     }
     mockSchema.save.mockRejectedValueOnce(mongoError)
+    mockMongoUtils.isMongoServerError.mockReturnValueOnce(true)
 
     expect(() => createSchema(testModelSchema)).rejects.toThrowError(
       /^The following is not unique: {"mockKey":"mockValue"}/

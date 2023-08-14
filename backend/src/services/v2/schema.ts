@@ -1,21 +1,8 @@
-import { MongoServerError } from 'mongodb'
-
 import { testDeploymentSchema, testModelSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import { SchemaKindKeys } from '../../types/v2/enums.js'
 import { BadReq, NotFound } from '../../utils/v2/error.js'
-
-function isMongoServerError(err: unknown): err is MongoServerError {
-  if (typeof err !== 'object' || err === null) {
-    return false
-  }
-
-  if (err instanceof Error && err.name === 'MongoServerError') {
-    return true
-  }
-
-  return false
-}
+import { isMongoServerError } from '../../utils/v2/mongo.js'
 
 export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })

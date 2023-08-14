@@ -17,6 +17,7 @@ vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 describe('routes > schema > postSchema', async () => {
   test('successfully stores the schema', async () => {
     const fixture = createFixture(postSchemaSchema)
+    mockSchemaService.createSchema.mockResolvedValue(fixture.body)
     const res = await testPost(`/api/v2/schemas`, fixture)
 
     expect(res.statusCode).toBe(200)
