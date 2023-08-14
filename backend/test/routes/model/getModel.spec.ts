@@ -4,7 +4,7 @@ import '../../../src/utils/test/testUtils.js'
 import { describe, expect, test, vi } from 'vitest'
 
 import { getModelSchema } from '../../../src/routes/v2/model/getModel.js'
-import { createFixture, testGet } from '../../../src/utils/v2/test/routes.js'
+import { createFixture, testGet } from '../../testUtils/routes.js'
 
 describe('routes > model > getModel', () => {
   test('200 > ok', async () => {
