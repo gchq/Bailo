@@ -1,3 +1,4 @@
+import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
 import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
@@ -47,6 +48,17 @@ describe('services > schema', () => {
     expect(mockSchema.deleteOne).toBeCalledTimes(1)
     expect(mockSchema.save).toBeCalledTimes(1)
     expect(result).toBe(testModelSchema)
+  })
+
+  test('an error is thrown on create collision', async () => {
+    const mongoError = new MongoServerError({})
+    mongoError.code = 11000
+    mongoError.keyValue = {
+      "mockKey":"mockValue"
+    }
+    mockSchema.save.mockRejectedValueOnce(mongoError)
+
+    expect(() => createSchema(testModelSchema)).rejects.toThrowError(/^The following is not unique: {"mockKey":"mockValue"}/)
   })
 
   test('that a schema can be retrieved by ID', async () => {
