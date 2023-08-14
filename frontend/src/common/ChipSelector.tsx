@@ -60,7 +60,7 @@ export default function ChipSelector<T extends string = string>({
 
   return (
     <>
-      <Typography variant='h6'>{`${label} ${displaySelectedTagCount()}`}</Typography>
+      <Typography component='h2' variant='h6'>{`${label} ${displaySelectedTagCount()}`}</Typography>
       {!expanded && allTags.slice(0, expandThreshold)}
       {expanded && allTags}
       {tags.length > expandThreshold && (

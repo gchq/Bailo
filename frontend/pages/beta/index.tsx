@@ -2,8 +2,11 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
+  FilledInput,
+  FormControl,
   IconButton,
-  InputBase,
+  InputAdornment,
+  InputLabel,
   Link as MuiLink,
   Paper,
   Stack,
@@ -74,30 +77,38 @@ export default function ExploreModels() {
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction='row' spacing={2}>
         <Stack spacing={2}>
+          <Typography component='h1' variant='h4' color='primary'>
+            Marketplace
+          </Typography>
           <Button variant='contained' onClick={() => handleNewModelClicked()}>
             Add new model
           </Button>
-          <Paper
-            component='form'
-            onSubmit={onFilterSubmit}
+          <FormControl
             sx={{
-              p: '2px 4px',
               display: 'flex',
               alignItems: 'center',
               maxWidth: '400px',
               marginBottom: 3,
             }}
+            variant='filled'
+            onSubmit={onFilterSubmit}
           >
-            <InputBase
-              sx={{ ml: 1, flex: 1 }}
-              placeholder='Filter Models'
+            <InputLabel htmlFor='model-filter-input'>Filter models</InputLabel>
+            <FilledInput
+              sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}
+              id='model-filter-input'
               value={filter}
+              disableUnderline
               onChange={handleFilterChange}
+              endAdornment={
+                <InputAdornment position='end'>
+                  <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-              <SearchIcon />
-            </IconButton>
-          </Paper>
+          </FormControl>
           <Box>
             <ChipSelector
               label='Tasks'

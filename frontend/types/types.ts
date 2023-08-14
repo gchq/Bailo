@@ -110,6 +110,7 @@ export interface UiConfig {
     enabled: boolean
     text: string
     colour: string
+    textColor: string
   }
 
   issues: {

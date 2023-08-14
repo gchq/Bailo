@@ -11,7 +11,7 @@ function Banner() {
     pb: 0.5,
     textAlign: 'center',
     backgroundColor: uiConfig?.banner?.colour || 'black',
-    color: 'white',
+    color: uiConfig?.banner?.textColor ? uiConfig?.banner?.textColor : 'white',
     borderRadius: 0,
     position: 'fixed',
     width: 1,

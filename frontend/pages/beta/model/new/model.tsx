@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Divider,
+  FormControl,
   FormControlLabel,
   Radio,
   RadioGroup,
@@ -12,6 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
@@ -29,6 +31,7 @@ export default function NewModel() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
+  const theme = useTheme()
 
   const formValid = teamName && modelName && description
 
@@ -75,14 +78,16 @@ export default function NewModel() {
   return (
     <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography component='h1' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
         <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
           <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
             <>
-              <Typography variant='h6'>Overview</Typography>
+              <Typography component='h2' variant='h6'>
+                Overview
+              </Typography>
               <Stack direction='row' spacing={2}>
                 <TeamAndModelSelector
                   setTeamValue={setTeamName}
@@ -92,15 +97,26 @@ export default function NewModel() {
                 />
               </Stack>
               <Stack>
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  Description <span style={{ color: 'red' }}>*</span>
-                </Typography>
-                <TextField required size='small' value={description} onChange={(e) => setDescription(e.target.value)} />
+                <FormControl>
+                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                  </Typography>
+                  <TextField
+                    id='new-model-description'
+                    required
+                    size='small'
+                    value={description}
+                    tabIndex={0}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </FormControl>
               </Stack>
             </>
             <Divider />
             <>
-              <Typography variant='h6'>Access control</Typography>
+              <Typography component='h3' variant='h6'>
+                Access control
+              </Typography>
               <RadioGroup
                 defaultValue='public'
                 value={visibility}
@@ -114,7 +130,7 @@ export default function NewModel() {
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button variant='contained' disabled={!formValid} type='submit'>
+                  <Button tabIndex={0} variant='contained' disabled={!formValid} type='submit'>
                     Create Model
                   </Button>
                 </span>
