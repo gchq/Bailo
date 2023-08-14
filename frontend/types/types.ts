@@ -410,3 +410,13 @@ export const SchemaKind = {
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
+
+export interface ApprovalRequestInterface {
+  model: string
+  release: string
+  kind: string
+  isActive: boolean
+  entities: Array<string>
+  createdAt: string
+  updatedAt: string
+}
