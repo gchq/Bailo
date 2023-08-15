@@ -1,10 +1,10 @@
-// Some bad parts
-import '../../../src/utils/test/testUtils.js'
-
 import { describe, expect, test, vi } from 'vitest'
 
 import { postModelSchema } from '../../../src/routes/v2/model/postModel.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
+
+vi.mock('../../../src/utils/config.js')
+vi.mock('../../../src/utils/user.js')
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
