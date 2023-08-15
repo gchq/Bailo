@@ -1,6 +1,7 @@
 import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { toEntity } from '../../utils/v2/entity.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 
@@ -11,6 +12,12 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
   const model = new Model({
     ...modelParams,
     id: modelId,
+    collaborators: [
+      {
+        entity: toEntity('user', user.dn),
+        roles: ['admin'],
+      },
+    ],
   })
 
   if (!(await authorisation.userModelAction(user, model, ModelAction.Create))) {

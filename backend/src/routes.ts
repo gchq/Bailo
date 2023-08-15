@@ -6,6 +6,7 @@ import grant from 'grant'
 
 import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
+import { getUser as getUserV2 } from './middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -88,12 +89,12 @@ if (config.oauth.enabled) {
   )
 }
 
-server.use(getUser)
-
-server.use(expressLogger)
-
 if (config.experimental.v2) {
+  server.use('/api/v2', getUserV2)
   server.use('/api/v2', expressLoggerV2)
+} else {
+  server.use('/api/v1', getUser)
+  server.use('/api/v1', expressLogger)
 }
 
 if (config.oauth.enabled) {
