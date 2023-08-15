@@ -4,6 +4,9 @@ import { NotFound } from '../../../src/utils/v2/error.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testModelSchema } from '../../testUtils/testModels.js'
 
+vi.mock('../../../src/utils/config.js')
+vi.mock('../../../src/utils/user.js')
+
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),

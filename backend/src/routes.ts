@@ -63,6 +63,7 @@ import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
+import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
@@ -210,6 +211,7 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
+  server.post('/api/v2/schemas', ...postSchemaV2)
 
   // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
