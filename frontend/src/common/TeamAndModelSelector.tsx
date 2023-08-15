@@ -49,10 +49,17 @@ export default function TeamAndModelSelector({
               value={teamValue}
               disabled={teamReadOnly}
               loading={isTeamsLoading}
+              dataTestKey='teamSelector'
             />
           )}
           {!teamOnly && (
-            <Selector data={modelNames} setData={(value) => setModelValue(value)} label='Model' value={modelValue} />
+            <Selector
+              data={modelNames}
+              setData={(value) => setModelValue(value)}
+              label='Model'
+              value={modelValue}
+              dataTestKey='modelSelector'
+            />
           )}
         </Stack>
       )}
@@ -67,9 +74,10 @@ interface SelectorProps {
   value: string
   disabled?: boolean
   loading?: boolean
+  dataTestKey: string
 }
 
-function Selector({ data, setData, label, value, disabled = false, loading = false }: SelectorProps) {
+function Selector({ data, setData, label, value, disabled = false, loading = false, dataTestKey }: SelectorProps) {
   const theme = useTheme()
   return (
     <FormControl>
@@ -89,6 +97,7 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
           value={value}
           renderInput={(params) => <TextField {...params} required size='small' value={data} />}
           disabled={disabled}
+          data-test={dataTestKey}
         />
       </Stack>
     </FormControl>

@@ -78,7 +78,13 @@ export default function NewModel() {
   return (
     <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography component='h1' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography
+          component='h1'
+          variant='h4'
+          sx={{ fontWeight: 'bold' }}
+          color='primary'
+          data-test='createModelPageTitle'
+        >
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
@@ -108,6 +114,7 @@ export default function NewModel() {
                     value={description}
                     tabIndex={0}
                     onChange={(e) => setDescription(e.target.value)}
+                    data-test='modelDescription'
                   />
                 </FormControl>
               </Stack>
@@ -122,15 +129,31 @@ export default function NewModel() {
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
               >
-                <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
-                <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
+                <FormControlLabel
+                  value='public'
+                  control={<Radio />}
+                  label={publicLabel()}
+                  data-test='publicButtonSelector'
+                />
+                <FormControlLabel
+                  value='private'
+                  control={<Radio />}
+                  label={privateLabel()}
+                  data-test='privateButtonSelector'
+                />
               </RadioGroup>
             </>
             <Divider />
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button tabIndex={0} variant='contained' disabled={!formValid} type='submit'>
+                  <Button
+                    tabIndex={0}
+                    variant='contained'
+                    disabled={!formValid}
+                    type='submit'
+                    data-test='createModelButton'
+                  >
                     Create Model
                   </Button>
                 </span>
