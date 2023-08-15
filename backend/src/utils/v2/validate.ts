@@ -11,3 +11,7 @@ export function parse<T extends AnyZodObject>(req: Request, schema: T): z.infer<
     throw BadReq(error.issues[0].message, { errors: error.issues })
   }
 }
+
+export function coerceArray(object: z.ZodTypeAny) {
+  return z.preprocess((val) => (Array.isArray(val) || val === undefined ? val : [val]), object)
+}

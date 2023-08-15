@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { ModelCardInterface } from '../../../models/v2/ModelCard.js'
 import { searchModels } from '../../../services/v2/modelCard.js'
-import { parse } from '../../../utils/validate.js'
+import { coerceArray, parse } from '../../../utils/v2/validate.js'
 
 export const GetModelFilters = {
   Mine: 'mine',
@@ -18,8 +18,8 @@ export const getModelsSchema = z.object({
     // These are all optional with defaults.  If they are not provided, they do not filter settings.
     task: z.string().optional(),
 
-    libraries: z.array(z.string()).optional().default([]),
-    filters: z.array(z.nativeEnum(GetModelFilters)).optional().default([]),
+    libraries: coerceArray(z.array(z.string()).optional().default([])),
+    filters: coerceArray(z.array(z.nativeEnum(GetModelFilters)).optional().default([])),
     search: z.string().optional().default(''),
   }),
 })

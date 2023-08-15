@@ -1,6 +1,5 @@
 import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
-import { ModelDoc } from '../../models/v2/Model.js'
-import ModelCardModel, { ModelCardDoc } from '../../models/v2/ModelCard.js'
+import ModelCardModel from '../../models/v2/ModelCard.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { GetModelFiltersKeys } from '../../routes/v2/model/getModels.js'
 import { asyncFilter } from '../../utils/v2/array.js'
@@ -55,7 +54,7 @@ export async function searchModels(
     results.match({
       'model.collaborators': {
         $elemMatch: {
-          entity: '', // TODO...
+          entity: { $in: await authorisation.getEntities(user) },
         },
       },
     })
