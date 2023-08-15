@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { timeDifference } from 'utils/dateUtils'
 
 import { ApprovalRequestInterface } from '../../types/types'
+import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
 
 type ApprovalsListProps = {
@@ -16,6 +17,7 @@ export default function ApprovalsList({ isActive = true }: ApprovalsListProps) {
   return (
     <>
       {isApprovalsLoading && <Loading />}
+      {approvals.length === 0 && <EmptyBlob text='No approvals found' />}
       <List>
         {approvals.map((approval) => (
           <ApprovalItem key={approval.release} approval={approval} />
