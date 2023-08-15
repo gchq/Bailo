@@ -173,6 +173,7 @@ module.exports = {
       enabled: true,
       text: 'DEPLOYMENT: INSECURE',
       colour: 'orange',
+      textColor: 'black',
     },
 
     // Contact details for the support team

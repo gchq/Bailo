@@ -11,6 +11,7 @@ import { omit } from 'lodash-es'
 import morgan from 'morgan'
 import { gzip } from 'pako'
 import { join, resolve, sep } from 'path'
+import stripAnsi from 'strip-ansi'
 import { fileURLToPath } from 'url'
 import { inspect } from 'util'
 import { v4 as uuidv4 } from 'uuid'
@@ -204,8 +205,7 @@ async function processStroomFiles() {
     try {
       await sendLogsToStroom(name)
     } catch (e) {
-      // ironically we cannot use our logger here.
-      console.error('Unable to send logs to stroom', e)
+      log.error('Unable to send logs to stroom', e)
     }
   }
 }
@@ -275,6 +275,8 @@ const log = bunyan.createLogger({
 
 const morganLog = morgan<any, any>(
   (tokens, req, res) => {
+    const message = tokens.dev(morgan, req, res) || ''
+
     req.log.trace(
       {
         url: tokens.url(req, res),
@@ -283,7 +285,7 @@ const morganLog = morgan<any, any>(
         status: tokens.status(req, res),
         code: 'approval',
       },
-      tokens.dev(morgan, req, res)
+      process.env.NODE_ENV == 'production' ? stripAnsi(message) : message
     )
 
     return ''
