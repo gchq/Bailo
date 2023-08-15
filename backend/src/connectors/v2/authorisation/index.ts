@@ -15,14 +15,14 @@ export abstract class BaseAuthorisationConnector {
 }
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined
-export async function getAuthorisationConnector(cache = true) {
+export function getAuthorisationConnector(cache = true) {
   if (authConnector && cache) {
     return authConnector
   }
 
   switch (config.connectors.authorisation.kind) {
     case 'silly':
-      authConnector = await SillyAuthorisationConnector.init()
+      authConnector = new SillyAuthorisationConnector()
       break
     default:
       throw new Error('No valid authorisation connector provided.')

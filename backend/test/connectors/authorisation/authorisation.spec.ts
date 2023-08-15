@@ -15,14 +15,14 @@ vi.mock('../../../src/utils/v2/config.js', () => ({
 }))
 
 describe('connectors > authorisation', () => {
-  test('silly', async () => {
-    const connector = await getAuthorisationConnector(false)
+  test('silly', () => {
+    const connector = getAuthorisationConnector(false)
     expect(connector.constructor.name).toBe('SillyAuthorisationConnector')
   })
 
-  test('invalid', async () => {
+  test('invalid', () => {
     configMock.connectors.authorisation.kind = 'invalid'
 
-    expect(() => getAuthorisationConnector(false)).rejects.toThrowError('No valid authorisation connector provided.')
+    expect(() => getAuthorisationConnector(false)).toThrowError('No valid authorisation connector provided.')
   })
 })

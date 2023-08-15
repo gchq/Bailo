@@ -4,14 +4,14 @@ import { SillyUserConnector } from './silly.js'
 export abstract class BaseUserConnector {}
 
 let userConnector: undefined | BaseUserConnector = undefined
-export async function getUserConnector(cache = true) {
+export function getUserConnector(cache = true) {
   if (userConnector && cache) {
     return userConnector
   }
 
   switch (config.connectors.user.kind) {
     case 'silly':
-      userConnector = await SillyUserConnector.init()
+      userConnector = new SillyUserConnector()
       break
     default:
       throw new Error('No valid user connector provided.')

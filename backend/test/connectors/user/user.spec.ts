@@ -15,14 +15,14 @@ vi.mock('../../../src/utils/v2/config.js', () => ({
 }))
 
 describe('connectors > user', () => {
-  test('silly', async () => {
-    const connector = await getUserConnector(false)
+  test('silly', () => {
+    const connector = getUserConnector(false)
     expect(connector.constructor.name).toBe('SillyUserConnector')
   })
 
-  test('invalid', async () => {
+  test('invalid', () => {
     configMock.connectors.user.kind = 'invalid'
 
-    expect(() => getUserConnector(false)).rejects.toThrowError('No valid user connector provided.')
+    expect(() => getUserConnector(false)).toThrowError('No valid user connector provided.')
   })
 })
