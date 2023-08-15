@@ -39,6 +39,6 @@ ApprovalRequestSchema.plugin(MongooseDelete, {
   deletedByType: Schema.Types.ObjectId,
 })
 
-const ApprovalRequestModel = model<ApprovalRequestInterface>('v2_Release', ApprovalRequestSchema)
+const ApprovalRequestModel = model<ApprovalRequestInterface>('v2_Approval', ApprovalRequestSchema)
 
 export default ApprovalRequestModel
