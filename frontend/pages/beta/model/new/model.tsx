@@ -57,7 +57,7 @@ export default function NewModel() {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
     )
@@ -69,7 +69,7 @@ export default function NewModel() {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>
     )
