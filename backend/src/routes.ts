@@ -89,12 +89,12 @@ if (config.oauth.enabled) {
   )
 }
 
+server.use('/api/v1', getUser)
+server.use('/api/v1', expressLogger)
+
 if (config.experimental.v2) {
   server.use('/api/v2', getUserV2)
   server.use('/api/v2', expressLoggerV2)
-} else {
-  server.use('/api/v1', getUser)
-  server.use('/api/v1', expressLogger)
 }
 
 if (config.oauth.enabled) {
