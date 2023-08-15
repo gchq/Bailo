@@ -1,6 +1,8 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { Entity } from '../../types/types.js'
+
 export const ModelVisibility = {
   Private: 'private',
   Public: 'public',
@@ -20,6 +22,8 @@ export interface ModelInterface {
   visibility: ModelVisibilityKeys
   deleted: boolean
 
+  entities: Entity[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -37,6 +41,8 @@ const ModelSchema = new Schema<ModelInterface>(
     description: { type: String, required: true },
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
+
+    entities: { type: Array<Entity> },
   },
   {
     timestamps: true,
