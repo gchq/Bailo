@@ -1,10 +1,10 @@
 import { List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetApprovalRequestsForUser } from 'actions/approval'
+import { useRouter } from 'next/router'
 import { timeDifference } from 'utils/dateUtils'
 
 import { ApprovalRequestInterface } from '../../types/types'
 import Loading from '../common/Loading'
-import Link from '../Link'
 
 type ApprovalsListProps = {
   isActive?: boolean
@@ -30,34 +30,37 @@ type ApprovalItemProps = {
 }
 
 function ApprovalItem({ approval }: ApprovalItemProps) {
+  const router = useRouter()
+
+  function listItemOnClick() {
+    router.push(`/beta/model/${approval.model}`)
+  }
   function editedAdornement() {
     if (approval.updatedAt > approval.createdAt) {
       return `Updated ${timeDifference(new Date(), new Date(approval.updatedAt))}.`
     }
   }
   return (
-    <Link style={{ textDecoration: 'none' }} href={`/beta/model/${approval.model}`}>
-      <ListItem disablePadding>
-        <ListItemButton>
-          <Stack>
-            <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
-              <Typography color='primary' variant='h6' component='h3' sx={{ fontWeight: 'bold' }}>
-                {approval.model}
-              </Typography>
-              <Typography>{approval.release}</Typography>
-            </Stack>
-            <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
-              <Typography variant='caption'>{`Created ${timeDifference(
-                new Date(),
-                new Date(approval.createdAt)
-              )}.`}</Typography>
-              <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
-                {editedAdornement()}
-              </Typography>
-            </Stack>
+    <ListItem disablePadding>
+      <ListItemButton onClick={listItemOnClick} aria-label={`Review model ${approval.model} ${approval.release}`}>
+        <Stack>
+          <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
+            <Typography color='primary' variant='h6' component='h2' sx={{ fontWeight: 'bold' }}>
+              {approval.model}
+            </Typography>
+            <Typography>{approval.release}</Typography>
           </Stack>
-        </ListItemButton>
-      </ListItem>
-    </Link>
+          <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
+            <Typography variant='caption'>{`Created ${timeDifference(
+              new Date(),
+              new Date(approval.createdAt)
+            )}.`}</Typography>
+            <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
+              {editedAdornement()}
+            </Typography>
+          </Stack>
+        </Stack>
+      </ListItemButton>
+    </ListItem>
   )
 }
