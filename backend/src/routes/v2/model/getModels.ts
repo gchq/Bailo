@@ -2,12 +2,13 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { ModelInterface } from '../../../models/v2/Model.js'
+import { ModelCardInterface } from '../../../models/v2/ModelCard.js'
+import { searchModels } from '../../../services/v2/modelCard.js'
 import { parse } from '../../../utils/validate.js'
-import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 
 export const GetModelFilters = {
   Mine: 'mine',
-  Favourites: 'favourites',
 } as const
 
 export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
@@ -25,44 +26,19 @@ export const getModelsSchema = z.object({
 
 interface GetModelsResponse {
   data: {
-    models: Array<ModelInterface>
+    cards: Array<ModelCardInterface & { model: ModelInterface }>
   }
 }
 
 export const getModels = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
-    const _ = parse(req, getModelsSchema)
+    const {
+      query: { libraries, filters, search, task },
+    } = parse(req, getModelsSchema)
 
-    return res.json({
-      data: {
-        models: [
-          {
-            id: 'example-model',
+    const cards = await searchModels(req.user, libraries, filters, search, task)
 
-            name: 'Example Model',
-            description: 'An example Bailo model',
-
-            visibility: ModelVisibility.Public,
-            deleted: false,
-
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 'example-model-2',
-
-            name: 'Example Model 2',
-            description: 'An example Bailo model 2',
-
-            visibility: ModelVisibility.Public,
-            deleted: false,
-
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
-    })
+    return res.json({ data: { cards } })
   },
 ]
