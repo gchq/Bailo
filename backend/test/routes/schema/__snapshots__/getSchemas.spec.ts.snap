@@ -3,7 +3,25 @@
 exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
 {
   "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_enum_value",
+          "message": "Invalid enum value. Expected 'model' | 'deployment', received 'notValid'",
+          "options": [
+            "model",
+            "deployment",
+          ],
+          "path": [
+            "query",
+            "kind",
+          ],
+          "received": "notValid",
+        },
+      ],
+    },
     "message": "Invalid enum value. Expected 'model' | 'deployment', received 'notValid'",
+    "name": "Error",
   },
 }
 `;

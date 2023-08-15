@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > postModel > 200 > ok 1`] = `
+{
+  "data": {
+    "model": {
+      "_id": "test",
+    },
+  },
+}
+`;
+
+exports[`routes > model > postModel > 400 > no description 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "message": "Must specify model description",
+          "path": [
+            "body",
+            "description",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Must specify model description",
+    "name": "Error",
+  },
+}
+`;

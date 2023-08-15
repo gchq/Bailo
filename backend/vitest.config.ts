@@ -5,5 +5,10 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     restoreMocks: true,
+    include: ['test/**/*.spec.ts'],
+    coverage: {
+      enabled: true,
+      include: ['**/v2/**/*.ts', '**/middleware/**/*.ts'],
+    },
   },
 })

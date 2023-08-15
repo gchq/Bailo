@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
+import { parse } from '../../../utils/validate.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 
 export const patchModelSchema = z.object({

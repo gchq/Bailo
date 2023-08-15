@@ -4,6 +4,8 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
+import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -87,7 +89,12 @@ if (config.oauth.enabled) {
 }
 
 server.use(getUser)
+
 server.use(expressLogger)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressLoggerV2)
+}
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
@@ -98,11 +105,14 @@ if (config.oauth.enabled) {
   })
 
   server.get('/api/logout', (req, res) => {
-    req.session.destroy(function () {
+    req.session.destroy(function (err: unknown) {
+      if (err) throw err
       res.redirect('/')
     })
   })
 }
+
+// V1 APIs
 
 server.post('/api/v1/model', ...postUpload)
 
@@ -231,4 +241,8 @@ if (config.experimental.v2) {
   logger.info('Not using experimental V2 endpoints')
 }
 
-server.use('/api', expressErrorHandler)
+server.use('/api/v1', expressErrorHandler)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressErrorHandlerV2)
+}

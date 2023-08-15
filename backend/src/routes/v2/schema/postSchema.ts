@@ -2,11 +2,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { createSchema } from '../../../services/v2/schema.js'
 import { SchemaKind } from '../../../types/v2/enums.js'
 import { ensureUserRole } from '../../../utils/user.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const postSchemaSchema = z.object({
   body: z.object({
