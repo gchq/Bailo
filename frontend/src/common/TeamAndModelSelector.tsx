@@ -90,7 +90,6 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
           id={`${label}-input`}
           sx={{ width: 200 }}
           freeSolo
-          tabIndex={0}
           autoSelect
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}
           options={data.map((option) => option.label)}
