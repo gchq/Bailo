@@ -1,6 +1,7 @@
 import { List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetApprovalRequestsForUser } from 'actions/approval'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { timeDifference } from 'utils/dateUtils'
 
 import { ApprovalRequestInterface } from '../../types/types'
@@ -9,17 +10,27 @@ import Loading from '../common/Loading'
 
 type ApprovalsListProps = {
   isActive?: boolean
+  kind?: 'release' | 'access' | 'all'
 }
 
-export default function ApprovalsList({ isActive = true }: ApprovalsListProps) {
+export default function ApprovalsList({ isActive = true, kind = 'all' }: ApprovalsListProps) {
   const { approvals, isApprovalsLoading } = useGetApprovalRequestsForUser(isActive)
+  const [filteredApprovals, setFilteredApprovals] = useState<ApprovalRequestInterface[]>([])
+
+  useEffect(() => {
+    if (kind === 'all') {
+      setFilteredApprovals(approvals)
+    } else {
+      setFilteredApprovals(approvals.filter((filteredApproval) => filteredApproval.kind === kind))
+    }
+  }, [approvals, setFilteredApprovals, kind])
 
   return (
     <>
       {isApprovalsLoading && <Loading />}
-      {approvals.length === 0 && <EmptyBlob text='No approvals found' />}
+      {filteredApprovals.length === 0 && <EmptyBlob text='No approvals found' />}
       <List>
-        {approvals.map((approval) => (
+        {filteredApprovals.map((approval) => (
           <ApprovalItem key={approval.release} approval={approval} />
         ))}
       </List>

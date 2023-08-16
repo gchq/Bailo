@@ -36,7 +36,7 @@ export const getApprovals = [
               {
                 model: 'yolo',
                 release: '3.0.2',
-                kind: 'technical',
+                kind: 'release',
                 isActive: true,
                 createdAt: new Date('08/13/2023'),
                 updatedAt: new Date('08/14/2023'),
@@ -44,7 +44,7 @@ export const getApprovals = [
               {
                 model: 'yolo',
                 release: '3.0.1',
-                kind: 'technical',
+                kind: 'release',
                 isActive: true,
                 createdAt: new Date('08/12/2023'),
                 updatedAt: new Date('08/12/2023'),
@@ -58,7 +58,7 @@ export const getApprovals = [
               {
                 model: 'yolo',
                 release: '3.0.0',
-                kind: 'technical',
+                kind: 'release',
                 isActive: false,
                 createdAt: new Date('08/11/2023'),
                 updatedAt: new Date('08/11/2023'),

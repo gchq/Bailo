@@ -8,7 +8,8 @@ export default function Review() {
       <PageWithTabs
         title='Your Reviews'
         tabs={[
-          { title: 'Your reviews', view: <ApprovalsList /> },
+          { title: 'Release reviews', view: <ApprovalsList kind='release' /> },
+          { title: 'Access request reviews', view: <ApprovalsList kind='access' /> },
           { title: 'Archived', view: <ApprovalsList isActive={false} /> },
         ]}
         displayActionButton={false}
