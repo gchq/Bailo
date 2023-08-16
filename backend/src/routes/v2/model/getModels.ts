@@ -46,7 +46,7 @@ export const getModels = [
             collaborators: [
               {
                 entity: 'user:user',
-                roles: ['admin'],
+                roles: ['owner'],
               },
             ],
 
@@ -65,7 +65,7 @@ export const getModels = [
             collaborators: [
               {
                 entity: 'user:user',
-                roles: ['admin'],
+                roles: ['owner'],
               },
             ],
 
