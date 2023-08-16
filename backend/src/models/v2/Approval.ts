@@ -9,7 +9,6 @@ export interface ApprovalRequestInterface {
   release: string
   kind: string
   isActive: boolean
-  entities: Array<string>
   createdAt: Date
   updatedAt: Date
 }
@@ -25,7 +24,6 @@ const ApprovalRequestSchema = new Schema<ApprovalRequestInterface>(
     release: { type: String, required: true },
     kind: { type: String, required: true },
     isActive: { type: Boolean, required: true },
-    entities: [{ type: String }],
   },
   {
     timestamps: true,
@@ -36,7 +34,7 @@ const ApprovalRequestSchema = new Schema<ApprovalRequestInterface>(
 ApprovalRequestSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
+  deletedByType: String,
 })
 
 const ApprovalRequestModel = model<ApprovalRequestInterface>('v2_Approval', ApprovalRequestSchema)
