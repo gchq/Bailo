@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { ApprovalRequestInterface } from '../../../models/v2/Approval.js'
 import { BadReq } from '../../../utils/v2/error.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getApprovalsSchema = z.object({
   query: z.object({
