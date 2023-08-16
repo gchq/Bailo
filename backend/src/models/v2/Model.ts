@@ -8,6 +8,11 @@ export const ModelVisibility = {
 
 export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
 
+export interface CollaboratorEntry {
+  entity: string
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -16,6 +21,8 @@ export interface ModelInterface {
 
   name: string
   description: string
+
+  collaborators: Array<CollaboratorEntry>
 
   visibility: ModelVisibilityKeys
   deleted: boolean
@@ -35,6 +42,13 @@ const ModelSchema = new Schema<ModelInterface>(
 
     name: { type: String, required: true },
     description: { type: String, required: true },
+
+    collaborators: [
+      {
+        entity: { type: String, required: true },
+        roles: [{ type: String }],
+      },
+    ],
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
   },

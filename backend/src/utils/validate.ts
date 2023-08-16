@@ -1,7 +1,7 @@
 import { Request } from 'express'
 import z, { AnyZodObject, ZodError } from 'zod'
 
-import { BadReq } from '../utils/v2/error.js'
+import { BadReq } from './v2/error.js'
 
 export function parse<T extends AnyZodObject>(req: Request, schema: T): z.infer<T> {
   try {

@@ -52,7 +52,7 @@ export default function ExpandableButton({ label, icon, onClick, ariaLabel }: Ex
         onMouseLeave={() => setHover(!hover)}
         onClick={() => onClick()}
         variant='outlined'
-        data-test='expandable-button'
+        data-test='expandableButton'
         aria-label={ariaLabel}
         sx={{ color: 'white', borderColor: 'white !important' }}
       >

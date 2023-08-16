@@ -4,6 +4,9 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
+import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
+import { getUser as getUserV2 } from './middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -63,6 +66,7 @@ import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
+import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
@@ -87,8 +91,13 @@ if (config.oauth.enabled) {
   )
 }
 
-server.use(getUser)
-server.use(expressLogger)
+server.use('/api/v1', getUser)
+server.use('/api/v1', expressLogger)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', getUserV2)
+  server.use('/api/v2', expressLoggerV2)
+}
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
@@ -99,11 +108,14 @@ if (config.oauth.enabled) {
   })
 
   server.get('/api/logout', (req, res) => {
-    req.session.destroy(function () {
+    req.session.destroy(function (err: unknown) {
+      if (err) throw err
       res.redirect('/')
     })
   })
 }
+
+// V1 APIs
 
 server.post('/api/v1/model', ...postUpload)
 
@@ -202,6 +214,7 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
+  server.post('/api/v2/schemas', ...postSchemaV2)
 
   // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
@@ -234,4 +247,8 @@ if (config.experimental.v2) {
   logger.info('Not using experimental V2 endpoints')
 }
 
-server.use('/api', expressErrorHandler)
+server.use('/api/v1', expressErrorHandler)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressErrorHandlerV2)
+}

@@ -1,4 +1,4 @@
-import convertNameToUrlFormat from '../utils/convertNameToUrlFormat'
+import convertNameToUrlFormat from '../../utils/convertNameToUrlFormat'
 
 let modelUrl = ''
 

@@ -22,11 +22,11 @@ proxy_set_header X-User '{"some":"data"}';
 ```
 
 To support other authentication mechanisms, an administrator can override the `getUserFromReq` method to get this
-information from any other method. To do this edit `backend/src/external/Authorisation.ts` to override the required
+information from any other method. To do this edit `backend/src/connectors/Authorisation.ts` to override the required
 methods from `backend/src/utils/AuthorisationBase.ts`. E.g.
 
 ```javascript
-// backend/src/external/Authorisation.ts
+// backend/src/connectors/Authorisation.ts
 import AuthorisationBase from '../utils/AuthorisationBase.js'
 import { Request } from 'express'
 
@@ -67,7 +67,7 @@ This authorisation affects both users directly viewing a model, as well as the m
 An example authorisation implemention:
 
 ```javascript
-// backend/src/external/Authorisation.ts
+// backend/src/connectors/Authorisation.ts
 import AuthorisationBase from '../utils/AuthorisationBase.js'
 import { UserDoc } from '../models/User.js'
 import { VersionDoc } from '../models/Version.js'

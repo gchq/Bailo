@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../middleware/validate.js'
+import { parse } from '../../../../utils/validate.js'
 import { FileCategory } from '../../../../models/v2/File.js'
 
 export const postStartMultipartUploadSchema = z.object({

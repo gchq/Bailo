@@ -34,7 +34,7 @@ const mockAudit = {
   onModelVersionUpdate: vi.fn(() => Promise.resolve()),
 }
 
-vi.mock('../../external/Audit.js', () => {
+vi.mock('../../connectors/Audit.js', () => {
   return {
     __esModule: true,
     default: mockAudit,

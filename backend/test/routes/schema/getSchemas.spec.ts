@@ -3,6 +3,9 @@ import { describe, expect, test, vi } from 'vitest'
 import { testGet } from '../../testUtils/routes.js'
 import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModels.js'
 
+vi.mock('../../../src/utils/config.js')
+vi.mock('../../../src/utils/user.js')
+
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),

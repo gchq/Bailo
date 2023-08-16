@@ -1,6 +1,6 @@
 import { basename } from 'path'
 
-import Authorisation from '../external/Authorisation.js'
+import Authorisation from '../connectors/Authorisation.js'
 import VersionModel from '../models/Version.js'
 import { DateString, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { FileRef } from '../utils/build/build.js'

@@ -1,4 +1,4 @@
-import Authorisation from '../external/Authorisation.js'
+import Authorisation from '../connectors/Authorisation.js'
 import DeploymentModel from '../models/Deployment.js'
 import VersionModel from '../models/Version.js'
 import { simpleEmail } from '../templates/simpleEmail.js'

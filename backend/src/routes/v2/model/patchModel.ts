@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
+import { parse } from '../../../utils/validate.js'
 
 export const patchModelSchema = z.object({
   body: z.object({
@@ -36,6 +36,13 @@ export const patchModel = [
 
           name: 'Example Model 2',
           description: 'An example Bailo model 2',
+
+          collaborators: [
+            {
+              entity: 'user:user',
+              roles: ['owner'],
+            },
+          ],
 
           visibility: ModelVisibility.Public,
           deleted: false,

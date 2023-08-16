@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > getModel > 200 > ok 1`] = `
+{
+  "data": {
+    "model": {
+      "_id": "test",
+    },
+  },
+}
+`;

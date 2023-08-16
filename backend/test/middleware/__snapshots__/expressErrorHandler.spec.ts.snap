@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`middleware > expressErrorHandler > good error 1`] = `
+[
+  {
+    "error": {
+      "context": {
+        "fake": true,
+      },
+      "message": "message",
+      "name": "test",
+    },
+  },
+]
+`;
