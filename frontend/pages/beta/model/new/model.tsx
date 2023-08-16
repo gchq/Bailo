@@ -16,6 +16,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import MarkdownEditor from 'src/common/MarkdownEditor'
 
 import { postModel } from '../../../../actions/model'
 import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
@@ -98,9 +99,15 @@ export default function NewModel() {
               </Stack>
               <Stack>
                 <FormControl>
-                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                  {/* <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography>
+                  </Typography> */}
+                  <MarkdownEditor
+                    setDataValue={function (string: any): void {
+                      throw new Error('Function not implemented.')
+                    }}
+                    dataValue={''}
+                  ></MarkdownEditor>
                   <TextField
                     id='new-model-description'
                     required
