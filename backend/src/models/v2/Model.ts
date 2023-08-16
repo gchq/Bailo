@@ -10,7 +10,7 @@ export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVis
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'admin' | 'write' | 'read' | string>
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
 // This interface stores information about the properties on the base object.

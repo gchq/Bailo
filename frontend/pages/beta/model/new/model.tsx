@@ -57,7 +57,7 @@ export default function NewModel() {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
     )
@@ -69,7 +69,7 @@ export default function NewModel() {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>
     )
@@ -112,7 +112,6 @@ export default function NewModel() {
                     required
                     size='small'
                     value={description}
-                    tabIndex={0}
                     onChange={(e) => setDescription(e.target.value)}
                     data-test='modelDescription'
                   />
@@ -147,13 +146,7 @@ export default function NewModel() {
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button
-                    tabIndex={0}
-                    variant='contained'
-                    disabled={!formValid}
-                    type='submit'
-                    data-test='createModelButton'
-                  >
+                  <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
                     Create Model
                   </Button>
                 </span>

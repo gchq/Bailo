@@ -40,7 +40,7 @@ export const patchModel = [
           collaborators: [
             {
               entity: 'user:user',
-              roles: ['admin'],
+              roles: ['owner'],
             },
           ],
 
