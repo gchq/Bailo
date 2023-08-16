@@ -42,7 +42,7 @@ const ModelSchema = new Schema<ModelInterface>(
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
 
-    entities: { type: Array<Entity> },
+    entities: [{ type: Object }],
   },
   {
     timestamps: true,

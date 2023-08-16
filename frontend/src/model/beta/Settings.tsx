@@ -1,7 +1,7 @@
-import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import { useState } from 'react'
 
-import { ModelInterface } from '../../../types/types'
+import { ModelInterface } from '../../../types/v2/types'
 import ModelAccess from './settings/ModelAccess'
 
 type SettingsCategory = 'general' | 'danger'
@@ -26,15 +26,8 @@ export default function Settings({ model }: { model: ModelInterface }) {
           </ListItemButton>
         </ListItem>
       </List>
-      <Box>
-        {selectedCategory === 'general' && (
-          <>
-            <Typography variant='h6' component='h2'>
-              Manage model access
-            </Typography>
-            <ModelAccess model={model} />
-          </>
-        )}
+      <Box sx={{ maxWidth: '750px' }}>
+        {selectedCategory === 'general' && <ModelAccess model={model} />}
         {selectedCategory === 'danger' && (
           <>
             <Button variant='contained' disabled>

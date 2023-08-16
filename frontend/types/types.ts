@@ -370,7 +370,7 @@ export interface ModelInterface {
   name: string
   description: string
   visibility: ModelVisibilityKeys
-  owners: Entity[]
+  entities: Entity[]
 }
 
 export type ModelForm = Omit<ModelInterface, 'id'>
