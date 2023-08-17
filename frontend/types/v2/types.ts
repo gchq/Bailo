@@ -18,5 +18,5 @@ export interface ModelInterface {
   name: string
   description: string
   visibility: ModelVisibilityKeys
-  entities: Entity[]
+  collaborators: Entity[]
 }

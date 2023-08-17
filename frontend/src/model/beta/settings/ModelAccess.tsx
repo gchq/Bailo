@@ -1,9 +1,11 @@
 import ClearIcon from '@mui/icons-material/Clear'
+import GroupsIcon from '@mui/icons-material/Groups'
+import PersonIcon from '@mui/icons-material/Person'
 import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
+  Chip,
   IconButton,
   List,
   ListItem,
@@ -11,6 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import _ from 'lodash-es'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { useListUsers } from '../../../../actions/user'
@@ -20,19 +23,24 @@ import Loading from '../../../common/Loading'
 
 export default function ModelAccess({ model }: { model: ModelInterface }) {
   const [open, setOpen] = useState(false)
-  const [accessList, setAccessList] = useState<Entity[]>(model.entities)
+  const [accessList, setAccessList] = useState<Entity[]>(model.collaborators)
   const { users, isUsersLoading } = useListUsers()
 
   useEffect(() => {
     if (model) {
-      setAccessList(model.entities)
+      setAccessList(model.collaborators)
     }
   }, [model, setAccessList])
 
   function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: User | null) {
-    if (newValue && accessList.find(({ entity }) => entity === `user:${newValue.id}`) === undefined) {
+    if (
+      newValue &&
+      accessList.find(({ entity }) => entity === `user:${newValue.id}`) === undefined &&
+      newValue &&
+      accessList.find(({ entity }) => entity === `group:${newValue.id}`) === undefined
+    ) {
       const updatedAccessList = accessList
-      const newAccess = { entity: `user:${newValue.id}`, roles: ['maintainer'] }
+      const newAccess = { entity: `user:${newValue.id}`, roles: ['consumer'] }
       updatedAccessList.push(newAccess)
       setAccessList(accessList)
     }
@@ -72,7 +80,7 @@ export default function ModelAccess({ model }: { model: ModelInterface }) {
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {isUsersLoading ? <CircularProgress color='inherit' size={20} /> : null}
+                        {isUsersLoading ? <Loading /> : null}
                         {params.InputProps.endAdornment}
                       </>
                     ),
@@ -80,15 +88,28 @@ export default function ModelAccess({ model }: { model: ModelInterface }) {
                 />
               )}
             />
-            <List>
-              {accessList &&
-                accessList.map((entity) => (
-                  <ListItem key={entity.entity}>
-                    <EntityItem entity={entity} accessList={accessList} setAccessList={setAccessList} />
-                  </ListItem>
-                ))}
-            </List>
-            <Button onClick={updateAccessList}>Save</Button>
+            <Box
+              sx={{
+                overflowY: 'auto',
+                maxHeight: '400px',
+                border: 'solid 1px',
+                padding: '20px',
+                borderColor: '#e0e0e0',
+                borderRadius: 1,
+              }}
+            >
+              <List disablePadding>
+                {accessList &&
+                  accessList.map((entity) => (
+                    <ListItem key={entity.entity}>
+                      <EntityItem entity={entity} accessList={accessList} setAccessList={setAccessList} />
+                    </ListItem>
+                  ))}
+              </List>
+            </Box>
+            <Button variant='outlined' aria-label='Save access list button' onClick={updateAccessList}>
+              Save
+            </Button>
           </Stack>
         </Box>
       )}
@@ -106,11 +127,15 @@ function EntityItem({
   setAccessList: Dispatch<SetStateAction<Entity[]>>
 }) {
   const roles = ['consumer', 'contributor', 'owner']
+  const fixedOptions = ['consumer']
 
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
-    const updatedAccessList = accessList
+    const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
-    updatedAccessList[index].roles = newValues
+    updatedAccessList[index].roles = [
+      ...fixedOptions,
+      ...newValues.filter((option) => fixedOptions.indexOf(option) === -1),
+    ]
     setAccessList(updatedAccessList)
   }
 
@@ -118,20 +143,33 @@ function EntityItem({
     setAccessList(accessList.filter((access) => access.entity !== entity.entity))
   }
 
+  function rowIcon() {
+    return entity.entity.startsWith('user:') ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
+  }
+
   return (
     <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2} sx={{ width: '100%' }}>
-      <Typography>{entity.entity}</Typography>
+      <>{rowIcon()}</>
+      <Typography>{entity.entity.replace('user:', '').replace('group:', '')}</Typography>
       <Autocomplete
         id='role-selector'
         sx={{ width: '100%' }}
         size='small'
         multiple
+        aria-label={`role selector input for entity ${entity.entity}`}
+        value={entity.roles}
         options={roles}
         getOptionLabel={(role) => role}
         onChange={onRoleChange}
         renderInput={(params) => <TextField {...params} label='Select roles' />}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            // eslint-disable-next-line react/jsx-key
+            <Chip label={option} {...getTagProps({ index })} disabled={fixedOptions.indexOf(option) !== -1} />
+          ))
+        }
       />
-      <IconButton onClick={removeEntity} aria-label='delete' size='large'>
+      <IconButton onClick={removeEntity} aria-label={`remove user ${entity.entity} from model access list button`}>
         <ClearIcon color='secondary' fontSize='inherit' />
       </IconButton>
     </Stack>
