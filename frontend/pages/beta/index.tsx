@@ -66,7 +66,7 @@ export default function ExploreModels() {
   }
 
   const handleNewModelClicked = () => {
-    router.push('/beta/model/new/model')
+    router.push('/beta/model/new')
   }
 
   const onFilterSubmit = (e: React.FormEvent) => {
