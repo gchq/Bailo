@@ -1,13 +1,15 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { ApprovalKind, ApprovalKindKeys } from '../../types/v2/enums.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ApprovalRequestInterface {
   model: string
   release: string
-  kind: string
+  kind: ApprovalKindKeys
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -22,7 +24,7 @@ const ApprovalRequestSchema = new Schema<ApprovalRequestInterface>(
   {
     model: { type: String, required: true },
     release: { type: String, required: true },
-    kind: { type: String, required: true },
+    kind: { type: String, enum: Object.values(ApprovalKind), required: true },
     isActive: { type: Boolean, required: true },
   },
   {
