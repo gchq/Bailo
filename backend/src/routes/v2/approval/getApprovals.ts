@@ -7,9 +7,7 @@ import { parse } from '../../../utils/v2/validate.js'
 
 export const getApprovalsSchema = z.object({
   query: z.object({
-    isActive: z.coerce.boolean({
-      required_error: 'Missing parameter isActive.',
-    }),
+    isActive: z.enum(['true', 'false']).transform((value) => value === 'true'),
   }),
 })
 
@@ -25,8 +23,6 @@ export const getApprovals = [
     const {
       query: { isActive },
     } = parse(req, getApprovalsSchema)
-
-    console.log(req.query, isActive)
 
     return isActive
       ? res.json({
