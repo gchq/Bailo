@@ -1,0 +1,46 @@
+variables:
+  TAG: latest
+backend-build:
+  stage: build
+  rules:
+      - if: $CI_COMMIT_BRANCH == "main"
+        when: manual
+        allow_failure: true
+  #    - if: $CI_PIPELINE_SOURCE == "schedule"
+  image: 
+    name: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python3 py3-pip
+    - pip install awscli
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY
+    - aws --version
+    - docker info
+    - docker --version
+    - cd backend
+  script:
+    - docker build -t $DOCKER_REGISTRY/$APP_NAME_BACKEND:$TAG .
+    - docker push $DOCKER_REGISTRY/$APP_NAME_BACKEND:$TAG
+frontend-build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      allow_failure: true
+#    - if: $CI_PIPELINE_SOURCE == "schedule"
+  image: 
+    name: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python3 py3-pip
+    - pip install awscli
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY
+    - aws --version
+    - docker info
+    - docker --version
+    - cd frontend
+  script:
+    - docker build -t $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$TAG .
+    - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$TAG
