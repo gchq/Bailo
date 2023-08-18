@@ -2,9 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../utils/validate.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { findSchemaById } from '../../../services/v2/schema.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
   params: z.object({

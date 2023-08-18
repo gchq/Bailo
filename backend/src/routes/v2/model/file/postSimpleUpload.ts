@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
 import { FileCategory } from '../../../../models/v2/File.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
   params: z.object({
