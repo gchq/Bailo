@@ -1,11 +1,6 @@
 // TODO Once beta has been completed these types need to be merged back into types/types.
 // Please note that some of these types have been duplicated, merge accordingly!
 
-export type Entity = {
-  entity: string
-  roles: string[]
-}
-
 export const ModelVisibility = {
   Private: 'private',
   Public: 'public',
@@ -18,5 +13,10 @@ export interface ModelInterface {
   name: string
   description: string
   visibility: ModelVisibilityKeys
-  collaborators: Entity[]
+  collaborators: CollaboratorEntry[]
+}
+
+export interface CollaboratorEntry {
+  entity: string
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }

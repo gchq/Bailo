@@ -25,7 +25,8 @@ import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType, ModelInterface } from '../../types/types'
+import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
+import { ModelInterface } from '../../types/v2/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
