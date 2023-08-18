@@ -35,7 +35,8 @@ export default class MinioStore {
     logger.info({ bucket, path }, 'Uploading file to Minio')
 
     try {
-      await this.client.putObject(bucket, path, file.stream, file.size)
+      await this.client.putObject(bucket, path, file.stream)
+
       logger.info({ bucket, path }, 'Finished uploading file to Minio')
     } catch (e) {
       logger.error({ error: e }, 'Unable to add file to Minio')
