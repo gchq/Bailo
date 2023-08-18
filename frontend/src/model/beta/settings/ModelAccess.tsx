@@ -14,7 +14,6 @@ type ModelAccessProps = {
 }
 
 export default function ModelAccess({ model }: ModelAccessProps) {
-  console.log(model)
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const { users, isUsersLoading } = useListUsers()
