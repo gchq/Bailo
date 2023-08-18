@@ -142,7 +142,7 @@ export default function ExploreModels() {
         <Box sx={{ width: '100%' }}>
           <Paper sx={{ py: 2, px: 4 }}>
             <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-              <Tabs value={'bailo'}>
+              <Tabs value={'bailo'} indicatorColor='secondary'>
                 <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
               </Tabs>
             </Box>
