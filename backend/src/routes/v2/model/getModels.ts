@@ -5,13 +5,8 @@ import { z } from 'zod'
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { ModelCardInterface } from '../../../models/v2/ModelCard.js'
 import { searchModels } from '../../../services/v2/modelCard.js'
+import { GetModelFilters } from '../../../types/v2/enums.js'
 import { coerceArray, parse } from '../../../utils/v2/validate.js'
-
-export const GetModelFilters = {
-  Mine: 'mine',
-} as const
-
-export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
 
 export const getModelsSchema = z.object({
   query: z.object({

@@ -1,7 +1,7 @@
 import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
 import ModelCardModel from '../../models/v2/ModelCard.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { GetModelFiltersKeys } from '../../routes/v2/model/getModels.js'
+import { GetModelFiltersKeys } from '../../types/v2/enums.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq } from '../../utils/v2/error.js'
 
@@ -31,6 +31,11 @@ export async function searchModels(
   }
 
   for (const filter of filters) {
+    // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
+    // enum.  Eslint will throw an error if we are not exhaustiviely matching all the enum options,
+    // which makes it far harder to forget.
+    // At the moment it does not do anything, as we already have TypeScript checking to ensure there
+    // are no unexpected filters.
     switch (filter) {
       case 'mine':
         // Handled below
