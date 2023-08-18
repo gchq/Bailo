@@ -20,7 +20,7 @@ export function useListModels(type: ListModelType, filter?: string) {
     },
     ErrorInfo
   >(
-    `/api/v2/models?${qs.stringify({
+    `/api/v2/models/search?${qs.stringify({
       type,
       filter,
     })}`,
