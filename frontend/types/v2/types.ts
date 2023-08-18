@@ -20,3 +20,5 @@ export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
+
+export type ModelForm = Omit<ModelInterface, 'id' | 'collaborators'>

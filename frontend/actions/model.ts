@@ -2,8 +2,8 @@ import axios from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { ListModelType, ModelForm } from '../types/types'
-import { ModelInterface } from '../types/v2/types'
+import { ListModelType } from '../types/types'
+import { ModelForm, ModelInterface } from '../types/v2/types'
 import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
