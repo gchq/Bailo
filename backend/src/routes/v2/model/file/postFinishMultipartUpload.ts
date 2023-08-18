@@ -14,9 +14,7 @@ export const postFinishMultipartUploadSchema = z.object({
 })
 
 interface PostFinishMultipartUpload {
-  data: {
-    message: string
-  }
+  message: string
 }
 
 export const postFinishMultipartUpload = [
@@ -24,9 +22,7 @@ export const postFinishMultipartUpload = [
     const _ = parse(req, postFinishMultipartUploadSchema)
 
     return res.json({
-      data: {
-        message: 'Successfully finished multipart upload.',
-      },
+      message: 'Successfully finished multipart upload.',
     })
   },
 ]

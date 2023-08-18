@@ -24,10 +24,8 @@ interface PresignedChunk {
 }
 
 interface PostStartMultipartUpload {
-  data: {
-    fileId: string
-    chunks: Array<PresignedChunk>
-  }
+  fileId: string
+  chunks: Array<PresignedChunk>
 }
 
 export const postStartMultipartUpload = [
@@ -35,16 +33,14 @@ export const postStartMultipartUpload = [
     const _ = parse(req, postStartMultipartUploadSchema)
 
     return res.json({
-      data: {
-        fileId: 'random_hash',
-        chunks: [
-          {
-            presignedUrl: 'https://example.com/',
-            startByte: 0,
-            endByte: 49392,
-          },
-        ],
-      },
+      fileId: 'random_hash',
+      chunks: [
+        {
+          presignedUrl: 'https://example.com/',
+          startByte: 0,
+          endByte: 49392,
+        },
+      ],
     })
   },
 ]

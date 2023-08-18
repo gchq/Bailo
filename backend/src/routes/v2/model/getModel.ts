@@ -15,9 +15,7 @@ export const getModelSchema = z.object({
 })
 
 interface GetModelResponse {
-  data: {
-    model: ModelInterface
-  }
+  model: ModelInterface
 }
 
 export const getModel = [
@@ -28,9 +26,7 @@ export const getModel = [
     const model = await getModelById(req.user, params.modelId)
 
     return res.json({
-      data: {
-        model,
-      },
+      model,
     })
   },
 ]
