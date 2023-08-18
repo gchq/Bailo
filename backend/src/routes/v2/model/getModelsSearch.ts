@@ -33,7 +33,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     const {
       query: { libraries, filters, search, task },
-    } = parse(req, getModelsSearch)
+    } = parse(req, getModelsSearchSchema)
 
     const cards = await searchModels(req.user, libraries, filters, search, task)
     const models = cards.map((card) => ({
