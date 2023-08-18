@@ -18,12 +18,12 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
-import { Entity, ModelInterface } from '../../../../types/v2/types'
+import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 import Loading from '../../../common/Loading'
 
 export default function ModelAccess({ model }: { model: ModelInterface }) {
   const [open, setOpen] = useState(false)
-  const [accessList, setAccessList] = useState<Entity[]>(model.collaborators)
+  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const { users, isUsersLoading } = useListUsers()
 
   useEffect(() => {
@@ -122,9 +122,9 @@ function EntityItem({
   accessList,
   setAccessList,
 }: {
-  entity: Entity
-  accessList: Entity[]
-  setAccessList: Dispatch<SetStateAction<Entity[]>>
+  entity: CollaboratorEntry
+  accessList: CollaboratorEntry[]
+  setAccessList: Dispatch<SetStateAction<CollaboratorEntry[]>>
 }) {
   const roles = ['consumer', 'contributor', 'owner']
   const fixedOptions = ['consumer']
