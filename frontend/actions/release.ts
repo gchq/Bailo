@@ -8,14 +8,14 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 export function useGetReleasesForModelId(id?: string) {
   const { data, error, mutate } = useSWR<
     {
-      data: { releases: ReleaseInterface[] }
+      releases: ReleaseInterface[]
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}/releases` : null, fetcher)
 
   return {
     mutateReleases: mutate,
-    releases: data ? data.data.releases : [],
+    releases: data ? data.releases : [],
     isReleasesLoading: !error && !data,
     isReleasesError: error,
   }
@@ -29,7 +29,7 @@ export async function postRelease(release: Partial<ReleaseInterface>, modelId: s
       headers: { 'Content-Type': 'application/json' },
       data: release,
     })
-    return { status: response.status, data: response.data.data }
+    return { status: response.status, data: response.data }
   } catch (error) {
     return handleAxiosError(error)
   }

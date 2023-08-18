@@ -19,9 +19,7 @@ export const patchModelSchema = z.object({
 })
 
 interface PatchModelResponse {
-  data: {
-    model: ModelInterface
-  }
+  model: ModelInterface
 }
 
 export const patchModel = [
@@ -30,26 +28,24 @@ export const patchModel = [
     const _ = parse(req, patchModelSchema)
 
     return res.json({
-      data: {
-        model: {
-          id: 'example-model-2',
+      model: {
+        id: 'example-model-2',
 
-          name: 'Example Model 2',
-          description: 'An example Bailo model 2',
+        name: 'Example Model 2',
+        description: 'An example Bailo model 2',
 
-          collaborators: [
-            {
-              entity: 'user:user',
-              roles: ['owner'],
-            },
-          ],
+        collaborators: [
+          {
+            entity: 'user:user',
+            roles: ['owner'],
+          },
+        ],
 
-          visibility: ModelVisibility.Public,
-          deleted: false,
+        visibility: ModelVisibility.Public,
+        deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

@@ -14,9 +14,7 @@ export const getFilesSchema = z.object({
 })
 
 interface GetFilesResponse {
-  data: {
-    files: Array<FileInterface>
-  }
+  files: Array<FileInterface>
 }
 
 export const getFiles = [
@@ -25,25 +23,23 @@ export const getFiles = [
     const _ = parse(req, getFilesSchema)
 
     return res.json({
-      data: {
-        files: [
-          {
-            modelId: 'example-model',
+      files: [
+        {
+          modelId: 'example-model',
 
-            name: 'example-file',
-            category: FileCategory.Other,
-            size: 1024,
+          name: 'example-file',
+          category: FileCategory.Other,
+          size: 1024,
 
-            bucket: 'uploads',
-            path: '/example/upload/path',
+          bucket: 'uploads',
+          path: '/example/upload/path',
 
-            complete: true,
+          complete: true,
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     })
   },
 ]

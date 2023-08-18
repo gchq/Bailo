@@ -19,9 +19,7 @@ export const getModelCardSchema = z.object({
 })
 
 interface GetModelCardResponse {
-  data: {
-    modelCard: ModelCardInterface
-  }
+  modelCard: ModelCardInterface
 }
 
 export const getModelCard = [
@@ -30,18 +28,16 @@ export const getModelCard = [
     const _ = parse(req, getModelCardSchema)
 
     return res.json({
-      data: {
-        modelCard: {
-          modelId: 'example-model',
-          schemaId: 'example-schema',
+      modelCard: {
+        modelId: 'example-model',
+        schemaId: 'example-schema',
 
-          version: 1,
-          metadata: { example: true },
+        version: 1,
+        metadata: { example: true },
 
-          createdBy: 'Example User (user)',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdBy: 'Example User (user)',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

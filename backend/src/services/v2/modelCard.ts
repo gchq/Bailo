@@ -1,5 +1,6 @@
 import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
-import ModelCardModel from '../../models/v2/ModelCard.js'
+import { ModelDoc } from '../../models/v2/Model.js'
+import ModelCardModel, { ModelCardDoc } from '../../models/v2/ModelCard.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { GetModelFiltersKeys } from '../../types/v2/enums.js'
 import { asyncFilter } from '../../utils/v2/array.js'
@@ -11,7 +12,7 @@ export async function searchModels(
   filters: Array<GetModelFiltersKeys>,
   search: string,
   task?: string
-) {
+): Promise<Array<ModelCardDoc & { model: ModelDoc }>> {
   const query: any = {}
 
   if (libraries.length) {

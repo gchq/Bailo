@@ -6,14 +6,14 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 export function useGetSchemas() {
   const { data, error, mutate } = useSWR<
     {
-      data: { schemas: SchemaInterface[] }
+      schemas: SchemaInterface[]
     },
     ErrorInfo
   >('/api/v2/schemas/', fetcher)
 
   return {
     mutateSchemas: mutate,
-    schemas: data ? data.data.schemas : [],
+    schemas: data ? data.schemas : [],
     isSchemasLoading: !error && !data,
     isSchemasError: error,
   }
@@ -22,14 +22,14 @@ export function useGetSchemas() {
 export function useGetSchema(id: string) {
   const { data, error, mutate } = useSWR<
     {
-      data: { schema: SchemaInterface }
+      schema: SchemaInterface
     },
     ErrorInfo
   >(id ? `/api/v2/schema/${id}` : null, fetcher)
 
   return {
     mutateSchema: mutate,
-    schema: data ? data.data.schema : undefined,
+    schema: data ? data.schema : undefined,
     isSchemaLoading: !error && !data,
     isSchemaError: error,
   }
