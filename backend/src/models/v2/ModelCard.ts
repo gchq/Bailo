@@ -22,7 +22,7 @@ export type ModelCardInterfaceDoc = ModelCardInterface & Document<any, any, Mode
 
 const ModelCardSchema = new Schema<ModelCardInterface>(
   {
-    modelId: { type: String, required: true },
+    modelId: { type: String, required: true, unique: true, index: true },
     schemaId: { type: String, required: true },
 
     version: { type: Number, required: true },

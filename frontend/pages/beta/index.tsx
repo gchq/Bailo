@@ -40,7 +40,6 @@ export default function ExploreModels() {
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const theme = useTheme()
-  const router = useRouter()
 
   useEffect(() => {
     switch (selectedType) {
@@ -65,10 +64,6 @@ export default function ExploreModels() {
     setFilter(e.target.value)
   }
 
-  const handleNewModelClicked = () => {
-    router.push('/beta/model/new')
-  }
-
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
@@ -80,7 +75,7 @@ export default function ExploreModels() {
           <Typography component='h1' variant='h4' color='primary'>
             Marketplace
           </Typography>
-          <Button variant='contained' onClick={() => handleNewModelClicked()}>
+          <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
           </Button>
           <FormControl
