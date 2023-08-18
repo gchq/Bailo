@@ -12,6 +12,7 @@ export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
 export abstract class BaseAuthorisationConnector {
   abstract userModelAction(user: UserDoc, model: ModelDoc, action: ModelActionKeys): Promise<boolean>
+  abstract getEntities(user: UserDoc): Promise<Array<string>>
 }
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined
