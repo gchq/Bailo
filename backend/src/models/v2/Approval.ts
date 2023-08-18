@@ -1,0 +1,44 @@
+import { Document, model, Schema } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
+
+// This interface stores information about the properties on the base object.
+// It should be used for plain object representations, e.g. for sending to the
+// client.
+export interface ApprovalInterface {
+  model: string
+  release: string
+  kind: string
+  active: boolean
+  entities: Array<string>
+  createdAt: Date
+  updatedAt: Date
+}
+
+// The doc type includes all values in the plain interface, as well as all the
+// properties and functions that Mongoose provides.  If a function takes in an
+// object from Mongoose it should use this interface
+export type ApprovalDoc = ApprovalInterface & Document<any, any, ApprovalInterface>
+
+const ApprovalRequestSchema = new Schema<ApprovalInterface>(
+  {
+    model: { type: String, required: true },
+    release: { type: String, required: true },
+    kind: { type: String, required: true },
+    active: { type: Boolean, required: true },
+    entities: [{ type: String }],
+  },
+  {
+    timestamps: true,
+    collection: 'v2_approvals',
+  }
+)
+
+ApprovalRequestSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+})
+
+const ApprovalRequestModel = model<ApprovalInterface>('v2_Approval', ApprovalRequestSchema)
+
+export default ApprovalRequestModel
