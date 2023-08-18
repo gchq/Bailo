@@ -53,7 +53,7 @@ export default function NewSchemaSelection() {
             </Typography>
             <Schema fontSize='large' color='primary' />
             <Typography variant='body1'>
-              Each organisation may have a different set of questions they require yoy to answer about any model you
+              Each organisation may have a different set of questions they require you to answer about any model you
               create. Select from the list below:
             </Typography>
           </Stack>

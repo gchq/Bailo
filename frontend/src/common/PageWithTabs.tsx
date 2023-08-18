@@ -12,15 +12,15 @@ export interface PageTab {
 export default function PageWithTabs({
   title,
   tabs,
-  actionButtonTitle,
+  actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
 }: {
   title
   tabs: PageTab[]
-  actionButtonTitle: string
+  actionButtonTitle?: string
   displayActionButton?: boolean
-  actionButtonOnClick: () => void
+  actionButtonOnClick?: () => void
 }) {
   const [value, setValue] = useState(0)
 
@@ -34,11 +34,13 @@ export default function PageWithTabs({
           <Typography component='h1' color='primary' variant='h6'>
             {title}
           </Typography>
-          <Button variant='contained' hidden={!displayActionButton} onClick={actionButtonOnClick}>
-            {actionButtonTitle}
-          </Button>
+          {displayActionButton && (
+            <Button variant='contained' onClick={actionButtonOnClick}>
+              {actionButtonTitle}
+            </Button>
+          )}
         </Stack>
-        <Tabs value={value} onChange={handleChange} aria-label='Tabbed view'>
+        <Tabs value={value} onChange={handleChange} aria-label='Tabbed view' indicatorColor='secondary'>
           {tabs.map((tab: PageTab) => {
             return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} />
           })}

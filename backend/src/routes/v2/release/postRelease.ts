@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../utils/validate.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { parse } from '../../../utils/validate.js'
 
 export const postReleaseSchema = z.object({
   params: z.object({

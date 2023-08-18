@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
 import { FileCategory, FileInterface } from '../../../../models/v2/File.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getFilesSchema = z.object({
   params: z.object({
