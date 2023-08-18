@@ -190,9 +190,7 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
                       <Chip color='primary' label={approval.approvalType} size='small' />
                       <Chip color='primary' label={`Version: ${approval.version?.version}`} size='small' />
                       <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
-                        <Typography variant='body1'>
-                          {approval.version?.metadata?.highLevelDetails?.modelInASentence}
-                        </Typography>
+                        <Typography>{approval.version?.metadata?.highLevelDetails?.modelInASentence}</Typography>
                       </Box>
                     </Stack>
                     {approval.version === undefined ||
@@ -214,7 +212,7 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
                         {approval.deployment?.metadata?.highLevelDetails?.name}
                       </MuiLink>
                     </Link>
-                    <Typography variant='body1'>
+                    <Typography>
                       Requesting deployment of{' '}
                       <Link href={`/model/${approval.deployment?.model?.uuid}`} passHref legacyBehavior>
                         <MuiLink
