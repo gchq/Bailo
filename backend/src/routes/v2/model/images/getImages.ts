@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
 import { ImageInterface } from '../../../../models/v2/Image.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
   params: z.object({
