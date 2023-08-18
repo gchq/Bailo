@@ -188,7 +188,14 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId', ...getModel)
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
-  server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+  server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+  // server.get('/api/v2/model/:modelId/model-cards/latest', ...getLatestModelCard)
+  // server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
+
+  // server.get('/api/v2/template/models', ...getModelTemplates)
+  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
@@ -206,11 +213,6 @@ if (config.experimental.v2) {
 
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
-
-  // server.get('/api/v2/template/models', ...getModelTemplates)
-  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
