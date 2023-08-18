@@ -373,8 +373,6 @@ export interface ModelInterface {
   entities: Entity[]
 }
 
-export type ModelForm = Omit<ModelInterface, 'id'>
-
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number

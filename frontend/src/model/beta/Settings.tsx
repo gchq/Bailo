@@ -29,11 +29,9 @@ export default function Settings({ model }: { model: ModelInterface }) {
       <Box sx={{ maxWidth: '750px' }}>
         {selectedCategory === 'general' && <ModelAccess model={model} />}
         {selectedCategory === 'danger' && (
-          <>
-            <Button variant='contained' disabled>
-              Delete model
-            </Button>
-          </>
+          <Button variant='contained' disabled>
+            Delete model
+          </Button>
         )}
       </Box>
     </Stack>

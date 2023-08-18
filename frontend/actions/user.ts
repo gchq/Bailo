@@ -13,7 +13,7 @@ export function useListUsers() {
 
   return {
     mutateUsers: mutate,
-    users: data ? data.users : undefined,
+    users: data ? data.users : [],
     isUsersLoading: !error && !data,
     isUsersError: error,
   }
