@@ -50,16 +50,20 @@ import {
 } from './routes/v1/version.js'
 import { getApprovals as getApprovalsV2 } from './routes/v2/approval/getApprovals.js'
 import { getApprovalsCount as getApprovalsCountV2 } from './routes/v2/approval/getApprovalsCount.js'
+import { getComplianceApprovals } from './routes/v2/model/compliance/getComplianceCheckApprovals.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
-import { getModelCard } from './routes/v2/model/getModelCard.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
+import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
+import { patchModelCard } from './routes/v2/model/modelcard/patchModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
+import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
+import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -189,13 +193,12 @@ if (config.experimental.v2) {
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
   server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
-  // server.get('/api/v2/model/:modelId/model-cards/latest', ...getLatestModelCard)
-  // server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
+  server.patch('/api/v2/model/:modelId/model-cards', ...patchModelCard)
 
-  // server.get('/api/v2/template/models', ...getModelTemplates)
-  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+  // *server.get('/api/v2/template/models', ...getModelTemplates)
+  // *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+  // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+  // *server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
@@ -208,20 +211,20 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
   server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteFile)
 
-  // server.get('/api/v2/model/:modelId/images', ...getImages)
-  // server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+  // *server.get('/api/v2/model/:modelId/images', ...getImages)
+  // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
-  // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
-  // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
+  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
 
-  // server.get('/api/v2/model/:modelId/roles', ...getModelRoles) // This lists all the roles on a model
-  // server.get('/api/v2/model/:modelId/role/:userId', ...getModelUserRole) // This lists all the roles a person has
+  server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
+  server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 
-  // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
+  server.get('/api/v2/model/:modelId/compliance/check-approvals', ...getComplianceApprovals)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
 
   server.post('/api/v2/teams', ...postTeam)
