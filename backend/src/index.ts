@@ -8,8 +8,10 @@ import processDeployments from './processors/processDeployments.js'
 import processUploads from './processors/processUploads.js'
 import { server } from './routes.js'
 import { addDefaultSchemas } from './services/schema.js'
+import { addDefaultSchemas as addDefaultSchemasv2 } from './services/v2/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
+import logger from './utils/logger.js'
 import { ensureBucketExists } from './utils/minio.js'
 import { registerSigTerminate } from './utils/signals.js'
 
@@ -34,11 +36,14 @@ createSchemaIndexes()
 
 // lazily add default schemas
 addDefaultSchemas()
+if (config.experimental.v2) {
+  addDefaultSchemasv2()
+}
 
 await Promise.all([processUploads(), processDeployments()])
 
 const httpServer = server.listen(config.api.port, () => {
-  console.log('Listening on port', config.api.port)
+  logger.info('Listening on port', config.api.port)
 })
 
 registerSigTerminate(httpServer)

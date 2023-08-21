@@ -3,12 +3,20 @@ import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 
+type PartialMessageAlertProps =
+  | {
+      linkText: string
+      href: string
+    }
+  | {
+      linkText?: never
+      href?: never
+    }
+
 type MessageAlertProps = {
   message?: string
   severity?: AlertProps['severity']
-  linkText?: string
-  href?: string
-}
+} & PartialMessageAlertProps
 
 export default function MessageAlert({ message, severity, linkText, href }: MessageAlertProps) {
   if (!message) return null

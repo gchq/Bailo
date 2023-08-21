@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../middleware/validate.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const deleteFileSchema = z.object({
   params: z.object({
@@ -12,9 +12,7 @@ export const deleteFileSchema = z.object({
 })
 
 interface DeleteFileResponse {
-  data: {
-    message: string
-  }
+  message: string
 }
 
 export const deleteFile = [
@@ -23,9 +21,7 @@ export const deleteFile = [
     const _ = parse(req, deleteFileSchema)
 
     return res.json({
-      data: {
-        message: 'Successfully removed file.',
-      },
+      message: 'Successfully removed file.',
     })
   },
 ]

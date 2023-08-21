@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
 
-import Authorisation from '../external/Authorisation.js'
+import Authorisation from '../connectors/Authorisation.js'
 import ModelModel from '../models/Model.js'
 import { Model, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { isUserInEntityList } from '../utils/entity.js'

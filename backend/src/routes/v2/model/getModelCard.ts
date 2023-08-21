@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { ModelCardInterface } from '../../../models/v2/ModelCard.js'
+import { parse } from '../../../utils/validate.js'
 
 export const GetModelCardVersionOptions = {
   Latest: 'latest',
@@ -19,9 +19,7 @@ export const getModelCardSchema = z.object({
 })
 
 interface GetModelCardResponse {
-  data: {
-    modelCard: ModelCardInterface
-  }
+  modelCard: ModelCardInterface
 }
 
 export const getModelCard = [
@@ -30,18 +28,16 @@ export const getModelCard = [
     const _ = parse(req, getModelCardSchema)
 
     return res.json({
-      data: {
-        modelCard: {
-          modelId: 'example-model',
-          schemaId: 'example-schema',
+      modelCard: {
+        modelId: 'example-model',
+        schemaId: 'example-schema',
 
-          version: 1,
-          metadata: { example: true },
+        version: 1,
+        metadata: { example: true },
 
-          createdBy: 'Example User (user)',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdBy: 'Example User (user)',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

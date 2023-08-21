@@ -2,15 +2,13 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { TeamInterface } from '../../../models/v2/Team.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getTeamsSchema = z.object({})
 
 interface GetTeamsResponse {
-  data: {
-    teams: Array<TeamInterface>
-  }
+  teams: Array<TeamInterface>
 }
 
 export const getTeams = [
@@ -19,32 +17,30 @@ export const getTeams = [
     const _ = parse(req, getTeamsSchema)
 
     return res.json({
-      data: {
-        teams: [
-          {
-            id: 'example-team',
+      teams: [
+        {
+          id: 'example-team',
 
-            name: 'Example Team',
-            description: 'An example Bailo team',
+          name: 'Example Team',
+          description: 'An example Bailo team',
 
-            deleted: false,
+          deleted: false,
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 'example-team-2',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'example-team-2',
 
-            name: 'Example Team 2',
-            description: 'An example Bailo team 2',
+          name: 'Example Team 2',
+          description: 'An example Bailo team 2',
 
-            deleted: false,
+          deleted: false,
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     })
   },
 ]

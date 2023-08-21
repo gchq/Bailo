@@ -1,4 +1,4 @@
-/** @type {import('../src/utils/config.js').Config} */
+/** @type {import('../src/utils/v2/config.js').Config} */
 module.exports = {
   api: {
     // Port to listen on
@@ -173,6 +173,7 @@ module.exports = {
       enabled: true,
       text: 'DEPLOYMENT: INSECURE',
       colour: 'orange',
+      textColor: 'black',
     },
 
     // Contact details for the support team
@@ -212,10 +213,24 @@ module.exports = {
         image: 'seldonio/seldon-core-s2i-python37:1.10.0',
       },
     ],
-    maxModelSizeGB: 50
+    maxModelSizeGB: 50,
   },
 
   experimental: {
     v2: false,
+  },
+
+  connectors: {
+    user: {
+      kind: 'silly',
+    },
+
+    authorisation: {
+      kind: 'silly',
+    },
+  },
+
+  log: {
+    level: 'trace',
   },
 }

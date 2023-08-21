@@ -4,6 +4,9 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
+import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
+import { getUser as getUserV2 } from './middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -45,6 +48,8 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getApprovals as getApprovalsV2 } from './routes/v2/approval/getApprovals.js'
+import { getApprovalsCount as getApprovalsCountV2 } from './routes/v2/approval/getApprovalsCount.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
@@ -52,7 +57,7 @@ import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCard } from './routes/v2/model/getModelCard.js'
-import { getModels as getModelsV2 } from './routes/v2/model/getModels.js'
+import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
@@ -61,12 +66,13 @@ import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
+import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
 import config from './utils/config.js'
-import { expressErrorHandler, expressLogger } from './utils/logger.js'
+import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 
 export const server = express()
@@ -85,8 +91,13 @@ if (config.oauth.enabled) {
   )
 }
 
-server.use(getUser)
-server.use(expressLogger)
+server.use('/api/v1', getUser)
+server.use('/api/v1', expressLogger)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', getUserV2)
+  server.use('/api/v2', expressLoggerV2)
+}
 
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
@@ -97,11 +108,14 @@ if (config.oauth.enabled) {
   })
 
   server.get('/api/logout', (req, res) => {
-    req.session.destroy(function () {
+    req.session.destroy(function (err: unknown) {
+      if (err) throw err
       res.redirect('/')
     })
   })
 }
+
+// V1 APIs
 
 server.post('/api/v1/model', ...postUpload)
 
@@ -165,14 +179,23 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
  */
 
 if (config.experimental.v2) {
+  logger.info('Using experimental V2 endpoints')
+
   server.post('/api/v2/models', ...postModel)
-  server.get('/api/v2/models', ...getModelsV2)
+  server.get('/api/v2/models/search', ...getModelsSearch)
   // server.post('/api/v2/models/import', ...postModelImport)
 
   server.get('/api/v2/model/:modelId', ...getModel)
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
-  server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+  server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+  // server.get('/api/v2/model/:modelId/model-cards/latest', ...getLatestModelCard)
+  // server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
+
+  // server.get('/api/v2/template/models', ...getModelTemplates)
+  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
@@ -191,13 +214,12 @@ if (config.experimental.v2) {
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
-  // server.get('/api/v2/template/models', ...getModelTemplates)
-  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
-
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
+  server.post('/api/v2/schemas', ...postSchemaV2)
+
+  // server.get('/api/v2/model/:modelId/roles', ...getModelRoles) // This lists all the roles on a model
+  // server.get('/api/v2/model/:modelId/role/:userId', ...getModelUserRole) // This lists all the roles a person has
 
   // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
@@ -208,6 +230,9 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/team/:teamId', ...getTeam)
   server.patch('/api/v2/team/:teamId', ...patchTeam)
+
+  server.get('/api/v2/approvals', ...getApprovalsV2)
+  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
 
   // server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
   // server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
@@ -223,6 +248,12 @@ if (config.experimental.v2) {
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
   // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
   // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+} else {
+  logger.info('Not using experimental V2 endpoints')
 }
 
-server.use('/api', expressErrorHandler)
+server.use('/api/v1', expressErrorHandler)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressErrorHandlerV2)
+}

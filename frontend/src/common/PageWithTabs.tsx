@@ -1,4 +1,6 @@
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { grey } from '@mui/material/colors/'
+import { useTheme } from '@mui/material/styles'
 import { ReactElement, useState } from 'react'
 
 export interface PageTab {
@@ -10,15 +12,15 @@ export interface PageTab {
 export default function PageWithTabs({
   title,
   tabs,
-  actionButtonTitle,
+  actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
 }: {
   title
   tabs: PageTab[]
-  actionButtonTitle: string
+  actionButtonTitle?: string
   displayActionButton?: boolean
-  actionButtonOnClick: () => void
+  actionButtonOnClick?: () => void
 }) {
   const [value, setValue] = useState(0)
 
@@ -29,14 +31,16 @@ export default function PageWithTabs({
     <>
       <Box>
         <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2} sx={{ p: 2 }}>
-          <Typography color='primary' variant='h6'>
+          <Typography component='h1' color='primary' variant='h6'>
             {title}
           </Typography>
-          <Button variant='contained' hidden={!displayActionButton} onClick={actionButtonOnClick}>
-            {actionButtonTitle}
-          </Button>
+          {displayActionButton && (
+            <Button variant='contained' onClick={actionButtonOnClick}>
+              {actionButtonTitle}
+            </Button>
+          )}
         </Stack>
-        <Tabs value={value} onChange={handleChange} aria-label='Tabbed view'>
+        <Tabs value={value} onChange={handleChange} aria-label='Tabbed view' indicatorColor='secondary'>
           {tabs.map((tab: PageTab) => {
             return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} />
           })}
@@ -63,10 +67,21 @@ interface TabPanelProps {
 
 function CustomTabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
+  const theme = useTheme()
 
   return (
     <div role='tabpanel' hidden={value !== index} {...other}>
-      {value === index && <Box sx={{ backgroundColor: 'white', p: 2, mb: 2 }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{
+            backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],
+            p: 2,
+            mb: 2,
+          }}
+        >
+          {children}
+        </Box>
+      )}
     </div>
   )
 }

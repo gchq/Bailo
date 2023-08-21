@@ -2,60 +2,30 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { SchemaInterface, SchemaKind } from '../../../models/v2/Schema.js'
+import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { findSchemasByKind } from '../../../services/v2/schema.js'
+import { SchemaKind } from '../../../types/v2/enums.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getSchemasSchema = z.object({
-  params: z.object({
-    use: z.nativeEnum(SchemaKind),
+  query: z.object({
+    kind: z.nativeEnum(SchemaKind).optional(),
   }),
 })
 
 interface GetSchemaResponse {
-  data: {
-    schemas: Array<SchemaInterface>
-  }
+  schemas: Array<SchemaInterface>
 }
 
 export const getSchemas = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaResponse>) => {
+    const { query } = parse(req, getSchemasSchema)
+
+    const schemas = await findSchemasByKind(query.kind)
+
     return res.json({
-      data: {
-        schemas: [
-          {
-            id: 'example-schema-1',
-            name: 'Example Schema 1',
-
-            inactive: false,
-            hidden: false,
-            kind: 'deployment',
-            display: 'This is the display?',
-            fields: {
-              'field 1': 'field 1 info',
-            },
-            metadata: { example: true },
-
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 'example-schema-2',
-            name: 'Example Schema 2',
-
-            inactive: false,
-            hidden: false,
-            kind: 'model',
-            display: 'This is the display?',
-            fields: {
-              'field 1': 'field 1 info',
-            },
-            metadata: { example: true },
-
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
+      schemas,
     })
   },
 ]
