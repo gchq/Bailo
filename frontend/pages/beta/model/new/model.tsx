@@ -16,7 +16,6 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import MarkdownEditor from 'src/common/MarkdownEditor'
 
 import { postModel } from '../../../../actions/model'
 import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
@@ -26,6 +25,7 @@ import { ModelForm } from '../../../../types/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
+
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>('public')
@@ -79,14 +79,14 @@ export default function NewModel() {
   return (
     <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography component='h1' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography component='h2' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
         <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
           <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
             <>
-              <Typography component='h2' variant='h6'>
+              <Typography component='h3' variant='h6'>
                 Overview
               </Typography>
               <Stack direction='row' spacing={2}>
@@ -99,15 +99,10 @@ export default function NewModel() {
               </Stack>
               <Stack>
                 <FormControl>
-                  {/* <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography> */}
-                  <MarkdownEditor
-                    setDataValue={function (string: any): void {
-                      throw new Error('Function not implemented.')
-                    }}
-                    dataValue={''}
-                  ></MarkdownEditor>
+                  </Typography>
+
                   <TextField
                     id='new-model-description'
                     required
