@@ -3,10 +3,12 @@ variables:
 backend-build:
   stage: build
   rules:
-      - if: $CI_COMMIT_BRANCH == "main"
-        when: manual
-        allow_failure: true
-  #    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+      allow_failure: true
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
   image: 
     name: docker:latest
   services:
@@ -25,10 +27,12 @@ backend-build:
 frontend-build:
   stage: build
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+      allow_failure: true
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
       allow_failure: true
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
   image: 
     name: docker:latest
   services:

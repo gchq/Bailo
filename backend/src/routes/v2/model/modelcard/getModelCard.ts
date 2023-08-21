@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ModelCardInterface } from '../../../models/v2/ModelCard.js'
-import { parse } from '../../../utils/validate.js'
+import { ModelCardInterface } from '../../../../models/v2/ModelCard.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const GetModelCardVersionOptions = {
   Latest: 'latest',
