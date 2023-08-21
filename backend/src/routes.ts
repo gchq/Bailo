@@ -47,6 +47,8 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getApprovals as getApprovalsV2 } from './routes/v2/approval/getApprovals.js'
+import { getApprovalsCount as getApprovalsCountV2 } from './routes/v2/approval/getApprovalsCount.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
@@ -208,6 +210,9 @@ if (config.experimental.v2) {
   // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
   // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
   // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+
+  server.get('/api/v2/approvals', ...getApprovalsV2)
+  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
