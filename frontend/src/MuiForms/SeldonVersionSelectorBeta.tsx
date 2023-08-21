@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TextField } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import { WidgetProps } from '@rjsf/utils'
