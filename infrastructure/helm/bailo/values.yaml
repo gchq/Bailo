@@ -165,7 +165,7 @@ minio:
   podSecurityContext:
     enabled: false
   region: ignored-for-minio
-  partSizeMB: 64 #64MB
+  partSizeMB: 64
   image:
     registry: docker.io
     repository: bitnami/minio
