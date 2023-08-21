@@ -3,11 +3,10 @@ variables:
 backend-build:
   stage: build
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
       allow_failure: true
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-      when: manual
+    - when: manual
       allow_failure: true
   image: 
     name: docker:latest
@@ -27,11 +26,10 @@ backend-build:
 frontend-build:
   stage: build
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
       allow_failure: true
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-      when: manual
+    - when: manual
       allow_failure: true
   image: 
     name: docker:latest
