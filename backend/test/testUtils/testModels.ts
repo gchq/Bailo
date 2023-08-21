@@ -43,3 +43,12 @@ export const testDeploymentSchema = {
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
+
+export const testReleaseApproval = {
+  model: 'yolo',
+  release: '3.0.2',
+  kind: 'release',
+  active: true,
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}

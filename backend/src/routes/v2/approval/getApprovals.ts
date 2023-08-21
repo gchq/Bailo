@@ -11,7 +11,7 @@ export const getApprovalsSchema = z.object({
   query: z.object({
     active: z.nativeEnum(Boolean, {
       required_error: 'Missing parameter active.',
-    })
+    }),
   }),
 })
 
@@ -23,9 +23,9 @@ export const getApprovals = [
   bodyParser.json(),
   async (req: Request, res: Response<GetApprovalsResponse>) => {
     const { query } = parse(req, getApprovalsSchema)
-    const approvals = await findApprovalsByActive(JSON.parse(query.active))
+    const approvals = await findApprovalsByActive(req.user, JSON.parse(query.active))
     return res.json({
-        approvals,
+      approvals,
     })
   },
 ]
