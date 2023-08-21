@@ -44,6 +44,9 @@ vi.mock('../../utils/config.js', () => {
           uploads: 'uploads',
         },
       },
+      experimental: {
+        v2: false,
+      },
       oauth: {
         enabled: false,
       },

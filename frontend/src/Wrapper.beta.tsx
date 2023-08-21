@@ -1,17 +1,17 @@
-import AdminIcon from '@mui/icons-material/AdminPanelSettingsTwoTone'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeftTwoTone'
-import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
-import DarkModeIcon from '@mui/icons-material/DarkModeTwoTone'
-import DashboardIcon from '@mui/icons-material/DashboardTwoTone'
-import FileUploadIcon from '@mui/icons-material/FileUploadTwoTone'
-import LinkIcon from '@mui/icons-material/LinkTwoTone'
+import Add from '@mui/icons-material/Add'
+import AdminIcon from '@mui/icons-material/AdminPanelSettings'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ContactSupportIcon from '@mui/icons-material/ContactSupport'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import LogoutIcon from '@mui/icons-material/LogoutTwoTone'
-import MenuIcon from '@mui/icons-material/MenuTwoTone'
-import SchemaIcon from '@mui/icons-material/SchemaTwoTone'
-import Settings from '@mui/icons-material/SettingsTwoTone'
-import ViewList from '@mui/icons-material/ViewListTwoTone'
-import { ListItemButton } from '@mui/material'
+import LogoutIcon from '@mui/icons-material/Logout'
+import MenuIcon from '@mui/icons-material/Menu'
+import SchemaIcon from '@mui/icons-material/Schema'
+import Settings from '@mui/icons-material/Settings'
+import ViewList from '@mui/icons-material/ViewList'
+import { ListItemButton, Stack } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
@@ -33,6 +33,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
+import { useRouter } from 'next/router'
 import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 
 import { useGetNumApprovals } from '../data/approvals'
@@ -40,6 +41,7 @@ import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
 import { EntityKind } from '../types/types'
 import Banner from './Banner'
+import ExpandableButton from './common/ExpandableButton'
 import UserAvatar from './common/UserAvatar'
 import ThemeModeContext from './contexts/themeModeContext'
 import Copyright from './Copyright'
@@ -120,6 +122,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
   const actionOpen = anchorEl !== null
+  const router = useRouter()
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -146,29 +149,20 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
     setAnchorEl(event.currentTarget)
   }
 
+  const handleNewModelClicked = () => {
+    router.push('/beta/model/new/model')
+  }
+
   const handleMenuClose = () => {
     setAnchorEl(null)
   }
 
-  const headerTitle =
-    typeof title === 'string' ? (
-      <Typography
-        noWrap
-        component='h1'
-        variant='h6'
-        color='inherit'
-        data-test='headerTitle'
-        sx={{ mr: '55px', flexGrow: 1 }}
-      >
-        {title}
-      </Typography>
-    ) : (
-      title
-    )
-
   const StyledList = styled(List)({
     paddingTop: 0,
     paddingBottom: 0,
+    '&, & .MuiListItemIcon-root': {
+      color: theme.palette.primary.main,
+    },
     '&& .Mui-selected, && .Mui-selected:hover': {
       '&, & .MuiListItemIcon-root': {
         color: theme.palette.secondary.main,
@@ -237,47 +231,49 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 {betaAdornment}
               </Link>
             </Box>
-            {headerTitle}
-            {currentUser ? (
-              <>
-                <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                  <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.id }} size='chip' />
-                </IconButton>
-                <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
-                  <MenuList>
-                    <MenuItem data-test='toggleDarkMode'>
-                      <ListItemIcon>
-                        <DarkModeIcon fontSize='small' />
-                      </ListItemIcon>
-                      <Switch
-                        size='small'
-                        checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                        onChange={toggleDarkMode}
-                        inputProps={{ 'aria-label': 'controlled' }}
-                      />
-                    </MenuItem>
-                    <Link href='/settings' color='inherit' underline='none'>
-                      <MenuItem data-test='settingsLink'>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <ExpandableButton label='Add Model' icon={<Add />} onClick={() => handleNewModelClicked()} />
+              {currentUser ? (
+                <>
+                  <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
+                    <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.id }} size='chip' />
+                  </IconButton>
+                  <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
+                    <MenuList>
+                      <MenuItem data-test='toggleDarkMode'>
                         <ListItemIcon>
-                          <Settings fontSize='small' />
+                          <DarkModeIcon fontSize='small' />
                         </ListItemIcon>
-                        <ListItemText>Settings</ListItemText>
+                        <Switch
+                          size='small'
+                          checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                          onChange={toggleDarkMode}
+                          inputProps={{ 'aria-label': 'controlled' }}
+                        />
                       </MenuItem>
-                    </Link>
-                    <Link href='/api/logout' color='inherit' underline='none'>
-                      <MenuItem data-test='logoutLink'>
-                        <ListItemIcon>
-                          <LogoutIcon fontSize='small' />
-                        </ListItemIcon>
-                        <ListItemText>Sign Out</ListItemText>
-                      </MenuItem>
-                    </Link>
-                  </MenuList>
-                </Menu>
-              </>
-            ) : (
-              <Typography variant='caption'>Loading...</Typography>
-            )}
+                      <Link href='/settings' color='inherit' underline='none'>
+                        <MenuItem data-test='settingsLink'>
+                          <ListItemIcon>
+                            <Settings fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Settings</ListItemText>
+                        </MenuItem>
+                      </Link>
+                      <Link href='/api/logout' color='inherit' underline='none'>
+                        <MenuItem data-test='logoutLink'>
+                          <ListItemIcon>
+                            <LogoutIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Sign Out</ListItemText>
+                        </MenuItem>
+                      </Link>
+                    </MenuList>
+                  </Menu>
+                </>
+              ) : (
+                <Typography variant='caption'>Loading...</Typography>
+              )}
+            </Stack>
           </Toolbar>
         </AppBar>
         <Drawer sx={pageTopStyling} variant='permanent' open={open}>
@@ -308,50 +304,35 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 <ListItemText primary='Marketplace' />
               </ListItemButton>
             </Link>
-            <Link href='/deployments' color='inherit' underline='none'>
-              <ListItemButton selected={page === 'deployments'}>
-                <ListItemIcon>
-                  {!open ? (
-                    <Tooltip title='My Deployments' arrow placement='right'>
-                      <ViewList />
-                    </Tooltip>
-                  ) : (
+            {/* <Link href='/deployments' color='inherit' underline='none'> */}
+            <ListItemButton disabled selected={page === 'deployments'}>
+              <ListItemIcon>
+                {!open ? (
+                  <Tooltip title='My Access Requests' arrow placement='right'>
                     <ViewList />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Deployments' />
-              </ListItemButton>
-            </Link>
-            <Link href='/beta/model/new/model' color='inherit' underline='none'>
-              <ListItemButton selected={page === 'upload'} data-test='uploadModelLink'>
-                <ListItemIcon>
-                  {!open ? (
-                    <Tooltip title='Upload Model' arrow placement='right'>
-                      <FileUploadIcon />
-                    </Tooltip>
-                  ) : (
-                    <FileUploadIcon />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Upload' />
-              </ListItemButton>
-            </Link>
-            <Link href='/review' color='inherit' underline='none'>
-              <ListItemButton selected={page === 'review'} data-test='reviewLink'>
-                <ListItemIcon>
-                  {!open ? (
-                    <Tooltip title='Review' arrow placement='right'>
-                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
-                        <ListAltIcon />
-                      </Badge>
-                    </Tooltip>
-                  ) : (
-                    <ListAltIcon />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Reviews' />
-              </ListItemButton>
-            </Link>
+                  </Tooltip>
+                ) : (
+                  <ViewList />
+                )}
+              </ListItemIcon>
+              <ListItemText primary='Deployments' />
+            </ListItemButton>
+            {/* <Link href='/review' color='inherit' underline='none'> */}
+            <ListItemButton disabled selected={page === 'review'} data-test='reviewLink'>
+              <ListItemIcon>
+                {!open ? (
+                  <Tooltip title='Review' arrow placement='right'>
+                    <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                      <ListAltIcon />
+                    </Badge>
+                  </Tooltip>
+                ) : (
+                  <ListAltIcon />
+                )}
+              </ListItemIcon>
+              <ListItemText primary='Reviews' />
+            </ListItemButton>
+            {/* </Link> */}
             <Divider />
             <Link href='/docs/api'>
               <ListItemButton selected={page === 'api'} data-test='apiDocsLink'>
@@ -367,7 +348,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
                 <ListItemText primary='API' />
               </ListItemButton>
             </Link>
-            <Link href='/help'>
+            <Link href='/beta/help'>
               <ListItemButton selected={page === 'help'} data-test='supportLink'>
                 <ListItemIcon>
                   {!open ? (
