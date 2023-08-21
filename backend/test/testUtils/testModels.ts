@@ -45,7 +45,7 @@ export const testDeploymentSchema = {
 }
 
 export const testReleaseApproval = {
-  model: 'yolo',
+  model: 'example-model-2-nevwg4',
   release: '3.0.2',
   kind: 'release',
   active: true,
