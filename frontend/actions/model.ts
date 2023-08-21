@@ -3,7 +3,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import { ListModelType } from '../types/types'
-import { ModelForm, ModelInterface } from '../types/v2/types'
+import { ModelForm, ModelInterface, Role } from '../types/v2/types'
 import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -49,6 +49,38 @@ export function useGetModel(id?: string) {
     model: data ? data.model : undefined,
     isModelLoading: !error && !data,
     isModelError: error,
+  }
+}
+
+export function useGetModelRoles(id?: string) {
+  const { data, error, mutate } = useSWR<
+    {
+      roles: Role[]
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/roles` : null, fetcher)
+
+  return {
+    mutateModelRoles: mutate,
+    modelRoles: data ? data.roles : [],
+    isModelRolesLoading: !error && !data,
+    isModelRolesError: error,
+  }
+}
+
+export function useGetModelRolesCurrentUser(id?: string) {
+  const { data, error, mutate } = useSWR<
+    {
+      roles: Role[]
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/roles/mine` : null, fetcher)
+
+  return {
+    mutateModelRolesCurrentUser: mutate,
+    modelRolesCurrentUser: data ? data.roles : [],
+    isModelRolesCurrentUserLoading: !error && !data,
+    isModelRolesCurrentUserError: error,
   }
 }
 

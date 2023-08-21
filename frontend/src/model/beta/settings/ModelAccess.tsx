@@ -94,7 +94,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               <List disablePadding>
                 {accessList.map((entity) => (
                   <ListItem key={entity.entity}>
-                    <EntityItem entity={entity} accessList={accessList} setAccessList={setAccessList} />
+                    <EntityItem entity={entity} accessList={accessList} setAccessList={setAccessList} model={model} />
                   </ListItem>
                 ))}
               </List>

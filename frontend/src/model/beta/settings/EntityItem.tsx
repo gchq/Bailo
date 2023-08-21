@@ -4,17 +4,20 @@ import PersonIcon from '@mui/icons-material/Person'
 import { Autocomplete, Chip, IconButton, Stack, TextField, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
+import Loading from 'src/common/Loading'
 
-import { CollaboratorEntry } from '../../../../types/v2/types'
+import { useGetModelRoles } from '../../../../actions/model'
+import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
   setAccessList: Dispatch<SetStateAction<CollaboratorEntry[]>>
+  model: ModelInterface
 }
 
-export default function EntityItem({ entity, accessList, setAccessList }: EntityItemProps) {
-  const roles = ['consumer', 'contributor', 'owner']
+export default function EntityItem({ entity, accessList, setAccessList, model }: EntityItemProps) {
+  const { modelRoles, isModelRolesLoading } = useGetModelRoles(model.id)
 
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
@@ -27,26 +30,40 @@ export default function EntityItem({ entity, accessList, setAccessList }: Entity
     setAccessList(accessList.filter((access) => access.entity !== entity.entity))
   }
 
+  function getModelRoles() {
+    return modelRoles.map((role) => role.id)
+  }
+
+  function getRole(roleId: string) {
+    const role = modelRoles.find((role) => role.id === roleId)
+    if (!role) return { id: roleId, name: 'Unknown Role' }
+
+    return role
+  }
+
   return (
     <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2} sx={{ width: '100%' }}>
       <EntityIcon entity={entity} />
       <Typography>{entity.entity.replace('user:', '').replace('group:', '')}</Typography>
-      <Autocomplete
-        id='role-selector'
-        sx={{ width: '100%' }}
-        size='small'
-        multiple
-        aria-label={`role selector input for entity ${entity.entity}`}
-        value={entity.roles}
-        data-test='accesslistAutoselect'
-        options={roles}
-        getOptionLabel={(role) => role}
-        onChange={onRoleChange}
-        renderInput={(params) => <TextField {...params} label='Select roles' />}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => <Chip label={option} {...getTagProps({ index })} key={option} />)
-        }
-      />
+      {isModelRolesLoading && <Loading />}
+      {!isModelRolesLoading && modelRoles.length > 0 && (
+        <Autocomplete
+          id='role-selector'
+          sx={{ width: '100%' }}
+          size='small'
+          multiple
+          aria-label={`role selector input for entity ${entity.entity}`}
+          value={entity.roles}
+          data-test='accessListAutoselect'
+          options={getModelRoles() || []}
+          getOptionLabel={(role) => getRole(role).name}
+          onChange={onRoleChange}
+          renderInput={(params) => <TextField {...params} label='Select roles' />}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => <Chip label={getRole(option).name} {...getTagProps({ index })} key={option} />)
+          }
+        />
+      )}
       <IconButton
         onClick={removeEntity}
         aria-label={`Remove user ${entity.entity} from model access list`}
