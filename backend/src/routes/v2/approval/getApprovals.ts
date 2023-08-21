@@ -12,9 +12,7 @@ export const getApprovalsSchema = z.object({
 })
 
 interface GetApprovalsResponse {
-  data: {
-    approvals: Array<ApprovalRequestInterface>
-  }
+  approvals: Array<ApprovalRequestInterface>
 }
 
 export const getApprovals = [
@@ -26,40 +24,36 @@ export const getApprovals = [
 
     return isActive
       ? res.json({
-          data: {
-            approvals: [
-              {
-                model: 'yolo',
-                release: '3.0.2',
-                kind: 'release',
-                isActive,
-                createdAt: new Date('08/13/2023'),
-                updatedAt: new Date('08/14/2023'),
-              },
-              {
-                model: 'yolo',
-                release: '3.0.1',
-                kind: 'release',
-                isActive,
-                createdAt: new Date('08/12/2023'),
-                updatedAt: new Date('08/12/2023'),
-              },
-            ],
-          },
+          approvals: [
+            {
+              model: 'yolo',
+              release: '3.0.2',
+              kind: 'release',
+              isActive,
+              createdAt: new Date('08/13/2023'),
+              updatedAt: new Date('08/14/2023'),
+            },
+            {
+              model: 'yolo',
+              release: '3.0.1',
+              kind: 'release',
+              isActive,
+              createdAt: new Date('08/12/2023'),
+              updatedAt: new Date('08/12/2023'),
+            },
+          ],
         })
       : res.json({
-          data: {
-            approvals: [
-              {
-                model: 'yolo',
-                release: '3.0.0',
-                kind: 'release',
-                isActive,
-                createdAt: new Date('08/11/2023'),
-                updatedAt: new Date('08/11/2023'),
-              },
-            ],
-          },
+          approvals: [
+            {
+              model: 'yolo',
+              release: '3.0.0',
+              kind: 'release',
+              isActive,
+              createdAt: new Date('08/11/2023'),
+              updatedAt: new Date('08/11/2023'),
+            },
+          ],
         })
   },
 ]

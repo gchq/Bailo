@@ -12,9 +12,7 @@ export const deleteFileSchema = z.object({
 })
 
 interface DeleteFileResponse {
-  data: {
-    message: string
-  }
+  message: string
 }
 
 export const deleteFile = [
@@ -23,9 +21,7 @@ export const deleteFile = [
     const _ = parse(req, deleteFileSchema)
 
     return res.json({
-      data: {
-        message: 'Successfully removed file.',
-      },
+      message: 'Successfully removed file.',
     })
   },
 ]

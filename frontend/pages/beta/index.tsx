@@ -143,7 +143,7 @@ export default function ExploreModels() {
             </Box>
             <div data-test='modelListBox'>
               {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-              {models.map((model: ModelInterface, index: number) => {
+              {models.map((model, index) => {
                 return (
                   <Fragment key={model.id}>
                     <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>

@@ -43,9 +43,7 @@ export const postSchemaSchema = z.object({
 })
 
 interface GetSchemaResponse {
-  data: {
-    schema: SchemaInterface
-  }
+  schema: SchemaInterface
 }
 
 export const postSchema = [
@@ -57,9 +55,7 @@ export const postSchema = [
     const schema = await createSchema(body)
 
     return res.json({
-      data: {
-        schema,
-      },
+      schema,
     })
   },
 ]

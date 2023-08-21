@@ -27,9 +27,7 @@ export const postReleaseSchema = z.object({
 })
 
 interface PostReleaseResponse {
-  data: {
-    release: ReleaseInterface
-  }
+  release: ReleaseInterface
 }
 
 export const postRelease = [
@@ -38,26 +36,24 @@ export const postRelease = [
     const _ = parse(req, postReleaseSchema)
 
     return res.json({
-      data: {
-        release: {
-          modelId: 'example-model-1',
-          modelCardVersion: 55,
+      release: {
+        modelId: 'example-model-1',
+        modelCardVersion: 55,
 
-          name: 'Example Release 1',
-          semver: '1.2.3',
-          notes: 'This is an example release',
+        name: 'Example Release 1',
+        semver: '1.2.3',
+        notes: 'This is an example release',
 
-          minor: true,
-          draft: true,
+        minor: true,
+        draft: true,
 
-          files: ['file-id'],
-          images: ['image-id'],
+        files: ['file-id'],
+        images: ['image-id'],
 
-          deleted: false,
+        deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

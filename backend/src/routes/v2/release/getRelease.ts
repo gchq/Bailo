@@ -13,9 +13,7 @@ export const getReleaseSchema = z.object({
 })
 
 interface getReleaseResponse {
-  data: {
-    release: ReleaseInterface
-  }
+  release: ReleaseInterface
 }
 
 export const getRelease = [
@@ -24,26 +22,24 @@ export const getRelease = [
     const _ = parse(req, getReleaseSchema)
 
     return res.json({
-      data: {
-        release: {
-          modelId: 'example-model-1',
-          modelCardVersion: 14,
+      release: {
+        modelId: 'example-model-1',
+        modelCardVersion: 14,
 
-          name: 'Example Release 1',
-          semver: '1.2.3',
-          notes: 'This is an example release',
+        name: 'Example Release 1',
+        semver: '1.2.3',
+        notes: 'This is an example release',
 
-          minor: true,
-          draft: true,
+        minor: true,
+        draft: true,
 
-          files: ['example-file-id'],
-          images: ['example-image-id'],
+        files: ['example-file-id'],
+        images: ['example-image-id'],
 
-          deleted: false,
+        deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

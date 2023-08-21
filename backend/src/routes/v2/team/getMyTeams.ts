@@ -8,9 +8,7 @@ import { parse } from '../../../utils/validate.js'
 export const getMyTeamsSchema = z.object({})
 
 interface GetMyTeamsResponse {
-  data: {
-    teams: Array<TeamInterface>
-  }
+  teams: Array<TeamInterface>
 }
 
 export const patchTeam = [
@@ -19,21 +17,19 @@ export const patchTeam = [
     const _ = parse(req, getMyTeamsSchema)
 
     return res.json({
-      data: {
-        teams: [
-          {
-            id: 'example-team',
+      teams: [
+        {
+          id: 'example-team',
 
-            name: 'Example Team',
-            description: 'An example Bailo team',
+          name: 'Example Team',
+          description: 'An example Bailo team',
 
-            deleted: false,
+          deleted: false,
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     })
   },
 ]
