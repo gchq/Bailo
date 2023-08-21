@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import axios from 'axios'
+import { useGetUiConfig } from 'data/uiConfig'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 
@@ -47,6 +48,7 @@ function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('UPLOAD')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { uiConfig, isUiConfigError, isUiConfigLoading } = useGetUiConfig()
 
   const router = useRouter()
 
@@ -105,7 +107,7 @@ function Upload() {
 
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
-        isComplete: fileTabComplete,
+        isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
       })
     )
 
@@ -132,6 +134,7 @@ function Upload() {
     }
 
     setSplitSchema({ reference, steps })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSchema, user])
 
   const errorWrapper = MultipleErrorWrapper(
@@ -140,6 +143,7 @@ function Upload() {
       isDefaultSchemaError,
       isSchemasError,
       isCurrentUserError,
+      isUiConfigError,
     },
     MinimalErrorWrapper
   )
@@ -153,6 +157,7 @@ function Upload() {
   if (isDefaultSchemaLoading || !defaultSchema) return Loading
   if (isSchemasLoading || !schemas) return Loading
   if (isCurrentUserLoading || !currentUser) return Loading
+  if (isUiConfigLoading || !uiConfig) return Loading
 
   const onSubmit = async () => {
     setError(undefined)
