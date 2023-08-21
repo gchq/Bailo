@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../utils/validate.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { parse } from '../../../utils/validate.js'
 
 export const postReleaseSchema = z.object({
   params: z.object({
@@ -27,9 +27,7 @@ export const postReleaseSchema = z.object({
 })
 
 interface PostReleaseResponse {
-  data: {
-    release: ReleaseInterface
-  }
+  release: ReleaseInterface
 }
 
 export const postRelease = [
@@ -38,26 +36,24 @@ export const postRelease = [
     const _ = parse(req, postReleaseSchema)
 
     return res.json({
-      data: {
-        release: {
-          modelId: 'example-model-1',
-          modelCardVersion: 55,
+      release: {
+        modelId: 'example-model-1',
+        modelCardVersion: 55,
 
-          name: 'Example Release 1',
-          semver: '1.2.3',
-          notes: 'This is an example release',
+        name: 'Example Release 1',
+        semver: '1.2.3',
+        notes: 'This is an example release',
 
-          minor: true,
-          draft: true,
+        minor: true,
+        draft: true,
 
-          files: ['file-id'],
-          images: ['image-id'],
+        files: ['file-id'],
+        images: ['image-id'],
 
-          deleted: false,
+        deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

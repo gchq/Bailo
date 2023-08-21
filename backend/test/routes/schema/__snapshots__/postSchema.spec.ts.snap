@@ -2,15 +2,13 @@
 
 exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
 {
-  "data": {
-    "schema": {
-      "id": "recusandae",
-      "kind": "deployment",
-      "meta": {},
-      "name": "Jaime Hilll",
-      "schema": {},
-      "uiSchema": {},
-    },
+  "schema": {
+    "id": "recusandae",
+    "kind": "deployment",
+    "meta": {},
+    "name": "Jaime Hilll",
+    "schema": {},
+    "uiSchema": {},
   },
 }
 `;

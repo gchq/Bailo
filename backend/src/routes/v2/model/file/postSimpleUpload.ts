@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
 import { FileCategory } from '../../../../models/v2/File.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
   params: z.object({
@@ -16,9 +16,7 @@ export const postSimpleUploadSchema = z.object({
 })
 
 interface PostSimpleUpload {
-  data: {
-    fileId: string
-  }
+  fileId: string
 }
 
 export const postSimpleUpload = [
@@ -26,9 +24,7 @@ export const postSimpleUpload = [
     const _ = parse(req, postSimpleUploadSchema)
 
     return res.json({
-      data: {
-        fileId: '5effaa5662679b5af2c58829',
-      },
+      fileId: '5effaa5662679b5af2c58829',
     })
   },
 ]

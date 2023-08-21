@@ -2,10 +2,8 @@
 
 exports[`routes > model > postModel > 200 > ok 1`] = `
 {
-  "data": {
-    "model": {
-      "_id": "test",
-    },
+  "model": {
+    "_id": "test",
   },
 }
 `;

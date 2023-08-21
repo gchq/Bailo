@@ -12,9 +12,7 @@ export const deleteReleaseSchema = z.object({
 })
 
 interface DeleteReleaseResponse {
-  data: {
-    message: string
-  }
+  message: string
 }
 
 export const deleteRelease = [
@@ -23,9 +21,7 @@ export const deleteRelease = [
     const _ = parse(req, deleteReleaseSchema)
 
     return res.json({
-      data: {
-        message: 'Successfully removed release.',
-      },
+      message: 'Successfully removed release.',
     })
   },
 ]

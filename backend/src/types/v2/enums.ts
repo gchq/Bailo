@@ -8,3 +8,14 @@ export const Boolean = {
   true: 'true',
   false: 'false',
 } as const
+export const GetModelFilters = {
+  Mine: 'mine',
+} as const
+
+export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
+
+export const ApprovalKind = {
+  Release: 'release',
+  Access: 'access',
+} as const
+export type ApprovalKindKeys = (typeof ApprovalKind)[keyof typeof ApprovalKind]

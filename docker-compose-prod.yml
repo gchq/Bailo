@@ -74,6 +74,7 @@ services:
     volumes:
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
+      - ./backend/config:/app/config
     depends_on:
       - mongo
       - minio

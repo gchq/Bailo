@@ -17,11 +17,11 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import { postModel } from '../../../../actions/model'
-import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
-import MessageAlert from '../../../../src/MessageAlert'
-import Wrapper from '../../../../src/Wrapper.beta'
-import { ModelForm } from '../../../../types/types'
+import { postModel } from '../../../actions/model'
+import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
+import MessageAlert from '../../../src/MessageAlert'
+import Wrapper from '../../../src/Wrapper.beta'
+import { ModelForm } from '../../../types/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
@@ -57,7 +57,7 @@ export default function NewModel() {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
     )
@@ -69,7 +69,7 @@ export default function NewModel() {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
-          <Typography variant='caption'>You choose who can access this model</Typography>
+          <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>
     )
@@ -78,7 +78,13 @@ export default function NewModel() {
   return (
     <Wrapper title='Create a new Model' page='upload'>
       <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography component='h1' variant='h4' sx={{ fontWeight: 'bold' }} color='primary'>
+        <Typography
+          component='h1'
+          variant='h4'
+          sx={{ fontWeight: 'bold' }}
+          color='primary'
+          data-test='createModelPageTitle'
+        >
           Create a new model
         </Typography>
         <Typography>A model repository contains all files, history and information related to a model.</Typography>
@@ -106,8 +112,8 @@ export default function NewModel() {
                     required
                     size='small'
                     value={description}
-                    tabIndex={0}
                     onChange={(e) => setDescription(e.target.value)}
+                    data-test='modelDescription'
                   />
                 </FormControl>
               </Stack>
@@ -122,15 +128,25 @@ export default function NewModel() {
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
               >
-                <FormControlLabel value='public' control={<Radio />} label={publicLabel()} />
-                <FormControlLabel value='private' control={<Radio />} label={privateLabel()} />
+                <FormControlLabel
+                  value='public'
+                  control={<Radio />}
+                  label={publicLabel()}
+                  data-test='publicButtonSelector'
+                />
+                <FormControlLabel
+                  value='private'
+                  control={<Radio />}
+                  label={privateLabel()}
+                  data-test='privateButtonSelector'
+                />
               </RadioGroup>
             </>
             <Divider />
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <Button tabIndex={0} variant='contained' disabled={!formValid} type='submit'>
+                  <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
                     Create Model
                   </Button>
                 </span>

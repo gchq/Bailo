@@ -19,9 +19,7 @@ export const postModelSchema = z.object({
 })
 
 interface PostModelResponse {
-  data: {
-    model: ModelInterface
-  }
+  model: ModelInterface
 }
 
 export const postModel = [
@@ -32,9 +30,7 @@ export const postModel = [
     const model = await createModel(req.user, body)
 
     return res.json({
-      data: {
-        model,
-      },
+      model,
     })
   },
 ]
