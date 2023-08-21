@@ -1,4 +1,4 @@
-export const betaModelUrl = '/beta/model/new/model'
+export const betaModelUrl = '/beta/model/new'
 
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {

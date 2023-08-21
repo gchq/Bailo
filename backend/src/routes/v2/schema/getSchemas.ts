@@ -14,9 +14,7 @@ export const getSchemasSchema = z.object({
 })
 
 interface GetSchemaResponse {
-  data: {
-    schemas: Array<SchemaInterface>
-  }
+  schemas: Array<SchemaInterface>
 }
 
 export const getSchemas = [
@@ -27,9 +25,7 @@ export const getSchemas = [
     const schemas = await findSchemasByKind(query.kind)
 
     return res.json({
-      data: {
-        schemas,
-      },
+      schemas,
     })
   },
 ]

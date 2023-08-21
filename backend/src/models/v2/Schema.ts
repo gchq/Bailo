@@ -26,7 +26,7 @@ export interface SchemaInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ModelCardInterfaceDoc = SchemaInterface & Document<any, any, SchemaInterface>
+export type SchemaDoc = SchemaInterface & Document<any, any, SchemaInterface>
 
 const SchemaSchema = new Schema<SchemaInterface>(
   {

@@ -7,14 +7,21 @@ import { ModelForm, ModelInterface } from '../types/v2/types'
 import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+interface ModelSearchResult {
+  id: string
+  name: string
+  description: string
+  tags: Array<string>
+}
+
 export function useListModels(type: ListModelType, filter?: string) {
   const { data, error, mutate } = useSWR<
     {
-      data: { models: ModelInterface[] }
+      models: ModelSearchResult[]
     },
     ErrorInfo
   >(
-    `/api/v2/models?${qs.stringify({
+    `/api/v2/models/search?${qs.stringify({
       type,
       filter,
     })}`,
@@ -23,7 +30,7 @@ export function useListModels(type: ListModelType, filter?: string) {
 
   return {
     mutateModels: mutate,
-    models: data ? data.data.models : [],
+    models: data ? data.models : [],
     isModelsLoading: !error && !data,
     isModelsError: error,
   }
@@ -32,14 +39,14 @@ export function useListModels(type: ListModelType, filter?: string) {
 export function useGetModel(id?: string) {
   const { data, error, mutate } = useSWR<
     {
-      data: { model: ModelInterface }
+      model: ModelInterface
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}` : null, fetcher)
 
   return {
     mutateModel: mutate,
-    model: data ? data.data.model : undefined,
+    model: data ? data.model : undefined,
     isModelLoading: !error && !data,
     isModelError: error,
   }
@@ -53,7 +60,7 @@ export async function postModel(form: ModelForm) {
       headers: { 'Content-Type': 'application/json' },
       data: form,
     })
-    return { status: response.status, data: response.data.data }
+    return { status: response.status, data: response.data }
   } catch (error) {
     return handleAxiosError(error)
   }

@@ -57,7 +57,7 @@ import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCard } from './routes/v2/model/getModelCard.js'
-import { getModels as getModelsV2 } from './routes/v2/model/getModels.js'
+import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
@@ -182,13 +182,20 @@ if (config.experimental.v2) {
   logger.info('Using experimental V2 endpoints')
 
   server.post('/api/v2/models', ...postModel)
-  server.get('/api/v2/models', ...getModelsV2)
+  server.get('/api/v2/models/search', ...getModelsSearch)
   // server.post('/api/v2/models/import', ...postModelImport)
 
   server.get('/api/v2/model/:modelId', ...getModel)
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
-  server.get('/api/v2/model/:modelId/model-cards/:version', getModelCard)
+  server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+  // server.get('/api/v2/model/:modelId/model-cards/latest', ...getLatestModelCard)
+  // server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
+
+  // server.get('/api/v2/template/models', ...getModelTemplates)
+  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
@@ -207,14 +214,12 @@ if (config.experimental.v2) {
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
   // server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
-  // server.get('/api/v2/template/models', ...getModelTemplates)
-  // server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-  // server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
-
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
+
+  // server.get('/api/v2/model/:modelId/roles', ...getModelRoles) // This lists all the roles on a model
+  // server.get('/api/v2/model/:modelId/role/:userId', ...getModelUserRole) // This lists all the roles a person has
 
   // server.get('/api/v2/model/:modelId/compliance/check-request', ...getUserComplianceRequests)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)

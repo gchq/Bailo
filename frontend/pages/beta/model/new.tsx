@@ -17,11 +17,11 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import { postModel } from '../../../../actions/model'
-import TeamAndModelSelector from '../../../../src/common/TeamAndModelSelector'
-import MessageAlert from '../../../../src/MessageAlert'
-import Wrapper from '../../../../src/Wrapper.beta'
-import { ModelForm } from '../../../../types/v2/types'
+import { postModel } from '../../../actions/model'
+import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
+import MessageAlert from '../../../src/MessageAlert'
+import Wrapper from '../../../src/Wrapper.beta'
+import { ModelForm } from '../../../types/v2/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')

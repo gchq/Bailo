@@ -11,8 +11,8 @@ import Wrapper from '../../../src/Wrapper.beta'
 
 export default function Model() {
   const router = useRouter()
-  const { id }: { id?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(id)
+  const { modelId }: { modelId?: string } = router.query
+  const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
   // TODO implement function
   function myFunction() {
@@ -21,7 +21,7 @@ export default function Model() {
   return (
     <Wrapper title='Model' page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
-      {!model && !isModelLoading && <EmptyBlob text={`Oh no, it looks like model ${id} doesn't exist!`} />}
+      {!model && !isModelLoading && <EmptyBlob text={`Oh no, it looks like model ${modelId} doesn't exist!`} />}
       {model && !isModelLoading && !isModelError && (
         <PageWithTabs
           title={model.id}

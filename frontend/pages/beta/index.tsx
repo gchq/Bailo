@@ -41,7 +41,6 @@ export default function ExploreModels() {
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
   const theme = useTheme()
-  const router = useRouter()
 
   useEffect(() => {
     switch (selectedType) {
@@ -66,10 +65,6 @@ export default function ExploreModels() {
     setFilter(e.target.value)
   }
 
-  const handleNewModelClicked = () => {
-    router.push('/beta/model/new/model')
-  }
-
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
@@ -81,7 +76,7 @@ export default function ExploreModels() {
           <Typography component='h1' variant='h4' color='primary'>
             Marketplace
           </Typography>
-          <Button variant='contained' onClick={() => handleNewModelClicked()}>
+          <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
           </Button>
           <FormControl
@@ -149,7 +144,7 @@ export default function ExploreModels() {
             </Box>
             <div data-test='modelListBox'>
               {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-              {models.map((model: ModelInterface, index: number) => {
+              {models.map((model, index) => {
                 return (
                   <Fragment key={model.id}>
                     <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>
