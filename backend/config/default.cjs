@@ -53,6 +53,7 @@ module.exports = {
       accessKey: 'minioadmin',
       secretKey: 'minioadmin',
       region: 'minio',
+      partSize: 64 * 1024 * 1024
     },
 
     // Automatically create the upload / registry bucket if they're not found?
