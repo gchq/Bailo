@@ -4,8 +4,6 @@ import Approval, { ApprovalInterface } from '../../models/v2/Approval.js'
 import { UserDoc } from '../../models/v2/User.js'
 
 export async function findApprovalsByActive(user: UserDoc, active: boolean): Promise<ApprovalInterface[]> {
-  //const baseSchemas = await Approval.find({ ...(active && { active }) }).sort({ createdAt: -1 })
-
   const approvals = await Approval.aggregate()
     .match({ ...(active && { active }) })
     .sort({ createdAt: -1 })
