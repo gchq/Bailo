@@ -64,7 +64,7 @@ data:
           port: {{ .Values.minio.service.ports.api }},
           useSSL: {{ .Values.minio.useSSL }},
           region: '{{ .Values.minio.region }}',
-          partSize: '{{ .Values.minio.partSizeMB }} * 1024 * 1024',
+          partSize: {{ .Values.minio.partSizeMB }} * 1024 * 1024,
           },
           automaticallyCreateBuckets: {{ .Values.minio.createBuckets }},
           buckets: {
