@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
 
+import { patchModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
@@ -40,7 +41,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   // TODO - add a request to update the model's collaborators field
   function updateAccessList() {
-    console.log(accessList)
+    const updatedModel: ModelInterface = _.cloneDeep(model)
+    updatedModel.collaborators = accessList
+    patchModel(updatedModel)
   }
 
   return (

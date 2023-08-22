@@ -97,3 +97,17 @@ export async function postModel(form: ModelForm) {
     return handleAxiosError(error)
   }
 }
+
+export async function patchModel(model: ModelInterface) {
+  try {
+    const response = await axios({
+      method: 'patch',
+      url: `/api/v2/model/${model.id}`,
+      headers: { 'Content-Type': 'application/json' },
+      data: model,
+    })
+    return { status: response.status, data: response.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
+}
