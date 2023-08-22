@@ -1,4 +1,16 @@
-import { Autocomplete, Box, Button, List, ListItem, Stack, TextField, Typography } from '@mui/material'
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
@@ -50,7 +62,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     <>
       {isUsersLoading && <Loading />}
       {users && (
-        <Box sx={{ width: '750px' }}>
+        <Box sx={{ width: '1000px' }}>
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
               Manage model access
@@ -94,13 +106,26 @@ export default function ModelAccess({ model }: ModelAccessProps) {
                 borderColor: theme.palette.primary.main,
               }}
             >
-              <List disablePadding>
-                {accessList.map((entity) => (
-                  <ListItem key={entity.entity}>
-                    <EntityItem entity={entity} accessList={accessList} setAccessList={setAccessList} model={model} />
-                  </ListItem>
-                ))}
-              </List>
+              <Table size='small'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Entity</TableCell>
+                    <TableCell>Roles</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {accessList.map((entity) => (
+                    <EntityItem
+                      key={entity.entity}
+                      entity={entity}
+                      accessList={accessList}
+                      setAccessList={setAccessList}
+                      model={model}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
             </Box>
             <Button aria-label='Save access list' onClick={updateAccessList}>
               Save
