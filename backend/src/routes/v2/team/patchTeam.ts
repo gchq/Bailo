@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { TeamInterface } from '../../../models/v2/Team.js'
+import { parse } from '../../../utils/validate.js'
 
 export const patchTeamSchema = z.object({
   body: z.object({
@@ -18,9 +18,7 @@ export const patchTeamSchema = z.object({
 })
 
 interface PatchTeamResponse {
-  data: {
-    team: TeamInterface
-  }
+  team: TeamInterface
 }
 
 export const patchTeam = [
@@ -29,18 +27,16 @@ export const patchTeam = [
     const _ = parse(req, patchTeamSchema)
 
     return res.json({
-      data: {
-        team: {
-          id: 'example-team',
+      team: {
+        id: 'example-team',
 
-          name: 'Example Team',
-          description: 'An example Bailo team',
+        name: 'Example Team',
+        description: 'An example Bailo team',
 
-          deleted: false,
+        deleted: false,
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

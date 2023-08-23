@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`utils > error > GenericError 1`] = `
+"{
+    \\"code\\": 999,
+    \\"context\\": {
+        \\"example\\": \\"context\\"
+    }
+}"
+`;
+
+exports[`utils > error > GenericError 2`] = `"Example Message"`;

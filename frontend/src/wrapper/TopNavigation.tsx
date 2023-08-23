@@ -76,7 +76,7 @@ export default function TopNavigation({
   }
 
   const handleNewModelClicked = () => {
-    router.push('/beta/model/new/model')
+    router.push('/beta/model/new')
   }
 
   const handleMenuClose = () => {

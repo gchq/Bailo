@@ -1,4 +1,4 @@
-/** @type {import('../src/utils/config.js').Config} */
+/** @type {import('../src/utils/v2/config.js').Config} */
 module.exports = {
   api: {
     // Port to listen on
@@ -53,6 +53,7 @@ module.exports = {
       accessKey: 'minioadmin',
       secretKey: 'minioadmin',
       region: 'minio',
+      partSize: 64 * 1024 * 1024
     },
 
     // Automatically create the upload / registry bucket if they're not found?
@@ -218,5 +219,19 @@ module.exports = {
 
   experimental: {
     v2: false,
+  },
+
+  connectors: {
+    user: {
+      kind: 'silly',
+    },
+
+    authorisation: {
+      kind: 'silly',
+    },
+  },
+
+  log: {
+    level: 'trace',
   },
 }

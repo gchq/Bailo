@@ -5,6 +5,14 @@ import { BailoError } from '../../types/v2/error.js'
 export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
   const err = Error(message) as BailoError
 
+  if (err.stack) {
+    // Remove this file from stack traces.
+    err.stack = err.stack
+      .split('\n')
+      .filter((line) => !line.includes('backend/src/utils/v2/error.ts'))
+      .join('\n')
+  }
+
   err.code = code
   err.context = context
 

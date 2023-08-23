@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../middleware/validate.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
+import { parse } from '../../../utils/validate.js'
 
 export const patchModelSchema = z.object({
   body: z.object({
@@ -19,9 +19,7 @@ export const patchModelSchema = z.object({
 })
 
 interface PatchModelResponse {
-  data: {
-    model: ModelInterface
-  }
+  model: ModelInterface
 }
 
 export const patchModel = [
@@ -30,19 +28,24 @@ export const patchModel = [
     const _ = parse(req, patchModelSchema)
 
     return res.json({
-      data: {
-        model: {
-          id: 'example-model-2',
+      model: {
+        id: 'example-model-2',
 
-          name: 'Example Model 2',
-          description: 'An example Bailo model 2',
+        name: 'Example Model 2',
+        description: 'An example Bailo model 2',
 
-          visibility: ModelVisibility.Public,
-          deleted: false,
+        collaborators: [
+          {
+            entity: 'user:user',
+            roles: ['owner'],
+          },
+        ],
 
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        visibility: ModelVisibility.Public,
+        deleted: false,
+
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })
   },

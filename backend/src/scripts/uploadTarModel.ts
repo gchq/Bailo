@@ -3,7 +3,7 @@ import open from 'open'
 import { join } from 'path'
 import { fileURLToPath } from 'url'
 
-import Bailo from '../external/BailoClient.js'
+import Bailo from '../connectors/BailoClient.js'
 import { EntityKind, ModelMetadata, ModelUploadType } from '../types/types.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import logger from '../utils/logger.js'

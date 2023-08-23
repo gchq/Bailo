@@ -22,7 +22,7 @@ import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties } from 'react'
 
-import { useGetNumApprovals } from '../../data/approvals'
+import { useGetNumApprovals } from '../../actions/approval'
 import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import Link from '../Link'
@@ -132,22 +132,24 @@ export default function SideNavigation({
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton disabled selected={page === 'review'} data-test='reviewLink'>
-                <ListItemIcon>
-                  {!drawerOpen ? (
-                    <Tooltip title='Review' arrow placement='right'>
+              <Link href='/beta/review' color='inherit' underline='none'>
+                <ListItemButton selected={page === 'beta/review'} data-test='reviewLink'>
+                  <ListItemIcon>
+                    {!drawerOpen ? (
+                      <Tooltip title='Review' arrow placement='right'>
+                        <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                          <ListAltIcon />
+                        </Badge>
+                      </Tooltip>
+                    ) : (
                       <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
                         <ListAltIcon />
                       </Badge>
-                    </Tooltip>
-                  ) : (
-                    <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
-                      <ListAltIcon />
-                    </Badge>
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Reviews' />
-              </ListItemButton>
+                    )}
+                  </ListItemIcon>
+                  <ListItemText primary='Reviews' />
+                </ListItemButton>
+              </Link>
             </ListItem>
           </StyledList>
           <Divider />
