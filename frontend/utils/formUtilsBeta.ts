@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 
 import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtonsBeta'
-import RenderForm from '../src/Form/RenderFormBeta'
+import RenderFormBeta from '../src/Form/RenderFormBeta'
 import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
 
@@ -132,8 +132,8 @@ export function getStepsFromSchema(
       schemaRef: schema.reference,
 
       section: prop,
-      render: RenderForm,
-      renderBasic: RenderForm,
+      render: RenderFormBeta,
+      renderBasic: RenderFormBeta,
       isComplete: validateForm,
     })
 

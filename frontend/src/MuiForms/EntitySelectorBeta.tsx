@@ -1,8 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Autocomplete from '@mui/material/Autocomplete'
-import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
+import Loading from 'src/common/Loading'
 
 import { useListUsers } from '../../data/user'
 import { EntityKind } from '../../types/types'
@@ -86,7 +86,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
             disableUnderline: !formContext.editMode ? true : false,
             endAdornment: (
               <>
-                {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
+                {isLoading ? <Loading /> : null}
                 {params.InputProps.endAdornment}
               </>
             ),

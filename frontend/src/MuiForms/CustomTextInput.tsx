@@ -1,5 +1,4 @@
 import TextField from '@mui/material/TextField'
-import _ from 'lodash'
 
 interface EntitySelectorProps {
   label?: string

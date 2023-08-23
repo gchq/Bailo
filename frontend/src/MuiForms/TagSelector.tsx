@@ -1,6 +1,4 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
+import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
 
 export default function TagSelector(props: any) {
   const { onChange, value: currentValue, label, formContext } = props
@@ -35,7 +33,7 @@ export default function TagSelector(props: any) {
                   ? { label: { WebkitTextFillColor: 'black' } }
                   : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
               }
-              variant={'outlined'}
+              variant='outlined'
               label={label}
               required={!formContext.editMode ? false : true}
             />
@@ -44,7 +42,7 @@ export default function TagSelector(props: any) {
       )}
       {!formContext.editMode && (
         <>
-          <Typography sx={{ color: 'black', mb: 1 }}>{label}</Typography>
+          <Typography sx={{ mb: 1 }}>{label}</Typography>
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((tag) => (

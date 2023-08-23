@@ -1,4 +1,5 @@
 import Form from '@rjsf/mui'
+import { DescriptionFieldProps, FieldHelpProps } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, Fragment, SetStateAction } from 'react'
 
@@ -31,9 +32,8 @@ export default function RenderFormBeta({
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function DescriptionFieldTemplate(props: any) {
-    return <></> // Removal of Description Fields when Read-only
+  function DescriptionFieldTemplate(_props: DescriptionFieldProps) {
+    return <></>
   }
 
   return (

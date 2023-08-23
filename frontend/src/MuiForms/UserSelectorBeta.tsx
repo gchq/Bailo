@@ -1,7 +1,5 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import Autocomplete from '@mui/material/Autocomplete'
-import CircularProgress from '@mui/material/CircularProgress'
-import TextField from '@mui/material/TextField'
+import { Autocomplete, CircularProgress, TextField } from '@mui/material'
 import * as React from 'react'
 
 import { useListUsers } from '../../data/user'
@@ -33,7 +31,7 @@ export default function UserSelector(props: any) {
       options={users || []}
       loading={isUsersLoading}
       disabled={!formContext.editMode}
-      popupIcon={!formContext.editMode ? <div></div> : <ExpandMoreIcon />}
+      popupIcon={!formContext.editMode ? <></> : <ExpandMoreIcon />}
       renderInput={(params) => (
         <TextField
           {...params}
