@@ -62,7 +62,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     <>
       {isUsersLoading && <Loading />}
       {users && (
-        <Box sx={{ width: '1000px' }}>
+        <Box sx={{ maxWidth: '1000px' }}>
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
               Manage model access

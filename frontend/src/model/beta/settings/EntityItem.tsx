@@ -1,7 +1,7 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
-import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Tooltip, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import Loading from 'src/common/Loading'
@@ -71,13 +71,15 @@ export default function EntityItem({ entity, accessList, setAccessList, model }:
         )}
       </TableCell>
       <TableCell>
-        <IconButton
-          onClick={removeEntity}
-          aria-label={`Remove user ${entity.entity} from model access list`}
-          data-test='accesslistRemoveUser'
-        >
-          <ClearIcon color='secondary' fontSize='inherit' />
-        </IconButton>
+        <Tooltip title='Remove user' arrow>
+          <IconButton
+            onClick={removeEntity}
+            aria-label={`Remove user ${entity.entity} from model access list`}
+            data-test='accesslistRemoveUser'
+          >
+            <ClearIcon color='secondary' fontSize='inherit' />
+          </IconButton>
+        </Tooltip>
       </TableCell>
     </TableRow>
   )
