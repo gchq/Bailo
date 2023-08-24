@@ -1,4 +1,5 @@
 import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 export default function TagSelector(props: any) {
   const { onChange, value: currentValue, label, formContext } = props
@@ -6,6 +7,8 @@ export default function TagSelector(props: any) {
   const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: any) => {
     onChange(newValues.map((value) => value))
   }
+
+  const theme = useTheme()
 
   return (
     <>
@@ -28,11 +31,17 @@ export default function TagSelector(props: any) {
             <TextField
               {...params}
               size='small'
-              sx={
-                !formContext.editMode
-                  ? { label: { WebkitTextFillColor: 'black' } }
-                  : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
-              }
+              sx={{
+                input: {
+                  color: theme.palette.mode === 'light' ? 'black' : 'white',
+                },
+                label: {
+                  WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+                },
+                '& .MuiInputBase-input.Mui-disabled': {
+                  WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+                },
+              }}
               variant='outlined'
               label={label}
               required={!formContext.editMode ? false : true}
@@ -42,7 +51,7 @@ export default function TagSelector(props: any) {
       )}
       {!formContext.editMode && (
         <>
-          <Typography sx={{ mb: 1 }}>{label}</Typography>
+          <Typography sx={{ color: theme.palette.mode === 'light' ? 'black' : 'white', mb: 1 }}>{label}</Typography>
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((tag) => (

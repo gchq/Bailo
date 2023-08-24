@@ -1,3 +1,4 @@
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 
 interface EntitySelectorProps {
@@ -18,15 +19,23 @@ export default function EntitySelector(props: EntitySelectorProps) {
     onChange(e.target.value)
   }
 
+  const theme = useTheme()
+
   return (
     <TextField
       {...props}
       size='small'
-      sx={
-        !formContext.editMode
-          ? { label: { WebkitTextFillColor: 'black' } }
-          : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
-      }
+      sx={{
+        input: {
+          color: theme.palette.mode === 'light' ? 'black' : 'white',
+        },
+        label: {
+          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+        },
+        '& .MuiInputBase-input.Mui-disabled': {
+          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+        },
+      }}
       onChange={_onChange}
       variant={!formContext.editMode ? 'standard' : 'outlined'}
       label={label}

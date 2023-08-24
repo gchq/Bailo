@@ -1,5 +1,5 @@
 import Form from '@rjsf/mui'
-import { DescriptionFieldProps, FieldHelpProps } from '@rjsf/utils'
+import { DescriptionFieldProps } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, Fragment, SetStateAction } from 'react'
 
@@ -32,7 +32,7 @@ export default function RenderFormBeta({
     setStepState(splitSchema, setSplitSchema, step, { ...step.state, ...form.formData })
   }
 
-  function DescriptionFieldTemplate(_props: DescriptionFieldProps) {
+  function descriptionFieldTemplate(_props: DescriptionFieldProps) {
     return <></>
   }
 
@@ -57,7 +57,7 @@ export default function RenderFormBeta({
       disabled={!canEdit}
       liveOmit
       formContext={{ editMode: canEdit, formSchema: step.schema }}
-      templates={!canEdit ? { DescriptionFieldTemplate } : {}}
+      templates={!canEdit ? { DescriptionFieldTemplate: descriptionFieldTemplate } : {}}
     >
       {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
       <></>

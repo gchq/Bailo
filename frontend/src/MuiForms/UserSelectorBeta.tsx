@@ -1,5 +1,6 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Autocomplete, CircularProgress, TextField } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import * as React from 'react'
 
 import { useListUsers } from '../../data/user'
@@ -13,6 +14,8 @@ export default function UserSelector(props: any) {
   const _onChange = (_event: any, newValue: any) => {
     onChange(newValue?.id)
   }
+
+  const theme = useTheme()
 
   return (
     <Autocomplete
@@ -36,11 +39,17 @@ export default function UserSelector(props: any) {
         <TextField
           {...params}
           size='small'
-          sx={
-            !formContext.editMode
-              ? { label: { WebkitTextFillColor: 'black' } }
-              : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
-          }
+          sx={{
+            input: {
+              color: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            label: {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+          }}
           variant={!formContext.editMode ? 'standard' : 'outlined'}
           label={label}
           required={!formContext.editMode ? false : true}

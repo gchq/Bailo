@@ -1,5 +1,6 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Autocomplete from '@mui/material/Autocomplete'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
 import Loading from 'src/common/Loading'
@@ -50,6 +51,8 @@ export default function EntitySelector(props: EntitySelectorProps) {
     onChange(newValues.map((value) => ({ kind: value.kind, id: value.id })))
   }
 
+  const theme = useTheme()
+
   return (
     <Autocomplete
       multiple
@@ -73,11 +76,17 @@ export default function EntitySelector(props: EntitySelectorProps) {
         <TextField
           {...params}
           size='small'
-          sx={
-            !formContext.editMode
-              ? { label: { WebkitTextFillColor: 'black' } }
-              : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
-          }
+          sx={{
+            input: {
+              color: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            label: {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+          }}
           variant={!formContext.editMode ? 'standard' : 'outlined'}
           label={label}
           required={!formContext.editMode ? false : true}

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Autocomplete from '@mui/material/Autocomplete'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 
 export default function ModelTypeSelector(props: any) {
@@ -9,6 +10,8 @@ export default function ModelTypeSelector(props: any) {
   const _onChange = (_event: any, newValue: any) => {
     onChange(newValue?.value)
   }
+
+  const theme = useTheme()
 
   return (
     <Autocomplete
@@ -23,11 +26,17 @@ export default function ModelTypeSelector(props: any) {
         <TextField
           {...params}
           size='small'
-          sx={
-            !formContext.editMode
-              ? { label: { WebkitTextFillColor: 'black' } }
-              : { '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: 'black' } }
-          }
+          sx={{
+            input: {
+              color: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            label: {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            },
+          }}
           variant={!formContext.editMode ? 'standard' : 'outlined'}
           label={label}
           required={!formContext.editMode ? false : true}
