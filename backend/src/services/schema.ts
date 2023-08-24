@@ -1,9 +1,10 @@
 import SchemaModel from '../models/Schema.js'
 import { Schema, SchemaType } from '../types/types.js'
+import { ModelMetadata } from '../types/types.js'
 import config from '../utils/config.js'
 import logger from '../utils/logger.js'
 
-export async function findSchemaByRef(ref: string): Promise<Schema | null> {
+export async function findSchemaByRef(ref: string) {
   const schema = await SchemaModel.findOne({
     reference: ref,
   })
@@ -46,4 +47,16 @@ export async function addDefaultSchemas() {
     logger.info({ name: schema.name, reference: schema.reference }, `Ensuring schema ${schema.reference} exists`)
     await createSchema({ ...schema, use: SchemaType.DEPLOYMENT }, true)
   }
+}
+
+export async function getManagerAndReviewer(metadata: ModelMetadata) {
+  const schema = await findSchemaByRef(metadata.schemaRef)
+
+  if (!schema) {
+    return { managerTitle: 'Managers', reviewerTitle: 'Technical Reviewer' }
+  }
+
+  const managerTitle = schema.schema.properties.contacts.properties.manager.title
+  const reviewerTitle = schema.schema.properties.contacts.properties.reviewer.title
+  return { managerTitle, reviewerTitle }
 }

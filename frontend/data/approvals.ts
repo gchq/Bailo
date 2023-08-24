@@ -22,7 +22,7 @@ export function useListApprovals(approvalCategory: ApprovalCategory, filter: App
 
   return {
     mutateApprovals: mutate,
-    approvals: data?.approvals,
+    approvals: data ? data.approvals : [],
     isApprovalsLoading: !error && !data,
     isApprovalsError: error,
   }

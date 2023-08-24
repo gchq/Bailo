@@ -26,7 +26,7 @@ import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprov
 import EmptyBlob from '../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
-import { Approval, ApprovalStates, ModelDoc, Version } from '../types/types'
+import { Approval, ApprovalStates, DeploymentDoc, ModelDoc, VersionDoc } from '../types/types'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (
@@ -39,7 +39,6 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
 function ApprovalList({ category, filter }: { category: ApprovalCategory; filter: ApprovalFilterType }) {
   const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
 
-  console.log(approvals)
   const error = MultipleErrorWrapper(
     `Unable to load approval page`,
     {
@@ -60,11 +59,11 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
       <Typography sx={{ p: 3 }} variant='h4'>
         {category === 'Upload' ? 'Models' : 'Deployments'}
       </Typography>
-      {approvals.map((approval: any) => (
+      {approvals.map((approval: Approval) => (
         <ApprovalItem
           approval={approval}
           category={approval.approvalCategory}
-          version={approval.version}
+          version={approval.version as VersionDoc}
           key={approval._id}
           mutateApprovals={mutateApprovals}
         />
@@ -78,16 +77,17 @@ function ApprovalList({ category, filter }: { category: ApprovalCategory; filter
 }
 
 type ApprovalItemProps = {
-  approval: any
+  approval: Approval // changing this from 'any' to 'Approval' causes errors
   category: string
-  version: Version
+  version: VersionDoc
+
   mutateApprovals: () => void
 }
 
 function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
-  const [getapproval, setGetApproval] = useState<Approval | undefined>(undefined)
+  //const [getapproval, setGetApproval] = useState<Approval | undefined>(undefined)
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
   const [showAlert, setShowAlert] = useState(false)
@@ -97,7 +97,8 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
   const theme = useTheme()
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(
-    (approval.version?.model as ModelDoc)?.schemaRef || (approval.deployment?.model as ModelDoc)?.schemaRef
+    ((approval.version as VersionDoc).model as ModelDoc)?.schemaRef ||
+      ((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.schemaRef
   )
 
   const reviewer = schema?.schema.properties.contacts.properties.reviewer.title
@@ -113,7 +114,8 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
     if (!approval.version || approval.approvalType === 'Reviewer') {
       return true
     } else {
-      return approval.approvalType === 'Manager' && approval.version.reviewerApproved === ApprovalStates.Accepted
+      return approval.approvalType === 'Manager' &&
+        (approval.version as VersionDoc).reviewerApproved === ApprovalStates.Accepted
         ? true
         : false
     }
@@ -130,7 +132,7 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
   }
 
   const onConfirm = async () => {
-    await postEndpoint(`/api/v1/approval/${getapproval?._id}/respond`, { choice }).then(async (res) => {
+    await postEndpoint(`/api/v1/approval/${approval?._id}/respond`, { choice }).then(async (res) => {
       if (res.status >= 400) {
         const errorResponse = await getErrorMessage(res)
         setShowAlert(true)
@@ -156,9 +158,9 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
     backgroundColor: theme.palette.container.main,
   }
 
-  const changeState = (changeStateChoice: string, changeStateApproval: Approval) => {
+  const changeState = (changeStateChoice: string) => {
     setOpen(true)
-    setGetApproval(changeStateApproval)
+
     setChoice(changeStateChoice)
     setShowAlert(false)
     if (changeStateChoice === 'Accepted') {
@@ -171,124 +173,133 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
   }
   return (
     <>
-      {approval && (
-        <>
-          <Box sx={{ px: 3 }} key={approval._id}>
-            <Grid container spacing={1} sx={approval.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
-              <Grid item xs={9}>
-                {category === 'Upload' && (
-                  <>
-                    <Link href={`/model/${approval.version?.model?.uuid}`} passHref legacyBehavior>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                      >
-                        {approval.version?.metadata?.highLevelDetails?.name}
-                      </MuiLink>
-                    </Link>
-                    <Stack direction='row' spacing={2}>
-                      <Chip color='primary' label={approval.approvalType} size='small' />
-                      <Chip color='primary' label={`Version: ${approval.version?.version}`} size='small' />
-                      <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
-                        <Typography>{approval.version?.metadata?.highLevelDetails?.modelInASentence}</Typography>
-                      </Box>
-                    </Stack>
-                    {approval.version === undefined ||
-                      (approval.version === null && (
-                        <Alert sx={{ mt: 2 }} severity='warning'>
-                          This model appears to have data missing - check with the uploader to make sure it was uploaded
-                          correctly
-                        </Alert>
-                      ))}
-                  </>
-                )}
-                {category === 'Deployment' && (
-                  <>
-                    <Link href={`/deployment/${approval.deployment?.uuid}`} passHref legacyBehavior>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                      >
-                        {approval.deployment?.metadata?.highLevelDetails?.name}
-                      </MuiLink>
-                    </Link>
+      <Box sx={{ px: 3 }} key={approval._id}>
+        <Grid container spacing={1} sx={approval.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+          <Grid item xs={9}>
+            {category === 'Upload' && (
+              <>
+                <Link
+                  href={`/model/${((approval.version as VersionDoc)?.model as ModelDoc)?.uuid}`}
+                  passHref
+                  legacyBehavior
+                >
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {(approval.version as VersionDoc)?.metadata?.highLevelDetails?.name}
+                  </MuiLink>
+                </Link>
+                <Stack direction='row' spacing={2}>
+                  <Chip color='primary' label={approval.approvalType} size='small' />
+                  <Chip color='primary' label={`Version: ${(approval.version as VersionDoc)?.version}`} size='small' />
+                  <Box sx={{ mt: 'auto !important', mb: 'auto !important' }}>
                     <Typography>
-                      Requesting deployment of{' '}
-                      <Link href={`/model/${approval.deployment?.model?.uuid}`} passHref legacyBehavior>
-                        <MuiLink
-                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
-                        >
-                          {approval.deployment?.model?.latestVersion?.metadata?.highLevelDetails?.name}
-                        </MuiLink>
-                      </Link>
+                      {(approval.version as VersionDoc)?.metadata?.highLevelDetails?.modelInASentence}
                     </Typography>
-                    {approval.deployment === undefined ||
-                      (approval.deployment === null && (
-                        <Alert sx={{ mt: 2 }} severity='warning'>
-                          This deployment appears to have data missing - check with the requester to make sure it was
-                          requested correctly
-                        </Alert>
-                      ))}
-                  </>
-                )}
-              </Grid>
-              <Grid item xs={12} md sx={{ display: 'flex' }}>
-                <Box ml='auto' my='auto'>
-                  {approval.status !== 'No Response' && (
-                    <Chip label={approval.status} color={approval.status === 'Accepted' ? 'success' : 'error'} />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item sx={{ display: 'flex', width: 200 }}>
-                <Box ml='auto' my='auto'>
-                  <Button
-                    color='secondary'
-                    variant='outlined'
-                    onClick={() => changeState('Declined', approval)}
-                    sx={{ mr: 1 }}
-                    disabled={approval.status === 'Declined'}
-                  >
-                    Reject
-                  </Button>
-                  <DisabledElementTooltip
-                    conditions={[!canApprove() ? `${reviewer} needs to appove this model first` : '']}
-                  >
-                    <Button
-                      variant='contained'
-                      onClick={() => changeState('Accepted', approval)}
-                      data-test={`approveButton${approval.approvalType}${
-                        category === 'Upload' ? approval.version?.model?.uuid : approval.deployment?.uuid
-                      }`}
-                      disabled={approval.status === 'Accepted' || !canApprove()}
-                    >
-                      Approve
-                    </Button>
-                  </DisabledElementTooltip>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle id='alert-dialog-title'>{approvalModalTitle}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>{approvalModalText}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button color='secondary' variant='outlined' onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmReviewButton'>
-                Confirm
-              </Button>
-            </DialogActions>
-            {showAlert && (
-              <Alert sx={{ m: 1 }} severity='error' onClose={() => setShowAlert(false)}>
-                {errorMessage}
-              </Alert>
+                  </Box>
+                </Stack>
+                {approval.version === undefined ||
+                  (approval.version === null && (
+                    <Alert sx={{ mt: 2 }} severity='warning'>
+                      This model appears to have data missing - check with the uploader to make sure it was uploaded
+                      correctly
+                    </Alert>
+                  ))}
+              </>
             )}
-          </Dialog>
-        </>
-      )}
+            {category === 'Deployment' && (
+              <>
+                <Link href={`/deployment/${(approval.deployment as DeploymentDoc)?.uuid}`} passHref legacyBehavior>
+                  <MuiLink
+                    variant='h5'
+                    sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}
+                  >
+                    {(approval.deployment as DeploymentDoc)?.metadata?.highLevelDetails?.name}
+                  </MuiLink>
+                </Link>
+                <Typography>
+                  Requesting deployment of{' '}
+                  <Link
+                    href={`/model/${((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.uuid}`}
+                    passHref
+                    legacyBehavior
+                  >
+                    <MuiLink sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.secondary.main }}>
+                      {
+                        (((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.latestVersion as VersionDoc)
+                          ?.metadata?.highLevelDetails?.name
+                      }
+                    </MuiLink>
+                  </Link>
+                </Typography>
+                {approval.deployment === undefined ||
+                  (approval.deployment === null && (
+                    <Alert sx={{ mt: 2 }} severity='warning'>
+                      This deployment appears to have data missing - check with the requester to make sure it was
+                      requested correctly
+                    </Alert>
+                  ))}
+              </>
+            )}
+          </Grid>
+          <Grid item xs={12} md sx={{ display: 'flex' }}>
+            <Box ml='auto' my='auto'>
+              {approval.status !== 'No Response' && (
+                <Chip label={approval.status} color={approval.status === 'Accepted' ? 'success' : 'error'} />
+              )}
+            </Box>
+          </Grid>
+          <Grid item sx={{ display: 'flex', width: 200 }}>
+            <Box ml='auto' my='auto'>
+              <Button
+                color='secondary'
+                variant='outlined'
+                onClick={() => changeState('Declined')}
+                sx={{ mr: 1 }}
+                disabled={approval.status === 'Declined'}
+              >
+                Reject
+              </Button>
+              <DisabledElementTooltip
+                conditions={[!canApprove() ? `${reviewer} needs to appove this model first` : '']}
+              >
+                <Button
+                  variant='contained'
+                  onClick={() => changeState('Accepted')}
+                  data-test={`approveButton${approval.approvalType}${
+                    category === 'Upload'
+                      ? ((approval.version as VersionDoc)?.model as ModelDoc)?.uuid
+                      : (approval.deployment as DeploymentDoc)?.uuid
+                  }`}
+                  disabled={approval.status === 'Accepted' || !canApprove()}
+                >
+                  Approve
+                </Button>
+              </DisabledElementTooltip>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle id='alert-dialog-title'>{approvalModalTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>{approvalModalText}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color='secondary' variant='outlined' onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant='contained' onClick={onConfirm} autoFocus data-test='confirmReviewButton'>
+            Confirm
+          </Button>
+        </DialogActions>
+        {showAlert && (
+          <Alert sx={{ m: 1 }} severity='error' onClose={() => setShowAlert(false)}>
+            {errorMessage}
+          </Alert>
+        )}
+      </Dialog>
     </>
   )
 }
