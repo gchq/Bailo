@@ -12,11 +12,13 @@ export default function FormDesigner({
   setSplitSchema,
   onSubmit,
   modelUploading,
+  canEdit = false,
 }: {
   splitSchema: SplitSchema
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
   onSubmit: () => void
   modelUploading: boolean
+  canEdit?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const [openValidateError, setOpenValidateError] = useState(false)
@@ -62,7 +64,7 @@ export default function FormDesigner({
       </Grid>
 
       <Grid item xs={9} lg={10} xl={11} sx={{ pt: 2 }}>
-        <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
+        <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={canEdit} />
         <RenderButtons
           step={currentStep}
           splitSchema={splitSchema}
@@ -73,6 +75,7 @@ export default function FormDesigner({
           openValidateError={openValidateError}
           setOpenValidateError={setOpenValidateError}
           modelUploading={modelUploading}
+          canEdit={canEdit}
         />
       </Grid>
     </Grid>
