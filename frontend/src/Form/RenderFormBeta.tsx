@@ -1,7 +1,7 @@
 import Form from '@rjsf/mui'
 import { DescriptionFieldProps } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, Fragment, SetStateAction } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtilsBeta'
