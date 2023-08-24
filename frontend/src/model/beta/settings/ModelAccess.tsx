@@ -62,76 +62,74 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     <>
       {isUsersLoading && <Loading />}
       {users && (
-        <Box sx={{ maxWidth: '1000px' }}>
-          <Stack spacing={2}>
-            <Typography variant='h6' component='h2'>
-              Manage model access
-            </Typography>
-            <Autocomplete
-              open={open}
-              onOpen={() => {
-                setOpen(true)
-              }}
-              onClose={() => {
-                setOpen(false)
-              }}
-              // we might get a string or an object back
-              isOptionEqualToValue={(option: User, value: User) => option.id === value.id}
-              onChange={onUserChange}
-              getOptionLabel={(option) => option.id}
-              options={users}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label='Add a user or group to the model access list'
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {isUsersLoading && <Loading size={20} />}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-            />
-            <Box
-              sx={{
-                overflowY: 'auto',
-                maxHeight: '400px',
-                border: 'solid 1px',
-                padding: '20px',
-                borderRadius: 1,
-                borderColor: theme.palette.primary.main,
-              }}
-            >
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Entity</TableCell>
-                    <TableCell>Roles</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {accessList.map((entity) => (
-                    <EntityItem
-                      key={entity.entity}
-                      entity={entity}
-                      accessList={accessList}
-                      setAccessList={setAccessList}
-                      model={model}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-            <Button aria-label='Save access list' onClick={updateAccessList}>
-              Save
-            </Button>
-          </Stack>
-        </Box>
+        <Stack spacing={2}>
+          <Typography variant='h6' component='h2'>
+            Manage model access
+          </Typography>
+          <Autocomplete
+            open={open}
+            onOpen={() => {
+              setOpen(true)
+            }}
+            onClose={() => {
+              setOpen(false)
+            }}
+            // we might get a string or an object back
+            isOptionEqualToValue={(option: User, value: User) => option.id === value.id}
+            onChange={onUserChange}
+            getOptionLabel={(option) => option.id}
+            options={users}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label='Add a user or group to the model access list'
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {isUsersLoading && <Loading size={20} />}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
+          <Box
+            sx={{
+              overflowY: 'auto',
+              maxHeight: '400px',
+              border: 'solid 1px',
+              padding: '20px',
+              borderRadius: 1,
+              borderColor: theme.palette.primary.main,
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Entity</TableCell>
+                  <TableCell>Roles</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {accessList.map((entity) => (
+                  <EntityItem
+                    key={entity.entity}
+                    entity={entity}
+                    accessList={accessList}
+                    setAccessList={setAccessList}
+                    model={model}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+          <Button aria-label='Save access list' onClick={updateAccessList}>
+            Save
+          </Button>
+        </Stack>
       )}
     </>
   )

@@ -26,7 +26,7 @@ export default function Settings({ model }: { model: ModelInterface }) {
           </ListItemButton>
         </ListItem>
       </List>
-      <Box sx={{ maxWidth: '750px' }}>
+      <Box sx={{ width: '100%', maxWidth: '1000px' }}>
         {selectedCategory === 'general' && <ModelAccess model={model} />}
         {selectedCategory === 'danger' && (
           <Button variant='contained' disabled>
