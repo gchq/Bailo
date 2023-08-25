@@ -12,6 +12,7 @@ export interface ModelInterface {
   id: string
   name: string
   description: string
+  schema: string
   visibility: ModelVisibilityKeys
   collaborators: CollaboratorEntry[]
 }

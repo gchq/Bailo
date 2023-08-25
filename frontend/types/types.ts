@@ -393,14 +393,15 @@ export type ListModelType = 'favourites' | 'user' | 'all'
 export interface SchemaInterface {
   id: string
   name: string
+  description: string
   active: boolean
   hidden: boolean
   kind: SchemaKindKeys
-  display: string
-  fields: unknown
-  metadata: unknown
-  createdAt: string
-  updatedAt: string
+  meta: unknown
+  uiSchema: unknown
+  schema: unknown
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const SchemaKind = {

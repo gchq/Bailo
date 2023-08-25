@@ -21,6 +21,7 @@ export interface ModelInterface {
 
   name: string
   description: string
+  schema: string
 
   collaborators: Array<CollaboratorEntry>
 

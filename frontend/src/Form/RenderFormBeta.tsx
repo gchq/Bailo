@@ -42,6 +42,7 @@ export default function RenderFormBeta({
       formData={step.state}
       onChange={onFormChange}
       validator={validator}
+      noValidate
       widgets={{
         userSelector: UserSelector,
         entitySelector: EntitySelector,

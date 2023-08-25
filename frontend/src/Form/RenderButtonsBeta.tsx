@@ -29,17 +29,8 @@ export default function RenderButtons({
   modelUploading,
   canEdit = false,
 }: RenderButtonsInterface): ReactElement | null {
-  const sendNotification = useNotification()
-
   const onClickSubmit = () => {
-    const isValid = validateForm(step)
-
-    if (!isValid) {
-      setStepValidate(splitSchema, setSplitSchema, step, true)
-      sendNotification({ variant: 'error', msg: 'This tab is not complete.' })
-      return
-    }
-
+    // TODO decide when we handle validation
     onSubmit()
   }
   if (!canEdit) {
