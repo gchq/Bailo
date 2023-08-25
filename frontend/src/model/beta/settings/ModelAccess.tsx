@@ -20,6 +20,7 @@ import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 import Loading from '../../../common/Loading'
+import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
 type ModelAccessProps = {
@@ -29,7 +30,7 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
-  const { users, isUsersLoading } = useListUsers()
+  const { users, isUsersLoading, isUsersError } = useListUsers()
 
   const theme = useTheme()
 
@@ -38,6 +39,10 @@ export default function ModelAccess({ model }: ModelAccessProps) {
       setAccessList(model.collaborators)
     }
   }, [model, setAccessList])
+
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
+  }
 
   function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: User | null) {
     if (
@@ -119,7 +124,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
                     key={entity.entity}
                     entity={entity}
                     accessList={accessList}
-                    setAccessList={setAccessList}
+                    onAccessListChange={setAccessList}
                     model={model}
                   />
                 ))}

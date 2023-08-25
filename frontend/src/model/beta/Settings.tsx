@@ -6,8 +6,12 @@ import ModelAccess from './settings/ModelAccess'
 
 type SettingsCategory = 'general' | 'danger'
 
-export default function Settings({ model }: { model: ModelInterface }) {
-  const [selectedCategory, setSelectedCategory] = useState('general')
+type SettingsProps = {
+  model: ModelInterface
+}
+
+export default function Settings({ model }: SettingsProps) {
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('general')
 
   const handleListItemClick = (category: SettingsCategory) => {
     setSelectedCategory(category)

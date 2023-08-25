@@ -3,31 +3,36 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
 import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Tooltip, Typography } from '@mui/material'
 import _ from 'lodash-es'
-import { Dispatch, SetStateAction } from 'react'
-import Loading from 'src/common/Loading'
+import { useMemo } from 'react'
 
 import { useGetModelRoles } from '../../../../actions/model'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import Loading from '../../../common/Loading'
+import MessageAlert from '../../../MessageAlert'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
-  setAccessList: Dispatch<SetStateAction<CollaboratorEntry[]>>
+  onAccessListChange: (value: CollaboratorEntry[]) => void
   model: ModelInterface
 }
 
-export default function EntityItem({ entity, accessList, setAccessList, model }: EntityItemProps) {
-  const { modelRoles, isModelRolesLoading } = useGetModelRoles(model.id)
+export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
+
+  if (isModelRolesError) {
+    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  }
 
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
     updatedAccessList[index].roles = newValues
-    setAccessList(updatedAccessList)
+    onAccessListChange(updatedAccessList)
   }
 
   function removeEntity() {
-    setAccessList(accessList.filter((access) => access.entity !== entity.entity))
+    onAccessListChange(accessList.filter((access) => access.entity !== entity.entity))
   }
 
   function getModelRoles() {
@@ -45,7 +50,7 @@ export default function EntityItem({ entity, accessList, setAccessList, model }:
     <TableRow>
       <TableCell>
         <EntityIcon entity={entity} />
-        <Typography>{entity.entity.replace('user:', '').replace('group:', '')}</Typography>
+        <EntityNameDisplay entity={entity} />
       </TableCell>
       <TableCell>
         {isModelRolesLoading && <Loading />}
@@ -90,5 +95,15 @@ type EntityIconProps = {
 }
 
 function EntityIcon({ entity }: EntityIconProps) {
-  return entity.entity.startsWith('user:') ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
+  const isUser = useMemo(() => entity.entity.startsWith('user:'), [entity])
+  return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
+}
+
+type EntityNameDisplayProps = {
+  entity: CollaboratorEntry
+}
+
+function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
+  const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
+  return <Typography>{entityName}</Typography>
 }
