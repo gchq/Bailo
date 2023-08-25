@@ -20,10 +20,6 @@ type EntityItemProps = {
 export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
-  }
-
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
@@ -44,6 +40,10 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
     if (!role) return { id: roleId, name: 'Unknown Role' }
 
     return role
+  }
+
+  if (isModelRolesError) {
+    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
   return (

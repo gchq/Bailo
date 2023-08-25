@@ -40,10 +40,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [model, setAccessList])
 
-  if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
-  }
-
   function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: User | null) {
     if (
       newValue &&
@@ -61,6 +57,10 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     const updatedModel: ModelInterface = _.cloneDeep(model)
     updatedModel.collaborators = accessList
     patchModel(updatedModel)
+  }
+
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
   return (
