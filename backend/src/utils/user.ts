@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 
-import Authorisation from '../external/Authorisation.js'
+import Authorisation from '../connectors/Authorisation.js'
 import { getAdminToken } from '../routes/v1/registryAuth.js'
 import { findAndUpdateUser, findUserCached, getUserById } from '../services/user.js'
 import { UserDoc } from '../types/types.js'

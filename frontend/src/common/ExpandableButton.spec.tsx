@@ -7,22 +7,22 @@ import ExpandableButton from './ExpandableButton'
 
 describe('ExpandableButton', () => {
   it('renders an ExpandableButton component where you cannot view the label text', async () => {
-    render(<ExpandableButton label='Click me' icon={<Add />} onClick={doNothing} />)
+    render(<ExpandableButton label='Click me' ariaLabel='' icon={<Add />} onClick={doNothing} />)
 
     await waitFor(async () => {
-      const expandableButton = screen.queryByTestId('expandable-button')
+      const expandableButton = screen.queryByTestId('expandableButton')
       expect(expandableButton).not.toBeUndefined()
       expect(screen.queryByText('Click me')).toBeNull()
     })
   })
 
   it('renders an ExpandableButton component that shows the label on hover', async () => {
-    render(<ExpandableButton label='Click me' icon={<Add />} onClick={doNothing} />)
+    render(<ExpandableButton label='Click me' ariaLabel='' icon={<Add />} onClick={doNothing} />)
 
-    fireEvent.mouseEnter(await screen.findByTestId('expandable-button'))
+    fireEvent.mouseEnter(await screen.findByTestId('expandableButton'))
 
     await waitFor(async () => {
-      const expandableButton = screen.queryByTestId('expandable-button')
+      const expandableButton = screen.queryByTestId('expandableButton')
       expect(expandableButton).not.toBeUndefined()
       expect(await screen.findByText('Click me')).not.toBeUndefined()
     })

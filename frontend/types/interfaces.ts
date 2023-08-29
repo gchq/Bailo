@@ -34,3 +34,35 @@ export interface Step {
   shouldValidate: boolean
   isComplete: (step: Step) => boolean
 }
+
+export interface TeamInterface {
+  id: string
+
+  name: string
+  description: string
+
+  deleted: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export const ModelVisibility = {
+  Private: 'private',
+  Public: 'public',
+} as const
+
+export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+
+export interface ModelInterface {
+  id: string
+
+  name: string
+  description: string
+
+  visibility: ModelVisibilityKeys
+  deleted: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}

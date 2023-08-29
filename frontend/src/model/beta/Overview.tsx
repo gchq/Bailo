@@ -20,7 +20,7 @@ export default function Overview({ model }: { model: any }) {
   }, [model])
 
   function createFromScratchOnClick() {
-    router.push(`/beta/model/new/schema?modelUuid=${model.uuid}`)
+    router.push(`/beta/model/${model.id}/schema`)
   }
 
   function displayTemplatePage() {
@@ -36,9 +36,9 @@ export default function Overview({ model }: { model: any }) {
   return (
     <>
       {showTemplatePage && (
-        <Box sx={{ maxWidth: '750px', mx: 'auto', my: 4 }}>
+        <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
           <Stack spacing={4} justifyContent='center' alignItems='center'>
-            <Typography variant='h6' color='primary'>
+            <Typography component='h2' variant='h6' color='primary' data-test='createModelCardOverview'>
               Create a model card
             </Typography>
             <PostAdd fontSize='large' color='primary' />
@@ -63,7 +63,9 @@ export default function Overview({ model }: { model: any }) {
                 }}
               >
                 <Stack spacing={2}>
-                  <Typography variant='h6'>Create from a template</Typography>
+                  <Typography component='h3' variant='h6'>
+                    Create from a template
+                  </Typography>
                   <Typography variant='body1'>Create a model using an existing model as a template.</Typography>
                   <Button variant='contained' disabled>
                     Create
@@ -80,7 +82,9 @@ export default function Overview({ model }: { model: any }) {
                 }}
               >
                 <Stack spacing={2}>
-                  <Typography variant='h6'>Create from scratch</Typography>
+                  <Typography component='h3' variant='h6'>
+                    Create from scratch
+                  </Typography>
                   <Typography variant='body1'>Create a model from scratch using a predifined schema.</Typography>
                   <Button variant='contained' onClick={createFromScratchOnClick}>
                     Create

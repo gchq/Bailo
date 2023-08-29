@@ -4,7 +4,7 @@ import multer from 'multer'
 import { customAlphabet } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid'
 
-import audit from '../../external/Audit.js'
+import audit from '../../connectors/Audit.js'
 import VersionModel from '../../models/Version.js'
 import { createVersionApprovals } from '../../services/approval.js'
 import { createModel, findModelByUuid } from '../../services/model.js'

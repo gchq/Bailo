@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { basename } from 'path'
 
-import audit from '../../external/Audit.js'
+import audit from '../../connectors/Audit.js'
 import ApprovalModel from '../../models/Approval.js'
 import ModelModel from '../../models/Model.js'
 import { createVersionApprovals, deleteApprovalsByVersion, findApprovalsByVersionId } from '../../services/approval.js'

@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../middleware/validate.js'
 import { ImageInterface } from '../../../../models/v2/Image.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
   params: z.object({
@@ -14,9 +14,7 @@ export const getImagesSchema = z.object({
 })
 
 interface GetImagesResponse {
-  data: {
-    images: Array<ImageInterface>
-  }
+  images: Array<ImageInterface>
 }
 
 export const getImages = [
@@ -25,22 +23,20 @@ export const getImages = [
     const _ = parse(req, getImagesSchema)
 
     return res.json({
-      data: {
-        images: [
-          {
-            modelId: 'model-123',
+      images: [
+        {
+          modelId: 'model-123',
 
-            namespace: 'abc',
-            model: 'model',
-            version: '1.2.3',
+          namespace: 'abc',
+          model: 'model',
+          version: '1.2.3',
 
-            size: 4834382,
+          size: 4834382,
 
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
     })
   },
 ]
