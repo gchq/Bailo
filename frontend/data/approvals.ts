@@ -1,11 +1,11 @@
 import qs from 'qs'
 import useSWR from 'swr'
 
-import { Approval, Deployment, Version } from '../types/types'
+import { Approval, ApprovalCategory, Deployment, Version } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export type ApprovalCategory = 'Upload' | 'Deployment'
 export type ApprovalFilterType = 'user' | 'archived'
+
 export function useListApprovals(approvalCategory: ApprovalCategory, filter: ApprovalFilterType) {
   const { data, error, mutate } = useSWR<
     {

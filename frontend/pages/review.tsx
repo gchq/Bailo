@@ -17,16 +17,24 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useGetSchema } from 'data/schema'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import DisabledElementTooltip from 'src/common/DisabledElementTooltip'
+import Loading from 'src/common/Loading'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { postEndpoint } from '../data/api'
-import { ApprovalCategory, ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
+import { ApprovalFilterType, useGetNumApprovals, useListApprovals } from '../data/approvals'
 import EmptyBlob from '../src/common/EmptyBlob'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
 import Wrapper from '../src/Wrapper'
-import { Approval, ApprovalStates, DeploymentDoc, ModelDoc, VersionDoc } from '../types/types'
+import {
+  Approval,
+  ApprovalCategory,
+  ApprovalStates,
+  DeploymentDoc,
+  ModelDoc,
+  UploadCategory,
+  VersionDoc,
+} from '../types/types'
 
 function ErrorWrapper({ message }: { message: string | undefined }) {
   return (
@@ -36,63 +44,61 @@ function ErrorWrapper({ message }: { message: string | undefined }) {
   )
 }
 
-function ApprovalList({ category, filter }: { category: ApprovalCategory; filter: ApprovalFilterType }) {
-  const { approvals, isApprovalsLoading, isApprovalsError, mutateApprovals } = useListApprovals(category, filter)
+function ApprovalList({
+  approvalCategory,
+  filter,
+}: {
+  approvalCategory: ApprovalCategory
+  filter: ApprovalFilterType
+}) {
+  const { approvals, isApprovalsLoading, isApprovalsError } = useListApprovals(approvalCategory, filter)
 
-  const error = MultipleErrorWrapper(
-    `Unable to load approval page`,
-    {
-      isApprovalsError,
-    },
-    ErrorWrapper
+  const uploadCategory: UploadCategory = useMemo(
+    () => (approvalCategory === ApprovalCategory.Upload ? 'model' : 'deployment'),
+    [approvalCategory]
   )
-  if (error) return error
 
-  const getUploadCategory = (approvalCategory: ApprovalCategory) =>
-    approvalCategory === 'Upload' ? 'models' : 'deployments'
-
-  if (isApprovalsLoading || !approvals) {
-    return <Paper sx={{ mt: 2, mb: 2 }} />
+  if (isApprovalsError) {
+    return <ErrorWrapper message={isApprovalsError.info.message} />
   }
+
+  if (isApprovalsLoading) {
+    return <Loading />
+  }
+
   return (
     <Paper sx={{ mt: 2, mb: 2, pb: 2 }}>
-      <Typography sx={{ p: 3 }} variant='h4'>
-        {category === 'Upload' ? 'Models' : 'Deployments'}
+      <Typography component='h2' variant='h5' sx={{ p: 3 }}>
+        {approvalCategory === ApprovalCategory.Upload ? 'Models' : 'Deployments'}
       </Typography>
       {approvals.map((approval: Approval) => (
         <ApprovalItem
           approval={approval}
-          category={approval.approvalCategory}
-          version={approval.version as VersionDoc}
+          approvalCategory={approval.approvalCategory}
+          filter={filter}
           key={approval._id}
-          mutateApprovals={mutateApprovals}
         />
       ))}
-
-      {approvals.length === 0 && (
-        <EmptyBlob text={`All done! No ${getUploadCategory(category)} are waiting for approval.`} />
-      )}
+      {approvals.length === 0 && <EmptyBlob text={`No ${uploadCategory}s awaiting approval.`} />}
     </Paper>
   )
 }
 
 type ApprovalItemProps = {
-  approval: Approval // changing this from 'any' to 'Approval' causes errors
-  category: string
-  version: VersionDoc
-
-  mutateApprovals: () => void
+  approval: Approval
+  approvalCategory: ApprovalCategory
+  filter: ApprovalFilterType
 }
 
-function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps) {
+function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps) {
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('')
-  //const [getapproval, setGetApproval] = useState<Approval | undefined>(undefined)
   const [approvalModalText, setApprovalModalText] = useState('')
   const [approvalModalTitle, setApprovalModalTitle] = useState('')
   const [showAlert, setShowAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const { mutateApprovals } = useListApprovals(approvalCategory, filter)
   const { mutateNumApprovals } = useGetNumApprovals()
   const theme = useTheme()
 
@@ -101,25 +107,30 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
       ((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.schemaRef
   )
 
-  const reviewer = schema?.schema.properties.contacts.properties.reviewer.title
-  if (isSchemaError) {
-    return <ErrorWrapper message={isSchemaError.info.message} />
-  }
+  const reviewer: string = useMemo(
+    () => (schema ? schema.schema.properties.contacts.properties.reviewer.title : ''),
+    [schema]
+  )
 
-  if (isSchemaLoading) {
-    return null
-  }
-
-  function canApprove() {
+  const canApprove = useMemo(() => {
     if (!approval.version || approval.approvalType === 'Reviewer') {
       return true
-    } else {
-      return approval.approvalType === 'Manager' &&
-        (approval.version as VersionDoc).reviewerApproved === ApprovalStates.Accepted
-        ? true
-        : false
     }
-  }
+    return (
+      approval.approvalType === 'Manager' &&
+      (approval.version as VersionDoc).reviewerApproved === ApprovalStates.Accepted
+    )
+  }, [approval.approvalType, approval.version])
+
+  const gridContainerStyling = useMemo(
+    () => ({
+      mb: 2,
+      p: 2,
+      backgroundColor: theme.palette.container.main,
+      borderLeft: `.3rem solid ${approval.approvalType === 'Manager' ? '#283593' : '#de3c30'}`,
+    }),
+    [approval.approvalType, theme]
+  )
 
   const handleClose = () => {
     setOpen(false)
@@ -145,38 +156,36 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
     })
   }
 
-  const managerStyling = {
-    mb: 2,
-    borderLeft: '.3rem solid #283593',
-    p: 2,
-    backgroundColor: theme.palette.container.main,
-  }
-  const reviewerStyling = {
-    mb: 2,
-    borderLeft: '.3rem solid #de3c30',
-    p: 2,
-    backgroundColor: theme.palette.container.main,
-  }
-
   const changeState = (changeStateChoice: string) => {
     setOpen(true)
 
     setChoice(changeStateChoice)
     setShowAlert(false)
     if (changeStateChoice === 'Accepted') {
-      setApprovalModalTitle(`Approve ${category}`)
-      setApprovalModalText(`I can confirm that the ${category.toLowerCase()} meets all necessary requirements.`)
+      setApprovalModalTitle(`Approve ${approvalCategory}`)
+      setApprovalModalText(`I can confirm that the ${approvalCategory.toLowerCase()} meets all necessary requirements.`)
     } else {
-      setApprovalModalTitle(`Reject ${category}`)
-      setApprovalModalText(`The ${category.toLowerCase()} does not meet the necessary requirements for approval.`)
+      setApprovalModalTitle(`Reject ${approvalCategory}`)
+      setApprovalModalText(
+        `The ${approvalCategory.toLowerCase()} does not meet the necessary requirements for approval.`
+      )
     }
   }
+
+  if (isSchemaError) {
+    return <ErrorWrapper message={isSchemaError.info.message} />
+  }
+
+  if (isSchemaLoading || !schema) {
+    return <Loading />
+  }
+
   return (
     <>
       <Box sx={{ px: 3 }} key={approval._id}>
-        <Grid container spacing={1} sx={approval.approvalType === 'Manager' ? managerStyling : reviewerStyling}>
+        <Grid container spacing={1} sx={gridContainerStyling}>
           <Grid item xs={9}>
-            {category === 'Upload' && (
+            {approvalCategory === 'Upload' && (
               <>
                 <Link
                   href={`/model/${((approval.version as VersionDoc)?.model as ModelDoc)?.uuid}`}
@@ -208,7 +217,7 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
                   ))}
               </>
             )}
-            {category === 'Deployment' && (
+            {approvalCategory === 'Deployment' && (
               <>
                 <Link href={`/deployment/${(approval.deployment as DeploymentDoc)?.uuid}`} passHref legacyBehavior>
                   <MuiLink
@@ -261,18 +270,16 @@ function ApprovalItem({ approval, category, mutateApprovals }: ApprovalItemProps
               >
                 Reject
               </Button>
-              <DisabledElementTooltip
-                conditions={[!canApprove() ? `${reviewer} needs to appove this model first` : '']}
-              >
+              <DisabledElementTooltip conditions={[!canApprove ? `${reviewer} needs to approve this model first` : '']}>
                 <Button
                   variant='contained'
                   onClick={() => changeState('Accepted')}
                   data-test={`approveButton${approval.approvalType}${
-                    category === 'Upload'
+                    approvalCategory === 'Upload'
                       ? ((approval.version as VersionDoc)?.model as ModelDoc)?.uuid
                       : (approval.deployment as DeploymentDoc)?.uuid
                   }`}
-                  disabled={approval.status === 'Accepted' || !canApprove()}
+                  disabled={approval.status === 'Accepted' || !canApprove}
                 >
                   Approve
                 </Button>
@@ -317,8 +324,8 @@ export default function Review() {
         <Tab value='user' label='Approvals' />
         <Tab value='archived' label='Archived' />
       </Tabs>
-      <ApprovalList category='Upload' filter={value} />
-      <ApprovalList category='Deployment' filter={value} />
+      <ApprovalList approvalCategory={ApprovalCategory.Upload} filter={value} />
+      <ApprovalList approvalCategory={ApprovalCategory.Deployment} filter={value} />
     </Wrapper>
   )
 }
