@@ -1,14 +1,13 @@
-import { Box, Button } from '@mui/material'
+import { Box, Button, Divider, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 import { useGetSchema } from '../../../../actions/schema'
 import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { SplitSchema } from '../../../../types/interfaces'
 import { ModelInterface } from '../../../../types/v2/types'
-import { createStep, getStepsFromSchema } from '../../../../utils/formUtilsBeta'
+import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
-import Form from '../../../Form/FormBeta'
-import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../Form/RenderFileTab'
+import ModelCardForm from '../../../Form/beta/ModelCardForm'
 import MessageAlert from '../../../MessageAlert'
 
 type FormEditPageProps = {
@@ -16,13 +15,19 @@ type FormEditPageProps = {
 }
 
 export default function FormEditPage({ model }: FormEditPageProps) {
-  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
   const [isEdit, setIsEdit] = useState(false)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.schema)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
+  const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  async function onSubmit() {
-    console.log(splitSchema)
+  function onSubmit() {
+    if (schema) {
+      const data = getStepsData(splitSchema, true)
+      data.schemaRef = schema.id
+      const form = JSON.stringify(data)
+      // TODO - submit form
+      console.log(form)
+    }
   }
 
   useEffect(() => {
@@ -36,27 +41,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         },
       },
       []
-    )
-
-    steps.push(
-      createStep({
-        schema: {
-          title: 'Files',
-        },
-        state: {
-          binary: undefined,
-          code: undefined,
-        },
-        schemaRef: schema.id,
-
-        type: 'Data',
-        index: steps.length,
-        section: 'files',
-
-        render: RenderFileTab,
-        renderBasic: RenderBasicFileTab,
-        isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
-      })
     )
 
     for (const step of steps) {
@@ -77,12 +61,31 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   return (
     <>
       {isSchemaLoading || (isUiConfigLoading && <Loading />)}
-      <Box sx={{ textAlign: 'right', width: '100%' }}>
-        <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
-          {isEdit ? 'View model card' : 'Edit model card'}
-        </Button>
+      <Box sx={{ px: 4, py: 1 }}>
+        {!isEdit && (
+          <Box sx={{ width: '100%', textAlign: 'right' }}>
+            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
+              Edit Model card
+            </Button>
+          </Box>
+        )}
+        {isEdit && (
+          <Stack
+            direction='row'
+            spacing={1}
+            justifyContent='flex-end'
+            divider={<Divider orientation='vertical' flexItem />}
+          >
+            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
+              Cancel
+            </Button>
+            <Button variant='contained' onClick={onSubmit}>
+              Save
+            </Button>
+          </Stack>
+        )}
+        <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
-      <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} canEdit={isEdit} />
     </>
   )
 }

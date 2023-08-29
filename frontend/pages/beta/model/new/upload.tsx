@@ -12,13 +12,13 @@ import { useGetCurrentUser } from '../../../../data/user'
 import LoadingBar from '../../../../src/common/LoadingBar'
 import { MinimalErrorWrapper } from '../../../../src/errors/ErrorWrapper'
 import MultipleErrorWrapper from '../../../../src/errors/MultipleErrorWrapper'
-import Form from '../../../../src/Form/FormBeta'
+import Form from '../../../../src/Form/beta/FormBeta'
 import RenderFileTab, { fileTabComplete, RenderBasicFileTab } from '../../../../src/Form/RenderFileTab'
 import SubmissionError from '../../../../src/Form/SubmissionError'
 import Wrapper from '../../../../src/Wrapper'
 import { SplitSchema } from '../../../../types/interfaces'
 import { EntityKind, Schema, User } from '../../../../types/types'
-import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/formUtilsBeta'
+import { createStep, getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 
 function Upload() {
   const { defaultSchema, isDefaultSchemaError, isDefaultSchemaLoading } = useGetDefaultSchema('UPLOAD')

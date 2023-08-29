@@ -86,96 +86,23 @@ export const schemaJson = {
       required: ['name', 'modelInASentence', 'modelOverview', 'modelCardVersion', 'tags'],
       additionalProperties: false,
     },
-    contacts: {
-      title: 'Contacts',
-      description:
-        'Details of those individuals responsible for the model, the detail in this card and the risk involved in using the model and its continued alignment with policy.',
+    anotherPage: {
+      title: 'Another Page',
+      description: 'This is a second page',
       type: 'object',
       properties: {
-        uploader: {
-          title: 'Model Developer',
-          description:
-            'The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.',
-          type: 'array',
-          items: { $ref: '#/definitions/entity' },
-          minLength: 1,
-          widget: 'entitySelector',
-        },
-        reviewer: {
-          title: 'Model Technical Reviewer',
-          description:
-            'An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.',
-          type: 'array',
-          items: { $ref: '#/definitions/entity' },
-          minLength: 1,
-          widget: 'entitySelector',
-        },
-        manager: {
-          title: 'Senior Responsible Officer',
-          description:
-            'A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.',
-          type: 'array',
-          items: { $ref: '#/definitions/entity' },
-          minLength: 1,
-          widget: 'entitySelector',
-        },
-      },
-      required: ['uploader', 'reviewer', 'manager'],
-      additionalProperties: false,
-    },
-    buildOptions: {
-      title: 'Build Options',
-      description: 'Optional build options for a model',
-      type: 'object',
-      properties: {
-        uploadType: {
+        questionOne: {
+          title: 'This is a question',
           type: 'string',
-          title: 'Upload type',
-          default: 'Code and binaries',
-          description: 'Select the type of model upload that you want',
-          enum: ['Code and binaries', 'Model card only', 'Prebuilt Docker image'],
-          widget: 'modelTypeSelector',
+          widget: 'customTextInput',
         },
-        seldonVersion: {
-          title: 'Seldon version',
+        questionTwo: {
+          title: 'This is another question',
           type: 'string',
-          widget: 'seldonVersionSelector',
+          widget: 'customTextInput',
         },
       },
-      dependencies: {
-        uploadType: {
-          oneOf: [
-            {
-              properties: {
-                uploadType: {
-                  enum: ['Model card only', 'Prebuilt Docker image'],
-                  readOnly: false,
-                },
-                seldonVersion: {
-                  readOnly: true,
-                },
-              },
-              required: ['uploadType'],
-              additionalProperties: false,
-            },
-            {
-              properties: {
-                uploadType: {
-                  enum: ['Code and binaries'],
-                  readOnly: true,
-                },
-                seldonVersion: {
-                  description: 'Select a seldon version for your build.',
-                  readOnly: false,
-                },
-              },
-              required: ['uploadType', 'seldonVersion'],
-              additionalProperties: false,
-            },
-          ],
-        },
-      },
-      required: ['uploadType'],
+      required: ['questionOne, questionTwo'],
     },
   },
   required: ['timeStamp', 'highLevelDetails'],

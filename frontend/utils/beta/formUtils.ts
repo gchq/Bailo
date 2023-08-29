@@ -6,10 +6,8 @@ import remove from 'lodash/remove'
 import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 
-import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtonsBeta'
-import RenderFormBeta from '../src/Form/RenderFormBeta'
-import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
-import { createUiSchema } from './uiSchemaUtils'
+import { SplitSchema, Step, StepType } from '../../types/interfaces'
+import { createUiSchema } from '../uiSchemaUtils'
 
 export function createStep({
   schema,
@@ -17,9 +15,6 @@ export function createStep({
   state,
   type,
   section,
-  render,
-  renderBasic,
-  renderButtons = RenderButtons,
   index,
   schemaRef,
   isComplete,
@@ -29,9 +24,6 @@ export function createStep({
   state: any
   type: StepType
   section: string
-  render: (props: RenderInterface) => JSX.Element | null
-  renderBasic?: (props: RenderInterface) => JSX.Element | null
-  renderButtons?: (props: RenderButtonsInterface) => JSX.Element | null
   index: number
   schemaRef: string
   isComplete: (step: Step) => boolean
@@ -49,9 +41,6 @@ export function createStep({
     shouldValidate: false,
 
     isComplete,
-    render,
-    renderBasic: renderBasic ?? render,
-    renderButtons,
   }
 }
 
@@ -62,10 +51,6 @@ export function setStepState(
   state: any
 ) {
   setSplitSchema((oldSchema) => {
-    if (oldSchema.reference !== step.schemaRef) {
-      return oldSchema
-    }
-
     const index = oldSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
     const duplicatedSteps = [...oldSchema.steps]
@@ -132,8 +117,6 @@ export function getStepsFromSchema(
       schemaRef: schema.reference,
 
       section: prop,
-      render: RenderFormBeta,
-      renderBasic: RenderFormBeta,
       isComplete: validateForm,
     })
 
