@@ -6,6 +6,7 @@ import { SillyAuthorisationConnector } from './silly.js'
 export const ModelAction = {
   Create: 'create',
   View: 'view',
+  Write: 'write',
 } as const
 
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]

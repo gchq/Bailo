@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ModelCardInterface } from '../../../../models/v2/ModelCard.js'
 import { parse } from '../../../../utils/validate.js'
 
-export const patchModelCardSchema = z.object({
+export const putModelCardSchema = z.object({
   params: z.object({
     modelId: z.string({
       required_error: 'Must specify model id as param',
@@ -16,14 +16,14 @@ export const patchModelCardSchema = z.object({
   }),
 })
 
-interface patchModelCardResponse {
+interface PutModelCardResponse {
   modelCard: ModelCardInterface
 }
 
-export const patchModelCard = [
+export const putModelCard = [
   bodyParser.json(),
-  async (req: Request, res: Response<patchModelCardResponse>) => {
-    const _ = parse(req, patchModelCardSchema)
+  async (req: Request, res: Response<PutModelCardResponse>) => {
+    const _ = parse(req, putModelCardSchema)
 
     return res.json({
       modelCard: {

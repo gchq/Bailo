@@ -3,6 +3,8 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ModelCardInterface } from '../../../../models/v2/ModelCard.js'
+import { ModelCardRevisionDoc } from '../../../../models/v2/ModelCardRevision.js'
+import { getModelCardLatestRevision, getModelCardRevision } from '../../../../services/v2/modelCard.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const GetModelCardVersionOptions = {
@@ -25,20 +27,17 @@ interface GetModelCardResponse {
 export const getModelCard = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelCardResponse>) => {
-    const _ = parse(req, getModelCardSchema)
+    const {
+      params: { modelId, version },
+    } = parse(req, getModelCardSchema)
 
-    return res.json({
-      modelCard: {
-        modelId: 'example-model',
-        schemaId: 'example-schema',
+    let modelCard: ModelCardRevisionDoc
+    if (version === GetModelCardVersionOptions.Latest) {
+      modelCard = await getModelCardLatestRevision(req.user, modelId)
+    } else {
+      modelCard = await getModelCardRevision(req.user, modelId, version)
+    }
 
-        version: 1,
-        metadata: { example: true },
-
-        createdBy: 'Example User (user)',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    })
+    return res.json({ modelCard })
   },
 ]

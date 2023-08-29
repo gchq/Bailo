@@ -26,9 +26,7 @@ const ModelCardSchema = new Schema<ModelCardInterface>(
     schemaId: { type: String, required: true },
 
     version: { type: Number, required: true },
-    metadata: { type: String, required: true, get: getSchema, set: setSchema },
-
-    createdBy: { type: String, required: true },
+    metadata: { type: Schema.Types.Mixed },
   },
   {
     timestamps: true,
@@ -36,14 +34,6 @@ const ModelCardSchema = new Schema<ModelCardInterface>(
     toJSON: { getters: true },
   }
 )
-
-function getSchema(schema: string) {
-  return JSON.parse(schema)
-}
-
-function setSchema(schema: unknown) {
-  return JSON.stringify(schema)
-}
 
 const ModelCardModel = model<ModelCardInterface>('v2_Model_Card', ModelCardSchema)
 

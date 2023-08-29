@@ -18,4 +18,9 @@ describe('utils > mongo', () => {
     const result = isMongoServerError(new Error())
     expect(result).toBe(false)
   })
+
+  test('returns false for an error that is not an object', async () => {
+    const result = isMongoServerError(null)
+    expect(result).toBe(false)
+  })
 })

@@ -1,4 +1,4 @@
-import authorisation, { ModelAction } from '../../connectors/v2/authorisation/index.js'
+import authorisation, { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/index.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { toEntity } from '../../utils/v2/entity.js'
@@ -39,8 +39,19 @@ export async function getModelById(user: UserDoc, modelId: string) {
   }
 
   if (!(await authorisation.userModelAction(user, model, ModelAction.View))) {
-    throw Forbidden(`You do not have permission to create this model.`, { userDn: user.dn })
+    throw Forbidden(`You do not have permission to get this model.`, { userDn: user.dn, modelId })
   }
 
   return model
+}
+
+export async function canUserActionModelById(user: UserDoc, modelId: string, action: ModelActionKeys) {
+  // In most cases this function could be done in a single trip by the previous
+  // query to the database.  An aggregate query with a 'lookup' can access this
+  // data without having to wait.
+  //
+  // This function is made for simplicity, most functions that call this will
+  // only be infrequently called.
+  const model = await getModelById(user, modelId)
+  return authorisation.userModelAction(user, model, action)
 }
