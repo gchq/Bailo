@@ -1,16 +1,19 @@
+import Box from '@mui/material/Box'
 import Tooltip, { TooltipProps } from '@mui/material/Tooltip'
-import React, { ReactNode, useEffect } from 'react'
+import { CSSProperties, ReactNode, useEffect, useState } from 'react'
 
 function DisabledElementTooltip({
   conditions,
   children,
   placement,
+  display = 'block',
 }: {
   conditions: string[]
   children: ReactNode
   placement?: TooltipProps['placement']
+  display?: CSSProperties['display']
 }) {
-  const [titleText, setTitleText] = React.useState<string>('')
+  const [titleText, setTitleText] = useState('')
 
   useEffect(() => {
     if (conditions !== undefined) {
@@ -26,7 +29,7 @@ function DisabledElementTooltip({
 
   return (
     <Tooltip arrow title={titleText} placement={placement || 'right'}>
-      <div>{children}</div>
+      <Box display={display}>{children}</Box>
     </Tooltip>
   )
 }

@@ -270,7 +270,10 @@ function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps)
               >
                 Reject
               </Button>
-              <DisabledElementTooltip conditions={[!canApprove ? `${reviewer} needs to approve this model first` : '']}>
+              <DisabledElementTooltip
+                display='inline-flex'
+                conditions={[!canApprove ? `${reviewer} needs to approve this model first` : '']}
+              >
                 <Button
                   variant='contained'
                   onClick={() => changeState('Accepted')}
