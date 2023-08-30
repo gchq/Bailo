@@ -14,7 +14,103 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
     },
     "name": "Example Schema 1",
     "schema": {
-      "Schema field 1": "field 1 info",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "anotherPage": {
+          "description": "This is a second page",
+          "properties": {
+            "questionOne": {
+              "description": "This is a question",
+              "title": "Question one",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+            "questionTwo": {
+              "description": "This is another question",
+              "title": "Question two",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+          },
+          "required": [
+            "questionOne, questionTwo",
+          ],
+          "title": "Another Page",
+          "type": "object",
+        },
+        "highLevelDetails": {
+          "additionalProperties": false,
+          "description": "Summary of the model functionality.",
+          "properties": {
+            "modelCardVersion": {
+              "maxLength": 100,
+              "pattern": "^[a-zA-Z0-9\\\\_\\\\-\\\\.]{0,128}$",
+              "title": "Model version",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+            "modelInASentence": {
+              "description": "This sentence will allow an individual to decide if they want to open the model card to read further Example: 'Takes Arabic text snippet inputs and outputs an English translation.'",
+              "maxLength": 140,
+              "minLength": 1,
+              "title": "Summarise the model in a sentence",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+            "modelOverview": {
+              "description": "A description of what the model does.",
+              "maxLength": 5000,
+              "minLength": 1,
+              "title": "What does the model do?",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+            "name": {
+              "description": "This should be descriptive name, such as 'Arabic - English Translation', and will be visible in the model marketplace.",
+              "maxLength": 140,
+              "minLength": 1,
+              "title": "Name of the Machine Learning Model",
+              "type": "string",
+              "widget": "customTextInput",
+            },
+            "tags": {
+              "description": "These tags will be searchable and will help others find this model.",
+              "items": {
+                "type": "string",
+              },
+              "title": "Descriptive tags for the model.",
+              "type": "array",
+              "uniqueItems": true,
+              "widget": "tagSelector",
+            },
+          },
+          "required": [
+            "name",
+            "modelInASentence",
+            "modelOverview",
+            "modelCardVersion",
+            "tags",
+          ],
+          "title": "Overview",
+          "type": "object",
+        },
+        "id": {
+          "type": "string",
+        },
+        "schemaRef": {
+          "title": "Schema reference",
+          "type": "string",
+        },
+        "timeStamp": {
+          "format": "date-time",
+          "type": "string",
+        },
+      },
+      "required": [
+        "timeStamp",
+        "highLevelDetails",
+      ],
+      "type": "object",
     },
     "uiSchema": {
       "UI Schema field 1": "field 1 info",

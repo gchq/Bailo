@@ -22,7 +22,12 @@ export interface CollaboratorEntry {
   roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
 }
 
-export type ModelForm = Omit<ModelInterface, 'id' | 'collaborators'>
+export type ModelForm = {
+  name: string
+  team: string
+  description: string
+  visibility: ModelVisibilityKeys
+}
 
 export interface Role {
   id: string

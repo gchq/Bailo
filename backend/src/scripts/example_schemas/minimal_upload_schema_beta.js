@@ -1,28 +1,5 @@
 export const schemaJson = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  definitions: {
-    provenance: {
-      type: 'string',
-      enum: ['IN_HOUSE', 'THIRD_PARTY', 'OPEN_SOURCE'],
-      enumNames: ['In House', 'Third Party', 'Open Source'],
-    },
-    entity: {
-      type: 'object',
-      properties: {
-        kind: {
-          type: 'string',
-          description: 'Type of entity (user, group).',
-        },
-        id: {
-          type: 'string',
-          description: 'Unique identifier for entity.',
-        },
-      },
-    },
-    tag: {
-      type: 'string',
-    },
-  },
   type: 'object',
   properties: {
     id: {
@@ -79,7 +56,9 @@ export const schemaJson = {
           description: 'These tags will be searchable and will help others find this model.',
           type: 'array',
           widget: 'tagSelector',
-          items: { $ref: '#/definitions/tag' },
+          items: {
+            type: 'string',
+          },
           uniqueItems: true,
         },
       },
@@ -92,12 +71,14 @@ export const schemaJson = {
       type: 'object',
       properties: {
         questionOne: {
-          title: 'This is a question',
+          title: 'Question one',
+          description: 'This is a question',
           type: 'string',
           widget: 'customTextInput',
         },
         questionTwo: {
-          title: 'This is another question',
+          title: 'Question two',
+          description: 'This is another question',
           type: 'string',
           widget: 'customTextInput',
         },

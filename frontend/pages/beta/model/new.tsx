@@ -21,13 +21,13 @@ import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
-import { ModelForm } from '../../../types/v2/types'
+import { ModelForm, ModelVisibility } from '../../../types/v2/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
-  const [visibility, setVisibility] = useState<ModelForm['visibility']>('public')
+  const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
@@ -39,7 +39,8 @@ export default function NewModel() {
     event.preventDefault()
     setErrorMessage('')
     const formData: ModelForm = {
-      name: `${teamName}/${modelName}`,
+      name: modelName,
+      team: teamName,
       description,
       visibility,
     }
