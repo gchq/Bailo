@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > getModel > latest > 200 > ok 1`] = `
+{
+  "modelCard": {
+    "example": "test",
+  },
+}
+`;
+
+exports[`routes > model > getModel > latest > 404 > no model card 1`] = `
+{
+  "error": {
+    "context": {
+      "modelId": "recusandae",
+      "version": "latest",
+    },
+    "message": "This model has no model card setup",
+    "name": "Error",
+  },
+}
+`;
+
+exports[`routes > model > getModel > version > 200 > ok 1`] = `
+{
+  "modelCard": {
+    "_id": "test",
+  },
+}
+`;

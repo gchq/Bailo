@@ -3,34 +3,36 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ModelCardRevisionInterface } from '../../../../models/v2/ModelCardRevision.js'
-import { updateModelCard } from '../../../../services/v2/model.js'
+import { createModelCardFromSchema } from '../../../../services/v2/model.js'
 import { parse } from '../../../../utils/validate.js'
 
-export const putModelCardSchema = z.object({
+export const postFromSchemaSchema = z.object({
   params: z.object({
     modelId: z.string({
       required_error: 'Must specify model id as param',
     }),
   }),
   body: z.object({
-    metadata: z.unknown(),
+    schemaId: z.string({
+      required_error: 'Must specify schema id within the body',
+    }),
   }),
 })
 
-interface PutModelCardResponse {
+interface PostFromSchemaResponse {
   card: ModelCardRevisionInterface
 }
 
-export const putModelCard = [
+export const postFromSchema = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutModelCardResponse>) => {
+  async (req: Request, res: Response<PostFromSchemaResponse>) => {
     const {
       params: { modelId },
-      body: { metadata },
-    } = parse(req, putModelCardSchema)
+      body: { schemaId },
+    } = parse(req, postFromSchemaSchema)
 
     return res.json({
-      card: await updateModelCard(req.user, modelId, metadata),
+      card: await createModelCardFromSchema(req.user, modelId, schemaId),
     })
   },
 ]

@@ -2,9 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ModelCardInterface } from '../../../../models/v2/ModelCard.js'
-import { ModelCardRevisionDoc } from '../../../../models/v2/ModelCardRevision.js'
-import { getModelCardLatestRevision, getModelCardRevision } from '../../../../services/v2/modelCard.js'
+import { ModelCardInterface } from '../../../../models/v2/Model.js'
+import { getModelById, getModelCardRevision } from '../../../../services/v2/model.js'
+import { NotFound } from '../../../../utils/v2/error.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const GetModelCardVersionOptions = {
@@ -16,7 +16,7 @@ export const getModelCardSchema = z.object({
     modelId: z.string({
       required_error: 'Must specify model id as param',
     }),
-    version: z.nativeEnum(GetModelCardVersionOptions).or(z.number()),
+    version: z.nativeEnum(GetModelCardVersionOptions).or(z.coerce.number()),
   }),
 })
 
@@ -31,9 +31,17 @@ export const getModelCard = [
       params: { modelId, version },
     } = parse(req, getModelCardSchema)
 
-    let modelCard: ModelCardRevisionDoc
+    let modelCard: ModelCardInterface
     if (version === GetModelCardVersionOptions.Latest) {
-      modelCard = await getModelCardLatestRevision(req.user, modelId)
+      const card = (await getModelById(req.user, modelId)).card
+
+      console.log('CARD', card)
+
+      if (!card) {
+        throw NotFound('This model has no model card setup', { modelId, version })
+      }
+
+      modelCard = card
     } else {
       modelCard = await getModelCardRevision(req.user, modelId, version)
     }

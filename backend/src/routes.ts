@@ -59,6 +59,7 @@ import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultip
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
+import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
@@ -198,7 +199,7 @@ if (config.experimental.v2) {
   // *server.get('/api/v2/template/models', ...getModelTemplates)
   // *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
   // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // *server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+  server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
