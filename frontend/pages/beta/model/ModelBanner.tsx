@@ -4,7 +4,7 @@ import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import * as React from 'react'
 
-export default function modelPageBanner() {
+export default function ModelBanner() {
   return (
     <Paper
       sx={{
@@ -18,7 +18,7 @@ export default function modelPageBanner() {
       }}
     >
       <Container maxWidth='xl'>
-        <Typography>Message goes here</Typography>
+        <Typography>This model needs approving</Typography>
       </Container>
       <Button
         variant='contained'
