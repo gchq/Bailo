@@ -23,10 +23,11 @@ export default function ModelBanner() {
       <Button
         variant='contained'
         style={{
-          maxWidth: '600px',
+          //maxWidth: '600px',
           maxHeight: '20px',
           minWidth: '60px',
           minHeight: '20px',
+          padding: '12px',
         }}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClick={() => {}}

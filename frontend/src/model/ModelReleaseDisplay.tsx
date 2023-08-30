@@ -1,6 +1,7 @@
 import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import ModelBanner from 'pages/beta/model/ModelBanner'
 
 import { ApprovalStates, ReleaseInterface } from '../../types/types'
 import Link from '../Link'
@@ -129,6 +130,7 @@ export default function ModelReleaseDisplay({
               ))}
             </Stack>
           </Stack>
+          <ModelBanner></ModelBanner>
         </Box>
       </Stack>
     </>
