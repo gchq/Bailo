@@ -33,15 +33,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   useEffect(() => {
     if (!model || !schema) return
 
-    const steps = getStepsFromSchema(
-      schema,
-      {
-        buildOptions: {
-          seldonVersion: { 'ui:widget': 'seldonVersionSelector' },
-        },
-      },
-      []
-    )
+    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'])
 
     for (const step of steps) {
       step.steps = steps

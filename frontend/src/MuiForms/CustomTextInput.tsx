@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 
@@ -22,30 +23,38 @@ export default function EntitySelector(props: EntitySelectorProps) {
   const theme = useTheme()
 
   return (
-    <TextField
-      {...props}
-      size='small'
-      sx={{
-        input: {
-          color: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-        label: {
-          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-        '& .MuiInputBase-input.Mui-disabled': {
-          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-      }}
-      onChange={_onChange}
-      variant={!formContext.editMode ? 'standard' : 'outlined'}
-      label={label}
-      required={!formContext.editMode ? false : true}
-      value={currentValue || ''}
-      disabled={!formContext.editMode}
-      InputProps={{
-        ...props.InputProps,
-        disableUnderline: !formContext.editMode ? true : false,
-      }}
-    />
+    <>
+      <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+      <TextField
+        size='small'
+        sx={{
+          input: {
+            color: theme.palette.mode === 'light' ? 'black' : 'white',
+          },
+          label: {
+            WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+          },
+          '& .MuiInputBase-input.Mui-disabled': {
+            WebkitTextFillColor: currentValue
+              ? theme.palette.mode === 'light'
+                ? 'black'
+                : 'white'
+              : theme.palette.mode === 'light'
+              ? '#535353'
+              : '#c8c8c8',
+          },
+          fontStyle: currentValue ? 'unset' : 'italic',
+        }}
+        onChange={_onChange}
+        variant={!formContext.editMode ? 'standard' : 'outlined'}
+        required={!formContext.editMode ? false : true}
+        value={currentValue || (!formContext.editMode ? 'Unanswered' : '')}
+        disabled={!formContext.editMode}
+        InputProps={{
+          ...props.InputProps,
+          disableUnderline: !formContext.editMode ? true : false,
+        }}
+      />
+    </>
   )
 }

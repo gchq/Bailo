@@ -1,5 +1,20 @@
 export const schemaJson = {
   $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    entity: {
+      type: 'object',
+      properties: {
+        kind: {
+          type: 'string',
+          description: 'Type of entity (user, group).',
+        },
+        id: {
+          type: 'string',
+          description: 'Unique identifier for entity.',
+        },
+      },
+    },
+  },
   type: 'object',
   properties: {
     id: {
@@ -77,7 +92,7 @@ export const schemaJson = {
           widget: 'customTextInput',
         },
         questionTwo: {
-          title: 'Question two',
+          title: 'Question one',
           description: 'This is another question',
           type: 'string',
           widget: 'customTextInput',
@@ -85,6 +100,43 @@ export const schemaJson = {
       },
       required: ['questionOne, questionTwo'],
     },
+    contacts: {
+      title: 'Contacts',
+      description:
+        'Details of those individuals responsible for the model, the detail in this card and the risk involved in using the model and its continued alignment with policy.',
+      type: 'object',
+      properties: {
+        uploader: {
+          title: 'Model Developer',
+          description:
+            'The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.',
+          type: 'array',
+          items: { $ref: '#/definitions/entity' },
+          minLength: 1,
+          widget: 'entitySelector',
+        },
+        reviewer: {
+          title: 'Model Technical Reviewer',
+          description:
+            'An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.',
+          type: 'array',
+          items: { $ref: '#/definitions/entity' },
+          minLength: 1,
+          widget: 'entitySelector',
+        },
+        manager: {
+          title: 'Senior Responsible Officer',
+          description:
+            'A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.',
+          type: 'array',
+          items: { $ref: '#/definitions/entity' },
+          minLength: 1,
+          widget: 'entitySelector',
+        },
+      },
+      required: ['uploader', 'reviewer', 'manager'],
+      additionalProperties: false,
+    },
   },
-  required: ['timeStamp', 'highLevelDetails'],
+  required: ['timeStamp', 'highLevelDetails', 'anotherPage'],
 }

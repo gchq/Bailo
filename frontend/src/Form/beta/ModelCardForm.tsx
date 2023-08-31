@@ -1,13 +1,12 @@
-import { Box, Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
+import { Box, Divider, Stack, StepButton, StepLabel, Stepper, Typography } from '@mui/material'
 import MaterialStep from '@mui/material/Step'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { DescriptionFieldProps } from '@rjsf/utils'
+import { DescriptionFieldProps, ObjectFieldTemplateProps } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
-import TagSelector from 'src/MuiForms/TagSelector'
-import UserSelector from 'src/MuiForms/UserSelectorBeta'
+import TagSelector from 'src/MuiForms/TagSelectorBeta'
 import { setStepState } from 'utils/beta/formUtils'
 
 import { SplitSchema } from '../../../types/interfaces'
@@ -46,12 +45,30 @@ export default function ModelCardForm({
     return <></>
   }
 
+  function objectFieldTemplate(props: ObjectFieldTemplateProps) {
+    return (
+      <Stack spacing={2}>
+        <Typography variant='h6' component='h2' color='primary'>
+          {props.title}
+        </Typography>
+        <Typography>{props.description}</Typography>
+        <Divider />
+        {props.properties.map((element) => (
+          <div key={element.name} className='property-wrapper'>
+            <Typography>{element.content}</Typography>
+          </div>
+        ))}
+      </Stack>
+    )
+  }
+
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={4}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
+      sx={{ width: '100%' }}
     >
       <Box>
         <Stepper
@@ -73,9 +90,9 @@ export default function ModelCardForm({
                       fontSize: '16px !important',
                     },
                     '& .Mui-active': {
-                      borderBottomStyle: 'groove',
+                      borderBottomStyle: 'solid',
                       color: `${theme.palette.primary.main} !important`,
-                      borderColor: `${theme.palette.primary.main} !important`,
+                      borderColor: `${theme.palette.secondary.main} !important`,
                     },
                   }}
                 >
@@ -94,7 +111,6 @@ export default function ModelCardForm({
         validator={validator}
         noValidate
         widgets={{
-          userSelector: UserSelector,
           nothing: Nothing,
           customTextInput: CustomTextInput,
           tagSelector: TagSelector,
@@ -105,7 +121,14 @@ export default function ModelCardForm({
         disabled={!canEdit}
         liveOmit
         formContext={{ editMode: canEdit, formSchema: currentStep.schema }}
-        templates={!canEdit ? { DescriptionFieldTemplate: descriptionFieldTemplate } : {}}
+        templates={
+          !canEdit
+            ? {
+                DescriptionFieldTemplate: descriptionFieldTemplate,
+                ObjectFieldTemplate: objectFieldTemplate,
+              }
+            : { ObjectFieldTemplate: objectFieldTemplate }
+        }
       >
         {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
         <></>

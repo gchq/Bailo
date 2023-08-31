@@ -91,6 +91,7 @@ export function getStepsFromSchema(
   omitFields: Array<string> = [],
   state: any = {}
 ): Array<Step> {
+  console.log(omitFields)
   const schemaDupe = omit(schema.schema, omitFields) as any
 
   for (const field of omitFields) {
