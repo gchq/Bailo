@@ -1,4 +1,4 @@
-import { testReleaseApproval } from '../../../test/testUtils/testModels.js'
+import { testReleaseInactiveApproval } from '../../../test/testUtils/testModels.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import Approval, { ApprovalInterface } from '../../models/v2/Approval.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -26,7 +26,7 @@ export async function findApprovalsByActive(user: UserDoc, active: boolean): Pro
  * Added for testing- remove?
  */
 export async function addDefaultApprovals() {
-  const approvalDoc = new Approval(testReleaseApproval)
+  const approvalDoc = new Approval(testReleaseInactiveApproval)
 
   await approvalDoc.save()
 }

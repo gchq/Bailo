@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > getApprovals > rejects missing active parameter 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "'true' | 'false'",
+          "message": "Missing parameter active.",
+          "path": [
+            "query",
+            "active",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Missing parameter active.",
+    "name": "Error",
+  },
+}
+`;
+
+exports[`routes > schema > getApprovals > rejects missing value for active parameter 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_enum_value",
+          "message": "Invalid enum value. Expected 'true' | 'false', received ''",
+          "options": [
+            "true",
+            "false",
+          ],
+          "path": [
+            "query",
+            "active",
+          ],
+          "received": "",
+        },
+      ],
+    },
+    "message": "Invalid enum value. Expected 'true' | 'false', received ''",
+    "name": "Error",
+  },
+}
+`;
+
+exports[`routes > schema > getApprovals > returns only active approvals 1`] = `
+{
+  "approvals": [
+    {
+      "active": true,
+      "createdAt": "2023-08-13T00:00:00.000Z",
+      "kind": "release",
+      "model": "example-model-2-nevwg4",
+      "release": "3.0.2",
+      "updatedAt": "2023-08-14T00:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`routes > schema > getApprovals > returns only inactive approvals 1`] = `
+{
+  "approvals": [
+    {
+      "active": false,
+      "createdAt": "2023-08-13T00:00:00.000Z",
+      "kind": "release",
+      "model": "example-model-2-nevwg4",
+      "release": "3.0.2",
+      "updatedAt": "2023-08-14T00:00:00.000Z",
+    },
+  ],
+}
+`;

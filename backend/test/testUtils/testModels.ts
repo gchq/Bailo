@@ -44,11 +44,20 @@ export const testDeploymentSchema = {
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
 
-export const testReleaseApproval = {
+export const testReleaseInactiveApproval = {
   model: 'example-model-2-nevwg4',
   release: '3.0.2',
   kind: 'release',
   active: false,
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}
+
+export const testReleaseActiveApproval = {
+  model: 'example-model-2-nevwg4',
+  release: '3.0.2',
+  kind: 'release',
+  active: true,
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }
