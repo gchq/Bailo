@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ApprovalRequestInterface } from '../../../../models/v2/Approval.js'
+import { ApprovalInterface } from '../../../../models/v2/Approval.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getComplianceApprovalsSchema = z.object({
@@ -14,7 +14,7 @@ export const getComplianceApprovalsSchema = z.object({
 })
 
 interface GetComplianceApprovalsResponse {
-  approvals: Array<ApprovalRequestInterface>
+  approvals: Array<ApprovalInterface>
 }
 
 export const getComplianceApprovals = [
@@ -28,7 +28,7 @@ export const getComplianceApprovals = [
           model: 'yolo',
           release: '3.0.2',
           kind: 'access',
-          isActive: true,
+          active: true,
           createdAt: new Date('08/13/2023'),
           updatedAt: new Date('08/14/2023'),
         },
@@ -36,7 +36,7 @@ export const getComplianceApprovals = [
           model: 'yolo',
           release: '3.0.1',
           kind: 'access',
-          isActive: true,
+          active: true,
           createdAt: new Date('08/12/2023'),
           updatedAt: new Date('08/12/2023'),
         },
