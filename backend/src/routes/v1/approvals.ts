@@ -13,9 +13,18 @@ import {
   findDeploymentsByModel,
   removeModelDeploymentsFromRegistry,
 } from '../../services/deployment.js'
+import { getManagerAndReviewer } from '../../services/schema.js'
 import { findVersionById } from '../../services/version.js'
 import { reviewedApproval } from '../../templates/reviewedApproval.js'
-import { ApprovalCategory, ApprovalStates, DeploymentDoc, Entity, ModelDoc, VersionDoc } from '../../types/types.js'
+import {
+  ApprovalCategory,
+  ApprovalStates,
+  ApprovalTypes,
+  DeploymentDoc,
+  Entity,
+  ModelDoc,
+  VersionDoc,
+} from '../../types/types.js'
 import { getUserListFromEntityList, isUserInEntityList } from '../../utils/entity.js'
 import { getDeploymentQueue } from '../../utils/queues.js'
 import { BadReq, Forbidden } from '../../utils/result.js'
@@ -101,9 +110,6 @@ export const postApprovalResponse = [
       )
     }
 
-    approval.status = choice as ApprovalStates
-    await approval.save()
-
     let field: 'managerApproved' | 'reviewerApproved'
     if (approval.approvalType === 'Manager') {
       field = 'managerApproved'
@@ -131,6 +137,19 @@ export const postApprovalResponse = [
 
       version[field] = choice as ApprovalStates
       await version.save()
+
+      if (approval.approvalType === ApprovalTypes.Manager && choice === ApprovalStates.Accepted) {
+        if (version.reviewerApproved !== ApprovalStates.Accepted) {
+          const { managerTitle, reviewerTitle } = await getManagerAndReviewer(version.metadata)
+          throw BadReq(
+            {
+              code: 'bad_request_type',
+              version: versionDoc.managerApproved,
+            },
+            `${managerTitle} cannot approve model versions until it has been accepted by a ${reviewerTitle}`
+          )
+        }
+      }
 
       if (version.managerApproved === ApprovalStates.Accepted && version.reviewerApproved === ApprovalStates.Accepted) {
         const deployments = await findDeploymentsByModel(req.user, version.model as ModelDoc)
@@ -180,6 +199,9 @@ export const postApprovalResponse = [
     } else {
       throw BadReq({ code: 'bad_approval_category', approvalId: approval._id }, 'Unable to determine approval category')
     }
+
+    approval.status = choice as ApprovalStates
+    await approval.save()
 
     const reviewingUser = req.user.id
     const userList = await getUserListFromEntityList(entities)
