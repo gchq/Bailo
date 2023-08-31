@@ -8,13 +8,12 @@ vi.mock('../../../src/utils/user.js')
 
 const mockApprovalService = vi.hoisted(() => {
   return {
-    findApprovalsByActive: vi.fn(() => [testReleaseInactiveApproval])
+    findApprovalsByActive: vi.fn(() => [testReleaseInactiveApproval]),
   }
 })
 vi.mock('../../../src/services/v2/approval.js', () => mockApprovalService)
 
 describe('routes > schema > getApprovals', () => {
-
   test('returns only inactive approvals', async () => {
     const res = await testGet(`/api/v2/approvals?active=false`)
 
