@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > release > getReleases > 200 > ok 1`] = `
+{
+  "releases": [
+    {
+      "_id": "test",
+    },
+  ],
+}
+`;
