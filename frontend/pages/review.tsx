@@ -71,7 +71,7 @@ function ApprovalList({
       <Typography component='h2' variant='h5' sx={{ p: 3 }}>
         {approvalCategory === ApprovalCategory.Upload ? 'Models' : 'Deployments'}
       </Typography>
-      {approvals.map((approval: Approval) => (
+      {approvals.map((approval) => (
         <ApprovalItem
           approval={approval}
           approvalCategory={approval.approvalCategory}
@@ -103,7 +103,7 @@ function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps)
   const theme = useTheme()
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(
-    ((approval.version as VersionDoc).model as ModelDoc)?.schemaRef ||
+    ((approval.version as VersionDoc)?.model as ModelDoc)?.schemaRef ||
       ((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.schemaRef
   )
 
