@@ -9,7 +9,7 @@ import CustomTextInput from 'src/MuiForms/CustomTextInput'
 import TagSelector from 'src/MuiForms/TagSelectorBeta'
 import { setStepState } from 'utils/beta/formUtils'
 
-import { SplitSchema } from '../../../types/interfaces'
+import { SplitSchemaNoRender } from '../../../types/interfaces'
 import Nothing from '../../MuiForms/Nothing'
 
 export default function ModelCardForm({
@@ -17,8 +17,8 @@ export default function ModelCardForm({
   setSplitSchema,
   canEdit = false,
 }: {
-  splitSchema: SplitSchema
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>
+  splitSchema: SplitSchemaNoRender
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)

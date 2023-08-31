@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { useGetSchema } from '../../../../actions/schema'
 import { useGetUiConfig } from '../../../../actions/uiConfig'
-import { SplitSchema } from '../../../../types/interfaces'
+import { SplitSchemaNoRender } from '../../../../types/interfaces'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
@@ -17,7 +17,7 @@ type FormEditPageProps = {
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.schema)
-  const [splitSchema, setSplitSchema] = useState<SplitSchema>({ reference: '', steps: [] })
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   function onSubmit() {

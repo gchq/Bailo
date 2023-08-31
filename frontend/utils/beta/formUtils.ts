@@ -6,7 +6,7 @@ import remove from 'lodash/remove'
 import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 
-import { SplitSchema, Step, StepType } from '../../types/interfaces'
+import { SplitSchemaNoRender, StepNoRender, StepType } from '../../types/interfaces'
 import { createUiSchema } from '../uiSchemaUtils'
 
 export function createStep({
@@ -26,8 +26,8 @@ export function createStep({
   section: string
   index: number
   schemaRef: string
-  isComplete: (step: Step) => boolean
-}): Step {
+  isComplete: (step: StepNoRender) => boolean
+}): StepNoRender {
   return {
     schema,
     uiSchema,
@@ -45,9 +45,9 @@ export function createStep({
 }
 
 export function setStepState(
-  _splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
-  step: Step,
+  _splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
+  step: StepNoRender,
   state: any
 ) {
   setSplitSchema((oldSchema) => {
@@ -68,9 +68,9 @@ export function setStepState(
 }
 
 export function setStepValidate(
-  splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
-  step: Step,
+  splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
+  step: StepNoRender,
   validate: boolean
 ) {
   const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
@@ -90,8 +90,7 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {}
-): Array<Step> {
-  console.log(omitFields)
+): Array<StepNoRender> {
   const schemaDupe = omit(schema.schema, omitFields) as any
 
   for (const field of omitFields) {
@@ -104,7 +103,7 @@ export function getStepsFromSchema(
     ['object', 'array'].includes(schemaDupe.properties[key].type)
   )
 
-  const steps: Array<Step> = []
+  const steps: Array<StepNoRender> = []
   props.forEach((prop: any, index: number) => {
     const createdStep = createStep({
       schema: {
@@ -127,7 +126,7 @@ export function getStepsFromSchema(
   return steps
 }
 
-export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
+export function getStepsData(splitSchema: SplitSchemaNoRender, includeAll = false) {
   const data: any = {}
 
   splitSchema.steps.forEach((step) => {
@@ -141,8 +140,8 @@ export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
 }
 
 export function setStepsData(
-  splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
+  splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
   data: any
 ) {
   const newSteps = splitSchema.steps.map((step) => {
@@ -162,7 +161,7 @@ export function setStepsData(
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }
 
-export function validateForm(step: Step) {
+export function validateForm(step: StepNoRender) {
   const validator = new Validator()
   const sectionErrors = validator.validate(step.state, step.schema)
 
