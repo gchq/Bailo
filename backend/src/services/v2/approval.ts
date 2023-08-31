@@ -5,7 +5,7 @@ import { UserDoc } from '../../models/v2/User.js'
 
 export async function findApprovalsByActive(user: UserDoc, active: boolean): Promise<ApprovalInterface[]> {
   const approvals = await Approval.aggregate()
-    .match({ ...(active && { active }) })
+    .match({ active })
     .sort({ createdAt: -1 })
     // Populate model entries
     .lookup({ from: 'v2_models', localField: 'model', foreignField: 'id', as: 'model' })
@@ -22,9 +22,11 @@ export async function findApprovalsByActive(user: UserDoc, active: boolean): Pro
   return approvals
 }
 
+/**
+ * Added for testing- remove?
+ */
 export async function addDefaultApprovals() {
   const approvalDoc = new Approval(testReleaseApproval)
 
-  const result = await approvalDoc.save()
-  console.log(JSON.stringify(result))
+  await approvalDoc.save()
 }

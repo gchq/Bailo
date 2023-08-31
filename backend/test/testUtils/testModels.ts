@@ -48,7 +48,7 @@ export const testReleaseApproval = {
   model: 'example-model-2-nevwg4',
   release: '3.0.2',
   kind: 'release',
-  active: true,
+  active: false,
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }

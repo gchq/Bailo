@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > approval > findApprovalsByActive > active 1`] = `
+[
+  {
+    "active": true,
+  },
+]
+`;
+
+exports[`services > approval > findApprovalsByActive > active 2`] = `
+[
+  {
+    "model.collaborators": {
+      "$elemMatch": {
+        "entity": {
+          "$in": [
+            "user:test",
+          ],
+        },
+      },
+    },
+  },
+]
+`;
+
+exports[`services > approval > findApprovalsByActive > not active 1`] = `
+[
+  {
+    "active": false,
+  },
+]
+`;
+
+exports[`services > approval > findApprovalsByActive > not active 2`] = `
+[
+  {
+    "model.collaborators": {
+      "$elemMatch": {
+        "entity": {
+          "$in": [
+            "user:test",
+          ],
+        },
+      },
+    },
+  },
+]
+`;
