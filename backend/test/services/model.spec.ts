@@ -81,6 +81,7 @@ describe('services > model', () => {
   test('createModel > bad authorisation', async () => {
     authorisationMocks.userModelAction.mockResolvedValueOnce(false)
     expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+    expect(modelMocks.save).not.toBeCalled()
   })
 
   test('getModelById > good', async () => {
