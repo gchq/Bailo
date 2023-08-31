@@ -17,6 +17,12 @@ interface Fixture {
   path?: unknown
 }
 
+export function testDelete(path: string) {
+  const request = supertest(server)
+
+  return request.delete(path)
+}
+
 export function testPost(path: string, fixture: Fixture) {
   const request = supertest(server)
 
