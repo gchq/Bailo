@@ -4,9 +4,9 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
-import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
-import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
-import { getUser as getUserV2 } from './middleware/getUser.js'
+import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
+import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
+import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {

@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { bailoErrorGuard, expressErrorHandler } from '../../src/middleware/expressErrorHandler.js'
+import { bailoErrorGuard, expressErrorHandler } from '../../../src/routes/middleware/expressErrorHandler.js'
 
 describe('middleware > expressErrorHandler', () => {
   test('bailoErrorGuard', () => {
