@@ -16,6 +16,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import MarkdownEditor from 'src/common/MarkdownEditor'
 
 import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
@@ -77,7 +78,7 @@ export default function NewModel() {
 
   return (
     <Wrapper title='Create a new Model' page='upload'>
-      <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
+      <Card sx={{ p: 4, maxWidth: 600, m: 'auto' }}>
         <Typography
           component='h1'
           variant='h4'
@@ -107,14 +108,22 @@ export default function NewModel() {
                   <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Description <span style={{ color: theme.palette.primary.main }}>*</span>
                   </Typography>
-                  <TextField
+                  <MarkdownEditor
+                    // onDataValueChange={function (value: string): void {
+                    //   throw new Error('Function not implemented.')
+                    // }}
+                    dataValue={description}
+                    onDataValueChange={(e) => setDescription(description)}
+                    data-test='modelDescription'
+                  />
+                  {/* <TextField
                     id='new-model-description'
                     required
                     size='small'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     data-test='modelDescription'
-                  />
+                  /> */}
                 </FormControl>
               </Stack>
             </>
