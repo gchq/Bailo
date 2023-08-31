@@ -35,8 +35,6 @@ export const getModelCard = [
     if (version === GetModelCardVersionOptions.Latest) {
       const card = (await getModelById(req.user, modelId)).card
 
-      console.log('CARD', card)
-
       if (!card) {
         throw NotFound('This model has no model card setup', { modelId, version })
       }
