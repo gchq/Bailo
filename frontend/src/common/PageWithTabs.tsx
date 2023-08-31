@@ -40,7 +40,14 @@ export default function PageWithTabs({
             </Button>
           )}
         </Stack>
-        <Tabs value={value} onChange={handleChange} aria-label='Tabbed view' indicatorColor='secondary'>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label='Tabbed view'
+          indicatorColor='secondary'
+          scrollButtons='auto'
+          variant='scrollable'
+        >
           {tabs.map((tab: PageTab) => {
             return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} />
           })}
