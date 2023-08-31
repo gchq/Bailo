@@ -116,5 +116,6 @@ describe('services > release', () => {
     expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
       /^You do not have permission to delete this release./
     )
+    expect(releaseModelMocks.save).not.toBeCalled()
   })
 })
