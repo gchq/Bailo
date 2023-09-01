@@ -53,7 +53,7 @@ module.exports = {
       accessKey: 'minioadmin',
       secretKey: 'minioadmin',
       region: 'minio',
-      partSize: 64 * 1024 * 1024
+      partSize: 64 * 1024 * 1024,
     },
 
     // Automatically create the upload / registry bucket if they're not found?
@@ -233,5 +233,22 @@ module.exports = {
 
   log: {
     level: 'trace',
+  },
+
+  s3: {
+    credentials: {
+      accessKeyId: 'minioadmin',
+      secretAccessKey: 'minioadmin',
+    },
+
+    endpoint: 'http://minio:9000',
+    region: 'ignored',
+    forcePathStyle: true,
+
+    // Names of buckets that Bailo uses
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
   },
 }
