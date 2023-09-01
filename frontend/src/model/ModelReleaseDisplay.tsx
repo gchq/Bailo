@@ -2,6 +2,7 @@ import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import ModelBanner from 'pages/beta/model/ModelBanner'
+import ReviewWithComment from 'src/common/ReviewWithComment'
 
 import { ApprovalStates, ReleaseInterface } from '../../types/types'
 import Link from '../Link'
@@ -66,6 +67,7 @@ export default function ModelReleaseDisplay({
           }}
         >
           <Stack spacing={2}>
+            <ModelBanner>This release needs to be reviewed.</ModelBanner>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
               justifyContent='space-between'
@@ -130,7 +132,6 @@ export default function ModelReleaseDisplay({
               ))}
             </Stack>
           </Stack>
-          <ModelBanner></ModelBanner>
         </Box>
       </Stack>
     </>

@@ -15,7 +15,7 @@ export const ResponseTypes = {
   Reject: 'reject',
 } as const
 
-type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
+export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
 export default function ReviewWithComment({ title, description, open, onClose, onSubmit }: ReviewWithCommentProps) {
   const [reviewComment, setReviewComment] = useState('')

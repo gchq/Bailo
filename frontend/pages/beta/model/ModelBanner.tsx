@@ -2,14 +2,36 @@ import Container from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
-import * as React from 'react'
+import { useTheme } from '@mui/material/styles'
+import { ReactNode, useState } from 'react'
+import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 
-export default function ModelBanner() {
+type Prop = {
+  children: ReactNode
+}
+
+export default function ModelBanner({ children }: Prop) {
+  const theme = useTheme()
+
+  const [reviewCommentOpen, setReviewCommentOpen] = useState(false)
+
+  const openReviewComment = () => {
+    setReviewCommentOpen(true)
+  }
+
+  const closeReviewComment = () => {
+    setReviewCommentOpen(false)
+  }
+
+  const handleSubmit = (kind: ResponseTypeKeys, reviewComment: string) => {
+    //TODO some response to API endpoint- BAI-858
+  }
+
   return (
     <Paper
       sx={{
-        backgroundColor: 'secondary',
-        color: 'black',
+        color: 'white',
+        backgroundColor: theme.palette.secondary.main,
         paddingTop: '0.25rem',
         paddingBottom: '0.25rem',
         display: 'flex',
@@ -18,22 +40,29 @@ export default function ModelBanner() {
       }}
     >
       <Container maxWidth='xl'>
-        <Typography>This model needs approving</Typography>
+        <Typography>{children}</Typography>
       </Container>
       <Button
-        variant='contained'
+        variant='outlined'
+        color='inherit'
         style={{
-          //maxWidth: '600px',
+          color: 'white',
           maxHeight: '20px',
           minWidth: '60px',
           minHeight: '20px',
           padding: '12px',
         }}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onClick={() => {}}
+        onClick={openReviewComment}
       >
         Review
       </Button>
+      <ReviewWithComment
+        title=''
+        description=''
+        open={reviewCommentOpen}
+        onClose={closeReviewComment}
+        onSubmit={handleSubmit}
+      />
     </Paper>
   )
 }
