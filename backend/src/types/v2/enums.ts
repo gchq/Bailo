@@ -4,10 +4,6 @@ export const SchemaKind = {
 } as const
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export const Boolean = {
-  true: 'true',
-  false: 'false',
-} as const
 export const GetModelFilters = {
   Mine: 'mine',
 } as const
