@@ -19,5 +19,4 @@ describe('routes > schema > getApprovals', () => {
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
-
 })
