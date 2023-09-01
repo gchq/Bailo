@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { findApprovalsByActive } from '../../src/services/v2/approval.js'
+import { countApprovals, findApprovalsByActive } from '../../src/services/v2/approval.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
@@ -33,6 +33,14 @@ describe('services > approval', () => {
   test('findApprovalsByActive > not active', async () => {
     const user: any = { dn: 'test' }
     await findApprovalsByActive(user, false)
+
+    expect(approvalModel.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(approvalModel.match.mock.calls.at(1)).toMatchSnapshot()
+  })
+
+  test('countApprovals > successful', async () => {
+    const user: any = { dn: 'test' }
+    await countApprovals(user)
 
     expect(approvalModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(approvalModel.match.mock.calls.at(1)).toMatchSnapshot()

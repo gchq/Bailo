@@ -1,5 +1,29 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > approval > countApprovals > successful 1`] = `
+[
+  {
+    "active": true,
+  },
+]
+`;
+
+exports[`services > approval > countApprovals > successful 2`] = `
+[
+  {
+    "model.collaborators": {
+      "$elemMatch": {
+        "entity": {
+          "$in": [
+            "user:test",
+          ],
+        },
+      },
+    },
+  },
+]
+`;
+
 exports[`services > approval > findApprovalsByActive > active 1`] = `
 [
   {

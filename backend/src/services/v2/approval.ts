@@ -21,6 +21,9 @@ export async function findApprovalsByActive(user: UserDoc, active: boolean): Pro
 
   return approvals
 }
+ export async function countApprovals(user: UserDoc): Promise<number> {
+  return (await findApprovalsByActive(user, true)).length
+ }
 
 /**
  * Added for testing- remove?
