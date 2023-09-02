@@ -87,6 +87,6 @@
     "jsdom": "^22.0.0",
     "next-router-mock": "^0.9.3",
     "vite-tsconfig-paths": "^4.2.0",
-    "vitest": "^0.30.1"
+    "vitest": "^0.34.3"
   }
 }
