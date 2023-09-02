@@ -70,11 +70,11 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
@@ -93,11 +93,11 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Install dependencies
       - run: npm ci
@@ -113,11 +113,11 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -283,11 +283,11 @@ jobs:
           echo "Check free disk space after cleanup."
           df -h
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -420,11 +420,11 @@ jobs:
           echo "Check free disk space after cleanup."
           df -h
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -542,11 +542,11 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -624,7 +624,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       # Install dependencies
       - name: Install dependencies
