@@ -17,7 +17,7 @@ const morganLog = promisify(
           status: tokens.status(req, res),
           code: 'approval',
         },
-        tokens.dev(morgan, req, res)
+        tokens.dev(morgan, req, res),
       )
 
       return ''
@@ -26,8 +26,8 @@ const morganLog = promisify(
       skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
       // write to nowhere...
       stream: devnull(),
-    }
-  )
+    },
+  ),
 )
 
 export async function expressLogger(req: Request, res: Response, next: NextFunction) {

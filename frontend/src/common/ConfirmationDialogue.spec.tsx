@@ -16,7 +16,7 @@ describe('ConfirmationDialogue', () => {
         onConfirm={doNothing}
         title={testTitle}
         errorMessage={testError}
-      />
+      />,
     )
 
     await waitFor(async () => {
@@ -33,7 +33,7 @@ describe('ConfirmationDialogue', () => {
         onConfirm={doNothing}
         title={testTitle}
         errorMessage={testError}
-      />
+      />,
     )
 
     await waitFor(async () => {

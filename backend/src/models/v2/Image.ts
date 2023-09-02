@@ -35,7 +35,7 @@ const ImageSchema = new Schema<ImageInterface>(
     timestamps: true,
     collection: 'v2_images',
     toJSON: { getters: true },
-  }
+  },
 )
 
 const ImageModel = model<ImageInterface>('v2_Image', ImageSchema)

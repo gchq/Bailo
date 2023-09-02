@@ -34,7 +34,7 @@ const ModelCardSchema = new Schema<ModelCardInterface>(
     timestamps: true,
     collection: 'v2_model_cards',
     toJSON: { getters: true },
-  }
+  },
 )
 
 function getSchema(schema: string) {

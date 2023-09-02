@@ -16,7 +16,7 @@ export function useListModels(type: ListModelType, filter?: string) {
       type,
       filter,
     })}`,
-    fetcher
+    fetcher,
   )
 
   return {
@@ -76,7 +76,7 @@ export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs
 
   const { data, error, mutate } = useSWR<Version, ErrorInfo>(
     uuid ? `/api/v1/model/${uuid}/version/${versionName}?logs=${logs}` : null,
-    fetcher
+    fetcher,
   )
 
   return {
@@ -90,7 +90,7 @@ export function useGetModelVersion(uuid?: string, selectedVersion?: string, logs
 export function useGetModelDeployments(uuid?: string) {
   const { data, error, mutate } = useSWR<Deployment[], ErrorInfo>(
     uuid ? `/api/v1/model/${uuid}/deployments` : null,
-    fetcher
+    fetcher,
   )
 
   return {

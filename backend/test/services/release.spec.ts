@@ -81,7 +81,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-      /^The requested release was not found./
+      /^The requested release was not found./,
     )
   })
 
@@ -93,7 +93,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-      /^You do not have permission to view this release./
+      /^You do not have permission to view this release./,
     )
   })
 
@@ -114,7 +114,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
 
     expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
-      /^You do not have permission to delete this release./
+      /^You do not have permission to delete this release./,
     )
     expect(releaseModelMocks.save).not.toBeCalled()
   })

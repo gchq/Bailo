@@ -34,7 +34,7 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
     timestamps: true,
     collection: 'v2_model_card_revisions',
     toJSON: { getters: true },
-  }
+  },
 )
 
 function getSchema(schema: string) {

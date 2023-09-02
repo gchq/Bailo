@@ -2,7 +2,7 @@ import { getUserById } from '../services/user.js'
 import { Entity, EntityKind, ParsedEntity, UserDoc } from '../types/types.js'
 
 export async function parseEntity(
-  entity: Entity
+  entity: Entity,
 ): Promise<{ valid: false; reason: string } | { valid: true; kind: Entity['kind']; entity: any }> {
   switch (entity.kind) {
     case 'user': {
@@ -34,7 +34,7 @@ interface ParseOptions {
 }
 export async function parseEntityList(
   entities: Array<Entity>,
-  opts: ParseOptions = { relaxed: false }
+  opts: ParseOptions = { relaxed: false },
 ): Promise<{ valid: false; reason: string; entity: Entity } | { valid: true; entities: Array<any> }> {
   const parsedEntities: Array<{ kind: string; entity: any }> = []
 

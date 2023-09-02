@@ -23,7 +23,7 @@ export abstract class BaseAuthorisationConnector {
     user: UserDoc,
     model: ModelDoc,
     release: ReleaseDoc,
-    action: ReleaseActionKeys
+    action: ReleaseActionKeys,
   ): Promise<boolean>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
 }

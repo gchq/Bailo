@@ -11,7 +11,7 @@ export async function searchModels(
   libraries: Array<string>,
   filters: Array<GetModelFiltersKeys>,
   search: string,
-  task?: string
+  task?: string,
 ): Promise<Array<ModelCardDoc & { model: ModelDoc }>> {
   const query: any = {}
 

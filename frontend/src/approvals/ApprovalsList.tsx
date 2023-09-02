@@ -66,7 +66,7 @@ function ApprovalItem({ approval }: ApprovalItemProps) {
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
             <Typography variant='caption'>{`Created ${timeDifference(
               new Date(),
-              new Date(approval.createdAt)
+              new Date(approval.createdAt),
             )}.`}</Typography>
             <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
               {editedAdornement()}

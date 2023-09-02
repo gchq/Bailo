@@ -31,7 +31,7 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
 
 export async function getModelReleases(
   user: UserDoc,
-  modelId: string
+  modelId: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface }>> {
   const results = await Release.aggregate()
     .match({ modelId })

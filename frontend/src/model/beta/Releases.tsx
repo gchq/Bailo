@@ -27,12 +27,12 @@ export default function Releases({ model }: { model: ModelInterface }) {
               modelId={model.id}
               release={release}
               latestRelease={latestRelease}
-            />
+            />,
           )
         }
         return releaseDisplays
       }, []),
-    [latestRelease, model.id, sortedReleases]
+    [latestRelease, model.id, sortedReleases],
   )
 
   useEffect(() => {

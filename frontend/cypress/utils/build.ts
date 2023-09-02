@@ -11,7 +11,7 @@ export const runCommand = async (
   command: string,
   //   onStdout: (data: string) => void,
   //   onStderr: (data: string) => void,
-  opts: RunCommandOptions = {}
+  opts: RunCommandOptions = {},
 ) => {
   const childProcess = exec(command, { async: true, silent: true })
   //   childProcess.stdout?.on('data', (data) => {
@@ -27,8 +27,8 @@ export const runCommand = async (
       if (childProcess.exitCode !== 0 && !opts.silentErrors) {
         reject(
           new Error(
-            `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`
-          )
+            `Failed with status code '${childProcess.exitCode}'${opts.hide ? '' : ` when running '${command}'`}`,
+          ),
         )
         return
       }

@@ -32,7 +32,7 @@ function MetadataDisplay({
     const currentSchema = schema.schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) =>
-        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false
+        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false,
     )
 
     setCurrentSchema(currentSchema)

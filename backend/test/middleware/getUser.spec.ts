@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { getUser } from '../../src/middleware/getUser.js'
 
-const getUserFromReq = vi.hoisted(() => vi.fn(() => ({ dn: 'default' } as any)))
+const getUserFromReq = vi.hoisted(() => vi.fn(() => ({ dn: 'default' }) as any))
 vi.mock('../../src/connectors/v2/user/index.js', () => ({
   default: {
     getUserFromReq,

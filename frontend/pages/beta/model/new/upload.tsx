@@ -63,7 +63,7 @@ function Upload() {
         },
       },
       [],
-      defaultState
+      defaultState,
     )
 
     steps.push(
@@ -84,7 +84,7 @@ function Upload() {
         render: RenderFileTab,
         renderBasic: RenderBasicFileTab,
         isComplete: (step) => fileTabComplete(step, uiConfig ? uiConfig.maxModelSizeGB : 0),
-      })
+      }),
     )
 
     for (const step of steps) {
@@ -103,7 +103,7 @@ function Upload() {
       isCurrentUserError,
       isUiConfigError,
     },
-    MinimalErrorWrapper
+    MinimalErrorWrapper,
   )
   if (errorWrapper) return errorWrapper
 

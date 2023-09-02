@@ -13,7 +13,7 @@ import modelSchema from './example_schemas/minimal_upload_schema.json' assert { 
       schema: modelSchema,
       use: SchemaType.UPLOAD,
     },
-    true
+    true,
   )
 
   await createSchema(
@@ -23,7 +23,7 @@ import modelSchema from './example_schemas/minimal_upload_schema.json' assert { 
       schema: deploySchema,
       use: SchemaType.DEPLOYMENT,
     },
-    true
+    true,
   )
 
   setTimeout(disconnectFromMongoose, 50)

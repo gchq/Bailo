@@ -52,7 +52,7 @@ export default function MarkdownEditor({ onDataValueChange, dataValue }: Markdow
               execute: toggleToolbar,
             }),
           ],
-    [showToolbar, toggleToolbar]
+    [showToolbar, toggleToolbar],
   )
 
   const handleChange = (value?: string) => {

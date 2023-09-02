@@ -38,7 +38,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           kind: EntityKind.USER,
           id: user.id,
           data: user,
-        }))
+        })),
       )
 
     return tempEntities
