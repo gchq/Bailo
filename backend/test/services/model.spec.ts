@@ -215,6 +215,7 @@ describe('services > model', () => {
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
       /^You do not have permission to update this model card/
     )
+    expect(modelCardRevisionModel.save).not.toBeCalled()
   })
 
   test('_setModelCard > should save and update model card if user has write permission', async () => {

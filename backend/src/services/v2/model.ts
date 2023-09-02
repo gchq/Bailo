@@ -114,6 +114,25 @@ export async function searchModels(
   return asyncFilter(await results, (result) => authorisation.userModelAction(user, result, ModelAction.View))
 }
 
+export const GetModelCardVersionOptions = {
+  Latest: 'latest',
+} as const
+export type GetModelCardVersionOptionsKeys =
+  (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]
+export async function getModelCard(user: UserDoc, modelId: string, version: number | GetModelCardVersionOptionsKeys) {
+  if (version === GetModelCardVersionOptions.Latest) {
+    const card = (await getModelById(user, modelId)).card
+
+    if (!card) {
+      throw NotFound('This model has no model card setup', { modelId, version })
+    }
+
+    return card
+  } else {
+    return getModelCardRevision(user, modelId, version)
+  }
+}
+
 export async function getModelCardRevision(user: UserDoc, modelId: string, version: number) {
   const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
 
