@@ -1,4 +1,4 @@
-FROM node:16-alpine as installer
+FROM node:20-alpine as installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:16-alpine as runner
+FROM node:20-alpine as runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat img docker skopeo
