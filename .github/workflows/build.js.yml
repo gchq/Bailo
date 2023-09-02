@@ -70,10 +70,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Create certs
@@ -93,10 +93,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Install dependencies
@@ -113,10 +113,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v3
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Setup BuildX
@@ -283,10 +283,10 @@ jobs:
           echo "Check free disk space after cleanup."
           df -h
 
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Setup BuildX
@@ -420,10 +420,10 @@ jobs:
           echo "Check free disk space after cleanup."
           df -h
 
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Setup BuildX
@@ -542,10 +542,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v3
-      - name: Use Node.js 20
+      - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: "npm"
 
       # Setup BuildX
