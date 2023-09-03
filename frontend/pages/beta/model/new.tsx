@@ -16,6 +16,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
@@ -44,11 +45,14 @@ export default function NewModel() {
       visibility,
     }
     const response = await postModel(formData)
-    if (response.status === 200) {
-      router.push(`/beta/model/${response.data.model.id}`)
-    } else {
-      setErrorMessage(response.data)
+
+    if (!response.ok) {
+      const error = await getErrorMessage(response)
+      return setErrorMessage(error)
     }
+
+    const data = await response.json()
+    router.push(`/beta/model/${data.model.id}`)
   }
 
   const privateLabel = () => {
