@@ -9,14 +9,13 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import MarkdownEditor from 'src/common/MarkdownEditor'
+import RichTextEditor from 'src/common/RichTextEditor'
 
 import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
@@ -78,7 +77,7 @@ export default function NewModel() {
 
   return (
     <Wrapper title='Create a new Model' page='upload'>
-      <Card sx={{ p: 4, maxWidth: 600, m: 'auto' }}>
+      <Card sx={{ p: 4, maxWidth: 520, m: 'auto' }}>
         <Typography
           component='h1'
           variant='h4'
@@ -95,35 +94,26 @@ export default function NewModel() {
               <Typography component='h2' variant='h6'>
                 Overview
               </Typography>
-              <Stack direction='row' spacing={2}>
+              <Box sx={{ width: '100%' }}>
                 <TeamAndModelSelector
                   setTeamValue={setTeamName}
                   teamValue={teamName}
                   setModelValue={setModelName}
                   modelValue={modelName}
                 />
-              </Stack>
+              </Box>
               <Stack>
                 <FormControl>
                   <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Description <span style={{ color: theme.palette.primary.main }}>*</span>
                   </Typography>
-                  <MarkdownEditor
-                    // onDataValueChange={function (value: string): void {
-                    //   throw new Error('Function not implemented.')
-                    // }}
-                    dataValue={description}
-                    onDataValueChange={(e) => setDescription(description)}
-                    data-test='modelDescription'
-                  />
-                  {/* <TextField
-                    id='new-model-description'
-                    required
-                    size='small'
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    data-test='modelDescription'
-                  /> */}
+                  <Box id='new-model-description'>
+                    <RichTextEditor
+                      dataValue={description}
+                      onDataValueChange={(value) => setDescription(value)}
+                      data-test='modelDescription'
+                    />
+                  </Box>
                 </FormControl>
               </Stack>
             </>

@@ -9,12 +9,12 @@ import { useCallback, useMemo, useState } from 'react'
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
-export type MarkdownEditorProps = {
+export type RichTextEditorProps = {
   onDataValueChange: (value: string) => void
   dataValue: string
 }
 
-export default function MarkdownEditor({ onDataValueChange, dataValue }: MarkdownEditorProps) {
+export default function RichTextEditor({ onDataValueChange, dataValue }: RichTextEditorProps) {
   const [showToolbar, setShowToolbar] = useState(false)
 
   const toggleToolbar = useCallback(() => {
@@ -62,6 +62,7 @@ export default function MarkdownEditor({ onDataValueChange, dataValue }: Markdow
   return (
     <MDEditor
       defaultTabEnable
+      preview='edit'
       commands={showToolbar ? undefined : []}
       extraCommands={extraCommands}
       value={dataValue}
