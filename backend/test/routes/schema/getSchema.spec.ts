@@ -1,7 +1,5 @@
-import _ from 'lodash'
 import { describe, expect, test, vi } from 'vitest'
 
-import { schemaJson } from '../../../src/scripts/example_schemas/minimal_upload_schema_beta.js'
 import { NotFound } from '../../../src/utils/v2/error.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testModelSchema } from '../../testUtils/testModels.js'
@@ -19,9 +17,7 @@ vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 
 describe('routes > schema > getSchema', () => {
   test('returns the schema with the matching ID', async () => {
-    const updatedTestSchema = _.cloneDeep(testModelSchema)
-    updatedTestSchema.schema = schemaJson
-    mockSchemaService.findSchemaById.mockReturnValueOnce(updatedTestSchema)
+    mockSchemaService.findSchemaById.mockReturnValueOnce(testModelSchema)
     const res = await testGet(`/api/v2/schema/${testModelSchema.id}`)
 
     expect(res.statusCode).toBe(200)
