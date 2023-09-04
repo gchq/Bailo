@@ -6,12 +6,16 @@ import { createFixture, testPost } from '../../../testUtils/routes.js'
 vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
 
+vi.mock('../../../../src/services/v2/model.js', async () => {
+  const actual = (await vi.importActual('../../../../src/services/v2/model.js')) as object
+  return {
+    ...actual,
+    createModelCardFromSchema: vi.fn(() => ({ _id: 'test' })),
+  }
+})
+
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../../src/services/v2/model.js', () => ({
-      createModelCardFromSchema: vi.fn(() => ({ _id: 'test' })),
-    }))
-
     const fixture = createFixture(postFromSchemaSchema)
     const res = await testPost('/api/v2/model/example/setup/from-schema', fixture)
 
