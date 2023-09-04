@@ -104,14 +104,17 @@ export default function NewModel() {
               </Box>
               <Stack>
                 <FormControl>
-                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
-                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography>
                   <Box id='new-model-description'>
                     <RichTextEditor
                       dataValue={description}
                       onDataValueChange={(value) => setDescription(value)}
                       data-test='modelDescription'
+                      ariaLabel='model description'
+                      label={
+                        <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                          Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                        </Typography>
+                      }
                     />
                   </Box>
                 </FormControl>

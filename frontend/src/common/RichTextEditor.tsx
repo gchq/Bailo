@@ -1,72 +1,47 @@
 import '@uiw/react-md-editor/markdown-editor.css'
 import '@uiw/react-markdown-preview/markdown.css'
 
-import ShowIcon from '@mui/icons-material/Visibility'
-import HideIcon from '@mui/icons-material/VisibilityOff'
-import { codeEdit, codeLive, codePreview, divider, fullscreen, group } from '@uiw/react-md-editor/lib/commands'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import dynamic from 'next/dynamic'
-import { useCallback, useMemo, useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
 export type RichTextEditorProps = {
   onDataValueChange: (value: string) => void
   dataValue: string
+  ariaLabel: string
+  label?: ReactNode
 }
 
-export default function RichTextEditor({ onDataValueChange, dataValue }: RichTextEditorProps) {
-  const [showToolbar, setShowToolbar] = useState(false)
+export default function RichTextEditor({ onDataValueChange, dataValue, ariaLabel, label }: RichTextEditorProps) {
+  const [hideToolbar, setHideToolbar] = useState(true)
 
-  const toggleToolbar = useCallback(() => {
-    setShowToolbar(!showToolbar)
-  }, [showToolbar])
-
-  const extraCommands = useMemo(
-    () =>
-      showToolbar
-        ? [
-            divider,
-            codeEdit,
-            codeLive,
-            codePreview,
-            fullscreen,
-            group([], {
-              name: 'Hide Toolbar',
-              icon: <HideIcon sx={{ fontSize: '12px' }} />,
-              groupName: 'hideToolbar',
-              buttonProps: {
-                'aria-label': 'Hide toolbar',
-              },
-              execute: toggleToolbar,
-            }),
-          ]
-        : [
-            fullscreen,
-            group([], {
-              name: 'Show Toolbar',
-              icon: <ShowIcon sx={{ fontSize: '12px' }} />,
-              groupName: 'showToolbar',
-              buttonProps: {
-                'aria-label': 'Show toolbar',
-              },
-              execute: toggleToolbar,
-            }),
-          ],
-    [showToolbar, toggleToolbar]
-  )
+  const toggleToolbar = () => {
+    setHideToolbar(!hideToolbar)
+  }
 
   const handleChange = (value?: string) => {
     onDataValueChange(value || '')
   }
 
   return (
-    <MDEditor
-      defaultTabEnable
-      preview='edit'
-      commands={showToolbar ? undefined : []}
-      extraCommands={extraCommands}
-      value={dataValue}
-      onChange={handleChange}
-    />
+    <>
+      <Box display='flex'>
+        {label}
+        <Button size='small' onClick={toggleToolbar} sx={{ ml: 'auto' }}>
+          {`${hideToolbar ? 'Show' : 'Hide'} Toolbar`}
+        </Button>
+      </Box>
+      <MDEditor
+        defaultTabEnable
+        preview='edit'
+        hideToolbar={hideToolbar}
+        value={dataValue}
+        onChange={handleChange}
+        textareaProps={{ 'aria-label': ariaLabel }}
+      />
+    </>
   )
 }
