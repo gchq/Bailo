@@ -15,6 +15,21 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
     "name": "Example Schema 1",
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "entity": {
+          "properties": {
+            "id": {
+              "description": "Unique identifier for entity.",
+              "type": "string",
+            },
+            "kind": {
+              "description": "Type of entity (user, group).",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+      },
       "properties": {
         "anotherPage": {
           "description": "This is a second page",
@@ -36,6 +51,49 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
             "questionOne, questionTwo",
           ],
           "title": "Another Page",
+          "type": "object",
+        },
+        "contacts": {
+          "additionalProperties": false,
+          "description": "Details of those individuals responsible for the model, the detail in this card and the risk involved in using the model and its continued alignment with policy.",
+          "properties": {
+            "manager": {
+              "description": "A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.",
+              "items": {
+                "$ref": "#/definitions/entity",
+              },
+              "minLength": 1,
+              "title": "Senior Responsible Officer",
+              "type": "array",
+              "widget": "entitySelector",
+            },
+            "reviewer": {
+              "description": "An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.",
+              "items": {
+                "$ref": "#/definitions/entity",
+              },
+              "minLength": 1,
+              "title": "Model Technical Reviewer",
+              "type": "array",
+              "widget": "entitySelector",
+            },
+            "uploader": {
+              "description": "The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.",
+              "items": {
+                "$ref": "#/definitions/entity",
+              },
+              "minLength": 1,
+              "title": "Model Developer",
+              "type": "array",
+              "widget": "entitySelector",
+            },
+          },
+          "required": [
+            "uploader",
+            "reviewer",
+            "manager",
+          ],
+          "title": "Contacts",
           "type": "object",
         },
         "highLevelDetails": {
@@ -109,6 +167,7 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
       "required": [
         "timeStamp",
         "highLevelDetails",
+        "anotherPage",
       ],
       "type": "object",
     },

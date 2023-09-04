@@ -92,7 +92,7 @@ export const schemaJson = {
           widget: 'customTextInput',
         },
         questionTwo: {
-          title: 'Question one',
+          title: 'Question two',
           description: 'This is another question',
           type: 'string',
           widget: 'customTextInput',
