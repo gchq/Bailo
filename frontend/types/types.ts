@@ -22,6 +22,8 @@ export enum ApprovalCategory {
   Deployment = 'Deployment',
 }
 
+export type UploadCategory = 'model' | 'deployment'
+
 export interface DeploymentMetadata {
   highLevelDetails: {
     name: string
