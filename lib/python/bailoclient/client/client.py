@@ -452,7 +452,6 @@ class Client:
     def _post_model(
         self,
         model_data: MultipartEncoder,
-        mode: str = "newModel",
         model_uuid: Optional[str] = None,
     ) -> str:
         """Post a new model or an updated model
@@ -478,7 +477,7 @@ class Client:
 
         if mode == "newModel":
             return self.api.post(
-                f"/model?mode={mode}",
+                f"/model",
                 request_body=model_data,
                 headers={"Content-Type": model_data.content_type},
             )
