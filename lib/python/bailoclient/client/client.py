@@ -452,6 +452,7 @@ class Client:
     def _post_model(
         self,
         model_data: MultipartEncoder,
+        mode: str = "newModel",
         model_uuid: Optional[str] = None,
     ) -> str:
         """Post a new model or an updated model
@@ -482,7 +483,7 @@ class Client:
                 headers={"Content-Type": model_data.content_type},
             )
 
-        raise ValueError("Invalid mode - must be newVersion if arg specified")
+        raise ValueError("Invalid mode - must be either newVersion or newModel")
 
     def _increment_model_version(self, model_uuid: str) -> str:
         """Increment the latest version of a model by 1
