@@ -17,5 +17,5 @@ export function coerceArray(object: z.ZodTypeAny) {
 }
 
 export function strictCoerceBoolean(object: z.ZodTypeAny) {
-  return z.preprocess(val => val === 'true' ? true : val === 'false' ? false : undefined, object)
+  return z.preprocess((val) => (val === 'true' ? true : val === 'false' ? false : undefined), object)
 }
