@@ -7,8 +7,8 @@ exports[`routes > schema > getApprovals > rejects missing active parameter 1`] =
       "errors": [
         {
           "code": "invalid_type",
-          "expected": "'true' | 'false'",
-          "message": "Missing parameter active.",
+          "expected": "boolean",
+          "message": "Required",
           "path": [
             "query",
             "active",
@@ -17,7 +17,7 @@ exports[`routes > schema > getApprovals > rejects missing active parameter 1`] =
         },
       ],
     },
-    "message": "Missing parameter active.",
+    "message": "Required",
     "name": "Error",
   },
 }
@@ -29,21 +29,18 @@ exports[`routes > schema > getApprovals > rejects missing value for active param
     "context": {
       "errors": [
         {
-          "code": "invalid_enum_value",
-          "message": "Invalid enum value. Expected 'true' | 'false', received ''",
-          "options": [
-            "true",
-            "false",
-          ],
+          "code": "invalid_type",
+          "expected": "boolean",
+          "message": "Required",
           "path": [
             "query",
             "active",
           ],
-          "received": "",
+          "received": "undefined",
         },
       ],
     },
-    "message": "Invalid enum value. Expected 'true' | 'false', received ''",
+    "message": "Required",
     "name": "Error",
   },
 }
@@ -58,6 +55,7 @@ exports[`routes > schema > getApprovals > returns only active approvals 1`] = `
       "kind": "release",
       "model": "example-model-2-nevwg4",
       "release": "3.0.2",
+      "role": "owner",
       "updatedAt": "2023-08-14T00:00:00.000Z",
     },
   ],
@@ -73,6 +71,7 @@ exports[`routes > schema > getApprovals > returns only inactive approvals 1`] = 
       "kind": "release",
       "model": "example-model-2-nevwg4",
       "release": "3.0.2",
+      "role": "owner",
       "updatedAt": "2023-08-14T00:00:00.000Z",
     },
   ],

@@ -4,11 +4,11 @@ import { z } from 'zod'
 
 import { ApprovalInterface } from '../../../models/v2/Approval.js'
 import { findApprovalsByActive } from '../../../services/v2/approval.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 
 export const getApprovalsSchema = z.object({
   query: z.object({
-    active: z.coerce.boolean(),
+    active: strictCoerceBoolean(z.boolean()),
   }),
 })
 

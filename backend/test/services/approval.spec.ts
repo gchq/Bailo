@@ -13,7 +13,7 @@ const approvalModel = vi.hoisted(() => {
   model.match = vi.fn(() => model)
   model.sort = vi.fn(() => model)
   model.lookup = vi.fn(() => model)
-  model.append = vi.fn(() => model)
+  model.unwind = vi.fn(() => model)
 
   return model
 })
