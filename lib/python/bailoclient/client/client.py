@@ -482,7 +482,7 @@ class Client:
                 headers={"Content-Type": model_data.content_type},
             )
 
-        raise ValueError("Invalid mode - must be either newVersion or newModel")
+        raise ValueError("Invalid mode - must be newVersion if arg specified")
 
     def _increment_model_version(self, model_uuid: str) -> str:
         """Increment the latest version of a model by 1
