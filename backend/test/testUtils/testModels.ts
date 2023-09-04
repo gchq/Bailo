@@ -47,6 +47,7 @@ export const testDeploymentSchema = {
 export const testReleaseInactiveApproval = {
   model: 'example-model-2-nevwg4',
   release: '3.0.2',
+  role: 'owner',
   kind: 'release',
   active: false,
   createdAt: new Date('08/13/2023'),
@@ -56,6 +57,7 @@ export const testReleaseInactiveApproval = {
 export const testReleaseActiveApproval = {
   model: 'example-model-2-nevwg4',
   release: '3.0.2',
+  role: 'owner',
   kind: 'release',
   active: true,
   createdAt: new Date('08/13/2023'),

@@ -10,12 +10,30 @@ export async function findApprovalsByActive(user: UserDoc, active: boolean): Pro
     // Populate model entries
     .lookup({ from: 'v2_models', localField: 'model', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
-    .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
+    .unwind({ path: '$model' })
     .match({
-      'model.collaborators': {
-        $elemMatch: {
-          entity: { $in: await authorisation.getEntities(user) },
-        },
+      $expr: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: '$model.collaborators',
+                as: 'item',
+                cond: {
+                  $and: [
+                    {
+                      $in: ['$$item.entity', await authorisation.getEntities(user)],
+                    },
+                    {
+                      $in: ['$role', '$$item.roles'],
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          0,
+        ],
       },
     })
 

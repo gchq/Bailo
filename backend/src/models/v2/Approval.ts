@@ -9,6 +9,7 @@ import { ApprovalKind, ApprovalKindKeys } from '../../types/v2/enums.js'
 export interface ApprovalInterface {
   model: string
   release: string
+  role: string
   kind: ApprovalKindKeys
   active: boolean
   createdAt: Date
@@ -24,6 +25,7 @@ const ApprovalRequestSchema = new Schema<ApprovalInterface>(
   {
     model: { type: String, required: true },
     release: { type: String, required: true },
+    role: { type: String, required: true },
     kind: { type: String, enum: Object.values(ApprovalKind), required: true },
     active: { type: Boolean, required: true },
   },

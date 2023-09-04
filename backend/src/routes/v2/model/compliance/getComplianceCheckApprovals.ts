@@ -27,6 +27,7 @@ export const getComplianceApprovals = [
         {
           model: 'yolo',
           release: '3.0.2',
+          role: 'owner',
           kind: 'access',
           active: true,
           createdAt: new Date('08/13/2023'),
@@ -35,6 +36,7 @@ export const getComplianceApprovals = [
         {
           model: 'yolo',
           release: '3.0.1',
+          role: 'owner',
           kind: 'access',
           active: true,
           createdAt: new Date('08/12/2023'),
