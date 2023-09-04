@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { SchemaInterface } from '../../../models/v2/Schema.js'
-import { schemaJson } from '../../../scripts/example_schemas/minimal_upload_schema_beta.js'
 import { findSchemaById } from '../../../services/v2/schema.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -25,7 +24,7 @@ export const getSchema = [
     const { params } = parse(req, getSchemaSchema)
 
     const schema = await findSchemaById(params.schemaId)
-    schema.schema = schemaJson
+    //schema.schema = schemaJson
 
     return res.json({
       schema,
