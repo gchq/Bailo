@@ -28,6 +28,10 @@ export function BadReq(message: string, context?: BailoError['context'], logger?
   return GenericError(400, message, context, logger)
 }
 
+export function Unauthorized(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(401, message, context, logger)
+}
+
 export function Forbidden(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(403, message, context, logger)
 }
