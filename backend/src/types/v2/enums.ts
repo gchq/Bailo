@@ -15,3 +15,9 @@ export const ApprovalKind = {
   Access: 'access',
 } as const
 export type ApprovalKindKeys = (typeof ApprovalKind)[keyof typeof ApprovalKind]
+
+export const GetModelCardVersionOptions = {
+  Latest: 'latest',
+} as const
+export type GetModelCardVersionOptionsKeys =
+  (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]

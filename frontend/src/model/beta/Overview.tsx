@@ -8,7 +8,7 @@ export default function Overview({ model }: { model: any }) {
   const [showFormPage, setShowFormPage] = useState(false)
 
   useEffect(() => {
-    if (!model.schema) {
+    if (!model.card || !model.card.schemaId) {
       displayTemplatePage()
     } else {
       displayFormPage()

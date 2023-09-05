@@ -1,6 +1,7 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
 
+import { putModelCard } from '../../../../actions/modelCard'
 import { useGetSchema } from '../../../../actions/schema'
 import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { SplitSchemaNoRender } from '../../../../types/interfaces'
@@ -16,24 +17,38 @@ type FormEditPageProps = {
 
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.schema)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  function onSubmit() {
+  async function onSubmit() {
     if (schema) {
       const data = getStepsData(splitSchema, true)
       data.schemaRef = schema.id
-      const form = JSON.stringify(data)
+      const form = data
       // TODO - submit form
-      console.log(form)
+      const res = await putModelCard(model.id, form)
+      if (res.status && res.status < 400) {
+        setIsEdit(false)
+      }
+    }
+  }
+
+  function onCancel() {
+    if (schema) {
+      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], model.card.metadata)
+      for (const step of steps) {
+        step.steps = steps
+      }
+      setSplitSchema({ reference: schema.id, steps })
+      setIsEdit(!isEdit)
     }
   }
 
   useEffect(() => {
     if (!model || !schema) return
-
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'])
+    const metadata = model.card.metadata
+    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
 
     for (const step of steps) {
       step.steps = steps
@@ -68,7 +83,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             justifyContent='flex-end'
             divider={<Divider orientation='vertical' flexItem />}
           >
-            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
+            <Button variant='outlined' onClick={onCancel}>
               Cancel
             </Button>
             <Button variant='contained' onClick={onSubmit}>

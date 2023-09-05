@@ -52,11 +52,9 @@ export async function addDefaultSchemas() {
       name: 'Minimal Schema v10 Beta',
       id: 'minimal-general-v10-beta',
       description: 'This is a test beta schema',
-      schema: modelSchemaBeta,
+      jsonSchema: modelSchemaBeta,
       kind: SchemaKind.Model,
       active: true,
-      meta: { example: true },
-      uiSchema: { 'UI Schema field 1': 'field 1 info' },
       hidden: false,
     },
     true

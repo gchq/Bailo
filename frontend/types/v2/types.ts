@@ -12,9 +12,17 @@ export interface ModelInterface {
   id: string
   name: string
   description: string
-  schema: string
+  card: ModelCardInterface
   visibility: ModelVisibilityKeys
   collaborators: CollaboratorEntry[]
+}
+
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: any
 }
 
 export interface CollaboratorEntry {

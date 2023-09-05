@@ -4,8 +4,10 @@ import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 
-import { patchModel, useGetModel } from '../../../../actions/model'
+import { useGetModel } from '../../../../actions/model'
+import { postFromSchema } from '../../../../actions/modelCard'
 import { useGetSchemas } from '../../../../actions/schema'
+import { useGetCurrentUser } from '../../../../actions/user'
 import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
 import MessageAlert from '../../../../src/MessageAlert'
@@ -17,15 +19,16 @@ export default function NewSchemaSelection() {
   const { modelId }: { modelId?: string } = router.query
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
-  async function createModelUsingSchema(schema: SchemaInterface) {
-    const updatedModel = _.cloneDeep(model)
-    updatedModel.schema = schema.id
-    await patchModel(updatedModel)
-    router.push(`/beta/model/${modelId}`)
+  async function createModelUsingSchema(newSchema: SchemaInterface) {
+    if (currentUser && model) {
+      await postFromSchema(model.id, newSchema.id)
+      router.push(`/beta/model/${modelId}`)
+    }
   }
 
   function schemaButton(schema: any) {
@@ -54,9 +57,13 @@ export default function NewSchemaSelection() {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
     <Wrapper title='Select a schema' page='upload'>
-      {isSchemasLoading || (isModelLoading && <Loading />)}
+      {(isSchemasLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
       {schemas && !isSchemasLoading && !isSchemasError && (
         <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
           <Stack spacing={2} justifyContent='center' alignItems='center'>
