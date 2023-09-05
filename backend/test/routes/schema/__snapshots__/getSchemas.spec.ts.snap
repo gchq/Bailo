@@ -36,15 +36,9 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       "hidden": false,
       "id": "example-deployment-schema-1",
       "kind": "deployment",
-      "meta": {
-        "example": true,
-      },
       "name": "Example Schema 1",
       "schema": {
         "Schema field 1": "field 1 info",
-      },
-      "uiSchema": {
-        "UI Schema field 1": "field 1 info",
       },
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
@@ -55,15 +49,9 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       "hidden": false,
       "id": "example-model-schema-1",
       "kind": "model",
-      "meta": {
-        "example": true,
-      },
       "name": "Example Schema 1",
       "schema": {
         "Schema field 1": "field 1 info",
-      },
-      "uiSchema": {
-        "UI Schema field 1": "field 1 info",
       },
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
@@ -81,15 +69,9 @@ exports[`routes > schema > getSchemas > returns only deployment schemas with the
       "hidden": false,
       "id": "example-deployment-schema-1",
       "kind": "deployment",
-      "meta": {
-        "example": true,
-      },
       "name": "Example Schema 1",
       "schema": {
         "Schema field 1": "field 1 info",
-      },
-      "uiSchema": {
-        "UI Schema field 1": "field 1 info",
       },
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
@@ -107,15 +89,9 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       "hidden": false,
       "id": "example-model-schema-1",
       "kind": "model",
-      "meta": {
-        "example": true,
-      },
       "name": "Example Schema 1",
       "schema": {
         "Schema field 1": "field 1 info",
-      },
-      "uiSchema": {
-        "UI Schema field 1": "field 1 info",
       },
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },

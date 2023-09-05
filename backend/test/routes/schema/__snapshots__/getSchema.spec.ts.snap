@@ -9,15 +9,9 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
     "hidden": false,
     "id": "example-model-schema-1",
     "kind": "model",
-    "meta": {
-      "example": true,
-    },
     "name": "Example Schema 1",
     "schema": {
       "Schema field 1": "field 1 info",
-    },
-    "uiSchema": {
-      "UI Schema field 1": "field 1 info",
     },
     "updatedAt": "2023-07-28T10:50:00.928Z",
   },
