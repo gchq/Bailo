@@ -21,7 +21,7 @@ export function createStep({
 }: {
   schema: any
   uiSchema?: any
-  state: any
+  state: unknown
   type: StepType
   section: string
   index: number

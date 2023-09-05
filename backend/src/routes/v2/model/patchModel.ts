@@ -33,7 +33,6 @@ export const patchModel = [
 
         name: 'Example Model 2',
         description: 'An example Bailo model 2',
-        schema: 'example-model-schema-1',
 
         collaborators: [
           {

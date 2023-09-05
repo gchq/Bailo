@@ -24,7 +24,6 @@ export const getSchema = [
     const { params } = parse(req, getSchemaSchema)
 
     const schema = await findSchemaById(params.schemaId)
-    //schema.schema = schemaJson
 
     return res.json({
       schema,

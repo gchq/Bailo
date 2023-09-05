@@ -24,7 +24,6 @@ interface PutModelCardResponse {
 export const putModelCard = [
   bodyParser.json(),
   async (req: Request, res: Response<PutModelCardResponse>) => {
-    console.log(req)
     const {
       params: { modelId },
       body: { metadata },

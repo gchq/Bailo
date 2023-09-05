@@ -22,7 +22,7 @@ export interface ModelCardInterface {
   version: number
   createdBy: string
 
-  metadata: any
+  metadata: unknown
 }
 
 export interface CollaboratorEntry {

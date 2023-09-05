@@ -1,6 +1,7 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
 
+import { useGetModel } from '../../../../actions/model'
 import { putModelCard } from '../../../../actions/modelCard'
 import { useGetSchema } from '../../../../actions/schema'
 import { useGetUiConfig } from '../../../../actions/uiConfig'
@@ -18,6 +19,7 @@ type FormEditPageProps = {
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
+  const { mutateModel } = useGetModel(model.id)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -36,6 +38,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
   function onCancel() {
     if (schema) {
+      mutateModel
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], model.card.metadata)
       for (const step of steps) {
         step.steps = steps

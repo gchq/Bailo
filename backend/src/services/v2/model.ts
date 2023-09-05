@@ -187,7 +187,11 @@ export async function _setModelCard(
   return revision
 }
 
-export async function updateModelCard(user: UserDoc, modelId: string, metadata: any): Promise<ModelCardRevisionDoc> {
+export async function updateModelCard(
+  user: UserDoc,
+  modelId: string,
+  metadata: unknown
+): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
   if (!(await authorisation.userModelAction(user, model, ModelAction.Write))) {
