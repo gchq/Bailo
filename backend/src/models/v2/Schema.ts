@@ -41,7 +41,7 @@ const SchemaSchema = new Schema<SchemaInterface>(
     timestamps: true,
     collection: 'v2_schemas',
     toJSON: { getters: true },
-  },
+  }
 )
 
 function getSchema(schema: string) {

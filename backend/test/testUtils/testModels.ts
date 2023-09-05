@@ -9,7 +9,7 @@ export const testModelSchema = {
   hidden: false,
 
   kind: SchemaKind.Model,
-  schema: {
+  jsonSchema: {
     'Schema field 1': 'field 1 info',
   },
 
@@ -26,7 +26,7 @@ export const testDeploymentSchema = {
   hidden: false,
 
   kind: SchemaKind.Deployment,
-  schema: {
+  jsonSchema: {
     'Schema field 1': 'field 1 info',
   },
 

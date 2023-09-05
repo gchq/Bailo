@@ -70,7 +70,7 @@ export async function searchModels(
   libraries: Array<string>,
   filters: Array<GetModelFiltersKeys>,
   search: string,
-  task?: string,
+  task?: string
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -156,7 +156,7 @@ export async function _setModelCard(
   modelId: string,
   schemaId: string,
   version: number,
-  metadata: unknown,
+  metadata: unknown
 ) {
   // This function could cause a race case in the 'ModelCardRevision' model.  This
   // is prevented by ensuring there is a compound index on 'modelId' and 'version'.
@@ -190,7 +190,7 @@ export async function _setModelCard(
 export async function updateModelCard(
   user: UserDoc,
   modelId: string,
-  metadata: unknown,
+  metadata: unknown
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
@@ -209,7 +209,7 @@ export async function updateModelCard(
 export async function createModelCardFromSchema(
   user: UserDoc,
   modelId: string,
-  schemaId: string,
+  schemaId: string
 ): Promise<ModelCardRevisionDoc> {
   if (!(await canUserActionModelById(user, modelId, ModelAction.Write))) {
     throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
