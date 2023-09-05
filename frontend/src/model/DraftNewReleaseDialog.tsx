@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postRelease } from '../../actions/release'
 import { ReleaseInterface } from '../../types/types'
@@ -47,12 +48,15 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
         files: [],
         images: [],
       }
+
       const response = await postRelease(release, modelId)
-      if (response.status === 200) {
-        handleClose()
-      } else {
-        setErrorMessage(response.data)
+
+      if (!response.ok) {
+        const error = await getErrorMessage(response)
+        return setErrorMessage(error)
       }
+
+      handleClose()
     }
   }
 

@@ -57,6 +57,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^4.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.4",
     "open": "^9.1.0",
     "openshift-rest-client": "^8.0.1",
