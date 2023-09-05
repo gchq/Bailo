@@ -1,4 +1,4 @@
-import { testDeploymentSchema, testModelSchema } from '../../../test/testUtils/testModels.js'
+import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
