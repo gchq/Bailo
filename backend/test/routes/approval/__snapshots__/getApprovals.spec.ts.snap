@@ -1,0 +1,79 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > getApprovals > rejects missing active parameter 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "boolean",
+          "message": "Required",
+          "path": [
+            "query",
+            "active",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Required",
+    "name": "Error",
+  },
+}
+`;
+
+exports[`routes > schema > getApprovals > rejects missing value for active parameter 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "boolean",
+          "message": "Required",
+          "path": [
+            "query",
+            "active",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Required",
+    "name": "Error",
+  },
+}
+`;
+
+exports[`routes > schema > getApprovals > returns only active approvals 1`] = `
+{
+  "approvals": [
+    {
+      "active": true,
+      "createdAt": "2023-08-13T00:00:00.000Z",
+      "kind": "release",
+      "model": "example-model-2-nevwg4",
+      "release": "3.0.2",
+      "role": "owner",
+      "updatedAt": "2023-08-14T00:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`routes > schema > getApprovals > returns only inactive approvals 1`] = `
+{
+  "approvals": [
+    {
+      "active": false,
+      "createdAt": "2023-08-13T00:00:00.000Z",
+      "kind": "release",
+      "model": "example-model-2-nevwg4",
+      "release": "3.0.2",
+      "role": "owner",
+      "updatedAt": "2023-08-14T00:00:00.000Z",
+    },
+  ],
+}
+`;
