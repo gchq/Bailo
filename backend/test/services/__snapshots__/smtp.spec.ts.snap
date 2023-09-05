@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > smtp > that an email is sent 1`] = `
+[
+  {
+    "from": "\\"Bailo 📝\\" <bailo@example.org>",
+    "html": undefined,
+    "subject": "subject",
+    "text": "content",
+    "to": "email",
+  },
+]
+`;

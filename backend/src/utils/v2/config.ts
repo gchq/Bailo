@@ -12,6 +12,25 @@ export interface Config {
     }
   }
 
+  smtp: {
+    enabled: boolean
+
+    connection: {
+      host: string
+      port: number
+      secure: boolean
+      auth: {
+        user: string
+        pass: string
+      }
+      tls: {
+        rejectUnauthorized: boolean
+      }
+    }
+
+    from: string
+  }
+
   log: {
     level: bunyan.LogLevel
   }
