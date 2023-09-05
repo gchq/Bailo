@@ -1,8 +1,8 @@
-import { Box, Divider, Stack, StepButton, StepLabel, Stepper, Typography } from '@mui/material'
+import { Box, Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
 import MaterialStep from '@mui/material/Step'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { DescriptionFieldProps, ObjectFieldTemplateProps } from '@rjsf/utils'
+import { DescriptionFieldProps } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
@@ -41,25 +41,8 @@ export default function ModelCardForm({
     setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
   }
 
-  function descriptionFieldTemplate(_props: DescriptionFieldProps) {
+  function DescriptionFieldTemplate(_props: DescriptionFieldProps) {
     return <></>
-  }
-
-  function objectFieldTemplate(props: ObjectFieldTemplateProps) {
-    return (
-      <Stack spacing={2}>
-        <Typography variant='h6' component='h2' color='primary'>
-          {props.title}
-        </Typography>
-        <Typography>{props.description}</Typography>
-        <Divider />
-        {props.properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            <Typography>{element.content}</Typography>
-          </div>
-        ))}
-      </Stack>
-    )
   }
 
   return (
@@ -124,10 +107,9 @@ export default function ModelCardForm({
         templates={
           !canEdit
             ? {
-                DescriptionFieldTemplate: descriptionFieldTemplate,
-                ObjectFieldTemplate: objectFieldTemplate,
+                DescriptionFieldTemplate,
               }
-            : { ObjectFieldTemplate: objectFieldTemplate }
+            : {}
         }
       >
         {/* eslint-disable-next-line react/jsx-no-useless-fragment */}

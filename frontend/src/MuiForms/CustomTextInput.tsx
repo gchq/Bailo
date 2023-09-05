@@ -1,8 +1,9 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { Fragment } from 'react'
 
-interface EntitySelectorProps {
+interface CustomTextInputProps {
   label?: string
   required?: boolean
   disabled?: boolean
@@ -13,17 +14,17 @@ interface EntitySelectorProps {
   InputProps?: any
 }
 
-export default function EntitySelector(props: EntitySelectorProps) {
+export default function CustomTextInput(props: CustomTextInputProps) {
   const { onChange, value: currentValue, label, formContext } = props
-
-  const _onChange = (e) => {
-    onChange(e.target.value)
-  }
 
   const theme = useTheme()
 
+  const _onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value)
+  }
+
   return (
-    <>
+    <Fragment key={label}>
       <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
       <TextField
         size='small'
@@ -55,6 +56,6 @@ export default function EntitySelector(props: EntitySelectorProps) {
           disableUnderline: !formContext.editMode ? true : false,
         }}
       />
-    </>
+    </Fragment>
   )
 }
