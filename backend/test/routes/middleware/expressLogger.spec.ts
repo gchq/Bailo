@@ -1,7 +1,7 @@
 import Logger from 'bunyan'
 import { describe, expect, test, vi } from 'vitest'
 
-import { expressLogger } from '../../src/middleware/expressLogger.js'
+import { expressLogger } from '../../../src/routes/middleware/expressLogger.js'
 
 describe('middleware > expressLogger', () => {
   test('middleware', async () => {
