@@ -3,7 +3,8 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ModelCardInterface } from '../../../../models/v2/Model.js'
-import { getModelCard as getModelCardService, GetModelCardVersionOptions } from '../../../../services/v2/model.js'
+import { getModelCard as getModelCardService } from '../../../../services/v2/model.js'
+import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelCardSchema = z.object({

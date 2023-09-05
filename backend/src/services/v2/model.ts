@@ -3,7 +3,11 @@ import ModelModel from '../../models/v2/Model.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../models/v2/ModelCardRevision.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { GetModelFiltersKeys } from '../../types/v2/enums.js'
+import {
+  GetModelCardVersionOptions,
+  GetModelCardVersionOptionsKeys,
+  GetModelFiltersKeys,
+} from '../../types/v2/enums.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
@@ -66,7 +70,7 @@ export async function searchModels(
   libraries: Array<string>,
   filters: Array<GetModelFiltersKeys>,
   search: string,
-  task?: string
+  task?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -114,11 +118,6 @@ export async function searchModels(
   return asyncFilter(await results, (result) => authorisation.userModelAction(user, result, ModelAction.View))
 }
 
-export const GetModelCardVersionOptions = {
-  Latest: 'latest',
-} as const
-export type GetModelCardVersionOptionsKeys =
-  (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]
 export async function getModelCard(user: UserDoc, modelId: string, version: number | GetModelCardVersionOptionsKeys) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
@@ -157,7 +156,7 @@ export async function _setModelCard(
   modelId: string,
   schemaId: string,
   version: number,
-  metadata: unknown
+  metadata: unknown,
 ) {
   // This function could cause a race case in the 'ModelCardRevision' model.  This
   // is prevented by ensuring there is a compound index on 'modelId' and 'version'.
@@ -191,7 +190,7 @@ export async function _setModelCard(
 export async function updateModelCard(
   user: UserDoc,
   modelId: string,
-  metadata: unknown
+  metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
@@ -210,7 +209,7 @@ export async function updateModelCard(
 export async function createModelCardFromSchema(
   user: UserDoc,
   modelId: string,
-  schemaId: string
+  schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   if (!(await canUserActionModelById(user, modelId, ModelAction.Write))) {
     throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })

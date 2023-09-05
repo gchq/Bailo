@@ -8,15 +8,14 @@ vi.mock('../../../../src/utils/user.js')
 
 const modelMock = vi.hoisted(() => {
   return {
-    getModelById: vi.fn(() => undefined as any),
-    getModelCardRevision: vi.fn(() => undefined as any),
+    getModelCard: vi.fn(() => undefined as any),
   }
 })
 vi.mock('../../../../src/services/v2/model.js', () => modelMock)
 
 describe('routes > model > getModel', () => {
   test('latest > 200 > ok', async () => {
-    modelMock.getModelById.mockResolvedValueOnce({ _id: 'test', card: { example: 'test' } })
+    modelMock.getModelCard.mockResolvedValueOnce({ example: 'test' })
 
     const fixture = createFixture(getModelCardSchema)
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/latest`)
@@ -25,18 +24,8 @@ describe('routes > model > getModel', () => {
     expect(res.body).matchSnapshot()
   })
 
-  test('latest > 404 > no model card', async () => {
-    modelMock.getModelById.mockResolvedValueOnce({ _id: 'test' })
-
-    const fixture = createFixture(getModelCardSchema)
-    const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/latest`)
-
-    expect(res.statusCode).toBe(404)
-    expect(res.body).matchSnapshot()
-  })
-
   test('version > 200 > ok', async () => {
-    modelMock.getModelCardRevision.mockResolvedValueOnce({ _id: 'test' })
+    modelMock.getModelCard.mockResolvedValueOnce({ _id: 'test' })
 
     const fixture = createFixture(getModelCardSchema)
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/100`)

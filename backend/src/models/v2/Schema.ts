@@ -14,10 +14,7 @@ export interface SchemaInterface {
   hidden: boolean
 
   kind: SchemaKindKeys
-  meta: unknown
-
-  uiSchema: unknown
-  schema: unknown
+  jsonSchema: unknown
 
   createdAt: Date
   updatedAt: Date
@@ -38,16 +35,13 @@ const SchemaSchema = new Schema<SchemaInterface>(
     hidden: { type: Boolean, default: false },
 
     kind: { type: String, enum: Object.values(SchemaKind), required: true },
-    meta: { type: String, required: true, get: getSchema, set: setSchema },
-
-    uiSchema: { type: String, required: true, get: getSchema, set: setSchema },
-    schema: { type: String, required: true, get: getSchema, set: setSchema },
+    jsonSchema: { type: String, required: true, get: getSchema, set: setSchema },
   },
   {
     timestamps: true,
     collection: 'v2_schemas',
     toJSON: { getters: true },
-  }
+  },
 )
 
 function getSchema(schema: string) {
