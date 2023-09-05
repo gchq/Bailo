@@ -8,6 +8,7 @@ import processDeployments from './processors/processDeployments.js'
 import processUploads from './processors/processUploads.js'
 import { server } from './routes.js'
 import { addDefaultSchemas } from './services/schema.js'
+import { addDefaultApprovals } from './services/v2/approval.js'
 import { addDefaultSchemas as addDefaultSchemasv2 } from './services/v2/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
@@ -38,6 +39,7 @@ createSchemaIndexes()
 addDefaultSchemas()
 if (config.experimental.v2) {
   addDefaultSchemasv2()
+  addDefaultApprovals()
 }
 
 await Promise.all([processUploads(), processDeployments()])

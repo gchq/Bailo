@@ -1,4 +1,6 @@
-import axios from 'axios'
+import https from 'node:https'
+
+import fetch from 'node-fetch'
 
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsAgent } from '../services/v2/http.js'
@@ -21,12 +23,12 @@ async function script() {
 
   const authorisation = `Bearer ${token}`
 
-  const { data: catalog } = await axios.get(`${registry}/_catalog`, {
+  const catalog = await fetch(`${registry}/_catalog`, {
     headers: {
       Authorization: authorisation,
     },
-    httpsAgent,
-  })
+    agent: httpsAgent,
+  }).then((res) => res.json())
 
   logger.info(catalog, 'Current catalog')
 

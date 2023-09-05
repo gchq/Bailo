@@ -9,12 +9,7 @@ export const testModelSchema = {
   hidden: false,
 
   kind: SchemaKind.Model,
-  meta: { example: true },
-
-  uiSchema: {
-    'UI Schema field 1': 'field 1 info',
-  },
-  schema: {
+  jsonSchema: {
     'Schema field 1': 'field 1 info',
   },
 
@@ -31,15 +26,30 @@ export const testDeploymentSchema = {
   hidden: false,
 
   kind: SchemaKind.Deployment,
-  meta: { example: true },
-
-  uiSchema: {
-    'UI Schema field 1': 'field 1 info',
-  },
-  schema: {
+  jsonSchema: {
     'Schema field 1': 'field 1 info',
   },
 
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
+}
+
+export const testReleaseInactiveApproval = {
+  model: 'example-model-2-nevwg4',
+  release: '3.0.2',
+  role: 'owner',
+  kind: 'release',
+  active: false,
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}
+
+export const testReleaseActiveApproval = {
+  model: 'example-model-2-nevwg4',
+  release: '3.0.2',
+  role: 'owner',
+  kind: 'release',
+  active: true,
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
 }
