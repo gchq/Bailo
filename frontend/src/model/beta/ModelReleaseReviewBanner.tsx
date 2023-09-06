@@ -43,20 +43,9 @@ export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBa
         borderRadius: '13px 13px 0px 0px',
       }}
     >
-      <Stack direction='row' spacing={2}>
+      <Stack direction='row' spacing={2} alignItems='center'>
         <Typography>{label}</Typography>
-        <Button
-          variant='outlined'
-          color='inherit'
-          style={{
-            color: 'white',
-            maxHeight: '20px',
-            minWidth: '60px',
-            minHeight: '20px',
-            padding: '12px',
-          }}
-          onClick={openReviewComment}
-        >
+        <Button variant='outlined' color='inherit' size='small' onClick={openReviewComment}>
           Review
         </Button>
       </Stack>
