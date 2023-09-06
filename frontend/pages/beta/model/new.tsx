@@ -109,12 +109,12 @@ export default function NewModel() {
                       dataValue={description}
                       onDataValueChange={(value) => setDescription(value)}
                       data-test='modelDescription'
-                      ariaLabel='model description'
                       label={
                         <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                           Description <span style={{ color: theme.palette.primary.main }}>*</span>
                         </Typography>
                       }
+                      dataTestKey='model description'
                     />
                   </Box>
                 </FormControl>
