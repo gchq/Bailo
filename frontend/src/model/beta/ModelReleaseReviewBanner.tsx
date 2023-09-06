@@ -4,7 +4,8 @@ import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+
+import ReviewWithComment, { ResponseTypeKeys } from '../../common/ReviewWithComment'
 
 type ModelReleaseReviewBannerProps = {
   label: string
@@ -36,7 +37,10 @@ export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBa
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        borderRadius: 0,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: theme.palette.primary.main,
+        borderRadius: '13px 13px 0px 0px',
       }}
     >
       <Stack direction='row' spacing={2}>

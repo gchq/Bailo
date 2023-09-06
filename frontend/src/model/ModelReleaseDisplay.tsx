@@ -58,9 +58,11 @@ export default function ModelReleaseDisplay({
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box
           sx={{
-            border: 'solid 2px',
+            borderWidth: '1px',
+            borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
+            borderRadius: 4,
           }}
         >
           <ModelReleaseReviewBanner label='This release needs to be reviewed' />
