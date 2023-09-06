@@ -5,7 +5,7 @@ import { SchemaType } from '../types/types.js'
 export interface Schema {
   name: string
   reference: string
-  schema: unknown
+  schema: any
   use: SchemaType
 }
 

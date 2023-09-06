@@ -1,9 +1,9 @@
 import { List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
-import { useGetApprovalRequestsForUser } from 'actions/approval'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { timeDifference } from 'utils/dateUtils'
 
+import { useGetApprovalRequestsForUser } from '../../actions/approval'
 import { ApprovalRequestInterface } from '../../types/types'
 import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'

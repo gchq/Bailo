@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { getModelReleases } from '../../../services/v2/release.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getReleasesSchema = z.object({
@@ -20,49 +21,14 @@ interface getReleasesResponse {
 export const getReleases = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleasesResponse>) => {
-    const _ = parse(req, getReleasesSchema)
+    const {
+      params: { modelId },
+    } = parse(req, getReleasesSchema)
+
+    const releases = await getModelReleases(req.user, modelId)
 
     return res.json({
-      releases: [
-        {
-          modelId: 'example-model-1',
-          modelCardVersion: 14,
-
-          name: 'Example Release 1',
-          semver: '1.2.2',
-          notes: 'This is an example release',
-
-          minor: true,
-          draft: true,
-
-          files: ['example-file-id'],
-          images: ['example-image-id'],
-
-          deleted: false,
-
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          modelId: 'example-model-1',
-          modelCardVersion: 15,
-
-          name: 'Example Release 2',
-          semver: '1.2.3',
-          notes: 'This is an example release',
-
-          minor: true,
-          draft: true,
-
-          files: ['example-file-id'],
-          images: ['example-image-id'],
-
-          deleted: false,
-
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
+      releases,
     })
   },
 ]

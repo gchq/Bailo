@@ -22,6 +22,8 @@ export enum ApprovalCategory {
   Deployment = 'Deployment',
 }
 
+export type UploadCategory = 'model' | 'deployment'
+
 export interface DeploymentMetadata {
   highLevelDetails: {
     name: string
@@ -370,9 +372,8 @@ export interface ModelInterface {
   name: string
   description: string
   visibility: ModelVisibilityKeys
+  entities: Entity[]
 }
-
-export type ModelForm = Omit<ModelInterface, 'id'>
 
 export type ReleaseInterface = {
   modelId: string

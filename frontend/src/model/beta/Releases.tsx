@@ -2,7 +2,7 @@ import { Box, Button, Stack } from '@mui/material'
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
-import { ModelInterface } from '../../../types/types'
+import { ModelInterface } from '../../../types/v2/types'
 import { sortByReleaseVersionDescending } from '../../../utils/arrayUtils'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
