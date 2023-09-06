@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 
 import { ApprovalStates, ReleaseInterface } from '../../types/types'
 import Link from '../Link'
+import ModelReleaseReviewBanner from './beta/ModelReleaseReviewBanner'
 
 export default function ModelReleaseDisplay({
   modelId,
@@ -57,78 +58,81 @@ export default function ModelReleaseDisplay({
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box
           sx={{
-            border: 'solid 2px',
-            borderRadius: 4,
-            padding: 2,
+            borderWidth: '1px',
+            borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
+            borderRadius: 4,
           }}
         >
-          <Stack spacing={2}>
-            <Stack
-              direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
-              spacing={2}
-            >
+          <ModelReleaseReviewBanner label='This release needs to be reviewed' />
+          <Box sx={{ padding: 2 }}>
+            <Stack spacing={2}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
                 justifyContent='space-between'
                 alignItems='center'
-                spacing={1}
+                spacing={2}
               >
-                <Typography component='h2' variant='h6' color='primary'>
-                  {release.name}
-                </Typography>
-                <Divider orientation='vertical' flexItem />
-                <Typography color='secondary'>{release.semver}</Typography>
-                {latestVersionAdornment()}
-                <Divider orientation='vertical' flexItem />
-                <Stack direction={{ sm: 'row', xs: 'column' }}>
-                  {approvalStatus(ApprovalStates.Accepted, 'Manager')}
-                  {approvalStatus(ApprovalStates.Accepted, 'Technical Reviewer')}
+                <Stack
+                  direction={{ sm: 'row', xs: 'column' }}
+                  justifyContent='space-between'
+                  alignItems='center'
+                  spacing={1}
+                >
+                  <Typography component='h2' variant='h6' color='primary'>
+                    {release.name}
+                  </Typography>
+                  <Divider orientation='vertical' flexItem />
+                  <Typography color='secondary'>{release.semver}</Typography>
+                  {latestVersionAdornment()}
+                  <Divider orientation='vertical' flexItem />
+                  <Stack direction={{ sm: 'row', xs: 'column' }}>
+                    {approvalStatus(ApprovalStates.Accepted, 'Manager')}
+                    {approvalStatus(ApprovalStates.Accepted, 'Technical Reviewer')}
+                  </Stack>
                 </Stack>
-              </Stack>
 
-              <Link href={`/beta/model/${modelId}?release=${release.semver}`}>Model Card</Link>
+                <Link href={`/beta/model/${modelId}?release=${release.semver}`}>Model Card</Link>
+              </Stack>
+              <Stack spacing={1} direction='row' sx={{ mt: '0px !important' }}>
+                <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
+                  {formatDate(release.updatedAt)}
+                </Typography>
+                <Typography variant='caption'>Joe Blogs</Typography>
+              </Stack>
+              <Typography variant='body1'>{release.notes}</Typography>
+              <Divider />
+              <Stack spacing={0}>
+                {release.files.map((file) => (
+                  <Stack
+                    key={file}
+                    direction={{ sm: 'row', xs: 'column' }}
+                    justifyContent='space-between'
+                    alignItems='center'
+                    spacing={2}
+                  >
+                    <Link href='/beta'>{file}</Link>
+                    {/* TODO - Add file size here */}
+                    {/* <Typography variant='caption'>123GB</Typography> */}
+                  </Stack>
+                ))}
+                {release.images.map((image) => (
+                  <Stack
+                    key={image}
+                    direction={{ sm: 'row', xs: 'column' }}
+                    justifyContent='space-between'
+                    alignItems='center'
+                    spacing={2}
+                  >
+                    <Link href='/beta'>{image}</Link>
+                    {/* TODO - Add file size here */}
+                    {/* <Typography variant='caption'>123GB</Typography> */}
+                  </Stack>
+                ))}
+              </Stack>
             </Stack>
-            <Stack spacing={1} direction='row' sx={{ mt: '0px !important' }}>
-              <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
-                {formatDate(release.updatedAt)}
-              </Typography>
-              <Typography variant='caption'>Joe Blogs</Typography>
-            </Stack>
-            <Typography variant='body1'>{release.notes}</Typography>
-            <Divider />
-            <Stack spacing={0}>
-              {release.files.map((file) => (
-                <Stack
-                  key={file}
-                  direction={{ sm: 'row', xs: 'column' }}
-                  justifyContent='space-between'
-                  alignItems='center'
-                  spacing={2}
-                >
-                  <Link href='/beta'>{file}</Link>
-                  {/* TODO - Add file size here */}
-                  {/* <Typography variant='caption'>123GB</Typography> */}
-                </Stack>
-              ))}
-              {release.images.map((image) => (
-                <Stack
-                  key={image}
-                  direction={{ sm: 'row', xs: 'column' }}
-                  justifyContent='space-between'
-                  alignItems='center'
-                  spacing={2}
-                >
-                  <Link href='/beta'>{image}</Link>
-                  {/* TODO - Add file size here */}
-                  {/* <Typography variant='caption'>123GB</Typography> */}
-                </Stack>
-              ))}
-            </Stack>
-          </Stack>
+          </Box>
         </Box>
       </Stack>
     </>
