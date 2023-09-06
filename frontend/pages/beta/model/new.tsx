@@ -94,14 +94,14 @@ export default function NewModel() {
               <Typography component='h2' variant='h6'>
                 Overview
               </Typography>
-              <Box sx={{ width: '100%' }}>
+              <Stack sx={{ width: '100%' }}>
                 <TeamAndModelSelector
                   setTeamValue={setTeamName}
                   teamValue={teamName}
                   setModelValue={setModelName}
                   modelValue={modelName}
                 />
-              </Box>
+              </Stack>
               <Stack>
                 <FormControl>
                   <Box id='new-model-description'>
