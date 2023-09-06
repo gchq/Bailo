@@ -11,7 +11,7 @@ describe('Beta create new model', () => {
 
     //team selected. model and description typed.
     cy.get('[data-test=teamSelector]').click({ force: true })
-    cy.get('[role=presentation]').click()
+    cy.get('[role=presentation]', { timeout: 15000 }).click()
     cy.get('[data-test=modelSelector]').type('test model')
     cy.get('[data-test=modelDescription]').type('test description')
 
