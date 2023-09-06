@@ -2,9 +2,9 @@ import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-import { ApprovalStates, ReleaseInterface } from '../../types/types'
-import Link from '../Link'
-import ModelReleaseReviewBanner from './beta/ModelReleaseReviewBanner'
+import { ApprovalStates, ReleaseInterface } from '../../../../types/types'
+import Link from '../../../Link'
+import ModelReleaseReviewBanner from './ModelReleaseReviewBanner'
 
 export default function ModelReleaseDisplay({
   modelId,

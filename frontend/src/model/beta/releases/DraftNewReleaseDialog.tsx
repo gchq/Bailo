@@ -15,20 +15,21 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
-import { getErrorMessage } from 'utils/fetcher'
 
-import { postRelease } from '../../actions/release'
-import { ReleaseInterface } from '../../types/types'
-import MultiFileInput from '../common/MultiFileInput'
-import MessageAlert from '../MessageAlert'
+import { postRelease } from '../../../../actions/release'
+import { ReleaseInterface } from '../../../../types/types'
+import { ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
+import MultiFileInput from '../../../common/MultiFileInput'
+import MessageAlert from '../../../MessageAlert'
 
 type DraftNewReleaseDialogProps = {
   open: boolean
   handleClose: () => void
-  modelId: string
+  model: ModelInterface
 }
 
-export default function DraftNewReleaseDialog({ open, handleClose, modelId }: DraftNewReleaseDialogProps) {
+export default function DraftNewReleaseDialog({ open, handleClose, model }: DraftNewReleaseDialogProps) {
   const [releaseName, setReleaseName] = useState('')
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
@@ -40,6 +41,7 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
     event.preventDefault()
     if (isValidSemver(semanticVersion)) {
       const release: Partial<ReleaseInterface> = {
+        modelId: model.id,
         name: releaseName,
         semver: semanticVersion,
         notes: releaseNotes,
@@ -49,7 +51,7 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
         images: [],
       }
 
-      const response = await postRelease(release, modelId)
+      const response = await postRelease(release, model.id)
 
       if (!response.ok) {
         const error = await getErrorMessage(response)

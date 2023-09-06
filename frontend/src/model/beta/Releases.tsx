@@ -6,8 +6,8 @@ import { ModelInterface } from '../../../types/v2/types'
 import { sortByReleaseVersionDescending } from '../../../utils/arrayUtils'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
-import DraftNewReleaseDialog from '../DraftNewReleaseDialog'
-import ModelReleaseDisplay from '../ModelReleaseDisplay'
+import DraftNewReleaseDialog from './releases/DraftNewReleaseDialog'
+import ModelReleaseDisplay from './releases/ModelReleaseDisplay'
 
 export default function Releases({ model }: { model: ModelInterface }) {
   const [latestRelease, setLatestRelease] = useState<string>('')
@@ -57,7 +57,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {modelReleaseDisplays}
       </Stack>
-      <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} modelId={model.id} />
+      <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} model={model} />
     </Box>
   )
 }
