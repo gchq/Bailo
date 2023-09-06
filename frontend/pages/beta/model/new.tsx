@@ -16,6 +16,7 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
