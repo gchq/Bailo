@@ -51,6 +51,7 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
 )
 
 ReleaseSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
 
 const ReleaseModel = model<ReleaseInterface>('v2_Release', ReleaseSchema)
 

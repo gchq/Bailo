@@ -22,6 +22,8 @@ export enum ApprovalCategory {
   Deployment = 'Deployment',
 }
 
+export type UploadCategory = 'model' | 'deployment'
+
 export interface DeploymentMetadata {
   highLevelDetails: {
     name: string
@@ -147,24 +149,6 @@ export type SeldonVersion = {
   name: string
   image: string
 }
-
-export type DocHeading = {
-  title: string
-  slug: string
-  hasIndex: boolean
-  children: DocFileOrHeading[]
-  priority: number
-}
-
-export type DocFile = {
-  title: string
-  slug: string
-  priority: number
-}
-
-export type DocFileOrHeading = DocHeading | DocFile
-
-export type DocsMenuContent = DocFileOrHeading[]
 
 export enum LogLevel {
   TRACE = 10,

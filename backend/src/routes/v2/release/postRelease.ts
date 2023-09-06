@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { createRelease } from '../../../services/v2/release.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postReleaseSchema = z.object({
@@ -33,28 +34,15 @@ interface PostReleaseResponse {
 export const postRelease = [
   bodyParser.json(),
   async (req: Request, res: Response<PostReleaseResponse>) => {
-    const _ = parse(req, postReleaseSchema)
+    const {
+      params: { modelId },
+      body,
+    } = parse(req, postReleaseSchema)
+
+    const release = await createRelease(req.user, { modelId, ...body })
 
     return res.json({
-      release: {
-        modelId: 'example-model-1',
-        modelCardVersion: 55,
-
-        name: 'Example Release 1',
-        semver: '1.2.3',
-        notes: 'This is an example release',
-
-        minor: true,
-        draft: true,
-
-        files: ['file-id'],
-        images: ['image-id'],
-
-        deleted: false,
-
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      release,
     })
   },
 ]
