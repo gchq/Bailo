@@ -13,7 +13,7 @@ describe('Beta create new model', () => {
     cy.get('[data-test=teamSelector]').click()
     cy.get('[role=presentation]').click()
     cy.get('[data-test=modelSelector]').type('test model')
-    cy.get('[aria-label=modelDescription]').type('test description')
+    cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
     cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
@@ -26,7 +26,7 @@ describe('Beta create new model', () => {
     //team, model and description typed.
     cy.get('[data-test=teamSelector]').type('test team')
     cy.get('[data-test=modelSelector]').type('test model')
-    cy.get('[aria-label=modelDescription]').type('test description')
+    cy.get('[data-test=modelDescription]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
     cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()

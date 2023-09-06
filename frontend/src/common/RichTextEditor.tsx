@@ -11,11 +11,11 @@ const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 export type RichTextEditorProps = {
   onDataValueChange: (value: string) => void
   dataValue: string
-  ariaLabel: string
   label?: ReactNode
+  dataTestKey: string
 }
 
-export default function RichTextEditor({ onDataValueChange, dataValue, ariaLabel, label }: RichTextEditorProps) {
+export default function RichTextEditor({ onDataValueChange, dataValue, label, dataTestKey }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
 
   const toggleToolbar = () => {
@@ -40,7 +40,7 @@ export default function RichTextEditor({ onDataValueChange, dataValue, ariaLabel
         hideToolbar={hideToolbar}
         value={dataValue}
         onChange={handleChange}
-        textareaProps={{ 'aria-label': ariaLabel }}
+        data-test={dataTestKey}
       />
     </>
   )
