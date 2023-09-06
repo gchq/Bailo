@@ -1,16 +1,16 @@
-import Container from '@mui/material/Box'
+import { Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 
-type Prop = {
-  children: ReactNode
+type ModelReleaseReviewBannerProps = {
+  label: string
 }
 
-export default function ModelBanner({ children }: Prop) {
+export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBannerProps) {
   const theme = useTheme()
 
   const [reviewCommentOpen, setReviewCommentOpen] = useState(false)
@@ -23,7 +23,7 @@ export default function ModelBanner({ children }: Prop) {
     setReviewCommentOpen(false)
   }
 
-  const handleSubmit = (kind: ResponseTypeKeys, reviewComment: string) => {
+  const handleSubmit = (_kind: ResponseTypeKeys, _reviewComment: string) => {
     //TODO some response to API endpoint- BAI-858
   }
 
@@ -31,34 +31,33 @@ export default function ModelBanner({ children }: Prop) {
     <Paper
       sx={{
         color: 'white',
-        backgroundColor: theme.palette.secondary.main,
-        paddingTop: '0.25rem',
-        paddingBottom: '0.25rem',
+        backgroundColor: theme.palette.primary.main,
+        py: 1,
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
+        borderRadius: 0,
       }}
     >
-      <Container maxWidth='xl'>
-        <Typography>{children}</Typography>
-      </Container>
-      <Button
-        variant='outlined'
-        color='inherit'
-        style={{
-          color: 'white',
-          maxHeight: '20px',
-          minWidth: '60px',
-          minHeight: '20px',
-          padding: '12px',
-        }}
-        onClick={openReviewComment}
-      >
-        Review
-      </Button>
+      <Stack direction='row' spacing={2}>
+        <Typography>{label}</Typography>
+        <Button
+          variant='outlined'
+          color='inherit'
+          style={{
+            color: 'white',
+            maxHeight: '20px',
+            minWidth: '60px',
+            minHeight: '20px',
+            padding: '12px',
+          }}
+          onClick={openReviewComment}
+        >
+          Review
+        </Button>
+      </Stack>
       <ReviewWithComment
-        title=''
-        description=''
+        title='Release review'
         open={reviewCommentOpen}
         onClose={closeReviewComment}
         onSubmit={handleSubmit}
