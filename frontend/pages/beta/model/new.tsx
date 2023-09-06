@@ -15,9 +15,9 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import RichTextEditor from 'src/common/RichTextEditor'
 
 import { postModel } from '../../../actions/model'
-import RichTextEditor from '../../../src/common/RichTextEditor'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
@@ -94,19 +94,22 @@ export default function NewModel() {
               <Typography component='h2' variant='h6'>
                 Overview
               </Typography>
-              <TeamAndModelSelector
-                setTeamValue={setTeamName}
-                teamValue={teamName}
-                setModelValue={setModelName}
-                modelValue={modelName}
-              />
+              <Box sx={{ width: '100%' }}>
+                <TeamAndModelSelector
+                  setTeamValue={setTeamName}
+                  teamValue={teamName}
+                  setModelValue={setModelName}
+                  modelValue={modelName}
+                />
+              </Box>
               <Stack>
                 <FormControl>
                   <Box id='new-model-description'>
                     <RichTextEditor
                       dataValue={description}
                       onDataValueChange={(value) => setDescription(value)}
-                      dataTestKey='modelDescription'
+                      data-test='modelDescription'
+                      ariaLabel='model description'
                       label={
                         <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                           Description <span style={{ color: theme.palette.primary.main }}>*</span>
