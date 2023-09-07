@@ -34,5 +34,5 @@ export const betaModelUrl = '/beta/model/new'
 //     cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
 //     cy.get('[data-test=createModelCardOverview]')
 //   })
-//})
+// })
 
