@@ -41,10 +41,11 @@ const transporterMock = vi.hoisted(() => {
     sendMail: vi.fn(() => ({ messageId: 123 })),
   }
 })
+const nodemailerMock = vi.hoisted(() => ({
+  createTransport: vi.fn(() => transporterMock),
+}))
 vi.mock('nodemailer', async () => ({
-  default: {
-    createTransport: vi.fn(() => transporterMock),
-  },
+  default: nodemailerMock,
 }))
 
 describe('services > smtp', () => {
@@ -80,9 +81,4 @@ describe('services > smtp', () => {
     const result: Promise<void> = sendEmail('email', 'subject', 'content')
     expect(result).rejects.toThrowError(`Error Sending email notification`)
   })
-
-  /*
-  test('that the transport is only created once', async () => {
-  })
-  */
 })

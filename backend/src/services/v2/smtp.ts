@@ -7,7 +7,6 @@ import log from './log.js'
 let transporter: undefined | Transporter = undefined
 
 export async function sendEmail(to: string, subject: string, body: string, html?: string) {
-  console.log(config)
   if (!config.smtp.enabled) {
     log.info({ subject, to }, 'Not sending email due to SMTP disabled')
     return
