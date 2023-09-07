@@ -4,7 +4,7 @@ import Wrapper from '../../src/Wrapper.beta'
 
 export default function Review() {
   return (
-    <Wrapper title='Review' page='marketplace' fullWidth>
+    <Wrapper title='Review' page='beta/review' fullWidth>
       <PageWithTabs
         title='Your Reviews'
         tabs={[

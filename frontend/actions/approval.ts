@@ -12,7 +12,7 @@ export function useGetApprovalRequestsForUser(isActive = true) {
     ErrorInfo
   >(
     `/api/v2/approvals?${qs.stringify({
-      isActive,
+      active: isActive,
     })}`,
     fetcher
   )
