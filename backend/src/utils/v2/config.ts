@@ -1,6 +1,8 @@
 import bunyan from 'bunyan'
 import _config from 'config'
 
+import { deepFreeze } from './object.js'
+
 export interface Config {
   connectors: {
     user: {
@@ -37,4 +39,5 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
+deepFreeze(config)
 export default config
