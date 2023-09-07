@@ -15,9 +15,7 @@ export default function Model() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
   // TODO implement function
-  function myFunction() {
-    console.log('Button pressed')
-  }
+
   return (
     <Wrapper title='Model' page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
@@ -30,9 +28,6 @@ export default function Model() {
             { title: 'Releases', view: <Releases model={model} /> },
             { title: 'Settings', view: <Settings model={model} /> },
           ]}
-          actionButtonOnClick={myFunction}
-          actionButtonTitle='Actions'
-          displayActionButton
         />
       )}
     </Wrapper>

@@ -1,6 +1,7 @@
-import { testDeploymentSchema, testModelSchema } from '../../../test/testUtils/testModels.js'
+import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
-import { SchemaKindKeys } from '../../types/v2/enums.js'
+import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
+import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
 import { BadReq, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
 
@@ -43,6 +44,18 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
  * TODO - convert and use default schemas from V1
  */
 export async function addDefaultSchemas() {
-  await createSchema(testModelSchema, true)
   await createSchema(testDeploymentSchema, true)
+
+  await createSchema(
+    {
+      name: 'Minimal Schema v10 Beta',
+      id: 'minimal-general-v10-beta',
+      description: 'This is a test beta schema',
+      jsonSchema: modelSchemaBeta,
+      kind: SchemaKind.Model,
+      active: true,
+      hidden: false,
+    },
+    true
+  )
 }

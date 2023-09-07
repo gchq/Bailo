@@ -1,25 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "provenance": {
-      "type": "string",
-      "enum": ["IN_HOUSE", "THIRD_PARTY", "OPEN_SOURCE"],
-      "enumNames": ["In House", "Third Party", "Open Source"]
-    },
     "entity": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string",
-          "description": "Type of entity (user, group)."
-        },
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for entity."
-        }
-      }
-    },
-    "tag": {
       "type": "string"
     }
   },
@@ -77,12 +59,34 @@
           "description": "These tags will be searchable and will help others find this model.",
           "type": "array",
           "widget": "tagSelector",
-          "items": { "$ref": "#/definitions/tag" },
+          "items": {
+            "type": "string"
+          },
           "uniqueItems": true
         }
       },
       "required": ["name", "modelInASentence", "modelOverview", "modelCardVersion", "tags"],
       "additionalProperties": false
+    },
+    "anotherPage": {
+      "title": "Another Page",
+      "description": "This is a second page",
+      "type": "object",
+      "properties": {
+        "questionOne": {
+          "title": "Question one",
+          "description": "This is a question",
+          "type": "string",
+          "widget": "customTextInput"
+        },
+        "questionTwo": {
+          "title": "Question two",
+          "description": "This is another question",
+          "type": "string",
+          "widget": "customTextInput"
+        }
+      },
+      "required": ["questionOne, questionTwo"]
     },
     "contacts": {
       "title": "Contacts",
@@ -93,7 +97,9 @@
           "title": "Model Developer",
           "description": "The individual who develops or leads the technical development of the ML model and implementation of ongoing technical actions highlighted in the model card.",
           "type": "array",
-          "items": { "$ref": "#/definitions/entity" },
+          "items": {
+            "$ref": "#/definitions/entity"
+          },
           "minLength": 1,
           "widget": "entitySelector"
         },
@@ -101,7 +107,9 @@
           "title": "Model Technical Reviewer",
           "description": "An experienced data scientist, responsible for reviewing and checking technical information added to the model card by the Model Developer before approving the model for operational use.",
           "type": "array",
-          "items": { "$ref": "#/definitions/entity" },
+          "items": {
+            "$ref": "#/definitions/entity"
+          },
           "minLength": 1,
           "widget": "entitySelector"
         },
@@ -109,68 +117,16 @@
           "title": "Senior Responsible Officer",
           "description": "A senior member of staff responsible for owning the ML model, associated legal, ethical and operational risk, and ensuring that the ML Model and its use is compliant with policy.",
           "type": "array",
-          "items": { "$ref": "#/definitions/entity" },
+          "items": {
+            "$ref": "#/definitions/entity"
+          },
           "minLength": 1,
           "widget": "entitySelector"
         }
       },
       "required": ["uploader", "reviewer", "manager"],
       "additionalProperties": false
-    },
-    "buildOptions": {
-      "title": "Build Options",
-      "description": "Optional build options for a model",
-      "type": "object",
-      "properties": {
-        "uploadType": {
-          "type": "string",
-          "title": "Upload type",
-          "default": "Code and binaries",
-          "description": "Select the type of model upload that you want",
-          "enum": ["Code and binaries", "Model card only", "Prebuilt Docker image"],
-          "widget": "modelTypeSelector"
-        },
-        "seldonVersion": {
-          "title": "Seldon version",
-          "type": "string",
-          "widget": "seldonVersionSelector"
-        }
-      },
-      "dependencies": {
-        "uploadType": {
-          "oneOf": [
-            {
-              "properties": {
-                "uploadType": {
-                  "enum": ["Model card only", "Prebuilt Docker image"],
-                  "readOnly": false
-                },
-                "seldonVersion": {
-                  "readOnly": true
-                }
-              },
-              "required": ["uploadType"],
-              "additionalProperties": false
-            },
-            {
-              "properties": {
-                "uploadType": {
-                  "enum": ["Code and binaries"],
-                  "readOnly": true
-                },
-                "seldonVersion": {
-                  "description": "Select a seldon version for your build.",
-                  "readOnly": false
-                }
-              },
-              "required": ["uploadType", "seldonVersion"],
-              "additionalProperties": false
-            }
-          ]
-        }
-      },
-      "required": ["uploadType"]
     }
   },
-  "required": ["timeStamp", "highLevelDetails"]
+  "required": ["timeStamp", "highLevelDetails", "anotherPage"]
 }
