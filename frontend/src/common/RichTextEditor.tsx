@@ -15,7 +15,12 @@ export type RichTextEditorProps = {
   dataTestKey: string
 }
 
-export default function RichTextEditor({ onDataValueChange, dataValue, label, dataTestKey }: RichTextEditorProps) {
+export default function RichTextEditor({
+  onDataValueChange,
+  dataValue,
+  label = <></>,
+  dataTestKey,
+}: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
 
   const toggleToolbar = () => {

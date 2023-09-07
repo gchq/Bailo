@@ -15,10 +15,10 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import RichTextEditor from 'src/common/RichTextEditor'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
+import RichTextEditor from '../../../src/common/RichTextEditor'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
@@ -113,7 +113,8 @@ export default function NewModel() {
                       dataValue={description}
                       onDataValueChange={(value) => setDescription(value)}
                       data-test='modelDescription'
-                      dataTestKey='model description'
+                      aria-label='Model Description'
+                      dataTestKey='modelDescription'
                       label={
                         <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                           Description <span style={{ color: theme.palette.primary.main }}>*</span>
