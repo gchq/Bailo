@@ -6,7 +6,8 @@ import log from './log.js'
 
 let transporter: undefined | Transporter = undefined
 
-export async function sendEmail(to: string, subject: string, body: string, html?: string): Promise<void> {
+export async function sendEmail(to: string, subject: string, body: string, html?: string) {
+  console.log(config)
   if (!config.smtp.enabled) {
     log.info({ subject, to }, 'Not sending email due to SMTP disabled')
     return
@@ -21,7 +22,6 @@ export async function sendEmail(to: string, subject: string, body: string, html?
       tls: config.smtp.connection.tls,
     })
   }
-  console.log(transporter)
 
   try {
     const info = await transporter.sendMail({
@@ -33,7 +33,6 @@ export async function sendEmail(to: string, subject: string, body: string, html?
     })
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
-    console.log(err)
-    throw GenericError(500, 'Error Sending email notification', { to, body })
+    throw GenericError(500, 'Error Sending email notification', { to, body, internal: err })
   }
 }
