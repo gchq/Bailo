@@ -11,7 +11,7 @@ describe('Model with model card only', () => {
     cy.log('Selecting schema and inputting metadata')
     cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
     cy.fixture('schema_names.json').then((schemaNames) => {
-      cy.get(`[role=option]:contains(${schemaNames.model})`).click()
+      cy.get(`[role=option]:contains(${schemaNames.model})`).click({ force: true })
       cy.get('body').type('{esc}')
     })
 

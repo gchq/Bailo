@@ -182,7 +182,7 @@ export async function _setModelCard(
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
   await revision.save()
 
-  await ModelModel.updateOne({ modelId }, { $set: { card: newDocument } })
+  await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
 
   return revision
 }
@@ -217,7 +217,7 @@ export async function createModelCardFromSchema(
 
   const model = await getModelById(user, modelId)
 
-  if (model.card) {
+  if (model.card?.schemaId) {
     throw BadReq('This model already has a model card.', { modelId })
   }
 
