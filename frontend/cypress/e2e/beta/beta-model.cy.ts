@@ -35,4 +35,3 @@ export const betaModelUrl = '/beta/model/new'
 //     cy.get('[data-test=createModelCardOverview]')
 //   })
 // })
-
