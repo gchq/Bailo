@@ -1,8 +1,8 @@
-import { Box, Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
+import { Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
 import MaterialStep from '@mui/material/Step'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { DescriptionFieldProps } from '@rjsf/utils'
+import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
@@ -12,6 +12,7 @@ import { setStepState } from 'utils/beta/formUtils'
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import Nothing from '../../MuiForms/Nothing'
 
+// TODO - add validation BAI-866
 export default function ModelCardForm({
   splitSchema,
   setSplitSchema,
@@ -22,8 +23,6 @@ export default function ModelCardForm({
   canEdit?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
-  // TODO - add validation
-  const [_openValidateError, _setOpenValidateError] = useState(false)
 
   const theme = useTheme()
 
@@ -33,15 +32,13 @@ export default function ModelCardForm({
     return null
   }
 
-  const onFormChange = (form) => {
-    if (form.schema.title !== currentStep.schema.title) {
-      return
+  const onFormChange = (form: RJSFSchema) => {
+    if (form.schema.title === currentStep.schema.title) {
+      setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
-
-    setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
   }
 
-  function DescriptionFieldTemplate(_props: DescriptionFieldProps) {
+  function DescriptionFieldTemplate() {
     return <></>
   }
 
@@ -53,9 +50,8 @@ export default function ModelCardForm({
       divider={<Divider flexItem orientation='vertical' />}
       sx={{ width: '100%' }}
     >
-      <Box>
+      <div>
         <Stepper
-          id='form-page-stepper'
           activeStep={activeStep}
           nonLinear
           alternativeLabel
@@ -70,12 +66,14 @@ export default function ModelCardForm({
                   sx={{
                     padding: 0,
                     '& .MuiStepLabel-label': {
-                      fontSize: '16px !important',
+                      fontSize: '16px',
+                    },
+                    '& .MuiStepLabel-label.Mui-active': {
+                      color: `${theme.palette.primary.main}`,
                     },
                     '& .Mui-active': {
                       borderBottomStyle: 'solid',
-                      color: `${theme.palette.primary.main} !important`,
-                      borderColor: `${theme.palette.secondary.main} !important`,
+                      borderColor: `${theme.palette.secondary.main}`,
                     },
                   }}
                 >
@@ -85,7 +83,7 @@ export default function ModelCardForm({
             </MaterialStep>
           ))}
         </Stepper>
-      </Box>
+      </div>
 
       <Form
         schema={currentStep.schema}

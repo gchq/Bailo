@@ -18,52 +18,13 @@ export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
-  async function createModelUsingSchema(newSchema: SchemaInterface) {
-    if (currentUser && model) {
-      await postFromSchema(model.id, newSchema.id)
-      router.push(`/beta/model/${modelId}`)
-    }
-  }
-
-  function schemaButton(schema: any) {
-    return (
-      <Grid item md={4} sm={12}>
-        <Tooltip title={schema.description}>
-          <Button
-            sx={{ width: '200px', height: '60px' }}
-            variant='outlined'
-            size='large'
-            onClick={() => createModelUsingSchema(schema)}
-          >
-            <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              <Typography variant='button'>{schema.name}</Typography>
-              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
-                {schema.description}
-              </Typography>
-            </Stack>
-          </Button>
-        </Tooltip>
-      </Grid>
-    )
-  }
-
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
   return (
     <Wrapper title='Select a schema' page='upload'>
-      {(isSchemasLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
+      {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && !isSchemasError && (
         <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
           <Stack spacing={2} justifyContent='center' alignItems='center'>
@@ -81,23 +42,75 @@ export default function NewSchemaSelection() {
               Active Schemas
             </Typography>
             <Grid container spacing={2}>
-              {activeSchemas.map((activeSchema) => {
-                return schemaButton(activeSchema)
-              })}
+              {modelId &&
+                activeSchemas.map((activeSchema) => (
+                  <SchemaButton key={activeSchema.id} schema={activeSchema} modelId={modelId} />
+                ))}
               {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
             </Grid>
             <Typography color='primary' variant='h6'>
               Inactive Schemas
             </Typography>
             <Grid container spacing={2}>
-              {inactiveSchemas.map((inactiveSchema) => {
-                return schemaButton(inactiveSchema)
-              })}
+              {modelId &&
+                inactiveSchemas.map((inactiveSchema) => (
+                  <SchemaButton key={inactiveSchema.id} schema={inactiveSchema} modelId={modelId} />
+                ))}
               {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}
             </Grid>
           </Stack>
         </Card>
       )}
     </Wrapper>
+  )
+}
+
+interface SchemaButtonProps {
+  modelId: string
+  schema: any
+}
+
+function SchemaButton({ modelId, schema }: SchemaButtonProps) {
+  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  const router = useRouter()
+
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
+  async function createModelUsingSchema(newSchema: SchemaInterface) {
+    if (currentUser && model) {
+      await postFromSchema(model.id, newSchema.id)
+      router.push(`/beta/model/${modelId}`)
+    }
+  }
+
+  return (
+    <>
+      {(isModelLoading || isCurrentUserLoading) && <Loading />}
+      <Grid item md={4} sm={12}>
+        <Tooltip title={schema.description}>
+          <Button
+            sx={{ width: '200px', height: '60px' }}
+            variant='outlined'
+            size='large'
+            onClick={() => createModelUsingSchema(schema)}
+          >
+            <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Typography variant='button'>{schema.name}</Typography>
+              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
+                {schema.description}
+              </Typography>
+            </Stack>
+          </Button>
+        </Tooltip>
+      </Grid>
+    </>
   )
 }

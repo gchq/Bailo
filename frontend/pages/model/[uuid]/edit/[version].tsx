@@ -43,8 +43,6 @@ function Upload() {
   useEffect(() => {
     if (!cSchema || !cVersion || splitSchema.steps.length) return
 
-    console.log(cVersion.metadata)
-
     const schemaSteps = getStepsFromSchema(
       cSchema,
       {

@@ -13,7 +13,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
   const theme = useTheme()
   const router = useRouter()
 
-  function createFromScratchOnClick() {
+  function handleCreateFromScratchClick() {
     router.push(`/beta/model/${model.id}/schema`)
   }
 
@@ -67,8 +67,8 @@ export default function TemplatePage({ model }: TemplatePageProps) {
               <Typography component='h3' variant='h6'>
                 Create from scratch
               </Typography>
-              <Typography variant='body1'>Create a model from scratch using a predifined schema.</Typography>
-              <Button variant='contained' onClick={createFromScratchOnClick}>
+              <Typography variant='body1'>Create a model from scratch using a predefined schema.</Typography>
+              <Button variant='contained' onClick={handleCreateFromScratchClick}>
                 Create
               </Button>
             </Stack>

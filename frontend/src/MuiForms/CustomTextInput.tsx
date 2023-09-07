@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 
 interface CustomTextInputProps {
   label?: string
@@ -15,13 +15,21 @@ interface CustomTextInputProps {
 }
 
 export default function CustomTextInput(props: CustomTextInputProps) {
-  const { onChange, value: currentValue, label, formContext } = props
+  const { onChange, value, label, formContext } = props
 
   const theme = useTheme()
 
-  const _onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
+
+  const disabledWebkitTextFillColor = useMemo(() => {
+    if (value) {
+      return theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white
+    } else {
+      return theme.palette.customTextInput.main
+    }
+  }, [theme, value])
 
   return (
     <Fragment key={label}>
@@ -30,30 +38,25 @@ export default function CustomTextInput(props: CustomTextInputProps) {
         size='small'
         sx={{
           input: {
-            color: theme.palette.mode === 'light' ? 'black' : 'white',
+            color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
           },
           label: {
-            WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+            WebkitTextFillColor:
+              theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
           },
           '& .MuiInputBase-input.Mui-disabled': {
-            WebkitTextFillColor: currentValue
-              ? theme.palette.mode === 'light'
-                ? 'black'
-                : 'white'
-              : theme.palette.mode === 'light'
-              ? '#535353'
-              : '#c8c8c8',
+            WebkitTextFillColor: disabledWebkitTextFillColor,
           },
-          fontStyle: currentValue ? 'unset' : 'italic',
+          fontStyle: value ? 'unset' : 'italic',
         }}
-        onChange={_onChange}
+        onChange={handleChange}
         variant={!formContext.editMode ? 'standard' : 'outlined'}
-        required={!formContext.editMode ? false : true}
-        value={currentValue || (!formContext.editMode ? 'Unanswered' : '')}
+        required={formContext.editMode}
+        value={value || (!formContext.editMode ? 'Unanswered' : '')}
         disabled={!formContext.editMode}
         InputProps={{
           ...props.InputProps,
-          disableUnderline: !formContext.editMode ? true : false,
+          disableUnderline: !formContext.editMod,
         }}
       />
     </Fragment>

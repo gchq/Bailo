@@ -1,3 +1,4 @@
+import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 
 export interface SplitSchema {
@@ -22,7 +23,7 @@ export type StepType = 'Form' | 'Data' | 'Message'
 
 export interface Step {
   schema: any
-  uiSchema?: any
+  uiSchema?: UiSchema
 
   state: any
   index: number
@@ -43,7 +44,7 @@ export interface Step {
 
 export interface StepNoRender {
   schema: any
-  uiSchema?: any
+  uiSchema?: UiSchema
 
   state: any
   index: number

@@ -1,31 +1,36 @@
 import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 
-export default function TagSelector(props: any) {
-  const { onChange, value: currentValue, label, formContext } = props
+interface TagSelectorProps {
+  onChange: (newValue: string[]) => void
+  value: string[]
+  label: string
+  formContext?: FormContextType
+}
 
-  const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: any) => {
-    onChange(newValues.map((value) => value))
+export default function TagSelector({ onChange, value, label, formContext }: TagSelectorProps) {
+  const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
+    onChange([...newValues])
   }
 
   const theme = useTheme()
 
   return (
     <>
-      {formContext.editMode && (
+      {formContext && formContext.editMode && (
         <>
           <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
           <Autocomplete
             multiple
-            isOptionEqualToValue={(option: any, value: any) => option === value}
-            value={currentValue || ''}
-            onChange={_onChange}
+            isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
+            value={value || ''}
+            onChange={handleChange}
             options={[]}
             freeSolo
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => (
-                // eslint-disable-next-line react/jsx-key
-                <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+            renderTags={(tagValue: string[], getTagProps) =>
+              tagValue.map((option: string, index: number) => (
+                <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
               ))
             }
             renderInput={(params) => (
@@ -34,31 +39,33 @@ export default function TagSelector(props: any) {
                 size='small'
                 sx={{
                   input: {
-                    color: theme.palette.mode === 'light' ? 'black' : 'white',
+                    color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
                   },
                   label: {
-                    WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+                    WebkitTextFillColor:
+                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
                   },
                   '& .MuiInputBase-input.Mui-disabled': {
-                    WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
+                    WebkitTextFillColor:
+                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
                   },
-                  fontStyle: currentValue ? 'unset' : 'italic',
+                  fontStyle: value ? 'unset' : 'italic',
                 }}
                 variant='outlined'
-                required={!formContext.editMode ? false : true}
+                required
               />
             )}
           />
         </>
       )}
-      {!formContext.editMode && (
+      {formContext && !formContext.editMode && (
         <>
           <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
-          {currentValue.length === 0 && (
+          {value.length === 0 && (
             <Typography
               sx={{
                 fontStyle: 'italic',
-                color: theme.palette.mode === 'light' ? '#535353' : '#c8c8c8',
+                color: theme.palette.customTextInput.main,
               }}
             >
               Unanswered
@@ -66,7 +73,7 @@ export default function TagSelector(props: any) {
           )}
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {currentValue.map((tag) => (
+              {value.map((tag) => (
                 <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>

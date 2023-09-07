@@ -27,9 +27,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     if (schema) {
       const data = getStepsData(splitSchema, true)
       data.schemaRef = schema.id
-      const form = data
-      // TODO - submit form
-      const res = await putModelCard(model.id, form)
+      const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
       }
@@ -38,7 +36,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
   function onCancel() {
     if (schema) {
-      mutateModel
+      mutateModel()
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], model.card.metadata)
       for (const step of steps) {
         step.steps = steps
@@ -58,8 +56,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     }
 
     setSplitSchema({ reference: schema.id, steps })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema])
+  }, [schema, model])
 
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
@@ -70,7 +67,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   }
   return (
     <>
-      {isSchemaLoading || (isUiConfigLoading && <Loading />)}
+      {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
         {!isEdit && (
           <Box sx={{ width: '100%', textAlign: 'right' }}>

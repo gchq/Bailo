@@ -28,7 +28,6 @@ export default function Model() {
             { title: 'Releases', view: <Releases model={model} /> },
             { title: 'Settings', view: <Settings model={model} /> },
           ]}
-          displayActionButton={false}
         />
       )}
     </Wrapper>
