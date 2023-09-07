@@ -55,7 +55,7 @@ describe('services > smtp', () => {
   })
 
   test('that an email is not sent when disabled in config', async () => {
-    vi.spyOn(config, 'smtp', 'get').mockReturnValue({
+    vi.spyOn(config, 'smtp', 'get').mockReturnValueOnce({
       enabled: false,
       connection: {
         host: 'localhost',
