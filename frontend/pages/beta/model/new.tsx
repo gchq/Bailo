@@ -9,7 +9,6 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -19,6 +18,7 @@ import { useState } from 'react'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
+import RichTextEditor from '../../../src/common/RichTextEditor'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
@@ -81,7 +81,7 @@ export default function NewModel() {
 
   return (
     <Wrapper title='Create a new Model' page='upload'>
-      <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
+      <Card sx={{ p: 4, maxWidth: 520, m: 'auto' }}>
         <Typography
           component='h1'
           variant='h4'
@@ -98,27 +98,30 @@ export default function NewModel() {
               <Typography component='h2' variant='h6'>
                 Overview
               </Typography>
-              <Stack direction='row' spacing={2}>
+              <Box sx={{ width: '100%' }}>
                 <TeamAndModelSelector
                   setTeamValue={setTeamName}
                   teamValue={teamName}
                   setModelValue={setModelName}
                   modelValue={modelName}
                 />
-              </Stack>
+              </Box>
               <Stack>
                 <FormControl>
-                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
-                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography>
-                  <TextField
-                    id='new-model-description'
-                    required
-                    size='small'
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    data-test='modelDescription'
-                  />
+                  <Box id='new-model-description'>
+                    <RichTextEditor
+                      dataValue={description}
+                      onDataValueChange={(value) => setDescription(value)}
+                      data-test='modelDescription'
+                      aria-label='Model Description'
+                      dataTestKey='modelDescription'
+                      label={
+                        <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                          Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                        </Typography>
+                      }
+                    />
+                  </Box>
                 </FormControl>
               </Stack>
             </>
