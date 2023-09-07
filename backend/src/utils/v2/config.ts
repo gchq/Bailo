@@ -4,6 +4,12 @@ import _config from 'config'
 import { deepFreeze } from './object.js'
 
 export interface Config {
+  app: {
+    protocol: string,
+    host: string
+    port: number
+  }
+
   connectors: {
     user: {
       kind: 'silly' | string

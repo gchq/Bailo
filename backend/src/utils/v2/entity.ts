@@ -1,4 +1,10 @@
-export function toEntity(kind: string, value: string) {
+export const EntityKind = {
+  User: 'user',
+  Group: 'group',
+} as const
+export type EntityKindKeys = (typeof EntityKind)[keyof typeof EntityKind]
+
+export function toEntity(kind: EntityKindKeys, value: string) {
   return `${kind}:${value}`
 }
 

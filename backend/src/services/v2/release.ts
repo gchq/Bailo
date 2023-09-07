@@ -4,6 +4,7 @@ import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.j
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
+import { createApprovalRequests } from './approval.js'
 import { getModelById } from './model.js'
 
 export type CreateReleaseParams = Pick<
@@ -23,6 +24,8 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
       modelId: releaseParams.modelId,
     })
   }
+
+  await createApprovalRequests(model, release)
 
   await release.save()
 

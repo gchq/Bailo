@@ -42,14 +42,14 @@ export const postSchemaSchema = z.object({
   }),
 })
 
-interface GetSchemaResponse {
+interface PostSchemaResponse {
   schema: SchemaInterface
 }
 
 export const postSchema = [
   ensureUserRole('admin'),
   bodyParser.json(),
-  async (req: Request, res: Response<GetSchemaResponse>) => {
+  async (req: Request, res: Response<PostSchemaResponse>) => {
     const { body } = parse(req, postSchemaSchema)
 
     const schema = await createSchema(body)

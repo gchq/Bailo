@@ -10,8 +10,8 @@ export const GetModelFilters = {
 
 export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
 
-export const ApprovalKind = {
+export const ReviewKind = {
   Release: 'release',
   Access: 'access',
 } as const
-export type ApprovalKindKeys = (typeof ApprovalKind)[keyof typeof ApprovalKind]
+export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]

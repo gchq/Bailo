@@ -1,7 +1,9 @@
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import UserModel from '../../../models/v2/User.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { toEntity } from '../../../utils/v2/entity.js'
+import { EntityKind, fromEntity, toEntity } from '../../../utils/v2/entity.js'
+import { GenericError } from '../../../utils/v2/error.js'
 import { BaseAuthorisationConnector, ModelActionKeys } from './index.js'
 
 export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
@@ -20,6 +22,15 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   }
 
   async getEntities(user: UserDoc) {
-    return [toEntity('user', user.dn)]
+    return [toEntity(EntityKind.User, user.dn)]
+  }
+
+  async getUserInformation(entity: string): Promise<{ email: string }> {
+    if (fromEntity(entity).kind !== EntityKind.User) {
+      throw new Error('Cannot get user information for a non-user entity')
+    }
+    return {
+      email: `${entity}@email.com`,
+    }
   }
 }

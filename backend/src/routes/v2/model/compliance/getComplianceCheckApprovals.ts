@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ApprovalInterface } from '../../../../models/v2/Approval.js'
+import { ReviewRequestInterface } from '../../../../models/v2/ReviewRequest.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getComplianceApprovalsSchema = z.object({
@@ -14,7 +14,7 @@ export const getComplianceApprovalsSchema = z.object({
 })
 
 interface GetComplianceApprovalsResponse {
-  approvals: Array<ApprovalInterface>
+  approvals: Array<ReviewRequestInterface>
 }
 
 export const getComplianceApprovals = [

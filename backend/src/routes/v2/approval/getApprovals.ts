@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ApprovalInterface } from '../../../models/v2/Approval.js'
+import { ReviewRequestInterface } from '../../../models/v2/ReviewRequest.js'
 import { findApprovalsByActive } from '../../../services/v2/approval.js'
 import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 
@@ -13,7 +13,7 @@ export const getApprovalsSchema = z.object({
 })
 
 interface GetApprovalsResponse {
-  approvals: Array<ApprovalInterface>
+  approvals: Array<ReviewRequestInterface>
 }
 
 export const getApprovals = [
