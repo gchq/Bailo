@@ -12,7 +12,6 @@ export default function Review() {
           { title: 'Access request reviews', view: <ApprovalsList kind='access' /> },
           { title: 'Archived', view: <ApprovalsList isActive={false} /> },
         ]}
-        displayActionButton={false}
       />
     </Wrapper>
   )
