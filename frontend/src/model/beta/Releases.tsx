@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Tooltip } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
