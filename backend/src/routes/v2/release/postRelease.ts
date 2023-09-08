@@ -15,7 +15,6 @@ export const postReleaseSchema = z.object({
   body: z.object({
     modelCardVersion: z.coerce.number(),
 
-    name: z.string(),
     semver: z.string(),
     notes: z.string(),
 
