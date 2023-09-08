@@ -49,7 +49,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
-          <Button variant='outlined' onClick={() => setOpenDraftNewRelease(true)}>
+          <Button variant='outlined' onClick={() => setOpenDraftNewRelease(true)} disabled={!model.card}>
             Draft new Release
           </Button>
         </Box>

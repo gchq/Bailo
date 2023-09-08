@@ -30,7 +30,6 @@ type DraftNewReleaseDialogProps = {
 }
 
 export default function DraftNewReleaseDialog({ open, handleClose, model }: DraftNewReleaseDialogProps) {
-  const [releaseName, setReleaseName] = useState('')
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
@@ -39,13 +38,13 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setErrorMessage('')
     if (isValidSemver(semanticVersion)) {
       const release: Partial<ReleaseInterface> = {
         modelId: model.id,
-        name: releaseName,
         semver: semanticVersion,
         notes: releaseNotes,
-        modelCardVersion: 1,
+        modelCardVersion: model.card.version,
         minor: isMinorRelease,
         files: [],
         images: [],
@@ -58,8 +57,22 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
         return setErrorMessage(error)
       }
 
+      clearFormData()
       handleClose()
     }
+  }
+
+  function handleCancel() {
+    clearFormData()
+    handleClose()
+  }
+
+  function clearFormData() {
+    setSemanticVersion('')
+    setReleaseNotes('')
+    setIsMinorRelease(false)
+    setArtefacts([])
+    setErrorMessage('')
   }
 
   function handleMinorReleaseChecked() {
@@ -87,10 +100,15 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
 
             <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
               <Stack sx={{ width: '100%' }}>
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  Release name <span style={{ color: 'red' }}>*</span>
-                </Typography>
-                <TextField required size='small' value={releaseName} onChange={(e) => setReleaseName(e.target.value)} />
+                <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+                <TextField
+                  required
+                  size='small'
+                  value={`${model.name}-${semanticVersion}`}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
@@ -132,18 +150,18 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
           <Divider sx={{ margin: 'auto' }} />
         </Box>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCancel}>Cancel</Button>
           <Button
             variant='contained'
             type='submit'
-            disabled={
-              !semanticVersion || !artefacts || !releaseNotes || !releaseName || !isValidSemver(semanticVersion)
-            }
+            disabled={!semanticVersion || !artefacts || !releaseNotes || !isValidSemver(semanticVersion)}
           >
             Create Release
           </Button>
-          <MessageAlert message={errorMessage} severity='error' />
         </DialogActions>
+        <Box sx={{ px: 2 }}>
+          <MessageAlert message={errorMessage} severity='error' />
+        </Box>
       </Box>
     </Dialog>
   )
