@@ -24,11 +24,12 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   }
 
   async getUserInformation(entity: string): Promise<{ email: string }> {
-    if (fromEntity(entity).kind !== EntityKind.User) {
+    const entityObject = fromEntity(entity)
+    if (entityObject.kind !== EntityKind.User) {
       throw new Error('Cannot get user information for a non-user entity')
     }
     return {
-      email: `${entity}@email.com`,
+      email: `${entityObject.value}@example.com`,
     }
   }
 

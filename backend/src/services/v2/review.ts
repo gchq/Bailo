@@ -62,6 +62,7 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
       kind: 'release',
       entity: collaborator,
     })
+    approval.save()
 
     // Send email (async)
     sendEmail(collaborator.entity, approval, release)
