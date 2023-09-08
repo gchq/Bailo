@@ -360,7 +360,6 @@ export interface ModelInterface {
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
-  name: string
   semver: string
   notes: string
   minor?: boolean

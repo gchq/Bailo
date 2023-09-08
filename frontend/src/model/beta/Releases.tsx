@@ -13,14 +13,14 @@ export default function Releases({ model }: { model: ModelInterface }) {
   const [latestRelease, setLatestRelease] = useState<string>('')
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
-  const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
 
   const sortedReleases = useMemo(() => releases.sort(sortByReleaseVersionDescending), [releases])
 
   const modelReleaseDisplays = useMemo(
     () =>
       sortedReleases.reduce<ReactElement[]>((releaseDisplays, release) => {
-        if (release.name) {
+        if (release.semver) {
           releaseDisplays.push(
             <ModelReleaseDisplay
               key={release.semver}
@@ -57,7 +57,12 @@ export default function Releases({ model }: { model: ModelInterface }) {
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {modelReleaseDisplays}
       </Stack>
-      <DraftNewReleaseDialog open={openDraftNewRelease} handleClose={handleDraftNewReleaseClose} model={model} />
+      <DraftNewReleaseDialog
+        open={openDraftNewRelease}
+        handleClose={handleDraftNewReleaseClose}
+        model={model}
+        mutateReleases={mutateReleases}
+      />
     </Box>
   )
 }

@@ -28,9 +28,15 @@ type DraftNewReleaseDialogProps = {
   open: boolean
   handleClose: () => void
   model: ModelInterface
+  mutateReleases: () => void
 }
 
-export default function DraftNewReleaseDialog({ open, handleClose, model }: DraftNewReleaseDialogProps) {
+export default function DraftNewReleaseDialog({
+  open,
+  handleClose,
+  model,
+  mutateReleases,
+}: DraftNewReleaseDialogProps) {
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
@@ -60,6 +66,7 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
 
       clearFormData()
       handleClose()
+      mutateReleases()
     }
   }
 
@@ -110,7 +117,7 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
                 <TextField
                   required
                   size='small'
-                  value={`${model.name}-${semanticVersion}`}
+                  value={`${model.name} - ${semanticVersion}`}
                   InputProps={{
                     readOnly: true,
                   }}

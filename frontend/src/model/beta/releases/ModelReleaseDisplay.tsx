@@ -81,7 +81,7 @@ export default function ModelReleaseDisplay({
                   spacing={1}
                 >
                   <Typography component='h2' variant='h6' color='primary'>
-                    {release.name}
+                    {modelId} - {release.semver}
                   </Typography>
                   <Divider orientation='vertical' flexItem />
                   <Typography color='secondary'>{release.semver}</Typography>
