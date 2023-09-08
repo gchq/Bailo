@@ -14,17 +14,15 @@ const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.por
 let transporter: undefined | Transporter = undefined
 
 export async function sendEmail(entity: string, approval: ReviewRequestDoc, release: ReleaseDoc) {
-
   let to: string
-  if(fromEntity(entity).kind === EntityKind.User) {
+  if (fromEntity(entity).kind === EntityKind.User) {
     to = (await authorisation.getUserInformation(entity)).email
-  } else if(fromEntity(entity).kind === EntityKind.Group) {
-    (await authorisation.getGroupMembers(entity)).forEach((groupMember) => sendEmail(groupMember, approval, release))
+  } else if (fromEntity(entity).kind === EntityKind.Group) {
+    ;(await authorisation.getGroupMembers(entity)).forEach((groupMember) => sendEmail(groupMember, approval, release))
     return
   } else {
     throw GenericError(500, 'Error Sending email notification to unrecognised entity', { entity })
   }
-
 
   const subject = await getSubject(release)
   const text = await getBody(approval, release)

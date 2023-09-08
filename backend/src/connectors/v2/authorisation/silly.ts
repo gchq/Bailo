@@ -37,6 +37,5 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
       throw new Error('Cannot get user information for a non-user entity')
     }
     return [toEntity(EntityKind.User, 'user1'), toEntity(EntityKind.User, 'user2')]
-    
   }
 }

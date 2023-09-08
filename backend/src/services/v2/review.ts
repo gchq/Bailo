@@ -55,8 +55,6 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
       return
     }
 
-
-
     // Create Approval Request
     const approval = new ReviewRequest({
       model: model.id,
@@ -75,4 +73,3 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
     throw BadReq('No approval requests have been created')
   }
 }
-

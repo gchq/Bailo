@@ -48,7 +48,7 @@ vi.mock('nodemailer', async () => ({
   default: nodemailerMock,
 }))
 
-  /*
+/*
 describe('services > smtp', () => {
   test('that an email is sent', async () => {
     await sendEmail('email', 'subject', 'content')

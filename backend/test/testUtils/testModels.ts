@@ -53,11 +53,15 @@ export const testReleaseReviewRequestWithReview = {
   reviews: [
     {
       user: 'user',
-      role: 'msro',
       decision: Decision.Approve,
       comment: 'looks amazing!',
     },
   ],
+  entity: {
+    entity: 'group:group',
+    roles: ['msro'],
+  },
+
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }
@@ -67,6 +71,10 @@ export const testReleaseReviewRequest = {
   semver: '3.0.3',
   role: 'owner',
   kind: ReviewKind.Release,
+  entity: {
+    entity: 'user:user',
+    roles: ['msro'],
+  },
   reviews: [],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
