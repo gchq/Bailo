@@ -79,7 +79,6 @@ function ExampleThemeDisplay({ themeKey, setUserTheme }: TestThemeDisplayProps) 
             color: themeKey.theme.palette.mode === 'light' ? 'white' : 'black',
           }}
         />
-        <Box sx={{ backgroundColor: themeKey.theme.palette.secondary.main, width: '100%', height: '12px' }}></Box>
         <StyledCardContent>
           <Box className='button-container'>
             <Stack justifyContent='center' justifyItems='center' sx={{ height: '100%' }}>
