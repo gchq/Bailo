@@ -5,12 +5,12 @@ import { testGet } from '../../testUtils/routes.js'
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
 
-const mockApprovalService = vi.hoisted(() => {
+const mockReviewService = vi.hoisted(() => {
   return {
     countApprovals: vi.fn(() => 7),
   }
 })
-vi.mock('../../../src/services/v2/approval.js', () => mockApprovalService)
+vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
 
 describe('routes > schema > getApprovals', () => {
   test('returns approvals count', async () => {

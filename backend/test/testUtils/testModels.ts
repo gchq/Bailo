@@ -1,4 +1,5 @@
-import { SchemaKind } from '../../src/types/v2/enums.js'
+import { Decision } from '../../src/models/v2/ReviewRequest.js'
+import { ReviewKind, SchemaKind } from '../../src/types/v2/enums.js'
 
 export const testModelSchema = {
   id: 'example-model-schema-1',
@@ -44,22 +45,29 @@ export const testDeploymentSchema = {
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
 
-export const testReleaseInactiveApproval = {
+export const testReleaseReviewRequestWithReview = {
   model: 'example-model-2-nevwg4',
-  release: '3.0.2',
+  semver: '3.0.2',
   role: 'owner',
-  kind: 'release',
-  active: false,
+  kind: ReviewKind.Release,
+  reviews: [
+    {
+      user: 'user',
+      role: 'msro',
+      decision: Decision.Approve,
+      comment: 'looks amazing!',
+    },
+  ],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }
 
-export const testReleaseActiveApproval = {
+export const testReleaseReviewRequest = {
   model: 'example-model-2-nevwg4',
-  release: '3.0.2',
+  semver: '3.0.3',
   role: 'owner',
-  kind: 'release',
-  active: true,
+  kind: ReviewKind.Release,
+  reviews: [],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }

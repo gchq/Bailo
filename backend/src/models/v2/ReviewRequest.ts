@@ -1,7 +1,7 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-import { ReviewKind,ReviewKindKeys } from '../../types/v2/enums.js'
+import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -21,7 +21,8 @@ interface Review {
 // client.
 export interface ReviewRequestInterface {
   model: string
-  modelArtefact: string
+  semver?: string
+  modelId?: string
   role: string
   kind: ReviewKindKeys
 
@@ -39,8 +40,18 @@ export type ReviewRequestDoc = ReviewRequestInterface & Document<any, any, Revie
 const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
   {
     model: { type: String, required: true },
-    // Release semver or an Access Request ID
-    modelArtefact: { type: String, required: true },
+    semver: {
+      type: String,
+      required: function (this: ReviewRequestInterface): boolean {
+        return this.kind === ReviewKind.Release
+      },
+    },
+    modelId: {
+      type: String,
+      required: function (this: ReviewRequestInterface): boolean {
+        return this.kind === ReviewKind.Access
+      },
+    },
     role: { type: String, required: true },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 

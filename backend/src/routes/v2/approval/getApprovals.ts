@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ReviewRequestInterface } from '../../../models/v2/ReviewRequest.js'
-import { findApprovalsByActive } from '../../../services/v2/approval.js'
+import { findApprovalsByActive } from '../../../services/v2/review.js'
 import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 
 export const getApprovalsSchema = z.object({

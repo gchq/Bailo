@@ -50,12 +50,12 @@ exports[`routes > schema > getApprovals > returns only active approvals 1`] = `
 {
   "approvals": [
     {
-      "active": true,
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "model": "example-model-2-nevwg4",
-      "release": "3.0.2",
+      "reviews": [],
       "role": "owner",
+      "semver": "3.0.3",
       "updatedAt": "2023-08-14T00:00:00.000Z",
     },
   ],
@@ -66,12 +66,19 @@ exports[`routes > schema > getApprovals > returns only inactive approvals 1`] = 
 {
   "approvals": [
     {
-      "active": false,
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "model": "example-model-2-nevwg4",
-      "release": "3.0.2",
+      "reviews": [
+        {
+          "comment": "looks amazing!",
+          "decision": "approve",
+          "role": "msro",
+          "user": "user",
+        },
+      ],
       "role": "owner",
+      "semver": "3.0.2",
       "updatedAt": "2023-08-14T00:00:00.000Z",
     },
   ],

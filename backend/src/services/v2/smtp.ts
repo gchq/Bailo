@@ -16,7 +16,6 @@ export async function sendEmail(to: string, approval: ReviewRequestDoc, release:
   const text = await getBody(approval, release)
   const html = await getHtml(to, approval, release)
 
-
   if (!config.smtp.enabled) {
     log.info({ subject, to }, 'Not sending email due to SMTP disabled')
     return
@@ -46,7 +45,6 @@ export async function sendEmail(to: string, approval: ReviewRequestDoc, release:
   }
 }
 
-
 async function getSubject(release: ReleaseDoc) {
   return dedent(`
     You have been requested to review '${release.name}' on Bailo
@@ -54,7 +52,6 @@ async function getSubject(release: ReleaseDoc) {
 }
 
 async function getBody(approval: ReviewRequestDoc, release: ReleaseDoc) {
-  
   // V2 change- we don't store the author of a release
   // TODO - Replace with URL to specific model release
   return dedent(`
@@ -86,18 +83,22 @@ export async function getHtml(email: string, approval: ReviewRequestDoc, release
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Approval Category</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${approval.kind}</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
+          approval.kind
+        }</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          email
-        }</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${email}</mj-text>
       </mj-column>
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
-        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${appBaseUrl}/model/${release.modelId}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${approval.kind}</mj-button>
+        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${appBaseUrl}/model/${
+      release.modelId
+    }" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${
+      approval.kind
+    }</mj-button>
       </mj-column>
       <mj-column width="50%">
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${appBaseUrl}/review" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="12px">See Reviews</mj-button>

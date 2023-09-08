@@ -2,6 +2,10 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import {
+  testReleaseReviewRequest,
+  testReleaseReviewRequestWithReview,
+} from '../../../../../test/testUtils/testModels.js'
 import { ReviewRequestInterface } from '../../../../models/v2/ReviewRequest.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -23,26 +27,7 @@ export const getComplianceApprovals = [
     const _ = parse(req, getComplianceApprovalsSchema)
 
     return res.json({
-      approvals: [
-        {
-          model: 'yolo',
-          release: '3.0.2',
-          role: 'owner',
-          kind: 'access',
-          active: true,
-          createdAt: new Date('08/13/2023'),
-          updatedAt: new Date('08/14/2023'),
-        },
-        {
-          model: 'yolo',
-          release: '3.0.1',
-          role: 'owner',
-          kind: 'access',
-          active: true,
-          createdAt: new Date('08/12/2023'),
-          updatedAt: new Date('08/12/2023'),
-        },
-      ],
+      approvals: [testReleaseReviewRequestWithReview, testReleaseReviewRequest],
     })
   },
 ]

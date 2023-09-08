@@ -5,7 +5,7 @@ import { deepFreeze } from './object.js'
 
 export interface Config {
   app: {
-    protocol: string,
+    protocol: string
     host: string
     port: number
   }

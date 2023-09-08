@@ -1,4 +1,3 @@
-import { testReleaseInactiveApproval } from '../../../test/testUtils/testModels.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
@@ -48,7 +47,7 @@ export async function countApprovals(user: UserDoc): Promise<number> {
   return (await findApprovalsByActive(user, true)).length
 }
 
-export async function createApprovalRequests(model: ModelDoc, release: ReleaseDoc) {
+export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc) {
   const msros = model.collaborators.filter((collaborator) => {
     collaborator.roles.includes('msro')
   })
@@ -65,29 +64,17 @@ export async function createApprovalRequests(model: ModelDoc, release: ReleaseDo
       model: model.id,
       modelArtefact: release.semver,
       kind: 'release',
-      role: "msro",
+      role: 'msro',
     })
 
     // Send email (async)
-    sendEmail(
-      (await authorisation.getUserInformation(collaborator.entity)).email,
-      approval,
-      release 
-    )
+    sendEmail((await authorisation.getUserInformation(collaborator.entity)).email, approval, release)
     requestCreated = true
   })
 
   // I think we care?
-  if(!requestCreated) {
+  if (!requestCreated) {
     throw BadReq('No approval requests have been created')
   }
 }
 
-/**
- * Added for testing- remove?
- */
-export async function addDefaultApprovals() {
-  const approvalDoc = new ReviewRequest(testReleaseInactiveApproval)
-
-  await approvalDoc.save()
-}

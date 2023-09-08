@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
-import { countApprovals } from '../../../services/v2/approval.js'
+import { countApprovals } from '../../../services/v2/review.js'
 
 interface GetApprovalsCountResponse {
   count: number
