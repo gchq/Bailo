@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
+import HelpPopover from 'src/common/HelpPopover'
 
 import { postRelease } from '../../../../actions/release'
 import { ReleaseInterface } from '../../../../types/types'
@@ -100,7 +101,12 @@ export default function DraftNewReleaseDialog({ open, handleClose, model }: Draf
 
             <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
               <Stack sx={{ width: '100%' }}>
-                <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+                <Stack direction='row'>
+                  <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+                  <HelpPopover>
+                    The release name is automatically generated using the model name and release semantic version
+                  </HelpPopover>
+                </Stack>
                 <TextField
                   required
                   size='small'
