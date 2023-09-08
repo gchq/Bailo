@@ -161,7 +161,7 @@ export default function TopNavigation({
                       inputProps={{ 'aria-label': 'controlled' }}
                     />
                   </MenuItem>
-                  <Link href='/settings' color='inherit' underline='none'>
+                  <Link href='/beta/settings' color='inherit' underline='none'>
                     <MenuItem data-test='settingsLink'>
                       <ListItemIcon>
                         <Settings fontSize='small' />

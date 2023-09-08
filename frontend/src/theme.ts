@@ -114,6 +114,57 @@ export const betaLightTheme = createTheme({
   },
 })
 
+export const sunsetTheme = createTheme({
+  components: {
+    ...removeElevation,
+  },
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#e37350',
+    },
+    secondary: {
+      main: '#ff7800',
+    },
+    error: {
+      main: red.A400,
+    },
+    container: {
+      main: '#f3f1f1',
+    },
+    customTextInput: {
+      main: '#535353',
+    },
+  },
+})
+
+export const earthTheme = createTheme({
+  components: {
+    ...removeElevation,
+  },
+  palette: {
+    mode: 'light',
+    background: {
+      default: 'red',
+    },
+    primary: {
+      main: '#55774e',
+    },
+    secondary: {
+      main: '#94d087',
+    },
+    error: {
+      main: red.A400,
+    },
+    container: {
+      main: '#f3f1f1',
+    },
+    customTextInput: {
+      main: '#535353',
+    },
+  },
+})
+
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
