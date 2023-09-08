@@ -2,16 +2,30 @@ import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 import nodemailer, { Transporter } from 'nodemailer'
 
-import { ReviewRequestDoc } from '../../models/v2/ReviewRequest.js'
+import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
+import { ReviewRequestDoc } from '../../models/v2/ReviewRequest.js'
 import config from '../../utils/v2/config.js'
+import { EntityKind, fromEntity } from '../../utils/v2/entity.js'
 import { GenericError } from '../../utils/v2/error.js'
 import log from './log.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
-export async function sendEmail(to: string, approval: ReviewRequestDoc, release: ReleaseDoc) {
+export async function sendEmail(entity: string, approval: ReviewRequestDoc, release: ReleaseDoc) {
+
+  let to: string
+  if(fromEntity(entity).kind === EntityKind.User) {
+    to = (await authorisation.getUserInformation(entity)).email
+  } else if(fromEntity(entity).kind === EntityKind.Group) {
+    (await authorisation.getGroupMembers(entity)).forEach((groupMember) => sendEmail(groupMember, approval, release))
+    return
+  } else {
+    throw GenericError(500, 'Error Sending email notification to unrecognised entity', { entity })
+  }
+
+
   const subject = await getSubject(release)
   const text = await getBody(approval, release)
   const html = await getHtml(to, approval, release)

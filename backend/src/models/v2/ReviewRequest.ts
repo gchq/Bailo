@@ -2,6 +2,7 @@ import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
+import { CollaboratorEntry } from './Model.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -23,8 +24,9 @@ export interface ReviewRequestInterface {
   model: string
   semver?: string
   modelId?: string
-  role: string
   kind: ReviewKindKeys
+
+  entity: CollaboratorEntry
 
   reviews: Array<Review>
 
@@ -52,8 +54,14 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
         return this.kind === ReviewKind.Access
       },
     },
-    role: { type: String, required: true },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
+
+    entity: 
+          {
+        entity: { type: String, required: true },
+        roles: [{ type: String }],
+     
+    },
 
     reviews: [
       {

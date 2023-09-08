@@ -26,9 +26,8 @@ export abstract class BaseAuthorisationConnector {
     action: ReleaseActionKeys
   ): Promise<boolean>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
-  abstract getUserInformation(userEntity: string): Promise<{
-    email: string
-  }>
+  abstract getUserInformation(userEntity: string): Promise<{email: string}>
+  abstract getGroupMembers(groupEntity: string): Promise<Array<string>>
 }
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined

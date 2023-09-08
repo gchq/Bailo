@@ -48,27 +48,25 @@ export async function countApprovals(user: UserDoc): Promise<number> {
 }
 
 export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc) {
-  const msros = model.collaborators.filter((collaborator) => {
-    collaborator.roles.includes('msro')
-  })
-
   let requestCreated = false
-  msros.forEach(async (collaborator) => {
+
+  model.collaborators.forEach(async (collaborator) => {
     if (!collaborator.roles.includes('msro')) {
       return
     }
 
+
+
     // Create Approval Request
-    // Duplicate approvals? In group as well as being a named user?
     const approval = new ReviewRequest({
       model: model.id,
-      modelArtefact: release.semver,
+      semver: release.semver,
       kind: 'release',
-      role: 'msro',
+      entity: collaborator,
     })
 
     // Send email (async)
-    sendEmail((await authorisation.getUserInformation(collaborator.entity)).email, approval, release)
+    sendEmail(collaborator.entity, approval, release)
     requestCreated = true
   })
 
