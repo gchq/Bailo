@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { FileCategory, FileInterface } from '../../../../models/v2/File.js'
+import { FileInterface } from '../../../../models/v2/File.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getFilesSchema = z.object({
@@ -28,7 +28,6 @@ export const getFiles = [
           modelId: 'example-model',
 
           name: 'example-file',
-          category: FileCategory.Other,
           size: 1024,
 
           bucket: 'uploads',

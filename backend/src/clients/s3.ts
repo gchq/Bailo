@@ -18,9 +18,16 @@ export async function putObjectStream(bucket: string, key: string, body: Readabl
     leavePartsOnError: false,
   })
 
+  let fileSize = 0
   upload.on('httpUploadProgress', (progress) => {
-    console.log(progress)
+    if (progress.loaded) {
+      fileSize = progress.loaded
+    }
   })
 
   await upload.done()
+
+  return {
+    fileSize,
+  }
 }
