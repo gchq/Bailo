@@ -41,12 +41,13 @@ describe('services > file', () => {
     const name = 'testFile'
     const mime = 'text/plain'
     const stream = new Readable()
+    fileModelMocks.save.mockResolvedValueOnce({ example: true })
 
     const result = await uploadModelFile(user, modelId, name, mime, stream)
 
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
-    expect(result).toMatchSnapshot()
+    expect(result.save).toBe(fileModelMocks.save)
   })
 
   test('uploadModelFile > no permission', async () => {
