@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 
 import config from '../utils/v2/config.js'
