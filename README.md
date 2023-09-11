@@ -79,7 +79,7 @@ sharing.
 
 ### Requirements:
 
-- Node v20
+- Node v18
 - Docker / Docker Compose
 
 <br />
