@@ -4,9 +4,11 @@ import { createTheme } from '@mui/material/styles'
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
     container: PaletteColor
+    customTextInput: PaletteColor
   }
   interface PaletteOptions {
-    container?: PaletteColorOptions
+    container: PaletteColorOptions
+    customTextInput: PaletteColorOptions
   }
 }
 
@@ -45,6 +47,9 @@ export const lightTheme = createTheme({
     },
     container: {
       main: '#f3f1f1',
+    },
+    customTextInput: {
+      main: '#535353',
     },
   },
 })
@@ -103,6 +108,9 @@ export const betaLightTheme = createTheme({
     container: {
       main: '#f3f1f1',
     },
+    customTextInput: {
+      main: '#535353',
+    },
   },
 })
 
@@ -139,6 +147,9 @@ export const darkTheme = createTheme({
     },
     container: {
       main: '#5a5a5a',
+    },
+    customTextInput: {
+      main: '#c8c8c8',
     },
   },
   components: {

@@ -1,9 +1,16 @@
+import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 
 export interface SplitSchema {
   reference: string
 
   steps: Array<Step>
+}
+
+export interface SplitSchemaNoRender {
+  reference: string
+
+  steps: Array<StepNoRender>
 }
 
 export interface RenderInterface {
@@ -16,7 +23,7 @@ export type StepType = 'Form' | 'Data' | 'Message'
 
 export interface Step {
   schema: any
-  uiSchema?: any
+  uiSchema?: UiSchema
 
   state: any
   index: number
@@ -28,11 +35,28 @@ export interface Step {
   schemaRef: string
 
   render: (RenderInterface) => JSX.Element | null
-  renderBasic?: (RenderInterface) => JSX.Element | null
+  renderBasic: (RenderInterface) => JSX.Element | null
   renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
   isComplete: (step: Step) => boolean
+}
+
+export interface StepNoRender {
+  schema: any
+  uiSchema?: UiSchema
+
+  state: any
+  index: number
+
+  steps?: Array<StepNoRender>
+
+  type: StepType
+  section: string
+  schemaRef: string
+
+  shouldValidate: boolean
+  isComplete: (step: StepNoRender) => boolean
 }
 
 export interface TeamInterface {

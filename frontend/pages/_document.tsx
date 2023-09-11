@@ -3,7 +3,7 @@ import Document, { Head, Html, Main, NextScript } from 'next/document'
 import * as React from 'react'
 
 import createEmotionCache from '../components/createEmotionCache'
-import { lightTheme } from '../styles/theme'
+import { lightTheme } from '../src/theme'
 
 export default class MyDocument extends Document {
   render() {

@@ -8,6 +8,7 @@ export const ModelAction = {
   Create: 'create',
   View: 'view',
   UploadFile: 'upload_file',
+  Write: 'write',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 

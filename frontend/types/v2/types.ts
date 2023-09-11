@@ -12,8 +12,17 @@ export interface ModelInterface {
   id: string
   name: string
   description: string
+  card: ModelCardInterface
   visibility: ModelVisibilityKeys
   collaborators: CollaboratorEntry[]
+}
+
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: unknown
 }
 
 export interface CollaboratorEntry {
@@ -21,7 +30,12 @@ export interface CollaboratorEntry {
   roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
 }
 
-export type ModelForm = Omit<ModelInterface, 'id' | 'collaborators'>
+export type ModelForm = {
+  name: string
+  team: string
+  description: string
+  visibility: ModelVisibilityKeys
+}
 
 export interface Role {
   id: string

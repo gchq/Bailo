@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { searchModels } from '../../../services/v2/modelCard.js'
+import { searchModels } from '../../../services/v2/model.js'
 import { GetModelFilters } from '../../../types/v2/enums.js'
 import { coerceArray, parse } from '../../../utils/v2/validate.js'
 
@@ -35,11 +35,11 @@ export const getModelsSearch = [
       query: { libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)
 
-    const cards = await searchModels(req.user, libraries, filters, search, task)
-    const models = cards.map((card) => ({
-      id: card.model.id,
-      name: card.model.name,
-      description: card.model.description,
+    const foundModels = await searchModels(req.user, libraries, filters, search, task)
+    const models = foundModels.map((model) => ({
+      id: model.id,
+      name: model.name,
+      description: model.description,
       tags: ['example_tag', 'model'], // TODO: Add model card tags
     }))
 

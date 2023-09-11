@@ -19,11 +19,11 @@ describe('routes > release > postRelease', () => {
     expect(res.body).matchSnapshot()
   })
 
-  test('400 > no name', async () => {
+  test('400 > no semver', async () => {
     const fixture = createFixture(postReleaseSchema) as any
 
-    // This release does not include a name.
-    delete fixture.body.name
+    // This release does not include a semver.
+    delete fixture.body.semver
 
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/releases`, fixture)
 
