@@ -234,4 +234,21 @@ module.exports = {
   log: {
     level: 'trace',
   },
+
+  s3: {
+    credentials: {
+      accessKeyId: 'minioadmin',
+      secretAccessKey: 'minioadmin',
+    },
+
+    endpoint: 'http://minio:9000',
+    region: 'ignored',
+    forcePathStyle: true,
+
+    // Names of buckets that Bailo uses
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
+  },
 }
