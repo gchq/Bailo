@@ -2,9 +2,9 @@ import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-import { ApprovalStates, ReleaseInterface } from '../../types/types'
-import Link from '../Link'
-import ModelReleaseReviewBanner from './beta/ModelReleaseReviewBanner'
+import { ApprovalStates, ReleaseInterface } from '../../../../types/types'
+import Link from '../../../Link'
+import ModelReleaseReviewBanner from './ModelReleaseReviewBanner'
 
 export default function ModelReleaseDisplay({
   modelId,
@@ -81,7 +81,7 @@ export default function ModelReleaseDisplay({
                   spacing={1}
                 >
                   <Typography component='h2' variant='h6' color='primary'>
-                    {release.name}
+                    {modelId} - {release.semver}
                   </Typography>
                   <Divider orientation='vertical' flexItem />
                   <Typography color='secondary'>{release.semver}</Typography>
@@ -99,7 +99,7 @@ export default function ModelReleaseDisplay({
                 <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
                   {formatDate(release.updatedAt)}
                 </Typography>
-                <Typography variant='caption'>Joe Blogs</Typography>
+                <Typography variant='caption'>{release.createdBy}</Typography>
               </Stack>
               <Typography variant='body1'>{release.notes}</Typography>
               <Divider />

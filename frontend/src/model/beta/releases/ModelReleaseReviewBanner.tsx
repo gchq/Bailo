@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 
-import ReviewWithComment, { ResponseTypeKeys } from '../../common/ReviewWithComment'
+import ReviewWithComment, { ResponseTypeKeys } from '../../../common/ReviewWithComment'
 
 type ModelReleaseReviewBannerProps = {
   label: string

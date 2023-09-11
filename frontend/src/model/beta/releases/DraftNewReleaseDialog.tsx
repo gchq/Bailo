@@ -15,21 +15,28 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
-import { getErrorMessage } from 'utils/fetcher'
+import HelpPopover from 'src/common/HelpPopover'
 
-import { postRelease } from '../../actions/release'
-import { ReleaseInterface } from '../../types/types'
-import MultiFileInput from '../common/MultiFileInput'
-import MessageAlert from '../MessageAlert'
+import { postRelease } from '../../../../actions/release'
+import { ReleaseInterface } from '../../../../types/types'
+import { ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
+import MultiFileInput from '../../../common/MultiFileInput'
+import MessageAlert from '../../../MessageAlert'
 
 type DraftNewReleaseDialogProps = {
   open: boolean
   handleClose: () => void
-  modelId: string
+  model: ModelInterface
+  mutateReleases: () => void
 }
 
-export default function DraftNewReleaseDialog({ open, handleClose, modelId }: DraftNewReleaseDialogProps) {
-  const [releaseName, setReleaseName] = useState('')
+export default function DraftNewReleaseDialog({
+  open,
+  handleClose,
+  model,
+  mutateReleases,
+}: DraftNewReleaseDialogProps) {
   const [semanticVersion, setSemanticVersion] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
@@ -38,26 +45,41 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setErrorMessage('')
     if (isValidSemver(semanticVersion)) {
       const release: Partial<ReleaseInterface> = {
-        name: releaseName,
+        modelId: model.id,
         semver: semanticVersion,
         notes: releaseNotes,
-        modelCardVersion: 1,
         minor: isMinorRelease,
         files: [],
         images: [],
       }
 
-      const response = await postRelease(release, modelId)
+      const response = await postRelease(release, model.id)
 
       if (!response.ok) {
         const error = await getErrorMessage(response)
         return setErrorMessage(error)
       }
 
+      clearFormData()
       handleClose()
+      mutateReleases()
     }
+  }
+
+  function handleCancel() {
+    clearFormData()
+    handleClose()
+  }
+
+  function clearFormData() {
+    setSemanticVersion('')
+    setReleaseNotes('')
+    setIsMinorRelease(false)
+    setArtefacts([])
+    setErrorMessage('')
   }
 
   function handleMinorReleaseChecked() {
@@ -85,10 +107,20 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
 
             <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
               <Stack sx={{ width: '100%' }}>
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  Release name <span style={{ color: 'red' }}>*</span>
-                </Typography>
-                <TextField required size='small' value={releaseName} onChange={(e) => setReleaseName(e.target.value)} />
+                <Stack direction='row'>
+                  <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+                  <HelpPopover>
+                    The release name is automatically generated using the model name and release semantic version
+                  </HelpPopover>
+                </Stack>
+                <TextField
+                  required
+                  size='small'
+                  value={`${model.name} - ${semanticVersion}`}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
@@ -130,18 +162,18 @@ export default function DraftNewReleaseDialog({ open, handleClose, modelId }: Dr
           <Divider sx={{ margin: 'auto' }} />
         </Box>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCancel}>Cancel</Button>
           <Button
             variant='contained'
             type='submit'
-            disabled={
-              !semanticVersion || !artefacts || !releaseNotes || !releaseName || !isValidSemver(semanticVersion)
-            }
+            disabled={!semanticVersion || !artefacts || !releaseNotes || !isValidSemver(semanticVersion)}
           >
             Create Release
           </Button>
-          <MessageAlert message={errorMessage} severity='error' />
         </DialogActions>
+        <Box sx={{ px: 2 }}>
+          <MessageAlert message={errorMessage} severity='error' />
+        </Box>
       </Box>
     </Dialog>
   )
