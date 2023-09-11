@@ -99,7 +99,7 @@ export default function ModelReleaseDisplay({
                 <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
                   {formatDate(release.updatedAt)}
                 </Typography>
-                <Typography variant='caption'>Joe Blogs</Typography>
+                <Typography variant='caption'>{release.createdBy}</Typography>
               </Stack>
               <Typography variant='body1'>{release.notes}</Typography>
               <Divider />

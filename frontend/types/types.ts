@@ -367,6 +367,7 @@ export type ReleaseInterface = {
   files: Array<string>
   images: Array<string>
   deleted: boolean
+  createdBy: string
   createdAt: string
   updatedAt: string
 }
