@@ -29,6 +29,7 @@ export const getFiles = [
 
           name: 'example-file',
           size: 1024,
+          mime: 'application/octet-stream',
 
           bucket: 'uploads',
           path: '/example/upload/path',
