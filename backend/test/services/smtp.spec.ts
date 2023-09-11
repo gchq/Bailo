@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { sendEmail } from '../../src/services/v2/smtp.js'
+import { sendEmail } from '../../src/services/v2/smtp/smtp.js'
 import config from '../../src/utils/v2/config.js'
 
 vi.mock('../../src/utils/v2/config.js', () => {

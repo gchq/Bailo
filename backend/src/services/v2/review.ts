@@ -4,7 +4,7 @@ import { ReleaseDoc } from '../../models/v2/Release.js'
 import ReviewRequest, { ReviewRequestInterface } from '../../models/v2/ReviewRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
-import { sendEmail } from './smtp.js'
+import { sendEmail } from './smtp/smtp.js'
 
 export async function findApprovalsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
   const approvals = await ReviewRequest.aggregate()
