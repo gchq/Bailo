@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { ModelInterface } from '../../../types/v2/types'
-import { sortByReleaseVersionDescending } from '../../../utils/arrayUtils'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
 import DraftNewReleaseDialog from './releases/DraftNewReleaseDialog'
@@ -15,21 +14,19 @@ export default function Releases({ model }: { model: ModelInterface }) {
 
   const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
 
-  const sortedReleases = useMemo(() => releases.sort(sortByReleaseVersionDescending), [releases])
-
   const modelReleaseDisplays = useMemo(
     () =>
-      sortedReleases.map((release) => (
+      releases.map((release) => (
         <ModelReleaseDisplay key={release.semver} modelId={model.id} release={release} latestRelease={latestRelease} />
       )),
-    [latestRelease, model.id, sortedReleases]
+    [latestRelease, model.id, releases]
   )
 
   useEffect(() => {
-    if (model && releases && sortedReleases.length > 0) {
-      setLatestRelease(sortedReleases[0].semver)
+    if (model && releases.length > 0) {
+      setLatestRelease(releases[0].semver)
     }
-  }, [model, releases, sortedReleases])
+  }, [model, releases])
 
   function handleDraftNewReleaseClose() {
     setOpenDraftNewRelease(false)
