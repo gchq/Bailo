@@ -1,5 +1,5 @@
 import { Box, Button, Stack } from '@mui/material'
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { ModelInterface } from '../../../types/v2/types'
@@ -19,19 +19,9 @@ export default function Releases({ model }: { model: ModelInterface }) {
 
   const modelReleaseDisplays = useMemo(
     () =>
-      sortedReleases.reduce<ReactElement[]>((releaseDisplays, release) => {
-        if (release.semver) {
-          releaseDisplays.push(
-            <ModelReleaseDisplay
-              key={release.semver}
-              modelId={model.id}
-              release={release}
-              latestRelease={latestRelease}
-            />
-          )
-        }
-        return releaseDisplays
-      }, []),
+      sortedReleases.map((release) => (
+        <ModelReleaseDisplay key={release.semver} modelId={model.id} release={release} latestRelease={latestRelease} />
+      )),
     [latestRelease, model.id, sortedReleases]
   )
 

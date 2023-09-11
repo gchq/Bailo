@@ -51,7 +51,6 @@ export default function DraftNewReleaseDialog({
         modelId: model.id,
         semver: semanticVersion,
         notes: releaseNotes,
-        modelCardVersion: model.card.version,
         minor: isMinorRelease,
         files: [],
         images: [],
