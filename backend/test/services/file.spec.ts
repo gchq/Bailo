@@ -40,7 +40,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
     const name = 'testFile'
     const mime = 'text/plain'
-    const stream = new Readable()
+    const stream = new Readable() as any
     fileModelMocks.save.mockResolvedValueOnce({ example: true })
 
     const result = await uploadModelFile(user, modelId, name, mime, stream)
@@ -54,7 +54,7 @@ describe('services > file', () => {
     authorisationMocks.userModelAction.mockResolvedValueOnce(false)
 
     expect(() => uploadModelFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
-      /^You do not have permission to upload a file to this model./
+      /^You do not have permission to upload a file to this model./,
     )
   })
 })
