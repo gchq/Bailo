@@ -9,6 +9,7 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -18,7 +19,6 @@ import { useState } from 'react'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
-import RichTextEditor from '../../../src/common/RichTextEditor'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
@@ -109,20 +109,15 @@ export default function NewModel() {
               </Box>
               <Stack>
                 <FormControl>
-                  <Box id='new-model-description'>
-                    <RichTextEditor
-                      dataValue={description}
-                      onDataValueChange={(value) => setDescription(value)}
-                      data-test='modelDescription'
-                      aria-label='Model Description'
-                      dataTestKey='modelDescription'
-                      label={
-                        <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
-                          Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                        </Typography>
-                      }
-                    />
-                  </Box>
+                  <Typography sx={{ fontWeight: 'bold' }}>
+                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                  </Typography>
+                  <TextField
+                    data-test='modelDescription'
+                    onChange={(event) => setDescription(event.target.value)}
+                    value={description}
+                    size='small'
+                  />
                 </FormControl>
               </Stack>
             </>
