@@ -4,8 +4,8 @@ import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 
 export interface IEmailTemplate {
   getSubject(resourceName: string): string
-  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, email: string): string
-  getBody(releaseName: string, reviewKind: ReviewKindKeys, baseUrl: string, modelId)
+  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string): string
+  getBody(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string): string
 }
 
 export abstract class BaseEmailTemplate {

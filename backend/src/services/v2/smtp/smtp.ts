@@ -1,4 +1,3 @@
-import mjml2html from 'mjml'
 import nodemailer, { Transporter } from 'nodemailer'
 
 import authorisation from '../../../connectors/v2/authorisation/index.js'
@@ -27,8 +26,8 @@ export async function sendEmail(entity: string, reviewRequest: ReviewRequestDoc,
 
   const email = new ReleaseReviewRequest()
   const subject = email.getSubject(release.name)
-  const text = email.getBody(release.name, reviewRequest.kind, appBaseUrl, release.modelId)
-  const html = email.getHtml(release.name, reviewRequest.kind, release.modelId, appBaseUrl, to)
+  const text = email.getBody(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
+  const html = email.getHtml(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
 
   if (!config.smtp.enabled) {
     log.info({ subject, to }, 'Not sending email due to SMTP disabled')

@@ -71,6 +71,6 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
 
   // I think we care?
   if (!requestCreated) {
-    throw BadReq('No approval requests have been created')
+    throw BadReq('No Review Requests have been created')
   }
 }

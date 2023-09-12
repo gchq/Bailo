@@ -11,26 +11,26 @@ export class ReleaseReviewRequest extends BaseEmailTemplate implements IEmailTem
   `)
   }
 
-  getBody(releaseName: string, reviewKind: ReviewKindKeys, baseUrl: string, modelId: string) {
+  getBody(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
     // V2 change- we don't store the author of a release
     // TODO - Replace with URL to specific model release
     return dedent(`
     You have been requested to review '${releaseName}' on Bailo.
 
-    Approval Category: '${reviewKind}'
-    Author: 'unknown'
+    Review Category: '${reviewKind}'
+    Author: '${author}'
 
     Open ${reviewKind}: ${baseUrl}/model/${modelId}
     See Reviews: ${baseUrl}/review
   `)
   }
 
-  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, email: string): string {
+  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
     return mjml2html(
       super.wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${reviewKind}.toLowerCase()}.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${reviewKind.toLowerCase()}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -44,8 +44,8 @@ export class ReleaseReviewRequest extends BaseEmailTemplate implements IEmailTem
         <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${reviewKind}</mj-text>
       </mj-column>
       <mj-column>
-        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Uploader</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${email}</mj-text>
+        <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Author</strong></mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${author}</mj-text>
       </mj-column>
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
