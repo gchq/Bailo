@@ -50,6 +50,7 @@ export default function DraftNewReleaseDialog({
       const release: Partial<ReleaseInterface> = {
         modelId: model.id,
         semver: semanticVersion,
+        modelCardVersion: model.card.version,
         notes: releaseNotes,
         minor: isMinorRelease,
         files: [],
