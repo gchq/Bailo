@@ -8,7 +8,7 @@ vi.mock('../../../src/utils/user.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    findApprovalsByActive: vi.fn(() => [testReleaseReviewRequestWithReview]),
+    findReviewRequestsByActive: vi.fn(() => [testReleaseReviewRequestWithReview]),
   }
 })
 vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
@@ -22,7 +22,7 @@ describe('routes > reviewRequest > getReviewRequests', () => {
   })
 
   test('returns only active review requests', async () => {
-    mockReviewService.findApprovalsByActive.mockReturnValueOnce([testReleaseReviewRequest])
+    mockReviewService.findReviewRequestsByActive.mockReturnValueOnce([testReleaseReviewRequest])
     const res = await testGet(`/api/v2/reviewRequests?active=true`)
 
     expect(res.statusCode).toBe(200)
@@ -32,7 +32,7 @@ describe('routes > reviewRequest > getReviewRequests', () => {
   test('rejects missing active parameter', async () => {
     const res = await testGet(`/api/v2/reviewRequests`)
 
-    expect(mockReviewService.findApprovalsByActive).not.toBeCalled()
+    expect(mockReviewService.findReviewRequestsByActive).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })
@@ -40,7 +40,7 @@ describe('routes > reviewRequest > getReviewRequests', () => {
   test('rejects missing value for active parameter', async () => {
     const res = await testGet(`/api/v2/reviewRequests?active`)
 
-    expect(mockReviewService.findApprovalsByActive).not.toBeCalled()
+    expect(mockReviewService.findReviewRequestsByActive).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })

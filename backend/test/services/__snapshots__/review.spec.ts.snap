@@ -1,0 +1,139 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > review > countReviewRequests > successful 1`] = `
+[
+  {
+    "active": true,
+  },
+]
+`;
+
+exports[`services > review > countReviewRequests > successful 2`] = `
+[
+  {
+    "$expr": {
+      "$gt": [
+        {
+          "$size": {
+            "$filter": {
+              "as": "item",
+              "cond": {
+                "$and": [
+                  {
+                    "$in": [
+                      "$$item.entity",
+                      [
+                        "user:test",
+                      ],
+                    ],
+                  },
+                  {
+                    "$in": [
+                      "$role",
+                      "$$item.roles",
+                    ],
+                  },
+                ],
+              },
+              "input": "$model.collaborators",
+            },
+          },
+        },
+        0,
+      ],
+    },
+  },
+]
+`;
+
+exports[`services > review > findApprovalsByActive > active 1`] = `
+[
+  {
+    "active": true,
+  },
+]
+`;
+
+exports[`services > review > findApprovalsByActive > active 2`] = `
+[
+  {
+    "$expr": {
+      "$gt": [
+        {
+          "$size": {
+            "$filter": {
+              "as": "item",
+              "cond": {
+                "$and": [
+                  {
+                    "$in": [
+                      "$$item.entity",
+                      [
+                        "user:test",
+                      ],
+                    ],
+                  },
+                  {
+                    "$in": [
+                      "$role",
+                      "$$item.roles",
+                    ],
+                  },
+                ],
+              },
+              "input": "$model.collaborators",
+            },
+          },
+        },
+        0,
+      ],
+    },
+  },
+]
+`;
+
+exports[`services > review > findReviewRequestsByActive > not active 1`] = `
+[
+  {
+    "active": false,
+  },
+]
+`;
+
+exports[`services > review > findReviewRequestsByActive > not active 2`] = `
+[
+  {
+    "$expr": {
+      "$gt": [
+        {
+          "$size": {
+            "$filter": {
+              "as": "item",
+              "cond": {
+                "$and": [
+                  {
+                    "$in": [
+                      "$$item.entity",
+                      [
+                        "user:test",
+                      ],
+                    ],
+                  },
+                  {
+                    "$in": [
+                      "$role",
+                      "$$item.roles",
+                    ],
+                  },
+                ],
+              },
+              "input": "$model.collaborators",
+            },
+          },
+        },
+        0,
+      ],
+    },
+  },
+]
+`;
