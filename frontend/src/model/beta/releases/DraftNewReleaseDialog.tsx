@@ -15,13 +15,14 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
-import HelpPopover from 'src/common/HelpPopover'
 
 import { postRelease } from '../../../../actions/release'
 import { ReleaseInterface } from '../../../../types/types'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
+import HelpPopover from '../../../common/HelpPopover'
 import MultiFileInput from '../../../common/MultiFileInput'
+import RichTextEditor from '../../../common/RichTextEditor'
 import MessageAlert from '../../../MessageAlert'
 
 type DraftNewReleaseDialogProps = {
@@ -46,6 +47,9 @@ export default function DraftNewReleaseDialog({
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
+    if (!model.card.version) {
+      return setErrorMessage('Please make sure your model has a schema set before drafting a release.')
+    }
     if (isValidSemver(semanticVersion)) {
       const release: Partial<ReleaseInterface> = {
         modelId: model.id,
@@ -140,16 +144,17 @@ export default function DraftNewReleaseDialog({
               </Stack>
             </Stack>
             <Stack>
-              <Typography sx={{ fontWeight: 'bold' }}>
-                Release notes <span style={{ color: 'red' }}>*</span>
-              </Typography>
-              <TextField
-                required
-                size='small'
-                multiline
-                rows={4}
-                value={releaseNotes}
-                onChange={(e) => setReleaseNotes(e.target.value)}
+              <RichTextEditor
+                dataValue={releaseNotes}
+                onDataValueChange={(value) => setReleaseNotes(value)}
+                aria-label='Release notes'
+                dataTestKey='releaseNotes'
+                data-test='releaseNotes'
+                label={
+                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+                    Release Notes <span style={{ color: 'red' }}>*</span>
+                  </Typography>
+                }
               />
             </Stack>
             <Stack direction='row'>
