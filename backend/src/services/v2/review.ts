@@ -6,7 +6,7 @@ import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
 import { sendEmail } from './smtp/smtp.js'
 
-export async function findApprovalsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
+export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
   const approvals = await ReviewRequest.aggregate()
     .match({ active })
     .sort({ createdAt: -1 })
@@ -43,8 +43,8 @@ export async function findApprovalsByActive(user: UserDoc, active: boolean): Pro
   return approvals
 }
 
-export async function countApprovals(user: UserDoc): Promise<number> {
-  return (await findApprovalsByActive(user, true)).length
+export async function countReviewRequests(user: UserDoc): Promise<number> {
+  return (await findReviewRequestsByActive(user, true)).length
 }
 
 export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc) {

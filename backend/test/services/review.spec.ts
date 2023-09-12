@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { countApprovals, findApprovalsByActive } from '../../src/services/v2/review.js'
+import { countReviewRequests, findReviewRequestsByActive } from '../../src/services/v2/review.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
@@ -21,26 +21,26 @@ vi.mock('../../src/models/v2/ReviewRequest.js', () => ({
   default: ReviewRequestModel,
 }))
 
-describe('services > approval', () => {
+describe('services > review', () => {
   test('findApprovalsByActive > active', async () => {
     const user: any = { dn: 'test' }
-    await findApprovalsByActive(user, true)
+    await findReviewRequestsByActive(user, true)
 
     expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('findApprovalsByActive > not active', async () => {
+  test('findReviewRequestsByActive > not active', async () => {
     const user: any = { dn: 'test' }
-    await findApprovalsByActive(user, false)
+    await findReviewRequestsByActive(user, false)
 
     expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('countApprovals > successful', async () => {
+  test('countReviewRequests > successful', async () => {
     const user: any = { dn: 'test' }
-    await countApprovals(user)
+    await countReviewRequests(user)
 
     expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()

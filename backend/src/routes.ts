@@ -48,8 +48,6 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
-import { getApprovals as getApprovalsV2 } from './routes/v2/approval/getApprovals.js'
-import { getApprovalsCount as getApprovalsCountV2 } from './routes/v2/approval/getApprovalsCount.js'
 import { getComplianceApprovals } from './routes/v2/model/compliance/getComplianceCheckApprovals.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -68,6 +66,8 @@ import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
+import { getReviewRequests } from './routes/v2/reviewRequest/getReviewRequests.js'
+import { getReviewRequestsCount } from './routes/v2/reviewRequest/getReviewRequestsCount.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
@@ -221,8 +221,8 @@ if (config.experimental.v2) {
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
 
-  server.get('/api/v2/approvals', ...getApprovalsV2)
-  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
+  server.get('/api/v2/reviewRequests', ...getReviewRequests)
+  server.get('/api/v2/reviewRequests/count', ...getReviewRequestsCount)
 
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
@@ -236,9 +236,6 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/team/:teamId', ...getTeam)
   server.patch('/api/v2/team/:teamId', ...patchTeam)
-
-  server.get('/api/v2/approvals', ...getApprovalsV2)
-  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
 
   // server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
   // server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)

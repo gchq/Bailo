@@ -12,9 +12,9 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
 
-describe('routes > schema > getApprovals', () => {
+describe('routes > reviewRequest > getReviewRequests', () => {
   test('returns approvals count', async () => {
-    const res = await testGet(`/api/v2/approvals/count`)
+    const res = await testGet(`/api/v2/reviewRequests/count`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
