@@ -8,12 +8,13 @@ import { getModelById } from './model.js'
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'name' | 'semver' | 'notes' | 'minor' | 'draft' | 'files' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'files' | 'images'
 >
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
 
   const release = new Release({
+    createdBy: user.dn,
     ...releaseParams,
   })
 

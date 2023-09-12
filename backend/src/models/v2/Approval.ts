@@ -6,11 +6,12 @@ import { ApprovalKind, ApprovalKindKeys } from '../../types/v2/enums.js'
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
-export interface ApprovalRequestInterface {
+export interface ApprovalInterface {
   model: string
   release: string
+  role: string
   kind: ApprovalKindKeys
-  isActive: boolean
+  active: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -18,14 +19,15 @@ export interface ApprovalRequestInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ApprovalRequestDoc = ApprovalRequestInterface & Document<any, any, ApprovalRequestInterface>
+export type ApprovalRequestDoc = ApprovalInterface & Document<any, any, ApprovalInterface>
 
-const ApprovalRequestSchema = new Schema<ApprovalRequestInterface>(
+const ApprovalRequestSchema = new Schema<ApprovalInterface>(
   {
     model: { type: String, required: true },
     release: { type: String, required: true },
+    role: { type: String, required: true },
     kind: { type: String, enum: Object.values(ApprovalKind), required: true },
-    isActive: { type: Boolean, required: true },
+    active: { type: Boolean, required: true },
   },
   {
     timestamps: true,
@@ -39,6 +41,6 @@ ApprovalRequestSchema.plugin(MongooseDelete, {
   deletedByType: String,
 })
 
-const ApprovalRequestModel = model<ApprovalRequestInterface>('v2_Approval', ApprovalRequestSchema)
+const ApprovalRequestModel = model<ApprovalInterface>('v2_Approval', ApprovalRequestSchema)
 
 export default ApprovalRequestModel

@@ -40,6 +40,7 @@ export default function TeamAndModelSelector({
           spacing={2}
           direction={{ xs: 'column', sm: 'row' }}
           divider={<Divider variant='middle' flexItem orientation='vertical' />}
+          justifyContent='space-between'
         >
           {!modelOnly && (
             <Selector

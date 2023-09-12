@@ -64,7 +64,7 @@ export class Writer extends WritableStream {
   getSrc(src: { file: string; line: any }) {
     const line = src.file.replace(this.basepath, '')
 
-    if (line.startsWith('middleware/expressLogger.ts')) {
+    if (line.startsWith('routes/middleware/expressLogger.ts')) {
       return 'express'
     }
 

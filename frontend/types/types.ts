@@ -150,24 +150,6 @@ export type SeldonVersion = {
   image: string
 }
 
-export type DocHeading = {
-  title: string
-  slug: string
-  hasIndex: boolean
-  children: DocFileOrHeading[]
-  priority: number
-}
-
-export type DocFile = {
-  title: string
-  slug: string
-  priority: number
-}
-
-export type DocFileOrHeading = DocHeading | DocFile
-
-export type DocsMenuContent = DocFileOrHeading[]
-
 export enum LogLevel {
   TRACE = 10,
   DEBUG = 20,
@@ -378,7 +360,6 @@ export interface ModelInterface {
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
-  name: string
   semver: string
   notes: string
   minor?: boolean
@@ -386,6 +367,7 @@ export type ReleaseInterface = {
   files: Array<string>
   images: Array<string>
   deleted: boolean
+  createdBy: string
   createdAt: string
   updatedAt: string
 }
@@ -395,14 +377,15 @@ export type ListModelType = 'favourites' | 'user' | 'all'
 export interface SchemaInterface {
   id: string
   name: string
+  description: string
   active: boolean
   hidden: boolean
   kind: SchemaKindKeys
-  display: string
-  fields: unknown
-  metadata: unknown
-  createdAt: string
-  updatedAt: string
+  meta: unknown
+  uiSchema: unknown
+  schema: unknown
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const SchemaKind = {

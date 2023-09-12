@@ -4,7 +4,7 @@ import Wrapper from '../../src/Wrapper.beta'
 
 export default function Review() {
   return (
-    <Wrapper title='Review' page='marketplace' fullWidth>
+    <Wrapper title='Review' page='beta/review' fullWidth>
       <PageWithTabs
         title='Your Reviews'
         tabs={[
@@ -12,7 +12,6 @@ export default function Review() {
           { title: 'Access request reviews', view: <ApprovalsList kind='access' /> },
           { title: 'Archived', view: <ApprovalsList isActive={false} /> },
         ]}
-        displayActionButton={false}
       />
     </Wrapper>
   )

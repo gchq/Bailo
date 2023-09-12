@@ -13,6 +13,14 @@ export interface CollaboratorEntry {
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: unknown
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -21,6 +29,7 @@ export interface ModelInterface {
 
   name: string
   description: string
+  card?: ModelCardInterface
 
   collaborators: Array<CollaboratorEntry>
 
@@ -42,6 +51,13 @@ const ModelSchema = new Schema<ModelInterface>(
 
     name: { type: String, required: true },
     description: { type: String, required: true },
+    card: {
+      schemaId: { type: String },
+      version: { type: Number },
+      createdBy: { type: String },
+
+      metadata: { type: Schema.Types.Mixed },
+    },
 
     collaborators: [
       {

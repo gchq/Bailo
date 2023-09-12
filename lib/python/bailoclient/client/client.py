@@ -478,7 +478,7 @@ class Client:
 
         if mode == "newModel":
             return self.api.post(
-                f"/model?mode={mode}",
+                f"/model",
                 request_body=model_data,
                 headers={"Content-Type": model_data.content_type},
             )

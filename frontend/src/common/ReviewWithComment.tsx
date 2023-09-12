@@ -6,7 +6,7 @@ type ReviewWithCommentProps = {
   onClose: () => void
   onSubmit: (kind: ResponseTypeKeys, reviewComment: string) => void
   title: string
-  description: string
+  description?: string
 }
 
 export const ResponseTypes = {
@@ -15,7 +15,7 @@ export const ResponseTypes = {
   Reject: 'reject',
 } as const
 
-type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
+export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
 export default function ReviewWithComment({ title, description, open, onClose, onSubmit }: ReviewWithCommentProps) {
   const [reviewComment, setReviewComment] = useState('')
@@ -40,7 +40,7 @@ export default function ReviewWithComment({ title, description, open, onClose, o
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
-            <DialogContentText>{description}</DialogContentText>
+            {description && <DialogContentText>{description}</DialogContentText>}
             <TextField
               size='small'
               minRows={4}

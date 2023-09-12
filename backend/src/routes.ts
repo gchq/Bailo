@@ -4,9 +4,9 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
-import { expressErrorHandler as expressErrorHandlerV2 } from './middleware/expressErrorHandler.js'
-import { expressLogger as expressLoggerV2 } from './middleware/expressLogger.js'
-import { getUser as getUserV2 } from './middleware/getUser.js'
+import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
+import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
+import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -59,7 +59,8 @@ import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultip
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
-import { patchModelCard } from './routes/v2/model/modelcard/patchModelCard.js'
+import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
+import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
@@ -193,12 +194,12 @@ if (config.experimental.v2) {
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
   server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
-  server.patch('/api/v2/model/:modelId/model-cards', ...patchModelCard)
+  server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 
   // *server.get('/api/v2/template/models', ...getModelTemplates)
   // *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
   // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  // *server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+  server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
@@ -220,6 +221,9 @@ if (config.experimental.v2) {
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
+
+  server.get('/api/v2/approvals', ...getApprovalsV2)
+  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
 
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)

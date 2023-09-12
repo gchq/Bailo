@@ -25,6 +25,8 @@
     "useTabs": false
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/lib-storage": "^3.400.0",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
     "archiver": "^6.0.0",
@@ -56,7 +58,9 @@
     "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "multer-s3": "^3.0.1",
     "nanoid": "^4.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.4",
     "open": "^9.1.0",
     "openshift-rest-client": "^8.0.1",
