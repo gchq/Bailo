@@ -17,7 +17,7 @@ import { SchemaInterface } from '../../../../types/types'
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas('model')
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
