@@ -12,6 +12,7 @@ import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
 import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
+import { Styling } from '../../../../types/enums'
 import { SchemaInterface } from '../../../../types/types'
 
 export default function NewSchemaSelection() {
@@ -26,7 +27,7 @@ export default function NewSchemaSelection() {
     <Wrapper title='Select a schema' page='upload'>
       {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && !isSchemasError && (
-        <Card sx={{ maxWidth: '750px', mx: 'auto', my: 4, p: 4 }}>
+        <Card sx={{ maxWidth: Styling.NARROW_WIDTH, mx: 'auto', my: 4, p: 4 }}>
           <Stack spacing={2} justifyContent='center' alignItems='center'>
             <Typography variant='h6' color='primary'>
               Choose a schema

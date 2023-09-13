@@ -2,9 +2,10 @@ import { Box, Button, Divider, List, ListItem, ListItemButton, Stack } from '@mu
 import { useState } from 'react'
 
 import { ModelInterface } from '../../../types/v2/types'
+import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 
-type SettingsCategory = 'general' | 'danger'
+type SettingsCategory = 'general' | 'danger' | 'access'
 
 type SettingsProps = {
   model: ModelInterface
@@ -24,6 +25,11 @@ export default function Settings({ model }: SettingsProps) {
             General Settings
           </ListItemButton>
         </ListItem>
+        <ListItem>
+          <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
+            Access Requests
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
             Danger Zone
@@ -32,6 +38,7 @@ export default function Settings({ model }: SettingsProps) {
       </List>
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
         {selectedCategory === 'general' && <ModelAccess model={model} />}
+        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
         {selectedCategory === 'danger' && (
           <Button variant='contained' disabled>
             Delete model

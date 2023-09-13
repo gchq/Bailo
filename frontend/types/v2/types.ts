@@ -8,11 +8,16 @@ export const ModelVisibility = {
 
 export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
 
+export interface AccessRequestSettings {
+  schemaId: string
+}
+
 export interface ModelInterface {
   id: string
   name: string
   description: string
   card: ModelCardInterface
+  accessRequestSettings?: AccessRequestSettings
   visibility: ModelVisibilityKeys
   collaborators: CollaboratorEntry[]
 }

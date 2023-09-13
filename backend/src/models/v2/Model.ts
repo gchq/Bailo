@@ -21,6 +21,10 @@ export interface ModelCardInterface {
   metadata: unknown
 }
 
+export interface AccessRequestSettings {
+  schemaId: string
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -30,6 +34,7 @@ export interface ModelInterface {
   name: string
   description: string
   card?: ModelCardInterface
+  accessRequestSettings?: AccessRequestSettings
 
   collaborators: Array<CollaboratorEntry>
 
@@ -71,7 +76,7 @@ const ModelSchema = new Schema<ModelInterface>(
   {
     timestamps: true,
     collection: 'v2_models',
-  }
+  },
 )
 
 ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
