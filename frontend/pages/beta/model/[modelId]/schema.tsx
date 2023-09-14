@@ -12,12 +12,12 @@ import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
 import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
-import { SchemaInterface } from '../../../../types/types'
+import { SchemaInterface, SchemaKind } from '../../../../types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Model)
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
