@@ -48,7 +48,7 @@ exports[`routes > reviewRequest > getReviewRequests > rejects missing value for 
 
 exports[`routes > reviewRequest > getReviewRequests > returns only active review requests 1`] = `
 {
-  "approvals": [
+  "reviewRequests": [
     {
       "createdAt": "2023-08-13T00:00:00.000Z",
       "entities": [
@@ -67,7 +67,7 @@ exports[`routes > reviewRequest > getReviewRequests > returns only active review
 
 exports[`routes > reviewRequest > getReviewRequests > returns only inactive review requests 1`] = `
 {
-  "approvals": [
+  "reviewRequests": [
     {
       "createdAt": "2023-08-13T00:00:00.000Z",
       "entities": [

@@ -22,7 +22,7 @@ vi.mock('../../src/models/v2/ReviewRequest.js', () => ({
 }))
 
 describe('services > review', () => {
-  test('findApprovalsByActive > active', async () => {
+  test('findReviewRequestsByActive > active', async () => {
     const user: any = { dn: 'test' }
     await findReviewRequestsByActive(user, true)
 

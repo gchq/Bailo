@@ -3,7 +3,9 @@
 exports[`services > review > countReviewRequests > successful 1`] = `
 [
   {
-    "active": true,
+    "reviews": {
+      "$size": 0,
+    },
   },
 ]
 `;
@@ -46,15 +48,17 @@ exports[`services > review > countReviewRequests > successful 2`] = `
 ]
 `;
 
-exports[`services > review > findApprovalsByActive > active 1`] = `
+exports[`services > review > findReviewRequestsByActive > active 1`] = `
 [
   {
-    "active": true,
+    "reviews": {
+      "$size": 0,
+    },
   },
 ]
 `;
 
-exports[`services > review > findApprovalsByActive > active 2`] = `
+exports[`services > review > findReviewRequestsByActive > active 2`] = `
 [
   {
     "$expr": {
@@ -95,7 +99,11 @@ exports[`services > review > findApprovalsByActive > active 2`] = `
 exports[`services > review > findReviewRequestsByActive > not active 1`] = `
 [
   {
-    "active": false,
+    "reviews": {
+      "$not": {
+        "$size": 0,
+      },
+    },
   },
 ]
 `;

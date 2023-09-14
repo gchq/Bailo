@@ -13,16 +13,16 @@ export const getReviewRequestsSchema = z.object({
 })
 
 interface GetReviewRequestsResponse {
-  approvals: Array<ReviewRequestInterface>
+  reviewRequests: Array<ReviewRequestInterface>
 }
 
 export const getReviewRequests = [
   bodyParser.json(),
   async (req: Request, res: Response<GetReviewRequestsResponse>) => {
-    const { query } = parse(req, getReviewRequestsSchema)
-    const approvals = await findReviewRequestsByActive(req.user, query.active)
+    const { query: { active } } = parse(req, getReviewRequestsSchema)
+    const reviewRequests = await findReviewRequestsByActive(req.user, active)
     return res.json({
-      approvals,
+      reviewRequests,
     })
   },
 ]

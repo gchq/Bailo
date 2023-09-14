@@ -7,8 +7,8 @@ import { BadReq } from '../../utils/v2/error.js'
 import { sendEmail } from './smtp/smtp.js'
 
 export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
-  const approvals = await ReviewRequest.aggregate()
-    .match({ active })
+  const reviews = await ReviewRequest.aggregate()
+    .match({ reviews: active ? { $size: 0 } : { $not: { $size: 0 } } })
     .sort({ createdAt: -1 })
     // Populate model entries
     .lookup({ from: 'v2_models', localField: 'model', foreignField: 'id', as: 'model' })
@@ -40,7 +40,7 @@ export async function findReviewRequestsByActive(user: UserDoc, active: boolean)
       },
     })
 
-  return approvals
+  return reviews
 }
 
 export async function countReviewRequests(user: UserDoc): Promise<number> {
