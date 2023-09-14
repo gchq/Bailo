@@ -62,13 +62,12 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
   reviewRequest.save()
 
   entitiesForRole.forEach((entity) => sendEmail(entity, reviewRequest, release))
-
 }
 
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
   const roleEntities: string[] = collaborators
     .filter((collaborator) => {
-      collaborator.roles.includes(role)
+      return collaborator.roles.includes(role)
     })
     .map((collaborator) => collaborator.entity)
   return roleEntities
