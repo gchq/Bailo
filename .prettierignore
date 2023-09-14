@@ -1,6 +1,8 @@
 .github
 .husky
 .vscode
+backend
+frontend
 infrastructure
 lib/python-beta/docs/pylint.md
 node_modules

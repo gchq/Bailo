@@ -8,8 +8,8 @@
     "script": "npm --prefix ./backend/ run script",
     "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
     "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
-    "style": "prettier --write .",
-    "check-style": "prettier --check .",
+    "style": "prettier --write . && npm --prefix ./backend/ run style && npm --prefix ./frontend/ run style",
+    "check-style": "prettier --check . && npm --prefix ./backend/ run check-style && npm --prefix ./frontend/ run check-style",
     "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
     "prepare": "husky install"
   },
