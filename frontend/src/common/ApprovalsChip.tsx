@@ -52,18 +52,18 @@ export default function ApprovalsChip({
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const numAcceptedApprovals = useMemo(
     () => approvals.filter((approval) => approval.status === ApprovalStates.Accepted).length,
-    [approvals]
+    [approvals],
   )
   const totalApprovals = useMemo(() => approvals.length, [approvals])
   const noResponseApprovals = useMemo(
     () => approvals.filter((approval) => approval.status === ApprovalStates.NoResponse),
-    [approvals]
+    [approvals],
   )
   const numCurrentUserApprovals = useMemo(
     () =>
       noResponseApprovals.filter((approval) => approval.approvers.some((reviewer) => reviewer.id === currentUser.id))
         .length,
-    [noResponseApprovals, currentUser]
+    [noResponseApprovals, currentUser],
   )
 
   const backgroundColor = useMemo(() => {
@@ -141,7 +141,7 @@ export default function ApprovalsChip({
         </ListItem>
       )
     },
-    [currentUser.id, mutateApprovals, mutateNumApprovals, sendNotification]
+    [currentUser.id, mutateApprovals, mutateNumApprovals, sendNotification],
   )
 
   const approvalResponseListItems = useMemo(
@@ -152,7 +152,7 @@ export default function ApprovalsChip({
           {index < approvals.length - 1 && <Divider variant='middle' />}
         </Fragment>
       )),
-    [approvals, getApprovalResponses]
+    [approvals, getApprovalResponses],
   )
 
   const handleApprovalsClicked = (event: MouseEvent<HTMLDivElement>) => {

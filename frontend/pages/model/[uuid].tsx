@@ -163,7 +163,7 @@ function Model() {
         putEndpoint(`/api/v1/version/${version?._id}/lastViewed/${role}`)
       }
     },
-    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, isPotentialUploader]
+    [managerLastViewed, reviewerLastViewed, version?._id, version?.updatedAt, isManager, isPotentialUploader],
   )
 
   useEffect(() => {

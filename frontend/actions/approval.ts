@@ -14,7 +14,7 @@ export function useGetApprovalRequestsForUser(isActive = true) {
     `/api/v2/approvals?${qs.stringify({
       active: isActive,
     })}`,
-    fetcher
+    fetcher,
   )
 
   return {

@@ -48,7 +48,7 @@ function ApprovalItem({ approval }: ApprovalItemProps) {
   function listItemOnClick() {
     router.push(`/beta/model/${approval.model}`)
   }
-  function editedAdornement() {
+  function editedAdornment() {
     if (approval.updatedAt > approval.createdAt) {
       return `Updated ${timeDifference(new Date(), new Date(approval.updatedAt))}.`
     }
@@ -66,10 +66,10 @@ function ApprovalItem({ approval }: ApprovalItemProps) {
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
             <Typography variant='caption'>{`Created ${timeDifference(
               new Date(),
-              new Date(approval.createdAt)
+              new Date(approval.createdAt),
             )}.`}</Typography>
             <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
-              {editedAdornement()}
+              {editedAdornment()}
             </Typography>
           </Stack>
         </Stack>

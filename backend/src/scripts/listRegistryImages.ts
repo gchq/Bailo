@@ -1,5 +1,3 @@
-import https from 'node:https'
-
 import fetch from 'node-fetch'
 
 import { getAccessToken } from '../routes/v1/registryAuth.js'

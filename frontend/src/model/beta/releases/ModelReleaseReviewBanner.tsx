@@ -24,7 +24,7 @@ export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBa
     setReviewCommentOpen(false)
   }
 
-  const handleSubmit = (kind: ResponseTypeKeys, reviewComment: string) => {
+  const handleSubmit = (_kind: ResponseTypeKeys, _reviewComment: string) => {
     //TODO some response to API endpoint- BAI-858
   }
 

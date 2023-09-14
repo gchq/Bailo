@@ -31,9 +31,7 @@ function DeploymentOverview({ deployment }: DeploymentOverviewProps) {
         </Box>
       </Grid>
       <Grid item xs={12} sm={8}>
-        {!deployment.ungoverned && (
-          <MetadataDisplay item={deployment.metadata} tabsDisplaySequentially use='DEPLOYMENT' />
-        )}
+        {!deployment.ungoverned && <MetadataDisplay item={deployment.metadata} tabsDisplaySequentially />}
         {deployment.ungoverned && (
           <Box
             sx={{ p: 4, backgroundColor: theme.palette.container.main, borderRadius: 2 }}
