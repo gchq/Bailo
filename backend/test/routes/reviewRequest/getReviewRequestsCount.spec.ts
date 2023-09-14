@@ -7,7 +7,7 @@ vi.mock('../../../src/utils/user.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    countApprovals: vi.fn(() => 7),
+    countReviewRequests: vi.fn(() => 7),
   }
 })
 vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
