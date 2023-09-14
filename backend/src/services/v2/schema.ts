@@ -1,5 +1,6 @@
 import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
+import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
 import { BadReq, NotFound } from '../../utils/v2/error.js'
@@ -57,5 +58,18 @@ export async function addDefaultSchemas() {
       hidden: false,
     },
     true,
+  )
+
+  await createSchema(
+    {
+      name: 'Minimal Access REquestSchema v10 Beta',
+      id: 'minimal-access-request-general-v10-beta',
+      description: 'This is a test beta schema',
+      jsonSchema: accessRequestSchemaBeta,
+      kind: SchemaKind.Deployment,
+      active: true,
+      hidden: false,
+    },
+    true
   )
 }

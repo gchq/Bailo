@@ -71,9 +71,6 @@ export default function ExploreModels() {
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction='row' spacing={2}>
         <Stack spacing={2}>
-          <Typography component='h1' variant='h4' color='primary'>
-            Marketplace
-          </Typography>
           <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
           </Button>
