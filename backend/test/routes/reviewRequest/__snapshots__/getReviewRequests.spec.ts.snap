@@ -55,7 +55,6 @@ exports[`routes > reviewRequest > getReviewRequests > returns only active review
         "group:group",
       ],
       "kind": "release",
-      "model": "example-model-2-nevwg4",
       "reviews": [],
       "role": "msro",
       "semver": "3.0.3",
@@ -74,7 +73,6 @@ exports[`routes > reviewRequest > getReviewRequests > returns only inactive revi
         "group:group",
       ],
       "kind": "release",
-      "model": "example-model-2-nevwg4",
       "reviews": [
         {
           "comment": "looks amazing!",

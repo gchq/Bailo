@@ -13,6 +13,11 @@ const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.por
 let transporter: undefined | Transporter = undefined
 
 export async function sendEmail(entity: string, reviewRequest: ReviewRequestDoc, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
   const entityKind = fromEntity(entity).kind
   let to: string
   if (entityKind === EntityKind.User) {
@@ -27,13 +32,8 @@ export async function sendEmail(entity: string, reviewRequest: ReviewRequestDoc,
 
   const email = new ReleaseReviewRequest()
   const subject = email.getSubject(release.name)
-  const text = email.getBody(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
+  const text = email.getText(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
   const html = email.getHtml(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
-
-  if (!config.smtp.enabled) {
-    log.info({ subject, to }, 'Not sending email due to SMTP disabled')
-    return
-  }
 
   if (!transporter) {
     transporter = nodemailer.createTransport({

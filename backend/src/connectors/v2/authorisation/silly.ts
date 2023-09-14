@@ -34,8 +34,8 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   }
 
   async getGroupMembers(entity: string): Promise<string[]> {
-    if (fromEntity(entity).kind !== EntityKind.User) {
-      throw new Error('Cannot get user information for a non-user entity')
+    if (fromEntity(entity).kind !== EntityKind.Group) {
+      throw new Error('Cannot get user information for a non-group entity')
     }
     return [toEntity(EntityKind.User, 'user1'), toEntity(EntityKind.User, 'user2')]
   }

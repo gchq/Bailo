@@ -19,7 +19,9 @@ interface GetReviewRequestsResponse {
 export const getReviewRequests = [
   bodyParser.json(),
   async (req: Request, res: Response<GetReviewRequestsResponse>) => {
-    const { query: { active } } = parse(req, getReviewRequestsSchema)
+    const {
+      query: { active },
+    } = parse(req, getReviewRequestsSchema)
     const reviewRequests = await findReviewRequestsByActive(req.user, active)
     return res.json({
       reviewRequests,

@@ -11,7 +11,7 @@ export class ReleaseReviewRequest extends BaseEmailTemplate implements IEmailTem
   `)
   }
 
-  getBody(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
+  getText(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
     // V2 change- we don't store the author of a release
     // TODO - Replace with URL to specific model release
     return dedent(`

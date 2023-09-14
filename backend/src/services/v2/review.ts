@@ -53,13 +53,12 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
     throw BadReq('No Review Requests have been created')
   }
   const reviewRequest = new ReviewRequest({
-    model: model.id,
     semver: release.semver,
     kind: 'release',
     role: 'msro',
     entities: entitiesForRole,
   })
-  reviewRequest.save()
+  await reviewRequest.save()
 
   entitiesForRole.forEach((entity) => sendEmail(entity, reviewRequest, release))
 }

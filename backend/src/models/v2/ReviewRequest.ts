@@ -2,7 +2,6 @@ import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
-import { CollaboratorEntry } from './Model.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -20,7 +19,6 @@ interface Review {
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ReviewRequestInterface {
-  model: string
   semver?: string
   modelId?: string
   kind: ReviewKindKeys
@@ -41,7 +39,6 @@ export type ReviewRequestDoc = ReviewRequestInterface & Document<any, any, Revie
 
 const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
   {
-    model: { type: String, required: true },
     semver: {
       type: String,
       required: function (this: ReviewRequestInterface): boolean {

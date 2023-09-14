@@ -63,7 +63,7 @@ const releaseEmailMock = vi.hoisted(() => {
   const obj: any = {}
 
   obj.getSubject = vi.fn(() => 'subject')
-  obj.getBody = vi.fn(() => 'body')
+  obj.getText = vi.fn(() => 'body')
   obj.getHtml = vi.fn(() => 'htlm')
 
   const model: any = vi.fn(() => obj)

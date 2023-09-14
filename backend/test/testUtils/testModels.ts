@@ -46,7 +46,6 @@ export const testDeploymentSchema = {
 }
 
 export const testReleaseReviewRequestWithReview = {
-  model: 'example-model-2-nevwg4',
   semver: '3.0.2',
   kind: ReviewKind.Release,
   reviews: [
@@ -65,7 +64,6 @@ export const testReleaseReviewRequestWithReview = {
 }
 
 export const testReleaseReviewRequest = {
-  model: 'example-model-2-nevwg4',
   semver: '3.0.3',
   kind: ReviewKind.Release,
 

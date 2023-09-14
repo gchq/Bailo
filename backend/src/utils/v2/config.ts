@@ -45,5 +45,4 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
-deepFreeze(config)
-export default config
+export default deepFreeze(config)
