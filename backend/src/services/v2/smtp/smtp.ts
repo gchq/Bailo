@@ -13,10 +13,11 @@ const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.por
 let transporter: undefined | Transporter = undefined
 
 export async function sendEmail(entity: string, reviewRequest: ReviewRequestDoc, release: ReleaseDoc) {
+  const entityKind = fromEntity(entity).kind
   let to: string
-  if (fromEntity(entity).kind === EntityKind.User) {
+  if (entityKind === EntityKind.User) {
     to = (await authorisation.getUserInformation(entity)).email
-  } else if (fromEntity(entity).kind === EntityKind.Group) {
+  } else if (entityKind === EntityKind.Group) {
     const groupMembers = await authorisation.getGroupMembers(entity)
     groupMembers.forEach((groupMember) => sendEmail(groupMember, reviewRequest, release))
     return
