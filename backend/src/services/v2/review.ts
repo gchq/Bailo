@@ -1,5 +1,5 @@
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { ModelDoc } from '../../models/v2/Model.js'
+import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import ReviewRequest, { ReviewRequestInterface } from '../../models/v2/ReviewRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -48,29 +48,28 @@ export async function countReviewRequests(user: UserDoc): Promise<number> {
 }
 
 export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc) {
-  let requestCreated = false
-
-  model.collaborators.forEach(async (collaborator) => {
-    if (!collaborator.roles.includes('msro')) {
-      return
-    }
-
-    // Create Approval Request
-    const approval = new ReviewRequest({
-      model: model.id,
-      semver: release.semver,
-      kind: 'release',
-      entity: collaborator,
-    })
-    approval.save()
-
-    // Send email (async)
-    sendEmail(collaborator.entity, approval, release)
-    requestCreated = true
-  })
-
-  // I think we care?
-  if (!requestCreated) {
+  const entitiesForRole = getEntitiesForRole(model.collaborators, 'msro')
+  if (entitiesForRole.length == 0) {
     throw BadReq('No Review Requests have been created')
   }
+  const reviewRequest = new ReviewRequest({
+    model: model.id,
+    semver: release.semver,
+    kind: 'release',
+    role: 'msro',
+    entities: entitiesForRole,
+  })
+  reviewRequest.save()
+
+  entitiesForRole.forEach((entity) => sendEmail(entity, reviewRequest, release))
+
+}
+
+function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
+  const roleEntities: string[] = collaborators
+    .filter((collaborator) => {
+      collaborator.roles.includes(role)
+    })
+    .map((collaborator) => collaborator.entity)
+  return roleEntities
 }

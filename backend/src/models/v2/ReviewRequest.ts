@@ -25,7 +25,8 @@ export interface ReviewRequestInterface {
   modelId?: string
   kind: ReviewKindKeys
 
-  entity: CollaboratorEntry
+  role: string
+  entities: Array<string>
 
   reviews: Array<Review>
 
@@ -55,10 +56,8 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
     },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 
-    entity: {
-      entity: { type: String, required: true },
-      roles: [{ type: String }],
-    },
+    role: { type: String, required: true },
+    entities: [{ type: String, required: true }],
 
     reviews: [
       {

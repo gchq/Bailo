@@ -48,7 +48,6 @@ export const testDeploymentSchema = {
 export const testReleaseReviewRequestWithReview = {
   model: 'example-model-2-nevwg4',
   semver: '3.0.2',
-  role: 'owner',
   kind: ReviewKind.Release,
   reviews: [
     {
@@ -57,10 +56,9 @@ export const testReleaseReviewRequestWithReview = {
       comment: 'looks amazing!',
     },
   ],
-  entity: {
-    entity: 'group:group',
-    roles: ['msro'],
-  },
+
+  role: 'msro',
+  entities: ['group:group'],
 
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
@@ -69,12 +67,10 @@ export const testReleaseReviewRequestWithReview = {
 export const testReleaseReviewRequest = {
   model: 'example-model-2-nevwg4',
   semver: '3.0.3',
-  role: 'owner',
   kind: ReviewKind.Release,
-  entity: {
-    entity: 'user:user',
-    roles: ['msro'],
-  },
+
+  role: 'msro',
+  entities: ['group:group'],
   reviews: [],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
