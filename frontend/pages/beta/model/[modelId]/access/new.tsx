@@ -9,18 +9,14 @@ import Loading from '../../../../../src/common/Loading'
 import ModelCardForm from '../../../../../src/Form/beta/ModelCardForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
-import { Styling } from '../../../../../types/enums'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
 import { getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()
-  const { modelId }: { modelId?: string } = router.query
+  const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
-  // TODO - populate the accessRequestSettings property
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(
-    model?.accessRequestSettings?.schemaId || 'minimal-access-request-general-v10-beta'
-  )
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
@@ -56,7 +52,7 @@ export default function NewAccessRequest() {
   return (
     <Wrapper title='Access Request' page='Model'>
       {(isSchemaLoading || isModelLoading) && <Loading />}
-      <Card sx={{ maxWidth: Styling.NARROW_WIDTH, mx: 'auto', my: 4, p: 4 }}>
+      <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
         {(!model || !model.card) && (
           <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
         )}

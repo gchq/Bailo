@@ -3,13 +3,13 @@ import useSWR from 'swr'
 import { SchemaInterface } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export function useGetSchemas() {
+export function useGetSchemas(kind?: string) {
   const { data, error, mutate } = useSWR<
     {
       schemas: SchemaInterface[]
     },
     ErrorInfo
-  >('/api/v2/schemas/', fetcher)
+  >(kind ? `/api/v2/schemas?kind=${kind}` : '/api/v2/schemas/', fetcher)
 
   return {
     mutateSchemas: mutate,

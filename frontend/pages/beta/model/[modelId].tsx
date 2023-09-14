@@ -15,7 +15,7 @@ export default function Model() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
   function requestAccess() {
-    router.push(`/beta/model/${modelId}/access/new`)
+    router.push(`/beta/model/${modelId}/access/schema`)
   }
 
   return (

@@ -1,4 +1,4 @@
-import { Box, Button, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
+import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 import { ModelInterface } from '../../../types/v2/types'
@@ -25,7 +25,7 @@ export default function Settings({ model }: SettingsProps) {
             General Settings
           </ListItemButton>
         </ListItem>
-        <ListItem>
+        <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
             Access Requests
           </ListItemButton>
@@ -38,11 +38,16 @@ export default function Settings({ model }: SettingsProps) {
       </List>
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
         {selectedCategory === 'general' && <ModelAccess model={model} />}
-        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
+        {selectedCategory === 'access' && <AccessRequestSettings />}
         {selectedCategory === 'danger' && (
-          <Button variant='contained' disabled>
-            Delete model
-          </Button>
+          <Stack spacing={2}>
+            <Typography variant='h6' component='h2'>
+              Danger Zone!
+            </Typography>
+            <Button variant='contained' disabled>
+              Delete model
+            </Button>
+          </Stack>
         )}
       </Box>
     </Stack>

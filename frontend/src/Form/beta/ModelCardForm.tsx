@@ -1,7 +1,5 @@
 import ErrorIcon from '@mui/icons-material/ErrorOutline'
-import { Divider, Stack, StepButton, StepLabel, Stepper, Tooltip } from '@mui/material'
-import MaterialStep from '@mui/material/Step'
-import { useTheme } from '@mui/material/styles'
+import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Tooltip, Typography } from '@mui/material'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -27,8 +25,6 @@ export default function ModelCardForm({
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
-  const theme = useTheme()
-
   const currentStep = splitSchema.steps[activeStep]
 
   if (!currentStep) {
@@ -48,7 +44,7 @@ export default function ModelCardForm({
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
-      spacing={4}
+      spacing={2}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
       sx={{ width: '100%' }}
@@ -62,32 +58,18 @@ export default function ModelCardForm({
           connector={<Nothing />}
           sx={{ minWidth: 'max-content' }}
         >
-          {splitSchema.steps.map((step, index) => (
-            <MaterialStep key={step.schema.title}>
-              <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-                <StepButton sx={{ p: 0, m: 0 }} onClick={() => setActiveStep(index)} icon={<Nothing />}>
-                  <StepLabel
-                    sx={{
-                      padding: 0,
-                      '& .MuiStepLabel-label': {
-                        fontSize: '16px',
-                      },
-                      '& .MuiStepLabel-label.Mui-active': {
-                        color: `${theme.palette.primary.main}`,
-                      },
-                      '& .Mui-active': {
-                        borderBottomStyle: 'solid',
-                        borderColor: `${theme.palette.secondary.main}`,
-                      },
-                    }}
-                  >
-                    {step.schema.title}
-                  </StepLabel>
-                </StepButton>
-                <ValidationErrorIcon displayLabelValidation={displayLabelValidation} step={step} />
-              </Stack>
-            </MaterialStep>
-          ))}
+          <List>
+            {splitSchema.steps.map((step, index) => (
+              <ListItem key={step.schema.title} disablePadding>
+                <ListItemButton selected={activeStep === index} onClick={() => setActiveStep(index)}>
+                  <Stack direction='row' spacing={2}>
+                    <Typography>{step.schema.title}</Typography>
+                    <ValidationErrorIcon displayLabelValidation={displayLabelValidation} step={step} />
+                  </Stack>
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
         </Stepper>
       </div>
 

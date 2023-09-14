@@ -4,20 +4,16 @@ import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 
-import { useGetModel } from '../../../../actions/model'
-import { postFromSchema } from '../../../../actions/modelCard'
-import { useGetSchemas } from '../../../../actions/schema'
-import { useGetCurrentUser } from '../../../../actions/user'
-import EmptyBlob from '../../../../src/common/EmptyBlob'
-import Loading from '../../../../src/common/Loading'
-import MessageAlert from '../../../../src/MessageAlert'
-import Wrapper from '../../../../src/Wrapper.beta'
-import { SchemaInterface, SchemaKind } from '../../../../types/types'
+import { useGetSchemas } from '../../../../../actions/schema'
+import EmptyBlob from '../../../../../src/common/EmptyBlob'
+import Loading from '../../../../../src/common/Loading'
+import Wrapper from '../../../../../src/Wrapper.beta'
+import { SchemaInterface, SchemaKind } from '../../../../../types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Model)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Deployment)
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
@@ -34,8 +30,8 @@ export default function NewSchemaSelection() {
               </Typography>
               <Schema fontSize='large' color='primary' />
               <Typography variant='body1'>
-                Each organisation may have a different set of questions they require you to answer about any model you
-                create. Select from the list below:
+                Each organisation may have a different set of questions they require you to answer about any access
+                request you create. Select from the list below:
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2}>
@@ -73,46 +69,29 @@ interface SchemaButtonProps {
 }
 
 function SchemaButton({ modelId, schema }: SchemaButtonProps) {
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-
   const router = useRouter()
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
-  async function createModelUsingSchema(newSchema: SchemaInterface) {
-    if (currentUser && model) {
-      await postFromSchema(model.id, newSchema.id)
-      router.push(`/beta/model/${modelId}`)
-    }
+  async function createAccessRequestUsingSchema(newSchema: SchemaInterface) {
+    router.push(`/beta/model/${modelId}/access/new?schemaId=${newSchema.id}`)
   }
 
   return (
-    <>
-      {(isModelLoading || isCurrentUserLoading) && <Loading />}
-      <Grid item md={4} sm={12}>
-        <Tooltip title={schema.description}>
-          <Button
-            sx={{ width: '200px', height: '60px' }}
-            variant='outlined'
-            size='large'
-            onClick={() => createModelUsingSchema(schema)}
-          >
-            <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              <Typography variant='button'>{schema.name}</Typography>
-              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
-                {schema.description}
-              </Typography>
-            </Stack>
-          </Button>
-        </Tooltip>
-      </Grid>
-    </>
+    <Grid item md={4} sm={12}>
+      <Tooltip title={schema.description}>
+        <Button
+          sx={{ width: '200px', height: '60px' }}
+          variant='outlined'
+          size='large'
+          onClick={() => createAccessRequestUsingSchema(schema)}
+        >
+          <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <Typography variant='button'>{schema.name}</Typography>
+            <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
+              {schema.description}
+            </Typography>
+          </Stack>
+        </Button>
+      </Tooltip>
+    </Grid>
   )
 }
