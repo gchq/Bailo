@@ -8,11 +8,14 @@
     "script": "npm --prefix ./backend/ run script",
     "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
     "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
-    "style": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-style": "prettier --check \"**/*.{ts,tsx,md}\"",
-    "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/"
+    "style": "prettier --write .",
+    "check-style": "prettier --check .",
+    "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1",
     "prettier": "^2.8.8"
   }
 }

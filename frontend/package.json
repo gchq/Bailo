@@ -8,17 +8,10 @@
     "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
     "cy:run-beta": "cypress run --spec \"cypress/e2e/beta/**/*\"",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir __tests__ --dir data --dir lib --dir pages --dir server --dir src --dir types --dir utils",
+    "style": "prettier --write .",
+    "check-style": "prettier --check .",
     "test": "vitest"
-  },
-  "prettier": {
-    "jsxSingleQuote": true,
-    "printWidth": 120,
-    "proseWrap": "always",
-    "semi": false,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "useTabs": false
   },
   "dependencies": {
     "@emotion/cache": "^11.10.7",

@@ -1,1 +1,5 @@
+.github
+.husky
+.vscode
 lib/python-beta/docs/pylint.md
+node_modules
