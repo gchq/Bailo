@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { ReactElement, useState } from 'react'
@@ -30,7 +30,13 @@ export default function PageWithTabs({
   return (
     <>
       <Box>
-        <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2} sx={{ p: 2 }}>
+        <Stack
+          direction='row'
+          divider={<Divider flexItem orientation='vertical' />}
+          alignItems='center'
+          spacing={2}
+          sx={{ p: 2 }}
+        >
           <Typography component='h1' color='primary' variant='h6'>
             {title}
           </Typography>

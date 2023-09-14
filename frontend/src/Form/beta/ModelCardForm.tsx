@@ -1,26 +1,29 @@
-import { Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
+import ErrorIcon from '@mui/icons-material/ErrorOutline'
+import { Divider, Stack, StepButton, StepLabel, Stepper, Tooltip } from '@mui/material'
 import MaterialStep from '@mui/material/Step'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
-import CustomTextInput from 'src/MuiForms/CustomTextInput'
-import TagSelector from 'src/MuiForms/TagSelectorBeta'
-import { setStepState } from 'utils/beta/formUtils'
 
-import { SplitSchemaNoRender } from '../../../types/interfaces'
+import { SplitSchemaNoRender, StepNoRender } from '../../../types/interfaces'
+import { setStepState } from '../../../utils/beta/formUtils'
+import CustomTextInput from '../../MuiForms/CustomTextInput'
 import Nothing from '../../MuiForms/Nothing'
+import TagSelector from '../../MuiForms/TagSelectorBeta'
 
 // TODO - add validation BAI-866
 export default function ModelCardForm({
   splitSchema,
   setSplitSchema,
   canEdit = false,
+  displayLabelValidation = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
+  displayLabelValidation?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
@@ -61,25 +64,28 @@ export default function ModelCardForm({
         >
           {splitSchema.steps.map((step, index) => (
             <MaterialStep key={step.schema.title}>
-              <StepButton sx={{ p: 0, m: 0 }} onClick={() => setActiveStep(index)} icon={<Nothing />}>
-                <StepLabel
-                  sx={{
-                    padding: 0,
-                    '& .MuiStepLabel-label': {
-                      fontSize: '16px',
-                    },
-                    '& .MuiStepLabel-label.Mui-active': {
-                      color: `${theme.palette.primary.main}`,
-                    },
-                    '& .Mui-active': {
-                      borderBottomStyle: 'solid',
-                      borderColor: `${theme.palette.secondary.main}`,
-                    },
-                  }}
-                >
-                  {step.schema.title}
-                </StepLabel>
-              </StepButton>
+              <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+                <StepButton sx={{ p: 0, m: 0 }} onClick={() => setActiveStep(index)} icon={<Nothing />}>
+                  <StepLabel
+                    sx={{
+                      padding: 0,
+                      '& .MuiStepLabel-label': {
+                        fontSize: '16px',
+                      },
+                      '& .MuiStepLabel-label.Mui-active': {
+                        color: `${theme.palette.primary.main}`,
+                      },
+                      '& .Mui-active': {
+                        borderBottomStyle: 'solid',
+                        borderColor: `${theme.palette.secondary.main}`,
+                      },
+                    }}
+                  >
+                    {step.schema.title}
+                  </StepLabel>
+                </StepButton>
+                <ValidationErrorIcon displayLabelValidation={displayLabelValidation} step={step} />
+              </Stack>
             </MaterialStep>
           ))}
         </Stepper>
@@ -90,7 +96,6 @@ export default function ModelCardForm({
         formData={currentStep.state}
         onChange={onFormChange}
         validator={validator}
-        noValidate
         widgets={{
           nothing: Nothing,
           customTextInput: CustomTextInput,
@@ -114,5 +119,20 @@ export default function ModelCardForm({
         <></>
       </Form>
     </Stack>
+  )
+}
+
+interface ValidationErrorIconProps {
+  displayLabelValidation: boolean
+  step: StepNoRender
+}
+
+function ValidationErrorIcon({ displayLabelValidation, step }: ValidationErrorIconProps) {
+  return displayLabelValidation && !step.isComplete(step) ? (
+    <Tooltip title='This step is unfinished'>
+      <ErrorIcon sx={{ color: 'red' }} />
+    </Tooltip>
+  ) : (
+    <></>
   )
 }

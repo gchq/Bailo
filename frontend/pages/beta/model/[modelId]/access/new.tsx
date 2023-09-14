@@ -1,5 +1,5 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Box, Button, Card, Stack } from '@mui/material'
+import { Box, Button, Card, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -11,7 +11,7 @@ import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { Styling } from '../../../../../types/enums'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsFromSchema } from '../../../../../utils/beta/formUtils'
+import { getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()
@@ -26,8 +26,7 @@ export default function NewAccessRequest() {
 
   useEffect(() => {
     if (!model || !schema) return
-    const metadata = model.card.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
+    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], {})
 
     for (const step of steps) {
       step.steps = steps
@@ -37,7 +36,13 @@ export default function NewAccessRequest() {
   }, [schema, model])
 
   function onSubmit() {
-    console.log()
+    for (const step of splitSchema.steps) {
+      const isValid = validateForm(step)
+      setStepValidate(splitSchema, setSplitSchema, step, true)
+      if (!isValid) {
+        return <MessageAlert message='Error' severity='error' />
+      }
+    }
   }
 
   if (isSchemaError) {
@@ -52,21 +57,26 @@ export default function NewAccessRequest() {
     <Wrapper title='Access Request' page='Model'>
       {(isSchemaLoading || isModelLoading) && <Loading />}
       <Card sx={{ maxWidth: Styling.NARROW_WIDTH, mx: 'auto', my: 4, p: 4 }}>
-        <Stack spacing={4}>
-          <Button
-            sx={{ width: 'fit-content' }}
-            startIcon={<ArrowBack />}
-            onClick={() => router.push(`/beta/model/${modelId}`)}
-          >
-            Back to model
-          </Button>
-          <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit />
-          <Box sx={{ textAlign: 'right' }}>
-            <Button sx={{ width: 'fit-content' }} variant='contained' onClick={onSubmit}>
-              Submit
+        {(!model || !model.card) && (
+          <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
+        )}
+        {model && model.card && (
+          <Stack spacing={4}>
+            <Button
+              sx={{ width: 'fit-content' }}
+              startIcon={<ArrowBack />}
+              onClick={() => router.push(`/beta/model/${modelId}`)}
+            >
+              Back to model
             </Button>
-          </Box>
-        </Stack>
+            <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
+            <Box sx={{ textAlign: 'right' }}>
+              <Button sx={{ width: 'fit-content' }} variant='contained' onClick={onSubmit}>
+                Submit
+              </Button>
+            </Box>
+          </Stack>
+        )}
       </Card>
     </Wrapper>
   )
