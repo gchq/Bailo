@@ -57,7 +57,7 @@ export async function addDefaultSchemas() {
       active: true,
       hidden: false,
     },
-    true,
+    true
   )
 
   await createSchema(
@@ -70,6 +70,6 @@ export async function addDefaultSchemas() {
       active: true,
       hidden: false,
     },
-    true,
+    true
   )
 }
