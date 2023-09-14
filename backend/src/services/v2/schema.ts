@@ -56,6 +56,6 @@ export async function addDefaultSchemas() {
       active: true,
       hidden: false,
     },
-    true
+    true,
   )
 }

@@ -8,7 +8,7 @@ backend-build:
       allow_failure: true
     - when: manual
       allow_failure: true
-  image: 
+  image:
     name: docker:latest
   services:
     - docker:dind
@@ -31,7 +31,7 @@ frontend-build:
       allow_failure: true
     - when: manual
       allow_failure: true
-  image: 
+  image:
     name: docker:latest
   services:
     - docker:dind

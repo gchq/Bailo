@@ -48,7 +48,7 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
   {
     timestamps: true,
     collection: 'v2_releases',
-  }
+  },
 )
 
 ReleaseSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

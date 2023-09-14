@@ -131,7 +131,7 @@ export async function removeModelDeploymentsFromRegistry(model: ModelDoc, deploy
       return
     }
     deleteImageTag({ namespace: deployment.uuid, model: model.uuid, version: versionDoc.version }, (level, msg) =>
-      logger[level](msg)
+      logger[level](msg),
     )
   })
 }

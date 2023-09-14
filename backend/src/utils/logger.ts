@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, no-console */
 import { WritableStream } from 'node:stream/web'
 
 import getAppRoot from 'app-root-path'
@@ -285,7 +285,7 @@ const morganLog = morgan<any, any>(
         status: tokens.status(req, res),
         code: 'approval',
       },
-      process.env.NODE_ENV == 'production' ? stripAnsi(message) : message
+      process.env.NODE_ENV == 'production' ? stripAnsi(message) : message,
     )
 
     return ''
@@ -294,7 +294,7 @@ const morganLog = morgan<any, any>(
     skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
-  }
+  },
 )
 
 export default log
@@ -347,8 +347,6 @@ export async function expressErrorHandler(err: BailoError, req: Request, res: Re
     },
   })
 }
-
-/* eslint-disable no-console */
 
 /**
  * These utility functions are only to be used for logging that is intended to be

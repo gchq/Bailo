@@ -32,7 +32,7 @@ const ApprovalRequestSchema = new Schema<ApprovalInterface>(
   {
     timestamps: true,
     collection: 'v2_approvals',
-  }
+  },
 )
 
 ApprovalRequestSchema.plugin(MongooseDelete, {

@@ -25,7 +25,7 @@ vi.mock('../../utils/entity.js', () => {
             user,
           },
         ],
-      })
+      }),
     ),
   }
 })

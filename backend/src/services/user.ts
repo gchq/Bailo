@@ -39,7 +39,7 @@ export async function findAndUpdateUser({ userId, email, data, roles }: FindAndU
   return UserModel.findOneAndUpdate(
     { $or: [{ id: userId }, { email }] },
     { id: userId, email, data, roles }, // upsert docs
-    { new: true, upsert: true }
+    { new: true, upsert: true },
   )
 }
 
