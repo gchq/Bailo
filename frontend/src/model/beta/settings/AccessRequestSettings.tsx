@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Stack, Typography } from '@mui/material'
+import { Button, Checkbox, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function AccessRequestSettings() {
@@ -13,9 +13,9 @@ export default function AccessRequestSettings() {
         <Checkbox onChange={(event) => setAllowUngoverned(event.target.checked)} value={allowUngoverned} size='small' />
         <Typography>Allow users to make ungoverned access requests</Typography>
       </Stack>
-      <Box>
+      <div>
         <Button>Save</Button>
-      </Box>
+      </div>
     </Stack>
   )
 }

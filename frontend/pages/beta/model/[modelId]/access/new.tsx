@@ -52,28 +52,30 @@ export default function NewAccessRequest() {
   return (
     <Wrapper title='Access Request' page='Model'>
       {(isSchemaLoading || isModelLoading) && <Loading />}
-      <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-        {(!model || !model.card) && (
-          <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
-        )}
-        {model && model.card && (
-          <Stack spacing={4}>
-            <Button
-              sx={{ width: 'fit-content' }}
-              startIcon={<ArrowBack />}
-              onClick={() => router.push(`/beta/model/${modelId}`)}
-            >
-              Back to model
-            </Button>
-            <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
-            <Box sx={{ textAlign: 'right' }}>
-              <Button sx={{ width: 'fit-content' }} variant='contained' onClick={onSubmit}>
-                Submit
+      {!isSchemaLoading && !isModelLoading && (
+        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+          {(!model || !model.card) && (
+            <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
+          )}
+          {model && model.card && (
+            <Stack spacing={4}>
+              <Button
+                sx={{ width: 'fit-content' }}
+                startIcon={<ArrowBack />}
+                onClick={() => router.push(`/beta/model/${modelId}`)}
+              >
+                Back to model
               </Button>
-            </Box>
-          </Stack>
-        )}
-      </Card>
+              <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
+              <Box sx={{ textAlign: 'right' }}>
+                <Button sx={{ width: 'fit-content' }} variant='contained' onClick={onSubmit}>
+                  Submit
+                </Button>
+              </Box>
+            </Stack>
+          )}
+        </Card>
+      )}
     </Wrapper>
   )
 }

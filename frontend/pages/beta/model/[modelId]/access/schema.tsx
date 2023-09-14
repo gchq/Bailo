@@ -1,5 +1,5 @@
 import { Schema } from '@mui/icons-material'
-import { Button, Card, Container, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -7,8 +7,10 @@ import { useMemo } from 'react'
 import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
 import Loading from '../../../../../src/common/Loading'
+import MessageAlert from '../../../../../src/MessageAlert'
+import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
 import Wrapper from '../../../../../src/Wrapper.beta'
-import { SchemaInterface, SchemaKind } from '../../../../../types/types'
+import { SchemaKind } from '../../../../../types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
@@ -18,10 +20,14 @@ export default function NewSchemaSelection() {
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
+  if (isSchemasError) {
+    return <MessageAlert message={isSchemasError.info.message} severity='error' />
+  }
+
   return (
     <Wrapper title='Select a schema' page='upload'>
       {isSchemasLoading && <Loading />}
-      {schemas && !isSchemasLoading && !isSchemasError && (
+      {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
@@ -60,38 +66,5 @@ export default function NewSchemaSelection() {
         </Container>
       )}
     </Wrapper>
-  )
-}
-
-interface SchemaButtonProps {
-  modelId: string
-  schema: any
-}
-
-function SchemaButton({ modelId, schema }: SchemaButtonProps) {
-  const router = useRouter()
-
-  async function createAccessRequestUsingSchema(newSchema: SchemaInterface) {
-    router.push(`/beta/model/${modelId}/access/new?schemaId=${newSchema.id}`)
-  }
-
-  return (
-    <Grid item md={4} sm={12}>
-      <Tooltip title={schema.description}>
-        <Button
-          sx={{ width: '200px', height: '60px' }}
-          variant='outlined'
-          size='large'
-          onClick={() => createAccessRequestUsingSchema(schema)}
-        >
-          <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <Typography variant='button'>{schema.name}</Typography>
-            <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
-              {schema.description}
-            </Typography>
-          </Stack>
-        </Button>
-      </Tooltip>
-    </Grid>
   )
 }

@@ -71,7 +71,7 @@ const ModelSchema = new Schema<ModelInterface>(
   {
     timestamps: true,
     collection: 'v2_models',
-  },
+  }
 )
 
 ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

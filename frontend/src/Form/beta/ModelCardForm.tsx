@@ -1,12 +1,12 @@
-import ErrorIcon from '@mui/icons-material/ErrorOutline'
-import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Tooltip, Typography } from '@mui/material'
+import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 
-import { SplitSchemaNoRender, StepNoRender } from '../../../types/interfaces'
+import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
+import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import CustomTextInput from '../../MuiForms/CustomTextInput'
 import Nothing from '../../MuiForms/Nothing'
 import TagSelector from '../../MuiForms/TagSelectorBeta'
@@ -64,7 +64,7 @@ export default function ModelCardForm({
                 <ListItemButton selected={activeStep === index} onClick={() => setActiveStep(index)}>
                   <Stack direction='row' spacing={2}>
                     <Typography>{step.schema.title}</Typography>
-                    <ValidationErrorIcon displayLabelValidation={displayLabelValidation} step={step} />
+                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </Stack>
                 </ListItemButton>
               </ListItem>
@@ -101,20 +101,5 @@ export default function ModelCardForm({
         <></>
       </Form>
     </Stack>
-  )
-}
-
-interface ValidationErrorIconProps {
-  displayLabelValidation: boolean
-  step: StepNoRender
-}
-
-function ValidationErrorIcon({ displayLabelValidation, step }: ValidationErrorIconProps) {
-  return displayLabelValidation && !step.isComplete(step) ? (
-    <Tooltip title='This step is unfinished'>
-      <ErrorIcon sx={{ color: 'red' }} />
-    </Tooltip>
-  ) : (
-    <></>
   )
 }

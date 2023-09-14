@@ -131,11 +131,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
-          <Box>
+          <div>
             <Button aria-label='Save access list' onClick={updateAccessList}>
               Save
             </Button>
-          </Box>
+          </div>
         </Stack>
       )}
     </>
