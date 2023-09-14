@@ -4,9 +4,9 @@ exports[`services > smtp > that an email is sent 1`] = `
 [
   {
     "from": "\\"Bailo 📝\\" <bailo@example.org>",
-    "html": "htlm",
+    "html": "html",
     "subject": "subject",
-    "text": "body",
+    "text": "text",
     "to": "email@email.com",
   },
 ]

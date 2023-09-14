@@ -3,9 +3,14 @@ import dedent from 'dedent-js'
 import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 
 export interface IEmailTemplate {
-  getSubject(resourceName: string): string
-  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string): string
-  getText(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string): string
+  to,
+  setTo(emailAddress: string)
+  subject,
+  setSubject(resourceName: string)
+  html
+  setHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string)
+  text
+  setText(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string)
 }
 
 export abstract class BaseEmailTemplate {

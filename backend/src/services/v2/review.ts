@@ -4,7 +4,7 @@ import { ReleaseDoc } from '../../models/v2/Release.js'
 import ReviewRequest, { ReviewRequestInterface } from '../../models/v2/ReviewRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
-import { sendEmail } from './smtp/smtp.js'
+import { requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
   const reviews = await ReviewRequest.aggregate()
@@ -47,7 +47,7 @@ export async function countReviewRequests(user: UserDoc): Promise<number> {
   return (await findReviewRequestsByActive(user, true)).length
 }
 
-export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc) {
+export async function createReleaseReviewRequests(model: ModelDoc, release: ReleaseDoc) {
   const entitiesForRole = getEntitiesForRole(model.collaborators, 'msro')
   if (entitiesForRole.length == 0) {
     throw BadReq('No Review Requests have been created')
@@ -60,7 +60,7 @@ export async function createReviewRequests(model: ModelDoc, release: ReleaseDoc)
   })
   await reviewRequest.save()
 
-  entitiesForRole.forEach((entity) => sendEmail(entity, reviewRequest, release))
+  entitiesForRole.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))
 }
 
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {

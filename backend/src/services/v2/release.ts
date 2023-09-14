@@ -5,7 +5,7 @@ import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { getModelById } from './model.js'
-import { createReviewRequests } from './review.js'
+import { createReleaseReviewRequests } from './review.js'
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
@@ -25,7 +25,7 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     })
   }
 
-  await createReviewRequests(model, release)
+  await createReleaseReviewRequests(model, release)
 
   await release.save()
 

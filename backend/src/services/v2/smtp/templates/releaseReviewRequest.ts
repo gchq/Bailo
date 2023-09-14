@@ -4,17 +4,26 @@ import mjml2html from 'mjml'
 import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 import { BaseEmailTemplate, IEmailTemplate } from './baseEmailTemplate.js'
 
-export class ReleaseReviewRequest extends BaseEmailTemplate implements IEmailTemplate {
-  getSubject(resourceName: string): string {
-    return dedent(`
+export class ReleaseReviewRequestEmail extends BaseEmailTemplate implements IEmailTemplate {
+  subject: string = ""
+  text: string = ""
+  html: string = ""
+  to: string = ""
+
+  setTo(emailAddress: string) {
+    this.to = emailAddress
+  }
+
+  setSubject(resourceName: string) {
+    this.subject = dedent(`
     You have been requested to review '${resourceName}' on Bailo
   `)
   }
 
-  getText(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
+  setText(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
     // V2 change- we don't store the author of a release
     // TODO - Replace with URL to specific model release
-    return dedent(`
+    this.text = dedent(`
     You have been requested to review '${releaseName}' on Bailo.
 
     Review Category: '${reviewKind}'
@@ -25,8 +34,8 @@ export class ReleaseReviewRequest extends BaseEmailTemplate implements IEmailTem
   `)
   }
 
-  getHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
-    return mjml2html(
+  setHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string) {
+    this.html = mjml2html(
       super.wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
