@@ -1,30 +1,29 @@
-import { Divider, Stack, StepButton, StepLabel, Stepper } from '@mui/material'
-import MaterialStep from '@mui/material/Step'
-import { useTheme } from '@mui/material/styles'
+import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import React, { Dispatch, SetStateAction, useState } from 'react'
-import CustomTextInput from 'src/MuiForms/CustomTextInput'
-import TagSelector from 'src/MuiForms/TagSelectorBeta'
-import { setStepState } from 'utils/beta/formUtils'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
+import { setStepState } from '../../../utils/beta/formUtils'
+import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
+import CustomTextInput from '../../MuiForms/CustomTextInput'
 import Nothing from '../../MuiForms/Nothing'
+import TagSelector from '../../MuiForms/TagSelectorBeta'
 
 // TODO - add validation BAI-866
 export default function ModelCardForm({
   splitSchema,
   setSplitSchema,
   canEdit = false,
+  displayLabelValidation = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
+  displayLabelValidation?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
-
-  const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -45,7 +44,7 @@ export default function ModelCardForm({
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
-      spacing={4}
+      spacing={2}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
       sx={{ width: '100%' }}
@@ -59,29 +58,18 @@ export default function ModelCardForm({
           connector={<Nothing />}
           sx={{ minWidth: 'max-content' }}
         >
-          {splitSchema.steps.map((step, index) => (
-            <MaterialStep key={step.schema.title}>
-              <StepButton sx={{ p: 0, m: 0 }} onClick={() => setActiveStep(index)} icon={<Nothing />}>
-                <StepLabel
-                  sx={{
-                    padding: 0,
-                    '& .MuiStepLabel-label': {
-                      fontSize: '16px',
-                    },
-                    '& .MuiStepLabel-label.Mui-active': {
-                      color: `${theme.palette.primary.main}`,
-                    },
-                    '& .Mui-active': {
-                      borderBottomStyle: 'solid',
-                      borderColor: `${theme.palette.secondary.main}`,
-                    },
-                  }}
-                >
-                  {step.schema.title}
-                </StepLabel>
-              </StepButton>
-            </MaterialStep>
-          ))}
+          <List>
+            {splitSchema.steps.map((step, index) => (
+              <ListItem key={step.schema.title} disablePadding>
+                <ListItemButton selected={activeStep === index} onClick={() => setActiveStep(index)}>
+                  <Stack direction='row' spacing={2}>
+                    <Typography>{step.schema.title}</Typography>
+                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
+                  </Stack>
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
         </Stepper>
       </div>
 
@@ -90,7 +78,6 @@ export default function ModelCardForm({
         formData={currentStep.state}
         onChange={onFormChange}
         validator={validator}
-        noValidate
         widgets={{
           nothing: Nothing,
           customTextInput: CustomTextInput,
