@@ -59,16 +59,16 @@ describe('ModelExportAndSubmission', () => {
         activeStep={1}
         setActiveStep={doNothing}
         modelUploading={false}
-      />
+      />,
     )
 
     await waitFor(async () => {
       expect(await screen.findByText('please check before submitting')).not.toBeUndefined()
       expect(
-        await screen.findByText('If you are happy with your submission click below to upload your model to Bailo.')
+        await screen.findByText('If you are happy with your submission click below to upload your model to Bailo.'),
       ).not.toBeUndefined()
       expect(
-        await screen.findByText('Click below to download your metadata as a JSON file for easy distribution.')
+        await screen.findByText('Click below to download your metadata as a JSON file for easy distribution.'),
       ).not.toBeUndefined()
     })
   })

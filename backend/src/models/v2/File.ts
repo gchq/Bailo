@@ -41,7 +41,7 @@ const FileSchema = new Schema<FileInterface>(
     timestamps: true,
     collection: 'v2_files',
     toJSON: { getters: true },
-  }
+  },
 )
 
 const FileModel = model<FileInterface>('v2_File', FileSchema)

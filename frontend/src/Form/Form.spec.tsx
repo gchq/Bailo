@@ -42,7 +42,7 @@ describe('Form', () => {
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true,
-      })
+      }),
     )
 
     await waitFor(async () => {

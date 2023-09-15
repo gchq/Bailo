@@ -112,7 +112,7 @@ function ModelExportAndSubmission({
           </html>
         `,
         ],
-        { type: 'text/html;charset=utf-8' }
+        { type: 'text/html;charset=utf-8' },
       )
       downloadToFile(blob, `${formData.highLevelDetails.name}.html`)
     }

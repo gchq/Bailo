@@ -8,7 +8,7 @@ import { ensureUserRole } from '../../utils/user.js'
 
 function parseDateQuery(
   queryDate: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
-  fallback: Date
+  fallback: Date,
 ): Date {
   if (typeof queryDate !== 'string') {
     return fallback
@@ -29,7 +29,7 @@ function queryStringArrayTypeGuard(query: unknown): query is QueryString.ParsedQ
 
 function parseQueryArray(
   property: string,
-  query: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined
+  query: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
 ): string[] {
   if (!query) {
     return []
@@ -48,7 +48,7 @@ function parseQueryArray(
 
 function parseString(
   property: string,
-  query: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined
+  query: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
 ): string | undefined {
   if (query !== undefined && typeof query !== 'string') {
     throw BadReq({ [property]: query }, `Must pass a string to ${property}`)

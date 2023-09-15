@@ -12,7 +12,7 @@ describe('ReviewWithComment', () => {
         open={true}
         onClose={() => undefined}
         onSubmit={() => undefined}
-      />
+      />,
     )
 
     await waitFor(async () => {
@@ -29,14 +29,14 @@ describe('ReviewWithComment', () => {
         open={true}
         onClose={() => undefined}
         onSubmit={() => undefined}
-      />
+      />,
     )
 
     await waitFor(async () => {
       const rejectButton = await screen.findByText('Reject')
       fireEvent.click(rejectButton)
       expect(
-        await screen.findByText('You must submit a comment when either rejecting or requesting changes.')
+        await screen.findByText('You must submit a comment when either rejecting or requesting changes.'),
       ).not.toBeUndefined()
     })
   })

@@ -1,5 +1,5 @@
 # Test limited to infrastructure/Pods running with expected listening ports
-# Application test is done seperately
+# Application test is done separately
 
 apiVersion: v1
 kind: ConfigMap
@@ -11,7 +11,7 @@ data:
   testconn.sh: |-
     set -x
 
-    echo "Checking Bailo-fronend"
+    echo "Checking Bailo-frontend"
     nc -vz bailo-backend {{ .Values.service.frontendPort }}
     echo "Checking Bailo-backend"
     nc -vz bailo-backend {{ .Values.service.backendPort }}

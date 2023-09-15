@@ -25,7 +25,7 @@ describe('DeploymentOverview', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <DeploymentOverview deployment={deployment as Deployment} />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     await waitFor(async () => {
