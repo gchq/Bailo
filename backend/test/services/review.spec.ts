@@ -17,7 +17,8 @@ const ReviewRequestModel = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/ReviewRequest.js', () => ({
+vi.mock('../../src/models/v2/ReviewRequest.js', async () => ({
+  ...((await vi.importActual('../../src/models/v2/ReviewRequest.js')) as object),
   default: ReviewRequestModel,
 }))
 
