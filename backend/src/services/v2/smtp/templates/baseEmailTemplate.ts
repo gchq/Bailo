@@ -6,7 +6,7 @@ export interface IEmailTemplate {
   to
   setTo(emailAddress: string)
   subject
-  setSubject(resourceName: string)
+  setSubject(resourceName: string, reviewerRole: string)
   html
   setHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string)
   text

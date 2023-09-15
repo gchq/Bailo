@@ -33,7 +33,7 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   async getUserInformation(entity: string): Promise<{ email: string }> {
     const entityObject = fromEntity(entity)
     if (entityObject.kind !== SillyEntityKind.User) {
-      throw new Error('Cannot get user information for a non-user entity')
+      throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
     }
     return {
       email: `${entityObject.value}@example.com`,
@@ -48,13 +48,13 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
       const groupMembers = await this.getGroupMembers(entity)
       return groupMembers.map((member) => this.getUserInformation(member))
     } else {
-      throw GenericError(500, 'Unable to get list of user information. Entity not recognised', { entity })
+      throw new Error(`Unable to get list of user information. Entity not recognised: ${entity}`)
     }
   }
 
   async getGroupMembers(entity: string): Promise<string[]> {
     if (fromEntity(entity).kind !== SillyEntityKind.Group) {
-      throw new Error('Cannot get user information for a non-group entity')
+      throw new Error('Cannot get group information for a non-group entity')
     }
     return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
   }

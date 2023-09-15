@@ -26,7 +26,7 @@ export const testDeploymentSchema = {
   active: true,
   hidden: false,
 
-  kind: SchemaKind.Deployment,
+  kind: SchemaKind.AccessRequest,
   jsonSchema: {
     'Schema field 1': 'field 1 info',
   },

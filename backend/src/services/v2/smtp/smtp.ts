@@ -24,7 +24,7 @@ export async function requestReviewForRelease(entity: string, reviewRequest: Rev
   const sendEmailResponses = userInfoList.map(async (userInfo) => {
     const email = new ReleaseReviewRequestEmail()
     email.setTo(userInfo.email)
-    email.setSubject(releaseName)
+    email.setSubject(releaseName, reviewRequest.role)
     email.setText(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
     email.setHtml(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
     return await sendEmail(email)

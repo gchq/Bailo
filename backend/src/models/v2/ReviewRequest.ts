@@ -45,12 +45,7 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
         return this.kind === ReviewKind.Release
       },
     },
-    modelId: {
-      type: String,
-      required: function (this: ReviewRequestInterface): boolean {
-        return this.kind === ReviewKind.Access
-      },
-    },
+    modelId: { type: String,required: true },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 
     role: { type: String, required: true },

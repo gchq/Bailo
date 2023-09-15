@@ -4,6 +4,8 @@ import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.j
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
+import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 import { createReleaseReviewRequests } from './review.js'
 
@@ -26,9 +28,20 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     })
   }
 
-  await createReleaseReviewRequests(model, release)
 
+  try {
   await release.save()
+  } catch(error) {
+    handleDuplicateKeys(error)
+  }
+
+  try {
+  await createReleaseReviewRequests(model, release)
+  } catch(error) { 
+    // Transactions here would solve this issue.
+    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release') 
+    throw error 
+  }
 
   return release
 }

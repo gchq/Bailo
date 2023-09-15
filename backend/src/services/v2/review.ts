@@ -5,6 +5,7 @@ import ReviewRequest, { ReviewRequestInterface } from '../../models/v2/ReviewReq
 import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
+import log from './log.js'
 
 export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
   const reviews = await ReviewRequest.aggregate()
@@ -48,19 +49,33 @@ export async function countReviewRequests(user: UserDoc): Promise<number> {
 }
 
 export async function createReleaseReviewRequests(model: ModelDoc, release: ReleaseDoc) {
-  const entitiesForRole = getEntitiesForRole(model.collaborators, 'msro')
-  if (entitiesForRole.length == 0) {
-    throw BadReq('No Review Requests have been created')
-  }
-  const reviewRequest = new ReviewRequest({
-    semver: release.semver,
-    kind: 'release',
-    role: 'msro',
-    entities: entitiesForRole,
-  })
-  await reviewRequest.save()
+  // This will be added to the schema(s)
+  const reviewRoles = ['msro','mtr']
 
-  entitiesForRole.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))
+  const roleEntities = reviewRoles.map((role) => {
+    const entites = getEntitiesForRole(model.collaborators, role)
+    if (entites.length == 0) {
+      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', {role})
+    }
+    return {role, entites}
+  })
+ 
+  const createReviewRequests = roleEntities.map((roleInfo) => {
+    const reviewRequest = new ReviewRequest({
+      semver: release.semver,
+      modelId: model.id,
+      kind: 'release',
+      role: roleInfo.role,
+      entities: roleInfo.entites,
+    })
+    try {
+      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))
+    } catch(error) {
+      log.warn('Error when sending notifications requesting review for release.', {error})
+    }
+    return reviewRequest.save()
+  })
+  await Promise.all(createReviewRequests)
 }
 
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {

@@ -14,9 +14,9 @@ export class ReleaseReviewRequestEmail extends BaseEmailTemplate implements IEma
     this.to = emailAddress
   }
 
-  setSubject(resourceName: string) {
+  setSubject(resourceName: string, reviewerRole: string) {
     this.subject = dedent(`
-    You have been requested to review '${resourceName}' on Bailo
+    ${reviewerRole.toUpperCase()}: You have been requested to review '${resourceName}' on Bailo
   `)
   }
 
