@@ -1,21 +1,30 @@
-import { Box } from '@mui/material'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
+import { Box, Card, Container, Typography } from '@mui/material'
+import { useGetModel } from 'actions/model'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import Wrapper from 'src/Wrapper.beta'
+import { SplitSchemaNoRender } from 'types/interfaces'
 
-import ModelCardForm from '../../../../../../frontend/src/Form/beta/ModelCardForm'
 import { useGetSchema } from '../../../../../actions/schema'
 import { useGetUiConfig } from '../../../../../actions/uiConfig'
 import Loading from '../../../../../src/common/Loading'
+import ModelCardForm from '../../../../../src/Form/beta/ModelCardForm'
 import MessageAlert from '../../../../../src/MessageAlert'
-import { ReleaseInterface } from '../../../../../types/types'
+import { getStepsFromSchema } from '../../../../../utils/beta/formUtils'
 
-type ModelCardVersionProps = {
-  version: ReleaseInterface
-}
+export default function ViewModelCardVersion() {
+  const router = useRouter()
+  const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
 
-export default function viewModelCardVersion({ version }: ModelCardVersionProps) {
-  const [isEdit, setIsEdit] = useState(true)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(version)
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  // const goBack = () => {
+  //   window.history.go(-1)
+  // }
 
   useEffect(() => {
     if (!model || !schema) return
@@ -37,12 +46,24 @@ export default function viewModelCardVersion({ version }: ModelCardVersionProps)
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
   return (
-    <>
-      {(isSchemaLoading || isUiConfigLoading) && <Loading />}
+    <Wrapper title='Modelcard Revision' page='modelcard'>
+      {(isSchemaLoading || isUiConfigLoading || isModelLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
-        <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={!isEdit} />
+        {!isSchemaLoading && !isUiConfigLoading && (
+          <Container>
+            <Card sx={{ p: 4 }}>
+              {/* <ArrowBackIosIcon onClick={() => goBack()}></ArrowBackIosIcon> */}
+              <ArrowBackIosIcon onClick={() => router.push(`/beta/model/${modelId}`)}></ArrowBackIosIcon>
+              <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
+            </Card>
+          </Container>
+        )}
       </Box>
-    </>
+    </Wrapper>
   )
 }
