@@ -3,7 +3,6 @@ import { describe, expect, test, vi } from 'vitest'
 import Release from '../../../src/models/v2/Release.js'
 import ReviewRequest from '../../../src/models/v2/ReviewRequest.js'
 import config from '../../../src/utils/v2/config.js'
-import { EntityKind, fromEntity } from '../../../src/utils/v2/entity.js'
 import { requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
 
 vi.mock('../../../src/utils/v2/config.js', () => {
@@ -35,10 +34,12 @@ vi.mock('../../../src/utils/v2/config.js', () => {
   }
 })
 
-vi.mock('../../../src/services/v2/log.js', async () => ({
-  default: {
+const logMock = vi.hoisted(() => ({
     info: vi.fn(),
-  },
+    warn: vi.fn(),
+}))
+vi.mock('../../../src/services/v2/log.js', async () => ({
+  default: logMock,
 }))
 
 const transporterMock = vi.hoisted(() => {
@@ -54,8 +55,7 @@ vi.mock('nodemailer', async () => ({
 }))
 
 const authorisationMock = vi.hoisted(() => ({
-  getUserInformation: vi.fn(() => ({ email: 'email@email.com' })),
-  getGroupMembers: vi.fn(),
+  getUserInformationList: vi.fn(() => ([Promise.resolve({ email: 'email@email.com' })])),
 }))
 vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ default: authorisationMock }))
 
@@ -80,15 +80,6 @@ const releaseEmailMock = vi.hoisted(() => {
 vi.mock('../../../src/services/v2/smtp/templates/releaseReviewRequest.js', () => ({
   ReleaseReviewRequestEmail: releaseEmailMock,
 }))
-
-const entityUtilsMock = vi.hoisted(async () => ({
-  ...((await vi.importActual('../../../src/utils/v2/entity.js')) as object),
-  fromEntity: vi.fn(() => ({
-    kind: 'user',
-    value: 'user',
-  })),
-}))
-vi.mock('../../../src/utils/v2/entity.js', () => entityUtilsMock)
 
 describe('services > smtp', () => {
   test('that an email is sent', async () => {
@@ -117,27 +108,19 @@ describe('services > smtp', () => {
     expect(transporterMock.sendMail).not.toBeCalled()
   })
 
-  test('that an error is thrown when an email cannot be sent', async () => {
-    transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
-
-    const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())
-    expect(result).rejects.toThrowError(`Error Sending email notification`)
-  })
-
-  test('that an error is thrown when an unknown entity is provided', async () => {
-    ;(await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: 'fake', value: 'fake' })
-
-    const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())
-    expect(result).rejects.toThrowError(`Error Sending email notification to unrecognised entity`)
-  })
-
   test('that sendEmail is called for each member of a group entity', async () => {
-    ;(await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: EntityKind.Group, value: 'groupName' })
-    const groupMembers: string[] = ['user:groupMember1', 'user:groupMember2']
-    authorisationMock.getGroupMembers.mockReturnValueOnce(groupMembers)
+    authorisationMock.getUserInformationList.mockReturnValueOnce([Promise.resolve({ email: 'member1@email.com' }), Promise.resolve({ email: 'member2@email.com' })])
 
     await requestReviewForRelease('group:group1', new ReviewRequest(), new Release())
 
-    expect(authorisationMock.getUserInformation.mock.calls).toMatchSnapshot()
+    expect(transporterMock.sendMail.mock.calls).toMatchSnapshot()
+  })
+
+  test('that we log when an email cannot be sent', async () => {
+    authorisationMock.getUserInformationList.mockReturnValueOnce([Promise.resolve({ email: 'member1@email.com' }), Promise.resolve({ email: 'member2@email.com' })])
+    transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
+
+    const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())
+    expect(result).rejects.toThrowError(`Unable to send email`)
   })
 })

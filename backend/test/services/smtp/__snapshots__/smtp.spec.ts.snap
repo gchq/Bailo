@@ -15,10 +15,22 @@ exports[`services > smtp > that an email is sent 1`] = `
 exports[`services > smtp > that sendEmail is called for each member of a group entity 1`] = `
 [
   [
-    "user:groupMember1",
+    {
+      "from": "\\"Bailo 📝\\" <bailo@example.org>",
+      "html": "html",
+      "subject": "subject",
+      "text": "text",
+      "to": "email@email.com",
+    },
   ],
   [
-    "user:groupMember2",
+    {
+      "from": "\\"Bailo 📝\\" <bailo@example.org>",
+      "html": "html",
+      "subject": "subject",
+      "text": "text",
+      "to": "email@email.com",
+    },
   ],
 ]
 `;

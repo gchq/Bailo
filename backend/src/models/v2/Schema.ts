@@ -14,7 +14,7 @@ export interface SchemaInterface {
   hidden: boolean
 
   kind: SchemaKindKeys
-  jsonSchema: unknown
+  jsonSchema: object
 
   createdAt: Date
   updatedAt: Date

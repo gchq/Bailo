@@ -1,4 +1,5 @@
 import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
+import { ModelCardRevisionDoc } from '../../models/v2/ModelCardRevision.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
@@ -38,6 +39,18 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
     }
     throw error
   }
+}
+
+export async function getManagerAndReviewer(modelCard: ModelCardRevisionDoc) {
+  const schema = await findSchemaById(modelCard.schemaId)
+
+  if (!schema) {
+    return { managerTitle: 'Managers', reviewerTitle: 'Technical Reviewer' }
+  }
+
+  const managerTitle = schema.jsonSchema.properties.contacts.properties.manager.title
+  const reviewerTitle = schema.jsonSchema.properties.contacts.properties.reviewer.title
+  return { managerTitle, reviewerTitle }
 }
 
 /**
