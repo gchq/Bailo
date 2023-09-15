@@ -3,9 +3,9 @@ import dedent from 'dedent-js'
 import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 
 export interface IEmailTemplate {
-  to,
+  to
   setTo(emailAddress: string)
-  subject,
+  subject
   setSubject(resourceName: string)
   html
   setHtml(releaseName: string, reviewKind: ReviewKindKeys, modelId: string, baseUrl: string, author: string)

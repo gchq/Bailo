@@ -14,10 +14,10 @@ export default function Model() {
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
-  // TODO implement function
-  function myFunction() {
-    console.log('Button pressed')
+  function requestAccess() {
+    router.push(`/beta/model/${modelId}/access/schema`)
   }
+
   return (
     <Wrapper title='Model' page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
@@ -30,9 +30,9 @@ export default function Model() {
             { title: 'Releases', view: <Releases model={model} /> },
             { title: 'Settings', view: <Settings model={model} /> },
           ]}
-          actionButtonOnClick={myFunction}
-          actionButtonTitle='Actions'
           displayActionButton
+          actionButtonTitle='Request access'
+          actionButtonOnClick={requestAccess}
         />
       )}
     </Wrapper>

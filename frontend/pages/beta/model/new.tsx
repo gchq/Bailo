@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Card,
+  Container,
   Divider,
   FormControl,
   FormControlLabel,
@@ -16,18 +17,19 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postModel } from '../../../actions/model'
 import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
 import MessageAlert from '../../../src/MessageAlert'
 import Wrapper from '../../../src/Wrapper.beta'
-import { ModelForm } from '../../../types/v2/types'
+import { ModelForm, ModelVisibility } from '../../../types/v2/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
-  const [visibility, setVisibility] = useState<ModelForm['visibility']>('public')
+  const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
@@ -39,16 +41,20 @@ export default function NewModel() {
     event.preventDefault()
     setErrorMessage('')
     const formData: ModelForm = {
-      name: `${teamName}/${modelName}`,
+      name: modelName,
+      team: teamName,
       description,
       visibility,
     }
     const response = await postModel(formData)
-    if (response.status === 200) {
-      router.push(`/beta/model/${response.data.model.id}`)
-    } else {
-      setErrorMessage(response.data)
+
+    if (!response.ok) {
+      const error = await getErrorMessage(response)
+      return setErrorMessage(error)
     }
+
+    const data = await response.json()
+    router.push(`/beta/model/${data.model.id}`)
   }
 
   const privateLabel = () => {
@@ -77,85 +83,85 @@ export default function NewModel() {
 
   return (
     <Wrapper title='Create a new Model' page='upload'>
-      <Card sx={{ p: 4, maxWidth: 500, m: 'auto' }}>
-        <Typography
-          component='h1'
-          variant='h4'
-          sx={{ fontWeight: 'bold' }}
-          color='primary'
-          data-test='createModelPageTitle'
-        >
-          Create a new model
-        </Typography>
-        <Typography>A model repository contains all files, history and information related to a model.</Typography>
-        <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
-          <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
-            <>
-              <Typography component='h2' variant='h6'>
-                Overview
-              </Typography>
-              <Stack direction='row' spacing={2}>
-                <TeamAndModelSelector
-                  setTeamValue={setTeamName}
-                  teamValue={teamName}
-                  setModelValue={setModelName}
-                  modelValue={modelName}
-                />
-              </Stack>
-              <Stack>
-                <FormControl>
-                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
-                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography>
-                  <TextField
-                    id='new-model-description'
-                    required
-                    size='small'
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    data-test='modelDescription'
+      <Container maxWidth='sm'>
+        <Card sx={{ p: 4, m: 'auto' }}>
+          <Typography
+            component='h1'
+            variant='h4'
+            sx={{ fontWeight: 'bold' }}
+            color='primary'
+            data-test='createModelPageTitle'
+          >
+            Create a new model
+          </Typography>
+          <Typography>A model repository contains all files, history and information related to a model.</Typography>
+          <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
+            <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
+              <>
+                <Typography component='h2' variant='h6'>
+                  Overview
+                </Typography>
+                <Box sx={{ width: '100%' }}>
+                  <TeamAndModelSelector
+                    setTeamValue={setTeamName}
+                    teamValue={teamName}
+                    setModelValue={setModelName}
+                    modelValue={modelName}
                   />
-                </FormControl>
-              </Stack>
-            </>
-            <Divider />
-            <>
-              <Typography component='h3' variant='h6'>
-                Access control
-              </Typography>
-              <RadioGroup
-                defaultValue='public'
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
-              >
-                <FormControlLabel
-                  value='public'
-                  control={<Radio />}
-                  label={publicLabel()}
-                  data-test='publicButtonSelector'
-                />
-                <FormControlLabel
-                  value='private'
-                  control={<Radio />}
-                  label={privateLabel()}
-                  data-test='privateButtonSelector'
-                />
-              </RadioGroup>
-            </>
-            <Divider />
-            <Box sx={{ textAlign: 'right' }}>
-              <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
-                <span>
-                  <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
-                    Create Model
-                  </Button>
-                </span>
-              </Tooltip>
-              <MessageAlert message={errorMessage} severity='error' />
-            </Box>
-          </Stack>
-        </Box>
-      </Card>
+                </Box>
+                <Stack>
+                  <FormControl>
+                    <Typography sx={{ fontWeight: 'bold' }}>
+                      Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                    </Typography>
+                    <TextField
+                      data-test='modelDescription'
+                      onChange={(event) => setDescription(event.target.value)}
+                      value={description}
+                      size='small'
+                    />
+                  </FormControl>
+                </Stack>
+              </>
+              <Divider />
+              <>
+                <Typography component='h3' variant='h6'>
+                  Access control
+                </Typography>
+                <RadioGroup
+                  defaultValue='public'
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value as ModelForm['visibility'])}
+                >
+                  <FormControlLabel
+                    value='public'
+                    control={<Radio />}
+                    label={publicLabel()}
+                    data-test='publicButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='private'
+                    control={<Radio />}
+                    label={privateLabel()}
+                    data-test='privateButtonSelector'
+                  />
+                </RadioGroup>
+              </>
+              <Divider />
+              <Box sx={{ textAlign: 'right' }}>
+                <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
+                  <span>
+                    <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
+                      Create Model
+                    </Button>
+                  </span>
+                </Tooltip>
+                <MessageAlert message={errorMessage} severity='error' />
+              </Box>
+            </Stack>
+          </Box>
+        </Card>
+      </Container>
     </Wrapper>
   )
 }

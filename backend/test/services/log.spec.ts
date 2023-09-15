@@ -50,7 +50,7 @@ describe('services > log', () => {
 
     expect(writer.getSrc({ file: '/base/a.ts', line: 10 })).toBe('a.ts:10')
     expect(writer.getSrc({ file: '/test/b.ts', line: 10 })).toBe('/test/b.ts:10')
-    expect(writer.getSrc({ file: 'middleware/expressLogger.ts', line: 10 })).toBe('express')
+    expect(writer.getSrc({ file: 'routes/middleware/expressLogger.ts', line: 10 })).toBe('express')
   })
 
   test('Writer > representValue', () => {

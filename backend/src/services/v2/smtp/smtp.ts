@@ -10,6 +10,7 @@ import log from '../log.js'
 import { ReleaseReviewRequestEmail } from './templates/releaseReviewRequest.js'
 import { IEmailTemplate } from './templates/baseEmailTemplate.js'
 import { emailDeploymentOwnersOnVersionDeletion } from '../../deployment.js'
+import { getReleaseName } from '../release.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
@@ -32,11 +33,12 @@ export async function requestReviewForRelease(entity: string, reviewRequest: Rev
     throw GenericError(500, 'Error Sending email notification to unrecognised entity', { entity })
   }
 
+  const releaseName = getReleaseName(release)
   const email = new ReleaseReviewRequestEmail()
   email.setTo(to)
-  email.setSubject(release.name)
-  email.setText(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
-  email.setHtml(release.name, reviewRequest.kind, release.modelId, appBaseUrl, 'unknown')
+  email.setSubject(releaseName)
+  email.setText(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
+  email.setHtml(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
   await sendEmail(email)
 }
 

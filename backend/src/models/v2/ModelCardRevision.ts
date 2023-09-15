@@ -26,7 +26,7 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
     schemaId: { type: String, required: true },
 
     version: { type: Number, required: true },
-    metadata: { type: String, required: true, get: getSchema, set: setSchema },
+    metadata: { type: Schema.Types.Mixed },
 
     createdBy: { type: String, required: true },
   },
@@ -37,13 +37,10 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
   }
 )
 
-function getSchema(schema: string) {
-  return JSON.parse(schema)
-}
-
-function setSchema(schema: unknown) {
-  return JSON.stringify(schema)
-}
+// This is required to stop a race case that could occur when there are two 'updateModelCard'
+// requests that happen simultaneously.  Check out the function implementation in 'services'
+// to learn more.
+ModelCardRevisionSchema.index({ modelId: 1, version: 1 }, { unique: true })
 
 const ModelCardRevisionModel = model<ModelCardRevisionInterface>('v2_Model_Card_Revision', ModelCardRevisionSchema)
 

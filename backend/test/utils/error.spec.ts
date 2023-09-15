@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { BadReq, Forbidden, GenericError, NotFound } from '../../src/utils/v2/error.js'
+import { BadReq, Forbidden, GenericError, NotFound, Unauthorized } from '../../src/utils/v2/error.js'
 
 describe('utils > error', () => {
   test('GenericError', () => {
@@ -13,6 +13,11 @@ describe('utils > error', () => {
   test('BadReq', () => {
     const error = BadReq('example')
     expect(error.code).toBe(400)
+  })
+
+  test('Unauthorized', () => {
+    const error = Unauthorized('example')
+    expect(error.code).toBe(401)
   })
 
   test('Forbidden', () => {

@@ -15,3 +15,9 @@ export const ReviewKind = {
   Access: 'access',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
+
+export const GetModelCardVersionOptions = {
+  Latest: 'latest',
+} as const
+export type GetModelCardVersionOptionsKeys =
+  (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]

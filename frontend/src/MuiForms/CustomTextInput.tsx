@@ -1,7 +1,9 @@
+import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { Fragment, useMemo } from 'react'
 
-interface EntitySelectorProps {
+interface CustomTextInputProps {
   label?: string
   required?: boolean
   disabled?: boolean
@@ -12,40 +14,51 @@ interface EntitySelectorProps {
   InputProps?: any
 }
 
-export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, label, formContext } = props
-
-  const _onChange = (e) => {
-    onChange(e.target.value)
-  }
+export default function CustomTextInput(props: CustomTextInputProps) {
+  const { onChange, value, label, formContext } = props
 
   const theme = useTheme()
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value)
+  }
+
+  const disabledWebkitTextFillColor = useMemo(() => {
+    if (value) {
+      return theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white
+    } else {
+      return theme.palette.customTextInput.main
+    }
+  }, [theme, value])
+
   return (
-    <TextField
-      {...props}
-      size='small'
-      sx={{
-        input: {
-          color: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-        label: {
-          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-        '& .MuiInputBase-input.Mui-disabled': {
-          WebkitTextFillColor: theme.palette.mode === 'light' ? 'black' : 'white',
-        },
-      }}
-      onChange={_onChange}
-      variant={!formContext.editMode ? 'standard' : 'outlined'}
-      label={label}
-      required={!formContext.editMode ? false : true}
-      value={currentValue || ''}
-      disabled={!formContext.editMode}
-      InputProps={{
-        ...props.InputProps,
-        disableUnderline: !formContext.editMode ? true : false,
-      }}
-    />
+    <Fragment key={label}>
+      <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+      <TextField
+        size='small'
+        sx={{
+          input: {
+            color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+          },
+          label: {
+            WebkitTextFillColor:
+              theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+          },
+          '& .MuiInputBase-input.Mui-disabled': {
+            WebkitTextFillColor: disabledWebkitTextFillColor,
+          },
+          fontStyle: value ? 'unset' : 'italic',
+        }}
+        onChange={handleChange}
+        variant={!formContext.editMode ? 'standard' : 'outlined'}
+        required={formContext.editMode}
+        value={value || (!formContext.editMode ? 'Unanswered' : '')}
+        disabled={!formContext.editMode}
+        InputProps={{
+          ...props.InputProps,
+          disableUnderline: !formContext.editMod,
+        }}
+      />
+    </Fragment>
   )
 }

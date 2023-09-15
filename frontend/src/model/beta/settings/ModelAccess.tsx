@@ -53,10 +53,10 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   }
 
   // TODO - add a request to update the model's collaborators field
-  function updateAccessList() {
+  async function updateAccessList() {
     const updatedModel: ModelInterface = _.cloneDeep(model)
     updatedModel.collaborators = accessList
-    patchModel(updatedModel)
+    await patchModel(updatedModel)
   }
 
   if (isUsersError) {
@@ -131,9 +131,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
-          <Button aria-label='Save access list' onClick={updateAccessList}>
-            Save
-          </Button>
+          <div>
+            <Button aria-label='Save access list' onClick={updateAccessList}>
+              Save
+            </Button>
+          </div>
         </Stack>
       )}
     </>

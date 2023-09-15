@@ -61,10 +61,10 @@ vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ defa
 
 const releaseEmailMock = vi.hoisted(() => {
   const obj: any = {
-    to: "email@email.com",
-    subject: "subject",
-    text: "text",
-    html: "html"
+    to: 'email@email.com',
+    subject: 'subject',
+    text: 'text',
+    html: 'html',
   }
 
   obj.setSubject = vi.fn()
@@ -125,14 +125,14 @@ describe('services > smtp', () => {
   })
 
   test('that an error is thrown when an unknown entity is provided', async () => {
-    (await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: 'fake', value: 'fake' })
+    ;(await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: 'fake', value: 'fake' })
 
     const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())
     expect(result).rejects.toThrowError(`Error Sending email notification to unrecognised entity`)
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {
-    (await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: EntityKind.Group, value: 'groupName' })
+    ;(await entityUtilsMock).fromEntity.mockReturnValueOnce({ kind: EntityKind.Group, value: 'groupName' })
     const groupMembers: string[] = ['user:groupMember1', 'user:groupMember2']
     authorisationMock.getGroupMembers.mockReturnValueOnce(groupMembers)
 

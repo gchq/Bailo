@@ -1,10 +1,8 @@
-import axios from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
 
 import { ListModelType } from '../types/types'
 import { ModelForm, ModelInterface, Role } from '../types/v2/types'
-import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 interface ModelSearchResult {
@@ -85,29 +83,17 @@ export function useGetModelRolesCurrentUser(id?: string) {
 }
 
 export async function postModel(form: ModelForm) {
-  try {
-    const response = await axios({
-      method: 'post',
-      url: '/api/v2/models',
-      headers: { 'Content-Type': 'application/json' },
-      data: form,
-    })
-    return { status: response.status, data: response.data }
-  } catch (error) {
-    return handleAxiosError(error)
-  }
+  return fetch(`/api/v2/models`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(form),
+  })
 }
 
 export async function patchModel(model: ModelInterface) {
-  try {
-    const response = await axios({
-      method: 'patch',
-      url: `/api/v2/model/${model.id}`,
-      headers: { 'Content-Type': 'application/json' },
-      data: model,
-    })
-    return { status: response.status, data: response.data }
-  } catch (error) {
-    return handleAxiosError(error)
-  }
+  return fetch(`/api/v2/model/${model.id}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(model),
+  })
 }

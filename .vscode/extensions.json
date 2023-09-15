@@ -1,3 +1,15 @@
 {
-  "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.pylint",
+    "ms-python.isort",
+    "ms-python.flake8",
+    "ms-python.black-formatter",
+    "ryanluker.vscode-coverage-gutters",
+    "bungcip.better-toml"
+  ]
 }

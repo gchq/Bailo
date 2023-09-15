@@ -16,7 +16,6 @@ import {
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import { useListModels } from '../../actions/model'
@@ -26,7 +25,6 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
 import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
-import { ModelInterface } from '../../types/v2/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
@@ -73,9 +71,6 @@ export default function ExploreModels() {
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction='row' spacing={2}>
         <Stack spacing={2}>
-          <Typography component='h1' variant='h4' color='primary'>
-            Marketplace
-          </Typography>
           <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
           </Button>
