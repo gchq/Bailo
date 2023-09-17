@@ -7,6 +7,7 @@ import { SillyAuthorisationConnector } from './silly.js'
 export const ModelAction = {
   Create: 'create',
   View: 'view',
+  Update: 'update',
   UploadFile: 'upload_file',
   Write: 'write',
 } as const
