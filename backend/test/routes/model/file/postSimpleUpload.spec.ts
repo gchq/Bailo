@@ -7,7 +7,7 @@ import { createFixture, testPost } from '../../../testUtils/routes.js'
 vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
 
-vi.mock('../../../../src/services/file.js', () => ({
+vi.mock('../../../../src/services/v2/file.js', () => ({
   uploadFile: vi.fn(() => ({ _id: 'test' })),
 }))
 

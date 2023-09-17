@@ -54,6 +54,17 @@ export async function getFileById(user: UserDoc, fileId: string) {
   return file
 }
 
+export async function getFilesByModel(user: UserDoc, modelId: string) {
+  const model = await getModelById(user, modelId)
+
+  if (!(await authorisation.userModelAction(user, model, ModelAction.View))) {
+    throw Forbidden(`You do not have permission to get these files.`, { userDn: user.dn, modelId })
+  }
+
+  const files = await FileModel.find({ modelId })
+  return files
+}
+
 export async function removeFile(user: UserDoc, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
 
