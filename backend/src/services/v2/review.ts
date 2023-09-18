@@ -6,6 +6,7 @@ import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 import log from './log.js'
+import { ReviewKind } from '../../types/v2/enums.js'
 
 export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
   const reviews = await ReviewRequest.aggregate()
@@ -64,9 +65,8 @@ export async function createReleaseReviewRequests(model: ModelDoc, release: Rele
     const reviewRequest = new ReviewRequest({
       semver: release.semver,
       modelId: model.id,
-      kind: 'release',
+      kind: ReviewKind.Release,
       role: roleInfo.role,
-      entities: roleInfo.entites,
     })
     try {
       roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))

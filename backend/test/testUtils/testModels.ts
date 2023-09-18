@@ -47,7 +47,6 @@ export const testReleaseReviewRequestWithReview = {
   ],
 
   role: 'msro',
-  entities: ['group:group'],
 
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
@@ -58,7 +57,6 @@ export const testReleaseReviewRequest = {
   kind: ReviewKind.Release,
 
   role: 'msro',
-  entities: ['group:group'],
   reviews: [],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),

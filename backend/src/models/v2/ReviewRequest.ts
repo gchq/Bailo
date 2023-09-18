@@ -24,7 +24,6 @@ export interface ReviewRequestInterface {
   kind: ReviewKindKeys
 
   role: string
-  entities: Array<string>
 
   reviews: Array<Review>
 
@@ -49,7 +48,6 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 
     role: { type: String, required: true },
-    entities: [{ type: String, required: true }],
 
     reviews: [
       {
