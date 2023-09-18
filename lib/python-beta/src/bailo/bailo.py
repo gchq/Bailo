@@ -176,3 +176,100 @@ class BailoClient:
             },
         ).json()
     
+    def create_release(
+        self,
+        model_id: str,
+        model_card_version: float,
+        release_version: str,
+        notes: str,
+        files: List[str],
+        images: List[str],
+        minor: Optional[bool] = False,
+        draft: Optional[bool] = False,
+    ):
+        """
+        Creates a new model release.
+
+        :param model_id: Unique model ID
+        :param model_card_version: Model card version
+        :param release_version: Release version
+        :param notes: Notes on release
+        :param files: Files for release
+        :param images: Images for release
+        :param minor: Signifies a minor release, defaults to False
+        :param draft: Signifies a draft release, defaults to False
+        :return: JSON response object
+        """        
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/releases",
+            json={
+                "modelCardVersion": model_card_version,
+                "semver": release_version,
+                "notes": notes,
+                "minor": minor,
+                "draft": draft,
+                "files": files,
+                "images": images
+            },
+        ).json()
+
+    def get_all_releases(
+        self,
+        model_id: str,
+    ):
+        """
+        Gets all releases for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/releases",
+        ).json()
+
+    def get_release(
+        self,
+        model_id: str,
+        release_version: str
+    ):
+        """
+        Gets a specific model release.
+
+        :param model_id: Unique model ID
+        :param release_version: Release version
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/releases/{release_version}",
+        ).json()
+
+    def delete_release(
+        self,
+        model_id: str,
+        release_version: str,
+    ):
+        """
+        Deletes a specific model release.
+
+        :param model_id: Unique model ID
+        :param release_version: Release version
+        :return: JSON response object
+        """        
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}/releases/{release_version}",
+        ).json()
+    
+    def get_files(
+            self,
+            model_id: str,
+    ):
+        """
+        Gets files for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/files",
+        ).json()
+
