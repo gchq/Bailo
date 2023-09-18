@@ -61,6 +61,7 @@ vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ defa
 
 const releaseEmailMock = vi.hoisted(() => {
   const obj: any = {
+    from: '"Bailo 📝" <bailo@example.org>',
     to: 'email@email.com',
     subject: 'subject',
     text: 'text',
@@ -81,7 +82,7 @@ vi.mock('../../../src/services/v2/smtp/templates/releaseReview.js', () => ({
   ReleaseReviewEmail: releaseEmailMock,
 }))
 
-describe('services > smtp', () => {
+describe('services > smtp > smtp', () => {
   test('that an email is sent', async () => {
     await requestReviewForRelease('user:user', new Review(), new Release())
 

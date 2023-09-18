@@ -25,8 +25,8 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     const email = new ReleaseReviewEmail()
     email.setTo(userInfo.email)
     email.setSubject(releaseName, review.role)
-    email.setText(releaseName, review.kind, release.modelId, appBaseUrl, release.createdBy)
-    email.setHtml(releaseName, review.kind, release.modelId, appBaseUrl, release.createdBy)
+    email.setText(releaseName, release.modelId, appBaseUrl, release.createdBy)
+    email.setHtml(releaseName, release.modelId, appBaseUrl, release.createdBy)
     return await sendEmail(email)
   })
   await Promise.all(sendEmailResponses)
@@ -45,7 +45,7 @@ async function sendEmail(email: IEmailTemplate) {
 
   try {
     const info = await transporter.sendMail({
-      from: config.smtp.from, // sender address
+      from: email.from, // sender address
       to: email.to,
       subject: email.subject,
       text: email.text,

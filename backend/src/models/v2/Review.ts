@@ -59,7 +59,7 @@ const ReviewSchema = new Schema<ReviewInterface>(
   },
   {
     timestamps: true,
-    collection: 'v2_review_requests',
+    collection: 'v2_reviews',
   }
 )
 
