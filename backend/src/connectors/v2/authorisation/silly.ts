@@ -1,8 +1,13 @@
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { toEntity } from '../../../utils/v2/entity.js'
+import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
 import { BaseAuthorisationConnector, ModelActionKeys } from './index.js'
+
+const SillyEntityKind = {
+  User: 'user',
+  Group: 'group',
+} as const
 
 export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   constructor() {
@@ -20,6 +25,31 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
   }
 
   async getEntities(user: UserDoc) {
-    return [toEntity('user', user.dn)]
+    return [toEntity(SillyEntityKind.User, user.dn)]
+  }
+
+  async getUserInformation(entity: string): Promise<{ email: string }> {
+    const entityObject = fromEntity(entity)
+    if (entityObject.kind !== SillyEntityKind.User) {
+      throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
+    }
+    return {
+      email: `${entityObject.value}@example.com`,
+    }
+  }
+
+  async getUserInformationList(entity): Promise<Promise<{ email: string }>[]> {
+    const entities = await this.getEntityMembers(entity)
+    return entities.map((member) => this.getUserInformation(member))
+  }
+
+  async getEntityMembers(entity: string): Promise<string[]> {
+    if (fromEntity(entity).kind === SillyEntityKind.User) {
+      return [entity]
+    } else if (fromEntity(entity).kind === SillyEntityKind.Group) {
+      return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
+    } else {
+      throw new Error(`Unable to get Entity Members. Entity not kind recognised: ${entity}`)
+    }
   }
 }

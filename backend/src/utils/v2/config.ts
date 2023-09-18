@@ -1,7 +1,15 @@
 import bunyan from 'bunyan'
 import _config from 'config'
 
+import { deepFreeze } from './object.js'
+
 export interface Config {
+  app: {
+    protocol: string
+    host: string
+    port: number
+  }
+
   connectors: {
     user: {
       kind: 'silly' | string
@@ -10,6 +18,25 @@ export interface Config {
     authorisation: {
       kind: 'silly' | string
     }
+  }
+
+  smtp: {
+    enabled: boolean
+
+    connection: {
+      host: string
+      port: number
+      secure: boolean
+      auth: {
+        user: string
+        pass: string
+      }
+      tls: {
+        rejectUnauthorized: boolean
+      }
+    }
+
+    from: string
   }
 
   log: {
@@ -34,4 +61,4 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
-export default config
+export default deepFreeze(config)

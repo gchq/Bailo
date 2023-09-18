@@ -20,20 +20,7 @@ export const postSchemaSchema = z.object({
     kind: z.nativeEnum(SchemaKind, {
       required_error: 'Must specify schema kind',
     }),
-    meta: z.object(
-      {},
-      {
-        required_error: 'Must specify schema metadata',
-      },
-    ),
-
-    uiSchema: z.object(
-      {},
-      {
-        required_error: 'Must specify schema UI schema object',
-      },
-    ),
-    schema: z.object(
+    jsonSchema: z.object(
       {},
       {
         required_error: 'Must specify schema schema object',
@@ -42,14 +29,14 @@ export const postSchemaSchema = z.object({
   }),
 })
 
-interface GetSchemaResponse {
+interface PostSchemaResponse {
   schema: SchemaInterface
 }
 
 export const postSchema = [
   ensureUserRole('admin'),
   bodyParser.json(),
-  async (req: Request, res: Response<GetSchemaResponse>) => {
+  async (req: Request, res: Response<PostSchemaResponse>) => {
     const { body } = parse(req, postSchemaSchema)
 
     const schema = await createSchema(body)

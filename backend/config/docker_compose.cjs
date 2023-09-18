@@ -9,6 +9,9 @@ module.exports = {
   },
 
   app: {
+    protocol: 'http',
+    host: 'localhost',
+    port: 8080,
     // Typically generated from `npm run certs`
     privateKey: '/certs/key.pem',
     publicKey: '/certs/cert.pem',

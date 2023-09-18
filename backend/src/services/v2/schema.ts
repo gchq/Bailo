@@ -3,8 +3,8 @@ import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
-import { BadReq, NotFound } from '../../utils/v2/error.js'
-import { isMongoServerError } from '../../utils/v2/mongo.js'
+import { NotFound } from '../../utils/v2/error.js'
+import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
 
 export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
@@ -33,9 +33,7 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
   try {
     return await schemaDoc.save()
   } catch (error) {
-    if (isMongoServerError(error) && error.code == 11000) {
-      throw BadReq(`The following is not unique: ${JSON.stringify(error.keyValue)}`)
-    }
+    handleDuplicateKeys(error)
     throw error
   }
 }
@@ -66,7 +64,7 @@ export async function addDefaultSchemas() {
       id: 'minimal-access-request-general-v10-beta',
       description: 'This is a test beta schema',
       jsonSchema: accessRequestSchemaBeta,
-      kind: SchemaKind.Deployment,
+      kind: SchemaKind.AccessRequest,
       active: true,
       hidden: false,
     },

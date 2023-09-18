@@ -1,4 +1,5 @@
-import { SchemaKind } from '../../src/types/v2/enums.js'
+import { Decision } from '../../src/models/v2/Review.js'
+import { ReviewKind, SchemaKind } from '../../src/types/v2/enums.js'
 
 export const testModelSchema = {
   id: 'example-model-schema-1',
@@ -25,7 +26,7 @@ export const testDeploymentSchema = {
   active: true,
   hidden: false,
 
-  kind: SchemaKind.Deployment,
+  kind: SchemaKind.AccessRequest,
   jsonSchema: {
     'Schema field 1': 'field 1 info',
   },
@@ -34,22 +35,29 @@ export const testDeploymentSchema = {
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
 
-export const testReleaseInactiveApproval = {
-  model: 'example-model-2-nevwg4',
-  release: '3.0.2',
-  role: 'owner',
-  kind: 'release',
-  active: false,
+export const testReleaseReviewWithResponses = {
+  semver: '3.0.2',
+  kind: ReviewKind.Release,
+  responses: [
+    {
+      user: 'user',
+      decision: Decision.Approve,
+      comment: 'looks amazing!',
+    },
+  ],
+
+  role: 'msro',
+
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }
 
-export const testReleaseActiveApproval = {
-  model: 'example-model-2-nevwg4',
-  release: '3.0.2',
-  role: 'owner',
-  kind: 'release',
-  active: true,
+export const testReleaseReview = {
+  semver: '3.0.3',
+  kind: ReviewKind.Release,
+
+  role: 'msro',
+  responses: [],
   createdAt: new Date('08/13/2023'),
   updatedAt: new Date('08/14/2023'),
 }

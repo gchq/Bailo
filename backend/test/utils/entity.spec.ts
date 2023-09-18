@@ -5,7 +5,7 @@ import { fromEntity, toEntity } from '../../src/utils/v2/entity.js'
 describe('utils > entity', () => {
   test('toEntity', () => {
     expect(toEntity('user', 'test')).toBe('user:test')
-    expect(toEntity('example', 'test:value')).toBe('example:test:value')
+    expect(toEntity('group', 'test:value')).toBe('group:test:value')
   })
 
   test('fromEntity', () => {
