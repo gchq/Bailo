@@ -21,7 +21,6 @@ const mockMjml = vi.hoisted(() => {
 vi.mock('mjml', async () => ({
   default: mockMjml,
 }))
-//import mjml2html from 'mjml'
 
 describe('services > smtp > templates > releaseReview', () => {
   test('that the subject is set', async () => {
