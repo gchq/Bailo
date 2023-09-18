@@ -102,7 +102,7 @@ function ModelOverview({ version }: ModelOverviewProps) {
         </Box>
       </Grid>
       <Grid item xs={12} md={8}>
-        <MetadataDisplay item={version.metadata} tabsDisplaySequentially use='UPLOAD' />
+        <MetadataDisplay item={version.metadata} tabsDisplaySequentially />
       </Grid>
     </Grid>
   )

@@ -20,8 +20,6 @@ const withMDX = nextMDX({
   },
 })
 
-const isDevelopment = process.env.NODE_ENV === 'development'
-
 const defaultBackend = isDocker() ? 'http://backend:3001' : 'http://localhost:3001'
 const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 
@@ -56,9 +54,6 @@ const nextConfig = {
   swcMinify: true,
 
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  eslint: {
-    dirs: ['__tests__', 'data', 'lib', 'pages', 'server', 'src', 'types', 'utils'],
-  },
 }
 
 export default withRemoveImports(withBundleAnalyzer(withMDX(nextConfig)))

@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, no-console */
 import { WritableStream } from 'node:stream/web'
 
 import getAppRoot from 'app-root-path'
@@ -347,8 +347,6 @@ export async function expressErrorHandler(err: BailoError, req: Request, res: Re
     },
   })
 }
-
-/* eslint-disable no-console */
 
 /**
  * These utility functions are only to be used for logging that is intended to be
