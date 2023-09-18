@@ -35,8 +35,8 @@ vi.mock('../../../src/utils/v2/config.js', () => {
 })
 
 const logMock = vi.hoisted(() => ({
-    info: vi.fn(),
-    warn: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 }))
 vi.mock('../../../src/services/v2/log.js', async () => ({
   default: logMock,
@@ -55,7 +55,7 @@ vi.mock('nodemailer', async () => ({
 }))
 
 const authorisationMock = vi.hoisted(() => ({
-  getUserInformationList: vi.fn(() => ([Promise.resolve({ email: 'email@email.com' })])),
+  getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
 }))
 vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ default: authorisationMock }))
 
@@ -109,7 +109,10 @@ describe('services > smtp', () => {
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {
-    authorisationMock.getUserInformationList.mockReturnValueOnce([Promise.resolve({ email: 'member1@email.com' }), Promise.resolve({ email: 'member2@email.com' })])
+    authorisationMock.getUserInformationList.mockReturnValueOnce([
+      Promise.resolve({ email: 'member1@email.com' }),
+      Promise.resolve({ email: 'member2@email.com' }),
+    ])
 
     await requestReviewForRelease('group:group1', new ReviewRequest(), new Release())
 
@@ -117,7 +120,10 @@ describe('services > smtp', () => {
   })
 
   test('that we log when an email cannot be sent', async () => {
-    authorisationMock.getUserInformationList.mockReturnValueOnce([Promise.resolve({ email: 'member1@email.com' }), Promise.resolve({ email: 'member2@email.com' })])
+    authorisationMock.getUserInformationList.mockReturnValueOnce([
+      Promise.resolve({ email: 'member1@email.com' }),
+      Promise.resolve({ email: 'member2@email.com' }),
+    ])
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
     const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())

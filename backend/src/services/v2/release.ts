@@ -28,19 +28,19 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     })
   }
 
-
   try {
-  await release.save()
-  } catch(error) {
+    await release.save()
+  } catch (error) {
     handleDuplicateKeys(error)
+    throw error
   }
 
   try {
-  await createReleaseReviewRequests(model, release)
-  } catch(error) { 
+    await createReleaseReviewRequests(model, release)
+  } catch (error) {
     // Transactions here would solve this issue.
-    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release') 
-    throw error 
+    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release')
+    throw error
   }
 
   return release

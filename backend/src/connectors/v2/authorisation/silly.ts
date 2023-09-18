@@ -11,7 +11,6 @@ const SillyEntityKind = {
 } as const
 
 export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
-
   constructor() {
     // do nothing
   }
@@ -40,22 +39,18 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
     }
   }
 
-  async getUserInformationList(entity): Promise<Promise<{ email: string; }>[]> {
-    const entityObject = fromEntity(entity)
-    if (entityObject.kind === SillyEntityKind.User) {
-      return [this.getUserInformation(entity)]
-    } else if (entityObject.kind === SillyEntityKind.Group) {
-      const groupMembers = await this.getGroupMembers(entity)
-      return groupMembers.map((member) => this.getUserInformation(member))
-    } else {
-      throw new Error(`Unable to get list of user information. Entity not recognised: ${entity}`)
-    }
+  async getUserInformationList(entity): Promise<Promise<{ email: string }>[]> {
+    const entities = await this.getEntityMembers(entity)
+    return entities.map((member) => this.getUserInformation(member))
   }
 
-  async getGroupMembers(entity: string): Promise<string[]> {
-    if (fromEntity(entity).kind !== SillyEntityKind.Group) {
-      throw new Error('Cannot get group information for a non-group entity')
+  async getEntityMembers(entity: string): Promise<string[]> {
+    if (fromEntity(entity).kind === SillyEntityKind.User) {
+      return [entity]
+    } else if (fromEntity(entity).kind === SillyEntityKind.Group) {
+      return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
+    } else {
+      throw new Error(`Unable to get Entity Members. Entity not kind recognised: ${entity}`)
     }
-    return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
   }
 }

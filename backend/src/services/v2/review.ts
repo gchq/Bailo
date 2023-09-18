@@ -50,16 +50,16 @@ export async function countReviewRequests(user: UserDoc): Promise<number> {
 
 export async function createReleaseReviewRequests(model: ModelDoc, release: ReleaseDoc) {
   // This will be added to the schema(s)
-  const reviewRoles = ['msro','mtr']
+  const reviewRoles = ['msro', 'mtr']
 
   const roleEntities = reviewRoles.map((role) => {
     const entites = getEntitiesForRole(model.collaborators, role)
     if (entites.length == 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', {role})
+      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
     }
-    return {role, entites}
+    return { role, entites }
   })
- 
+
   const createReviewRequests = roleEntities.map((roleInfo) => {
     const reviewRequest = new ReviewRequest({
       semver: release.semver,
@@ -70,8 +70,8 @@ export async function createReleaseReviewRequests(model: ModelDoc, release: Rele
     })
     try {
       roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))
-    } catch(error) {
-      log.warn('Error when sending notifications requesting review for release.', {error})
+    } catch (error) {
+      log.warn('Error when sending notifications requesting review for release.', { error })
     }
     return reviewRequest.save()
   })
@@ -80,9 +80,7 @@ export async function createReleaseReviewRequests(model: ModelDoc, release: Rele
 
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
   const roleEntities: string[] = collaborators
-    .filter((collaborator) => {
-      return collaborator.roles.includes(role)
-    })
+    .filter((collaborator) => collaborator.roles.includes(role))
     .map((collaborator) => collaborator.entity)
   return roleEntities
 }

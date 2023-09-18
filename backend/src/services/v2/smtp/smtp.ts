@@ -32,7 +32,6 @@ export async function requestReviewForRelease(entity: string, reviewRequest: Rev
   await Promise.all(sendEmailResponses)
 }
 
-
 async function sendEmail(email: IEmailTemplate) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
@@ -54,7 +53,7 @@ async function sendEmail(email: IEmailTemplate) {
     })
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
-    const content ={to : email.to, subject: email.subject, text: email.text}
+    const content = { to: email.to, subject: email.subject, text: email.text }
     log.warn(`Unable to send email`, content)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }

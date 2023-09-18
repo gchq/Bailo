@@ -33,10 +33,10 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
   try {
     return await schemaDoc.save()
   } catch (error) {
-    throw handleDuplicateKeys(error)
+    handleDuplicateKeys(error)
+    throw error
   }
 }
-
 
 /**
  * Use the mock data as defaults
