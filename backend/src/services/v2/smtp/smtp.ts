@@ -6,7 +6,7 @@ import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
 import { getReleaseName } from '../release.js'
-import { IEmailTemplate } from './templates/baseEmailTemplate.js'
+import { BaseEmailTemplate } from './templates/baseEmailTemplate.js'
 import { ReleaseReviewEmail } from './templates/releaseReview.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
@@ -31,7 +31,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   await Promise.all(sendEmailResponses)
 }
 
-async function sendEmail(email: IEmailTemplate) {
+async function sendEmail(email: BaseEmailTemplate) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: config.smtp.connection.host,

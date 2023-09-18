@@ -2,16 +2,9 @@ import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 
 import { ReviewKind } from '../../../../types/v2/enums.js'
-import config from '../../../../utils/v2/config.js'
-import { BaseEmailTemplate, IEmailTemplate } from './baseEmailTemplate.js'
+import { BaseEmailTemplate } from './baseEmailTemplate.js'
 
-export class ReleaseReviewEmail extends BaseEmailTemplate implements IEmailTemplate {
-  from: string = config.smtp.from // sender address
-  subject = ''
-  text = ''
-  html = ''
-  to = ''
-
+export class ReleaseReviewEmail extends BaseEmailTemplate {
   setTo(emailAddress: string) {
     this.to = emailAddress
   }
