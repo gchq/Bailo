@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 from typing import List, Optional, Any
 from .enums import ModelVisibility
-
+from .model import Model
 
 class Agent:
     def __init__(self):
@@ -19,32 +19,27 @@ class PkiAgent(Agent):
         return requests.get(*args, **kwargs)
 
 
-class BailoClient:
+class BailoClient():
     def __init__(self, url: str, agent: Agent = Agent()):
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
     def create_model(
             self,
-            name: str,
-            description: str,
-            visibility: ModelVisibility
+            model: Model,
         ):
         """
         Creates a new model.
 
-        :param name: Name of the model
-        :param description: Description of the model
-        :param visibility: Object to define model visability (e.g. public or
-            private)
+        :param model: Model object containing name, description and visibility.
         :return: JSON response object
         """
         return self.agent.post(
             f"{self.url}/v2/models",
             json={
-                "name": name,
-                "description": description,
-                "visibility": visibility.value,
+                "name": model["name"],
+                "description": model["description"],
+                "visibility": model["visibility"].value,
             },
         ).json()
 
@@ -91,35 +86,18 @@ class BailoClient:
     def update_model(
         self,
         model_id: str,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        visibility: Optional[ModelVisibility] = None,
+        model: Model,
     ):
         """
         Updates a specific model using its unique ID.
 
         :param model_id: Unique model ID
-        :param name: Name of the model
-        :param description: Description of the model
-        :param visibility: Object to define model visability (e.g. public or
-            private)
+        :param model: Model object containing name, description and/or visibility.
         :return: JSON response object
         """ 
-
-        x = {}
-
-        if name is not None:
-            x.update({"name": name})
-
-        if description is not None:
-            x.update({"description": description})
-
-        if visibility is not None:
-            x.update({"visibility": visibility})
-            
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}",
-            json=x,
+            json=model,
         ).json()
 
     def get_model_card(
