@@ -1,4 +1,5 @@
 import { MongoServerError } from 'mongodb'
+
 import { BadReq } from './error.js'
 
 export function isMongoServerError(err: unknown): err is MongoServerError {

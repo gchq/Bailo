@@ -5,10 +5,9 @@ import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { ReleaseReviewEmail } from './templates/releaseReview.js'
-import { IEmailTemplate } from './templates/baseEmailTemplate.js'
-import { emailDeploymentOwnersOnVersionDeletion } from '../../deployment.js'
 import { getReleaseName } from '../release.js'
+import { IEmailTemplate } from './templates/baseEmailTemplate.js'
+import { ReleaseReviewEmail } from './templates/releaseReview.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined

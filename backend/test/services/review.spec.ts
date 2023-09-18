@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { countReviews, createReleaseReviews, findReviewsByActive } from '../../src/services/v2/review.js'
-import Release from '../../src/models/v2/Release.js'
 import Model from '../../src/models/v2/Model.js'
+import Release from '../../src/models/v2/Release.js'
+import { countReviews, createReleaseReviews, findReviewsByActive } from '../../src/services/v2/review.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },

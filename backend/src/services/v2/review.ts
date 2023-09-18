@@ -3,10 +3,10 @@ import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { BadReq } from '../../utils/v2/error.js'
-import { requestReviewForRelease } from './smtp/smtp.js'
-import log from './log.js'
 import { ReviewKind } from '../../types/v2/enums.js'
+import { BadReq } from '../../utils/v2/error.js'
+import log from './log.js'
+import { requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviewsByActive(user: UserDoc, active: boolean): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()

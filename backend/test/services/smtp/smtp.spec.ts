@@ -2,8 +2,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import Release from '../../../src/models/v2/Release.js'
 import Review from '../../../src/models/v2/Review.js'
-import config from '../../../src/utils/v2/config.js'
 import { requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
+import config from '../../../src/utils/v2/config.js'
 
 vi.mock('../../../src/utils/v2/config.js', () => {
   return {

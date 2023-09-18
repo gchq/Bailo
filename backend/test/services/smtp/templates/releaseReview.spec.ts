@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { BaseEmailTemplate } from '../../../../src/services/v2/smtp/templates/baseEmailTemplate.js'
+
 import { ReleaseReviewEmail } from '../../../../src/services/v2/smtp/templates/releaseReview.js'
 
 const mockDedent = vi.hoisted(() => {
