@@ -6,7 +6,7 @@ const validator = new Validator()
 
 export function validateSchema(data: any, schema: any) {
   const props = Object.keys(schema.properties).filter((key) =>
-    ['object', 'array'].includes(schema.properties[key].type)
+    ['object', 'array'].includes(schema.properties[key].type),
   )
 
   const schemaSteps = props.map((prop: any) => ({

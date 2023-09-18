@@ -76,7 +76,7 @@ describe('services > review', () => {
   test('createReleaseReviews > successful', async () => {
     await createReleaseReviews(
       new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new Release()
+      new Release(),
     )
     expect(ReviewModel.save).toBeCalled()
     expect(smtpMock.requestReviewForRelease).toBeCalled()

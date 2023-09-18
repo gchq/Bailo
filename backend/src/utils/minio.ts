@@ -46,7 +46,7 @@ export async function emptyBucket(bucket: string) {
 
   await client.removeObjects(
     bucket,
-    files.map((file) => file.name).filter((item): item is string => !!item)
+    files.map((file) => file.name).filter((item): item is string => !!item),
   )
   logger.info({ bucket }, 'Removed all files from bucket')
 }
