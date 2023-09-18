@@ -104,7 +104,15 @@ export default function ExploreModels() {
             <ChipSelector
               label='Tasks'
               // TODO fetch all model tags
-              tags={['Task 1', 'Task 2']}
+              tags={[
+                'Translation',
+                'Image Classification',
+                'Summarization',
+                'Tokenisation',
+                'Text to Speech',
+                'Tabular Regression',
+              ]}
+              expandThreshold={10}
               selectedTags={selectedTask}
               onChange={setSelectedTask}
               size='small'
@@ -114,9 +122,10 @@ export default function ExploreModels() {
             <ChipSelector
               label='Libraries'
               // TODO fetch all model libraries
-              tags={['Library 1', 'Library 2']}
-              onChange={setSelectedLibrary}
+              tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+              expandThreshold={10}
               selectedTags={selectedLibrary}
+              onChange={setSelectedLibrary}
               size='small'
             />
           </Box>
