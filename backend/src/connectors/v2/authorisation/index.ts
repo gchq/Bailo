@@ -1,4 +1,4 @@
-import { ModelDoc } from '../../../models/v2/Model.js'
+import { ModelDoc, ModelVisibility } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import config from '../../../utils/v2/config.js'
@@ -31,6 +31,26 @@ export abstract class BaseAuthorisationConnector {
   abstract getUserInformation(userEntity: string): Promise<{ email: string }>
   abstract getUserInformationList(userEntity: string): Promise<Promise<{ email: string }>[]>
   abstract getEntityMembers(groupEntity: string): Promise<Array<string>>
+
+  async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
+    if (model.visibility === ModelVisibility.Public) {
+      return true
+    }
+
+    const roles = await this.getUserModelRoles(user, model)
+    if (roles.length === 0) return false
+
+    return true
+  }
+
+  async getUserModelRoles(user: UserDoc, model: ModelDoc) {
+    const entities = await this.getEntities(user)
+
+    return model.collaborators
+      .filter((collaborator) => entities.includes(collaborator.entity))
+      .map((collaborator) => collaborator.roles)
+      .flat()
+  }
 }
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined
