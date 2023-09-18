@@ -2,10 +2,10 @@ import nodemailer, { Transporter } from 'nodemailer'
 
 import authorisation from '../../../connectors/v2/authorisation/index.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
-import { ReviewRequestDoc } from '../../../models/v2/ReviewRequest.js'
+import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { ReleaseReviewRequestEmail } from './templates/releaseReviewRequest.js'
+import { ReleaseReviewEmail } from './templates/releaseReview.js'
 import { IEmailTemplate } from './templates/baseEmailTemplate.js'
 import { emailDeploymentOwnersOnVersionDeletion } from '../../deployment.js'
 import { getReleaseName } from '../release.js'
@@ -13,7 +13,7 @@ import { getReleaseName } from '../release.js'
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
-export async function requestReviewForRelease(entity: string, reviewRequest: ReviewRequestDoc, release: ReleaseDoc) {
+export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -22,11 +22,11 @@ export async function requestReviewForRelease(entity: string, reviewRequest: Rev
   const releaseName = getReleaseName(release)
   const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
   const sendEmailResponses = userInfoList.map(async (userInfo) => {
-    const email = new ReleaseReviewRequestEmail()
+    const email = new ReleaseReviewEmail()
     email.setTo(userInfo.email)
-    email.setSubject(releaseName, reviewRequest.role)
-    email.setText(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
-    email.setHtml(releaseName, reviewRequest.kind, release.modelId, appBaseUrl, release.createdBy)
+    email.setSubject(releaseName, review.role)
+    email.setText(releaseName, review.kind, release.modelId, appBaseUrl, release.createdBy)
+    email.setHtml(releaseName, review.kind, release.modelId, appBaseUrl, release.createdBy)
     return await sendEmail(email)
   })
   await Promise.all(sendEmailResponses)

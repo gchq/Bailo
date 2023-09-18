@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > review > countReviewRequests > successful 1`] = `
+exports[`services > review > countReviews > successful 1`] = `
 [
   {
     "reviews": {
@@ -10,7 +10,7 @@ exports[`services > review > countReviewRequests > successful 1`] = `
 ]
 `;
 
-exports[`services > review > countReviewRequests > successful 2`] = `
+exports[`services > review > countReviews > successful 2`] = `
 [
   {
     "$expr": {
@@ -48,7 +48,7 @@ exports[`services > review > countReviewRequests > successful 2`] = `
 ]
 `;
 
-exports[`services > review > findReviewRequestsByActive > active 1`] = `
+exports[`services > review > findReviewsByActive > active 1`] = `
 [
   {
     "reviews": {
@@ -58,7 +58,7 @@ exports[`services > review > findReviewRequestsByActive > active 1`] = `
 ]
 `;
 
-exports[`services > review > findReviewRequestsByActive > active 2`] = `
+exports[`services > review > findReviewsByActive > active 2`] = `
 [
   {
     "$expr": {
@@ -96,7 +96,7 @@ exports[`services > review > findReviewRequestsByActive > active 2`] = `
 ]
 `;
 
-exports[`services > review > findReviewRequestsByActive > not active 1`] = `
+exports[`services > review > findReviewsByActive > not active 1`] = `
 [
   {
     "reviews": {
@@ -108,7 +108,7 @@ exports[`services > review > findReviewRequestsByActive > not active 1`] = `
 ]
 `;
 
-exports[`services > review > findReviewRequestsByActive > not active 2`] = `
+exports[`services > review > findReviewsByActive > not active 2`] = `
 [
   {
     "$expr": {

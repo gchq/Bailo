@@ -2,11 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import {
-  testReleaseReviewRequest,
-  testReleaseReviewRequestWithReview,
-} from '../../../../../test/testUtils/testModels.js'
-import { ReviewRequestInterface } from '../../../../models/v2/ReviewRequest.js'
+import { testReleaseReview, testReleaseReviewWithResponses } from '../../../../../test/testUtils/testModels.js'
+import { ReviewInterface } from '../../../../models/v2/Review.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getComplianceApprovalsSchema = z.object({
@@ -18,7 +15,7 @@ export const getComplianceApprovalsSchema = z.object({
 })
 
 interface GetComplianceApprovalsResponse {
-  approvals: Array<ReviewRequestInterface>
+  approvals: Array<ReviewInterface>
 }
 
 export const getComplianceApprovals = [
@@ -27,7 +24,7 @@ export const getComplianceApprovals = [
     const _ = parse(req, getComplianceApprovalsSchema)
 
     return res.json({
-      approvals: [testReleaseReviewRequestWithReview, testReleaseReviewRequest],
+      approvals: [testReleaseReviewWithResponses, testReleaseReview],
     })
   },
 ]

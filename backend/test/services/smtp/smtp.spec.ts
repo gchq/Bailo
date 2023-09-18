@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import Release from '../../../src/models/v2/Release.js'
-import ReviewRequest from '../../../src/models/v2/ReviewRequest.js'
+import Review from '../../../src/models/v2/Review.js'
 import config from '../../../src/utils/v2/config.js'
 import { requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
 
@@ -77,13 +77,13 @@ const releaseEmailMock = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../../src/services/v2/smtp/templates/releaseReviewRequest.js', () => ({
-  ReleaseReviewRequestEmail: releaseEmailMock,
+vi.mock('../../../src/services/v2/smtp/templates/releaseReview.js', () => ({
+  ReleaseReviewEmail: releaseEmailMock,
 }))
 
 describe('services > smtp', () => {
   test('that an email is sent', async () => {
-    await requestReviewForRelease('user:user', new ReviewRequest(), new Release())
+    await requestReviewForRelease('user:user', new Review(), new Release())
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
@@ -103,7 +103,7 @@ describe('services > smtp', () => {
       from: '"Bailo 📝" <bailo@example.org>',
     })
 
-    await requestReviewForRelease('user:user', new ReviewRequest(), new Release())
+    await requestReviewForRelease('user:user', new Review(), new Release())
 
     expect(transporterMock.sendMail).not.toBeCalled()
   })
@@ -114,7 +114,7 @@ describe('services > smtp', () => {
       Promise.resolve({ email: 'member2@email.com' }),
     ])
 
-    await requestReviewForRelease('group:group1', new ReviewRequest(), new Release())
+    await requestReviewForRelease('group:group1', new Review(), new Release())
 
     expect(transporterMock.sendMail.mock.calls).toMatchSnapshot()
   })
@@ -126,7 +126,7 @@ describe('services > smtp', () => {
     ])
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
-    const result: Promise<void> = requestReviewForRelease('user:user', new ReviewRequest(), new Release())
+    const result: Promise<void> = requestReviewForRelease('user:user', new Review(), new Release())
     expect(result).rejects.toThrowError(`Unable to send email`)
   })
 })

@@ -4,7 +4,7 @@ import mjml2html from 'mjml'
 import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 import { BaseEmailTemplate, IEmailTemplate } from './baseEmailTemplate.js'
 
-export class ReleaseReviewRequestEmail extends BaseEmailTemplate implements IEmailTemplate {
+export class ReleaseReviewEmail extends BaseEmailTemplate implements IEmailTemplate {
   subject: string = ''
   text: string = ''
   html: string = ''

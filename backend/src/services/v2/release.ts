@@ -7,7 +7,7 @@ import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { createReleaseReviewRequests } from './review.js'
+import { createReleaseReviews } from './review.js'
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
@@ -36,7 +36,7 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   }
 
   try {
-    await createReleaseReviewRequests(model, release)
+    await createReleaseReviews(model, release)
   } catch (error) {
     // Transactions here would solve this issue.
     log.warn('Error when creating Release Review Requests. Approval cannot be given to this release')

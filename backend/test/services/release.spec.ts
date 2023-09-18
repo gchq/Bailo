@@ -43,7 +43,7 @@ vi.mock('../../src/models/v2/Release.js', () => ({ default: releaseModelMocks })
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    createReleaseReviewRequests: vi.fn(),
+    createReleaseReviews: vi.fn(),
   }
 })
 vi.mock('../../src/services/v2/review.js', () => mockReviewService)
@@ -56,7 +56,7 @@ describe('services > release', () => {
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
-    expect(mockReviewService.createReleaseReviewRequests).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).toBeCalled()
   })
 
   test('createRelease > bad authorisation', async () => {

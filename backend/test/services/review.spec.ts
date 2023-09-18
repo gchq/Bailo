@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { countReviewRequests, findReviewRequestsByActive } from '../../src/services/v2/review.js'
+import { countReviews, findReviewsByActive } from '../../src/services/v2/review.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 
-const ReviewRequestModel = vi.hoisted(() => {
+const ReviewModel = vi.hoisted(() => {
   const model: any = {}
 
   model.aggregate = vi.fn(() => model)
@@ -17,33 +17,33 @@ const ReviewRequestModel = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/ReviewRequest.js', async () => ({
-  ...((await vi.importActual('../../src/models/v2/ReviewRequest.js')) as object),
-  default: ReviewRequestModel,
+vi.mock('../../src/models/v2/Review.js', async () => ({
+  ...((await vi.importActual('../../src/models/v2/Review.js')) as object),
+  default: ReviewModel,
 }))
 
 describe('services > review', () => {
-  test('findReviewRequestsByActive > active', async () => {
+  test('findReviewsByActive > active', async () => {
     const user: any = { dn: 'test' }
-    await findReviewRequestsByActive(user, true)
+    await findReviewsByActive(user, true)
 
-    expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('findReviewRequestsByActive > not active', async () => {
+  test('findReviewsByActive > not active', async () => {
     const user: any = { dn: 'test' }
-    await findReviewRequestsByActive(user, false)
+    await findReviewsByActive(user, false)
 
-    expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('countReviewRequests > successful', async () => {
+  test('countReviews > successful', async () => {
     const user: any = { dn: 'test' }
-    await countReviewRequests(user)
+    await countReviews(user)
 
-    expect(ReviewRequestModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewRequestModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 })

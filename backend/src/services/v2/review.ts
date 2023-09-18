@@ -1,15 +1,15 @@
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
-import ReviewRequest, { ReviewRequestInterface } from '../../models/v2/ReviewRequest.js'
+import Review, { ReviewInterface } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { BadReq } from '../../utils/v2/error.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 import log from './log.js'
 import { ReviewKind } from '../../types/v2/enums.js'
 
-export async function findReviewRequestsByActive(user: UserDoc, active: boolean): Promise<ReviewRequestInterface[]> {
-  const reviews = await ReviewRequest.aggregate()
+export async function findReviewsByActive(user: UserDoc, active: boolean): Promise<ReviewInterface[]> {
+  const reviews = await Review.aggregate()
     .match({ reviews: active ? { $size: 0 } : { $not: { $size: 0 } } })
     .sort({ createdAt: -1 })
     // Populate model entries
@@ -45,11 +45,11 @@ export async function findReviewRequestsByActive(user: UserDoc, active: boolean)
   return reviews
 }
 
-export async function countReviewRequests(user: UserDoc): Promise<number> {
-  return (await findReviewRequestsByActive(user, true)).length
+export async function countReviews(user: UserDoc): Promise<number> {
+  return (await findReviewsByActive(user, true)).length
 }
 
-export async function createReleaseReviewRequests(model: ModelDoc, release: ReleaseDoc) {
+export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
   // This will be added to the schema(s)
   const reviewRoles = ['msro', 'mtr']
 
@@ -61,21 +61,21 @@ export async function createReleaseReviewRequests(model: ModelDoc, release: Rele
     return { role, entites }
   })
 
-  const createReviewRequests = roleEntities.map((roleInfo) => {
-    const reviewRequest = new ReviewRequest({
+  const createReviews = roleEntities.map((roleInfo) => {
+    const review = new Review({
       semver: release.semver,
       modelId: model.id,
       kind: ReviewKind.Release,
       role: roleInfo.role,
     })
     try {
-      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, reviewRequest, release))
+      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, release))
     } catch (error) {
       log.warn('Error when sending notifications requesting review for release.', { error })
     }
-    return reviewRequest.save()
+    return review.save()
   })
-  await Promise.all(createReviewRequests)
+  await Promise.all(createReviews)
 }
 
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {

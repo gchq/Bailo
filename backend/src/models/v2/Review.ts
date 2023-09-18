@@ -9,7 +9,7 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-interface Review {
+interface ReviewResponse {
   user: string
   decision: DecisionKeys
   comment: string
@@ -18,14 +18,14 @@ interface Review {
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
-export interface ReviewRequestInterface {
+export interface ReviewInterface {
   semver?: string
   modelId?: string
   kind: ReviewKindKeys
 
   role: string
 
-  reviews: Array<Review>
+  responses: Array<ReviewResponse>
 
   createdAt: Date
   updatedAt: Date
@@ -34,13 +34,13 @@ export interface ReviewRequestInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReviewRequestDoc = ReviewRequestInterface & Document<any, any, ReviewRequestInterface>
+export type ReviewDoc = ReviewInterface & Document<any, any, ReviewInterface>
 
-const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
+const ReviewSchema = new Schema<ReviewInterface>(
   {
     semver: {
       type: String,
-      required: function (this: ReviewRequestInterface): boolean {
+      required: function (this: ReviewInterface): boolean {
         return this.kind === ReviewKind.Release
       },
     },
@@ -49,7 +49,7 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
 
     role: { type: String, required: true },
 
-    reviews: [
+    responses: [
       {
         user: { type: String, required: true },
         decision: { type: String, enum: Object.values(Decision), required: true },
@@ -63,12 +63,12 @@ const ReviewRequestSchema = new Schema<ReviewRequestInterface>(
   }
 )
 
-ReviewRequestSchema.plugin(MongooseDelete, {
+ReviewSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
 })
 
-const ReviewRequestModel = model<ReviewRequestInterface>('v2_Review_Request', ReviewRequestSchema)
+const ReviewModel = model<ReviewInterface>('v2_Review', ReviewSchema)
 
-export default ReviewRequestModel
+export default ReviewModel
