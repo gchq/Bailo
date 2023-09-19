@@ -10,10 +10,11 @@ import { requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviewsByActive(user: UserDoc, active: boolean): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
-    .match({ reviews: active ? { $size: 0 } : { $not: { $size: 0 } } })
+    .match({ responses: active ? { $size: 0 } : { $not: { $size: 0 } } })
+    //.match(modelId ? { modelId } : {})
     .sort({ createdAt: -1 })
     // Populate model entries
-    .lookup({ from: 'v2_models', localField: 'model', foreignField: 'id', as: 'model' })
+    .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
     .match({
