@@ -238,8 +238,8 @@ class BailoClient():
         ).json()
     
     def get_files(
-            self,
-            model_id: str,
+        self,
+        model_id: str,
     ):
         """
         Gets files for a model.
@@ -250,4 +250,105 @@ class BailoClient():
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
+    
+    #def simple_upload(): TBC
 
+    #def start_multi_upload(): TBC
+
+    #def finish_multi_upload(): TBC
+
+    def delete_file(
+        self,
+        model_id: str,
+        file_id: str,
+    ):
+        """
+        Deletes a specific file associated with a model.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: JSON response object
+        """        
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}/files/{file_id}",
+        ).json()
+    
+    #def get_all_schemas():
+
+    #def get_schema():
+
+    #def create_schema():
+
+    #def get_reviews():
+
+    #def get_reviews_count():
+
+    def get_model_roles(
+        self,
+        model_id: str,
+    ):
+        """
+        Gets roles for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/roles",
+        ).json()
+
+    def get_model_user_roles(
+        self,
+        model_id: str,
+    ):
+        """
+        Gets current users roles for a model.
+
+        :param model_id: Unique model ID
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/roles/mine",
+        ).json()
+    
+    def create_team(
+        self,
+        team_id: str,
+        name: str,
+        description: str,
+    ):
+        """
+        Create new team.
+
+        :param team_id: Unique team ID
+        :param name: Team name
+        :param description: Team description
+        :return: JSON response object
+        """        
+        return self.agent.post(
+            f"{self.url}/v2/teams",
+        ).json()
+    
+    def get_all_teams(
+        self,
+    ):
+        """
+        Get all teams.
+
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/teams",
+        ).json()
+    
+    def get_user_teams(
+        self,
+    ):
+        """
+        Get user teams.
+
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/teams/mine",
+        ).json()
