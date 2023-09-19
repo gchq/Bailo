@@ -16,14 +16,14 @@ vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
 describe('routes > review > getReviews', () => {
   const endpoint = `/api/v2/reviews`
 
-  test('returns only inactive review requests', async () => {
+  test('returns only inactive reviews', async () => {
     const res = await testGet(`${endpoint}?active=false`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
 
-  test('returns only active review requests', async () => {
+  test('returns only active reviews', async () => {
     mockReviewService.findReviewsByActive.mockReturnValueOnce([testReleaseReview])
     const res = await testGet(`${endpoint}?active=true`)
 
@@ -44,6 +44,14 @@ describe('routes > review > getReviews', () => {
 
     expect(mockReviewService.findReviewsByActive).not.toBeCalled()
     expect(res.statusCode).toBe(400)
+    expect(res.body).matchSnapshot()
+  })
+
+  test('returns only active reviews for the specified model', async () => {
+    mockReviewService.findReviewsByActive.mockReturnValueOnce([testReleaseReview])
+    const res = await testGet(`${endpoint}?active=true&modelId=${testReleaseReview.modelId}`)
+
+    expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
 })
