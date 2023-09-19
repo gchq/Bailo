@@ -2,6 +2,17 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseReviewEmail } from '../../../../src/services/v2/smtp/templates/releaseReview.js'
 
+vi.mock('../../../../src/utils/v2/config.js', () => {
+  return {
+    __esModule: true,
+    default: {
+      smtp: {
+        from: '"Bailo 📝" <bailo@example.org>',
+      },
+    },
+  }
+})
+
 const mockDedent = vi.hoisted(() => {
   const model: any = vi.fn()
 
