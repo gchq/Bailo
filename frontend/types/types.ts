@@ -395,7 +395,7 @@ export const SchemaKind = {
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export interface ApprovalRequestInterface {
+export interface ReviewRequestInterface {
   model: string
   release: string
   kind: 'release' | 'acess'
