@@ -3,7 +3,7 @@
 exports[`services > review > countReviews > successful 1`] = `
 [
   {
-    "reviews": {
+    "responses": {
       "$size": 0,
     },
   },
@@ -48,12 +48,10 @@ exports[`services > review > countReviews > successful 2`] = `
 ]
 `;
 
-exports[`services > review > createReleaseReviews > successful 1`] = `[]`;
-
 exports[`services > review > findReviewsByActive > active 1`] = `
 [
   {
-    "reviews": {
+    "responses": {
       "$size": 0,
     },
   },
@@ -101,7 +99,7 @@ exports[`services > review > findReviewsByActive > active 2`] = `
 exports[`services > review > findReviewsByActive > not active 1`] = `
 [
   {
-    "reviews": {
+    "responses": {
       "$not": {
         "$size": 0,
       },

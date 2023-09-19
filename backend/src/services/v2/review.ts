@@ -8,10 +8,16 @@ import { BadReq } from '../../utils/v2/error.js'
 import log from './log.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 
-export async function findReviewsByActive(user: UserDoc, active: boolean): Promise<ReviewInterface[]> {
+export async function findReviewsByActive(
+  user: UserDoc,
+  active: boolean,
+  modelId?: string,
+): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
-    .match({ responses: active ? { $size: 0 } : { $not: { $size: 0 } } })
-    //.match(modelId ? { modelId } : {})
+    .match({
+      responses: active ? { $size: 0 } : { $not: { $size: 0 } },
+      ...(modelId ? { modelId } : {}),
+    })
     .sort({ createdAt: -1 })
     // Populate model entries
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
