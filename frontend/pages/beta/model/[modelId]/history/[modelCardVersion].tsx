@@ -1,6 +1,6 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { Box, Card, Container, Stack, Typography } from '@mui/material'
-import { useGetModel } from 'actions/model'
+import { useModelCard } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Wrapper from 'src/Wrapper.beta'
@@ -18,13 +18,13 @@ export default function ViewModelCardVersion() {
   const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')
+  const { model, isModelLoading, isModelError } = useModelCard(modelId, modelCardVersion)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaId || '')
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   useEffect(() => {
     if (!model || !schema) return
-    const metadata = model.card.metadata
+    const metadata = model.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
 
     for (const step of steps) {
@@ -54,7 +54,12 @@ export default function ViewModelCardVersion() {
           <Container>
             <Card sx={{ p: 4 }}>
               <Stack direction='row' alignItems='center' gap={1} paddingBottom={2}>
-                <ArrowBackIosIcon onClick={() => router.push(`/beta/model/${modelId}`)}></ArrowBackIosIcon>
+                <ArrowBackIosIcon
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => router.push(`/beta/model/${modelId}`)}
+                ></ArrowBackIosIcon>
                 <Typography>Back To Model</Typography>
               </Stack>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
