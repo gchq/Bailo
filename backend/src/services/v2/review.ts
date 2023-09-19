@@ -8,11 +8,7 @@ import { BadReq } from '../../utils/v2/error.js'
 import log from './log.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 
-export async function findReviewsByActive(
-  user: UserDoc,
-  active: boolean,
-  modelId?: string,
-): Promise<ReviewInterface[]> {
+export async function findReviews(user: UserDoc, active: boolean, modelId?: string): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },
@@ -53,7 +49,7 @@ export async function findReviewsByActive(
 }
 
 export async function countReviews(user: UserDoc): Promise<number> {
-  return (await findReviewsByActive(user, true)).length
+  return (await findReviews(user, true)).length
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
