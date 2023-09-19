@@ -1,5 +1,5 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import { Box, Card, Container, Typography } from '@mui/material'
+import { Box, Card, Container, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -21,10 +21,6 @@ export default function ViewModelCardVersion() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.card.schemaId || '')
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
-  // const goBack = () => {
-  //   window.history.go(-1)
-  // }
 
   useEffect(() => {
     if (!model || !schema) return
@@ -57,8 +53,10 @@ export default function ViewModelCardVersion() {
         {!isSchemaLoading && !isUiConfigLoading && (
           <Container>
             <Card sx={{ p: 4 }}>
-              {/* <ArrowBackIosIcon onClick={() => goBack()}></ArrowBackIosIcon> */}
-              <ArrowBackIosIcon onClick={() => router.push(`/beta/model/${modelId}`)}></ArrowBackIosIcon>
+              <Stack direction='row' alignItems='center' gap={1} paddingBottom={2}>
+                <ArrowBackIosIcon onClick={() => router.push(`/beta/model/${modelId}`)}></ArrowBackIosIcon>
+                <Typography>Back To Model</Typography>
+              </Stack>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
             </Card>
           </Container>

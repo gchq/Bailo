@@ -18,10 +18,6 @@ export default function ModelReleaseDisplay({
 }) {
   const theme = useTheme()
   const router = useRouter()
-  // const openModelCardVersion = (modelId, release) => {
-  //   const url = `/beta/model/${modelId}/history/${release.modelCardVersion}`
-  //   window.open(url, 'blank')
-  // }
 
   function formatDate(timestamp: string) {
     const date = new Date(timestamp)
@@ -99,9 +95,8 @@ export default function ModelReleaseDisplay({
                   </Stack>
                 </Stack>
 
-                {/* <Button onClick={() => openModelCardVersion(modelId, release)}> */}
                 <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
-                  Model Card
+                  View Model Card
                 </Button>
               </Stack>
               <Stack spacing={1} direction='row' sx={{ mt: '0px !important' }}>
