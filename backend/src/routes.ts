@@ -48,7 +48,6 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
-import { getComplianceApprovals } from './routes/v2/model/compliance/getComplianceCheckApprovals.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
@@ -228,7 +227,6 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 
-  server.get('/api/v2/model/:modelId/compliance/check-approvals', ...getComplianceApprovals)
   // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
 
   server.post('/api/v2/teams', ...postTeam)

@@ -46,12 +46,13 @@ exports[`routes > review > getReviews > rejects missing value for active paramet
 }
 `;
 
-exports[`routes > review > getReviews > returns only active review requests 1`] = `
+exports[`routes > review > getReviews > returns only active reviews 1`] = `
 {
   "reviews": [
     {
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
+      "modelId": "abc",
       "responses": [],
       "role": "msro",
       "semver": "3.0.3",
@@ -61,12 +62,29 @@ exports[`routes > review > getReviews > returns only active review requests 1`] 
 }
 `;
 
-exports[`routes > review > getReviews > returns only inactive review requests 1`] = `
+exports[`routes > review > getReviews > returns only active reviews for the specified model 1`] = `
 {
   "reviews": [
     {
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
+      "modelId": "abc",
+      "responses": [],
+      "role": "msro",
+      "semver": "3.0.3",
+      "updatedAt": "2023-08-14T00:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`routes > review > getReviews > returns only inactive reviews 1`] = `
+{
+  "reviews": [
+    {
+      "createdAt": "2023-08-13T00:00:00.000Z",
+      "kind": "release",
+      "modelId": "abc",
       "responses": [
         {
           "comment": "looks amazing!",

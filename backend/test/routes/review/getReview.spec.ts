@@ -8,7 +8,7 @@ vi.mock('../../../src/utils/user.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    findReviewsByActive: vi.fn(() => [testReleaseReviewWithResponses]),
+    findReviews: vi.fn(() => [testReleaseReviewWithResponses]),
   }
 })
 vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
@@ -16,15 +16,15 @@ vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
 describe('routes > review > getReviews', () => {
   const endpoint = `/api/v2/reviews`
 
-  test('returns only inactive review requests', async () => {
+  test('returns only inactive reviews', async () => {
     const res = await testGet(`${endpoint}?active=false`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
 
-  test('returns only active review requests', async () => {
-    mockReviewService.findReviewsByActive.mockReturnValueOnce([testReleaseReview])
+  test('returns only active reviews', async () => {
+    mockReviewService.findReviews.mockReturnValueOnce([testReleaseReview])
     const res = await testGet(`${endpoint}?active=true`)
 
     expect(res.statusCode).toBe(200)
@@ -34,7 +34,7 @@ describe('routes > review > getReviews', () => {
   test('rejects missing active parameter', async () => {
     const res = await testGet(`${endpoint}`)
 
-    expect(mockReviewService.findReviewsByActive).not.toBeCalled()
+    expect(mockReviewService.findReviews).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })
@@ -42,8 +42,16 @@ describe('routes > review > getReviews', () => {
   test('rejects missing value for active parameter', async () => {
     const res = await testGet(`${endpoint}?active`)
 
-    expect(mockReviewService.findReviewsByActive).not.toBeCalled()
+    expect(mockReviewService.findReviews).not.toBeCalled()
     expect(res.statusCode).toBe(400)
+    expect(res.body).matchSnapshot()
+  })
+
+  test('returns only active reviews for the specified model', async () => {
+    mockReviewService.findReviews.mockReturnValueOnce([testReleaseReview])
+    const res = await testGet(`${endpoint}?active=true&modelId=${testReleaseReview.modelId}`)
+
+    expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
 })

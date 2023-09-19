@@ -36,6 +36,7 @@ export const testDeploymentSchema = {
 }
 
 export const testReleaseReviewWithResponses = {
+  modelId: 'abc',
   semver: '3.0.2',
   kind: ReviewKind.Release,
   responses: [
@@ -53,6 +54,7 @@ export const testReleaseReviewWithResponses = {
 }
 
 export const testReleaseReview = {
+  modelId: 'abc',
   semver: '3.0.3',
   kind: ReviewKind.Release,
 

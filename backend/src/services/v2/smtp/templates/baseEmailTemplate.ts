@@ -1,18 +1,19 @@
 import dedent from 'dedent-js'
 
-export interface IEmailTemplate {
-  from: string
-  to: string
-  setTo(emailAddress: string)
-  subject: string
-  setSubject(resourceName: string, reviewerRole: string)
-  html: string
-  setHtml(releaseName: string, modelId: string, baseUrl: string, author: string)
-  text: string
-  setText(releaseName: string, modelId: string, baseUrl: string, author: string)
-}
+import config from '../../../../utils/v2/config.js'
 
 export abstract class BaseEmailTemplate {
+  from = config.smtp.from
+  subject = ''
+  text = ''
+  html = ''
+  to = ''
+
+  abstract setTo(emailAddress: string)
+  abstract setSubject(resourceName: string, reviewerRole: string)
+  abstract setHtml(releaseName: string, modelId: string, baseUrl: string, author: string)
+  abstract setText(releaseName: string, modelId: string, baseUrl: string, author: string)
+
   wrapper(children: string) {
     return dedent(`
     <mjml>

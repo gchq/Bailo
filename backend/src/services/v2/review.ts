@@ -8,12 +8,15 @@ import { BadReq } from '../../utils/v2/error.js'
 import log from './log.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 
-export async function findReviewsByActive(user: UserDoc, active: boolean): Promise<ReviewInterface[]> {
+export async function findReviews(user: UserDoc, active: boolean, modelId?: string): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
-    .match({ reviews: active ? { $size: 0 } : { $not: { $size: 0 } } })
+    .match({
+      responses: active ? { $size: 0 } : { $not: { $size: 0 } },
+      ...(modelId ? { modelId } : {}),
+    })
     .sort({ createdAt: -1 })
     // Populate model entries
-    .lookup({ from: 'v2_models', localField: 'model', foreignField: 'id', as: 'model' })
+    .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
     .match({
@@ -46,7 +49,7 @@ export async function findReviewsByActive(user: UserDoc, active: boolean): Promi
 }
 
 export async function countReviews(user: UserDoc): Promise<number> {
-  return (await findReviewsByActive(user, true)).length
+  return (await findReviews(user, true)).length
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
