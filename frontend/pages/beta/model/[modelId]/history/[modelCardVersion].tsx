@@ -1,16 +1,16 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import { Box, Card, Container, Stack, Typography } from '@mui/material'
-import { useModelCard } from 'actions/modelCard'
+import { Box, Button, Card, Container } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import Wrapper from 'src/Wrapper.beta'
-import { SplitSchemaNoRender } from 'types/interfaces'
 
+import { useModelCard } from '../../../../../actions/modelCard'
 import { useGetSchema } from '../../../../../actions/schema'
 import { useGetUiConfig } from '../../../../../actions/uiConfig'
 import Loading from '../../../../../src/common/Loading'
 import ModelCardForm from '../../../../../src/Form/beta/ModelCardForm'
 import MessageAlert from '../../../../../src/MessageAlert'
+import Wrapper from '../../../../../src/Wrapper.beta'
+import { SplitSchemaNoRender } from '../../../../../types/interfaces'
 import { getStepsFromSchema } from '../../../../../utils/beta/formUtils'
 
 export default function ViewModelCardVersion() {
@@ -53,15 +53,9 @@ export default function ViewModelCardVersion() {
         {!isSchemaLoading && !isUiConfigLoading && (
           <Container>
             <Card sx={{ p: 4 }}>
-              <Stack direction='row' alignItems='center' gap={1} paddingBottom={2}>
-                <ArrowBackIosIcon
-                  style={{
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => router.push(`/beta/model/${modelId}`)}
-                ></ArrowBackIosIcon>
-                <Typography>Back To Model</Typography>
-              </Stack>
+              <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/beta/model/${modelId}`)}>
+                Back To Model
+              </Button>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
             </Card>
           </Container>
