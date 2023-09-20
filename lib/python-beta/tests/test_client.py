@@ -90,3 +90,65 @@ def test_model_card_from_schema(requests_mock):
     )
 
     assert result == {"success": True}
+
+
+def test_create_release(requests_mock):
+    requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.create_release(
+        model_id="test_id", 
+        model_card_version=1, 
+        release_version='v1',
+        notes='Test Note',
+        files=[],
+        images=[],
+    )
+
+    assert result == {"success": True}
+
+
+def test_get_all_releases(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id/releases", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_all_releases(
+        model_id="test_id", 
+    )
+
+    assert result == {"success": True}
+
+
+def test_get_release(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id/releases/v1", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_release(
+        model_id="test_id",
+        release_version="v1",
+    )
+
+    assert result == {"success": True}
+
+
+def test_delete_release(requests_mock):
+    requests_mock.delete("https://example.com/api/v2/model/test_id/releases/v1", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.delete_release(
+        model_id="test_id",
+        release_version="v1",
+    )
+
+    assert result == {"success": True}
+
+
+def test_get_files(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id/files", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_files(
+        model_id="test_id",
+    )
+
+    assert result == {"success": True}

@@ -36,6 +36,14 @@ export interface DeploymentMetadata {
   }
 }
 
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: unknown
+}
+
 export interface ModelMetadata {
   highLevelDetails: {
     tags: Array<string>

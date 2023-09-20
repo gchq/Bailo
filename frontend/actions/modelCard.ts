@@ -1,6 +1,9 @@
 import axios from 'axios'
+import useSWR from 'swr'
 
+import { ModelCardInterface } from '../types/types'
 import { handleAxiosError } from '../utils/axios'
+import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export async function postFromSchema(modelId: string, schemaId: string) {
   try {
@@ -27,5 +30,20 @@ export async function putModelCard(modelId: string, metadata: unknown) {
     return { status: response.status, data: response.data }
   } catch (error) {
     return handleAxiosError(error)
+  }
+}
+
+export function useModelCard(modelId?: string, modelCardVersion?: number) {
+  const { data, error } = useSWR<
+    {
+      modelCard: ModelCardInterface
+    },
+    ErrorInfo
+  >(modelId && modelCardVersion ? `/api/v2/model/${modelId}/model-card/${modelCardVersion}` : null, fetcher)
+
+  return {
+    model: data ? data.modelCard : undefined,
+    isModelLoading: !error && !data,
+    isModelError: error,
   }
 }
