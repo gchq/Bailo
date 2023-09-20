@@ -67,7 +67,7 @@ describe('services > schema', () => {
     mockMongoUtils.isMongoServerError.mockReturnValueOnce(true)
 
     expect(() => createSchema(testModelSchema)).rejects.toThrowError(
-      /^The following is not unique: {"mockKey":"mockValue"}/,
+      /^The following is not unique: {"mockKey":"mockValue"}/
     )
   })
 

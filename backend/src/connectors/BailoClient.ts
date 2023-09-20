@@ -135,7 +135,7 @@ export default class API {
       `/models?${qs.stringify({
         type,
         filter,
-      })}`,
+      })}`
     )
 
     return models.map((model: any) => new Model(this, model))
@@ -192,7 +192,7 @@ export default class API {
     const schemas = await this.apiGet(
       `/schemas?${qs.stringify({
         use,
-      })}`,
+      })}`
     )
 
     return schemas.map((schema: any) => new Schema(this, schema))
@@ -202,7 +202,7 @@ export default class API {
     const schema = await this.apiGet(
       `/schema/default?${qs.stringify({
         use,
-      })}`,
+      })}`
     )
 
     return new Schema(this, schema)
@@ -231,7 +231,7 @@ export default class API {
       `/approvals?${qs.stringify({
         approvalCategory,
         filter,
-      })}`,
+      })}`
     )
 
     return approvals.map((approval: any) => new Approval(this, approval))

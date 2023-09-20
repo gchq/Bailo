@@ -71,7 +71,7 @@ export async function findModels(user: UserDoc, { filter, type }: ModelFilter, o
         if (await isUserInEntityList(user, latestVersion.metadata.contacts.uploader)) {
           userModels.push(model)
         }
-      }),
+      })
     )
 
     return filterModelArray(user, userModels)

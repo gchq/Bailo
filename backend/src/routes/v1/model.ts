@@ -82,7 +82,7 @@ export const getModelDeployments = [
 
     req.log.info(
       { code: 'fetch_deployments_by_model', modelId: model._id, deployments },
-      'User fetching all deployments for model',
+      'User fetching all deployments for model'
     )
     return res.json(deployments)
   },
@@ -103,7 +103,7 @@ export const getModelSchema = [
     if (!schema) {
       throw NotFound(
         { code: 'schema_not_found', uuid, schemaRef: model.schemaRef },
-        `Unable to find schema '${model.schemaRef}'`,
+        `Unable to find schema '${model.schemaRef}'`
       )
     }
 
@@ -129,7 +129,7 @@ export const getModelVersions = [
 
     req.log.info(
       { code: 'fetch_versions_for_model', modelId: model._id, versions },
-      'User fetching versions for specified model',
+      'User fetching versions for specified model'
     )
     return res.json(versions)
   },
@@ -161,7 +161,7 @@ export const getModelVersion = [
 
     req.log.info(
       { code: 'fetch_version_for_model', modelId: model._id, version },
-      'User finding specific version for model',
+      'User finding specific version for model'
     )
     return res.json(version)
   },

@@ -66,7 +66,7 @@ function Deployments() {
   React.useEffect(() => {
     if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
       const sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
-        a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1,
+        a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1
       )
       setOrderedDeployments(sortedArray)
     } else if (selectedOrder === 'date' && userDeployments !== undefined) {

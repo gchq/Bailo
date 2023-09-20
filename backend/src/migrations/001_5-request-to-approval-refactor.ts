@@ -7,7 +7,7 @@ const batchSize = 100
 
 const moveRequests = async (
   requestsCollection: Collection<Document>,
-  approvalsCollection: Collection<Document>,
+  approvalsCollection: Collection<Document>
 ): Promise<boolean> => {
   const requests = await requestsCollection.find({}, { limit: batchSize }).toArray()
 

@@ -103,7 +103,7 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
         kid: await getKid(),
         alg: 'RS256',
       },
-    },
+    }
   )
 }
 
@@ -116,7 +116,7 @@ export function getRefreshToken(user: UserDoc) {
     },
     {
       expiresIn: '30 days',
-    },
+    }
   )
 }
 
@@ -143,7 +143,7 @@ export function getAccessToken(user: User, access: Array<Access>) {
     },
     {
       expiresIn: '1 hour',
-    },
+    }
   )
 }
 
@@ -216,7 +216,7 @@ export const getDockerRegistryAuth = [
       throw Forbidden(
         { expectedService: config.registry.service },
         'Received registry auth request from unexpected service',
-        rlog,
+        rlog
       )
     }
 

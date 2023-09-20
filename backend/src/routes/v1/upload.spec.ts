@@ -81,7 +81,7 @@ const mockVersionService = {
       populate: vi.fn(() => ({
         execPopulate: vi.fn(() => Promise.resolve([])),
       })),
-    }),
+    })
   ),
 }
 vi.doMock('../../services/version', () => mockVersionService)

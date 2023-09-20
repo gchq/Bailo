@@ -31,7 +31,7 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
     timestamps: true,
     collection: 'v2_access_requests',
-  },
+  }
 )
 
 AccessRequestSchema.plugin(MongooseDelete, {

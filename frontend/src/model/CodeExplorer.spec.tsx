@@ -45,7 +45,7 @@ describe('CodeExplorer', () => {
             /* noop */
           }}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {

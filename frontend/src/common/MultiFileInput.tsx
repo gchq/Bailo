@@ -45,7 +45,7 @@ export default function MultiFileInput({
     if (newFiles) {
       if (files) {
         const updatedFiles = newFiles.concat(
-          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name))
         )
         setFiles(updatedFiles)
       } else {

@@ -60,7 +60,7 @@ export async function html({ document, approvalCategory, user }: ReviewApprovalC
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${base}/review" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="12px">See Reviews</mj-button>
       </mj-column>
     </mj-section>
-  `),
+  `)
   ).html
 }
 

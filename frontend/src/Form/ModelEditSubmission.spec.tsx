@@ -29,7 +29,7 @@ describe('ModelEditSubmission', () => {
     await waitFor(async () => {
       expect(await screen.findByText('please check before submitting')).not.toBeUndefined()
       expect(
-        await screen.findByText('If you are happy with your submission click below to upload your model to Bailo.'),
+        await screen.findByText('If you are happy with your submission click below to upload your model to Bailo.')
       ).not.toBeUndefined()
     })
   })

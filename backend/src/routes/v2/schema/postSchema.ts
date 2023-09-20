@@ -24,7 +24,7 @@ export const postSchemaSchema = z.object({
       {},
       {
         required_error: 'Must specify schema schema object',
-      },
+      }
     ),
   }),
 })

@@ -4,7 +4,7 @@ export async function asyncFilter<T>(arr: Array<T>, predicate: (v: T) => Promise
 
 export function getPropertyFromEnumValue<Enum extends { [key: string]: string | number }>(
   t: Enum,
-  key: string,
+  key: string
 ): string | undefined {
   const values = Object.values(t)
 

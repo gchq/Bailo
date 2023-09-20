@@ -50,7 +50,7 @@ export async function findVersionByName(
   user: UserDoc,
   model: ModelId | ModelDoc,
   name: string,
-  opts?: GetVersionOptions,
+  opts?: GetVersionOptions
 ) {
   let version = VersionModel.findOne({ model, version: name })
   if (opts?.thin) version = version.select({ state: 0, metadata: 0 })
@@ -118,7 +118,7 @@ export async function updateManagerLastViewed(id: ModelId) {
   return VersionModel.findOneAndUpdate(
     { _id: id },
     { $set: { managerLastViewed: new Date() as DateString } },
-    { timestamps: false },
+    { timestamps: false }
   )
 }
 
@@ -126,7 +126,7 @@ export async function updateReviewerLastViewed(id: ModelId) {
   return VersionModel.findOneAndUpdate(
     { _id: id },
     { $set: { reviewerLastViewed: new Date() as DateString } },
-    { timestamps: false },
+    { timestamps: false }
   )
 }
 

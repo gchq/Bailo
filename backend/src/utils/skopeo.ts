@@ -29,10 +29,10 @@ export async function copyDockerImage(src: ImageRef, dest: ImageRef, log: LogFun
 
   return runCommand(
     `skopeo copy --src-registry-token ${srcToken} --dest-registry-token ${destToken} docker://${getDockerPath(
-      src,
+      src
     )} docker://${getDockerPath(dest)}`,
     (msg) => log('info', msg),
-    (msg) => log('error', msg),
+    (msg) => log('error', msg)
   )
 }
 
@@ -45,13 +45,13 @@ export async function downloadDockerExport(src: ImageRef, filepath: string, log:
   await runCommand(
     `skopeo copy --src-registry-token ${srcToken} docker://${getDockerPath(src)} ${dest}`,
     (msg) => log('info', msg),
-    (msg) => log('error', msg),
+    (msg) => log('error', msg)
   )
 
   await runCommand(
     `gzip --fast ${filepath}.tar`,
     (msg) => log('info', msg),
-    (msg) => log('error', msg),
+    (msg) => log('error', msg)
   )
 }
 
@@ -63,7 +63,7 @@ export async function uploadDockerExport(filepath: string, dest: ImageRef, log: 
   await runCommand(
     `skopeo copy --dest-registry-token ${token} docker-archive:${filepath} docker://${getDockerPath(dest)}`,
     (msg) => log('info', msg),
-    (msg) => log('error', msg),
+    (msg) => log('error', msg)
   )
 }
 
@@ -75,6 +75,6 @@ export async function deleteImageTag(image: ImageRef, log: LogFunction) {
   return runCommand(
     `skopeo delete --registry-token ${token} docker://${getDockerPath(image)}`,
     (msg) => log('info', msg),
-    (msg) => log('error', msg),
+    (msg) => log('error', msg)
   )
 }

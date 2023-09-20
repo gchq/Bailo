@@ -12,7 +12,7 @@ export async function uploadModelFile(
   modelId: string,
   name: string,
   mime: string,
-  stream: ReadableStream,
+  stream: ReadableStream
 ) {
   const model = await getModelById(user, modelId)
 

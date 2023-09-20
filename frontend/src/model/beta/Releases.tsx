@@ -19,7 +19,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
       releases.map((release) => (
         <ModelReleaseDisplay key={release.semver} modelId={model.id} release={release} latestRelease={latestRelease} />
       )),
-    [latestRelease, model.id, releases],
+    [latestRelease, model.id, releases]
   )
 
   useEffect(() => {

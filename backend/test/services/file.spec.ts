@@ -54,7 +54,7 @@ describe('services > file', () => {
     authorisationMocks.userModelAction.mockResolvedValueOnce(false)
 
     expect(() => uploadModelFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
-      /^You do not have permission to upload a file to this model./,
+      /^You do not have permission to upload a file to this model./
     )
   })
 })

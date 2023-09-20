@@ -76,12 +76,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         </Fragment>
       )
     },
-    [pathname],
+    [pathname]
   )
 
   const currentIndex = useMemo(
     () => flatDirectory.findIndex((item) => item.slug === pathname.replace(/^(\/docs\/)/, '')),
-    [pathname],
+    [pathname]
   )
 
   function changePage(newIndex: number) {

@@ -21,7 +21,7 @@ export async function up() {
           { namespace: deployment.uuid, model: model.uuid, version: version.version },
           (level: 'info' | 'error', message: string) => {
             logger[level](message)
-          },
+          }
         )
       }
     }

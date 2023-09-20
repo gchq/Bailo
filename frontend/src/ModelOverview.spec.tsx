@@ -68,7 +68,7 @@ describe('ModelOverview', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <ModelOverview version={version} />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {

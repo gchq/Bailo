@@ -20,7 +20,7 @@ const UserSchema = new Schema<User>(
   },
   {
     timestamps: true,
-  },
+  }
 )
 
 UserSchema.pre('save', function userPreSave(next) {

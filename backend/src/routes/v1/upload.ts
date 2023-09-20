@@ -135,7 +135,7 @@ export const postUpload = [
     } else {
       throw BadReq(
         { code: 'upload_mode_invalid' },
-        `Upload mode ${req.query.mode} is not valid.  Must be one of ${Object.keys(UploadModes).join(', ')}.`,
+        `Upload mode ${req.query.mode} is not valid.  Must be one of ${Object.keys(UploadModes).join(', ')}.`
       )
     }
 
@@ -185,7 +185,7 @@ export const postUpload = [
           {
             message: 'This model already has a version with the same name',
             documentationUrl: '/docs/errors/duplicate-version',
-          },
+          }
         )
       }
 
@@ -207,7 +207,7 @@ export const postUpload = [
     })
     req.log.info(
       { code: 'created_review_approvals', managerId: managerApproval._id, reviewApproval: reviewerApproval._id },
-      'Successfully created approvals for review',
+      'Successfully created approvals for review'
     )
 
     switch (uploadType) {
@@ -229,7 +229,7 @@ export const postUpload = [
           await VersionModel.findOneAndUpdate({ _id: version._id }, { files: { rawCodePath, rawBinaryPath } })
           req.log.info(
             { code: 'adding_file_paths', rawCodePath, rawBinaryPath },
-            `Adding paths for raw model exports of files to version.`,
+            `Adding paths for raw model exports of files to version.`
           )
         } catch (e: unknown) {
           throw GenericError({ e }, 'Error uploading raw code and binary to Minio', 500)

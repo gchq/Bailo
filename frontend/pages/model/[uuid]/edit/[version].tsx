@@ -51,7 +51,7 @@ function Upload() {
         },
       },
       [],
-      cVersion.metadata,
+      cVersion.metadata
     )
 
     schemaSteps.push(
@@ -69,7 +69,7 @@ function Upload() {
         render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
-      }),
+      })
     )
 
     for (const step of schemaSteps) {

@@ -12,7 +12,7 @@ describe('DisabledElementTooltip', () => {
     render(
       <DisabledElementTooltip conditions={[testMessage]}>
         <Button data-test='trigger'>Button</Button>
-      </DisabledElementTooltip>,
+      </DisabledElementTooltip>
     )
 
     await waitFor(async () => {

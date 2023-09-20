@@ -13,7 +13,7 @@ describe('DocsWrapper', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <DocsWrapper />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {

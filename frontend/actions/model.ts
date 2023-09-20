@@ -23,7 +23,7 @@ export function useListModels(type: ListModelType, filter?: string) {
       type,
       filter,
     })}`,
-    fetcher,
+    fetcher
   )
 
   return {

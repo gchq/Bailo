@@ -60,7 +60,7 @@ const ReviewSchema = new Schema<ReviewInterface>(
   {
     timestamps: true,
     collection: 'v2_reviews',
-  },
+  }
 )
 
 ReviewSchema.plugin(MongooseDelete, {

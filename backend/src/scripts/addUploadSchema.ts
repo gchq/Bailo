@@ -12,7 +12,7 @@ import minimal from './example_schemas/minimal_upload_schema.json' assert { type
       schema: minimal,
       use: SchemaType.UPLOAD,
     },
-    true,
+    true
   )
 
   setTimeout(disconnectFromMongoose, 50)

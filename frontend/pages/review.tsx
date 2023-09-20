@@ -55,7 +55,7 @@ function ApprovalList({
 
   const uploadCategory: UploadCategory = useMemo(
     () => (approvalCategory === ApprovalCategory.Upload ? 'model' : 'deployment'),
-    [approvalCategory],
+    [approvalCategory]
   )
 
   if (isApprovalsError) {
@@ -104,12 +104,12 @@ function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(
     ((approval.version as VersionDoc)?.model as ModelDoc)?.schemaRef ||
-      ((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.schemaRef,
+      ((approval.deployment as DeploymentDoc)?.model as ModelDoc)?.schemaRef
   )
 
   const reviewer: string = useMemo(
     () => (schema ? schema.schema.properties.contacts.properties.reviewer.title : ''),
-    [schema],
+    [schema]
   )
 
   const canApprove = useMemo(() => {
@@ -129,7 +129,7 @@ function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps)
       backgroundColor: theme.palette.container.main,
       borderLeft: `.3rem solid ${approval.approvalType === 'Manager' ? '#283593' : '#de3c30'}`,
     }),
-    [approval.approvalType, theme],
+    [approval.approvalType, theme]
   )
 
   const handleClose = () => {
@@ -167,7 +167,7 @@ function ApprovalItem({ approval, approvalCategory, filter }: ApprovalItemProps)
     } else {
       setApprovalModalTitle(`Reject ${approvalCategory}`)
       setApprovalModalText(
-        `The ${approvalCategory.toLowerCase()} does not meet the necessary requirements for approval.`,
+        `The ${approvalCategory.toLowerCase()} does not meet the necessary requirements for approval.`
       )
     }
   }

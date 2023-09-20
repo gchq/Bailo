@@ -15,7 +15,7 @@ const MigrationSchema = new Schema<Migration>(
   },
   {
     timestamps: true,
-  },
+  }
 )
 
 const MigrationModel = model<Migration>('Migration', MigrationSchema)

@@ -46,11 +46,11 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
 
   const buildId = useMemo(
     () => (type === LogType.Build && typeof log.buildId === 'string' ? log.buildId : undefined),
-    [log.buildId, type],
+    [log.buildId, type]
   )
   const approvalId = useMemo(
     () => (type === LogType.Approval && typeof log.id === 'string' ? log.id : undefined),
-    [log.id, type],
+    [log.id, type]
   )
 
   const childLogs = useGetAppLogs({
@@ -162,7 +162,7 @@ export default function ChildLogDetails({ uiConfig, log, type, indent, query }: 
 
   const isExpandable = useMemo(
     () => !(type === LogType.Misc && Object.keys(omit(log, miscIgnoreList)).length === 0),
-    [log, type],
+    [log, type]
   )
 
   const icon = useMemo(() => {

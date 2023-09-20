@@ -34,12 +34,12 @@ export default function BuildOrApprovalLogDetails({
               log={childLog}
               indent={indent}
               type={LogType.Misc}
-            />,
+            />
           )
         }
         return logDetails
       }, []),
-    [childLogs, filterCode, indent, query, uiConfig],
+    [childLogs, filterCode, indent, query, uiConfig]
   )
 
   return (

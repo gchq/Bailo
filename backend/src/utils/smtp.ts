@@ -45,7 +45,7 @@ export async function sendEmail({
         text,
       },
       'Error sending email notification',
-      500,
+      500
     )
   }
 }

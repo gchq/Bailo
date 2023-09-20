@@ -7,7 +7,7 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 export function useGetDeployment(uuid?: string, logs = false) {
   const { data, error, mutate } = useSWR<Deployment, ErrorInfo>(
     uuid ? `/api/v1/deployment/${uuid}?logs=${logs}` : null,
-    fetcher,
+    fetcher
   )
 
   return {
@@ -21,7 +21,7 @@ export function useGetDeployment(uuid?: string, logs = false) {
 export function useGetUserDeployments(_id?: string | Types.ObjectId) {
   const { data, error, mutate } = useSWR<Deployment[], ErrorInfo>(
     _id ? `/api/v1/deployment/user/${_id}` : null,
-    fetcher,
+    fetcher
   )
 
   return {

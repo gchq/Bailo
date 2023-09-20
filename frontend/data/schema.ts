@@ -9,7 +9,7 @@ export function useGetDefaultSchema(use = 'UPLOAD') {
     `/api/v1/schema/default?${qs.stringify({
       use,
     })}`,
-    fetcher,
+    fetcher
   )
 
   return {
@@ -26,7 +26,7 @@ export function useGetSchemas(use: SchemaUse) {
     `/api/v1/schemas?${qs.stringify({
       use,
     })}`,
-    fetcher,
+    fetcher
   )
 
   return {
@@ -40,7 +40,7 @@ export function useGetSchemas(use: SchemaUse) {
 export function useGetSchema(schemaRef?: string) {
   const { data, error, mutate } = useSWR<Schema, ErrorInfo>(
     schemaRef ? `/api/v1/schema/${encodeURIComponent(schemaRef)}` : null,
-    fetcher,
+    fetcher
   )
 
   return {

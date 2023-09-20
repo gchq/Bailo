@@ -35,7 +35,7 @@ const VersionSchema = new Schema<Version>(
   {
     timestamps: true,
     toJSON: { virtuals: true },
-  },
+  }
 )
 
 VersionSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

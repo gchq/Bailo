@@ -75,7 +75,7 @@ export const postDeployment = [
     if (!schema) {
       throw NotFound(
         { code: 'schema_not_found', schemaRef: body.schemaRef },
-        `Unable to find schema with name: '${body.schemaRef}'`,
+        `Unable to find schema with name: '${body.schemaRef}'`
       )
     }
 
@@ -86,7 +86,7 @@ export const postDeployment = [
     if (schemaIsInvalid) {
       throw BadReq(
         { code: 'invalid_schema', errors: schemaIsInvalid, schemaRef: body.schemaRef },
-        `Your deployment does not conform to the schema: '${body.schemaRef}'`,
+        `Your deployment does not conform to the schema: '${body.schemaRef}'`
       )
     }
 
@@ -95,7 +95,7 @@ export const postDeployment = [
     if (!model) {
       throw NotFound(
         { code: 'model_not_found', modelId: body.highLevelDetails.modelID },
-        `Unable to find model with name: '${body.highLevelDetails.modelID}'`,
+        `Unable to find model with name: '${body.highLevelDetails.modelID}'`
       )
     }
 
@@ -104,7 +104,7 @@ export const postDeployment = [
     if (!version) {
       throw NotFound(
         { code: 'version_not_found', versionId: (model as ModelDoc).latestVersion },
-        'Unable to find version',
+        'Unable to find version'
       )
     }
 
@@ -113,7 +113,7 @@ export const postDeployment = [
     const approvedVersions = versions.filter(
       (modelVersion) =>
         (modelVersion as VersionDoc).managerApproved === ApprovalStates.Accepted &&
-        (modelVersion as VersionDoc).reviewerApproved === ApprovalStates.Accepted,
+        (modelVersion as VersionDoc).reviewerApproved === ApprovalStates.Accepted
     )
 
     if (approvedVersions.length === 0) {
@@ -156,7 +156,7 @@ export const postDeployment = [
 
     req.log.info(
       { code: 'created_deployment', deploymentId: deployment._id, approval: managerApproval._id, uuid },
-      'Successfully created deployment',
+      'Successfully created deployment'
     )
 
     res.json({
@@ -179,7 +179,7 @@ export const postUngovernedDeployment = [
     if (!model) {
       throw NotFound(
         { code: 'model_not_found', modelId: body.modelUuid },
-        `Unable to find model with name: '${body.modelUuid}'`,
+        `Unable to find model with name: '${body.modelUuid}'`
       )
     }
 
@@ -215,7 +215,7 @@ export const postUngovernedDeployment = [
 
     req.log.info(
       { code: 'created_ungoverned_deployment', deploymentId: deployment._id, uuid },
-      'Successfully created deployment',
+      'Successfully created deployment'
     )
 
     req.log.info({ code: 'triggered_deployments', deployment }, 'Triggered deployment')
@@ -241,7 +241,7 @@ export const resetDeploymentApprovals = [
     if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
       throw Forbidden(
         { code: 'not_allowed_to_reset_approvals' },
-        'You cannot reset the approvals for a deployment you do not own.',
+        'You cannot reset the approvals for a deployment you do not own.'
       )
     }
 
@@ -252,7 +252,7 @@ export const resetDeploymentApprovals = [
     if (!version) {
       throw NotFound(
         { code: 'version_not_found', versionId: (deployment.model as ModelDoc).latestVersion },
-        'Unable to find version',
+        'Unable to find version'
       )
     }
     await createDeploymentApprovals({ deployment, version, user: req.user })
@@ -276,7 +276,7 @@ export const fetchRawModelFiles = [
       const owners = deployment.metadata.contacts.owner.map((owner: any) => owner.id).join(', ')
       throw Forbidden(
         { deploymentOwner: deployment.metadata.contacts.owner },
-        `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`,
+        `User is not authorised to download this file. Requester: ${req.user.id}, owners: ${owners}`
       )
     }
 
@@ -289,7 +289,7 @@ export const fetchRawModelFiles = [
     if (deployment.managerApproved !== 'Accepted') {
       throw Forbidden(
         { approvalStatus: deployment.managerApproved },
-        'User is not authorised to download this file as it has not been approved.',
+        'User is not authorised to download this file as it has not been approved.'
       )
     }
 
@@ -377,7 +377,7 @@ export const getExportModelVersion = [
     if (!deployment) {
       throw NotFound(
         { code: 'deployment_not_found', deploymentUuid },
-        `Unable to find requested deployment: '${deploymentUuid}'`,
+        `Unable to find requested deployment: '${deploymentUuid}'`
       )
     }
 
@@ -408,7 +408,7 @@ export const getExportModelVersion = [
           deploymentUuid,
           versionName,
         },
-        'Errored during artefact bundling',
+        'Errored during artefact bundling'
       )
     })
 

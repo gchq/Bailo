@@ -17,7 +17,7 @@ const LogSchema = new Schema<Log>(
     timestamps: true,
     capped: { size: 1024 * 1024 * 32 },
     strict: false,
-  },
+  }
 )
 
 const LogModel = model<Log>('Log', LogSchema)

@@ -20,7 +20,7 @@ describe('Snackbar', () => {
     render(
       <SnackbarProvider>
         <TestComponent />
-      </SnackbarProvider>,
+      </SnackbarProvider>
     )
 
     await waitFor(async () => {

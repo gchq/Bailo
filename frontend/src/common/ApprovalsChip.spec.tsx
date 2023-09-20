@@ -43,7 +43,7 @@ describe('ApprovalsChip', () => {
           approvalCategory={ApprovalCategory.Upload}
           currentUser={testUser}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {
@@ -68,7 +68,7 @@ describe('ApprovalsChip', () => {
           approvalCategory={ApprovalCategory.Upload}
           currentUser={testUser}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {
@@ -93,7 +93,7 @@ describe('ApprovalsChip', () => {
           approvalCategory={ApprovalCategory.Upload}
           currentUser={testUser}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {
@@ -118,7 +118,7 @@ describe('ApprovalsChip', () => {
           approvalCategory={ApprovalCategory.Upload}
           currentUser={testUser}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {
@@ -143,7 +143,7 @@ describe('ApprovalsChip', () => {
           approvalCategory={ApprovalCategory.Upload}
           currentUser={testUser}
         />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {

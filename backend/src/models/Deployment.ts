@@ -25,7 +25,7 @@ const DeploymentSchema = new Schema<Deployment>(
   },
   {
     timestamps: true,
-  },
+  }
 )
 
 DeploymentSchema.plugin(MongooseDelete, {

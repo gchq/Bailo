@@ -24,7 +24,7 @@ const UserSchema = new Schema<UserInterface>(
   {
     timestamps: true,
     collection: 'v2_users',
-  },
+  }
 )
 
 const UserModel = model<UserInterface>('v2_User', UserSchema)

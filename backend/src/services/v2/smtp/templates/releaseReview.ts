@@ -57,14 +57,14 @@ export class ReleaseReviewEmail extends BaseEmailTemplate {
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${baseUrl}/model/${modelId}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${
-          ReviewKind.Release
-        }</mj-button>
+        ReviewKind.Release
+      }</mj-button>
       </mj-column>
       <mj-column width="50%">
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${baseUrl}/review" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="12px">See Reviews</mj-button>
       </mj-column>
     </mj-section>
-  `),
+  `)
     ).html
   }
 }

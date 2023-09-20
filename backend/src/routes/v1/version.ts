@@ -198,7 +198,7 @@ export const postResetVersionApprovals = [
     if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
       throw Forbidden(
         { code: 'user_unauthorised', version: version._id },
-        'User is not authorised to do this operation.',
+        'User is not authorised to do this operation.'
       )
     }
     version.managerApproved = ApprovalStates.NoResponse
@@ -224,7 +224,7 @@ export const postRebuildModel = [
     if (!(await isUserInEntityList(user, version.metadata.contacts.uploader))) {
       throw Forbidden(
         { code: 'user_unauthorised', version: version._id },
-        'User is not authorised to do this operation.',
+        'User is not authorised to do this operation.'
       )
     }
 
@@ -290,7 +290,7 @@ export const putUpdateLastViewed = [
     if (!['manager', 'reviewer'].includes(role)) {
       throw BadReq(
         { code: 'invalid_version_role' },
-        'Cannot update last view date as role type specified is not recognised.',
+        'Cannot update last view date as role type specified is not recognised.'
       )
     }
 
@@ -302,13 +302,13 @@ export const putUpdateLastViewed = [
       await updateManagerLastViewed(id)
       req.log.info(
         { code: 'version_last_viewed_updated', version: id, role },
-        "Version's manager last viewed date has been updated",
+        "Version's manager last viewed date has been updated"
       )
     } else if (role === 'reviewer') {
       await updateReviewerLastViewed(id)
       req.log.info(
         { code: 'version_last_viewed_updated', version: id, role },
-        "Version's reviewer last viewed date has been updated",
+        "Version's reviewer last viewed date has been updated"
       )
     }
 

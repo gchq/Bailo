@@ -15,7 +15,7 @@ describe('SettingsProfileTab', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SettingsProfileTab user={user} />
-      </ThemeProvider>,
+      </ThemeProvider>
     )
 
     await waitFor(async () => {

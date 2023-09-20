@@ -31,7 +31,7 @@ const TeamSchema = new Schema<TeamInterface>(
   {
     timestamps: true,
     collection: 'v2_teams',
-  },
+  }
 )
 
 TeamSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

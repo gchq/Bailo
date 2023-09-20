@@ -48,7 +48,7 @@ export function setStepState(
   _splitSchema: SplitSchemaNoRender,
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
   step: StepNoRender,
-  state: any,
+  state: any
 ) {
   setSplitSchema((oldSchema) => {
     const index = oldSchema.steps.findIndex((iStep) => step.section === iStep.section)
@@ -71,7 +71,7 @@ export function setStepValidate(
   splitSchema: SplitSchemaNoRender,
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
   step: StepNoRender,
-  validate: boolean,
+  validate: boolean
 ) {
   const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
@@ -89,7 +89,7 @@ export function getStepsFromSchema(
   schema: any,
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
-  state: any = {},
+  state: any = {}
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -100,7 +100,7 @@ export function getStepsFromSchema(
 
   const uiSchema = createUiSchema(schemaDupe, baseUiSchema)
   const props = Object.keys(schemaDupe.properties).filter((key) =>
-    ['object', 'array'].includes(schemaDupe.properties[key].type),
+    ['object', 'array'].includes(schemaDupe.properties[key].type)
   )
 
   const steps: Array<StepNoRender> = []
@@ -142,7 +142,7 @@ export function getStepsData(splitSchema: SplitSchemaNoRender, includeAll = fals
 export function setStepsData(
   splitSchema: SplitSchemaNoRender,
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
-  data: any,
+  data: any
 ) {
   const newSteps = splitSchema.steps.map((step) => {
     if (!data[step.section]) return { ...step }
