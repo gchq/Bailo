@@ -91,7 +91,7 @@ if (config.oauth.enabled) {
       store: MongoStore.create({
         mongoUrl: config.mongo.uri,
       }),
-    }),
+    })
   )
 }
 
