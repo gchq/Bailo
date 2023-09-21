@@ -1,6 +1,7 @@
 import { Close, Done, HourglassEmpty } from '@mui/icons-material'
-import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useRouter } from 'next/router'
 
 import { ApprovalStates, ReleaseInterface } from '../../../../types/types'
 import Link from '../../../Link'
@@ -16,6 +17,7 @@ export default function ModelReleaseDisplay({
   latestRelease: string
 }) {
   const theme = useTheme()
+  const router = useRouter()
 
   function formatDate(timestamp: string) {
     const date = new Date(timestamp)
@@ -93,7 +95,9 @@ export default function ModelReleaseDisplay({
                   </Stack>
                 </Stack>
 
-                <Link href={`/beta/model/${modelId}?release=${release.semver}`}>Model Card</Link>
+                <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
+                  View Model Card
+                </Button>
               </Stack>
               <Stack spacing={1} direction='row' sx={{ mt: '0px !important' }}>
                 <Typography variant='caption' sx={{ fontWeight: 'bold' }}>

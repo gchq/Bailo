@@ -36,6 +36,14 @@ export interface DeploymentMetadata {
   }
 }
 
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: unknown
+}
+
 export interface ModelMetadata {
   highLevelDetails: {
     tags: Array<string>
@@ -395,7 +403,7 @@ export const SchemaKind = {
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export interface ApprovalRequestInterface {
+export interface ReviewRequestInterface {
   model: string
   release: string
   kind: 'release' | 'acess'
