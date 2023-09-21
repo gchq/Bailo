@@ -88,7 +88,7 @@ export async function respondToReview(
     { new: true },
   )
   if (!update) {
-    throw GenericError(500, `Adding response to review was not successful`, { modelId, semver, role })
+    throw GenericError(500, `Adding response to Review was not successful`, { modelId, semver, role })
   }
   return update
 }
