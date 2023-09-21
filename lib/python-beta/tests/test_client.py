@@ -8,7 +8,6 @@ import json
 
 from bailo import BailoClient
 from bailo.enums import ModelVisibility
-from bailo.model import Model
 
 mock_result = {"success": True}
 
@@ -17,9 +16,10 @@ def test_create_model(requests_mock):
     requests_mock.post("https://example.com/api/v2/models", json={"success": True})
 
     client = BailoClient("https://example.com")
-    model = Model(name="test", description="test", visibility=ModelVisibility.Public)
     result = client.create_model(
-        model=model
+        name="test",
+        description="test",
+        visibility=ModelVisibility.Public
     )
 
     assert result == {"success": True}
@@ -51,9 +51,9 @@ def test_update_model(requests_mock):
     requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
 
     client = BailoClient("https://example.com")
-    model = Model(name="test")
     result = client.update_model(
-        model_id="test_id", model=model
+        model_id="test_id",
+        name="test",
     )
 
     assert result == {"success": True}

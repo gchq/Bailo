@@ -3,7 +3,6 @@ from __future__ import annotations
 import requests
 from typing import List, Optional, Any
 from .enums import ModelVisibility
-from .model import Model
 
 class Agent:
     def __init__(self):
@@ -26,20 +25,24 @@ class BailoClient():
 
     def create_model(
             self,
-            model: Model,
-        ):
+            name: str,
+            description: str,
+            visibility: Optional[ModelVisibility] = None,
+    ):
         """
-        Creates a new model.
+        Creates a model.
 
-        :param model: Model object containing name, description and visibility.
+        :param name: Name of the model
+        :param description: Description of the model
+        :param visibility: Object to define model visibility (e.g public or private)
         :return: JSON response object
         """
         return self.agent.post(
             f"{self.url}/v2/models",
             json={
-                "name": model["name"],
-                "description": model["description"],
-                "visibility": model["visibility"].value,
+                "name": name,
+                "description": description,
+                "visibility": visibility.value,
             },
         ).json()
 
@@ -86,18 +89,33 @@ class BailoClient():
     def update_model(
         self,
         model_id: str,
-        model: Model,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        visibility: Optional[str] = None,
     ):
         """
         Updates a specific model using its unique ID.
 
         :param model_id: Unique model ID
-        :param model: Model object containing name, description and/or visibility.
+        :param name: Name of the model, defaults to None
+        :param description: Description of the model, defaults to None
+        :param visibility: Object to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
-        """ 
+        """
+        x = {}
+
+        if name is not None:
+            x.update({"name": name})
+
+        if description is not None:
+            x.update({"description": description})
+
+        if visibility is not None:
+            x.update({"visibility": visibility})
+
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}",
-            json=model,
+            json=x,
         ).json()
 
     def get_model_card(
@@ -327,6 +345,11 @@ class BailoClient():
         """        
         return self.agent.post(
             f"{self.url}/v2/teams",
+            json={
+                "id": team_id,
+                "name": name,
+                "description": description,
+            }
         ).json()
     
     def get_all_teams(
