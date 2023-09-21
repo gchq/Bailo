@@ -20,40 +20,9 @@ export async function findReviews(user: UserDoc, active: boolean, modelId?: stri
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
-    .match(
-      // Move this into one variable
-      {
-        $expr: {
-          $gt: [
-            {
-              $size: {
-                $filter: {
-                  input: '$model.collaborators',
-                  as: 'item',
-                  cond: {
-                    $and: [
-                      {
-                        $in: ['$$item.entity', await authorisation.getEntities(user)],
-                      },
-                      {
-                        $in: ['$role', '$$item.roles'],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            0,
-          ],
-        },
-      },
-    )
+    .match(await findUserInCollaborators(user))
 
   return reviews
-}
-
-export async function countReviews(user: UserDoc): Promise<number> {
-  return (await findReviews(user, true)).length
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
@@ -105,47 +74,60 @@ export async function respondToReview(
       .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
       // Populate model as value instead of array
       .unwind({ path: '$model' })
-      .match({
-        $expr: {
-          $gt: [
-            {
-              $size: {
-                $filter: {
-                  input: '$model.collaborators',
-                  as: 'item',
-                  cond: {
-                    $and: [
-                      {
-                        $in: ['$$item.entity', await authorisation.getEntities(user)],
-                      },
-                      {
-                        $in: ['$role', '$$item.roles'],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            0,
-          ],
-        },
-      })
+      .match(await findUserInCollaborators(user))
       .limit(1)
   ).at(0)
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, semver, role })
   }
-  const update = await Review.findByIdAndUpdate(review._id, {
-    $push: { responses: { user: toEntity('user', user.dn), ...response } },
-  })
+  const update = await Review.findByIdAndUpdate(
+    review._id,
+    {
+      $push: { responses: { user: toEntity('user', user.dn), ...response } },
+    },
+    { new: true },
+  )
   if (!update) {
     throw GenericError(500, `Adding response to review was not successful`, { modelId, semver, role })
   }
   return update
 }
+
 function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
   const roleEntities: string[] = collaborators
     .filter((collaborator) => collaborator.roles.includes(role))
     .map((collaborator) => collaborator.entity)
   return roleEntities
+}
+
+/**
+ * Return the models where one of the user's entities is in the model's collaberators
+ * and the role in the review is in the list of roles in that collaborator entry.
+ */
+async function findUserInCollaborators(user: UserDoc) {
+  return {
+    $expr: {
+      $gt: [
+        {
+          $size: {
+            $filter: {
+              input: '$model.collaborators',
+              as: 'item',
+              cond: {
+                $and: [
+                  {
+                    $in: ['$$item.entity', await authorisation.getEntities(user)],
+                  },
+                  {
+                    $in: ['$role', '$$item.roles'],
+                  },
+                ],
+              },
+            },
+          },
+        },
+        0,
+      ],
+    },
+  }
 }

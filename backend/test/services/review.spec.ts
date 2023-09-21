@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import Model from '../../src/models/v2/Model.js'
 import Release from '../../src/models/v2/Release.js'
-import { countReviews, createReleaseReviews, findReviews } from '../../src/services/v2/review.js'
+import { createReleaseReviews, findReviews } from '../../src/services/v2/review.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
@@ -68,13 +68,6 @@ describe('services > review', () => {
 
   test('findReviewsByActive > inactive reviews for a specific model', async () => {
     await findReviews(user, false, 'modelId')
-
-    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
-  test('countReviews > successful', async () => {
-    await countReviews(user)
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()

@@ -27,7 +27,7 @@ export const getReviews = [
       params: { modelId },
     } = parse(req, getReviewSchema)
     const reviews = await findReviews(req.user, active, modelId)
-    res.setHeader('X-Total-Count', reviews.length)
+    res.setHeader('x-count', reviews.length)
     return res.json({
       reviews,
     })
