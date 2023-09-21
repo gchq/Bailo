@@ -22,7 +22,7 @@ import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties } from 'react'
 
-import { useGetNumApprovals } from '../../actions/approval'
+import { useGetNumReviews } from '../../actions/review'
 import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import Link from '../Link'
@@ -80,7 +80,7 @@ export default function SideNavigation({
   toggleDrawer,
   currentUser,
 }: SideNavigationProps) {
-  const { numApprovals, isNumApprovalsLoading } = useGetNumApprovals()
+  const { numReviews, isNumReviewsLoading } = useGetNumReviews()
 
   const theme = useTheme()
 
@@ -137,12 +137,12 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                        <Badge badgeContent={isNumReviewsLoading ? 0 : numReviews} color='secondary'>
                           <ListAltIcon />
                         </Badge>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={isNumApprovalsLoading ? 0 : numApprovals} color='secondary'>
+                      <Badge badgeContent={isNumReviewsLoading ? 0 : numReviews} color='secondary'>
                         <ListAltIcon />
                       </Badge>
                     )}
