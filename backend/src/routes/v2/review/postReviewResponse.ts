@@ -29,7 +29,9 @@ export const postReviewResponse = [
       params: { modelId, semver, role },
       body,
     } = parse(req, postReviewResponseSchema)
+
     const review = await respondToReview(req.user, modelId, semver, role, body)
+
     return res.json({
       review,
     })

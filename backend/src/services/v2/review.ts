@@ -101,6 +101,7 @@ function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: strin
 }
 
 /**
+ * Requires the model attribute.
  * Return the models where one of the user's entities is in the model's collaberators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
