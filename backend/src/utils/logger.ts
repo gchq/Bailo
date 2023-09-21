@@ -285,7 +285,7 @@ const morganLog = morgan<any, any>(
         status: tokens.status(req, res),
         code: 'approval',
       },
-      process.env.NODE_ENV == 'production' ? stripAnsi(message) : message
+      process.env.NODE_ENV == 'production' ? stripAnsi(message) : message,
     )
 
     return ''
@@ -294,7 +294,7 @@ const morganLog = morgan<any, any>(
     skip: (req, _res) => ['/_next/', '/__nextjs'].some((val) => req.originalUrl.startsWith(val)),
     // write to nowhere...
     stream: devnull(),
-  }
+  },
 )
 
 export default log

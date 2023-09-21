@@ -12,7 +12,7 @@ import minimal from './example_schemas/minimal_deployment_schema.json' assert { 
       schema: minimal,
       use: SchemaType.DEPLOYMENT,
     },
-    true
+    true,
   )
 
   setTimeout(disconnectFromMongoose, 50)

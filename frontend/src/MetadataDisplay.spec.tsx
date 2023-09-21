@@ -42,7 +42,7 @@ describe('MetadataDisplay', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <MetadataDisplay item={item} tabsDisplaySequentially />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     await waitFor(async () => {

@@ -27,7 +27,7 @@ const ApprovalSchema = new Schema<Approval>(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 ApprovalSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

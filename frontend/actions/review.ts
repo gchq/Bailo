@@ -14,7 +14,7 @@ export function useGetReviewRequestsForUser(isActive = true) {
     `/api/v2/reviews?${qs.stringify({
       active: isActive,
     })}`,
-    fetcher
+    fetcher,
   )
 
   return {

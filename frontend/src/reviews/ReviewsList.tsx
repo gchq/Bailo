@@ -71,7 +71,7 @@ function ReviewItem({ review }: ReviewItemProps) {
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
             <Typography variant='caption'>{`Created ${timeDifference(
               new Date(),
-              new Date(review.createdAt)
+              new Date(review.createdAt),
             )}.`}</Typography>
             <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
               {editedAdornment()}

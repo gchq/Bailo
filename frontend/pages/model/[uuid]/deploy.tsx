@@ -59,7 +59,7 @@ export default function Deploy() {
         render: () => null,
         renderButtons: renderSubmissionTab,
         isComplete: () => true,
-      })
+      }),
     )
 
     for (const step of newSteps) {

@@ -13,7 +13,7 @@ describe('Wrapper', () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <Wrapper title='marketplace' page='/' />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     await waitFor(async () => {

@@ -163,7 +163,7 @@ describe('services > model', () => {
     modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(undefined)
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
-      /^Version '.*' does not exist/
+      /^Version '.*' does not exist/,
     )
   })
 
@@ -177,7 +177,7 @@ describe('services > model', () => {
     authorisationMocks.userModelAction.mockResolvedValue(false)
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
-      /^You do not have permission/
+      /^You do not have permission/,
     )
   })
 
@@ -205,7 +205,7 @@ describe('services > model', () => {
     authorisationMocks.userModelAction.mockImplementation((async (
       user: UserDoc,
       model: ModelDoc,
-      action: ModelActionKeys
+      action: ModelActionKeys,
     ) => {
       // Only deny write actions
       if (action === 'write') return false
@@ -213,7 +213,7 @@ describe('services > model', () => {
     }) as any)
 
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
-      /^You do not have permission to update this model card/
+      /^You do not have permission to update this model card/,
     )
     expect(modelCardRevisionModel.save).not.toBeCalled()
   })

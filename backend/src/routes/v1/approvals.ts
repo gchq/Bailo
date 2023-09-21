@@ -48,7 +48,7 @@ export const getApprovals = [
       if (!hasRole(['admin'], req.user)) {
         throw Forbidden(
           { code: 'unauthorised_admin_role_missing', roles: req.user.roles },
-          'Forbidden.  Your user does not have the "admin" role'
+          'Forbidden.  Your user does not have the "admin" role',
         )
       }
     } else {
@@ -99,14 +99,14 @@ export const postApprovalResponse = [
           userId: req.user._id,
           approvalApprovers: approval.approvers,
         },
-        'You do not have permissions to approve this'
+        'You do not have permissions to approve this',
       )
     }
 
     if (!['Accepted', 'Declined'].includes(choice)) {
       throw BadReq(
         { code: 'invalid_approval_choice', choice, approvalId: id },
-        `Received invalid approval choice, received '${choice}'`
+        `Received invalid approval choice, received '${choice}'`,
       )
     }
 
@@ -127,7 +127,7 @@ export const postApprovalResponse = [
       if (!version) {
         throw BadReq(
           { code: 'version_not_found', version: versionDoc._id },
-          `Received invalid version '${versionDoc._id}'`
+          `Received invalid version '${versionDoc._id}'`,
         )
       }
 
@@ -146,7 +146,7 @@ export const postApprovalResponse = [
               code: 'bad_request_type',
               version: versionDoc.managerApproved,
             },
-            `${managerTitle} cannot approve model versions until it has been accepted by a ${reviewerTitle}`
+            `${managerTitle} cannot approve model versions until it has been accepted by a ${reviewerTitle}`,
           )
         }
       }
@@ -171,7 +171,7 @@ export const postApprovalResponse = [
       if (!deployment) {
         throw BadReq(
           { code: 'deployment_not_found', deployment: deploymentId },
-          `Received invalid deployment '${deploymentId}'`
+          `Received invalid deployment '${deploymentId}'`,
         )
       }
 
