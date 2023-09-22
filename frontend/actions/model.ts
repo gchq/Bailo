@@ -92,7 +92,7 @@ export async function postModel(form: ModelForm) {
 
 export async function patchModel(model: ModelInterface) {
   return fetch(`/api/v2/model/${model.id}`, {
-    method: 'post',
+    method: 'patch',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(model),
   })

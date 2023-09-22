@@ -3,16 +3,23 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
+import { postReviewResponse } from '../../../../actions/review'
 import { useState } from 'react'
+import { ReleaseInterface } from '../../../../types/types'
 
 import ReviewWithComment, { ResponseTypeKeys } from '../../../common/ReviewWithComment'
+import { useGetReleasesForModelId } from 'actions/release'
 
 type ModelReleaseReviewBannerProps = {
   label: string
+  release: ReleaseInterface
+  mutateReviews: () => void
 }
 
-export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBannerProps) {
+export default function ModelReleaseReviewBanner({ label, release, mutateReviews }: ModelReleaseReviewBannerProps) {
   const theme = useTheme()
+
+  const { mutateReleases } = useGetReleasesForModelId(release.modelId)
 
   const [reviewCommentOpen, setReviewCommentOpen] = useState(false)
 
@@ -24,8 +31,12 @@ export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBa
     setReviewCommentOpen(false)
   }
 
-  const handleSubmit = (_kind: ResponseTypeKeys, _reviewComment: string) => {
-    //TODO some response to API endpoint- BAI-858
+  const handleSubmit = (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => {
+    postReviewResponse(release.modelId, release.semver, reviewRole, reviewComment, kind).then(() => {
+      mutateReviews()
+      mutateReleases()
+      setReviewCommentOpen(false)
+    })
   }
 
   return (
@@ -54,6 +65,7 @@ export default function ModelReleaseReviewBanner({ label }: ModelReleaseReviewBa
         open={reviewCommentOpen}
         onClose={closeReviewComment}
         onSubmit={handleSubmit}
+        release={release}
       />
     </Paper>
   )

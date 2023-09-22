@@ -1,8 +1,17 @@
 {
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "printWidth": 120,
+    "semi": false,
+    "singleQuote": true,
+    "jsxSingleQuote": true
+  },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "python.analysis.typeCheckingMode": "basic",
   "editor.formatOnPaste": true,
   "files.trimTrailingWhitespace": true,
@@ -28,5 +37,5 @@
   ],
   "isort.args": [
     "--settings-path=lib/python-beta/pyproject.toml"
-  ]
+  ],
 }

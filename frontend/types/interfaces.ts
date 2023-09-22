@@ -1,5 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
+import { ReviewResponse } from './types'
 
 export interface SplitSchema {
   reference: string
@@ -89,4 +90,15 @@ export interface ModelInterface {
 
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ReviewRequestInterface {
+  model: ModelInterface
+  semver: string
+  role: string
+  kind: 'release' | 'acess'
+  responses: ReviewResponse[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }

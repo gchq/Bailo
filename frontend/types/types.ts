@@ -403,11 +403,14 @@ export const SchemaKind = {
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export interface ReviewRequestInterface {
-  model: string
-  release: string
-  kind: 'release' | 'acess'
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
 }

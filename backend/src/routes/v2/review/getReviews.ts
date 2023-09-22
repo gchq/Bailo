@@ -12,6 +12,7 @@ export const getReviewSchema = z.object({
   }),
   params: z.object({
     modelId: z.string().optional(),
+    semver: z.string().optional(),
   }),
 })
 
@@ -24,9 +25,9 @@ export const getReviews = [
   async (req: Request, res: Response<GetReviewResponse>) => {
     const {
       query: { active },
-      params: { modelId },
+      params: { modelId, semver },
     } = parse(req, getReviewSchema)
-    const reviews = await findReviews(req.user, active, modelId)
+    const reviews = await findReviews(req.user, active, modelId, semver)
     res.setHeader('x-count', reviews.length)
     return res.json({
       reviews,
