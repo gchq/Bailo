@@ -9,8 +9,6 @@ import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 export const getReviewsSchema = z.object({
   query: z.object({
     active: strictCoerceBoolean(z.boolean()),
-  }),
-  params: z.object({
     modelId: z.string().optional(),
   }),
 })
@@ -23,8 +21,7 @@ export const getReviews = [
   bodyParser.json(),
   async (req: Request, res: Response<GetReviewResponse>) => {
     const {
-      query: { active },
-      params: { modelId },
+      query: { active, modelId },
     } = parse(req, getReviewsSchema)
     const reviews = await findReviews(req.user, active, modelId)
     res.setHeader('x-count', reviews.length)

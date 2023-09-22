@@ -6,29 +6,29 @@ import { Decision, ReviewInterface } from '../../../models/v2/Review.js'
 import { respondToReview } from '../../../services/v2/review.js'
 import { parse } from '../../../utils/v2/validate.js'
 
-export const postReviewResponseSchema = z.object({
+export const postReleaseReviewResponseSchema = z.object({
   params: z.object({
     modelId: z.string(),
     semver: z.string(),
-    role: z.string(),
   }),
   body: z.object({
+    role: z.string(),
     comment: z.string().optional(),
     decision: z.nativeEnum(Decision),
   }),
 })
 
-interface PostReviewResponse {
+interface PostReleaseReviewResponse {
   review: ReviewInterface
 }
 
-export const postReviewResponse = [
+export const postReleaseReviewResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReviewResponse>) => {
+  async (req: Request, res: Response<PostReleaseReviewResponse>) => {
     const {
-      params: { modelId, semver, role },
-      body,
-    } = parse(req, postReviewResponseSchema)
+      params: { modelId, semver },
+      body: { role, ...body },
+    } = parse(req, postReleaseReviewResponseSchema)
 
     const review = await respondToReview(req.user, modelId, semver, role, body)
 

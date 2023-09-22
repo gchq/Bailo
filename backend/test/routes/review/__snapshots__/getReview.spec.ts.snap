@@ -78,6 +78,18 @@ exports[`routes > review > getReviews > returns only active reviews for the spec
 }
 `;
 
+exports[`routes > review > getReviews > returns only active reviews for the specified model 2`] = `
+[
+  [
+    {
+      "dn": "user",
+    },
+    true,
+    "abc",
+  ],
+]
+`;
+
 exports[`routes > review > getReviews > returns only inactive reviews 1`] = `
 {
   "reviews": [
