@@ -49,7 +49,7 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
     } else if (fromEntity(entity).kind === SillyEntityKind.Group) {
       return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
     } else {
-      throw new Error(`Unable to get Entity Members. Entity not kind recognised: ${entity}`)
+      throw new Error(`Unable to get Entity Members. Entity kind not recognised: ${entity}`)
     }
   }
 }
