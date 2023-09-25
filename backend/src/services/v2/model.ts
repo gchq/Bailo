@@ -207,6 +207,20 @@ export async function updateModelCard(
   return revision
 }
 
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'>
+export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
+  const model = await getModelById(user, modelId)
+
+  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+
+  Object.assign(model, diff)
+  await model.save()
+
+  return model
+}
+
 export async function createModelCardFromSchema(
   user: UserDoc,
   modelId: string,

@@ -5,6 +5,7 @@ import { UserDoc } from '../../../models/v2/User.js'
 export const ModelAction = {
   Create: 'create',
   View: 'view',
+  Update: 'update',
   UploadFile: 'upload_file',
   Write: 'write',
 } as const
