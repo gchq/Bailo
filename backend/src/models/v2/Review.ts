@@ -9,10 +9,10 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-interface ReviewResponse {
+export interface ReviewResponse {
   user: string
   decision: DecisionKeys
-  comment: string
+  comment?: string
 }
 
 // This interface stores information about the properties on the base object.

@@ -2,7 +2,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import Model from '../../src/models/v2/Model.js'
 import Release from '../../src/models/v2/Release.js'
-import { countReviews, createReleaseReviews, findReviews } from '../../src/services/v2/review.js'
+import { Decision, ReviewInterface } from '../../src/models/v2/Review.js'
+import { createReleaseReviews, findReviews, respondToReview } from '../../src/services/v2/review.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
@@ -10,17 +11,21 @@ vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
 
 const ReviewModel = vi.hoisted(() => {
   const save = vi.fn()
+  const findByIdAndUpdate = vi.fn(() => 'review')
   const model: any = vi.fn(() => ({
     save,
+    findByIdAndUpdate,
   }))
 
   model.save = save
+  model.findByIdAndUpdate = findByIdAndUpdate
 
   model.aggregate = vi.fn(() => model)
   model.match = vi.fn(() => model)
   model.sort = vi.fn(() => model)
   model.lookup = vi.fn(() => model)
   model.unwind = vi.fn(() => model)
+  model.limit = vi.fn(() => [model])
 
   return model
 })
@@ -73,15 +78,9 @@ describe('services > review', () => {
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('countReviews > successful', async () => {
-    await countReviews(user)
-
-    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
   test('createReleaseReviews > No entities found for required roles', async () => {
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
+
     expect(result).rejects.toThrowError(`Could not find any entities for the role`)
     expect(ReviewModel.save).not.toBeCalled()
   })
@@ -91,7 +90,42 @@ describe('services > review', () => {
       new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
       new Release(),
     )
+
     expect(ReviewModel.save).toBeCalled()
     expect(smtpMock.requestReviewForRelease).toBeCalled()
+  })
+
+  test('respondToReview > successful', async () => {
+    await respondToReview(user, 'modelId', 'semver', 'msro', {
+      decision: Decision.RequestChanges,
+      comment: 'Do better!',
+    })
+
+    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(ReviewModel.findByIdAndUpdate).toBeCalled()
+  })
+
+  test('respondToReview > mongo update fails', async () => {
+    ReviewModel.findByIdAndUpdate.mockReturnValueOnce()
+
+    const result: Promise<ReviewInterface> = respondToReview(user, 'modelId', 'semver', 'msro', {
+      decision: Decision.RequestChanges,
+      comment: 'Do better!',
+    })
+
+    expect(result).rejects.toThrowError(`Adding response to Review was not successful`)
+  })
+
+  test('respondToReview > no reviews found', async () => {
+    ReviewModel.limit.mockReturnValueOnce([])
+
+    const result: Promise<ReviewInterface> = respondToReview(user, 'modelId', 'semver', 'msro', {
+      decision: Decision.RequestChanges,
+      comment: 'Do better!',
+    })
+
+    expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
+    expect(ReviewModel.findByIdAndUpdate).not.toBeCalled()
   })
 })

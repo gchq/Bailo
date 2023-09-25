@@ -66,8 +66,8 @@ import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
-import { getReviewsCount } from './routes/v2/review/getReviewCount.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
+import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
@@ -205,6 +205,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
   server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
+  server.post('/api/v2/model/:modelId/releases/:semver/review', ...postReleaseReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
@@ -223,7 +224,6 @@ if (config.experimental.v2) {
   server.post('/api/v2/schemas', ...postSchemaV2)
 
   server.get('/api/v2/reviews', ...getReviews)
-  server.get('/api/v2/reviews/count', ...getReviewsCount)
 
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
