@@ -2,18 +2,14 @@ import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { BaseAuthorisationConnector, ModelActionKeys } from './index.js'
+import { BaseAuthorisationConnector, ModelActionKeys } from './BaseAuthenticationConnector.js'
 
 const SillyEntityKind = {
   User: 'user',
   Group: 'group',
 } as const
 
-export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
-  constructor() {
-    // do nothing
-  }
-
+export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
   async userModelAction(_user: UserDoc, _model: ModelDoc, _action: ModelActionKeys) {
     // With silly authorisation, every user can complete every action.
     return true
@@ -36,11 +32,6 @@ export class SillyAuthorisationConnector implements BaseAuthorisationConnector {
     return {
       email: `${entityObject.value}@example.com`,
     }
-  }
-
-  async getUserInformationList(entity): Promise<Promise<{ email: string }>[]> {
-    const entities = await this.getEntityMembers(entity)
-    return entities.map((member) => this.getUserInformation(member))
   }
 
   async getEntityMembers(entity: string): Promise<string[]> {

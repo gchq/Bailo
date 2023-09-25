@@ -1,4 +1,5 @@
-import authorisation, { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/index.js'
+import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/BaseAuthenticationConnector.js'
+import authorisation from '../../connectors/v2/authorisation/index.js'
 import ModelModel from '../../models/v2/Model.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../models/v2/ModelCardRevision.js'

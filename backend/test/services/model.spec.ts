@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelActionKeys } from '../../src/connectors/v2/authorisation/index.js'
+import { ModelActionKeys } from '../../src/connectors/v2/authorisation/BaseAuthenticationConnector.js'
 import { ModelDoc } from '../../src/models/v2/Model.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import {
@@ -66,7 +66,6 @@ const authorisationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  ...((await vi.importActual('../../src/connectors/v2/authorisation/index.js')) as object),
   default: authorisationMocks,
 }))
 
