@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
+import { updateModel } from '../../../services/v2/model.js'
 import { parse } from '../../../utils/validate.js'
 
 export const patchModelSchema = z.object({
@@ -25,28 +26,15 @@ interface PatchModelResponse {
 export const patchModel = [
   bodyParser.json(),
   async (req: Request, res: Response<PatchModelResponse>) => {
-    const _ = parse(req, patchModelSchema)
+    const {
+      body,
+      params: { modelId },
+    } = parse(req, patchModelSchema)
+
+    const model = await updateModel(req.user, modelId, body)
 
     return res.json({
-      model: {
-        id: 'example-model-2',
-
-        name: 'Example Model 2',
-        description: 'An example Bailo model 2',
-
-        collaborators: [
-          {
-            entity: 'user:user',
-            roles: ['owner'],
-          },
-        ],
-
-        visibility: ModelVisibility.Public,
-        deleted: false,
-
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      model,
     })
   },
 ]
