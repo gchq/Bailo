@@ -75,6 +75,7 @@ import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
+import { getCurrentUser } from './routes/v2/user/getCurrentUser.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -244,7 +245,7 @@ if (config.experimental.v2) {
   // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
   // server.get('/api/v2/users', ...getUsers)
-  // server.get('/api/v2/users/me', ...getCurrentUser)
+  server.get('/api/v2/users/me', ...getCurrentUser)
 
   // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
