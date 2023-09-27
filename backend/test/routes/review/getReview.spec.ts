@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { testGet } from '../../testUtils/routes.js'
 import { testReleaseReview, testReleaseReviewWithResponses } from '../../testUtils/testModels.js'
 
+vi.mock('../../../src/utils/v2/config.js')
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
 
@@ -56,5 +57,6 @@ describe('routes > review > getReviews', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+    expect(mockReviewService.findReviews.mock.calls).matchSnapshot()
   })
 })

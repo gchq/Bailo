@@ -7,6 +7,7 @@ import { SillyAuthorisationConnector } from './silly.js'
 export const ModelAction = {
   Create: 'create',
   View: 'view',
+  Update: 'update',
   UploadFile: 'upload_file',
   Write: 'write',
 } as const
@@ -30,7 +31,7 @@ export abstract class BaseAuthorisationConnector {
   abstract getEntities(user: UserDoc): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<{ email: string }>
   abstract getUserInformationList(userEntity: string): Promise<Promise<{ email: string }>[]>
-  abstract getEntityMembers(groupEntity: string): Promise<Array<string>>
+  abstract getEntityMembers(entity: string): Promise<Array<string>>
 }
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined
