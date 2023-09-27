@@ -1,4 +1,5 @@
 import { Document, model, Schema } from 'mongoose'
+import MongooseDelete from 'mongoose-delete'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -43,6 +44,8 @@ const FileSchema = new Schema<FileInterface>(
     toJSON: { getters: true },
   },
 )
+
+FileSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const FileModel = model<FileInterface>('v2_File', FileSchema)
 
