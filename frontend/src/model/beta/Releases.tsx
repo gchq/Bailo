@@ -14,6 +14,8 @@ export default function Releases({ model }: { model: ModelInterface }) {
 
   const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
 
+  console.log('a')
+
   const modelReleaseDisplays = useMemo(
     () =>
       releases.map((release) => (

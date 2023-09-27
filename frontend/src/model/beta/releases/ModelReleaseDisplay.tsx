@@ -1,14 +1,15 @@
 import { Close, Done, HourglassEmpty } from '@mui/icons-material'
 import { Box, Button, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { useRouter } from 'next/router'
+import Markdown from 'src/common/MarkdownRenderer'
 
+import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
-import Link from '../../../Link'
-import ModelReleaseReviewBanner from './ModelReleaseReviewBanner'
-import MessageAlert from '../../../MessageAlert'
 import Loading from '../../../common/Loading'
+import Link from '../../../Link'
+import MessageAlert from '../../../MessageAlert'
+import ModelReleaseReviewBanner from './ModelReleaseReviewBanner'
 import ModelReleaseReviewsDisplay from './ModelReleaseReviewDisplay'
 
 export default function ModelReleaseDisplay({
@@ -23,13 +24,13 @@ export default function ModelReleaseDisplay({
   const theme = useTheme()
   const router = useRouter()
 
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(modelId, release.semver, true)
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-    mutateReviews,
-  } = useGetReviewRequestsForModel(modelId, release.semver, false)
+  // const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(modelId, release.semver, true)
+  // const {
+  //   reviews: inactiveReviews,
+  //   isReviewsLoading: isInactiveReviewsLoading,
+  //   isReviewsError: isInactiveReviewsError,
+  //   mutateReviews,
+  // } = useGetReviewRequestsForModel(modelId, release.semver, false)
 
   function formatDate(timestamp: string) {
     const date = new Date(timestamp)
@@ -44,17 +45,17 @@ export default function ModelReleaseDisplay({
     }
   }
 
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
-  }
+  // if (isReviewsError) {
+  //   return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  // }
 
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
-  }
+  // if (isInactiveReviewsError) {
+  //   return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  // }
 
   return (
     <>
-      {(isReviewsLoading || isInactiveReviewsLoading) && <Loading />}
+      {/* {(isReviewsLoading || isInactiveReviewsLoading) && <Loading />} */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box
           sx={{
@@ -65,13 +66,13 @@ export default function ModelReleaseDisplay({
             borderRadius: 4,
           }}
         >
-          {reviews.length > 0 ? (
+          {/* {reviews.length > 0 ? (
             <ModelReleaseReviewBanner
               label='This release needs to be reviewed'
               release={release}
               mutateReviews={mutateReviews}
             />
-          ) : undefined}
+          ) : undefined} */}
           <Box sx={{ padding: 2 }}>
             <Stack spacing={2}>
               <Stack
@@ -102,7 +103,7 @@ export default function ModelReleaseDisplay({
                 </Typography>
                 <Typography variant='caption'>{release.createdBy}</Typography>
               </Stack>
-              <Typography variant='body1'>{release.notes}</Typography>
+              <Markdown>{release.notes}</Markdown>
               {(release.files.length > 0 || release.images.length > 0) && <Divider />}
               <Stack spacing={0}>
                 {release.files.map((file) => (
@@ -131,12 +132,12 @@ export default function ModelReleaseDisplay({
                     {/* <Typography variant='caption'>123GB</Typography> */}
                   </Stack>
                 ))}
-                {inactiveReviews.length > 0 && <Divider />}
+                {/* {inactiveReviews.length > 0 && <Divider />}
                 <Box sx={{ pt: 2 }}>
                   {inactiveReviews.map((review) => (
                     <ModelReleaseReviewsDisplay review={review} />
                   ))}
-                </Box>
+                </Box> */}
               </Stack>
             </Stack>
           </Box>

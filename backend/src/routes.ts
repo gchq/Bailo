@@ -224,6 +224,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/schemas', ...postSchemaV2)
 
   server.get('/api/v2/reviews', ...getReviews)
+  server.get('/api/v2/review/:reviewId', ...getReviews)
 
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)

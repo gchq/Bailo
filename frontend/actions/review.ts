@@ -52,16 +52,11 @@ export function useGetReviewRequestsForModel(modelId, semver?, isActive = true) 
 
 // TODO - this API has been removed
 export function useGetNumReviews() {
-  const { data, error, mutate } = useSWR<
-    {
-      count: number
-    },
-    ErrorInfo
-  >('/api/v2/reviews/count?active=true', fetcher)
+  const { data, error, mutate } = useSWR('/api/v2/reviews?active=true', fetcher)
 
   return {
     mutateNumReviews: mutate,
-    numReviews: data?.count,
+    numReviews: data?.reviews?.length,
     isNumReviewsLoading: !error && !data,
     isNumReviewsError: error,
   }
