@@ -8,14 +8,15 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { useGetModelRoles } from '../../actions/model'
 import { useEffect, useState } from 'react'
-import { ReviewRequestInterface } from '../../types/interfaces'
-import Loading from './Loading'
-import MessageAlert from '../MessageAlert'
-import { getRoleDisplay } from '../../utils/beta/roles'
+
+import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
+import { ReviewRequestInterface } from '../../types/interfaces'
 import { ReleaseInterface } from '../../types/types'
+import { getRoleDisplay } from '../../utils/beta/roles'
+import MessageAlert from '../MessageAlert'
+import Loading from './Loading'
 
 type ReviewWithCommentProps = {
   open: boolean
@@ -41,11 +42,7 @@ export default function ReviewWithComment({
   onSubmit,
   release,
 }: ReviewWithCommentProps) {
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(
-    release.modelId,
-    release.semver,
-    true,
-  )
+  const { reviews } = useGetReviewRequestsForModel(release.modelId, release.semver, true)
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(reviews[0].model.id)
 
   const [reviewComment, setReviewComment] = useState('')
@@ -87,7 +84,7 @@ export default function ReviewWithComment({
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Dialog open={open} onClose={onClose}>
+      <Dialog fullWidth open={open} onClose={onClose}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>

@@ -33,11 +33,14 @@ export function useGetReviewRequestsForModel(modelId, semver?, isActive = true) 
     ErrorInfo
   >(
     semver
-      ? `/api/v2/reviews/${modelId}/${semver}?${qs.stringify({
+      ? `/api/v2/reviews?${qs.stringify({
           active: isActive,
+          modelId,
+          semver,
         })}`
-      : `/api/v2/reviews/${modelId}?${qs.stringify({
+      : `/api/v2/reviews?${qs.stringify({
           active: isActive,
+          modelId,
         })}`,
     fetcher,
   )
@@ -69,9 +72,9 @@ export async function postReviewResponse(
   comment: string,
   decision: string,
 ) {
-  return fetch(`/api/v2/reviews/${modelId}/${semver}/${role}`, {
+  return fetch(`/api/v2/model/${modelId}/releases/${semver}/review`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ comment, decision }),
+    body: JSON.stringify({ comment, decision, role }),
   })
 }

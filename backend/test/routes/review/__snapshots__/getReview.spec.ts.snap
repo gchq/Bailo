@@ -86,6 +86,7 @@ exports[`routes > review > getReviews > returns only active reviews for the spec
     },
     true,
     "abc",
+    undefined,
   ],
 ]
 `;

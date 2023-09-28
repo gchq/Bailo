@@ -19,7 +19,6 @@ export default function ReviewsList({ isActive = true, kind = 'all' }: ReviewsLi
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
   useEffect(() => {
-    console.log(reviews)
     if (kind === 'all') {
       setFilteredReviews(reviews)
     } else {

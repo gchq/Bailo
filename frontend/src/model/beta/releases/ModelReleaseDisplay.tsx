@@ -1,5 +1,4 @@
-import { Close, Done, HourglassEmpty } from '@mui/icons-material'
-import { Box, Button, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import Markdown from 'src/common/MarkdownRenderer'
@@ -24,13 +23,13 @@ export default function ModelReleaseDisplay({
   const theme = useTheme()
   const router = useRouter()
 
-  // const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(modelId, release.semver, true)
-  // const {
-  //   reviews: inactiveReviews,
-  //   isReviewsLoading: isInactiveReviewsLoading,
-  //   isReviewsError: isInactiveReviewsError,
-  //   mutateReviews,
-  // } = useGetReviewRequestsForModel(modelId, release.semver, false)
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(modelId, release.semver, true)
+  const {
+    reviews: inactiveReviews,
+    isReviewsLoading: isInactiveReviewsLoading,
+    isReviewsError: isInactiveReviewsError,
+    mutateReviews,
+  } = useGetReviewRequestsForModel(modelId, release.semver, false)
 
   function formatDate(timestamp: string) {
     const date = new Date(timestamp)
@@ -45,17 +44,17 @@ export default function ModelReleaseDisplay({
     }
   }
 
-  // if (isReviewsError) {
-  //   return <MessageAlert message={isReviewsError.info.message} severity='error' />
-  // }
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
 
-  // if (isInactiveReviewsError) {
-  //   return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
-  // }
+  if (isInactiveReviewsError) {
+    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  }
 
   return (
     <>
-      {/* {(isReviewsLoading || isInactiveReviewsLoading) && <Loading />} */}
+      {(isReviewsLoading || isInactiveReviewsLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box
           sx={{
@@ -66,13 +65,13 @@ export default function ModelReleaseDisplay({
             borderRadius: 4,
           }}
         >
-          {/* {reviews.length > 0 ? (
+          {reviews.length > 0 ? (
             <ModelReleaseReviewBanner
               label='This release needs to be reviewed'
               release={release}
               mutateReviews={mutateReviews}
             />
-          ) : undefined} */}
+          ) : undefined}
           <Box sx={{ padding: 2 }}>
             <Stack spacing={2}>
               <Stack
@@ -132,12 +131,12 @@ export default function ModelReleaseDisplay({
                     {/* <Typography variant='caption'>123GB</Typography> */}
                   </Stack>
                 ))}
-                {/* {inactiveReviews.length > 0 && <Divider />}
+                {inactiveReviews.length > 0 && <Divider sx={{ pt: 2 }} />}
                 <Box sx={{ pt: 2 }}>
                   {inactiveReviews.map((review) => (
-                    <ModelReleaseReviewsDisplay review={review} />
+                    <ModelReleaseReviewsDisplay review={review} key={review.semver} />
                   ))}
-                </Box> */}
+                </Box>
               </Stack>
             </Stack>
           </Box>
