@@ -9,6 +9,7 @@ export const ModelAction = {
   View: 'view',
   Update: 'update',
   UploadFile: 'upload_file',
+  DeleteFile: 'delete_file',
   Write: 'write',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
