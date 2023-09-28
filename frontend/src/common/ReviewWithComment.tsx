@@ -1,25 +1,64 @@
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Stack, TextField } from '@mui/material'
-import { useState } from 'react'
+import {
+  Autocomplete,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack,
+  TextField,
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+
+import { useGetModelRoles } from '../../actions/model'
+import { useGetReviewRequestsForModel } from '../../actions/review'
+import { ReviewRequestInterface } from '../../types/interfaces'
+import { ReleaseInterface } from '../../types/types'
+import { getRoleDisplay } from '../../utils/beta/roles'
+import MessageAlert from '../MessageAlert'
+import Loading from './Loading'
 
 type ReviewWithCommentProps = {
   open: boolean
   onClose: () => void
-  onSubmit: (kind: ResponseTypeKeys, reviewComment: string) => void
+  onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
   title: string
   description?: string
+  release: ReleaseInterface
 }
 
 export const ResponseTypes = {
   Approve: 'approve',
-  RequestChanges: 'request changes',
-  Reject: 'reject',
+  RequestChanges: 'request_changes',
 } as const
 
 export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
-export default function ReviewWithComment({ title, description, open, onClose, onSubmit }: ReviewWithCommentProps) {
+export default function ReviewWithComment({
+  title,
+  description,
+  open,
+  onClose,
+  onSubmit,
+  release,
+}: ReviewWithCommentProps) {
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(
+    release.modelId,
+    release.semver,
+    true,
+  )
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(reviews[0].model.id)
+
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
+  const [selectOpen, setSelectOpen] = useState(false)
+  const [reviewKind, setReviewKind] = useState<ReviewRequestInterface>()
+
+  useEffect(() => {
+    if (reviews) {
+      setReviewKind(reviews[0])
+    }
+  }, [reviews])
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -27,19 +66,62 @@ export default function ReviewWithComment({ title, description, open, onClose, o
 
   function submitForm(kind: ResponseTypeKeys) {
     setShowError(false)
-    if (invalidComment() && (kind === ResponseTypes.Reject || kind === ResponseTypes.RequestChanges)) {
+    if (invalidComment() && kind === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
-      onSubmit(kind, reviewComment)
+      if (reviewKind) {
+        onSubmit(kind, reviewComment, reviewKind.role)
+      }
     }
+  }
+
+  function onChange(_event: React.SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
+    if (newValue) {
+      setReviewKind(newValue)
+    }
+  }
+
+  if (isModelRolesError) {
+    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      {isModelRolesLoading && <Loading />}
+      <Dialog fullWidth open={open} onClose={onClose}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
+            <Autocomplete
+              sx={{ pt: 1 }}
+              open={selectOpen}
+              onOpen={() => {
+                setSelectOpen(true)
+              }}
+              onClose={() => {
+                setSelectOpen(false)
+              }}
+              // we might get a string or an object back
+              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                option.role === value.role
+              }
+              onChange={onChange}
+              value={reviewKind}
+              disabled={reviews.length === 1}
+              getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
+              options={reviews}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label='Select your role'
+                  size='small'
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: <>{params.InputProps.endAdornment}</>,
+                  }}
+                />
+              )}
+            />
             {description && <DialogContentText>{description}</DialogContentText>}
             <TextField
               size='small'
@@ -51,7 +133,7 @@ export default function ReviewWithComment({ title, description, open, onClose, o
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
               error={showError}
-              helperText={showError ? 'You must submit a comment when either rejecting or requesting changes.' : ''}
+              helperText={showError ? 'You must submit a comment when requesting changes.' : ''}
             />
             <Stack
               spacing={2}
@@ -59,14 +141,9 @@ export default function ReviewWithComment({ title, description, open, onClose, o
               justifyContent='space-between'
               alignItems='center'
             >
-              <Button variant='outlined' onClick={onClose}>
-                Cancel
-              </Button>
+              <Button onClick={onClose}>Cancel</Button>
               <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                <Button color='error' variant='contained' onClick={() => submitForm(ResponseTypes.Reject)}>
-                  Reject
-                </Button>
-                <Button variant='contained' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
+                <Button variant='outlined' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
                   Request Changes
                 </Button>
                 <Button variant='contained' onClick={() => submitForm(ResponseTypes.Approve)}>

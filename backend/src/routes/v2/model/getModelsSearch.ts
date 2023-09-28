@@ -1,10 +1,27 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import { sampleSize } from 'lodash-es'
 import { z } from 'zod'
 
 import { searchModels } from '../../../services/v2/model.js'
 import { GetModelFilters } from '../../../types/v2/enums.js'
 import { coerceArray, parse } from '../../../utils/v2/validate.js'
+
+const tags = [
+  'Translation',
+  'Image Classification',
+  'Summarization',
+  'Tokenisation',
+  'Text to Speech',
+  'Tabular Regression',
+  'PyTorch',
+  'TensorFlow',
+  'JAX',
+  'Transformers',
+  'ONNX',
+  'Safetensors',
+  'spaCy',
+]
 
 export const getModelsSearchSchema = z.object({
   query: z.object({
@@ -40,7 +57,7 @@ export const getModelsSearch = [
       id: model.id,
       name: model.name,
       description: model.description,
-      tags: ['example_tag', 'model'], // TODO: Add model card tags
+      tags: sampleSize(tags, Math.floor(Math.random() * 5) + 1), // TODO: Add model card tags
     }))
 
     return res.json({ models })

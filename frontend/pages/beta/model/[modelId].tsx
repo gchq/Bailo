@@ -19,15 +19,18 @@ export default function Model() {
   }
 
   return (
-    <Wrapper title='Model' page='marketplace' fullWidth>
+    <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
       {!model && !isModelLoading && <EmptyBlob text={`Oh no, it looks like model ${modelId} doesn't exist!`} />}
       {model && !isModelLoading && !isModelError && (
         <PageWithTabs
-          title={model.id}
+          title={`Example Team / ${model.name}`}
           tabs={[
             { title: 'Overview', view: <Overview model={model} /> },
+            { title: 'Code', view: <Settings model={model} /> },
             { title: 'Releases', view: <Releases model={model} /> },
+            { title: 'Compliance', view: <Settings model={model} /> },
+            { title: 'Access Requests', view: <Settings model={model} /> },
             { title: 'Settings', view: <Settings model={model} /> },
           ]}
           displayActionButton

@@ -1,4 +1,4 @@
-import { Button, Checkbox, Stack, Typography } from '@mui/material'
+import { Alert, Button, Checkbox, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function AccessRequestSettings() {
@@ -11,7 +11,16 @@ export default function AccessRequestSettings() {
       </Typography>
       <Stack direction='row' alignItems='center'>
         <Checkbox onChange={(event) => setAllowUngoverned(event.target.checked)} value={allowUngoverned} size='small' />
-        <Typography>Allow users to make ungoverned access requests</Typography>
+        <Typography>
+          <b>Enable public model access</b> - This will enable users to access models artefacts without prior approval.
+        </Typography>
+      </Stack>
+      <Stack direction='row' alignItems='center'>
+        <Checkbox onChange={(event) => setAllowUngoverned(event.target.checked)} value={allowUngoverned} size='small' />
+        <Typography>
+          <b>Enable development model access</b> - This will allow users to request model access for non-operational
+          environments.
+        </Typography>
       </Stack>
       <div>
         <Button>Save</Button>

@@ -54,6 +54,11 @@
           "pattern": "^[a-zA-Z0-9\\_\\-\\.]{0,128}$",
           "widget": "customTextInput"
         },
+        "test": {
+          "type": "string",
+          "title": "Test",
+          "widget": "richTextInput"
+        },
         "tags": {
           "title": "Descriptive tags for the model.",
           "description": "These tags will be searchable and will help others find this model.",

@@ -3,32 +3,28 @@ import '@uiw/react-markdown-preview/markdown.css'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { MDEditorProps } from '@uiw/react-md-editor'
 import dynamic from 'next/dynamic'
 import { ReactNode, useState } from 'react'
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
 export type RichTextEditorProps = {
-  onDataValueChange: (value: string) => void
-  dataValue: string
+  value: string
+  onChange: (value: string) => void
   label?: ReactNode
-  dataTestKey: string
+  textareaProps?: MDEditorProps['textareaProps']
 }
 
-export default function RichTextEditor({
-  onDataValueChange,
-  dataValue,
-  label = <></>,
-  dataTestKey,
-}: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, label = <></> }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
 
   const toggleToolbar = () => {
     setHideToolbar(!hideToolbar)
   }
 
-  const handleChange = (value?: string) => {
-    onDataValueChange(value || '')
+  const handleChange = (newValue?: string) => {
+    onChange(newValue || '')
   }
 
   return (
@@ -43,9 +39,9 @@ export default function RichTextEditor({
         defaultTabEnable
         preview='edit'
         hideToolbar={hideToolbar}
-        value={dataValue}
+        value={value}
         onChange={handleChange}
-        data-test={dataTestKey}
+        height={150}
       />
     </>
   )

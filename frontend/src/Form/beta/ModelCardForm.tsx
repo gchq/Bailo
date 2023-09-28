@@ -9,7 +9,9 @@ import { setStepState } from '../../../utils/beta/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import CustomTextInput from '../../MuiForms/CustomTextInput'
 import Nothing from '../../MuiForms/Nothing'
+import RichTextInput from '../../MuiForms/RichTextInput'
 import TagSelector from '../../MuiForms/TagSelectorBeta'
+import TagSelectorBeta from '../../MuiForms/TagSelectorBeta'
 
 // TODO - add validation BAI-866
 export default function ModelCardForm({
@@ -82,6 +84,8 @@ export default function ModelCardForm({
           nothing: Nothing,
           customTextInput: CustomTextInput,
           tagSelector: TagSelector,
+          tagSelectorBeta: TagSelectorBeta,
+          richTextInput: RichTextInput,
         }}
         uiSchema={currentStep.uiSchema}
         liveValidate={currentStep.shouldValidate}

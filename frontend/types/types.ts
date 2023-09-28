@@ -372,7 +372,7 @@ export type ReleaseInterface = {
   notes: string
   minor?: boolean
   draft?: boolean
-  files: Array<string>
+  files: Array<{ name: string; size: number }>
   images: Array<string>
   deleted: boolean
   createdBy: string
@@ -398,16 +398,19 @@ export interface SchemaInterface {
 
 export const SchemaKind = {
   Model: 'model',
-  Deployment: 'deployment',
+  Deployment: 'accessRequest',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export interface ReviewRequestInterface {
-  model: string
-  release: string
-  kind: 'release' | 'acess'
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
 }

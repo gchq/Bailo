@@ -14,7 +14,7 @@ export interface ReleaseInterface {
   minor: boolean
   draft: boolean
 
-  files: Array<string>
+  files: Array<{ name: string; size: number }>
   images: Array<string>
 
   deleted: boolean
@@ -40,7 +40,7 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     minor: { type: Boolean, required: true },
     draft: { type: Boolean, required: true },
 
-    files: [{ type: String }],
+    files: [{ name: { type: String }, size: { type: Number } }],
     images: [{ type: String }],
 
     createdBy: { type: String, required: true },

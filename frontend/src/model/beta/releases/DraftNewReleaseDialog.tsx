@@ -57,7 +57,7 @@ export default function DraftNewReleaseDialog({
         modelCardVersion: model.card.version,
         notes: releaseNotes,
         minor: isMinorRelease,
-        files: [],
+        files: artefacts.map((artefact) => ({ name: artefact.name, size: artefact.size })),
         images: [],
       }
 
@@ -145,11 +145,9 @@ export default function DraftNewReleaseDialog({
             </Stack>
             <Stack>
               <RichTextEditor
-                dataValue={releaseNotes}
-                onDataValueChange={(value) => setReleaseNotes(value)}
+                value={releaseNotes}
+                onChange={setReleaseNotes}
                 aria-label='Release notes'
-                dataTestKey='releaseNotes'
-                data-test='releaseNotes'
                 label={
                   <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Release Notes <span style={{ color: 'red' }}>*</span>

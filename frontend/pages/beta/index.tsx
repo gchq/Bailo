@@ -2,6 +2,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
+  Chip,
   FilledInput,
   FormControl,
   IconButton,
@@ -156,7 +157,7 @@ export default function ExploreModels() {
                         variant='h5'
                         sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                       >
-                        {model.name}
+                        Example Team / {model.name}
                       </MuiLink>
                     </Link>
                     <Typography variant='body1' sx={{ marginBottom: 2 }}>
@@ -164,9 +165,9 @@ export default function ExploreModels() {
                     </Typography>
                     <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
                       {/* TODO Implement model tags */}
-                      {/* {model.tags.map((tag: string) => (
-                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                        ))} */}
+                      {model.tags.map((tag: string) => (
+                        <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                      ))}
                     </Stack>
                     {index !== models.length - 1 && (
                       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />

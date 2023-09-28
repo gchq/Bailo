@@ -68,7 +68,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   return (
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
-      <Box sx={{ py: 1 }}>
+      <Box sx={{ py: 1, px: 2 }}>
         {!isEdit && (
           <Box sx={{ width: '100%', textAlign: 'right' }}>
             <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
