@@ -49,7 +49,7 @@ const ModelSchema = new Schema<ModelInterface>(
   {
     id: { type: String, required: true, unique: true, index: true },
 
-    name: { type: String, text: true, required: true },
+    name: { type: String, required: true },
     description: { type: String, required: true },
     card: {
       schemaId: { type: String },
@@ -75,6 +75,7 @@ const ModelSchema = new Schema<ModelInterface>(
 )
 
 ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+ModelSchema.index({ '$**': 'text' })
 
 const ModelModel = model<ModelInterface>('v2_Model', ModelSchema)
 
