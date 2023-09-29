@@ -49,7 +49,7 @@ const ModelSchema = new Schema<ModelInterface>(
   {
     id: { type: String, required: true, unique: true, index: true },
 
-    name: { type: String, required: true },
+    name: { type: String, text: true, required: true },
     description: { type: String, required: true },
     card: {
       schemaId: { type: String },
