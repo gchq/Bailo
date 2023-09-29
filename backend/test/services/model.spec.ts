@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelActionKeys } from '../../src/connectors/v2/authorisation/BaseAuthenticationConnector.js'
+import { ModelActionKeys } from '../../src/connectors/v2/authorisation/Base.js'
 import { ModelDoc } from '../../src/models/v2/Model.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import {

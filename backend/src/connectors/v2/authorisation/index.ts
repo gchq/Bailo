@@ -1,5 +1,5 @@
 import config from '../../../utils/v2/config.js'
-import { BaseAuthorisationConnector } from './BaseAuthenticationConnector.js'
+import { BaseAuthorisationConnector } from './Base.js'
 import { SillyAuthorisationConnector } from './silly.js'
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined

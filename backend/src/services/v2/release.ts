@@ -1,4 +1,4 @@
-import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/BaseAuthenticationConnector.js'
+import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelInterface } from '../../models/v2/Model.js'
 import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'

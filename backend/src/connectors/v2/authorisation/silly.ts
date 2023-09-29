@@ -2,7 +2,7 @@ import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { BaseAuthorisationConnector, ModelActionKeys } from './BaseAuthenticationConnector.js'
+import { BaseAuthorisationConnector, ModelActionKeys } from './Base.js'
 
 const SillyEntityKind = {
   User: 'user',
