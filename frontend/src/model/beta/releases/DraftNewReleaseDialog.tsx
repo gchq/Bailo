@@ -111,21 +111,14 @@ export default function DraftNewReleaseDialog({
             </DialogContentText>
 
             <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-              <Stack sx={{ width: '100%' }}>
+              <Stack sx={{ width: '100%' }} justifyContent='center'>
                 <Stack direction='row'>
                   <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
                   <HelpPopover>
                     The release name is automatically generated using the model name and release semantic version
                   </HelpPopover>
                 </Stack>
-                <TextField
-                  required
-                  size='small'
-                  value={`${model.name} - ${semanticVersion}`}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
+                <Typography>{`${model.name} - ${semanticVersion}`}</Typography>
               </Stack>
               <Stack>
                 <Typography sx={{ fontWeight: 'bold' }}>
