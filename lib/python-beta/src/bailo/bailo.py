@@ -1,8 +1,8 @@
 """Main entry point"""
 from __future__ import annotations
 import requests
-from typing import List, Optional, Any
-from .enums import ModelVisibility
+from typing import List, Optional, Dict, Any
+from .enums import ModelVisibility, SchemaKind
 
 class Agent:
     def __init__(self):
@@ -34,7 +34,7 @@ class BailoClient():
 
         :param name: Name of the model
         :param description: Description of the model
-        :param visibility: Object to define model visibility (e.g public or private)
+        :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
         return self.agent.post(
@@ -99,7 +99,7 @@ class BailoClient():
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
         :param description: Description of the model, defaults to None
-        :param visibility: Object to define model visibility (e.g. public or private), defaults to None
+        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
         x = {}
@@ -269,7 +269,25 @@ class BailoClient():
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
     
-    #def simple_upload(): TBC
+    def simple_upload(
+        self,
+        model_id: str,
+        name: str,
+        mime: Optional[str] = None,
+    ):
+        """
+        Creates a simple file upload.
+
+        :param model_id: Unique model ID
+        :param name: File name
+        :param mime: MIME aka media type, defaults to None
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/files/upload/simple",
+            params={"name": name, "mime": mime},
+        ).json()  
+
 
     #def start_multi_upload(): TBC
 
@@ -291,15 +309,65 @@ class BailoClient():
             f"{self.url}/v2/model/{model_id}/files/{file_id}",
         ).json()
     
-    #def get_all_schemas():
+    def get_all_schemas(
+        self,
+        kind: Optional[SchemaKind] = None,
+    ):
+        """
+        Gets all schemas.
 
-    #def get_schema():
+        :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
+        :return: JSON response object
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/schemas",
+            json={"kind": kind},
+        ).json()
+    
+    def get_schema(
+        self,
+        schema_id: str,
+    ):
+        """
+        Retrieves a specific schema using its unique ID.
 
-    #def create_schema():
+        :param schema_id: Unique schema ID
+        :return: JSON response object.
+        """        
+        return self.agent.get(
+            f"{self.url}/v2/schema/{schema_id}",
+        ).json()
 
-    #def get_reviews():
 
-    #def get_reviews_count():
+    def create_schema(
+        self,
+        schema_id: str,
+        name: str,
+        kind: SchemaKind,
+        json_schema: Dict[str, Any],
+    ):
+        """
+        Creates a schema.
+
+        :param schema_id: Unique schema ID
+        :param name: Name of the schema
+        :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
+        :param json_schema: JSON schema
+        :return: JSON response object
+        """        
+        return self.agent.post(
+            f"{self.url}/v2/schemas",
+            json={
+                "id": schema_id,
+                "name": name,
+                "kind": kind,
+                "jsonSchema": json_schema,
+            }
+        ).json()
+
+    #def get_reviews(): TBC
+
+    #def get_reviews_count(): TBC
 
     def get_model_roles(
         self,
@@ -374,4 +442,46 @@ class BailoClient():
         """        
         return self.agent.get(
             f"{self.url}/v2/teams/mine",
+        ).json()
+    
+    def get_team(
+        self,
+        team_id: str,
+    ):
+        """
+        Retrieves a specific team given its unique ID.
+
+        :param team_id: Unique team ID
+        :return: JSON response object
+        """    
+        return self.agent.get(
+            f"{self.url}/v2/team/{team_id}",
+        ).json()
+
+    def update_team(
+        self,
+        team_id: str,
+        name: Optional[str] = None,
+        description: Optional[str] = None,      
+    ):
+        """
+        Updates a team given its unique ID.
+
+        :param team_id: Unique team ID
+        :param name: Name of team, defaults to None
+        :param description: Description of team, defaults to None
+        :return: JSON response object
+        """    
+        
+        x = {}
+
+        if name is not None:
+            x.update({"name": name})
+
+        if description is not None:
+            x.update({"description": description})
+
+        return self.agent.patch(
+            f"{self.url}/v2/team/{team_id}",
+            json=x,
         ).json()

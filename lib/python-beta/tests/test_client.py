@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 
 from bailo import BailoClient
-from bailo.enums import ModelVisibility
+from bailo.enums import ModelVisibility, SchemaKind
 
 mock_result = {"success": True}
 
@@ -156,7 +156,16 @@ def test_get_files(requests_mock):
 
     assert result == {"success": True}
 
-#def test_simple_upload(requests_mock):
+def test_simple_upload(requests_mock):
+    requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=file_name", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.simple_upload(
+        model_id="test_id",
+        name="file_name",
+    )
+
+    assert result == {"success": True}
 
 #def test_start_multi_upload(requests_mock):
 
@@ -173,11 +182,38 @@ def test_delete_file(requests_mock):
 
     assert result == {"success": True}
 
-#def test_get_all_schemas(requests_mock):
+def test_get_all_schemas(requests_mock):
+    requests_mock.get("https://example.com/api/v2/schemas", json={"success": True})
 
-#def test_get_schema(requests_mock):
+    client = BailoClient("https://example.com")
+    result = client.get_all_schemas(
+        kind=SchemaKind.Model
+    )
 
-#def test_create_schema(requests_mock):
+    assert result == {"success": True}
+
+def test_get_schema(requests_mock):
+    requests_mock.get("https://example.com/api/v2/schema/test_id", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_schema(
+        schema_id="test_id"
+    )
+
+    assert result == {"success": True}
+
+def test_create_schema(requests_mock):
+    requests_mock.post("https://example.com/api/v2/schemas", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.create_schema(
+        schema_id="test_id",
+        name="test",
+        kind=SchemaKind.Model,
+        json_schema={"test": "test"}
+    )
+
+    assert result == {"success": True}
 
 #def test_get_reviews(requests_mock):
 
@@ -228,5 +264,26 @@ def test_get_user_teams(requests_mock):
 
     client = BailoClient("https://example.com")
     result = client.get_user_teams()
+
+    assert result == {"success": True}
+
+def test_get_team(requests_mock):
+    requests_mock.get("https://example.com/api/v2/team/test_id", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_team(
+        team_id="test_id",
+    )
+
+    assert result == {"success": True}
+
+def test_update_team(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/team/test_id", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.update_team(
+        team_id="test_id",
+        name="name",
+    )
 
     assert result == {"success": True}
