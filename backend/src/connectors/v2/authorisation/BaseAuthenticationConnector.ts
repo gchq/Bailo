@@ -6,6 +6,7 @@ export const ModelAction = {
   Create: 'create',
   View: 'view',
   Update: 'update',
+  DeleteFile: 'delete_file',
   UploadFile: 'upload_file',
   Write: 'write',
 } as const

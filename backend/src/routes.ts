@@ -55,6 +55,7 @@ import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
+import { getImages } from './routes/v2/model/images/getImages.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
@@ -213,7 +214,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
   server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteFile)
 
-  // *server.get('/api/v2/model/:modelId/images', ...getImages)
+  server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
   // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)

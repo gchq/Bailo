@@ -58,6 +58,13 @@ export interface Config {
       registry: string
     }
   }
+
+  registry: {
+    connection: {
+      internal: string
+      insecure: boolean
+    }
+  }
 }
 
 const config: Config = _config.util.toObject()
