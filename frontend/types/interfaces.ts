@@ -1,8 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 
-import { ReviewResponse } from './types'
-
 export interface SplitSchema {
   reference: string
 
@@ -91,6 +89,18 @@ export interface ModelInterface {
 
   createdAt: Date
   updatedAt: Date
+}
+
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
 }
 
 export interface ReviewRequestInterface {
