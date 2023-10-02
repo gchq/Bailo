@@ -22,7 +22,7 @@ export default function ModelReleaseReviewBanner({ label, release }: ModelReleas
 
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateReviews: mutateActiveReviews } = useGetReviewRequestsForModel(release.modelId, release.semver, true)
-  const { mutateReviews: mutateInactiveReviews } = useGetReviewRequestsForModel(release.modelId, release.semver, true)
+  const { mutateReviews: mutateInactiveReviews } = useGetReviewRequestsForModel(release.modelId, release.semver, false)
 
   const [reviewCommentOpen, setReviewCommentOpen] = useState(false)
   const [postResponseError, setPostResponseError] = useState('')
