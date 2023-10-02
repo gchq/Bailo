@@ -75,6 +75,7 @@ const ModelSchema = new Schema<ModelInterface>(
 )
 
 ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+ModelSchema.index({ '$**': 'text' })
 
 const ModelModel = model<ModelInterface>('v2_Model', ModelSchema)
 

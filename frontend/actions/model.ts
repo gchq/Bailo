@@ -12,7 +12,7 @@ interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(type: ListModelType, filter?: string) {
+export function useListModels(type: ListModelType, search?: string) {
   const { data, error, mutate } = useSWR<
     {
       models: ModelSearchResult[]
@@ -21,7 +21,7 @@ export function useListModels(type: ListModelType, filter?: string) {
   >(
     `/api/v2/models/search?${qs.stringify({
       type,
-      filter,
+      search,
     })}`,
     fetcher,
   )

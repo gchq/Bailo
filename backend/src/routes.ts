@@ -229,8 +229,6 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 
-  // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
-
   server.post('/api/v2/teams', ...postTeam)
   server.get('/api/v2/teams', ...getTeams)
   server.get('/api/v2/teams/mine', ...getTeams)
