@@ -90,3 +90,26 @@ export interface ModelInterface {
   createdAt: Date
   updatedAt: Date
 }
+
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
+}
+
+export interface ReviewRequestInterface {
+  model: ModelInterface
+  semver: string
+  role: string
+  kind: 'release' | 'acess'
+  responses: ReviewResponse[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}

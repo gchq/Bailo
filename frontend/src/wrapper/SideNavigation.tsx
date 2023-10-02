@@ -20,9 +20,9 @@ import {
 } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
-import { CSSProperties } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 
-import { useGetNumReviews } from '../../actions/review'
+import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import Link from '../Link'
@@ -80,9 +80,19 @@ export default function SideNavigation({
   toggleDrawer,
   currentUser,
 }: SideNavigationProps) {
-  const { numReviews, isNumReviewsLoading } = useGetNumReviews()
+  const [reviewCount, setReviewCount] = useState(0)
 
   const theme = useTheme()
+
+  // We should add some error handling here, such as an error message appearing in a snackbar
+  // Additional error messages should be added for screen-readers
+  useEffect(() => {
+    fetchReviewCount()
+  }, [])
+
+  async function fetchReviewCount() {
+    setReviewCount((await getReviewCount()).headers.get('x-count') as unknown as number)
+  }
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
@@ -137,12 +147,12 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={isNumReviewsLoading ? 0 : numReviews} color='secondary'>
+                        <Badge badgeContent={reviewCount} color='secondary'>
                           <ListAltIcon />
                         </Badge>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={isNumReviewsLoading ? 0 : numReviews} color='secondary'>
+                      <Badge badgeContent={reviewCount} color='secondary'>
                         <ListAltIcon />
                       </Badge>
                     )}

@@ -9,11 +9,17 @@ import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
 import { requestReviewForRelease } from './smtp/smtp.js'
 
-export async function findReviews(user: UserDoc, active: boolean, modelId?: string): Promise<ReviewInterface[]> {
+export async function findReviews(
+  user: UserDoc,
+  active: boolean,
+  modelId?: string,
+  semver?: string,
+): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },
       ...(modelId ? { modelId } : {}),
+      ...(semver ? { semver } : {}),
     })
     .sort({ createdAt: -1 })
     // Populate model entries

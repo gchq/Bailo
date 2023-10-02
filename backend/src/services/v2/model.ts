@@ -25,7 +25,7 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
     collaborators: [
       {
         entity: toEntity('user', user.dn),
-        roles: ['owner'],
+        roles: ['owner', 'msro', 'mtr'],
       },
     ],
   })
