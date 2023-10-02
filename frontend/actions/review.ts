@@ -53,16 +53,11 @@ export function useGetReviewRequestsForModel(modelId, semver?, isActive = true) 
   }
 }
 
-// TODO - this API has been removed
-export function useGetNumReviews() {
-  const { data, error, mutate } = useSWR('/api/v2/reviews?active=true', fetcher)
-
-  return {
-    mutateNumReviews: mutate,
-    numReviews: data?.reviews?.length,
-    isNumReviewsLoading: !error && !data,
-    isNumReviewsError: error,
-  }
+export async function getReviewCount() {
+  return fetch('/api/v2/reviews?active=true', {
+    method: 'head',
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
 
 export async function postReviewResponse(
