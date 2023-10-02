@@ -1,12 +1,4 @@
 {
-  "prettier": {
-    "tabWidth": 2,
-    "useTabs": false,
-    "printWidth": 120,
-    "semi": false,
-    "singleQuote": true,
-    "jsxSingleQuote": true
-  },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true

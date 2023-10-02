@@ -11,7 +11,7 @@ export function useGetReviewRequestsForUser(isActive = true) {
     },
     ErrorInfo
   >(
-    `/api/v2/reviews/?${qs.stringify({
+    `/api/v2/reviews?${qs.stringify({
       active: isActive,
     })}`,
     fetcher,
@@ -25,7 +25,7 @@ export function useGetReviewRequestsForUser(isActive = true) {
   }
 }
 
-export function useGetReviewRequestsForModel(modelId, semver?, isActive = true) {
+export function useGetReviewRequestsForModel(modelId: string, semver?: string, isActive = true) {
   const { data, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]

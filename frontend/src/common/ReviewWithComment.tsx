@@ -7,8 +7,10 @@ import {
   DialogTitle,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useTheme } from '@mui/material/styles'
+import { SyntheticEvent, useEffect, useState } from 'react'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
@@ -25,6 +27,7 @@ type ReviewWithCommentProps = {
   title: string
   description?: string
   release: ReleaseInterface
+  errorText: string
 }
 
 export const ResponseTypes = {
@@ -41,18 +44,20 @@ export default function ReviewWithComment({
   onClose,
   onSubmit,
   release,
+  errorText,
 }: ReviewWithCommentProps) {
   const { reviews } = useGetReviewRequestsForModel(release.modelId, release.semver, true)
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(reviews[0].model.id)
+  const theme = useTheme()
 
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
   const [selectOpen, setSelectOpen] = useState(false)
-  const [reviewKind, setReviewKind] = useState<ReviewRequestInterface>()
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface | undefined>()
 
   useEffect(() => {
     if (reviews) {
-      setReviewKind(reviews[0])
+      setReviewRequest(reviews[0])
     }
   }, [reviews])
 
@@ -65,15 +70,17 @@ export default function ReviewWithComment({
     if (invalidComment() && kind === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
-      if (reviewKind) {
-        onSubmit(kind, reviewComment, reviewKind.role)
+      if (reviewRequest) {
+        onSubmit(kind, reviewComment, reviewRequest.role)
+      } else {
+        return <MessageAlert message='Could not find associated access requests' severity='error' />
       }
     }
   }
 
-  function onChange(_event: React.SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
+  function onChange(_event: SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
     if (newValue) {
-      setReviewKind(newValue)
+      setReviewRequest(newValue)
     }
   }
 
@@ -102,7 +109,7 @@ export default function ReviewWithComment({
                 option.role === value.role
               }
               onChange={onChange}
-              value={reviewKind}
+              value={reviewRequest}
               disabled={reviews.length === 1}
               getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
               options={reviews}
@@ -113,7 +120,6 @@ export default function ReviewWithComment({
                   size='small'
                   InputProps={{
                     ...params.InputProps,
-                    endAdornment: <>{params.InputProps.endAdornment}</>,
                   }}
                 />
               )}
@@ -147,6 +153,9 @@ export default function ReviewWithComment({
                 </Button>
               </Stack>
             </Stack>
+            <Typography color={theme.palette.error.main} variant='caption'>
+              {errorText}
+            </Typography>
           </Stack>
         </DialogContent>
       </Dialog>

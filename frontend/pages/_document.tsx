@@ -8,7 +8,7 @@ import { lightTheme } from '../src/theme'
 export default class MyDocument extends Document {
   render() {
     return (
-      <Html lang='en' data-color-mode='light'>
+      <Html lang='en'>
         <Head>
           {/* PWA primary color */}
           <meta name='theme-color' content={lightTheme.palette.primary.main} />

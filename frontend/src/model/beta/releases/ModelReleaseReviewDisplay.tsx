@@ -1,6 +1,7 @@
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
+import { useMemo } from 'react'
 
 import { useGetModelRoles } from '../../../../actions/model'
 import { ReviewRequestInterface } from '../../../../types/interfaces'
@@ -16,6 +17,38 @@ interface ModelReleaseReviewDisplayProps {
 export default function ModelReleaseReviewDisplay({ review }: ModelReleaseReviewDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
 
+  const acceptedReviewResponses = useMemo(() => {
+    return review.responses
+      .filter((response) => response.decision === ApprovalStates.Accepted)
+      .map((response) => (
+        <Stack direction='row' spacing={1} key={`${response.user}-${response.decision}`}>
+          <Done color='success' fontSize='small' />
+          <Typography variant='caption'>
+            <Box component='span' sx={{ fontWeight: 'bold' }}>
+              {response.user.split(':')[1]}
+            </Box>
+            {` has approved this release (${getRoleDisplay(review.role, modelRoles)})`}
+          </Typography>
+        </Stack>
+      ))
+  }, [review, modelRoles])
+
+  const changesRequestedReviewResponses = useMemo(() => {
+    return review.responses
+      .filter((response) => response.decision === ApprovalStates.RequestChanges)
+      .map((response) => (
+        <Stack direction='row' spacing={1} key={`${response.user}-${response.decision}`}>
+          <HourglassEmpty color='warning' fontSize='small' />
+          <Typography variant='caption'>
+            <Box component='span' sx={{ fontWeight: 'bold' }}>
+              {response.user.split(':')[0]}
+            </Box>
+            {` has requested changes for this release (${getRoleDisplay(review.role, modelRoles)})`}
+          </Typography>
+        </Stack>
+      ))
+  }, [review, modelRoles])
+
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
@@ -23,31 +56,8 @@ export default function ModelReleaseReviewDisplay({ review }: ModelReleaseReview
     <>
       {isModelRolesLoading && <Loading />}
       <Stack direction={{ sm: 'row', xs: 'column' }}>
-        {review.responses.map((response) => {
-          const [_kind, username] = response.user.split(':')
-          switch (response.decision) {
-            case ApprovalStates.Accepted:
-              return (
-                <Stack direction='row' spacing={1}>
-                  <Done color='success' fontSize='small' />
-                  <Typography variant='caption'>
-                    <span style={{ fontWeight: 'bold' }}>{username}</span>
-                    {` has approved this release (${getRoleDisplay(review.role, modelRoles)})`}
-                  </Typography>
-                </Stack>
-              )
-            case ApprovalStates.RequestChanges:
-              return (
-                <Stack direction='row' spacing={1}>
-                  <HourglassEmpty color='warning' fontSize='small' />
-                  <Typography variant='caption'>
-                    <span style={{ fontWeight: 'bold' }}>{username}</span>
-                    {` has requested changes for this release (${getRoleDisplay(review.role, modelRoles)})`}
-                  </Typography>
-                </Stack>
-              )
-          }
-        })}
+        {acceptedReviewResponses}
+        {changesRequestedReviewResponses}
       </Stack>
     </>
   )

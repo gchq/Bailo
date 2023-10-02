@@ -28,7 +28,6 @@ export default function ModelReleaseDisplay({
     reviews: inactiveReviews,
     isReviewsLoading: isInactiveReviewsLoading,
     isReviewsError: isInactiveReviewsError,
-    mutateReviews,
   } = useGetReviewRequestsForModel(modelId, release.semver, false)
 
   function formatDate(timestamp: string) {
@@ -66,11 +65,7 @@ export default function ModelReleaseDisplay({
           }}
         >
           {reviews.length > 0 ? (
-            <ModelReleaseReviewBanner
-              label='This release needs to be reviewed'
-              release={release}
-              mutateReviews={mutateReviews}
-            />
+            <ModelReleaseReviewBanner label='This release needs to be reviewed' release={release} />
           ) : undefined}
           <Box sx={{ padding: 2 }}>
             <Stack spacing={2}>
