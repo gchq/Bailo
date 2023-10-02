@@ -12,7 +12,8 @@ import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
 import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
-import { SchemaInterface, SchemaKind } from '../../../../types/types'
+import { SchemaInterface } from '../../../../types/types'
+import { SchemaKind } from '../../../../types/v2/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
