@@ -8,7 +8,7 @@ export default function Review() {
       <PageWithTabs
         title='Your Reviews'
         tabs={[
-          { title: 'Release reviews', path: 'reviews', view: <ReviewsList kind='release' /> },
+          { title: 'Release reviews', path: 'releases', view: <ReviewsList kind='release' /> },
           { title: 'Access request reviews', path: 'access-requests', view: <ReviewsList kind='access' /> },
           { title: 'Archived', path: 'archived', view: <ReviewsList isActive={false} /> },
         ]}
