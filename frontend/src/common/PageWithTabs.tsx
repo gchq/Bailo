@@ -31,10 +31,10 @@ export default function PageWithTabs({
     <>
       <Box>
         <Stack
-          direction='row'
+          direction={{ xs: 'column', sm: 'row' }}
           divider={<Divider flexItem orientation='vertical' />}
           alignItems='center'
-          spacing={2}
+          spacing={{ sm: 2 }}
           sx={{ p: 2 }}
         >
           <Typography component='h1' color='primary' variant='h6'>

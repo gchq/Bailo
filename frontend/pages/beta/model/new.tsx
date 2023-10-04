@@ -88,7 +88,7 @@ export default function NewModel() {
           <Typography
             component='h1'
             variant='h4'
-            sx={{ fontWeight: 'bold' }}
+            sx={{ fontWeight: 'bold', mb: 2 }}
             color='primary'
             data-test='createModelPageTitle'
           >

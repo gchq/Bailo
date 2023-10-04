@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
-import Image from 'next/legacy/image'
+import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 
@@ -56,6 +56,8 @@ const AppBar = styled(MuiAppBar, {
     }),
   }),
 }))
+
+const pacifico = Pacifico({ subsets: ['latin'], weight: '400' })
 
 // This is currently only being used by the beta wrapper
 export default function TopNavigation({
@@ -114,26 +116,19 @@ export default function TopNavigation({
           aria-label='open drawer'
           onClick={toggleDrawer}
           sx={{
-            marginRight: '36px',
+            marginRight: 2,
             ...(drawerOpen && { display: 'none' }),
           }}
         >
           <MenuIcon />
         </IconButton>
-        <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-          <Link href='/beta' color='inherit' underline='none'>
-            <Image src='/bailo-logo.png' alt='Bailo Logo' width={35} height={45} priority />
-          </Link>
-        </Box>
-        <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
-          <Link
-            href='/beta'
-            color='inherit'
-            underline='none'
-            style={{ color: 'inherit', textDecoration: 'inherit', fontSize: '1.25rem', fontWeight: 500 }}
-          >
-            Bailo
-            {betaAdornment}
+
+        <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
+          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+            <Typography variant='h5' component='div'>
+              <span className={pacifico.className}>Bailo</span>
+              {betaAdornment}
+            </Typography>
           </Link>
         </Box>
         <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>

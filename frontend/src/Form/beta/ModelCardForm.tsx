@@ -44,7 +44,7 @@ export default function ModelCardForm({
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
-      spacing={2}
+      spacing={{ sm: 2 }}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
       sx={{ width: '100%' }}
@@ -58,7 +58,7 @@ export default function ModelCardForm({
           connector={<Nothing />}
           sx={{ minWidth: 'max-content' }}
         >
-          <List>
+          <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
                 <ListItemButton selected={activeStep === index} onClick={() => setActiveStep(index)}>
