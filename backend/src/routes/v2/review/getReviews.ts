@@ -6,10 +6,11 @@ import { ReviewInterface } from '../../../models/v2/Review.js'
 import { findReviews } from '../../../services/v2/review.js'
 import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 
-export const getReviewSchema = z.object({
+export const getReviewsSchema = z.object({
   query: z.object({
     active: strictCoerceBoolean(z.boolean()),
     modelId: z.string().optional(),
+    semver: z.string().optional(),
   }),
 })
 
@@ -21,9 +22,10 @@ export const getReviews = [
   bodyParser.json(),
   async (req: Request, res: Response<GetReviewResponse>) => {
     const {
-      query: { active, modelId },
-    } = parse(req, getReviewSchema)
-    const reviews = await findReviews(req.user, active, modelId)
+      query: { active, modelId, semver },
+    } = parse(req, getReviewsSchema)
+    const reviews = await findReviews(req.user, active, modelId, semver)
+    res.setHeader('x-count', reviews.length)
     return res.json({
       reviews,
     })

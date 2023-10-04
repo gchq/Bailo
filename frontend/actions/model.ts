@@ -12,7 +12,7 @@ interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(type: ListModelType, filter?: string) {
+export function useListModels(type: ListModelType, search?: string) {
   const { data, error, mutate } = useSWR<
     {
       models: ModelSearchResult[]
@@ -21,7 +21,7 @@ export function useListModels(type: ListModelType, filter?: string) {
   >(
     `/api/v2/models/search?${qs.stringify({
       type,
-      filter,
+      search,
     })}`,
     fetcher,
   )
@@ -92,7 +92,7 @@ export async function postModel(form: ModelForm) {
 
 export async function patchModel(model: ModelInterface) {
   return fetch(`/api/v2/model/${model.id}`, {
-    method: 'post',
+    method: 'patch',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(model),
   })

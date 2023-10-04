@@ -1,11 +1,15 @@
-import { Close, Done, HourglassEmpty } from '@mui/icons-material'
-import { Box, Button, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
+import Markdown from 'src/common/MarkdownRenderer'
 
-import { ApprovalStates, ReleaseInterface } from '../../../../types/types'
+import { useGetReviewRequestsForModel } from '../../../../actions/review'
+import { ReleaseInterface } from '../../../../types/types'
+import Loading from '../../../common/Loading'
 import Link from '../../../Link'
+import MessageAlert from '../../../MessageAlert'
 import ModelReleaseReviewBanner from './ModelReleaseReviewBanner'
+import ModelReleaseReviewsDisplay from './ModelReleaseReviewDisplay'
 
 export default function ModelReleaseDisplay({
   modelId,
@@ -19,34 +23,18 @@ export default function ModelReleaseDisplay({
   const theme = useTheme()
   const router = useRouter()
 
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel(modelId, release.semver, true)
+  const {
+    reviews: inactiveReviews,
+    isReviewsLoading: isInactiveReviewsLoading,
+    isReviewsError: isInactiveReviewsError,
+  } = useGetReviewRequestsForModel(modelId, release.semver, false)
+
   function formatDate(timestamp: string) {
     const date = new Date(timestamp)
     const year = date.getFullYear().toString()
     const formattedYear = `'${year.substring(date.getFullYear().toString().length - 2)}`
     return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} ${formattedYear}`
-  }
-
-  function approvalStatus(status: ApprovalStates, label: string) {
-    switch (status) {
-      case ApprovalStates.Accepted:
-        return (
-          <Tooltip title={`${label} has approved this release`}>
-            <Done color='success' />
-          </Tooltip>
-        )
-      case ApprovalStates.NoResponse:
-        return (
-          <Tooltip title={`${label} has not reviewed this release`}>
-            <HourglassEmpty color='warning' />
-          </Tooltip>
-        )
-      case ApprovalStates.Declined:
-        return (
-          <Tooltip title={`${label} has declined this release`}>
-            <Close color='error' />
-          </Tooltip>
-        )
-    }
   }
 
   function latestVersionAdornment() {
@@ -55,8 +43,17 @@ export default function ModelReleaseDisplay({
     }
   }
 
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
+
+  if (isInactiveReviewsError) {
+    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  }
+
   return (
     <>
+      {(isReviewsLoading || isInactiveReviewsLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Box
           sx={{
@@ -67,7 +64,9 @@ export default function ModelReleaseDisplay({
             borderRadius: 4,
           }}
         >
-          <ModelReleaseReviewBanner label='This release needs to be reviewed' />
+          {reviews.length > 0 ? (
+            <ModelReleaseReviewBanner label='This release needs to be reviewed' release={release} />
+          ) : undefined}
           <Box sx={{ padding: 2 }}>
             <Stack spacing={2}>
               <Stack
@@ -85,14 +84,7 @@ export default function ModelReleaseDisplay({
                   <Typography component='h2' variant='h6' color='primary'>
                     {modelId} - {release.semver}
                   </Typography>
-                  <Divider orientation='vertical' flexItem />
-                  <Typography color='secondary'>{release.semver}</Typography>
                   {latestVersionAdornment()}
-                  <Divider orientation='vertical' flexItem />
-                  <Stack direction={{ sm: 'row', xs: 'column' }}>
-                    {approvalStatus(ApprovalStates.Accepted, 'Manager')}
-                    {approvalStatus(ApprovalStates.Accepted, 'Technical Reviewer')}
-                  </Stack>
                 </Stack>
 
                 <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
@@ -105,8 +97,8 @@ export default function ModelReleaseDisplay({
                 </Typography>
                 <Typography variant='caption'>{release.createdBy}</Typography>
               </Stack>
-              <Typography variant='body1'>{release.notes}</Typography>
-              <Divider />
+              <Markdown>{release.notes}</Markdown>
+              {(release.files.length > 0 || release.images.length > 0) && <Divider />}
               <Stack spacing={0}>
                 {release.files.map((file) => (
                   <Stack
@@ -134,6 +126,12 @@ export default function ModelReleaseDisplay({
                     {/* <Typography variant='caption'>123GB</Typography> */}
                   </Stack>
                 ))}
+                {inactiveReviews.length > 0 && <Divider sx={{ pt: 2 }} />}
+                <Box sx={{ pt: 2 }}>
+                  {inactiveReviews.map((review) => (
+                    <ModelReleaseReviewsDisplay review={review} key={review.semver} />
+                  ))}
+                </Box>
               </Stack>
             </Stack>
           </Box>
