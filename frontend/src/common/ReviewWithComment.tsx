@@ -90,11 +90,16 @@ export default function ReviewWithComment({
 
   return (
     <>
-      {!modelRoles.length && isModelRolesLoading && <Loading />}
-      {modelRoles.length && (
-        <Dialog fullWidth open={open} onClose={onClose}>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogContent>
+      {isModelRolesLoading && <Loading />}
+
+      <Dialog fullWidth open={open} onClose={onClose}>
+        <DialogTitle>{title}</DialogTitle>
+
+        <DialogContent>
+          {modelRoles.length === 0 && (
+            <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
+          )}
+          {modelRoles.length && (
             <Stack spacing={2}>
               <Autocomplete
                 sx={{ pt: 1 }}
@@ -149,9 +154,9 @@ export default function ReviewWithComment({
                 {errorText}
               </Typography>
             </Stack>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
