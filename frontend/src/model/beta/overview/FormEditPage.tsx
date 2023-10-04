@@ -1,8 +1,9 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
+import ViewModelCardHistoryDialog from 'src/model/beta/overview/ModelCardHistoryDialog'
 
 import { useGetModel } from '../../../../actions/model'
-import { putModelCard } from '../../../../actions/modelCard'
+import { putModelCard, useModelCardRevisions } from '../../../../actions/modelCard'
 import { useGetSchema } from '../../../../actions/schema'
 import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { SplitSchemaNoRender } from '../../../../types/interfaces'
@@ -20,8 +21,10 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { mutateModel } = useGetModel(model.id)
+  const { mutateModelCardRevisions } = useModelCardRevisions(model.id)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   async function onSubmit() {
     if (schema) {
@@ -30,6 +33,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
+        mutateModelCardRevisions()
       }
     }
   }
@@ -69,28 +73,33 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ py: 1 }}>
-        {!isEdit && (
-          <Box sx={{ width: '100%', textAlign: 'right' }}>
-            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
-              Edit Model card
-            </Button>
-          </Box>
-        )}
-        {isEdit && (
-          <Stack
-            direction='row'
-            spacing={1}
-            justifyContent='flex-end'
-            divider={<Divider orientation='vertical' flexItem />}
-          >
-            <Button variant='outlined' onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button variant='contained' onClick={onSubmit}>
-              Save
-            </Button>
-          </Stack>
-        )}
+        <Stack>
+          {!isEdit && (
+            <Box sx={{ width: '100%', textAlign: 'right' }}>
+              <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
+                Edit Model card
+              </Button>
+            </Box>
+          )}
+          {isEdit && (
+            <Stack
+              direction='row'
+              spacing={1}
+              justifyContent='flex-end'
+              divider={<Divider orientation='vertical' flexItem />}
+            >
+              <Button variant='outlined' onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button variant='contained' onClick={onSubmit}>
+                Save
+              </Button>
+            </Stack>
+          )}
+          <Button onClick={() => setDialogOpen(true)}>View History</Button>
+          <ViewModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
+        </Stack>
+
         <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
     </>
