@@ -54,7 +54,7 @@ export default function ModelCardForm({
     return <></>
   }
 
-  function listButtonOnClick(index: number, formPageKey: string) {
+  function handleListItemClick(index: number, formPageKey: string) {
     setActiveStep(index)
     router.replace({
       query: { ...router.query, formPage: formPageKey },
@@ -81,7 +81,10 @@ export default function ModelCardForm({
           <List>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
-                <ListItemButton selected={activeStep === index} onClick={() => listButtonOnClick(index, step.section)}>
+                <ListItemButton
+                  selected={activeStep === index}
+                  onClick={() => handleListItemClick(index, step.section)}
+                >
                   <Stack direction='row' spacing={2}>
                     <Typography>{step.schema.title}</Typography>
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}

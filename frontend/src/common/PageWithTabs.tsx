@@ -2,7 +2,7 @@ import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/materia
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, SyntheticEvent, useEffect, useState } from 'react'
 
 export interface PageTab {
   title: string
@@ -28,13 +28,13 @@ export default function PageWithTabs({
 
   const router = useRouter()
 
-  const tab = router.query.tab
+  const { tab } = router.query
 
   useEffect(() => {
     tab && tabs.length ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
   }, [tab, setCurrentTab, tabs])
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue)
     router.replace({
       query: { ...router.query, tab: newValue },
