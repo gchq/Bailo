@@ -32,7 +32,7 @@ export default function ViewModelCardHistoryDialog({
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle>History details for {model.name}</DialogTitle>
 
-        <DialogContent sx={{}}>
+        <DialogContent>
           <List>
             {modelCardRevisions &&
               modelCardRevisions.map((modelCardRevision) => (
