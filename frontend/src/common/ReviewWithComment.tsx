@@ -91,63 +91,70 @@ export default function ReviewWithComment({
   return (
     <>
       {isModelRolesLoading && <Loading />}
+
       <Dialog fullWidth open={open} onClose={onClose}>
         <DialogTitle>{title}</DialogTitle>
+
         <DialogContent>
-          <Stack spacing={2}>
-            <Autocomplete
-              sx={{ pt: 1 }}
-              open={selectOpen}
-              onOpen={() => {
-                setSelectOpen(true)
-              }}
-              onClose={() => {
-                setSelectOpen(false)
-              }}
-              // we might get a string or an object back
-              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
-                option.role === value.role
-              }
-              onChange={onChange}
-              value={reviewRequest}
-              disabled={reviews.length === 1}
-              getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
-              options={reviews}
-              renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
-            />
-            {description && <DialogContentText>{description}</DialogContentText>}
-            <TextField
-              size='small'
-              minRows={4}
-              maxRows={8}
-              multiline
-              placeholder='Leave a comment'
-              data-test='review-with-comment-input'
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              error={showError}
-              helperText={showError ? 'You must submit a comment when requesting changes.' : ''}
-            />
-            <Stack
-              spacing={2}
-              direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
-            >
-              <Button onClick={onClose}>Cancel</Button>
-              <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                <Button variant='outlined' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
-                  Request Changes
-                </Button>
-                <Button variant='contained' onClick={() => submitForm(ResponseTypes.Approve)}>
-                  Approve
-                </Button>
+          {modelRoles.length === 0 && (
+            <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
+          )}
+          {modelRoles.length && (
+            <Stack spacing={2}>
+              <Autocomplete
+                sx={{ pt: 1 }}
+                open={selectOpen}
+                onOpen={() => {
+                  setSelectOpen(true)
+                }}
+                onClose={() => {
+                  setSelectOpen(false)
+                }}
+                // we might get a string or an object back
+                isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                  option.role === value.role
+                }
+                onChange={onChange}
+                value={reviewRequest}
+                disabled={reviews.length === 1}
+                getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
+                options={reviews}
+                renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+              />
+              {description && <DialogContentText>{description}</DialogContentText>}
+              <TextField
+                size='small'
+                minRows={4}
+                maxRows={8}
+                multiline
+                placeholder='Leave a comment'
+                data-test='review-with-comment-input'
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                error={showError}
+                helperText={showError ? 'You must submit a comment when requesting changes.' : ''}
+              />
+              <Stack
+                spacing={2}
+                direction={{ sm: 'row', xs: 'column' }}
+                justifyContent='space-between'
+                alignItems='center'
+              >
+                <Button onClick={onClose}>Cancel</Button>
+                <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
+                  <Button variant='outlined' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
+                    Request Changes
+                  </Button>
+                  <Button variant='contained' onClick={() => submitForm(ResponseTypes.Approve)}>
+                    Approve
+                  </Button>
+                </Stack>
               </Stack>
+              <Typography color={theme.palette.error.main} variant='caption'>
+                {errorText}
+              </Typography>
             </Stack>
-            <Typography color={theme.palette.error.main} variant='caption'>
-              {errorText}
-            </Typography>
-          </Stack>
+          )}
         </DialogContent>
       </Dialog>
     </>
