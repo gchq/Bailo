@@ -1,3 +1,4 @@
+import { Schema as JsonSchema } from 'jsonschema'
 import { Document, model, Schema } from 'mongoose'
 
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
@@ -14,7 +15,7 @@ export interface SchemaInterface {
   hidden: boolean
 
   kind: SchemaKindKeys
-  jsonSchema: unknown
+  jsonSchema: JsonSchema
 
   createdAt: Date
   updatedAt: Date

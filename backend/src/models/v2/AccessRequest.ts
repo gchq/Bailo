@@ -5,10 +5,11 @@ import MongooseDelete from 'mongoose-delete'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface AccessRequestInterface {
-  id: string
-  schemaRef: string
+  modelId: string
+  entity: string
 
-  metadata: unknown
+  schemaId: string
+  metadata?: unknown
 
   deleted: boolean
 
@@ -23,9 +24,10 @@ export type AccessRequestDoc = AccessRequestInterface & Document<any, any, Acces
 
 const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
-    id: { type: String, required: true, unique: true, index: true },
-    schemaRef: { type: String, required: true },
+    modelId: { type: String, required: true },
+    entity: { type: String, required: true },
 
+    schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed },
   },
   {
