@@ -20,7 +20,7 @@ export interface ReviewResponse {
 // client.
 export interface ReviewInterface {
   semver?: string
-  modelId?: string
+  modelId: string
   kind: ReviewKindKeys
 
   role: string

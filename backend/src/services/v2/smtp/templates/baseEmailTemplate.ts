@@ -1,5 +1,6 @@
 import dedent from 'dedent-js'
 
+import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 import config from '../../../../utils/v2/config.js'
 
 export abstract class BaseEmailTemplate {
@@ -11,8 +12,8 @@ export abstract class BaseEmailTemplate {
 
   abstract setTo(emailAddress: string)
   abstract setSubject(resourceName: string, reviewerRole: string)
-  abstract setHtml(releaseName: string, modelId: string, baseUrl: string, author: string)
-  abstract setText(releaseName: string, modelId: string, baseUrl: string, author: string)
+  abstract setHtml(reviewKind: ReviewKindKeys, releaseName: string, modelId: string, baseUrl: string, author: string)
+  abstract setText(reviewKind: ReviewKindKeys, releaseName: string, modelId: string, baseUrl: string, author: string)
 
   wrapper(children: string) {
     return dedent(`

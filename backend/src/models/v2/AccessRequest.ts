@@ -16,10 +16,12 @@ export interface AccessRequestInterface {
       endDate?: string
       [x: string]: unknown
     }
+    [x: string]: unknown
   }
 
   deleted: boolean
 
+  createdBy: string
   createdAt: Date
   updatedAt: Date
 }
@@ -36,6 +38,8 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },
+
+    createdBy: { type: String, required: true },
   },
   {
     timestamps: true,

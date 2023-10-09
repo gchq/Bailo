@@ -1,7 +1,7 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 
-import { ReviewKind } from '../../../../types/v2/enums.js'
+import { ReviewKindKeys } from '../../../../types/v2/enums.js'
 import { BaseEmailTemplate } from './baseEmailTemplate.js'
 
 export class ReleaseReviewEmail extends BaseEmailTemplate {
@@ -15,26 +15,27 @@ export class ReleaseReviewEmail extends BaseEmailTemplate {
   `)
   }
 
-  setText(releaseName: string, modelId: string, baseUrl: string, author: string) {
+  setText(reviewKind: ReviewKindKeys, releaseName: string, modelId: string, baseUrl: string, author: string) {
     // V2 change- we don't store the author of a release
     // TODO - Replace with URL to specific model release
     this.text = dedent(`
     You have been requested to review '${releaseName}' on Bailo.
 
-    Review Category: '${ReviewKind.Release}'
+    Model: '${modelId}'
+    Review Category: '${reviewKind}'
     Author: '${author}'
 
-    Open ${ReviewKind.Release}: ${baseUrl}/model/${modelId}
+    Open ${reviewKind}: ${baseUrl}/model/${modelId}
     See Reviews: ${baseUrl}/review
   `)
   }
 
-  setHtml(releaseName: string, modelId: string, baseUrl: string, author: string) {
+  setHtml(reviewKind: ReviewKindKeys, releaseName: string, modelId: string, baseUrl: string, author: string) {
     this.html = mjml2html(
       super.wrapper(`
     <mj-section background-color="#27598e" padding-bottom="5px" padding-top="20px">
       <mj-column width="100%">
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${ReviewKind.Release.toLowerCase()}.</span>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="28px" padding-top="28px"><span style="font-size:20px; font-weight:bold">You have been requested to review a ${reviewKind.toLowerCase()}.</span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -45,9 +46,7 @@ export class ReleaseReviewEmail extends BaseEmailTemplate {
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Review Category</strong></mj-text>
-        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${
-          ReviewKind.Release
-        }</mj-text>
+        <mj-text align="center" color="#FFF" font-size="13px" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="20px" padding-top="10px">${reviewKind}</mj-text>
       </mj-column>
       <mj-column>
         <mj-text align="center" color="#FFF" font-size="15px" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="0px"><strong>Author</strong></mj-text>
@@ -56,9 +55,7 @@ export class ReleaseReviewEmail extends BaseEmailTemplate {
     </mj-section>
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       <mj-column width="50%">
-        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${baseUrl}/model/${modelId}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${
-          ReviewKind.Release
-        }</mj-button>
+        <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${baseUrl}/model/${modelId}" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="10px">Open ${reviewKind}</mj-button>
       </mj-column>
       <mj-column width="50%">
         <mj-button background-color="#f37f58" color="#FFF" font-size="14px" align="center" font-weight="bold" border="none" padding="15px 30px" border-radius="10px" href="${baseUrl}/review" font-family="Helvetica" padding-left="25px" padding-right="25px" padding-bottom="12px">See Reviews</mj-button>

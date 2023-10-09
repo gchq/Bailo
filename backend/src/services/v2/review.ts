@@ -1,4 +1,5 @@
 import authorisation from '../../connectors/v2/authorisation/index.js'
+import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
@@ -54,6 +55,34 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, release))
     } catch (error) {
       log.warn('Error when sending notifications requesting review for release.', { error })
+    }
+    return review.save()
+  })
+  await Promise.all(createReviews)
+}
+
+export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
+  // This will be added to the schema(s)
+  const reviewRoles = ['mtr']
+
+  const roleEntities = reviewRoles.map((role) => {
+    const entites = getEntitiesForRole(model.collaborators, role)
+    if (entites.length == 0) {
+      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
+    }
+    return { role, entites }
+  })
+
+  const createReviews = roleEntities.map((roleInfo) => {
+    const review = new Review({
+      modelId: model.id,
+      kind: ReviewKind.Access,
+      role: roleInfo.role,
+    })
+    try {
+      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, accessRequest))
+    } catch (error) {
+      log.warn('Error when sending notifications requesting review for access Request.', { error })
     }
     return review.save()
   })
