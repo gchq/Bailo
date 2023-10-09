@@ -1,5 +1,7 @@
 import { Document, Types } from 'mongoose'
 
+import { SchemaKindKeys } from './v2/types'
+
 export enum ModelUploadType {
   Zip = 'Code and binaries',
   ModelCard = 'Model card only',
@@ -395,13 +397,6 @@ export interface SchemaInterface {
   createdAt: Date
   updatedAt: Date
 }
-
-export const SchemaKind = {
-  Model: 'model',
-  Deployment: 'deployment',
-} as const
-
-export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 export interface ReviewRequestInterface {
   model: string

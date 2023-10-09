@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { ReviewRequestInterface } from '../types/types'
+import { ReviewRequestInterface } from '../types/interfaces'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReviewRequestsForUser(isActive = true) {
@@ -25,18 +25,51 @@ export function useGetReviewRequestsForUser(isActive = true) {
   }
 }
 
-export function useGetNumReviews() {
+export function useGetReviewRequestsForModel(modelId: string, semver?: string, isActive = true) {
   const { data, error, mutate } = useSWR<
     {
-      count: number
+      reviews: ReviewRequestInterface[]
     },
     ErrorInfo
-  >('/api/v2/reviews/count', fetcher)
+  >(
+    semver
+      ? `/api/v2/reviews?${qs.stringify({
+          active: isActive,
+          modelId,
+          semver,
+        })}`
+      : `/api/v2/reviews?${qs.stringify({
+          active: isActive,
+          modelId,
+        })}`,
+    fetcher,
+  )
 
   return {
-    mutateNumReviews: mutate,
-    numReviews: data?.count,
-    isNumReviewsLoading: !error && !data,
-    isNumReviewsError: error,
+    mutateReviews: mutate,
+    reviews: data ? data.reviews : [],
+    isReviewsLoading: !error && !data,
+    isReviewsError: error,
   }
+}
+
+export async function getReviewCount() {
+  return fetch('/api/v2/reviews?active=true', {
+    method: 'head',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export async function postReviewResponse(
+  modelId: string,
+  semver: string,
+  role: string,
+  comment: string,
+  decision: string,
+) {
+  return fetch(`/api/v2/model/${modelId}/releases/${semver}/review`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment, decision, role }),
+  })
 }

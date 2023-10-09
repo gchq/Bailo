@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
 import { useGetReviewRequestsForUser } from '../../actions/review'
-import { ReviewRequestInterface } from '../../types/types'
+import { ReviewRequestInterface } from '../../types/interfaces'
 import { timeDifference } from '../../utils/dateUtils'
 import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
@@ -36,7 +36,7 @@ export default function ReviewsList({ isActive = true, kind = 'all' }: ReviewsLi
       {filteredReviews.length === 0 && <EmptyBlob text='No reviews found' />}
       <List>
         {filteredReviews.map((review) => (
-          <ReviewItem key={review.release} review={review} />
+          <ReviewItem key={review.semver} review={review} />
         ))}
       </List>
     </>
@@ -51,7 +51,7 @@ function ReviewItem({ review }: ReviewItemProps) {
   const router = useRouter()
 
   function listItemOnClick() {
-    router.push(`/beta/model/${review.model}`)
+    router.push(`/beta/model/${review.model.id}`)
   }
   function editedAdornment() {
     if (review.updatedAt > review.createdAt) {
@@ -60,13 +60,13 @@ function ReviewItem({ review }: ReviewItemProps) {
   }
   return (
     <ListItem disablePadding>
-      <ListItemButton onClick={listItemOnClick} aria-label={`Review model ${review.model} ${review.release}`}>
+      <ListItemButton onClick={listItemOnClick} aria-label={`Review model ${review.model} ${review.semver}`}>
         <Stack>
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
             <Typography color='primary' variant='h6' component='h2' sx={{ fontWeight: 'bold' }}>
-              {review.model}
+              {review.model.name}
             </Typography>
-            <Typography>{review.release}</Typography>
+            <Typography>{review.semver}</Typography>
           </Stack>
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
             <Typography variant='caption'>{`Created ${timeDifference(

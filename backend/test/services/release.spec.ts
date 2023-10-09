@@ -11,7 +11,6 @@ const authorisationMocks = vi.hoisted(() => ({
   userReleaseAction: vi.fn(() => true),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  ...((await vi.importActual('../../src/connectors/v2/authorisation/index.js')) as object),
   default: authorisationMocks,
 }))
 

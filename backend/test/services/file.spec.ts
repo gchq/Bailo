@@ -4,6 +4,8 @@ import { describe, expect, test, vi } from 'vitest'
 import { UserDoc } from '../../src/models/v2/User.js'
 import { uploadFile } from '../../src/services/v2/file.js'
 
+vi.mock('../../src/utils/config.js')
+
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
 }))
@@ -13,7 +15,6 @@ const authorisationMocks = vi.hoisted(() => ({
   userModelAction: vi.fn(() => true),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  ...((await vi.importActual('../../src/connectors/v2/authorisation/index.js')) as object),
   default: authorisationMocks,
 }))
 
