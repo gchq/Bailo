@@ -12,8 +12,8 @@ const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 export type RichTextEditorProps = {
   value: string
   onChange: (value: string) => void
-  textareaProps: MDEditorProps['textareaProps']
   label?: ReactNode
+  textareaProps?: MDEditorProps['textareaProps']
 }
 
 export default function RichTextEditor({ value, onChange, textareaProps, label = <></> }: RichTextEditorProps) {

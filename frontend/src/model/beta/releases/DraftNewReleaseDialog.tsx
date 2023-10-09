@@ -138,11 +138,9 @@ export default function DraftNewReleaseDialog({
             </Stack>
             <Stack>
               <RichTextEditor
-                dataValue={releaseNotes}
-                onDataValueChange={(value) => setReleaseNotes(value)}
+                value={releaseNotes}
+                onChange={(value) => setReleaseNotes(value)}
                 aria-label='Release notes'
-                dataTestKey='releaseNotes'
-                data-test='releaseNotes'
                 label={
                   <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Release Notes <span style={{ color: 'red' }}>*</span>
