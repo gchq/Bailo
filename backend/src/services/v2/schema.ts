@@ -1,11 +1,7 @@
-import { Schema as JsonSchema, Validator } from 'jsonschema'
-
-import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
-import { SchemaValidationError } from '../../types/v2/SchemaValidationError.js'
 import { NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
 
@@ -41,40 +37,11 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
   }
 }
 
-export function validateData(data: any, schema: JsonSchema) {
-  let properties
-  if (schema.properties === undefined) {
-    throw Error('Properties missing from Schema')
-  } else {
-    properties = schema.properties
-  }
-  const validator = new Validator()
-
-  const props = Object.keys(schema.properties).filter((key) => ['object', 'array'].includes(properties[key].type))
-
-  const schemaSteps = props.map((prop: any) => ({
-    schema: {
-      definitions: schema.definitions,
-      ...properties[prop],
-    },
-    stepName: prop,
-  }))
-
-  for (const step of schemaSteps) {
-    const result = validator.validate(data[step.stepName], step.schema)
-    if (!result.valid) {
-      throw new SchemaValidationError(step.stepName, result.errors)
-    }
-  }
-}
-
 /**
  * Use the mock data as defaults
  * TODO - convert and use default schemas from V1
  */
 export async function addDefaultSchemas() {
-  await createSchema(testDeploymentSchema, true)
-
   await createSchema(
     {
       name: 'Minimal Schema v10 Beta',

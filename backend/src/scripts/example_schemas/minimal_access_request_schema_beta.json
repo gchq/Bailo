@@ -27,17 +27,6 @@
   },
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "timeStamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "schemaRef": {
-      "title": "Schema reference",
-      "type": "string"
-    },
     "highLevelDetails": {
       "title": "Details",
       "type": "object",
@@ -64,6 +53,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["timeStamp", "user", "highLevelDetails"],
+  "required": ["highLevelDetails"],
   "additionalProperties": false
 }

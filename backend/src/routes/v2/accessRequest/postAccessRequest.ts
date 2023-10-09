@@ -12,7 +12,7 @@ export const postAccessRequestSchema = z.object({
   }),
   body: z.object({
     entity: z.string(),
-    schemaRef: z.string(),
+    schemaId: z.string(),
     metadata: z.unknown(),
   }),
 })
