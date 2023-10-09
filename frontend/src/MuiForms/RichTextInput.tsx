@@ -4,10 +4,10 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface RichTextInputProps {
-  label: string
   value: string
-  formContext: any
   onChange: (newValue: string) => void
+  label?: string
+  formContext?: any
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
