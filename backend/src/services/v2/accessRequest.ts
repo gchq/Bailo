@@ -30,10 +30,10 @@ export async function createAccessRequest(user: UserDoc, modelId: string, access
     throw error
   }
 
-  const release = new AccessRequest({
+  const newAccessRequest = new AccessRequest({
     modelId,
     ...accessRequest,
   })
 
-  return await release.save()
+  return await newAccessRequest.save()
 }

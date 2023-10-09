@@ -9,7 +9,14 @@ export interface AccessRequestInterface {
   entity: string
 
   schemaId: string
-  metadata?: unknown
+  metadata: {
+    highLevelDetails: {
+      name: string
+      hasEndDate: boolean
+      endDate?: string
+      [x: string]: unknown
+    }
+  }
 
   deleted: boolean
 
@@ -28,7 +35,7 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
     entity: { type: String, required: true },
 
     schemaId: { type: String, required: true },
-    metadata: { type: Schema.Types.Mixed },
+    metadata: { type: Schema.Types.Mixed, required: true },
   },
   {
     timestamps: true,
