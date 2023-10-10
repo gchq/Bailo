@@ -31,7 +31,7 @@ export default function MyApp(props: MyAppProps) {
   useEffect(() => {
     const mode = themeModeValue.theme.palette.mode === 'dark' ? 'dark' : 'light'
     document.documentElement.setAttribute('data-color-mode', mode)
-  })
+  }, [themeModeValue])
 
   return (
     <CacheProvider value={emotionCache}>
