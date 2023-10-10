@@ -6,7 +6,11 @@ import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
+import authorisation from '../../connectors/v2/authorisation/index.js'
+import { ModelDoc } from '../../models/v2/Model.js'
+import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
 import { findDeploymentByUuid } from '../../services/deployment.js'
+import { getModelById } from '../../services/v2/model.js'
 import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList } from '../../utils/entity.js'
@@ -158,7 +162,45 @@ function generateAccess(scope: any) {
   }
 }
 
+async function checkAccessV2(access: Access, user: UserDocV2) {
+  const modelUuid = access.name.split('/')[0]
+  let model: ModelDoc
+  try {
+    model = await getModelById(user, modelUuid)
+  } catch (e) {
+    // bad model id?
+    return false
+  }
+
+  const entities = await authorisation.getEntities(user)
+  if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
+    // They are a collaborator to the model, let them push or pull.
+    return true
+  }
+
+  if (!isEqual(access.actions, ['pull'])) {
+    // If users are not collaborators, they should only be able to pull
+    return false
+  }
+
+  // TODO: When access requests are done, we need to check if a user has one of them
+  // prior to being able to pull the model.
+
+  // Alternatively, if the model is 'public access', it should be approved regardless.
+
+  return true
+}
+
 async function checkAccess(access: Access, user: UserDoc) {
+  const modelUuid = access.name.split('/')[0]
+  try {
+    const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
+    await getModelById(v2User, modelUuid)
+    return checkAccessV2(access, v2User)
+  } catch (e) {
+    // do nothing, assume v1 authorisation
+  }
+
   if (access.type !== 'repository') {
     // not a repository request
     return false
