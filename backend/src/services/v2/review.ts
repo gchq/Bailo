@@ -33,7 +33,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  const roleEntities = getRoleEntites(['mtr'], model.collaborators)
+  const roleEntities = getRoleEntites(['mtr', 'msro'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
