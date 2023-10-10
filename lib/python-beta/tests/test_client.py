@@ -26,11 +26,11 @@ def test_create_model(requests_mock):
 
 
 def test_find_models(requests_mock):
-    requests_mock.get("https://example.com/api/v2/models/search", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/models/search?task=image_classification", json={"success": True})
 
     client = BailoClient("https://example.com")
     result = client.find_models(
-        task="Image Classification"
+        task="image_classification"
     )
 
     assert result == {"success": True}
@@ -157,12 +157,16 @@ def test_get_files(requests_mock):
     assert result == {"success": True}
 
 def test_simple_upload(requests_mock):
-    requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=file_name", json={"success": True})
+    requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=test.txt", json={"success": True})
+
+    data = 'TEST'
+    data = bytes(data, 'utf-8')
 
     client = BailoClient("https://example.com")
     result = client.simple_upload(
         model_id="test_id",
-        name="file_name",
+        name="test.txt",
+        binary=data,
     )
 
     assert result == {"success": True}
@@ -183,7 +187,7 @@ def test_delete_file(requests_mock):
     assert result == {"success": True}
 
 def test_get_all_schemas(requests_mock):
-    requests_mock.get("https://example.com/api/v2/schemas", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
     client = BailoClient("https://example.com")
     result = client.get_all_schemas(

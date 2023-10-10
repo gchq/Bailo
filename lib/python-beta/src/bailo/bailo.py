@@ -64,7 +64,7 @@ class BailoClient():
         """
         return self.agent.get(
             f"{self.url}/v2/models/search",
-            json={
+            params={
                 "task": task,
                 "libraries": libraries,
                 "filters": filters,
@@ -273,6 +273,7 @@ class BailoClient():
         self,
         model_id: str,
         name: str,
+        binary: bytes,
         mime: Optional[str] = None,
     ):
         """
@@ -280,12 +281,14 @@ class BailoClient():
 
         :param model_id: Unique model ID
         :param name: File name
+        :param binary: File data
         :param mime: MIME aka media type, defaults to None
         :return: JSON response object
         """
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
             params={"name": name, "mime": mime},
+            data = binary,
         ).json()  
 
 
@@ -321,7 +324,7 @@ class BailoClient():
         """        
         return self.agent.get(
             f"{self.url}/v2/schemas",
-            json={"kind": kind},
+            params={"kind": kind},
         ).json()
     
     def get_schema(
