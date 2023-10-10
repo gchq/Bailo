@@ -1,47 +1,84 @@
 import nodemailer, { Transporter } from 'nodemailer'
+import Mail from 'nodemailer/lib/mailer/index.js'
 
 import authorisation from '../../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
-import { ReviewKind } from '../../../types/v2/enums.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { BaseEmailTemplate } from './templates/baseEmailTemplate.js'
-import { ReleaseReviewEmail } from './templates/releaseReview.js'
+import { buildEmail } from './emailBuilder.js'
 
-const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
+//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
-export async function requestReviewForRelease(
+export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `Release ${release.semver} has been created for model ${release.modelId}`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+      { title: 'Semver', data: release.semver },
+      { title: 'Created By', data: release.createdBy },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+
+  const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
+
+export async function requestReviewForAccessRequest(
   entity: string,
   review: ReviewDoc,
-  reviewItem: ReleaseDoc | AccessRequestDoc,
+  accessRequest: AccessRequestDoc,
 ) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
 
-  let title = ``
-  if (review.kind === ReviewKind.Release && isReviewDoc(reviewItem)) {
-    title = `Release ${reviewItem.semver} for ${reviewItem.modelId}`
-  } else if (review.kind === ReviewKind.Access && isAccessRequestDoc(reviewItem)) {
-    title = `Access to ${reviewItem.modelId} for ${reviewItem.entity} `
-  }
+  const emailContent = buildEmail(
+    `'${accessRequest.entity}' has requested access to the model '${accessRequest.modelId}'`,
+    [
+      { title: 'Model ID', data: accessRequest.modelId },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+      { title: 'User Requesting Access', data: accessRequest.entity },
+      { title: 'Created By', data: accessRequest.createdBy },
+    ],
+    [
+      { name: 'Open Access Request', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+
   const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
-  const sendEmailResponses = userInfoList.map(async (userInfo) => {
-    const email = new ReleaseReviewEmail()
-    email.setTo(userInfo.email)
-    email.setSubject(title, review.role)
-    email.setText(review.kind, title, reviewItem.modelId, appBaseUrl, reviewItem.createdBy)
-    email.setHtml(review.kind, title, reviewItem.modelId, appBaseUrl, reviewItem.createdBy)
-    return await sendEmail(email)
-  })
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
   await Promise.all(sendEmailResponses)
 }
 
-async function sendEmail(email: BaseEmailTemplate) {
+async function sendEmail(email: Mail.Options) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: config.smtp.connection.host,
@@ -54,11 +91,8 @@ async function sendEmail(email: BaseEmailTemplate) {
 
   try {
     const info = await transporter.sendMail({
-      from: email.from, // sender address
-      to: email.to,
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
+      from: config.smtp.from,
+      ...email,
     })
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
@@ -66,18 +100,4 @@ async function sendEmail(email: BaseEmailTemplate) {
     log.warn(`Unable to send email`, content)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
-}
-
-function isReviewDoc(reviewItem: ReleaseDoc | AccessRequestDoc): reviewItem is ReleaseDoc {
-  if (typeof reviewItem !== 'object' || reviewItem === null) {
-    return false
-  }
-  return (reviewItem as ReleaseDoc).semver !== undefined
-}
-
-function isAccessRequestDoc(reviewItem: ReleaseDoc | AccessRequestDoc): reviewItem is AccessRequestDoc {
-  if (typeof reviewItem !== 'object' || reviewItem === null) {
-    return false
-  }
-  return (reviewItem as AccessRequestDoc).metadata !== undefined
 }

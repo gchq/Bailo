@@ -5,35 +5,50 @@ import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
 import { BadReq, NotFound } from '../../utils/v2/error.js'
+import log from './log.js'
 import { getModelById } from './model.js'
+import { createAccessRequestReviews } from './review.js'
 import { findSchemaById } from './schema.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'entity' | 'metadata' | 'schemaId'>
-export async function createAccessRequest(user: UserDoc, modelId: string, accessRequest: CreateAccessRequestParams) {
+export async function createAccessRequest(
+  user: UserDoc,
+  modelId: string,
+  accessRequestInfo: CreateAccessRequestParams,
+) {
   // Check the model exists and the user can view it before making an AR
-  await getModelById(user, modelId)
+  const model = await getModelById(user, modelId)
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequest.schemaId)
+  const schema = await findSchemaById(accessRequestInfo.schemaId)
   if (!schema) {
-    throw NotFound('Schema could not be found', { schemaId: accessRequest.schemaId })
+    throw NotFound('Schema could not be found', { schemaId: accessRequestInfo.schemaId })
   }
   try {
-    new Validator().validate(accessRequest.metadata, schema.jsonSchema)
+    new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema)
   } catch (error) {
     if (isValidatorResultError(error)) {
       throw BadReq('Access Request Metadata could not be validated against the schema.', {
-        schemaId: accessRequest.schemaId,
+        schemaId: accessRequestInfo.schemaId,
         validationErrors: error.errors,
       })
     }
     throw error
   }
 
-  const newAccessRequest = new AccessRequest({
+  const accessRequest = new AccessRequest({
+    createdBy: user.dn,
     modelId,
-    ...accessRequest,
+    ...accessRequestInfo,
   })
+  await accessRequest.save()
 
-  return await newAccessRequest.save()
+  try {
+    await createAccessRequestReviews(model, accessRequest)
+  } catch (error) {
+    // Transactions here would solve this issue.
+    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+  }
+
+  return accessRequest
 }

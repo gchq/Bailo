@@ -13,6 +13,7 @@ export const postAccessRequestSchema = z.object({
   body: z.object({
     entity: z.string(),
     schemaId: z.string(),
+    // This needs updating
     metadata: z.unknown(),
   }),
 })

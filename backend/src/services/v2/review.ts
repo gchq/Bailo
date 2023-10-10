@@ -8,7 +8,7 @@ import { ReviewKind } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
-import { requestReviewForRelease } from './smtp/smtp.js'
+import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviews(
   user: UserDoc,
@@ -80,7 +80,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
       role: roleInfo.role,
     })
     try {
-      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, accessRequest))
+      roleInfo.entites.forEach((entity) => requestReviewForAccessRequest(entity, review, accessRequest))
     } catch (error) {
       log.warn('Error when sending notifications requesting review for access Request.', { error })
     }
