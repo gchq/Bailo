@@ -33,16 +33,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  // This will be added to the schema(s)
-  const reviewRoles = ['msro', 'mtr']
-
-  const roleEntities = reviewRoles.map((role) => {
-    const entites = getEntitiesForRole(model.collaborators, role)
-    if (entites.length == 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
-    }
-    return { role, entites }
-  })
+  const roleEntities = getRoleEntites(['mtr'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -62,16 +53,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  // This will be added to the schema(s)
-  const reviewRoles = ['mtr']
-
-  const roleEntities = reviewRoles.map((role) => {
-    const entites = getEntitiesForRole(model.collaborators, role)
-    if (entites.length == 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
-    }
-    return { role, entites }
-  })
+  const roleEntities = getRoleEntites(['mtr'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -82,7 +64,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
     try {
       roleInfo.entites.forEach((entity) => requestReviewForAccessRequest(entity, review, accessRequest))
     } catch (error) {
-      log.warn('Error when sending notifications requesting review for access Request.', { error })
+      log.warn('Error when sending notifications requesting review for Access Request.', { error })
     }
     return review.save()
   })
@@ -128,11 +110,16 @@ export async function respondToReview(
   return update
 }
 
-function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
-  const roleEntities: string[] = collaborators
-    .filter((collaborator) => collaborator.roles.includes(role))
-    .map((collaborator) => collaborator.entity)
-  return roleEntities
+function getRoleEntites(roles: string[], collaborators: CollaboratorEntry[]) {
+  return roles.map((role) => {
+    const entites = collaborators
+      .filter((collaborator) => collaborator.roles.includes(role))
+      .map((collaborator) => collaborator.entity)
+    if (entites.length == 0) {
+      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
+    }
+    return { role, entites }
+  })
 }
 
 /**

@@ -16,7 +16,7 @@ export async function createAccessRequest(
   modelId: string,
   accessRequestInfo: CreateAccessRequestParams,
 ) {
-  // Check the model exists and the user can view it before making an AR
+  // Check the model exists and the user can view it before creating an AR
   const model = await getModelById(user, modelId)
 
   // Ensure that the AR meets the schema
@@ -47,7 +47,7 @@ export async function createAccessRequest(
     await createAccessRequestReviews(model, accessRequest)
   } catch (error) {
     // Transactions here would solve this issue.
-    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+    log.warn('Error when creating Release Review Requests. Approval cannot be given to this Access Request', error)
   }
 
   return accessRequest
