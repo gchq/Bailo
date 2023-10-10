@@ -25,7 +25,7 @@ export async function createAccessRequest(
     throw NotFound('Schema could not be found', { schemaId: accessRequestInfo.schemaId })
   }
   try {
-    new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema)
+    new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
     if (isValidatorResultError(error)) {
       throw BadReq('Access Request Metadata could not be validated against the schema.', {

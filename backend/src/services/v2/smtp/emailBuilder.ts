@@ -1,13 +1,13 @@
 import dedent from 'dedent-js'
 import mjml2html from 'mjml'
 
-export type emailContent = {
+export type EmailContent = {
   subject: string
   text: string
   html: string
 }
 
-export type info = {
+export type Info = {
   title: string
   data: string
 }
@@ -17,7 +17,7 @@ export type actions = {
   url: string
 }
 
-export function buildEmail(title: string, metadata: info[], actions: actions[]): emailContent {
+export function buildEmail(title: string, metadata: Info[], actions: actions[]): EmailContent {
   return {
     subject: title,
     text: emailText(title, metadata, actions),
@@ -25,7 +25,7 @@ export function buildEmail(title: string, metadata: info[], actions: actions[]):
   }
 }
 
-function emailText(title, reviewMetadata: info[], reviewActions: actions[]) {
+function emailText(title, reviewMetadata: Info[], reviewActions: actions[]) {
   return dedent(`
     ${title}
 
@@ -35,7 +35,7 @@ function emailText(title, reviewMetadata: info[], reviewActions: actions[]) {
   `)
 }
 
-function textMetadata(reviewMetadata: info[]) {
+function textMetadata(reviewMetadata: Info[]) {
   return `${reviewMetadata.map((info) => `${info.title}: '${info.data}'\n`).join('')}`
 }
 
@@ -62,7 +62,7 @@ function emailHtml(title, reviewMetadata, reviewActions) {
   ).html
 }
 
-function htmlMetadata(reviewMetadata: info[]) {
+function htmlMetadata(reviewMetadata: Info[]) {
   return `${reviewMetadata
     .map(
       (info) => `
