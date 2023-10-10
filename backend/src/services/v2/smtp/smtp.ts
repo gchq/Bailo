@@ -54,11 +54,11 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `'${accessRequest.entity}' has requested access to the model '${accessRequest.modelId}'`,
+    `Request for Entities '${accessRequest.entities}' access to the model '${accessRequest.modelId}'`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
-      { title: 'User Requesting Access', data: accessRequest.entity },
+      { title: 'Entities Requesting Access', data: accessRequest.entities.toString() },
       { title: 'Created By', data: accessRequest.createdBy },
     ],
     [

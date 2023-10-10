@@ -1,23 +1,25 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+export interface AccessRequestMetadata {
+  highLevelDetails: {
+    name: string
+    hasEndDate: boolean
+    endDate?: string
+    [x: string]: unknown
+  }
+  [x: string]: unknown
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface AccessRequestInterface {
   modelId: string
-  entity: string
+  entities: Array<string>
 
   schemaId: string
-  metadata: {
-    highLevelDetails: {
-      name: string
-      hasEndDate: boolean
-      endDate?: string
-      [x: string]: unknown
-    }
-    [x: string]: unknown
-  }
+  metadata: AccessRequestMetadata
 
   deleted: boolean
 
@@ -34,7 +36,7 @@ export type AccessRequestDoc = AccessRequestInterface & Document<any, any, Acces
 const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
     modelId: { type: String, required: true },
-    entity: { type: String, required: true },
+    entities: [{ type: String, required: true }],
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },

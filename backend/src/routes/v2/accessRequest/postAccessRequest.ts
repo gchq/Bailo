@@ -23,7 +23,7 @@ export const postAccessRequestSchema = z.object({
     modelId: z.string(),
   }),
   body: z.object({
-    entity: z.string(),
+    entities: z.array(z.string()),
     schemaId: z.string(),
     metadata: z.intersection(KnownMetadata, z.record(z.unknown())),
   }),

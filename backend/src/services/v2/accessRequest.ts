@@ -4,13 +4,13 @@ import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
 import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { BadReq, NotFound } from '../../utils/v2/error.js'
+import { BadReq } from '../../utils/v2/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'entity' | 'metadata' | 'schemaId'>
+export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'entities' | 'metadata' | 'schemaId'>
 export async function createAccessRequest(
   user: UserDoc,
   modelId: string,
@@ -21,9 +21,6 @@ export async function createAccessRequest(
 
   // Ensure that the AR meets the schema
   const schema = await findSchemaById(accessRequestInfo.schemaId)
-  if (!schema) {
-    throw NotFound('Schema could not be found', { schemaId: accessRequestInfo.schemaId })
-  }
   try {
     new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
