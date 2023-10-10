@@ -32,7 +32,11 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
   )
 
-  const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
   const sendEmailResponses = userInfoList.map(
     async (userInfo) =>
       await sendEmail({
@@ -67,7 +71,11 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
-  const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
   const sendEmailResponses = userInfoList.map(
     async (userInfo) =>
       await sendEmail({
