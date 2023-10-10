@@ -158,32 +158,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserDoc) {
-  return true
-
-  if (access.type !== 'repository') {
-    // not a repository request
-    return false
-  }
-
-  const deploymentUuid = access.name.split('/')[0]
-  const deployment = await findDeploymentByUuid(user, deploymentUuid)
-
-  if (!deployment) {
-    // no deployment found
-    return false
-  }
-
-  if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
-    // user not in access list
-    return false
-  }
-
-  if (!isEqual(access.actions, ['pull'])) {
-    // users should only be able to pull images
-    return false
-  }
-
+async function checkAccess(_access: Access, _user: UserDoc) {
   return true
 }
 

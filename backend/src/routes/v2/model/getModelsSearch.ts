@@ -57,7 +57,8 @@ export const getModelsSearch = [
       id: model.id,
       name: model.name,
       description: model.description,
-      tags: sampleSize(tags, Math.floor(Math.random() * 5) + 1), // TODO: Add model card tags
+      tags: (model as any).card?.metadata?.highLevelDetails?.tags || [],
+      // tags: sampleSize(tags, Math.floor(Math.random() * 5) + 1), // TODO: Add model card tags
     }))
 
     return res.json({ models })

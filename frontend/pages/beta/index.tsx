@@ -157,7 +157,7 @@ export default function ExploreModels() {
                         variant='h5'
                         sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
                       >
-                        Example Team / {model.name}
+                        {model.name}
                       </MuiLink>
                     </Link>
                     <Typography variant='body1' sx={{ marginBottom: 2 }}>
