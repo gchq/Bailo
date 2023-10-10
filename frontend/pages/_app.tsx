@@ -28,6 +28,8 @@ export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   const themeModeValue = useThemeMode()
+
+  // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
     const mode = themeModeValue.theme.palette.mode === 'dark' ? 'dark' : 'light'
     document.documentElement.setAttribute('data-color-mode', mode)
