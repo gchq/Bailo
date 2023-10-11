@@ -3,7 +3,7 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { useRouter } from 'next/router'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
@@ -104,11 +104,11 @@ export default function ModelCardForm({
         onChange={onFormChange}
         validator={validator}
         widgets={{
-          nothing: Nothing,
+          TextareaWidget: RichTextInput,
           customTextInput: CustomTextInput,
           tagSelector: TagSelector,
           tagSelectorBeta: TagSelectorBeta,
-          richTextInput: RichTextInput,
+          nothing: Nothing,
         }}
         uiSchema={currentStep.uiSchema}
         liveValidate={currentStep.shouldValidate}

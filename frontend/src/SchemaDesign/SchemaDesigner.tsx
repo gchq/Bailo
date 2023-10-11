@@ -26,8 +26,9 @@ import Typography from '@mui/material/Typography'
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import _ from 'lodash-es'
-import React, { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided } from 'react-beautiful-dnd'
+import RichTextInput from 'src/MuiForms/RichTextInput'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 import { Schema, SchemaQuestion, SchemaType } from '../../types/types'
@@ -324,6 +325,9 @@ export default function SchemaDesigner() {
                 schema={splitSchema.steps[stepIndex].schema}
                 formData={splitSchema.steps[stepIndex].state}
                 uiSchema={splitSchema.steps[stepIndex].uiSchema}
+                widgets={{
+                  TextareaWidget: RichTextInput,
+                }}
               />
             )}
           </Paper>
