@@ -85,6 +85,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
           spacing={1}
           justifyContent='flex-end'
           divider={<Divider orientation='vertical' flexItem />}
+          sx={{ mb: { xs: 2 } }}
         >
           {!isHistoryOpen && (
             <Button variant='outlined' onClick={() => setDialogOpen(true)}>

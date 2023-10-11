@@ -2,7 +2,8 @@ import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Typography } f
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import { useRouter } from 'next/router'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
@@ -25,6 +26,18 @@ export default function ModelCardForm({
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
+  const router = useRouter()
+  const formPage = router.query.formPage
+
+  useEffect(() => {
+    if (formPage) {
+      const stepFromUrl = splitSchema.steps.find((step) => step.section === formPage)
+      if (stepFromUrl) {
+        setActiveStep(stepFromUrl.index)
+      }
+    }
+  }, [formPage, splitSchema.steps])
+
   const currentStep = splitSchema.steps[activeStep]
 
   if (!currentStep) {
@@ -41,10 +54,17 @@ export default function ModelCardForm({
     return <></>
   }
 
+  function handleListItemClick(index: number, formPageKey: string) {
+    setActiveStep(index)
+    router.replace({
+      query: { ...router.query, formPage: formPageKey },
+    })
+  }
+
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
-      spacing={2}
+      spacing={{ sm: 2 }}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
       sx={{ width: '100%' }}
@@ -58,10 +78,13 @@ export default function ModelCardForm({
           connector={<Nothing />}
           sx={{ minWidth: 'max-content' }}
         >
-          <List>
+          <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
-                <ListItemButton selected={activeStep === index} onClick={() => setActiveStep(index)}>
+                <ListItemButton
+                  selected={activeStep === index}
+                  onClick={() => handleListItemClick(index, step.section)}
+                >
                   <Stack direction='row' spacing={2}>
                     <Typography>{step.schema.title}</Typography>
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
