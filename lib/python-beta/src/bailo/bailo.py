@@ -1,6 +1,7 @@
 """Main entry point"""
 from __future__ import annotations
 import requests
+import validators
 from typing import List, Optional, Dict, Any
 from .enums import ModelVisibility, SchemaKind
 
@@ -20,6 +21,8 @@ class PkiAgent(Agent):
 
 class BailoClient():
     def __init__(self, url: str, agent: Agent = Agent()):
+        if not validators.url(url):
+            raise ValueError("URL not valid.")
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
