@@ -31,8 +31,8 @@ export interface ModelCardRevisionInterface {
   version: number
   metadata: unknown
   createdBy: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CollaboratorEntry {

@@ -1,6 +1,5 @@
 import { Box, Button, Divider, Stack } from '@mui/material'
 import { useEffect, useState } from 'react'
-import ViewModelCardHistoryDialog from 'src/model/beta/overview/ModelCardHistoryDialog'
 
 import { useGetModel } from '../../../../actions/model'
 import { putModelCard, useModelCardRevisions } from '../../../../actions/modelCard'
@@ -12,6 +11,7 @@ import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUti
 import Loading from '../../../common/Loading'
 import ModelCardForm from '../../../Form/beta/ModelCardForm'
 import MessageAlert from '../../../MessageAlert'
+import ModelCardHistoryDialog from '../overview/ModelCardHistoryDialog'
 
 type FormEditPageProps = {
   model: ModelInterface
@@ -19,12 +19,18 @@ type FormEditPageProps = {
 
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useModelCardRevisions(model.id)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  const handleButtonClick = () => {
+    setIsEdit(!isEdit)
+    setIsHistoryOpen(!isHistoryOpen)
+  }
 
   async function onSubmit() {
     if (schema) {
@@ -47,6 +53,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       }
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(!isEdit)
+      setIsHistoryOpen(!isHistoryOpen)
     }
   }
 
@@ -73,35 +80,36 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ py: 1 }}>
-        <Stack>
-          {!isEdit && (
-            <Box sx={{ width: '100%', textAlign: 'right' }}>
-              <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
-                Edit Model card
-              </Button>
-            </Box>
+        <Stack
+          direction='row'
+          spacing={1}
+          justifyContent='flex-end'
+          divider={<Divider orientation='vertical' flexItem />}
+        >
+          {!isHistoryOpen && (
+            <Button variant='outlined' onClick={() => setDialogOpen(true)}>
+              View History
+            </Button>
+          )}
+          {!isEdit && !isHistoryOpen && (
+            <Button variant='outlined' onClick={handleButtonClick}>
+              Edit Model card
+            </Button>
           )}
           {isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              justifyContent='flex-end'
-              divider={<Divider orientation='vertical' flexItem />}
-            >
-              <Button variant='outlined' onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button variant='contained' onClick={onSubmit}>
-                Save
-              </Button>
-            </Stack>
+            <Button variant='outlined' onClick={onCancel}>
+              Cancel
+            </Button>
           )}
-          <Button onClick={() => setDialogOpen(true)}>View History</Button>
-          <ViewModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
+          {isEdit && (
+            <Button variant='contained' onClick={onSubmit}>
+              Save
+            </Button>
+          )}
         </Stack>
-
         <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
+      <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
     </>
   )
 }

@@ -58,7 +58,7 @@ export function useModelCardRevisions(modelId: string) {
 
   return {
     mutateModelCardRevisions: mutate,
-    modelCardRevisions: data ? data.modelCardRevisions : undefined,
+    modelCardRevisions: data ? data.modelCardRevisions : [],
     isModelCardRevisionsLoading: !error && !data,
     isModelCardRevisionsError: error,
   }
