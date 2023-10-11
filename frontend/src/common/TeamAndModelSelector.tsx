@@ -1,4 +1,4 @@
-import { Autocomplete, Divider, FormControl, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, FormControl, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 import { useGetTeams } from '../../actions/team'
@@ -36,12 +36,7 @@ export default function TeamAndModelSelector({
     <>
       {isTeamsLoading && <Typography>Fetching Teams</Typography>}{' '}
       {!isTeamsLoading && (
-        <Stack
-          spacing={2}
-          direction={{ xs: 'column', sm: 'row' }}
-          divider={<Divider variant='middle' flexItem orientation='vertical' />}
-          justifyContent='space-between'
-        >
+        <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
           {!modelOnly && (
             <Selector
               data={teamNames}
@@ -81,7 +76,7 @@ interface SelectorProps {
 function Selector({ data, setData, label, value, disabled = false, loading = false, dataTestKey }: SelectorProps) {
   const theme = useTheme()
   return (
-    <FormControl>
+    <FormControl sx={{ width: '100%' }}>
       <Stack>
         <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={`${label}-input`}>
           {label} <span style={{ color: theme.palette.primary.main }}>*</span>
@@ -89,7 +84,6 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
         <Autocomplete
           loading={loading}
           id={`${label}-input`}
-          sx={{ width: 200 }}
           freeSolo
           autoSelect
           onChange={(_event, newValue: string | null) => setData(newValue ? newValue : '')}

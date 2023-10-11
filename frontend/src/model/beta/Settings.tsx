@@ -18,7 +18,11 @@ export default function Settings({ model }: SettingsProps) {
     setSelectedCategory(category)
   }
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} divider={<Divider orientation='vertical' flexItem />}>
+    <Stack
+      direction={{ xs: 'column', sm: 'row' }}
+      spacing={{ sm: 2 }}
+      divider={<Divider orientation='vertical' flexItem />}
+    >
       <List>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'general'} onClick={() => handleListItemClick('general')}>

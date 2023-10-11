@@ -26,9 +26,9 @@ export default function Model() {
         <PageWithTabs
           title={model.name}
           tabs={[
-            { title: 'Overview', view: <Overview model={model} /> },
-            { title: 'Releases', view: <Releases model={model} /> },
-            { title: 'Settings', view: <Settings model={model} /> },
+            { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
+            { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
+            { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]}
           displayActionButton
           actionButtonTitle='Request access'

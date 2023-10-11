@@ -70,7 +70,7 @@ export default function ModelReleaseReviewBanner({ label, release }: ModelReleas
         borderRadius: '13px 13px 0px 0px',
       }}
     >
-      <Stack direction='row' spacing={2} alignItems='center'>
+      <Stack direction='row' spacing={2} alignItems='center' sx={{ px: 2 }}>
         <Typography>{label}</Typography>
         <Button variant='outlined' color='inherit' size='small' onClick={openReviewComment}>
           Review

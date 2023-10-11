@@ -69,7 +69,7 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <Stack direction='row' spacing={2}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Stack spacing={2} sx={{ maxWidth: '250px' }}>
           <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
