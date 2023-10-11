@@ -1,6 +1,7 @@
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction } from 'react'
+import RichTextInput from 'src/MuiForms/RichTextInput'
 
 import { SplitSchema, Step } from '../../types/interfaces'
 import { setStepState } from '../../utils/formUtils'
@@ -33,6 +34,7 @@ export default function RenderForm({
       onChange={onFormChange}
       validator={validator}
       widgets={{
+        TextareaWidget: RichTextInput,
         userSelector: UserSelector,
         entitySelector: EntitySelector,
         seldonVersionSelector: SeldonVersionSelector,
