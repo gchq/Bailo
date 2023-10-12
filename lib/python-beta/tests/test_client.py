@@ -219,9 +219,15 @@ def test_post_schema(requests_mock):
 
     assert result == {"success": True}
 
-#def test_get_reviews(requests_mock):
+def test_get_reviews(requests_mock):
+    requests_mock.get("https://example.com/api/v2/reviews?active=True", json={"success": True})
 
-#def test_get_reviews_count(requests_mock):
+    client = BailoClient("https://example.com")
+    result = client.get_reviews(
+        active=True,
+    )
+
+    assert result == {"success": True}
 
 def test_get_model_roles(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})

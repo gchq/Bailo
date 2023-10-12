@@ -371,9 +371,28 @@ class BailoClient():
             }
         ).json()
 
-    #def get_reviews(): TBC
+    def get_reviews(
+        self,
+        active: bool,
+        model_id: Optional[str] = None,
+        version: Optional[str] = None,
+    ):
+        """
+        Gets all reviews within given parameters.
 
-    #def get_reviews_count(): TBC
+        :param active: Boolean representing status of review
+        :param model_id: Unique model ID, defaults to None
+        :param version: Model version, defaults to None
+        :return: JSON response object.
+        """    
+        return self.agent.get(
+            f"{self.url}/v2/reviews",
+            params={
+                "active": active,
+                "modelId": model_id,
+                "semver": version,
+            }
+        ).json()
 
     def get_model_roles(
         self,
