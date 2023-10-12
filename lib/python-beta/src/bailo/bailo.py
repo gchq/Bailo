@@ -384,7 +384,9 @@ class BailoClient():
         :param model_id: Unique model ID, defaults to None
         :param version: Model version, defaults to None
         :return: JSON response object.
-        """    
+        """
+        active = str(active).lower()
+
         return self.agent.get(
             f"{self.url}/v2/reviews",
             params={

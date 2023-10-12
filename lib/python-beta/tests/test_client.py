@@ -220,7 +220,7 @@ def test_post_schema(requests_mock):
     assert result == {"success": True}
 
 def test_get_reviews(requests_mock):
-    requests_mock.get("https://example.com/api/v2/reviews?active=True", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/reviews?active=true", json={"success": True})
 
     client = BailoClient("https://example.com")
     result = client.get_reviews(
