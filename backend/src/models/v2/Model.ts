@@ -13,12 +13,22 @@ export interface CollaboratorEntry {
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
+export interface ModelMetadata {
+  overview?: {
+    tags: Array<string>
+    [x: string]: unknown
+  }
+
+  // allow other properties
+  [x: string]: unknown
+}
+
 export interface ModelCardInterface {
   schemaId: string
   version: number
   createdBy: string
 
-  metadata: unknown
+  metadata: ModelMetadata
 }
 
 // This interface stores information about the properties on the base object.
