@@ -42,6 +42,6 @@ describe('delete version', () => {
     cy.log('Select confirm')
     cy.get('[data-test=confirmButton]').click()
     cy.visit(modelUrl)
-    cy.get('body').contains('Unable to load model page')
+    cy.get('body').contains('Not Found')
   })
 })
