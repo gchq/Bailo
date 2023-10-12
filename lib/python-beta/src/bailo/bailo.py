@@ -1,6 +1,7 @@
 """Main entry point"""
 from __future__ import annotations
 import requests
+import validators
 from typing import List, Optional, Dict, Any
 from .enums import ModelVisibility, SchemaKind
 
@@ -20,10 +21,12 @@ class PkiAgent(Agent):
 
 class BailoClient():
     def __init__(self, url: str, agent: Agent = Agent()):
+        if not validators.url(url):
+            raise ValueError("URL not valid.")
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
-    def create_model(
+    def post_model(
             self,
             name: str,
             description: str,
@@ -46,7 +49,7 @@ class BailoClient():
             },
         ).json()
 
-    def find_models(
+    def get_models(
         self,
         task: Optional[str] = None,
         libraries: List[str] = [],
@@ -86,7 +89,7 @@ class BailoClient():
             f"{self.url}/v2/model/{model_id}",
         ).json()
 
-    def update_model(
+    def patch_model(
         self,
         model_id: str,
         name: Optional[str] = None,
@@ -134,7 +137,7 @@ class BailoClient():
             f"{self.url}/v2/model/{model_id}/model-card/{version}",
         ).json()
 
-    def update_model_card(
+    def put_model_card(
         self,
         model_id: str,
         metadata: Any,
@@ -172,7 +175,7 @@ class BailoClient():
             },
         ).json()
     
-    def create_release(
+    def post_release(
         self,
         model_id: str,
         model_card_version: float,
@@ -342,7 +345,7 @@ class BailoClient():
         ).json()
 
 
-    def create_schema(
+    def post_schema(
         self,
         schema_id: str,
         name: str,
@@ -400,7 +403,7 @@ class BailoClient():
             f"{self.url}/v2/model/{model_id}/roles/mine",
         ).json()
     
-    def create_team(
+    def post_team(
         self,
         team_id: str,
         name: str,
@@ -461,7 +464,7 @@ class BailoClient():
             f"{self.url}/v2/team/{team_id}",
         ).json()
 
-    def update_team(
+    def patch_team(
         self,
         team_id: str,
         name: Optional[str] = None,
