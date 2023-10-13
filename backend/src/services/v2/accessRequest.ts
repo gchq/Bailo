@@ -17,7 +17,7 @@ export async function createAccessRequest(
   modelId: string,
   accessRequestInfo: CreateAccessRequestParams,
 ) {
-  // Check the model exists and the user can view it before creating an AR
+  // Check the model exists and the user can view it before creating an access request
   const model = await getModelById(user, modelId)
 
   // Ensure that the AR meets the schema
@@ -35,7 +35,7 @@ export async function createAccessRequest(
   }
 
   const accessRequest = new AccessRequest({
-    id: convertStringToId(accessRequestInfo.metadata.highLevelDetails.name),
+    id: convertStringToId(accessRequestInfo.metadata.overview.name),
     createdBy: user.dn,
     modelId,
     ...accessRequestInfo,

@@ -6,19 +6,16 @@ import { AccessRequestInterface } from '../../../models/v2/AccessRequest.js'
 import { createAccessRequest } from '../../../services/v2/accessRequest.js'
 import { parse } from '../../../utils/validate.js'
 
-const knownHighLevelDetails = z.object({
+const knownOverview = z.object({
   name: z.string(),
-  hasEndDate: z.boolean(),
   endDate: z.string().optional(),
+  entities: z.array(z.string()),
 })
 
-const highLevelDetails = z.intersection(knownHighLevelDetails, z.record(z.unknown()))
+const overview = z.intersection(knownOverview, z.record(z.unknown()))
 
 const KnownMetadata = z.object({
-  highLevelDetails: highLevelDetails,
-  contacts: z.object({
-    entities: z.array(z.string()),
-  }),
+  overview,
 })
 
 export const postAccessRequestSchema = z.object({

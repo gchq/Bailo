@@ -57,7 +57,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntites(['mtr'], model.collaborators)
+  const roleEntities = getRoleEntites(['msro'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({

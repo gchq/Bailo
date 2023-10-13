@@ -2,15 +2,14 @@ import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
 export interface AccessRequestMetadata {
-  highLevelDetails: {
+  overview: {
     name: string
-    hasEndDate: boolean
+    entities: Array<string>
+
     endDate?: string
     [x: string]: unknown
   }
-  contacts: {
-    entities: Array<string>
-  }
+
   [x: string]: unknown
 }
 
