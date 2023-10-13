@@ -27,17 +27,6 @@
   },
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "timeStamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "schemaRef": {
-      "title": "Schema reference",
-      "type": "string"
-    },
     "highLevelDetails": {
       "title": "Details",
       "type": "object",
@@ -62,8 +51,31 @@
       },
       "required": ["name", "hasEndDate"],
       "additionalProperties": false
+    },
+    "contacts": {
+      "title": "Additional contacts",
+
+      "description": "The individuals requesting access.",
+
+      "type": "object",
+
+      "properties": {
+        "entities": {
+          "title": "Additional contacts",
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          },
+
+          "minLength": 1,
+
+          "widget": "entitySelector"
+        }
+      }
     }
   },
-  "required": ["timeStamp", "user", "highLevelDetails"],
+  "required": ["highLevelDetails"],
   "additionalProperties": false
 }

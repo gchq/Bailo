@@ -1,15 +1,15 @@
 import nodemailer, { Transporter } from 'nodemailer'
+import Mail from 'nodemailer/lib/mailer/index.js'
 
 import authorisation from '../../../connectors/v2/authorisation/index.js'
+import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { getReleaseName } from '../release.js'
-import { BaseEmailTemplate } from './templates/baseEmailTemplate.js'
-import { ReleaseReviewEmail } from './templates/releaseReview.js'
+import { buildEmail } from './emailBuilder.js'
 
-const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
+//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
@@ -18,20 +18,75 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     return
   }
 
-  const releaseName = getReleaseName(release)
-  const userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
-  const sendEmailResponses = userInfoList.map(async (userInfo) => {
-    const email = new ReleaseReviewEmail()
-    email.setTo(userInfo.email)
-    email.setSubject(releaseName, review.role)
-    email.setText(releaseName, release.modelId, appBaseUrl, release.createdBy)
-    email.setHtml(releaseName, release.modelId, appBaseUrl, release.createdBy)
-    return await sendEmail(email)
-  })
+  const emailContent = buildEmail(
+    `Release ${release.semver} has been created for model ${release.modelId}`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+      { title: 'Semver', data: release.semver },
+      { title: 'Created By', data: release.createdBy },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+
+  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
   await Promise.all(sendEmailResponses)
 }
 
-async function sendEmail(email: BaseEmailTemplate) {
+export async function requestReviewForAccessRequest(
+  entity: string,
+  review: ReviewDoc,
+  accessRequest: AccessRequestDoc,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `Request for Entities '${accessRequest.metadata.contacts.entities}' access to the model '${accessRequest.modelId}'`,
+    [
+      { title: 'Model ID', data: accessRequest.modelId },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+      { title: 'Entities Requesting Access', data: accessRequest.metadata.contacts.entities.toString() },
+      { title: 'Created By', data: accessRequest.createdBy },
+    ],
+    [
+      { name: 'Open Access Request', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+
+  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
+
+async function sendEmail(email: Mail.Options) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: config.smtp.connection.host,
@@ -44,11 +99,8 @@ async function sendEmail(email: BaseEmailTemplate) {
 
   try {
     const info = await transporter.sendMail({
-      from: email.from, // sender address
-      to: email.to,
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
+      from: config.smtp.from,
+      ...email,
     })
     log.info({ messageId: info.messageId }, 'Email sent')
   } catch (err) {
