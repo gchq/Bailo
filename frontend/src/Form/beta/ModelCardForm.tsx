@@ -4,10 +4,10 @@ import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { widgets } from 'utils/formUtils'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
+import { widgets } from '../../../utils/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import Nothing from '../../MuiForms/Nothing'
 
