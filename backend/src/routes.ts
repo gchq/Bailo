@@ -204,11 +204,13 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
-  server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
   server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/releases/:semver/review', ...postReleaseReviewResponse)
+
+  server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
+  //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)

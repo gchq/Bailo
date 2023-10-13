@@ -15,12 +15,16 @@ export async function findReviews(
   active: boolean,
   modelId?: string,
   semver?: string,
+  accessRequestId?: string,
+  kind?: string,
 ): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },
       ...(modelId ? { modelId } : {}),
       ...(semver ? { semver } : {}),
+      ...(accessRequestId ? { accessRequestId } : {}),
+      ...(kind ? { kind } : {}),
     })
     .sort({ createdAt: -1 })
     // Populate model entries
@@ -57,6 +61,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
+      accessRequestId: accessRequest.id,
       modelId: model.id,
       kind: ReviewKind.Access,
       role: roleInfo.role,

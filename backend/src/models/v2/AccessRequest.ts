@@ -15,6 +15,7 @@ export interface AccessRequestMetadata {
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface AccessRequestInterface {
+  id: string
   modelId: string
   entities: Array<string>
 
@@ -35,6 +36,7 @@ export type AccessRequestDoc = AccessRequestInterface & Document<any, any, Acces
 
 const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
+    id: { type: String, unique: true, required: true },
     modelId: { type: String, required: true },
     entities: [{ type: String, required: true }],
 
