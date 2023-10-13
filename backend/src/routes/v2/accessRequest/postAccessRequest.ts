@@ -16,6 +16,9 @@ const highLevelDetails = z.intersection(knownHighLevelDetails, z.record(z.unknow
 
 const KnownMetadata = z.object({
   highLevelDetails: highLevelDetails,
+  contacts: z.object({
+    entities: z.array(z.string()),
+  }),
 })
 
 export const postAccessRequestSchema = z.object({
@@ -23,7 +26,6 @@ export const postAccessRequestSchema = z.object({
     modelId: z.string(),
   }),
   body: z.object({
-    entities: z.array(z.string()),
     schemaId: z.string(),
     metadata: z.intersection(KnownMetadata, z.record(z.unknown())),
   }),

@@ -1,5 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Box, Button, Card, Stack, Typography } from '@mui/material'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -18,19 +19,22 @@ export default function NewAccessRequest() {
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
   useEffect(() => {
-    if (!model || !schema) return
-    const steps = getStepsFromSchema(schema, {}, [], {})
-
+    if (!model || !schema || !currentUser) return
+    const defaultState = {
+      contacts: { entities: [currentUser.id] },
+    }
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model])
+  }, [schema, model, currentUser])
 
   async function onSubmit() {
     for (const step of splitSchema.steps) {
@@ -61,9 +65,13 @@ export default function NewAccessRequest() {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
     <Wrapper title='Access Request' page='Model'>
-      {(isSchemaLoading || isModelLoading) && <Loading />}
+      {(isSchemaLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
       {!isSchemaLoading && !isModelLoading && (
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           {(!model || !model.card) && (

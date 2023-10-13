@@ -20,9 +20,10 @@ export interface ReviewResponse {
 // client.
 export interface ReviewInterface {
   semver?: string
+  accessRequestId?: string
   modelId: string
-  kind: ReviewKindKeys
 
+  kind: ReviewKindKeys
   role: string
 
   responses: Array<ReviewResponse>
@@ -42,6 +43,24 @@ const ReviewSchema = new Schema<ReviewInterface>(
       type: String,
       required: function (this: ReviewInterface): boolean {
         return this.kind === ReviewKind.Release
+      },
+      validate: function (this: ReviewInterface, val: any): boolean {
+        if (this.kind === ReviewKind.Release && val) {
+          return true
+        }
+        throw new Error(`Cannot provide a 'semver' with '${JSON.stringify({ kind: this.kind })}'`)
+      },
+    },
+    accessRequestId: {
+      type: String,
+      required: function (this: ReviewInterface): boolean {
+        return this.kind === ReviewKind.Access
+      },
+      validate: function (this: ReviewInterface, val: any): boolean {
+        if (this.kind === ReviewKind.Access && val) {
+          return true
+        }
+        throw new Error(`Cannot provide an 'accessRequestId' with '${JSON.stringify({ kind: this.kind })}'`)
       },
     },
     modelId: { type: String, required: true },

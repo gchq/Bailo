@@ -1,8 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import AccessRequest from '../../../src/models/v2/AccessRequest.js'
 import Release from '../../../src/models/v2/Release.js'
 import Review from '../../../src/models/v2/Review.js'
-import { requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
+import { requestReviewForAccessRequest, requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
 import config from '../../../src/utils/v2/config.js'
 
 vi.mock('../../../src/utils/v2/config.js', () => {
@@ -59,38 +60,18 @@ const authorisationMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ default: authorisationMock }))
 
-const releaseEmailMock = vi.hoisted(() => {
-  const obj: any = {
-    from: '"Bailo 📝" <bailo@example.org>',
-    to: 'email@email.com',
-    subject: 'subject',
-    text: 'text',
-    html: 'html',
-  }
-
-  obj.setSubject = vi.fn()
-  obj.setTo = vi.fn()
-  obj.setText = vi.fn()
-  obj.setHtml = vi.fn()
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../../src/services/v2/smtp/templates/releaseReview.js', () => ({
-  ReleaseReviewEmail: releaseEmailMock,
+const emailBuilderMock = vi.hoisted(() => ({
+  buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
 }))
+vi.mock('../../../src/services/v2/smtp/emailBuilder.js', async () => emailBuilderMock)
 
 describe('services > smtp > smtp', () => {
-  test('that an email is sent', async () => {
-    await requestReviewForRelease('user:user', new Review(), new Release())
+  const review = new Review({ role: 'owner' })
+  const release = new Release({ modelId: 'testmodel-123', semver: '1.2.3', createdBy: 'user:user' })
+  const access = new AccessRequest()
 
-    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('that an email is not sent when disabled in config', async () => {
-    vi.spyOn(config, 'smtp', 'get').mockReturnValueOnce({
+  test('that a Release Review email is not sent when disabled in config', async () => {
+    vi.spyOn(config, 'smtp', 'get').mockReturnValue({
       enabled: false,
       connection: {
         host: 'localhost',
@@ -104,9 +85,41 @@ describe('services > smtp > smtp', () => {
       from: '"Bailo 📝" <bailo@example.org>',
     })
 
-    await requestReviewForRelease('user:user', new Review(), new Release())
+    await requestReviewForRelease('user:user', review, release)
 
     expect(transporterMock.sendMail).not.toBeCalled()
+  })
+
+  test('that an Access Request Review email is not sent when disabled in config', async () => {
+    vi.spyOn(config, 'smtp', 'get').mockReturnValue({
+      enabled: false,
+      connection: {
+        host: 'localhost',
+        port: 1025,
+        secure: false,
+        auth: { user: '', pass: '' },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      },
+      from: '"Bailo 📝" <bailo@example.org>',
+    })
+
+    await requestReviewForAccessRequest('user:user', review, access)
+
+    expect(transporterMock.sendMail).not.toBeCalled()
+  })
+
+  test('that an email is sent for Release Reviews', async () => {
+    await requestReviewForRelease('user:user', review, release)
+
+    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('that an email is sent for Access Request Reviews', async () => {
+    await requestReviewForAccessRequest('user:user', review, access)
+
+    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {
@@ -115,9 +128,21 @@ describe('services > smtp > smtp', () => {
       Promise.resolve({ email: 'member2@email.com' }),
     ])
 
-    await requestReviewForRelease('group:group1', new Review(), new Release())
+    await requestReviewForRelease('group:group1', review, release)
 
     expect(transporterMock.sendMail.mock.calls).toMatchSnapshot()
+  })
+
+  test('that sendEmail is called a maximum of 20 times', async () => {
+    const users: Promise<{ email: string }>[] = []
+    for (let i = 0; i < 20; i += 1) {
+      users[i] = Promise.resolve({ email: `member${i}@email.com` })
+    }
+    authorisationMock.getUserInformationList.mockReturnValueOnce(users)
+
+    await requestReviewForRelease('group:group1', new Review({ role: 'owner' }), new Release())
+
+    expect(transporterMock.sendMail.mock.calls.length).toBe(20)
   })
 
   test('that we log when an email cannot be sent', async () => {
@@ -127,7 +152,7 @@ describe('services > smtp > smtp', () => {
     ])
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
-    const result: Promise<void> = requestReviewForRelease('user:user', new Review(), new Release())
+    const result: Promise<void> = requestReviewForRelease('user:user', review, release)
     expect(result).rejects.toThrowError(`Unable to send email`)
   })
 })

@@ -41,7 +41,8 @@
           "minLength": 1,
           "widget": "entitySelector"
         }
-      }
+      },
+      "required": ["entities"]
     }
   },
   "required": ["highLevelDetails", "contacts"],
