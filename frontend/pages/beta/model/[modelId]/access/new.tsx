@@ -3,6 +3,7 @@ import { Box, Button, Card, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
+import { postAccessRequest } from '../../../../../actions/access'
 import { useGetModel } from '../../../../../actions/model'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
@@ -10,7 +11,7 @@ import ModelCardForm from '../../../../../src/Form/beta/ModelCardForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
+import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function NewAccessRequest() {
 
   useEffect(() => {
     if (!model || !schema) return
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], {})
+    const steps = getStepsFromSchema(schema, {}, [], {})
 
     for (const step of steps) {
       step.steps = steps
@@ -31,12 +32,23 @@ export default function NewAccessRequest() {
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, model])
 
-  function onSubmit() {
+  async function onSubmit() {
     for (const step of splitSchema.steps) {
       const isValid = validateForm(step)
       setStepValidate(splitSchema, setSplitSchema, step, true)
       if (!isValid) {
         return <MessageAlert message='Error' severity='error' />
+      }
+      if (!modelId) {
+        return <MessageAlert message='Unknown model ID' severity='error' />
+      }
+      if (!schemaId) {
+        return <MessageAlert message='Unknown schema ID' severity='error' />
+      }
+      const data = getStepsData(splitSchema, true)
+      const res = await postAccessRequest(modelId, schemaId, data)
+      if (res.status && res.status < 400) {
+        router.push(`/beta/model/${modelId}`)
       }
     }
   }

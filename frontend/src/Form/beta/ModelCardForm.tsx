@@ -8,6 +8,7 @@ import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import CustomTextInput from '../../MuiForms/CustomTextInput'
+import EntitySelector from '../../MuiForms/EntitySelectorBeta'
 import Nothing from '../../MuiForms/Nothing'
 import TagSelector from '../../MuiForms/TagSelectorBeta'
 
@@ -82,6 +83,7 @@ export default function ModelCardForm({
           nothing: Nothing,
           customTextInput: CustomTextInput,
           tagSelector: TagSelector,
+          entitySelector: EntitySelector,
         }}
         uiSchema={currentStep.uiSchema}
         liveValidate={currentStep.shouldValidate}
