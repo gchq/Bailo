@@ -51,6 +51,29 @@
       },
       "required": ["name", "hasEndDate"],
       "additionalProperties": false
+    },
+    "contacts": {
+      "title": "Additional contacts",
+
+      "description": "The individuals requesting access.",
+
+      "type": "object",
+
+      "properties": {
+        "entities": {
+          "title": "Additional contacts",
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          },
+
+          "minLength": 1,
+
+          "widget": "entitySelector"
+        }
+      }
     }
   },
   "required": ["highLevelDetails"],

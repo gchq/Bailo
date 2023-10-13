@@ -8,6 +8,9 @@ export interface AccessRequestMetadata {
     endDate?: string
     [x: string]: unknown
   }
+  contacts: {
+    entities: Array<string>
+  }
   [x: string]: unknown
 }
 
@@ -17,7 +20,6 @@ export interface AccessRequestMetadata {
 export interface AccessRequestInterface {
   id: string
   modelId: string
-  entities: Array<string>
 
   schemaId: string
   metadata: AccessRequestMetadata
@@ -38,7 +40,6 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
     id: { type: String, unique: true, required: true },
     modelId: { type: String, required: true },
-    entities: [{ type: String, required: true }],
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },

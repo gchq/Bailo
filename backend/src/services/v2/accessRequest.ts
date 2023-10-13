@@ -11,7 +11,7 @@ import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'entities' | 'metadata' | 'schemaId'>
+export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
   user: UserDoc,
   modelId: string,
