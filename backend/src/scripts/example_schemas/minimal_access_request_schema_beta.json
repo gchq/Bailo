@@ -39,7 +39,7 @@
             "type": "string"
           },
           "minLength": 1,
-          "widget": "entitySelector"
+          "widget": "entitySelectorBeta"
         }
       },
       "required": ["entities"]

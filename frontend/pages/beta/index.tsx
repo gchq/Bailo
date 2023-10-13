@@ -2,6 +2,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
+  Chip,
   FilledInput,
   FormControl,
   IconButton,
@@ -69,7 +70,7 @@ export default function ExploreModels() {
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
-      <Stack direction='row' spacing={2}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Stack spacing={2} sx={{ maxWidth: '250px' }}>
           <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
@@ -163,10 +164,9 @@ export default function ExploreModels() {
                       {model.description}
                     </Typography>
                     <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                      {/* TODO Implement model tags */}
-                      {/* {model.tags.map((tag: string) => (
-                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                        ))} */}
+                      {model.tags.map((tag) => (
+                        <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                      ))}
                     </Stack>
                     {index !== models.length - 1 && (
                       <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />

@@ -12,7 +12,7 @@ interface EntitySelectorProps {
   onChange: (newValue: string[]) => void
 }
 
-export default function EntitySelector(props: EntitySelectorProps) {
+export default function EntitySelectorBeta(props: EntitySelectorProps) {
   const { users, isUsersLoading: isLoading } = useListUsers()
   const [open, setOpen] = React.useState(false)
 
