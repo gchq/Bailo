@@ -9,13 +9,3 @@ exports[`routes > images > getImages > 200 > ok 1`] = `
   ],
 }
 `;
-
-exports[`routes > release > getReleases > 200 > ok 1`] = `
-{
-  "releases": [
-    {
-      "_id": "test",
-    },
-  ],
-}
-`;
