@@ -19,7 +19,7 @@ type FormEditPageProps = {
 
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useModelCardRevisions(model.id)
@@ -27,9 +27,8 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const handleButtonClick = () => {
-    setIsEdit(!isEdit)
-    setIsHistoryOpen(!isHistoryOpen)
+  const handleEdit = () => {
+    setIsEdit(true)
   }
 
   async function onSubmit() {
@@ -39,6 +38,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
+
         mutateModelCardRevisions()
       }
     }
@@ -52,8 +52,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         step.steps = steps
       }
       setSplitSchema({ reference: schema.id, steps })
-      setIsEdit(!isEdit)
-      setIsHistoryOpen(!isHistoryOpen)
+      setIsEdit(false)
     }
   }
 
@@ -87,13 +86,13 @@ export default function FormEditPage({ model }: FormEditPageProps) {
           divider={<Divider orientation='vertical' flexItem />}
           sx={{ mb: { xs: 2 } }}
         >
-          {!isHistoryOpen && (
+          {!isEdit && (
             <Button variant='outlined' onClick={() => setDialogOpen(true)}>
               View History
             </Button>
           )}
-          {!isEdit && !isHistoryOpen && (
-            <Button variant='outlined' onClick={handleButtonClick}>
+          {!isEdit && (
+            <Button variant='outlined' onClick={handleEdit}>
               Edit Model card
             </Button>
           )}

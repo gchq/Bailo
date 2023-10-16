@@ -1,4 +1,4 @@
-import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { TableBody, TableCell, TableRow } from '@mui/material'
 import { ThemeProvider, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 
@@ -15,22 +15,30 @@ export default function ModelCardRevisionListDisplay({ modelCard }: revisionProp
 
   return (
     <ThemeProvider theme={theme}>
-      <Stack direction='column' justifyContent='space-evenly' alignItems='center' spacing={0.5}>
-        <ListItem sx={{ fontSize: '20px' }}>
-          <ListItemButton
-            // sx={{ border: '0.5px solid grey' }}
-            onClick={() => router.push(`/beta/model/${modelId}/history/${modelCardVersion}`)}
-          >
-            <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-              <Typography color='secondary'>{modelCard.version}</Typography>
-              <Divider orientation='vertical' flexItem />
-              <Typography color='primary'>{modelCard.createdBy}</Typography>
-
-              <Typography color='primary'>{formatDateString(modelCard.createdAt)}</Typography>
-            </Stack>
-          </ListItemButton>
-        </ListItem>
-      </Stack>
+      <TableBody>
+        <TableRow
+          onClick={() => router.push(`/beta/model/${modelId}/history/${modelCardVersion}`)}
+          // this route leads to blank page that says 'undefined'
+          sx={{ '&:hover': { backgroundColor: '#f0f0f0', cursor: 'pointer' } }}
+        >
+          <TableCell style={{ color: theme.palette.secondary.main }}>{modelCard.version}</TableCell>
+          <TableCell style={{ color: theme.palette.primary.main }}>{modelCard.createdBy}</TableCell>
+          <TableCell style={{ color: theme.palette.primary.main }}>{formatDateString(modelCard.createdAt)}</TableCell>
+        </TableRow>
+      </TableBody>
     </ThemeProvider>
   )
 }
+// ;<Stack direction='column' justifyContent='space-evenly' alignItems='center' spacing={0.5}>
+//   <ListItem sx={{ fontSize: '20px' }}>
+//     <ListItemButton onClick={() => router.push(`/beta/model/${modelId}/history/${modelCardVersion}`)}>
+//       <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+//         <Typography color='secondary'>{modelCard.version}</Typography>
+//         <Divider orientation='vertical' flexItem />
+//         <Typography color='primary'>{modelCard.createdBy}</Typography>
+
+//         <Typography color='primary'>{formatDateString(modelCard.createdAt)}</Typography>
+//       </Stack>
+//     </ListItemButton>
+//   </ListItem>
+// </Stack>

@@ -1,6 +1,5 @@
-import { Button, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import { Button, DialogActions, DialogTitle, Paper, Table, TableContainer } from '@mui/material'
 import Dialog from '@mui/material/Dialog'
-import List from '@mui/material/List'
 import { ThemeProvider, useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 
@@ -9,7 +8,8 @@ import Loading from '../../../../src/common/Loading'
 import MessageAlert from '../../../../src/MessageAlert'
 import { ModelInterface } from '../../../../types/v2/types'
 import { sortByCreatedAtDescending } from '../../../../utils/dateUtils'
-import ModelCardRevisionListDisplay from './ModelCardRevisionListDisplay'
+import ModelCardHistoryHeaderTable from '../overview/ModelCardHistoryTable'
+import ModelCardRevisionListDisplay from '../overview/ModelCardRevisionListDisplay'
 
 type DialogProps = {
   model: ModelInterface
@@ -42,13 +42,14 @@ export default function ViewModelCardHistoryDialog({
           <DialogTitle>
             History details for <span style={{ color: theme.palette.primary.main }}>{model.name}</span>
           </DialogTitle>
-          <DialogContent>
-            <List>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 550 }}>
+              <ModelCardHistoryHeaderTable />
               {sortedModelCardRevisions.map((modelCardRevision) => (
                 <ModelCardRevisionListDisplay key={model.id} modelCard={modelCardRevision} />
               ))}
-            </List>
-          </DialogContent>
+            </Table>
+          </TableContainer>
 
           <DialogActions>
             <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>
