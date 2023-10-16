@@ -68,7 +68,7 @@ vi.mock('../../../src/services/v2/smtp/emailBuilder.js', async () => emailBuilde
 describe('services > smtp > smtp', () => {
   const review = new Review({ role: 'owner' })
   const release = new Release({ modelId: 'testmodel-123', semver: '1.2.3', createdBy: 'user:user' })
-  const access = new AccessRequest({ metadata: { contacts: { entities: ['user:user'] } } })
+  const access = new AccessRequest({ metadata: { overview: { entities: ['user:user'] } } })
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({

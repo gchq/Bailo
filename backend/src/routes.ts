@@ -216,7 +216,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
-  server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteFile)
+  server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
