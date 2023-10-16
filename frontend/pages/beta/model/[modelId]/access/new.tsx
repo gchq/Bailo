@@ -1,5 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Box, Button, Card, Stack, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Button, Card, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -16,17 +18,24 @@ import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 
 
 export default function NewAccessRequest() {
   const router = useRouter()
+  const theme = useTheme()
+
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [submissionErrorText, setSubmissionErrorText] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+
+  // TODO - we can probably improve this with a useMemo to stop currentUser causing the useEffect below to re-render
+  const currentUserId = (currentUser && currentUser.id) || ''
 
   useEffect(() => {
-    if (!model || !schema || !currentUser) return
+    if (!model || !schema) return
     const defaultState = {
-      contacts: { entities: [currentUser.id] },
+      contacts: { entities: [currentUserId] },
     }
     const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
@@ -34,25 +43,35 @@ export default function NewAccessRequest() {
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model, currentUser])
+  }, [schema, model, currentUserId])
 
   async function onSubmit() {
+    setSubmissionErrorText('')
+    setSubmitButtonLoading(true)
     for (const step of splitSchema.steps) {
       const isValid = validateForm(step)
       setStepValidate(splitSchema, setSplitSchema, step, true)
       if (!isValid) {
-        return <MessageAlert message='Error' severity='error' />
+        setSubmissionErrorText('Please make sure that all sections have been completed.')
+        setSubmitButtonLoading(false)
       }
       if (!modelId) {
-        return <MessageAlert message='Unknown model ID' severity='error' />
+        setSubmissionErrorText('Unknown model ID')
+        setSubmitButtonLoading(false)
       }
       if (!schemaId) {
-        return <MessageAlert message='Unknown schema ID' severity='error' />
+        setSubmissionErrorText('Unknown schema ID')
+        setSubmitButtonLoading(false)
       }
-      const data = getStepsData(splitSchema, true)
-      const res = await postAccessRequest(modelId, schemaId, data)
-      if (res.status && res.status < 400) {
-        router.push(`/beta/model/${modelId}`)
+      if (modelId && schemaId) {
+        const data = getStepsData(splitSchema, true)
+        const res = await postAccessRequest(modelId, schemaId, data)
+        if (res.status && res.status < 400) {
+          setSubmissionErrorText('')
+          router.push(`/beta/model/${modelId}`)
+        } else {
+          setSubmitButtonLoading(false)
+        }
       }
     }
   }
@@ -82,16 +101,25 @@ export default function NewAccessRequest() {
               <Button
                 sx={{ width: 'fit-content' }}
                 startIcon={<ArrowBack />}
-                onClick={() => router.push(`/beta/model/${modelId}`)}
+                onClick={() => router.push(`/beta/model/${modelId}/access/schema`)}
               >
-                Back to model
+                Choose a different schema
               </Button>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
-              <Box sx={{ textAlign: 'right' }}>
-                <Button sx={{ width: 'fit-content' }} variant='contained' onClick={onSubmit}>
+
+              <Stack alignItems='flex-end'>
+                <LoadingButton
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  onClick={onSubmit}
+                  loading={submitButtonLoading}
+                >
                   Submit
-                </Button>
-              </Box>
+                </LoadingButton>
+                <Typography variant='caption' color={theme.palette.error.main}>
+                  {submissionErrorText}
+                </Typography>
+              </Stack>
             </Stack>
           )}
         </Card>

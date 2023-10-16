@@ -1,9 +1,11 @@
+import { Chip } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
 
-import { useListUsers } from '../../data/user'
+import { useGetCurrentUser, useListUsers } from '../../actions/user'
+import Loading from '../common/Loading'
+import MessageAlert from '../MessageAlert'
 
 interface EntitySelectorProps {
   label?: string
@@ -14,6 +16,7 @@ interface EntitySelectorProps {
 
 export default function EntitySelectorBeta(props: EntitySelectorProps) {
   const { users, isUsersLoading: isLoading } = useListUsers()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [open, setOpen] = React.useState(false)
 
   const entities = React.useMemo(() => {
@@ -29,38 +32,51 @@ export default function EntitySelectorBeta(props: EntitySelectorProps) {
     onChange(newValues)
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
-    <Autocomplete
-      multiple
-      open={open}
-      onOpen={() => {
-        setOpen(true)
-      }}
-      onClose={() => {
-        setOpen(false)
-      }}
-      // we might get a string or an object back
-      isOptionEqualToValue={(option: string, value: string) => option === value}
-      getOptionLabel={(option) => option}
-      value={currentValue || []}
-      onChange={_onChange}
-      options={entities || []}
-      loading={isLoading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label + (required ? ' *' : '')}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
+    <>
+      {isCurrentUserLoading && <Loading />}
+      {currentUser && (
+        <Autocomplete
+          multiple
+          open={open}
+          onOpen={() => {
+            setOpen(true)
           }}
+          onClose={() => {
+            setOpen(false)
+          }}
+          clearIcon={false}
+          // we might get a string or an object back
+          isOptionEqualToValue={(option: string, value: string) => option === value}
+          getOptionLabel={(option) => option}
+          value={currentValue || []}
+          onChange={_onChange}
+          options={entities || []}
+          loading={isLoading}
+          getOptionDisabled={(option) => option === currentUser.id}
+          renderTags={(tagValue, getTagProps) =>
+            tagValue.map((option, index) => (
+              // eslint-disable-next-line react/jsx-key
+              <Chip label={option} {...getTagProps({ index })} disabled={option === currentUser.id} />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={label + (required ? ' *' : '')}
+              onKeyDown={(event: any) => {
+                if (event.key === 'Backspace') {
+                  event.stopPropagation()
+                }
+              }}
+            />
+          )}
         />
       )}
-    />
+    </>
   )
 }
