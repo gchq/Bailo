@@ -2,9 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AccessRequestInterface } from '../../../models/v2/AccessRequest.js'
-import { createAccessRequest } from '../../../services/v2/accessRequest.js'
-import { parse } from '../../../utils/validate.js'
+import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
+import { createAccessRequest } from '../../../../services/v2/accessRequest.js'
+import { parse } from '../../../../utils/validate.js'
 
 const knownOverview = z.object({
   name: z.string(),
@@ -18,13 +18,15 @@ const KnownMetadata = z.object({
   overview,
 })
 
+export const accessRequestMetadata = z.intersection(KnownMetadata, z.record(z.unknown()))
+
 export const postAccessRequestSchema = z.object({
   params: z.object({
     modelId: z.string(),
   }),
   body: z.object({
     schemaId: z.string(),
-    metadata: z.intersection(KnownMetadata, z.record(z.unknown())),
+    metadata: accessRequestMetadata,
   }),
 })
 
