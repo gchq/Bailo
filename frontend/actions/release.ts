@@ -26,3 +26,11 @@ export async function postRelease(release: Partial<ReleaseInterface>, modelId: s
     body: JSON.stringify(release),
   })
 }
+
+export async function postArtefact(artefact: File, modelId: string, name: string, mime: string) {
+  return fetch(`/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: artefact,
+  })
+}
