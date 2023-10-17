@@ -1,11 +1,15 @@
-export const formatDate = (date: Date) => date.toLocaleDateString('en-GB')
+export const formatDate = (date: Date) => {
+  return date.toDateString()
+}
 
 export const formatDateString = (value: string) => {
   const date = new Date(value)
-  return date.toLocaleDateString('en-GB')
+  return formatDate(date)
 }
 
-export const plural = (value: number, phrase: string) => `${value} ${phrase}${value === 1 ? '' : 's'}`
+export const plural = (value: number, phrase: string) => {
+  return `${value} ${phrase}${value === 1 ? '' : 's'}`
+}
 
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000
