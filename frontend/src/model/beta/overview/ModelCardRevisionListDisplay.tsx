@@ -29,16 +29,3 @@ export default function ModelCardRevisionListDisplay({ modelCard }: revisionProp
     </ThemeProvider>
   )
 }
-// ;<Stack direction='column' justifyContent='space-evenly' alignItems='center' spacing={0.5}>
-//   <ListItem sx={{ fontSize: '20px' }}>
-//     <ListItemButton onClick={() => router.push(`/beta/model/${modelId}/history/${modelCardVersion}`)}>
-//       <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-//         <Typography color='secondary'>{modelCard.version}</Typography>
-//         <Divider orientation='vertical' flexItem />
-//         <Typography color='primary'>{modelCard.createdBy}</Typography>
-
-//         <Typography color='primary'>{formatDateString(modelCard.createdAt)}</Typography>
-//       </Stack>
-//     </ListItemButton>
-//   </ListItem>
-// </Stack>
