@@ -1,14 +1,9 @@
 import Form from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction } from 'react'
-import RichTextInput from 'src/MuiForms/RichTextInput'
 
 import { SplitSchema, Step } from '../../types/interfaces'
-import { setStepState } from '../../utils/formUtils'
-import EntitySelector from '../MuiForms/EntitySelector'
-import Nothing from '../MuiForms/Nothing'
-import SeldonVersionSelector from '../MuiForms/SeldonVersionSelector'
-import UserSelector from '../MuiForms/UserSelector'
+import { setStepState, widgets } from '../../utils/formUtils'
 
 export default function RenderForm({
   step,
@@ -33,13 +28,7 @@ export default function RenderForm({
       formData={step.state}
       onChange={onFormChange}
       validator={validator}
-      widgets={{
-        TextareaWidget: RichTextInput,
-        userSelector: UserSelector,
-        entitySelector: EntitySelector,
-        seldonVersionSelector: SeldonVersionSelector,
-        nothing: Nothing,
-      }}
+      widgets={widgets}
       uiSchema={step.uiSchema}
       liveValidate={step.shouldValidate}
       omitExtraData
