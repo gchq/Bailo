@@ -3,14 +3,13 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { useRouter } from 'next/router'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
+import { widgets } from '../../../utils/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
-import CustomTextInput from '../../MuiForms/CustomTextInput'
 import Nothing from '../../MuiForms/Nothing'
-import TagSelector from '../../MuiForms/TagSelectorBeta'
 
 // TODO - add validation BAI-866
 export default function ModelCardForm({
@@ -101,11 +100,7 @@ export default function ModelCardForm({
         formData={currentStep.state}
         onChange={onFormChange}
         validator={validator}
-        widgets={{
-          nothing: Nothing,
-          customTextInput: CustomTextInput,
-          tagSelector: TagSelector,
-        }}
+        widgets={widgets}
         uiSchema={currentStep.uiSchema}
         liveValidate={currentStep.shouldValidate}
         omitExtraData
