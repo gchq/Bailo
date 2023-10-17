@@ -10,25 +10,15 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { SyntheticEvent, useEffect, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
-import { ReviewRequestInterface } from '../../types/interfaces'
+import { AccessRequestInterface, ReviewRequestInterface } from '../../types/interfaces'
 import { ReleaseInterface } from '../../types/types'
 import { getRoleDisplay } from '../../utils/beta/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
-
-type ReviewWithCommentProps = {
-  open: boolean
-  onClose: () => void
-  onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
-  title: string
-  description?: string
-  release: ReleaseInterface
-  errorText: string
-}
 
 export const ResponseTypes = {
   Approve: 'approve',
@@ -37,23 +27,48 @@ export const ResponseTypes = {
 
 export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
+type PartialReviewWithCommentProps =
+  | {
+      release: ReleaseInterface
+      accessRequest?: never
+    }
+  | {
+      release?: never
+      accessRequest: AccessRequestInterface
+    }
+
+type ReviewWithCommentProps = {
+  open: boolean
+  title: string
+  errorText: string
+  onClose: () => void
+  onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
+  description?: string
+} & PartialReviewWithCommentProps
+
 export default function ReviewWithComment({
-  title,
-  description,
   open,
+  title,
+  errorText,
   onClose,
   onSubmit,
+  description,
   release,
-  errorText,
+  accessRequest,
 }: ReviewWithCommentProps) {
-  const { reviews } = useGetReviewRequestsForModel(release.modelId, release.semver, true)
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(reviews[0].model.id)
   const theme = useTheme()
-
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
   const [selectOpen, setSelectOpen] = useState(false)
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface | undefined>()
+
+  const [modelId, semver] = useMemo(
+    () => (release ? [release.modelId, release.semver] : [accessRequest.modelId, '']),
+    [release, accessRequest],
+  )
+
+  const { reviews } = useGetReviewRequestsForModel({ modelId, semver, isActive: true })
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   useEffect(() => {
     if (reviews) {
@@ -91,15 +106,13 @@ export default function ReviewWithComment({
   return (
     <>
       {isModelRolesLoading && <Loading />}
-
       <Dialog fullWidth open={open} onClose={onClose}>
         <DialogTitle>{title}</DialogTitle>
-
         <DialogContent>
           {modelRoles.length === 0 && (
             <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
           )}
-          {modelRoles.length && (
+          {modelRoles.length > 0 && (
             <Stack spacing={2}>
               <Autocomplete
                 sx={{ pt: 1 }}
@@ -150,9 +163,11 @@ export default function ReviewWithComment({
                   </Button>
                 </Stack>
               </Stack>
-              <Typography color={theme.palette.error.main} variant='caption'>
-                {errorText}
-              </Typography>
+              {errorText && (
+                <Typography color={theme.palette.error.main} variant='caption'>
+                  {errorText}
+                </Typography>
+              )}
             </Stack>
           )}
         </DialogContent>

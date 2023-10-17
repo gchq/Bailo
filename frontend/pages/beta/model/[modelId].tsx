@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router'
+import AccessRequests from 'src/model/beta/AccessRequests'
 
 import { useGetModel } from '../../../actions/model'
 import EmptyBlob from '../../../src/common/EmptyBlob'
@@ -28,6 +29,7 @@ export default function Model() {
           tabs={[
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
+            { title: 'Access Requests', path: 'access-requests', view: <AccessRequests model={model} /> },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]}
           displayActionButton
