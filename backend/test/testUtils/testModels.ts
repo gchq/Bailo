@@ -64,7 +64,7 @@ export const testReleaseReview = {
   updatedAt: new Date('08/14/2023'),
 }
 
-export const testModelCardRevisions = {
+export const testModelCardRevision = {
   modelId: 'abc',
   CreatedBy: 'user',
   createdAt: new Date('08/13/2023'),
