@@ -17,9 +17,9 @@ import {
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
 
-import { postArtefact, postRelease } from '../../../../actions/release'
+import { postFile, postRelease } from '../../../../actions/release'
 import { ReleaseInterface } from '../../../../types/types'
-import { ModelInterface, PostSimpleUpload } from '../../../../types/v2/types'
+import { ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import HelpPopover from '../../../common/HelpPopover'
 import MultiFileInput from '../../../common/MultiFileInput'
@@ -57,11 +57,15 @@ export default function DraftNewReleaseDialog({
     if (isValidSemver(semanticVersion)) {
       const fileIds: string[] = []
       for (const artefact of artefacts) {
-        const postArtefactResponse = await postArtefact(artefact, model.id, artefact.name, artefact.type)
-        if (postArtefactResponse.status === 200) {
-          await postArtefactResponse.json().then((res: PostSimpleUpload) => {
-            fileIds.push(res.file._id)
-          })
+        const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
+        if (postArtefactResponse.ok) {
+          const res = await postArtefactResponse.json()
+          fileIds.push(res.file._id)
+        } else {
+          setLoading(false)
+          return setErrorMessage(
+            `Status code ${postArtefactResponse.status}. There was a problem uploading your files, please try again.`,
+          )
         }
       }
 
