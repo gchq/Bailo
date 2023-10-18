@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 import { useGetModel } from '../../../../actions/model'
@@ -69,29 +69,38 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ py: 1 }}>
-        {!isEdit && (
-          <Box sx={{ width: '100%', textAlign: 'right' }}>
+        <Stack
+          direction={{ sx: 'column', sm: 'row' }}
+          justifyContent={{ sx: 'center', sm: 'space-between' }}
+          alignItems='center'
+          sx={{ pb: 2 }}
+        >
+          <div>
+            <Typography fontWeight='bold'>Schema</Typography>
+            <Typography>{schema?.name}</Typography>
+          </div>
+          {!isEdit && (
             <Button variant='outlined' onClick={() => setIsEdit(!isEdit)} sx={{ mb: { xs: 2 } }}>
               Edit Model card
             </Button>
-          </Box>
-        )}
-        {isEdit && (
-          <Stack
-            direction='row'
-            spacing={1}
-            justifyContent='flex-end'
-            divider={<Divider orientation='vertical' flexItem />}
-            sx={{ mb: { xs: 2 } }}
-          >
-            <Button variant='outlined' onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button variant='contained' onClick={onSubmit}>
-              Save
-            </Button>
-          </Stack>
-        )}
+          )}
+          {isEdit && (
+            <Stack
+              direction='row'
+              spacing={1}
+              justifyContent='flex-end'
+              divider={<Divider orientation='vertical' flexItem />}
+              sx={{ mb: { xs: 2 } }}
+            >
+              <Button variant='outlined' onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button variant='contained' onClick={onSubmit}>
+                Save
+              </Button>
+            </Stack>
+          )}
+        </Stack>
         <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
     </>
