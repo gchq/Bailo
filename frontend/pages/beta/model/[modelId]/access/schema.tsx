@@ -10,12 +10,12 @@ import Loading from '../../../../../src/common/Loading'
 import MessageAlert from '../../../../../src/MessageAlert'
 import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
 import Wrapper from '../../../../../src/Wrapper.beta'
-import { SchemaKind } from '../../../../../types/types'
+import { SchemaKind } from '../../../../../types/v2/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Deployment)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.AccessRequest)
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])

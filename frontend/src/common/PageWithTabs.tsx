@@ -1,10 +1,12 @@
 import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement, useState } from 'react'
+import { useRouter } from 'next/router'
+import { ReactElement, SyntheticEvent, useEffect, useState } from 'react'
 
 export interface PageTab {
   title: string
+  path: string
   view: ReactElement
   disabled?: boolean
 }
@@ -22,19 +24,31 @@ export default function PageWithTabs({
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
 }) {
-  const [value, setValue] = useState(0)
+  const [currentTab, setCurrentTab] = useState('')
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)
+  const router = useRouter()
+
+  const { tab } = router.query
+
+  useEffect(() => {
+    tab && tabs.length ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
+  }, [tab, setCurrentTab, tabs])
+
+  const handleChange = (_event: SyntheticEvent, newValue: string) => {
+    setCurrentTab(newValue)
+    router.replace({
+      query: { ...router.query, tab: newValue },
+    })
   }
+
   return (
     <>
       <Box>
         <Stack
-          direction='row'
+          direction={{ xs: 'column', sm: 'row' }}
           divider={<Divider flexItem orientation='vertical' />}
           alignItems='center'
-          spacing={2}
+          spacing={{ sm: 2 }}
           sx={{ p: 2 }}
         >
           <Typography component='h1' color='primary' variant='h6'>
@@ -47,7 +61,7 @@ export default function PageWithTabs({
           )}
         </Stack>
         <Tabs
-          value={value}
+          value={currentTab}
           onChange={handleChange}
           aria-label='Tabbed view'
           indicatorColor='secondary'
@@ -55,14 +69,14 @@ export default function PageWithTabs({
           variant='scrollable'
         >
           {tabs.map((tab: PageTab) => {
-            return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} />
+            return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} value={tab.path} />
           })}
         </Tabs>
       </Box>
       <Box sx={{}}>
-        {tabs.map((tab: PageTab, index: number) => {
+        {tabs.map((tab: PageTab) => {
           return (
-            <CustomTabPanel key={tab.title} value={value} index={index}>
+            <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
               {tab.view}
             </CustomTabPanel>
           )
@@ -74,17 +88,17 @@ export default function PageWithTabs({
 
 interface TabPanelProps {
   children?: ReactElement
-  index: number
-  value: number
+  tabKey: string
+  currentTab: string
 }
 
 function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
+  const { children, tabKey, currentTab, ...other } = props
   const theme = useTheme()
 
   return (
-    <div role='tabpanel' hidden={value !== index} {...other}>
-      {value === index && (
+    <div role='tabpanel' hidden={currentTab !== tabKey} {...other}>
+      {currentTab === tabKey && (
         <Box
           sx={{
             backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],

@@ -110,46 +110,34 @@ export default function DraftNewReleaseDialog({
               requests will be able to select for any release of a model for deployment.
             </DialogContentText>
 
-            <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-              <Stack sx={{ width: '100%' }}>
-                <Stack direction='row'>
-                  <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
-                  <HelpPopover>
-                    The release name is automatically generated using the model name and release semantic version
-                  </HelpPopover>
-                </Stack>
-                <TextField
-                  required
-                  size='small'
-                  value={`${model.name} - ${semanticVersion}`}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
+            <Stack sx={{ width: '100%' }} justifyContent='center'>
+              <Stack direction='row'>
+                <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+                <HelpPopover>
+                  The release name is automatically generated using the model name and release semantic version
+                </HelpPopover>
               </Stack>
-              <Stack>
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  Semantic version <span style={{ color: 'red' }}>*</span>
-                </Typography>
-                <TextField
-                  required
-                  size='small'
-                  error={semanticVersion !== '' && !isValidSemver(semanticVersion)}
-                  helperText={
-                    semanticVersion !== '' && !isValidSemver(semanticVersion) ? 'Must follow format #.#.#' : ''
-                  }
-                  value={semanticVersion}
-                  onChange={(e) => setSemanticVersion(e.target.value)}
-                />
-              </Stack>
+              <Typography>{`${model.name} - ${semanticVersion}`}</Typography>
             </Stack>
             <Stack>
+              <Typography sx={{ fontWeight: 'bold' }}>
+                Semantic version <span style={{ color: 'red' }}>*</span>
+              </Typography>
+              <TextField
+                required
+                size='small'
+                error={semanticVersion !== '' && !isValidSemver(semanticVersion)}
+                helperText={semanticVersion !== '' && !isValidSemver(semanticVersion) ? 'Must follow format #.#.#' : ''}
+                value={semanticVersion}
+                onChange={(e) => setSemanticVersion(e.target.value)}
+              />
+            </Stack>
+
+            <Stack>
               <RichTextEditor
-                dataValue={releaseNotes}
-                onDataValueChange={(value) => setReleaseNotes(value)}
+                value={releaseNotes}
+                onChange={(value) => setReleaseNotes(value)}
                 aria-label='Release notes'
-                dataTestKey='releaseNotes'
-                data-test='releaseNotes'
                 label={
                   <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
                     Release Notes <span style={{ color: 'red' }}>*</span>

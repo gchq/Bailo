@@ -29,6 +29,12 @@ export function testPost(path: string, fixture: Fixture) {
   return request.post(path).send(fixture.body as object)
 }
 
+export function testPatch(path: string, fixture: Fixture) {
+  const request = supertest(server)
+
+  return request.patch(path).send(fixture.body as object)
+}
+
 export function testGet(path: string) {
   const request = supertest(server)
 

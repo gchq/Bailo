@@ -1,5 +1,5 @@
-import ApprovalsList from '../../src/approvals/ApprovalsList'
 import PageWithTabs from '../../src/common/PageWithTabs'
+import ReviewsList from '../../src/reviews/ReviewsList'
 import Wrapper from '../../src/Wrapper.beta'
 
 export default function Review() {
@@ -8,9 +8,9 @@ export default function Review() {
       <PageWithTabs
         title='Your Reviews'
         tabs={[
-          { title: 'Release reviews', view: <ApprovalsList kind='release' /> },
-          { title: 'Access request reviews', view: <ApprovalsList kind='access' /> },
-          { title: 'Archived', view: <ApprovalsList isActive={false} /> },
+          { title: 'Release reviews', path: 'releases', view: <ReviewsList kind='release' /> },
+          { title: 'Access request reviews', path: 'access-requests', view: <ReviewsList kind='access' /> },
+          { title: 'Archived', path: 'archived', view: <ReviewsList isActive={false} /> },
         ]}
       />
     </Wrapper>

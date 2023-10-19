@@ -1,17 +1,31 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+export interface AccessRequestMetadata {
+  overview: {
+    name: string
+    entities: Array<string>
+
+    endDate?: string
+    [x: string]: unknown
+  }
+
+  [x: string]: unknown
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface AccessRequestInterface {
   id: string
-  schemaRef: string
+  modelId: string
 
-  metadata: unknown
+  schemaId: string
+  metadata: AccessRequestMetadata
 
   deleted: boolean
 
+  createdBy: string
   createdAt: Date
   updatedAt: Date
 }
@@ -23,10 +37,13 @@ export type AccessRequestDoc = AccessRequestInterface & Document<any, any, Acces
 
 const AccessRequestSchema = new Schema<AccessRequestInterface>(
   {
-    id: { type: String, required: true, unique: true, index: true },
-    schemaRef: { type: String, required: true },
+    id: { type: String, unique: true, required: true },
+    modelId: { type: String, required: true },
 
-    metadata: { type: Schema.Types.Mixed },
+    schemaId: { type: String, required: true },
+    metadata: { type: Schema.Types.Mixed, required: true },
+
+    createdBy: { type: String, required: true },
   },
   {
     timestamps: true,
