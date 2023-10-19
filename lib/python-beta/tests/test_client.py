@@ -7,16 +7,16 @@ from __future__ import annotations
 import json
 
 from bailo import BailoClient
-from bailo.enums import ModelVisibility
+from bailo.enums import ModelVisibility, SchemaKind
 
 mock_result = {"success": True}
 
 
-def test_create_model(requests_mock):
+def test_post_model(requests_mock):
     requests_mock.post("https://example.com/api/v2/models", json={"success": True})
 
     client = BailoClient("https://example.com")
-    result = client.create_model(
+    result = client.post_model(
         name="test",
         description="test",
         visibility=ModelVisibility.Public
@@ -25,12 +25,12 @@ def test_create_model(requests_mock):
     assert result == {"success": True}
 
 
-def test_find_models(requests_mock):
-    requests_mock.get("https://example.com/api/v2/models/search", json={"success": True})
+def test_get_models(requests_mock):
+    requests_mock.get("https://example.com/api/v2/models/search?task=image_classification", json={"success": True})
 
     client = BailoClient("https://example.com")
-    result = client.find_models(
-        task="Image Classification"
+    result = client.get_models(
+        task="image_classification"
     )
 
     assert result == {"success": True}
@@ -47,11 +47,11 @@ def test_get_model(requests_mock):
     assert result == {"success": True}
 
 
-def test_update_model(requests_mock):
+def test_patch_model(requests_mock):
     requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
 
     client = BailoClient("https://example.com")
-    result = client.update_model(
+    result = client.patch_model(
         model_id="test_id",
         name="test",
     )
@@ -70,14 +70,14 @@ def test_get_model_card(requests_mock):
     assert result == {"success": True}
 
 
-def test_update_model_card(requests_mock):
+def test_put_model_card(requests_mock):
     requests_mock.put("https://example.com/api/v2/model/test_id/model-cards", json={"success": True})
 
     x = {"test" : "object"}
     y = json.dumps(x)
 
     client = BailoClient("https://example.com")
-    result = client.update_model_card(
+    result = client.put_model_card(
         model_id="test_id", metadata=y
     )
 
@@ -95,13 +95,13 @@ def test_model_card_from_schema(requests_mock):
     assert result == {"success": True}
 
 
-def test_create_release(requests_mock):
+def test_post_release(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
 
     client = BailoClient("https://example.com")
-    result = client.create_release(
-        model_id="test_id",
-        model_card_version=1,
+    result = client.post_release(
+        model_id="test_id", 
+        model_card_version=1, 
         release_version='v1',
         notes='Test Note',
         files=[],
@@ -156,7 +156,20 @@ def test_get_files(requests_mock):
 
     assert result == {"success": True}
 
-#def test_simple_upload(requests_mock):
+def test_simple_upload(requests_mock):
+    requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=test.txt", json={"success": True})
+
+    data = 'TEST'
+    data = bytes(data, 'utf-8')
+
+    client = BailoClient("https://example.com")
+    result = client.simple_upload(
+        model_id="test_id",
+        name="test.txt",
+        binary=data,
+    )
+
+    assert result == {"success": True}
 
 #def test_start_multi_upload(requests_mock):
 
@@ -173,15 +186,48 @@ def test_delete_file(requests_mock):
 
     assert result == {"success": True}
 
-#def test_get_all_schemas(requests_mock):
+def test_get_all_schemas(requests_mock):
+    requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
-#def test_get_schema(requests_mock):
+    client = BailoClient("https://example.com")
+    result = client.get_all_schemas(
+        kind=SchemaKind.Model
+    )
 
-#def test_create_schema(requests_mock):
+    assert result == {"success": True}
 
-#def test_get_reviews(requests_mock):
+def test_get_schema(requests_mock):
+    requests_mock.get("https://example.com/api/v2/schema/test_id", json={"success": True})
 
-#def test_get_reviews_count(requests_mock):
+    client = BailoClient("https://example.com")
+    result = client.get_schema(
+        schema_id="test_id"
+    )
+
+    assert result == {"success": True}
+
+def test_post_schema(requests_mock):
+    requests_mock.post("https://example.com/api/v2/schemas", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.post_schema(
+        schema_id="test_id",
+        name="test",
+        kind=SchemaKind.Model,
+        json_schema={"test": "test"}
+    )
+
+    assert result == {"success": True}
+
+def test_get_reviews(requests_mock):
+    requests_mock.get("https://example.com/api/v2/reviews?active=true", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_reviews(
+        active=True,
+    )
+
+    assert result == {"success": True}
 
 def test_get_model_roles(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})
@@ -203,11 +249,11 @@ def test_get_model_user_roles(requests_mock):
 
     assert result == {"success": True}
 
-def test_create_team(requests_mock):
+def test_post_team(requests_mock):
     requests_mock.post("https://example.com/api/v2/teams", json={"success": True})
 
     client = BailoClient("https://example.com")
-    result = client.create_team(
+    result = client.post_team(
         team_id="test_id",
         name="test",
         description="test",
@@ -228,5 +274,26 @@ def test_get_user_teams(requests_mock):
 
     client = BailoClient("https://example.com")
     result = client.get_user_teams()
+
+    assert result == {"success": True}
+
+def test_get_team(requests_mock):
+    requests_mock.get("https://example.com/api/v2/team/test_id", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.get_team(
+        team_id="test_id",
+    )
+
+    assert result == {"success": True}
+
+def test_patch_team(requests_mock):
+    requests_mock.patch("https://example.com/api/v2/team/test_id", json={"success": True})
+
+    client = BailoClient("https://example.com")
+    result = client.patch_team(
+        team_id="test_id",
+        name="name",
+    )
 
     assert result == {"success": True}

@@ -51,7 +51,7 @@ function ReviewItem({ review }: ReviewItemProps) {
   const router = useRouter()
 
   function listItemOnClick() {
-    router.push(`/beta/model/${review.model.id}`)
+    router.push(`/beta/model/${review.model.id}?tab=releases`)
   }
   function editedAdornment() {
     if (review.updatedAt > review.createdAt) {

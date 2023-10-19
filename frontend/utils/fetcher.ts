@@ -38,12 +38,23 @@ export const fetcher = async (input: RequestInfo, init: RequestInit) => {
     if (res.status === 401) {
       redirectToLoginPage()
     }
-    const error: ErrorInfo = {
-      ...new Error('An error occurred while fetching the data.'),
-      info: await res.json(),
-      status: res.status,
+    try {
+      const error: ErrorInfo = {
+        ...new Error('An error occurred while fetching the data.'),
+        info: await res.json(),
+        status: res.status,
+      }
+      throw error
+    } catch (e) {
+      const error: ErrorInfo = {
+        ...new Error('An error occurred while fetching the data.'),
+        info: {
+          message: res.statusText,
+        },
+        status: res.status,
+      }
+      throw error
     }
-    throw error
   }
 
   return res.json()
