@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > getModel > latest > 200 > ok 1`] = `
+{
+  "modelCard": {
+    "example": "test",
+  },
+}
+`;
+
+exports[`routes > model > getModel > version > 200 > ok 1`] = `
+{
+  "modelCard": {
+    "_id": "test",
+  },
+}
+`;

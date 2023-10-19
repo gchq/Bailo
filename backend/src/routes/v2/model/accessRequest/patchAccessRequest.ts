@@ -7,7 +7,7 @@ import { updateAccessRequest } from '../../../../services/v2/accessRequest.js'
 import { parse } from '../../../../utils/validate.js'
 import { accessRequestMetadata } from './postAccessRequest.js'
 
-export const patchModelSchema = z.object({
+export const patchAccessRequestSchema = z.object({
   body: z.object({
     metadata: accessRequestMetadata,
   }),
@@ -26,7 +26,7 @@ export const patchAccessRequest = [
     const {
       body,
       params: { accessRequestId },
-    } = parse(req, patchModelSchema)
+    } = parse(req, patchAccessRequestSchema)
 
     const accessRequest = await updateAccessRequest(req.user, accessRequestId, body)
 

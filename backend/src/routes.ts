@@ -209,15 +209,15 @@ if (config.experimental.v2) {
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
-  server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
-  server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
-  server.post('/api/v2/model/:modelId/releases/:semver/review', ...postReleaseReviewResponse)
+  server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+  server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
+  server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
   server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
   server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
-  server.get('/api/v2/model/:modelId/access-requests/:accessRequestId', ...getAccessRequest)
-  server.delete('/api/v2/model/:modelId/access-requests/:accessRequestId', ...deleteAccessRequest)
-  server.patch('/api/v2/model/:modelId/access-requests/:accessRequestId', ...patchAccessRequest)
+  server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
+  server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
+  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 
   //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
 
@@ -230,8 +230,8 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)

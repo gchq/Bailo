@@ -145,7 +145,7 @@ class BailoClient():
         :param model_id: Unique model ID
         :param metadata: Metadata object, defined by model card schema
         :return: JSON response object
-        """        
+        """
         return self.agent.put(
             f"{self.url}/v2/model/{model_id}/model-cards",
             json={
@@ -164,14 +164,14 @@ class BailoClient():
         :param model_id: Unique model ID
         :param schema_id: Unique model card schema ID
         :return: JSON response object
-        """        
+        """
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/setup/from-schema",
             json={
                 "schemaId": schema_id,
             },
         ).json()
-    
+
     def create_release(
         self,
         model_id: str,
@@ -195,7 +195,7 @@ class BailoClient():
         :param minor: Signifies a minor release, defaults to False
         :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
-        """        
+        """
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/releases",
             json={
@@ -218,7 +218,7 @@ class BailoClient():
 
         :param model_id: Unique model ID
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/releases",
         ).json()
@@ -234,9 +234,9 @@ class BailoClient():
         :param model_id: Unique model ID
         :param release_version: Release version
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/releases/{release_version}",
+            f"{self.url}/v2/model/{model_id}/release/{release_version}",
         ).json()
 
     def delete_release(
@@ -250,11 +250,11 @@ class BailoClient():
         :param model_id: Unique model ID
         :param release_version: Release version
         :return: JSON response object
-        """        
+        """
         return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/releases/{release_version}",
+            f"{self.url}/v2/model/{model_id}/release/{release_version}",
         ).json()
-    
+
     def get_files(
         self,
         model_id: str,
@@ -264,11 +264,11 @@ class BailoClient():
 
         :param model_id: Unique model ID
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
-    
+
     #def simple_upload(): TBC
 
     #def start_multi_upload(): TBC
@@ -286,11 +286,11 @@ class BailoClient():
         :param model_id: Unique model ID
         :param file_id: Unique file ID
         :return: JSON response object
-        """        
+        """
         return self.agent.delete(
             f"{self.url}/v2/model/{model_id}/files/{file_id}",
         ).json()
-    
+
     #def get_all_schemas():
 
     #def get_schema():
@@ -310,7 +310,7 @@ class BailoClient():
 
         :param model_id: Unique model ID
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles",
         ).json()
@@ -324,11 +324,11 @@ class BailoClient():
 
         :param model_id: Unique model ID
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles/mine",
         ).json()
-    
+
     def create_team(
         self,
         team_id: str,
@@ -342,7 +342,7 @@ class BailoClient():
         :param name: Team name
         :param description: Team description
         :return: JSON response object
-        """        
+        """
         return self.agent.post(
             f"{self.url}/v2/teams",
             json={
@@ -351,7 +351,7 @@ class BailoClient():
                 "description": description,
             }
         ).json()
-    
+
     def get_all_teams(
         self,
     ):
@@ -359,11 +359,11 @@ class BailoClient():
         Get all teams.
 
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/teams",
         ).json()
-    
+
     def get_user_teams(
         self,
     ):
@@ -371,7 +371,7 @@ class BailoClient():
         Get user teams.
 
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/teams/mine",
         ).json()
