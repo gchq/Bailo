@@ -11,28 +11,47 @@ const SillyEntityKind = {
 } as const
 
 export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
-  async userModelAction(_user: UserDoc, _model: ModelDoc, _action: ModelActionKeys) {
-    // With silly authorisation, every user can complete every action.
+  constructor() {
+    super()
+  }
+
+  async userModelAction(user: UserDoc, model: ModelDoc, _action: ModelActionKeys) {
+    // Prohibit non-collaborators from seeing private models
+    if (!(await this.hasModelVisibilityAccess(user, model))) {
+      return false
+    }
+
+    // Allow any other action to be completed
     return true
   }
 
   async userReleaseAction(
-    _user: UserDoc,
-    _model: ModelDoc,
+    user: UserDoc,
+    model: ModelDoc,
     _release: ReleaseDoc,
     _action: ReleaseActionKeys,
   ): Promise<boolean> {
-    // With silly authorisation, every user can complete every action.
+    // Prohibit non-collaborators from seeing private models
+    if (!(await this.hasModelVisibilityAccess(user, model))) {
+      return false
+    }
+
+    // Allow any other action to be completed
     return true
   }
 
   async userAccessRequestAction(
-    _user: UserDoc,
-    _model: ModelDoc,
+    user: UserDoc,
+    model: ModelDoc,
     _accessRequest: AccessRequestDoc,
     _action: AccessRequestActionKeys,
   ) {
-    // With silly authorisation, every user can complete every action.
+    // Prohibit non-collaborators from seeing private models
+    if (!(await this.hasModelVisibilityAccess(user, model))) {
+      return false
+    }
+
+    // Allow any other action to be completed
     return true
   }
 
@@ -41,22 +60,26 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
   }
 
   async getUserInformation(entity: string): Promise<{ email: string }> {
-    const entityObject = fromEntity(entity)
-    if (entityObject.kind !== SillyEntityKind.User) {
+    const { kind, value } = fromEntity(entity)
+
+    if (kind !== SillyEntityKind.User) {
       throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
     }
+
     return {
-      email: `${entityObject.value}@example.com`,
+      email: `${value}@example.com`,
     }
   }
 
   async getEntityMembers(entity: string): Promise<string[]> {
-    if (fromEntity(entity).kind === SillyEntityKind.User) {
-      return [entity]
-    } else if (fromEntity(entity).kind === SillyEntityKind.Group) {
-      return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
-    } else {
-      throw new Error(`Unable to get Entity Members. Entity kind not recognised: ${entity}`)
+    const { kind } = fromEntity(entity)
+    switch (kind) {
+      case SillyEntityKind.User:
+        return [entity]
+      case SillyEntityKind.Group:
+        return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
+      default:
+        throw new Error(`Unable to get members, entity kind not recognised: ${entity}`)
     }
   }
 }
