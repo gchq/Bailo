@@ -67,7 +67,7 @@ export async function postReviewResponse(
   comment: string,
   decision: string,
 ) {
-  return fetch(`/api/v2/model/${modelId}/releases/${semver}/review`, {
+  return fetch(`/api/v2/model/${modelId}/release/${semver}/review`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision, role }),

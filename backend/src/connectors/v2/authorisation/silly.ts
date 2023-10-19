@@ -1,8 +1,9 @@
+import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { BaseAuthorisationConnector, ModelActionKeys } from './Base.js'
+import { AccessRequestActionKeys, BaseAuthorisationConnector, ModelActionKeys, ReleaseActionKeys } from './Base.js'
 
 const SillyEntityKind = {
   User: 'user',
@@ -15,7 +16,22 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     return true
   }
 
-  async userReleaseAction(_user: UserDoc, _model: ModelDoc, _release: ReleaseDoc, _action: string): Promise<boolean> {
+  async userReleaseAction(
+    _user: UserDoc,
+    _model: ModelDoc,
+    _release: ReleaseDoc,
+    _action: ReleaseActionKeys,
+  ): Promise<boolean> {
+    // With silly authorisation, every user can complete every action.
+    return true
+  }
+
+  async userAccessRequestAction(
+    _user: UserDoc,
+    _model: ModelDoc,
+    _accessRequest: AccessRequestDoc,
+    _action: AccessRequestActionKeys,
+  ) {
     // With silly authorisation, every user can complete every action.
     return true
   }

@@ -116,14 +116,14 @@ def test_get_all_releases(requests_mock):
 
     client = BailoClient("https://example.com")
     result = client.get_all_releases(
-        model_id="test_id", 
+        model_id="test_id",
     )
 
     assert result == {"success": True}
 
 
 def test_get_release(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/releases/v1", json={"success": True})
+    requests_mock.get("https://example.com/api/v2/model/test_id/release/v1", json={"success": True})
 
     client = BailoClient("https://example.com")
     result = client.get_release(
@@ -135,7 +135,7 @@ def test_get_release(requests_mock):
 
 
 def test_delete_release(requests_mock):
-    requests_mock.delete("https://example.com/api/v2/model/test_id/releases/v1", json={"success": True})
+    requests_mock.delete("https://example.com/api/v2/model/test_id/release/v1", json={"success": True})
 
     client = BailoClient("https://example.com")
     result = client.delete_release(
