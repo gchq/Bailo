@@ -48,7 +48,7 @@ export function useModelCard(modelId?: string, modelCardVersion?: number) {
   }
 }
 
-export function useModelCardRevisions(modelId: string) {
+export function useGetModelCardRevisions(modelId: string) {
   const { data, error, mutate } = useSWR<
     {
       modelCardRevisions: ModelCardRevisionInterface[]
