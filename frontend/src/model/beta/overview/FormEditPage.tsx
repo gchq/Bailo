@@ -26,7 +26,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   async function onSubmit() {
     if (schema) {
       const data = getStepsData(splitSchema, true)
-      data.schemaRef = schema.id
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
