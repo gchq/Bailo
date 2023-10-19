@@ -10,6 +10,7 @@ import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelDoc } from '../../models/v2/Model.js'
 import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
 import { findDeploymentByUuid } from '../../services/deployment.js'
+import { getAccessRequestsByModel } from '../../services/v2/accessRequest.js'
 import { getModelById } from '../../services/v2/model.js'
 import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -163,10 +164,10 @@ function generateAccess(scope: any) {
 }
 
 async function checkAccessV2(access: Access, user: UserDocV2) {
-  const modelUuid = access.name.split('/')[0]
+  const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
-    model = await getModelById(user, modelUuid)
+    model = await getModelById(user, modelId)
   } catch (e) {
     // bad model id?
     return false
@@ -183,10 +184,17 @@ async function checkAccessV2(access: Access, user: UserDocV2) {
     return false
   }
 
-  // TODO: When access requests are done, we need to check if a user has one of them
-  // prior to being able to pull the model.
+  // TODO: If the model is 'public access' automatically approve pulls.
 
-  // Alternatively, if the model is 'public access', it should be approved regardless.
+  const accessRequests = await getAccessRequestsByModel(user, modelId)
+  const accessRequest = accessRequests.find((accessRequest) =>
+    accessRequest.metadata.overview.entities.some((entity) => entities.includes(entity)),
+  )
+
+  if (!accessRequest) {
+    // User does not have a valid access request
+    return false
+  }
 
   return true
 }
