@@ -18,13 +18,13 @@ export default function PageWithTabs({
   displayActionButton = false,
   actionButtonOnClick,
 }: {
-  title
+  title: string
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
 }) {
-  const [currentTab, setCurrentTab] = useState('')
+  const [currentTab, setCurrentTab] = useState(tabs[0].path)
 
   const router = useRouter()
 
