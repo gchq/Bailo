@@ -1,3 +1,5 @@
+import { Validator } from 'jsonschema'
+
 import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import ModelModel from '../../models/v2/Model.js'
@@ -9,6 +11,7 @@ import {
   GetModelCardVersionOptionsKeys,
   GetModelFiltersKeys,
 } from '../../types/v2/enums.js'
+import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
@@ -201,6 +204,19 @@ export async function updateModelCard(
 
   if (!model.card) {
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
+  }
+
+  const schema = await findSchemaById(model.card.schemaId)
+  try {
+    new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        schemaId: model.card.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
   }
 
   const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
