@@ -35,7 +35,7 @@ export default function NewAccessRequest() {
   useEffect(() => {
     if (!model || !schema) return
     const defaultState = {
-      contacts: { entities: [currentUserId] },
+      overview: { entities: [currentUserId] },
     }
     const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {

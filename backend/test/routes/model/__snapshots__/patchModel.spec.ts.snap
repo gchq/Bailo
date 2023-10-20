@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > patchModel > 200 > ok 1`] = `
+{
+  "model": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > model > patchModel > 400 > bad visibility 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_enum_value",
+          "message": "Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
+          "options": [
+            "private",
+            "public",
+          ],
+          "path": [
+            "body",
+            "visibility",
+          ],
+          "received": "not_valid",
+        },
+      ],
+    },
+    "message": "Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
+    "name": "Error",
+  },
+}
+`;

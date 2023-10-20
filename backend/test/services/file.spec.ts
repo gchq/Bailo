@@ -2,7 +2,7 @@ import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { UserDoc } from '../../src/models/v2/User.js'
-import { uploadFile } from '../../src/services/v2/file.js'
+import { getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
 
@@ -27,6 +27,9 @@ const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
   obj.save = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -57,5 +60,49 @@ describe('services > file', () => {
     expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
       /^You do not have permission to upload a file to this model./,
     )
+  })
+
+  test('removeFile > success', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileId = 'testFileId'
+
+    const result = await removeFile(user, modelId, fileId)
+
+    expect(result).toMatchSnapshot()
+  })
+
+  test('removeFile > no permission', async () => {
+    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileId = 'testFileId'
+
+    expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(
+      /^You do not have permission to delete a file from this model./,
+    )
+
+    expect(fileModelMocks.delete).not.toBeCalled()
+  })
+
+  test('getFilesByModel > success', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+
+    const result = await getFilesByModel(user, modelId)
+
+    expect(result).toMatchSnapshot()
+  })
+
+  test('getFilesByModel > no permission', async () => {
+    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+
+    expect(() => getFilesByModel(user, modelId)).rejects.toThrowError(/^You do not have permission to get these files./)
+
+    expect(fileModelMocks.delete).not.toBeCalled()
   })
 })

@@ -2,24 +2,23 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AccessRequestInterface } from '../../../models/v2/AccessRequest.js'
-import { createAccessRequest } from '../../../services/v2/accessRequest.js'
-import { parse } from '../../../utils/validate.js'
+import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
+import { createAccessRequest } from '../../../../services/v2/accessRequest.js'
+import { parse } from '../../../../utils/validate.js'
 
-const knownHighLevelDetails = z.object({
+const knownOverview = z.object({
   name: z.string(),
-  hasEndDate: z.boolean(),
   endDate: z.string().optional(),
+  entities: z.array(z.string()),
 })
 
-const highLevelDetails = z.intersection(knownHighLevelDetails, z.record(z.unknown()))
+const overview = z.intersection(knownOverview, z.record(z.unknown()))
 
 const KnownMetadata = z.object({
-  highLevelDetails: highLevelDetails,
-  contacts: z.object({
-    entities: z.array(z.string()),
-  }),
+  overview,
 })
+
+export const accessRequestMetadata = z.intersection(KnownMetadata, z.record(z.unknown()))
 
 export const postAccessRequestSchema = z.object({
   params: z.object({
@@ -27,7 +26,7 @@ export const postAccessRequestSchema = z.object({
   }),
   body: z.object({
     schemaId: z.string(),
-    metadata: z.intersection(KnownMetadata, z.record(z.unknown())),
+    metadata: accessRequestMetadata,
   }),
 })
 

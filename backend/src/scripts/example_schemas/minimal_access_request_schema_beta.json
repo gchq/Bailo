@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "highLevelDetails": {
+    "overview": {
       "title": "Details",
       "type": "object",
       "properties": {
@@ -10,28 +10,13 @@
           "title": "What is the name of the access request?",
           "description": "This will be used to distinguish your access request from other access requests of this model",
           "type": "string",
-          "maxLength": 100,
           "widget": "customTextInput"
         },
-        "hasEndDate": {
-          "title": "Is there a known end date for this access request?",
-          "description": "Choose YES if this access request will only be used for a short period choose an end date. Choose NO if the access request will be ongoing and/or using new versions of the model when released.",
-          "type": "boolean"
-        },
         "endDate": {
-          "title": "If you have answered yes to the above then what is the end date for this access request?",
+          "title": "What is the end date for this access request?",
           "type": "string",
           "format": "date"
-        }
-      },
-      "required": ["name", "hasEndDate"],
-      "additionalProperties": false
-    },
-    "contacts": {
-      "title": "Additional contacts",
-      "description": "The individuals requesting access.",
-      "type": "object",
-      "properties": {
+        },
         "entities": {
           "title": "Additional contacts",
           "type": "array",
@@ -42,9 +27,10 @@
           "widget": "entitySelectorBeta"
         }
       },
-      "required": ["entities"]
+      "required": ["name"],
+      "additionalProperties": false
     }
   },
-  "required": ["highLevelDetails", "contacts"],
+  "required": ["overview"],
   "additionalProperties": false
 }

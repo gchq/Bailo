@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > accessRequest > getAccessRequest > latest > 200 > ok 1`] = `
+{
+  "accessRequest": {
+    "example": "test",
+  },
+}
+`;
+
+exports[`routes > accessRequest > getModelAccessRequests > 200 > ok 1`] = `
+{
+  "accessRequests": {
+    "example": "test",
+  },
+}
+`;
+
+exports[`routes > accessRequest > getModelAccessRequests > latest > 200 > ok 1`] = `
+{
+  "accessRequests": {
+    "example": "test",
+  },
+}
+`;

@@ -9,9 +9,9 @@ import config from '../../../utils/v2/config.js'
 import log from '../log.js'
 import { buildEmail } from './emailBuilder.js'
 
-//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
+//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
@@ -58,11 +58,11 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `Request for Entities '${accessRequest.metadata.contacts.entities}' access to the model '${accessRequest.modelId}'`,
+    `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
-      { title: 'Entities Requesting Access', data: accessRequest.metadata.contacts.entities.toString() },
+      { title: 'Entities Requesting Access', data: accessRequest.metadata.overview.entities.toString() },
       { title: 'Created By', data: accessRequest.createdBy },
     ],
     [
