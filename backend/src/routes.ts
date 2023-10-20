@@ -48,7 +48,11 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
-import { postAccessRequest } from './routes/v2/accessRequest/postAccessRequest.js'
+import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
+import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
+import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
+import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
+import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
@@ -205,11 +209,16 @@ if (config.experimental.v2) {
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
-  server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
-  server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
-  server.post('/api/v2/model/:modelId/releases/:semver/review', ...postReleaseReviewResponse)
+  server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+  server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
+  server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
   server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
+  server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
+  server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
+  server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
+  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
+
   //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
@@ -221,8 +230,8 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
