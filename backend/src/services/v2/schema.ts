@@ -1,4 +1,3 @@
-import { testDeploymentSchema } from '../../../test/testUtils/testModels.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
 import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
@@ -43,8 +42,6 @@ export async function createSchema(schema: Partial<SchemaInterface>, overwrite =
  * TODO - convert and use default schemas from V1
  */
 export async function addDefaultSchemas() {
-  await createSchema(testDeploymentSchema, true)
-
   await createSchema(
     {
       name: 'Minimal Schema v10 Beta',

@@ -20,7 +20,7 @@ describe('routes > review > postReleaseReviewResponse', () => {
 
   test('successfully respond to a review', async () => {
     const res = await testPost(
-      `${endpoint}/model-id/releases/1.1.1/review`,
+      `${endpoint}/model-id/release/1.1.1/review`,
       createFixture(postReleaseReviewResponseSchema),
     )
 
@@ -31,7 +31,7 @@ describe('routes > review > postReleaseReviewResponse', () => {
   test('missing review decision', async () => {
     const fixture = createFixture(postReleaseReviewResponseSchema) as any
     delete fixture.body.decision
-    const res = await testPost(`${endpoint}/model-id/releases/1.1.1/review`, fixture)
+    const res = await testPost(`${endpoint}/model-id/release/1.1.1/review`, fixture)
 
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
@@ -40,7 +40,7 @@ describe('routes > review > postReleaseReviewResponse', () => {
   test('successfully respond to a review without a comment', async () => {
     const fixture = createFixture(postReleaseReviewResponseSchema) as any
     delete fixture.body.comment
-    const res = await testPost(`${endpoint}/model-id/releases/1.1.1/review`, fixture)
+    const res = await testPost(`${endpoint}/model-id/release/1.1.1/review`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

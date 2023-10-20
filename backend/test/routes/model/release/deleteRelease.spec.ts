@@ -13,7 +13,7 @@ describe('routes > release > deleteRelease', () => {
     }))
 
     const fixture = createFixture(deleteReleaseSchema)
-    const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/releases/${fixture.params.semver}`)
+    const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

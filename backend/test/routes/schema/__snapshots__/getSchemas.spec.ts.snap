@@ -49,7 +49,23 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       "hidden": false,
       "id": "example-model-schema-1",
       "jsonSchema": {
-        "Schema field 1": "field 1 info",
+        "properties": {
+          "highLevelDetails": {
+            "description": "Summary of the model functionality.",
+            "properties": {
+              "name": {
+                "description": "This should be descriptive name, such as 'Arabic - English Translation', and will be visible in the model marketplace.",
+                "maxLength": 140,
+                "minLength": 1,
+                "title": "Name of the Machine Learning Model",
+                "type": "string",
+                "widget": "customTextInput",
+              },
+            },
+            "title": "Overview",
+            "type": "object",
+          },
+        },
       },
       "kind": "model",
       "name": "Example Schema 1",
@@ -89,7 +105,23 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       "hidden": false,
       "id": "example-model-schema-1",
       "jsonSchema": {
-        "Schema field 1": "field 1 info",
+        "properties": {
+          "highLevelDetails": {
+            "description": "Summary of the model functionality.",
+            "properties": {
+              "name": {
+                "description": "This should be descriptive name, such as 'Arabic - English Translation', and will be visible in the model marketplace.",
+                "maxLength": 140,
+                "minLength": 1,
+                "title": "Name of the Machine Learning Model",
+                "type": "string",
+                "widget": "customTextInput",
+              },
+            },
+            "title": "Overview",
+            "type": "object",
+          },
+        },
       },
       "kind": "model",
       "name": "Example Schema 1",

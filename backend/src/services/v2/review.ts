@@ -1,4 +1,5 @@
 import authorisation from '../../connectors/v2/authorisation/index.js'
+import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
@@ -7,19 +8,23 @@ import { ReviewKind } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
-import { requestReviewForRelease } from './smtp/smtp.js'
+import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviews(
   user: UserDoc,
   active: boolean,
   modelId?: string,
   semver?: string,
+  accessRequestId?: string,
+  kind?: string,
 ): Promise<ReviewInterface[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },
       ...(modelId ? { modelId } : {}),
       ...(semver ? { semver } : {}),
+      ...(accessRequestId ? { accessRequestId } : {}),
+      ...(kind ? { kind } : {}),
     })
     .sort({ createdAt: -1 })
     // Populate model entries
@@ -32,16 +37,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  // This will be added to the schema(s)
-  const reviewRoles = ['msro', 'mtr']
-
-  const roleEntities = reviewRoles.map((role) => {
-    const entites = getEntitiesForRole(model.collaborators, role)
-    if (entites.length == 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
-    }
-    return { role, entites }
-  })
+  const roleEntities = getRoleEntites(['mtr', 'msro'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -54,6 +50,26 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, release))
     } catch (error) {
       log.warn('Error when sending notifications requesting review for release.', { error })
+    }
+    return review.save()
+  })
+  await Promise.all(createReviews)
+}
+
+export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
+  const roleEntities = getRoleEntites(['msro'], model.collaborators)
+
+  const createReviews = roleEntities.map((roleInfo) => {
+    const review = new Review({
+      accessRequestId: accessRequest.id,
+      modelId: model.id,
+      kind: ReviewKind.Access,
+      role: roleInfo.role,
+    })
+    try {
+      roleInfo.entites.forEach((entity) => requestReviewForAccessRequest(entity, review, accessRequest))
+    } catch (error) {
+      log.warn('Error when sending notifications requesting review for Access Request.', { error })
     }
     return review.save()
   })
@@ -99,11 +115,16 @@ export async function respondToReview(
   return update
 }
 
-function getEntitiesForRole(collaborators: Array<CollaboratorEntry>, role: string): string[] {
-  const roleEntities: string[] = collaborators
-    .filter((collaborator) => collaborator.roles.includes(role))
-    .map((collaborator) => collaborator.entity)
-  return roleEntities
+function getRoleEntites(roles: string[], collaborators: CollaboratorEntry[]) {
+  return roles.map((role) => {
+    const entites = collaborators
+      .filter((collaborator) => collaborator.roles.includes(role))
+      .map((collaborator) => collaborator.entity)
+    if (entites.length === 0) {
+      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
+    }
+    return { role, entites }
+  })
 }
 
 /**
