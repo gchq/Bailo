@@ -1,3 +1,4 @@
+import { Theme } from '@mui/material'
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 
@@ -112,4 +113,9 @@ export interface ReviewRequestInterface {
   isActive: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface ThemeKey {
+  name: string
+  theme: Theme
 }

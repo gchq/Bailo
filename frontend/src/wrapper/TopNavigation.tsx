@@ -1,5 +1,4 @@
 import { Add, Settings } from '@mui/icons-material'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
 import {
@@ -11,7 +10,6 @@ import {
   MenuItem,
   MenuList,
   Stack,
-  Switch,
   Toolbar,
   Typography,
 } from '@mui/material'
@@ -19,13 +17,12 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
 import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useContext, useState } from 'react'
+import { CSSProperties, MouseEvent, useState } from 'react'
 
 import { EntityKind, User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import UserAvatar from '../common/UserAvatar'
-import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
 type TopNavigationProps = {
@@ -71,7 +68,6 @@ export default function TopNavigation({
   const actionOpen = anchorEl !== null
   const router = useRouter()
   const theme = useTheme()
-  const { toggleDarkMode } = useContext(ThemeModeContext)
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -101,7 +97,7 @@ export default function TopNavigation({
         top: 'unset',
         background:
           theme.palette.mode === 'light'
-            ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
+            ? `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`
             : '#242424',
       }}
     >
@@ -145,17 +141,6 @@ export default function TopNavigation({
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>
-                  <MenuItem data-test='toggleDarkMode'>
-                    <ListItemIcon>
-                      <DarkModeIcon fontSize='small' />
-                    </ListItemIcon>
-                    <Switch
-                      size='small'
-                      checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                      onChange={toggleDarkMode}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </MenuItem>
                   <Link href='/beta/settings' color='inherit' underline='none'>
                     <MenuItem data-test='settingsLink'>
                       <ListItemIcon>

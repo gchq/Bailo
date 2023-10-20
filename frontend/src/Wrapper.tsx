@@ -238,7 +238,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                       </ListItemIcon>
                       <Switch
                         size='small'
-                        checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                        checked={theme.palette.mode === 'dark' ? true : false}
                         onChange={toggleDarkMode}
                         inputProps={{ 'aria-label': 'controlled' }}
                       />

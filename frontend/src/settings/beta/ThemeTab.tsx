@@ -1,21 +1,19 @@
-import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, Stack, Tab, Tabs, Theme } from '@mui/material'
+import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, Stack, Tab, Tabs } from '@mui/material'
 import { styled, ThemeProvider } from '@mui/material/styles'
+import { useContext } from 'react'
 
 import { betaLightTheme, darkTheme, lightTheme } from '../../../src/theme'
+import { ThemeKey } from '../../../types/interfaces'
 import { User } from '../../../types/types'
+import ThemeModeContext from '../../contexts/themeModeContext'
 
 interface ThemeTabProps {
   user: User
 }
 
-interface ThemeKey {
-  name: string
-  theme: Theme
-}
-
-// TODO - determine how we are storing user themes
-
 export default function ThemeTab({ user }: ThemeTabProps) {
+  const { setUserTheme } = useContext(ThemeModeContext)
+
   const themes: ThemeKey[] = [
     { name: 'Bailo Default', theme: betaLightTheme },
     { name: 'Bailo Classic', theme: lightTheme },
@@ -25,6 +23,7 @@ export default function ThemeTab({ user }: ThemeTabProps) {
   function userThemeOnChange(themeKey) {
     // eslint-disable-next-line no-console
     console.log(`Setting ${themeKey.name} as default theme for ${user.id}`)
+    setUserTheme(themeKey.name)
   }
   return (
     <Grid container direction='row' justifyContent='center' alignItems='center'>
