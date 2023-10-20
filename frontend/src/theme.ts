@@ -28,6 +28,11 @@ const removeElevation = {
       elevation: 0,
     },
   },
+  MuiButton: {
+    defaultProps: {
+      disableElevation: true,
+    },
+  },
 }
 
 export const lightTheme = createTheme({

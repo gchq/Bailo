@@ -7,10 +7,7 @@ exports[`routes > model > getModelsSearch > 200 > ok 1`] = `
       "description": "description",
       "id": "test",
       "name": "name",
-      "tags": [
-        "example_tag",
-        "model",
-      ],
+      "tags": [],
     },
   ],
 }

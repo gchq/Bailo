@@ -13,7 +13,7 @@ const ModelSchema = new Schema<Model>(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 ModelSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

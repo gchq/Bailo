@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { FileCategory } from '../../../../models/v2/File.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postStartMultipartUploadSchema = z.object({
@@ -11,7 +10,6 @@ export const postStartMultipartUploadSchema = z.object({
   body: z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
-    category: z.nativeEnum(FileCategory).optional().default(FileCategory.Other),
 
     size: z.number(),
   }),

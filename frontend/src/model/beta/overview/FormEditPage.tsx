@@ -68,10 +68,10 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   return (
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
-      <Box sx={{ px: 4, py: 1 }}>
+      <Box sx={{ py: 1 }}>
         {!isEdit && (
           <Box sx={{ width: '100%', textAlign: 'right' }}>
-            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
+            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)} sx={{ mb: { xs: 2 } }}>
               Edit Model card
             </Button>
           </Box>
@@ -82,6 +82,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             spacing={1}
             justifyContent='flex-end'
             divider={<Divider orientation='vertical' flexItem />}
+            sx={{ mb: { xs: 2 } }}
           >
             <Button variant='outlined' onClick={onCancel}>
               Cancel

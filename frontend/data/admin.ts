@@ -43,7 +43,7 @@ export function useGetAppLogs({
 
   const { data, error, mutate } = useSWR<{ logs: Array<LogEntry> }>(
     disabled ? null : `/api/v1/admin/logs${group}?${qs.stringify(query, { indices: false })}`,
-    fetcher
+    fetcher,
   )
 
   return {

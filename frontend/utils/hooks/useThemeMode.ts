@@ -13,7 +13,7 @@ export default function useThemeMode(): ThemeModeHook {
     typeof window !== 'undefined' && window.location.pathname.includes('/beta') ? betaLightTheme : lightTheme
 
   const [theme, setTheme] = useState(
-    typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightThemeToUse
+    typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightThemeToUse,
   )
 
   const toggleDarkMode = useCallback(
@@ -21,7 +21,7 @@ export default function useThemeMode(): ThemeModeHook {
       localStorage.setItem('dark_mode_enabled', `${event.target.checked}`)
       setTheme(localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightThemeToUse)
     },
-    [lightThemeToUse]
+    [lightThemeToUse],
   )
 
   return {

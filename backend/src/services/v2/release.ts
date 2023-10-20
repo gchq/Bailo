@@ -1,19 +1,24 @@
-import authorisation, { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/index.js'
+import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
+import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelInterface } from '../../models/v2/Model.js'
 import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
+import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import log from './log.js'
 import { getModelById } from './model.js'
+import { createReleaseReviews } from './review.js'
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'name' | 'semver' | 'notes' | 'minor' | 'draft' | 'files' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'files' | 'images'
 >
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
 
   const release = new Release({
+    createdBy: user.dn,
     ...releaseParams,
   })
 
@@ -24,14 +29,26 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     })
   }
 
-  await release.save()
+  try {
+    await release.save()
+  } catch (error) {
+    handleDuplicateKeys(error)
+    throw error
+  }
+
+  try {
+    await createReleaseReviews(model, release)
+  } catch (error) {
+    // Transactions here would solve this issue.
+    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+  }
 
   return release
 }
 
 export async function getModelReleases(
   user: UserDoc,
-  modelId: string
+  modelId: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface }>> {
   const results = await Release.aggregate()
     .match({ modelId })
@@ -71,4 +88,8 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
   await release.delete()
 
   return { modelId, semver }
+}
+
+export function getReleaseName(release: ReleaseDoc): string {
+  return `${release.modelId} - v${release.semver}`
 }

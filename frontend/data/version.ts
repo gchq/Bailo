@@ -28,7 +28,7 @@ interface FileListResponse {
 export function useGetVersionFileList(id?: string, file = 'code') {
   const { data, error, mutate } = useSWR<FileListResponse, ErrorInfo>(
     id ? `/api/v1/version/${id}/contents/${file}/list` : null,
-    fetcher
+    fetcher,
   )
 
   return {
@@ -46,7 +46,7 @@ export function useGetVersionFile(id?: string, path?: string, file = 'code') {
           path,
         })}`
       : null,
-    textFetcher
+    textFetcher,
   )
 
   return {

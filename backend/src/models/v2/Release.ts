@@ -8,7 +8,6 @@ export interface ReleaseInterface {
   modelId: string
   modelCardVersion: number
 
-  name: string
   semver: string
   notes: string
 
@@ -20,6 +19,7 @@ export interface ReleaseInterface {
 
   deleted: boolean
 
+  createdBy: string
   createdAt: Date
   updatedAt: Date
 }
@@ -34,7 +34,6 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     modelId: { type: String, required: true },
     modelCardVersion: { type: Number, required: true },
 
-    name: { type: String, required: true },
     semver: { type: String, required: true },
     notes: { type: String, required: true },
 
@@ -43,11 +42,13 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
 
     files: [{ type: String }],
     images: [{ type: String }],
+
+    createdBy: { type: String, required: true },
   },
   {
     timestamps: true,
     collection: 'v2_releases',
-  }
+  },
 )
 
 ReleaseSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })

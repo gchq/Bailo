@@ -11,7 +11,6 @@ const authorisationMocks = vi.hoisted(() => ({
   userReleaseAction: vi.fn(() => true),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  ...((await vi.importActual('../../src/connectors/v2/authorisation/index.js')) as object),
   default: authorisationMocks,
 }))
 
@@ -41,6 +40,13 @@ const releaseModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/v2/Release.js', () => ({ default: releaseModelMocks }))
 
+const mockReviewService = vi.hoisted(() => {
+  return {
+    createReleaseReviews: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/review.js', () => mockReviewService)
+
 describe('services > release', () => {
   test('createRelease > simple', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
@@ -49,6 +55,7 @@ describe('services > release', () => {
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).toBeCalled()
   })
 
   test('createRelease > bad authorisation', async () => {
@@ -81,7 +88,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-      /^The requested release was not found./
+      /^The requested release was not found./,
     )
   })
 
@@ -93,7 +100,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-      /^You do not have permission to view this release./
+      /^You do not have permission to view this release./,
     )
   })
 
@@ -114,7 +121,7 @@ describe('services > release', () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
 
     expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
-      /^You do not have permission to delete this release./
+      /^You do not have permission to delete this release./,
     )
     expect(releaseModelMocks.save).not.toBeCalled()
   })

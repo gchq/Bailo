@@ -1,5 +1,8 @@
 const config = {
   app: {
+    api: {
+      port: 123,
+    },
     app: {
       protocol: '',
     },

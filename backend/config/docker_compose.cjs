@@ -9,6 +9,9 @@ module.exports = {
   },
 
   app: {
+    protocol: 'http',
+    host: 'localhost',
+    port: 8080,
     // Typically generated from `npm run certs`
     privateKey: '/certs/key.pem',
     publicKey: '/certs/cert.pem',
@@ -27,6 +30,7 @@ module.exports = {
 
   registry: {
     connection: {
+      internal: 'https://registry:5000',
       host: 'registry:5000',
       port: 5000,
       protocol: 'https',

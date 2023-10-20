@@ -1,5 +1,7 @@
 import { Document, model, Schema } from 'mongoose'
 
+import { ModelMetadata } from './Model.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -8,7 +10,7 @@ export interface ModelCardRevisionInterface {
   schemaId: string
 
   version: number
-  metadata: unknown
+  metadata: ModelMetadata
 
   createdBy: string
   createdAt: Date
@@ -34,7 +36,7 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
     timestamps: true,
     collection: 'v2_model_card_revisions',
     toJSON: { getters: true },
-  }
+  },
 )
 
 // This is required to stop a race case that could occur when there are two 'updateModelCard'

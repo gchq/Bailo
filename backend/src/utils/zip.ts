@@ -99,7 +99,7 @@ export async function listZipFiles(reader: MinioRandomAccessReader): Promise<Arr
               'relativeOffsetOfLocalHeader',
               'uncompressedSize',
               'fileName',
-            ])
+            ]),
           )
 
           return zipfile.readEntry()
@@ -108,7 +108,7 @@ export async function listZipFiles(reader: MinioRandomAccessReader): Promise<Arr
         zipfile.on('end', () => {
           resolve(entries)
         })
-      }
+      },
     )
   })
 }
@@ -136,7 +136,7 @@ export async function getFileStream(reader: MinioRandomAccessReader, minimalEntr
           if (streamError) throw streamError
           resolve(stream)
         })
-      }
+      },
     )
   })
 }

@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { ImageInterface } from '../../../../models/v2/Image.js'
+import { listModelImages } from '../../../../services/v2/registry.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getImagesSchema = z.object({
@@ -14,29 +14,22 @@ export const getImagesSchema = z.object({
 })
 
 interface GetImagesResponse {
-  images: Array<ImageInterface>
+  images: Array<{
+    namespace: string
+    model: string
+    versions: Array<string>
+  }>
 }
 
 export const getImages = [
   bodyParser.json(),
   async (req: Request, res: Response<GetImagesResponse>) => {
-    const _ = parse(req, getImagesSchema)
+    const {
+      params: { modelId },
+    } = parse(req, getImagesSchema)
 
     return res.json({
-      images: [
-        {
-          modelId: 'model-123',
-
-          namespace: 'abc',
-          model: 'model',
-          version: '1.2.3',
-
-          size: 4834382,
-
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
+      images: await listModelImages(req.user, modelId),
     })
   },
 ]

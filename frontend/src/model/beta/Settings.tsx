@@ -1,10 +1,11 @@
-import { Box, Button, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
+import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 import { ModelInterface } from '../../../types/v2/types'
+import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 
-type SettingsCategory = 'general' | 'danger'
+type SettingsCategory = 'general' | 'danger' | 'access'
 
 type SettingsProps = {
   model: ModelInterface
@@ -17,11 +18,20 @@ export default function Settings({ model }: SettingsProps) {
     setSelectedCategory(category)
   }
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} divider={<Divider orientation='vertical' flexItem />}>
+    <Stack
+      direction={{ xs: 'column', sm: 'row' }}
+      spacing={{ sm: 2 }}
+      divider={<Divider orientation='vertical' flexItem />}
+    >
       <List>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'general'} onClick={() => handleListItemClick('general')}>
             General Settings
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
+            Access Requests
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -32,10 +42,16 @@ export default function Settings({ model }: SettingsProps) {
       </List>
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
         {selectedCategory === 'general' && <ModelAccess model={model} />}
+        {selectedCategory === 'access' && <AccessRequestSettings />}
         {selectedCategory === 'danger' && (
-          <Button variant='contained' disabled>
-            Delete model
-          </Button>
+          <Stack spacing={2}>
+            <Typography variant='h6' component='h2'>
+              Danger Zone!
+            </Typography>
+            <Button variant='contained' disabled>
+              Delete model
+            </Button>
+          </Stack>
         )}
       </Box>
     </Stack>

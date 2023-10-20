@@ -12,7 +12,8 @@
 
 ### Dependencies
 
-This library requires some additional requirements to build [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html).
+This library requires some additional requirements to build
+[pycryptodome](https://pycryptodome.readthedocs.io/en/latest/src/installation.html).
 
 ```bash
 # RPM / Fedora Based
@@ -97,7 +98,8 @@ There are two ways to interact with a Bailo instance:
 
 ### `bailoclient.Client` Example
 
-This class makes available all the functionality to interact with a bailo instance. There are three client creation function available to quickly create a `bailoclient.Client` instance.
+This class makes available all the functionality to interact with a bailo instance. There are three client creation
+function available to quickly create a `bailoclient.Client` instance.
 
 ```python
 from bailoclient import create_pki_client
@@ -112,8 +114,9 @@ client.get_my_models()
 
 ### `bailoclient.Bailo` Example
 
-This class has all the functionality of `bailoclient.client` with additional functionality to improve the user experience for data scientists.
-Additional functionality includes making the model bundlers available and generating requirements files from python files.
+This class has all the functionality of `bailoclient.client` with additional functionality to improve the user
+experience for data scientists. Additional functionality includes making the model bundlers available and generating
+requirements files from python files.
 
 ```python
 from bailoclient import Bailo, BailoConfig, Pkcs12Config
@@ -166,17 +169,17 @@ Example yaml configuration `config.yaml`
 
 ```yaml
 api:
-  bailo_url: "http://example.com"
-  ca_verify: "path/to/ca/cert"
+  bailo_url: 'http://example.com'
+  ca_verify: 'path/to/ca/cert'
   timeout_period: 5
-  aws_gateway: "True"
+  aws_gateway: 'True'
   auth:
     username: username
     password: password
-    user_pool_id: "USER_POOL_ID"
-    client_id: "APP_CLIENT_ID"
-    client_secret: "APP_CLIENT_SECRET"
-    region: "AWS_REGION"
+    user_pool_id: 'USER_POOL_ID'
+    client_id: 'APP_CLIENT_ID'
+    client_secret: 'APP_CLIENT_SECRET'
+    region: 'AWS_REGION'
 ```
 
 ## Development setup

@@ -3,5 +3,30 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "python.analysis.typeCheckingMode": "basic"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "python.analysis.typeCheckingMode": "basic",
+  "editor.formatOnPaste": true,
+  "files.trimTrailingWhitespace": true,
+  "git.autofetch": true,
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.defaultInterpreterPath": "/usr/local/bin/python",
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "pylint.args": [
+    "--rcfile=lib/python-beta/pyproject.toml"
+  ],
+  "black-formatter.args": [
+    "--config=lib/python-beta/pyproject.toml"
+  ],
+  "flake8.args": [
+    "--toml-config=lib/python-beta/pyproject.toml"
+  ],
+  "isort.args": [
+    "--settings-path=lib/python-beta/pyproject.toml"
+  ],
 }

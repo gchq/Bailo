@@ -40,7 +40,7 @@ export const getModelsSearch = [
       id: model.id,
       name: model.name,
       description: model.description,
-      tags: ['example_tag', 'model'], // TODO: Add model card tags
+      tags: model.card?.metadata?.overview?.tags || [],
     }))
 
     return res.json({ models })

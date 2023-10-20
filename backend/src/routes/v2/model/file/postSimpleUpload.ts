@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { FileCategory } from '../../../../models/v2/File.js'
+import { FileInterface } from '../../../../models/v2/File.js'
+import { uploadFile } from '../../../../services/v2/file.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
@@ -11,20 +12,31 @@ export const postSimpleUploadSchema = z.object({
   query: z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
-    category: z.nativeEnum(FileCategory).optional().default(FileCategory.Other),
   }),
 })
 
 interface PostSimpleUpload {
-  fileId: string
+  file: FileInterface
 }
 
 export const postSimpleUpload = [
   async (req: Request, res: Response<PostSimpleUpload>) => {
-    const _ = parse(req, postSimpleUploadSchema)
+    // Does user have permission to upload a file?
+    const {
+      params: { modelId },
+      query: { name, mime },
+    } = parse(req, postSimpleUploadSchema)
+
+    // The `putObjectStream` function takes in a `StreamingBlobPayloadInputTypes`.  This type
+    // includes the 'ReadableStream' interface for handling streaming payloads, but a request
+    // is not by default assignable to this type.
+    //
+    // In practice, it is fine, as the only reason this assignment is not possible is due
+    // to a missing `.locked` parameter which is not a required field for our uploads.
+    const file = await uploadFile(req.user, modelId, name, mime, req as unknown as ReadableStream)
 
     return res.json({
-      fileId: '5effaa5662679b5af2c58829',
+      file,
     })
   },
 ]

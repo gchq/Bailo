@@ -5,11 +5,30 @@ import omit from 'lodash/omit'
 import remove from 'lodash/remove'
 import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
+import CustomTextInput from 'src/MuiForms/CustomTextInput'
+import EntitySelector from 'src/MuiForms/EntitySelector'
+import Nothing from 'src/MuiForms/Nothing'
+import RichTextInput from 'src/MuiForms/RichTextInput'
+import SeldonVersionSelector from 'src/MuiForms/SeldonVersionSelector'
+import TagSelector from 'src/MuiForms/TagSelector'
+import TagSelectorBeta from 'src/MuiForms/TagSelectorBeta'
+import UserSelector from 'src/MuiForms/UserSelector'
 
 import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
 import RenderForm from '../src/Form/RenderForm'
 import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
+
+export const widgets = {
+  TextareaWidget: RichTextInput,
+  customTextInput: CustomTextInput,
+  tagSelector: TagSelector,
+  tagSelectorBeta: TagSelectorBeta,
+  userSelector: UserSelector,
+  entitySelector: EntitySelector,
+  seldonVersionSelector: SeldonVersionSelector,
+  nothing: Nothing,
+}
 
 export function createStep({
   schema,
@@ -59,7 +78,7 @@ export function setStepState(
   _splitSchema: SplitSchema,
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
   step: Step,
-  state: any
+  state: any,
 ) {
   setSplitSchema((oldSchema) => {
     if (oldSchema.reference !== step.schemaRef) {
@@ -86,7 +105,7 @@ export function setStepValidate(
   splitSchema: SplitSchema,
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
   step: Step,
-  validate: boolean
+  validate: boolean,
 ) {
   const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
@@ -104,7 +123,7 @@ export function getStepsFromSchema(
   schema: any,
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
-  state: any = {}
+  state: any = {},
 ): Array<Step> {
   const schemaDupe = omit(schema.schema, omitFields) as any
 
@@ -115,7 +134,7 @@ export function getStepsFromSchema(
 
   const uiSchema = createUiSchema(schemaDupe, baseUiSchema)
   const props = Object.keys(schemaDupe.properties).filter((key) =>
-    ['object', 'array'].includes(schemaDupe.properties[key].type)
+    ['object', 'array'].includes(schemaDupe.properties[key].type),
   )
 
   const steps: Array<Step> = []
@@ -159,7 +178,7 @@ export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
 export function setStepsData(
   splitSchema: SplitSchema,
   setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
-  data: any
+  data: any,
 ) {
   const newSteps = splitSchema.steps.map((step) => {
     if (!data[step.section]) return { ...step }

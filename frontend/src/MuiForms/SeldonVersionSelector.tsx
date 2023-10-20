@@ -21,7 +21,7 @@ export default function SeldonVersionSelector({ label, value, required, readonly
           {version.name}
         </MenuItem>
       )),
-    [seldonVersions]
+    [seldonVersions],
   )
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
