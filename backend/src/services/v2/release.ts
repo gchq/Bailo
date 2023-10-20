@@ -56,7 +56,7 @@ export async function getModelReleases(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
 
-  return asyncFilter(results, (result) => authorisation.userReleaseAction(user, result, result.model, ModelAction.View))
+  return asyncFilter(results, (result) => authorisation.userReleaseAction(user, result.model, result, ModelAction.View))
 }
 
 export async function getReleaseBySemver(user: UserDoc, modelId: string, semver: string) {
