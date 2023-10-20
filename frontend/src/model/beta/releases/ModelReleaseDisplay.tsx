@@ -95,12 +95,16 @@ export default function ModelReleaseDisplay({
                 View Model Card
               </Button>
             </Stack>
-            <Stack spacing={1} direction='row'>
-              <Typography variant='caption' sx={{ fontWeight: 'bold' }}>
-                {formatDateString(release.updatedAt)}
+            <Typography variant='caption' sx={{ mb: 2 }}>
+              Created by
+              <Typography variant='caption' fontWeight='bold'>
+                {` ${release.createdBy} `}
               </Typography>
-              <Typography variant='caption'>{release.createdBy}</Typography>
-            </Stack>
+              on
+              <Typography variant='caption' fontWeight='bold'>
+                {` ${formatDateString(release.createdAt)} `}
+              </Typography>
+            </Typography>
             <Markdown>{release.notes}</Markdown>
             {(release.files.length > 0 || release.images.length > 0) && <Divider />}
             <Stack>

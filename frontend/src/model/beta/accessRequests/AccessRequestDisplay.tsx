@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { AccessRequestInterface } from 'types/interfaces'
@@ -78,27 +78,31 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 View Access Request
               </Button>
             </Stack>
-            <Stack spacing={1} direction='row'>
-              <Tooltip
-                describeChild
-                title={`Created by ${accessRequest.createdBy} on ${formatDateString(accessRequest.createdAt)}`}
-              >
-                <div>
+            <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
+              <Typography variant='caption'>
+                Created by
+                <Typography variant='caption' fontWeight='bold'>
+                  {` ${accessRequest.createdBy} `}
+                </Typography>
+                on
+                <Typography variant='caption' fontWeight='bold'>
+                  {` ${formatDateString(accessRequest.createdAt)} `}
+                </Typography>
+              </Typography>
+              {accessRequest.metadata.overview.endDate && (
+                <Typography variant='caption'>
+                  End Date:
                   <Typography variant='caption' fontWeight='bold'>
-                    {formatDateString(accessRequest.createdAt)}
+                    {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
-                  <Typography variant='caption' sx={{ ml: 1 }}>
-                    {accessRequest.createdBy}
-                  </Typography>
-                </div>
-              </Tooltip>
+                </Typography>
+              )}
             </Stack>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
               alignItems='flex-end'
               justifyContent='space-between'
               spacing={4}
-              mt={2}
             >
               <Box
                 sx={{
@@ -115,20 +119,12 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Typography>
                 <Grid container>
                   {accessRequest.metadata.overview.entities.map((entity) => (
-                    <Grid item xs={accessRequest.metadata.overview.endDate ? 4 : 3} key={entity}>
+                    <Grid item xs={3} key={entity}>
                       <Typography variant='body2'>{entity}</Typography>
                     </Grid>
                   ))}
                 </Grid>
               </Box>
-              {accessRequest.metadata.overview.endDate && (
-                <Box ml='auto' minWidth={170}>
-                  <Typography variant='caption'>End Date:</Typography>
-                  <Typography variant='caption' fontWeight='bold' sx={{ ml: 1 }}>
-                    {formatDateString(accessRequest.metadata.overview.endDate)}
-                  </Typography>
-                </Box>
-              )}
             </Stack>
             {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
             {inactiveReviews.map((review) => (

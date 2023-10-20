@@ -31,7 +31,7 @@ export default function PageWithTabs({
   const { tab } = router.query
 
   useEffect(() => {
-    tab && tabs.length ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
+    tab ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
   }, [tab, setCurrentTab, tabs])
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {

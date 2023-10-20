@@ -27,7 +27,6 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
     [accessRequests, model.name],
   )
 
-  // TODO me - Check this works once the above endpoint is live
   if (isAccessRequestsError) {
     return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
   }
