@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, Stack, Tab, Tabs, Theme } from '@mui/material'
 import { styled, ThemeProvider } from '@mui/material/styles'
 
-import { betaLightTheme, darkTheme, earthTheme, lightTheme, sunsetTheme } from '../../../src/theme'
+import { betaLightTheme, darkTheme, lightTheme } from '../../../src/theme'
 import { User } from '../../../types/types'
 
 interface ThemeTabProps {
@@ -20,11 +20,10 @@ export default function ThemeTab({ user }: ThemeTabProps) {
     { name: 'Bailo Default', theme: betaLightTheme },
     { name: 'Bailo Classic', theme: lightTheme },
     { name: 'Bailo Dark', theme: darkTheme },
-    { name: 'Bailo Sunset', theme: sunsetTheme },
-    { name: 'Bailo Earth', theme: earthTheme },
   ]
 
   function userThemeOnChange(themeKey) {
+    // eslint-disable-next-line no-console
     console.log(`Setting ${themeKey.name} as default theme for ${user.id}`)
   }
   return (
