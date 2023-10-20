@@ -1,34 +1,33 @@
 import { Chip } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
-import * as React from 'react'
+import { KeyboardEvent, SyntheticEvent, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
-interface EntitySelectorProps {
+interface EntitySelectorBetaProps {
   label?: string
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
 }
 
-export default function EntitySelectorBeta(props: EntitySelectorProps) {
+export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const { users, isUsersLoading: isLoading } = useListUsers()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
 
-  const entities = React.useMemo(() => {
-    let tempEntities: string[] = []
+  const entities = useMemo(() => {
+    if (!users) return []
 
-    if (users) tempEntities = tempEntities.concat(users.map((user) => user.id))
-    return tempEntities
+    return users.map((user) => user.id)
   }, [users])
 
   const { onChange, value: currentValue, required, label } = props
 
-  const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
+  const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange(newValues)
   }
 
@@ -54,7 +53,7 @@ export default function EntitySelectorBeta(props: EntitySelectorProps) {
           isOptionEqualToValue={(option: string, value: string) => option === value}
           getOptionLabel={(option) => option}
           value={currentValue || []}
-          onChange={_onChange}
+          onChange={handleChange}
           options={entities || []}
           loading={isLoading}
           getOptionDisabled={(option) => option === currentUser.id}
@@ -68,7 +67,7 @@ export default function EntitySelectorBeta(props: EntitySelectorProps) {
             <TextField
               {...params}
               label={label + (required ? ' *' : '')}
-              onKeyDown={(event: any) => {
+              onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {
                   event.stopPropagation()
                 }

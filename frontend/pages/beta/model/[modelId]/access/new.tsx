@@ -4,7 +4,7 @@ import { Button, Card, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { postAccessRequest } from '../../../../../actions/access'
 import { useGetModel } from '../../../../../actions/model'
@@ -29,8 +29,7 @@ export default function NewAccessRequest() {
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  // TODO - we can probably improve this with a useMemo to stop currentUser causing the useEffect below to re-render
-  const currentUserId = (currentUser && currentUser.id) || ''
+  const currentUserId = useMemo(() => (currentUser ? currentUser?.id : ''), [currentUser])
 
   useEffect(() => {
     if (!model || !schema) return
