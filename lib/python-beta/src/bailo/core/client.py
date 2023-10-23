@@ -1,25 +1,11 @@
-"""Main entry point"""
-from __future__ import annotations
-import requests
-import validators
 from typing import List, Optional, Dict, Any
-from .enums import ModelVisibility, SchemaKind
 
-class Agent:
-    def __init__(self):
-        self.get = requests.get
-        self.post = requests.post
-        self.put = requests.put
-        self.patch = requests.patch
-        self.delete = requests.delete
+from bailo.core.agent import Agent
+from bailo.core.enums import ModelVisibility, SchemaKind
 
+import validators
 
-class PkiAgent(Agent):
-    def get(self, *args, **kwargs):
-        return requests.get(*args, **kwargs)
-
-
-class BailoClient():
+class Client():
     def __init__(self, url: str, agent: Agent = Agent()):
         if not validators.url(url):
             raise ValueError("URL not valid.")
@@ -291,9 +277,8 @@ class BailoClient():
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
             params={"name": name, "mime": mime},
-            data = binary,
+            data=binary,
         ).json()  
-
 
     #def start_multi_upload(): TBC
 
