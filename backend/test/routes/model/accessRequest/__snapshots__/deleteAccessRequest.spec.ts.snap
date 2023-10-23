@@ -5,9 +5,3 @@ exports[`routes > accessRequest > deleteAccessRequest > 200 > ok 1`] = `
   "message": "Successfully removed access request.",
 }
 `;
-
-exports[`routes > release > deleteRelease > 200 > ok 1`] = `
-{
-  "message": "Successfully removed release.",
-}
-`;
