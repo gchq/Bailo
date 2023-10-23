@@ -7,6 +7,8 @@
   "editor.formatOnPaste": true,
   "files.trimTrailingWhitespace": true,
   "git.autofetch": true,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
