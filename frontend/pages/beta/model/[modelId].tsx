@@ -1,14 +1,13 @@
+import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
+import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
+import PageWithTabs from 'src/common/PageWithTabs'
 import AccessRequests from 'src/model/beta/AccessRequests'
-
-import { useGetModel } from '../../../actions/model'
-import EmptyBlob from '../../../src/common/EmptyBlob'
-import Loading from '../../../src/common/Loading'
-import PageWithTabs from '../../../src/common/PageWithTabs'
-import Overview from '../../../src/model/beta/Overview'
-import Releases from '../../../src/model/beta/Releases'
-import Settings from '../../../src/model/beta/Settings'
-import Wrapper from '../../../src/Wrapper.beta'
+import Overview from 'src/model/beta/Overview'
+import Releases from 'src/model/beta/Releases'
+import Settings from 'src/model/beta/Settings'
+import Wrapper from 'src/Wrapper.beta'
 
 export default function Model() {
   const router = useRouter()
@@ -29,7 +28,7 @@ export default function Model() {
           tabs={[
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
-            { title: 'Access Requests', path: 'access-requests', view: <AccessRequests model={model} /> },
+            { title: 'Access Requests', path: 'access', view: <AccessRequests model={model} /> },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]}
           displayActionButton
