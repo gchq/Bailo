@@ -30,34 +30,3 @@ exports[`routes > accessRequest > postAccessRequest > 400 > no description 1`] =
   },
 }
 `;
-
-exports[`routes > model > postModel > 200 > ok 1`] = `
-{
-  "card": {
-    "_id": "test",
-  },
-}
-`;
-
-exports[`routes > model > postModel > 400 > no description 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "string",
-          "message": "Must specify schema id within the body",
-          "path": [
-            "body",
-            "schemaId",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Must specify schema id within the body",
-    "name": "Error",
-  },
-}
-`;

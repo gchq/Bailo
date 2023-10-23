@@ -8,28 +8,3 @@ exports[`routes > files > getFiles > 200 > ok 1`] = `
   ],
 }
 `;
-
-exports[`routes > files > getFiles > version > 200 > ok 1`] = `
-{
-  "files": [
-    "a",
-    "b",
-  ],
-}
-`;
-
-exports[`routes > model > getModel > latest > 200 > ok 1`] = `
-{
-  "modelCard": {
-    "example": "test",
-  },
-}
-`;
-
-exports[`routes > model > getModel > version > 200 > ok 1`] = `
-{
-  "modelCard": {
-    "_id": "test",
-  },
-}
-`;
