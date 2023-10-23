@@ -5,11 +5,3 @@ exports[`routes > release > deleteRelease > 200 > ok 1`] = `
   "message": "Successfully removed release.",
 }
 `;
-
-exports[`routes > release > getRelease > 200 > ok 1`] = `
-{
-  "release": {
-    "_id": "test",
-  },
-}
-`;

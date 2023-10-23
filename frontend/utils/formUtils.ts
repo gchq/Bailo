@@ -7,6 +7,7 @@ import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
 import EntitySelector from 'src/MuiForms/EntitySelector'
+import EntitySelectorBeta from 'src/MuiForms/EntitySelectorBeta'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import SeldonVersionSelector from 'src/MuiForms/SeldonVersionSelector'
@@ -26,6 +27,7 @@ export const widgets = {
   tagSelectorBeta: TagSelectorBeta,
   userSelector: UserSelector,
   entitySelector: EntitySelector,
+  entitySelectorBeta: EntitySelectorBeta,
   seldonVersionSelector: SeldonVersionSelector,
   nothing: Nothing,
 }

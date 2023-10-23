@@ -1,5 +1,6 @@
 import { Schema } from '@mui/icons-material'
-import { Card, Container, Grid, Stack, Typography } from '@mui/material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -30,6 +31,13 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+            <Button
+              sx={{ width: 'fit-content' }}
+              startIcon={<ArrowBack />}
+              onClick={() => router.push(`/beta/model/${modelId}`)}
+            >
+              Back to model
+            </Button>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
               <Typography variant='h6' color='primary'>
                 Choose a schema

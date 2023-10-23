@@ -5,9 +5,3 @@ exports[`routes > file > deleteFile > 200 > ok 1`] = `
   "message": "Successfully removed file.",
 }
 `;
-
-exports[`routes > release > deleteRelease > 200 > ok 1`] = `
-{
-  "message": "Successfully removed release.",
-}
-`;

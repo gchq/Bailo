@@ -32,34 +32,3 @@ exports[`routes > accessRequest > patchAccessRequest > 400 > no name 1`] = `
   },
 }
 `;
-
-exports[`routes > accessRequest > postAccessRequest > 200 > ok 1`] = `
-{
-  "accessRequest": {
-    "_id": "test",
-  },
-}
-`;
-
-exports[`routes > accessRequest > postAccessRequest > 400 > no description 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "string",
-          "message": "Required",
-          "path": [
-            "body",
-            "schemaId",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Required",
-    "name": "Error",
-  },
-}
-`;
