@@ -4,16 +4,13 @@
     "source.fixAll.eslint": true
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "python.analysis.typeCheckingMode": "basic",
   "editor.formatOnPaste": true,
   "files.trimTrailingWhitespace": true,
   "git.autofetch": true,
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
+  "python.analysis.typeCheckingMode": "basic",
   "python.defaultInterpreterPath": "/usr/local/bin/python",
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,

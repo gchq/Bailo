@@ -1,11 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "prettier",
-    "simple-import-sort"
-  ],
+  "plugins": ["@typescript-eslint", "prettier", "simple-import-sort"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -16,21 +12,10 @@
     "next/core-web-vitals"
   ],
   "rules": {
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }
-    ],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "react/jsx-newline": [
-      1,
-      {
-        "prevent": true
-      }
-    ],
+    "react/jsx-newline": [1, { "prevent": true }],
     "simple-import-sort/imports": "warn",
     "simple-import-sort/exports": "warn",
     "no-console": "warn"
