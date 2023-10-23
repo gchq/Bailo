@@ -109,7 +109,6 @@ export default function DraftNewReleaseDialog({
               A release takes a snapshoot of the current state of the model code, artefacts and model card. Access
               requests will be able to select for any release of a model for deployment.
             </DialogContentText>
-
             <Stack sx={{ width: '100%' }} justifyContent='center'>
               <Stack direction='row'>
                 <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
@@ -132,7 +131,6 @@ export default function DraftNewReleaseDialog({
                 onChange={(e) => setSemanticVersion(e.target.value)}
               />
             </Stack>
-
             <Stack>
               <RichTextEditor
                 value={releaseNotes}
