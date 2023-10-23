@@ -84,7 +84,7 @@ export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const accessRequests = await AccessRequest.find({ modelId })
 
-  return asyncFilter(await accessRequests, (request) =>
+  return asyncFilter(accessRequests, (request) =>
     authorisation.userAccessRequestAction(user, model, request, AccessRequestAction.View),
   )
 }

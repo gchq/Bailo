@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > accessRequest > getAccessRequestsByModel > good 1`] = `
+[
+  {
+    "response": "example",
+  },
+]
+`;
+
+exports[`services > accessRequest > getAccessRequestsByModel > good 2`] = `
+[
+  [
+    {
+      "_id": "a",
+    },
+    {
+      "_id": "b",
+    },
+  ],
+  [Function],
+]
+`;
