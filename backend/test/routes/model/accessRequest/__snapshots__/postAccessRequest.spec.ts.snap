@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > accessRequest > postAccessRequest > 200 > ok 1`] = `
+{
+  "accessRequest": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > accessRequest > postAccessRequest > 400 > no description 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "message": "Required",
+          "path": [
+            "body",
+            "schemaId",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Required",
+    "name": "Error",
+  },
+}
+`;

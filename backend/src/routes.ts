@@ -48,9 +48,11 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
-import { getApprovals as getApprovalsV2 } from './routes/v2/approval/getApprovals.js'
-import { getApprovalsCount as getApprovalsCountV2 } from './routes/v2/approval/getApprovalsCount.js'
-import { getComplianceApprovals } from './routes/v2/model/compliance/getComplianceCheckApprovals.js'
+import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
+import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
+import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
+import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
+import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
@@ -58,6 +60,7 @@ import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
+import { getImages } from './routes/v2/model/images/getImages.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
@@ -69,6 +72,8 @@ import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
+import { getReviews } from './routes/v2/review/getReviews.js'
+import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
@@ -76,6 +81,7 @@ import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
+import { getCurrentUser } from './routes/v2/user/getCurrentUser.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -92,7 +98,7 @@ if (config.oauth.enabled) {
       store: MongoStore.create({
         mongoUrl: config.mongo.uri,
       }),
-    })
+    }),
   )
 }
 
@@ -203,33 +209,38 @@ if (config.experimental.v2) {
 
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
-  server.get('/api/v2/model/:modelId/releases/:semver', ...getRelease)
-  server.delete('/api/v2/model/:modelId/releases/:semver', ...deleteRelease)
+  server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+  server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
+  server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
+
+  server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
+  server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
+  server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
+  server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
+  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
+
+  //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
-  server.delete('/api/v2/model/:modelId/files/:fileId', ...deleteFile)
+  server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
-  // *server.get('/api/v2/model/:modelId/images', ...getImages)
+  server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/list', ...getModelFileList)
-  // *server.get('/api/v2/model/:modelId/releases/:semver/file/:fileCode/raw', ...getModelFileRaw)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
+  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
 
-  server.get('/api/v2/approvals', ...getApprovalsV2)
-  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
+  server.get('/api/v2/reviews', ...getReviews)
 
   server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
   server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
-
-  server.get('/api/v2/model/:modelId/compliance/check-approvals', ...getComplianceApprovals)
-  // server.post('/api/v2/model/:modelId/compliance/respond/:role', ...postComplianceResponse)
 
   server.post('/api/v2/teams', ...postTeam)
   server.get('/api/v2/teams', ...getTeams)
@@ -237,9 +248,6 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/team/:teamId', ...getTeam)
   server.patch('/api/v2/team/:teamId', ...patchTeam)
-
-  server.get('/api/v2/approvals', ...getApprovalsV2)
-  server.get('/api/v2/approvals/count', ...getApprovalsCountV2)
 
   // server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
   // server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
@@ -249,7 +257,7 @@ if (config.experimental.v2) {
   // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
   // server.get('/api/v2/users', ...getUsers)
-  // server.get('/api/v2/users/me', ...getCurrentUser)
+  server.get('/api/v2/users/me', ...getCurrentUser)
 
   // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)

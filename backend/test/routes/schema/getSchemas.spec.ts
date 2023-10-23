@@ -30,9 +30,9 @@ describe('routes > schema > getSchemas', () => {
     expect(res.body).matchSnapshot()
   })
 
-  test('returns only deployment schemas with the deployment parameter', async () => {
+  test('returns only deployment schemas with the accessRequest parameter', async () => {
     mockSchemaService.findSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
-    const res = await testGet(`/api/v2/schemas?kind=deployment`)
+    const res = await testGet(`/api/v2/schemas?kind=accessRequest`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

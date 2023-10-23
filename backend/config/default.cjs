@@ -69,9 +69,11 @@ module.exports = {
   registry: {
     // Registry connection information should be the internal connection to the registry.
     connection: {
+      internal: 'https://localhost:5000',
       host: 'localhost:5000',
       port: 5000,
       protocol: 'https',
+      insecure: true,
     },
 
     // Service and Issuer must match those set in the registry configuration
@@ -233,5 +235,22 @@ module.exports = {
 
   log: {
     level: 'trace',
+  },
+
+  s3: {
+    credentials: {
+      accessKeyId: 'minioadmin',
+      secretAccessKey: 'minioadmin',
+    },
+
+    endpoint: 'http://minio:9000',
+    region: 'ignored',
+    forcePathStyle: true,
+
+    // Names of buckets that Bailo uses
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
   },
 }

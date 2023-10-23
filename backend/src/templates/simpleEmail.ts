@@ -73,7 +73,7 @@ export function html({ text, columns, buttons }: SimpleEmail) {
     <mj-section background-color="#27598e" padding-bottom="20px" padding-top="20px">
       ${buttons.map((button) => formatButton(button, buttons.length))}
     </mj-section>
-  `)
+  `),
   ).html
 }
 

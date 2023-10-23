@@ -11,6 +11,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
+import { useEffect } from 'react'
 
 import createEmotionCache from '../components/createEmotionCache'
 import ThemeModeContext from '../src/contexts/themeModeContext'
@@ -27,6 +28,12 @@ export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   const themeModeValue = useThemeMode()
+
+  // This is set so that 'react-markdown-editor' respects the theme set by MUI.
+  useEffect(() => {
+    const mode = themeModeValue.theme.palette.mode === 'dark' ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-color-mode', mode)
+  }, [themeModeValue])
 
   return (
     <CacheProvider value={emotionCache}>

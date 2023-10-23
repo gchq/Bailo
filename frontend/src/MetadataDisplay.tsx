@@ -8,15 +8,7 @@ import { useGetSchema } from '../data/schema'
 import { printProperty } from '../utils/propertyUtils'
 import CommonTabs from './common/CommonTabs'
 
-function MetadataDisplay({
-  item,
-  tabsDisplaySequentially,
-  use,
-}: {
-  item: any
-  tabsDisplaySequentially: boolean
-  use: any
-}) {
+function MetadataDisplay({ item, tabsDisplaySequentially }: { item: any; tabsDisplaySequentially: boolean }) {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(item.schemaRef)
 
   const [currentSchema, setCurrentSchema] = useState<any | undefined>(undefined)
@@ -32,7 +24,7 @@ function MetadataDisplay({
     const currentSchema = schema.schema
     const keys = Object.keys(currentSchema.properties).filter(
       (sectionName) =>
-        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false
+        !propertiesToIgnore.includes(sectionName) && currentSchema.properties[sectionName].displayModelCard !== false,
     )
 
     setCurrentSchema(currentSchema)

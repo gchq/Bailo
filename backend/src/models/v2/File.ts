@@ -1,10 +1,5 @@
 import { Document, model, Schema } from 'mongoose'
-
-export const FileCategory = {
-  Other: 'other',
-} as const
-
-export type FileCategoryKeys = (typeof FileCategory)[keyof typeof FileCategory]
+import MongooseDelete from 'mongoose-delete'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -13,8 +8,8 @@ export interface FileInterface {
   modelId: string
 
   name: string
-  category: FileCategoryKeys
   size: number
+  mime: string
 
   bucket: string
   path: string
@@ -35,8 +30,8 @@ const FileSchema = new Schema<FileInterface>(
     modelId: { type: String, required: true },
 
     name: { type: String, required: true },
-    category: { type: String, enum: Object.values(FileCategory), default: FileCategory.Other },
     size: { type: Number, required: true },
+    mime: { type: String, required: true },
 
     bucket: { type: String, required: true },
     path: { type: String, required: true },
@@ -47,8 +42,10 @@ const FileSchema = new Schema<FileInterface>(
     timestamps: true,
     collection: 'v2_files',
     toJSON: { getters: true },
-  }
+  },
 )
+
+FileSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
 
 const FileModel = model<FileInterface>('v2_File', FileSchema)
 

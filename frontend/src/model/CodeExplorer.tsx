@@ -30,7 +30,7 @@ export default function CodeExplorer({
       addQueryParameter('path', newPath)
       setPath(newPath)
     },
-    [addQueryParameter]
+    [addQueryParameter],
   )
 
   const tree: RenderTree = useMemo(() => {

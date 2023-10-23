@@ -79,7 +79,7 @@ sharing.
 
 ### Requirements:
 
-- Node v16
+- Node v18
 - Docker / Docker Compose
 
 <br />
@@ -100,8 +100,9 @@ DOCKER_BUILDKIT=1 docker-compose build --parallel
 docker-compose up -d
 ```
 
-On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript
-modules. These are cached however, so future starts only require a few seconds. You should access the site via [localhost:8080](http://localhost:8080).
+On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
+These are cached however, so future starts only require a few seconds. You should access the site via
+[localhost:8080](http://localhost:8080).
 
 <br />
 
@@ -115,7 +116,8 @@ npm run script -- addDeploymentSchema
 npm run script -- addUploadSchema
 ```
 
-> NOTE: Scripts are also written in Typescript. In production, run them using `node`, in development, run them using `ts-node` or `npm run script`.
+> NOTE: Scripts are also written in Typescript. In production, run them using `node`, in development, run them using
+> `ts-node` or `npm run script`.
 
 <br />
 
@@ -134,7 +136,8 @@ npm run script -- addUploadSchema
 \*\* Note: these credentials are intentionally basic/default, but in your own instances we recommend changing them to
 something more secure.
 
-We expect the administrator to provide their own forms of authentication. By default all users authenticate using as 'user'.
+We expect the administrator to provide their own forms of authentication. By default all users authenticate using as
+'user'.
 
 You can test out your new deployment using the example models which can be found in `__tests__`
 [`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and
@@ -150,10 +153,10 @@ You can test out your new deployment using the example models which can be found
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
-2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./frontend/data`. Each one exposes variables
-   to specify if it is loading, errored, data, etc.
-3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/routes.ts`. Each route is
-   an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
+2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./frontend/data`. Each one exposes
+   variables to specify if it is loading, errored, data, etc.
+3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/routes.ts`. Each route
+   is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
 4. Routes interact with the database via `mongoose`, which stores models in `./backend/models`.
 
 Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are

@@ -14,20 +14,25 @@ export default function Model() {
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
-  // TODO implement function
+  function requestAccess() {
+    router.push(`/beta/model/${modelId}/access/schema`)
+  }
 
   return (
-    <Wrapper title='Model' page='marketplace' fullWidth>
+    <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
       {!model && !isModelLoading && <EmptyBlob text={`Oh no, it looks like model ${modelId} doesn't exist!`} />}
       {model && !isModelLoading && !isModelError && (
         <PageWithTabs
-          title={model.id}
+          title={model.name}
           tabs={[
-            { title: 'Overview', view: <Overview model={model} /> },
-            { title: 'Releases', view: <Releases model={model} /> },
-            { title: 'Settings', view: <Settings model={model} /> },
+            { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
+            { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
+            { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]}
+          displayActionButton
+          actionButtonTitle='Request access'
+          actionButtonOnClick={requestAccess}
         />
       )}
     </Wrapper>

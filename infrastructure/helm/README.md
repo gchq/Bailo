@@ -29,7 +29,7 @@ image:
 ---
 image:
   repository: some.repository.com/bailo
-  tag: "latest"
+  tag: 'latest'
 ```
 
 This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is
@@ -45,9 +45,9 @@ Basic certs can be in `backend/certs`
 
 ```yaml
 image:
-  frontendRepository: "image-registry-openshift-imagestreams"
+  frontendRepository: 'image-registry-openshift-imagestreams'
   frontendTag: tag
-  backendRepository: "image-registry-openshift-imagestreams"
+  backendRepository: 'image-registry-openshift-imagestreams'
   backendTag: tag
 
 route:
@@ -69,19 +69,19 @@ openshift:
 
 ```yaml
 image:
-  frontendRepository: "aws-elastic-container-registry"
+  frontendRepository: 'aws-elastic-container-registry'
   frontendTag: tag
-  backendRepository: "aws-elastic-container-registry"
+  backendRepository: 'aws-elastic-container-registry'
   backendTag: tag
 
 ingress:
   enabled: true
-  name: "bailo-ingress"
+  name: 'bailo-ingress'
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: instance
-  fqdn: "*.amazonaws.com"
+  fqdn: '*.amazonaws.com'
 
 aws:
   enabled: true

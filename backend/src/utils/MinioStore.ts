@@ -55,7 +55,7 @@ export default class MinioStore {
   async _removeFile(
     _req: Request,
     file: Express.Multer.File & { bucket: string },
-    cb: (error: Error | null, data: any) => void
+    cb: (error: Error | null, data: any) => void,
   ) {
     logger.info({ bucket: file.bucket, path: file.path }, 'Removing file from Minio')
     try {

@@ -2,7 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { FileCategory, FileInterface } from '../../../../models/v2/File.js'
+import { FileInterface } from '../../../../models/v2/File.js'
+import { getFilesByModel } from '../../../../services/v2/file.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getFilesSchema = z.object({
@@ -20,26 +21,14 @@ interface GetFilesResponse {
 export const getFiles = [
   bodyParser.json(),
   async (req: Request, res: Response<GetFilesResponse>) => {
-    const _ = parse(req, getFilesSchema)
+    const {
+      params: { modelId },
+    } = parse(req, getFilesSchema)
+
+    const files = await getFilesByModel(req.user, modelId)
 
     return res.json({
-      files: [
-        {
-          modelId: 'example-model',
-
-          name: 'example-file',
-          category: FileCategory.Other,
-          size: 1024,
-
-          bucket: 'uploads',
-          path: '/example/upload/path',
-
-          complete: true,
-
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
+      files,
     })
   },
 ]

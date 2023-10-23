@@ -32,7 +32,7 @@ const SchemaSchema = new MongooseSchema<Schema>(
   {
     timestamps: true,
     toJSON: { getters: true },
-  }
+  },
 )
 
 const SchemaModel = model<Schema>('Schema', SchemaSchema)

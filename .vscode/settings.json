@@ -3,10 +3,10 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "python.analysis.typeCheckingMode": "basic",
   "editor.formatOnPaste": true,
   "files.trimTrailingWhitespace": true,
-  "files.autoSave": "onFocusChange",
   "git.autofetch": true,
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
@@ -28,5 +28,5 @@
   ],
   "isort.args": [
     "--settings-path=lib/python-beta/pyproject.toml"
-  ]
+  ],
 }

@@ -17,7 +17,7 @@ export function useListApprovals(approvalCategory: ApprovalCategory, filter: App
       approvalCategory,
       filter,
     })}`,
-    fetcher
+    fetcher,
   )
 
   return {
@@ -30,7 +30,7 @@ export function useListApprovals(approvalCategory: ApprovalCategory, filter: App
 
 export function useGetVersionOrDeploymentApprovals(
   approvalCategory: ApprovalCategory,
-  versionOrDeploymentId: Version['_id'] | Deployment['_id']
+  versionOrDeploymentId: Version['_id'] | Deployment['_id'],
 ) {
   const { data, error, mutate } = useSWR<
     {

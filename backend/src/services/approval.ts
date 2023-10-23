@@ -154,7 +154,7 @@ async function createApproval({
       upsert: true,
       new: true,
       rawResult: true,
-    }
+    },
   )) as unknown as any
 
   if (!lastErrorObject?.updatedExisting) {
@@ -301,7 +301,7 @@ export async function deleteApprovalsByVersion(user: UserDoc, version: VersionDo
     {
       version: version._id,
     },
-    user._id
+    user._id,
   )
 }
 
@@ -310,7 +310,7 @@ export async function deleteApprovalsByDeployment(user: UserDoc, deployment: Dep
     {
       deployment: deployment._id,
     },
-    user._id
+    user._id,
   )
 }
 
@@ -323,7 +323,7 @@ export async function requestDeploymentsForModelVersions(user: UserDoc, deployme
   if (!versions) {
     throw BadReq(
       { code: 'versions_not_found', deployment },
-      `Could not find versions for deployment '${deployment.uuid}'`
+      `Could not find versions for deployment '${deployment.uuid}'`,
     )
   }
   versions.forEach(async (versionId) => {
@@ -331,7 +331,7 @@ export async function requestDeploymentsForModelVersions(user: UserDoc, deployme
     if (!versionDoc) {
       throw BadReq(
         { code: 'versions_not_found', deployment },
-        `Could not find version for deployment '${deployment.uuid}'`
+        `Could not find version for deployment '${deployment.uuid}'`,
       )
     }
     if (

@@ -40,7 +40,7 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
 
   const buildOptionsStep = useMemo(
     () => splitSchema.steps.find((buildOptionSchemaStep) => buildOptionSchemaStep.section === 'buildOptions'),
-    [splitSchema.steps]
+    [splitSchema.steps],
   )
 
   const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
