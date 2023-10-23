@@ -54,9 +54,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
-    const updatedModel: ModelInterface = _.cloneDeep(model)
-    updatedModel.collaborators = accessList
-    await patchModel(updatedModel)
+    await patchModel(model.id, { collaborators: accessList })
   }
 
   if (isUsersError) {
