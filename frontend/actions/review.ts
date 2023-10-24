@@ -45,7 +45,6 @@ type GetReviewRequestsForModelQuery = {
 export function useGetReviewRequestsForModel({
   modelId,
   isActive,
-  reviewKind,
   semver,
   accessRequestId,
 }: GetReviewRequestsForModelQuery) {
@@ -64,16 +63,9 @@ export function useGetReviewRequestsForModel({
     fetcher,
   )
 
-  let reviews: ReviewRequestInterface[] = []
-
-  if (data) {
-    // TODO me - This filter can be removed if we can pass in accessRequest.id as a query param above
-    reviews = reviewKind ? data.reviews.filter((review) => review.kind === reviewKind) : data.reviews
-  }
-
   return {
     mutateReviews: mutate,
-    reviews,
+    reviews: data ? data.reviews : [],
     isReviewsLoading: !error && !data,
     isReviewsError: error,
   }

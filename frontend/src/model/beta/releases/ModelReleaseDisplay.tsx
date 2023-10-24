@@ -32,7 +32,6 @@ export default function ModelReleaseDisplay({
     modelId,
     semver: release.semver,
     isActive: true,
-    reviewKind: 'release',
   })
   const {
     reviews: inactiveReviews,
@@ -42,7 +41,6 @@ export default function ModelReleaseDisplay({
     modelId,
     semver: release.semver,
     isActive: false,
-    reviewKind: 'release',
   })
 
   function latestVersionAdornment() {

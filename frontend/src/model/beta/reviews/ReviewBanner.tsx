@@ -44,13 +44,11 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     modelId,
     semver,
     isActive: true,
-    reviewKind: 'release',
   })
   const { mutateReviews: mutateInactiveReviews } = useGetReviewRequestsForModel({
     modelId,
     semver,
     isActive: false,
-    reviewKind: 'release',
   })
 
   const handleReviewOpen = () => {

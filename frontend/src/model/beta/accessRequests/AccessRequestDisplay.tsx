@@ -18,7 +18,6 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
   const theme = useTheme()
   const router = useRouter()
 
-  // TODO me - get access request reviews (both active and inactive)
   const {
     reviews: activeReviews,
     isReviewsLoading: isActiveReviewsLoading,
@@ -27,7 +26,6 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
     isActive: true,
-    reviewKind: 'access',
   })
   const {
     reviews: inactiveReviews,
@@ -37,7 +35,6 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
     isActive: false,
-    reviewKind: 'access',
   })
 
   if (isActiveReviewsError) {
