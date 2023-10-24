@@ -223,8 +223,6 @@ if (config.experimental.v2) {
   server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
-  //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
-
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
