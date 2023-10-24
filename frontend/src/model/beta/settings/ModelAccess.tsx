@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Divider,
   Stack,
   Table,
   TableBody,
@@ -52,7 +53,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }
 
-  // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
     await patchModel(model.id, { collaborators: accessList })
   }
@@ -129,8 +129,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
+          <Divider />
           <div>
-            <Button aria-label='Save access list' onClick={updateAccessList}>
+            <Button variant='contained' aria-label='Save access list' onClick={updateAccessList}>
               Save
             </Button>
           </div>

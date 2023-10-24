@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { ModelInterface } from '../../../types/v2/types'
 import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
+import ModelDetails from './settings/ModelDetails'
 
-type SettingsCategory = 'general' | 'danger' | 'access'
+type SettingsCategory = 'general' | 'danger' | 'access' | 'permissions'
 
 type SettingsProps = {
   model: ModelInterface
@@ -26,7 +27,15 @@ export default function Settings({ model }: SettingsProps) {
       <List>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'general'} onClick={() => handleListItemClick('general')}>
-            General Settings
+            Details
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            selected={selectedCategory === 'permissions'}
+            onClick={() => handleListItemClick('permissions')}
+          >
+            Model Access
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -41,7 +50,8 @@ export default function Settings({ model }: SettingsProps) {
         </ListItem>
       </List>
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
-        {selectedCategory === 'general' && <ModelAccess model={model} />}
+        {selectedCategory === 'general' && <ModelDetails model={model} />}
+        {selectedCategory === 'permissions' && <ModelAccess model={model} />}
         {selectedCategory === 'access' && <AccessRequestSettings />}
         {selectedCategory === 'danger' && (
           <Stack spacing={2}>
