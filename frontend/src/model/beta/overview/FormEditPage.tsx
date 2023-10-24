@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack } from '@mui/material'
+import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 import { useGetModel } from '../../../../actions/model'
@@ -29,7 +29,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   async function onSubmit() {
     if (schema) {
       const data = getStepsData(splitSchema, true)
-      data.schemaRef = schema.id
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
@@ -75,31 +74,46 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ py: 1 }}>
         <Stack
-          direction='row'
-          spacing={1}
-          justifyContent='flex-end'
-          divider={<Divider orientation='vertical' flexItem />}
-          sx={{ mb: { xs: 2 } }}
+          direction={{ sx: 'column', sm: 'row' }}
+          justifyContent={{ sx: 'center', sm: 'space-between' }}
+          alignItems='center'
+          sx={{ pb: 2 }}
         >
+          <div>
+            <Typography fontWeight='bold'>Schema</Typography>
+            <Typography>{schema?.name}</Typography>
+          </div>
           {!isEdit && (
-            <Button variant='outlined' onClick={() => setDialogOpen(true)}>
-              View History
-            </Button>
-          )}
-          {!isEdit && (
-            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)}>
-              Edit Model card
-            </Button>
+            <Stack
+              direction='row'
+              spacing={1}
+              justifyContent='flex-end'
+              divider={<Divider orientation='vertical' flexItem />}
+              sx={{ mb: { xs: 2 } }}
+            >
+              <Button variant='outlined' onClick={() => setDialogOpen(true)}>
+                View History
+              </Button>
+              <Button variant='outlined' onClick={() => setIsEdit(!isEdit)} sx={{ mb: { xs: 2 } }}>
+                Edit Model card
+              </Button>
+            </Stack>
           )}
           {isEdit && (
-            <Button variant='outlined' onClick={onCancel}>
-              Cancel
-            </Button>
-          )}
-          {isEdit && (
-            <Button variant='contained' onClick={onSubmit}>
-              Save
-            </Button>
+            <Stack
+              direction='row'
+              spacing={1}
+              justifyContent='flex-end'
+              divider={<Divider orientation='vertical' flexItem />}
+              sx={{ mb: { xs: 2 } }}
+            >
+              <Button variant='outlined' onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button variant='contained' onClick={onSubmit}>
+                Save
+              </Button>
+            </Stack>
           )}
         </Stack>
         <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />

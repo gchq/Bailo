@@ -11,7 +11,24 @@ export const testModelSchema = {
 
   kind: SchemaKind.Model,
   jsonSchema: {
-    'Schema field 1': 'field 1 info',
+    properties: {
+      highLevelDetails: {
+        title: 'Overview',
+        description: 'Summary of the model functionality.',
+        type: 'object',
+        properties: {
+          name: {
+            title: 'Name of the Machine Learning Model',
+            description:
+              "This should be descriptive name, such as 'Arabic - English Translation', and will be visible in the model marketplace.",
+            type: 'string',
+            minLength: 1,
+            maxLength: 140,
+            widget: 'customTextInput',
+          },
+        },
+      },
+    },
   },
 
   createdAt: new Date('2023-07-28T10:50:00.928Z'),

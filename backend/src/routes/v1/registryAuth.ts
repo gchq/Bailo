@@ -6,7 +6,13 @@ import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
+import authorisation from '../../connectors/v2/authorisation/index.js'
+import { ModelDoc } from '../../models/v2/Model.js'
+import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
 import { findDeploymentByUuid } from '../../services/deployment.js'
+import { getAccessRequestsByModel } from '../../services/v2/accessRequest.js'
+import log from '../../services/v2/log.js'
+import { getModelById } from '../../services/v2/model.js'
 import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList } from '../../utils/entity.js'
@@ -158,9 +164,59 @@ function generateAccess(scope: any) {
   }
 }
 
+async function checkAccessV2(access: Access, user: UserDocV2) {
+  const modelId = access.name.split('/')[0]
+  let model: ModelDoc
+  try {
+    model = await getModelById(user, modelId)
+  } catch (e) {
+    log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
+    // bad model id?
+    return false
+  }
+
+  const entities = await authorisation.getEntities(user)
+  if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
+    // They are a collaborator to the model, let them push or pull.
+    return true
+  }
+
+  if (!isEqual(access.actions, ['pull'])) {
+    // If users are not collaborators, they should only be able to pull
+    log.warn({ userDn: user.dn, access }, 'Non-collaborator can only pull models')
+    return false
+  }
+
+  // TODO: If the model is 'public access' automatically approve pulls.
+
+  const accessRequests = await getAccessRequestsByModel(user, modelId)
+  const accessRequest = accessRequests.find((accessRequest) =>
+    accessRequest.metadata.overview.entities.some((entity) => entities.includes(entity)),
+  )
+
+  if (!accessRequest) {
+    // User does not have a valid access request
+    log.warn({ userDn: user.dn, access }, 'No valid access request found')
+    return false
+  }
+
+  return true
+}
+
 async function checkAccess(access: Access, user: UserDoc) {
+  const modelUuid = access.name.split('/')[0]
+  try {
+    const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
+    await getModelById(v2User, modelUuid)
+    return checkAccessV2(access, v2User)
+  } catch (e) {
+    // do nothing, assume v1 authorisation
+    log.warn({ userId: user.id, access, e }, 'Falling back to V1 authorisation')
+  }
+
   if (access.type !== 'repository') {
     // not a repository request
+    log.warn({ userId: user.id, access }, 'Refusing non-repository request')
     return false
   }
 
@@ -169,16 +225,19 @@ async function checkAccess(access: Access, user: UserDoc) {
 
   if (!deployment) {
     // no deployment found
+    log.warn({ userId: user.id, access }, 'No deployment found')
     return false
   }
 
   if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
     // user not in access list
+    log.warn({ userId: user.id, access }, 'User not in deployment list')
     return false
   }
 
   if (!isEqual(access.actions, ['pull'])) {
     // users should only be able to pull images
+    log.warn({ userId: user.id, access }, 'User tried to request permissions beyond pulling')
     return false
   }
 
