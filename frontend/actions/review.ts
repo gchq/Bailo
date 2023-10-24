@@ -39,7 +39,6 @@ type PartialGetReviewRequestsForModelQuery =
 type GetReviewRequestsForModelQuery = {
   modelId: ModelInterface['id']
   isActive: boolean
-  reviewKind?: ReviewRequestInterface['kind'] // Can be removed once accessRequestId as a query param has been implemented on backend
 } & PartialGetReviewRequestsForModelQuery
 
 export function useGetReviewRequestsForModel({
