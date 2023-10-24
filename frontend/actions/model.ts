@@ -90,10 +90,13 @@ export async function postModel(form: ModelForm) {
   })
 }
 
-export async function patchModel(model: ModelInterface) {
-  return fetch(`/api/v2/model/${model.id}`, {
-    method: 'patch',
+export async function patchModel(
+  id: string,
+  delta: Partial<Pick<ModelInterface, 'name' | 'description' | 'collaborators' | 'visibility'>>,
+) {
+  return fetch(`/api/v2/model/${id}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(model),
+    body: JSON.stringify(delta),
   })
 }
