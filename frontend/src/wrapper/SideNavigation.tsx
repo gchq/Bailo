@@ -147,12 +147,12 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={reviewCount} color='secondary'>
+                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount == 0}>
                           <ListAltIcon />
                         </Badge>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={reviewCount} color='secondary'>
+                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount == 0}>
                         <ListAltIcon />
                       </Badge>
                     )}
