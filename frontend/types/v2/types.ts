@@ -25,6 +25,16 @@ export interface ModelCardInterface {
   metadata: unknown
 }
 
+export interface ModelCardRevisionInterface {
+  modelId: string
+  schemaId: string
+  version: number
+  metadata: unknown
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface CollaboratorEntry {
   entity: string
   roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
