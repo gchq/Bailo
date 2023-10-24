@@ -7,10 +7,10 @@ import { respondToReview } from '../../../services/v2/review.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'
 
-export const postReleaseReviewResponseSchema = z.object({
+export const postAccessRequestReviewResponseSchema = z.object({
   params: z.object({
     modelId: z.string(),
-    semver: z.string(),
+    accessRequestId: z.string(),
   }),
   body: z.object({
     role: z.string(),
@@ -19,19 +19,19 @@ export const postReleaseReviewResponseSchema = z.object({
   }),
 })
 
-interface PostReleaseReviewResponse {
+interface PostAccessRequestReviewResponse {
   review: ReviewInterface
 }
 
-export const postReleaseReviewResponse = [
+export const postAccessRequestReviewResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReleaseReviewResponse>) => {
+  async (req: Request, res: Response<PostAccessRequestReviewResponse>) => {
     const {
-      params: { modelId, semver },
+      params: { modelId, accessRequestId },
       body: { role, ...body },
-    } = parse(req, postReleaseReviewResponseSchema)
+    } = parse(req, postAccessRequestReviewResponseSchema)
 
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
+    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
 
     return res.json({
       review,

@@ -4,7 +4,7 @@ import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { ReviewKind } from '../../types/v2/enums.js'
+import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
@@ -80,15 +80,28 @@ export type ReviewResponseParams = Pick<ReviewResponse, 'decision' | 'comment'>
 export async function respondToReview(
   user: UserDoc,
   modelId: string,
-  semver: string,
   role: string,
   response: ReviewResponseParams,
+  kind: ReviewKindKeys,
+  reviewId: string,
 ): Promise<ReviewInterface> {
+  let reviewIdQuery
+  switch (kind) {
+    case ReviewKind.Access:
+      reviewIdQuery = { accessRequestId: reviewId }
+      break
+    case ReviewKind.Release:
+      reviewIdQuery = { semver: reviewId }
+      break
+    default:
+      throw BadReq('Review Kind not recognised', reviewIdQuery)
+  }
+
   const review = (
     await Review.aggregate()
       .match({
         modelId,
-        semver,
+        ...reviewIdQuery,
         role,
       })
       .sort({ createdAt: -1 })
@@ -100,7 +113,7 @@ export async function respondToReview(
       .limit(1)
   ).at(0)
   if (!review) {
-    throw NotFound(`Unable to find Review to respond to.`, { modelId, semver, role })
+    throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
   const update = await Review.findByIdAndUpdate(
     review._id,
@@ -110,7 +123,7 @@ export async function respondToReview(
     { new: true },
   )
   if (!update) {
-    throw GenericError(500, `Adding response to Review was not successful`, { modelId, semver, role })
+    throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
   return update
 }
