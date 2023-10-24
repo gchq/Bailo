@@ -63,9 +63,7 @@ export default function DraftNewReleaseDialog({
           fileIds.push(res.file._id)
         } else {
           setLoading(false)
-          return setErrorMessage(
-            `Status code ${postArtefactResponse.status}. There was a problem uploading your files, please try again.`,
-          )
+          return setErrorMessage(await getErrorMessage(postArtefactResponse))
         }
       }
 
