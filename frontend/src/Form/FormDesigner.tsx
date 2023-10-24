@@ -52,7 +52,6 @@ export default function FormDesigner({
           </MaterialStep>
         ))}
       </Stepper>
-
       <Render step={currentStep} splitSchema={splitSchema} setSplitSchema={setSplitSchema} />
       <RenderButtons
         step={currentStep}

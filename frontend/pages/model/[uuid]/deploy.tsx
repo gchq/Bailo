@@ -121,7 +121,6 @@ export default function Deploy() {
             schemas={schemas}
           />
         </Grid>
-
         <SubmissionError error={error} />
         <Form splitSchema={splitSchema} setSplitSchema={setSplitSchema} onSubmit={onSubmit} />
       </Paper>

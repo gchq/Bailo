@@ -82,7 +82,6 @@ export default function RenderFileTab({ step, splitSchema, setSplitSchema }: Ren
             </Box>
           </Stack>
         )}
-
         {buildOptionsStep !== undefined && buildOptionsStep.state.uploadType === ModelUploadType.ModelCard && (
           <Typography sx={{ p: 2 }}>Uploading a model card without any code or binary files</Typography>
         )}

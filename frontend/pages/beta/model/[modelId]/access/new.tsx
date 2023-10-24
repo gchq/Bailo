@@ -105,7 +105,6 @@ export default function NewAccessRequest() {
                 Choose a different schema
               </Button>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
-
               <Stack alignItems='flex-end'>
                 <LoadingButton
                   sx={{ width: 'fit-content' }}

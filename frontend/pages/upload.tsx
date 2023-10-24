@@ -201,7 +201,6 @@ function Upload() {
           schemas={schemas}
         />
       </Grid>
-
       <SubmissionError error={error} />
       <Form
         splitSchema={splitSchema}

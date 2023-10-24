@@ -49,13 +49,11 @@ export default function Settings({ version, isPotentialUploader }: Props) {
       <Typography variant='h6' sx={{ mb: 1 }}>
         General
       </Typography>
-
       <Box mb={2}>
         <Button variant='outlined' onClick={copyModelCardToClipboard}>
           Copy model card to clipboard
         </Button>
       </Box>
-
       <Box sx={{ mb: 4 }} />
       <ConfirmationDialogue
         open={deleteConfirmOpen}
