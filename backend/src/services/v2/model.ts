@@ -150,6 +150,18 @@ export async function getModelCardRevision(user: UserDoc, modelId: string, versi
   return modelCard
 }
 
+export async function getModelCardRevisions(user: UserDoc, modelId: string) {
+  const modelCardRevisions = await ModelCardRevisionModel.find({ modelId })
+
+  if (!modelCardRevisions) {
+    throw NotFound(`Version '${modelId}' does not exist on the requested model`, { modelId })
+  }
+
+  return asyncFilter(modelCardRevisions, (modelCard) =>
+    canUserActionModelById(user, modelCard.modelId, ModelAction.View),
+  )
+}
+
 // This is an internal function.  Use an equivalent like 'updateModelCard' or 'createModelCardFromSchema'
 // if interacting with this from another service.
 //
@@ -223,7 +235,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'>
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'>
 export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 

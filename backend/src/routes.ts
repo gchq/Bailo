@@ -62,6 +62,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
+import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
@@ -73,6 +74,7 @@ import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
+import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
@@ -200,6 +202,7 @@ if (config.experimental.v2) {
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
   server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+  server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
   server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 
   // *server.get('/api/v2/template/models', ...getModelTemplates)
@@ -218,8 +221,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
   server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
   server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
-
-  //server.post('/api/v2/model/:modelId/access-requests/:accessRequestId/review', ...postAccessRequest)
+  server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)

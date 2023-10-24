@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 export const formatDate = (date: Date) => {
   return date.toDateString()
 }
@@ -5,6 +7,14 @@ export const formatDate = (date: Date) => {
 export const formatDateString = (value: string) => {
   const date = new Date(value)
   return formatDate(date)
+}
+
+export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T, b: T) => {
+  if (!dayjs(a.createdAt).isValid() || !dayjs(b.createdAt).isValid()) {
+    throw new Error('Invalid date provided to sortByCreatedByDescending')
+  }
+
+  return new Date(a.createdAt) > new Date(b.createdAt) ? -1 : 1
 }
 
 export const plural = (value: number, phrase: string) => {

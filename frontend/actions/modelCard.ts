@@ -1,7 +1,7 @@
 import axios from 'axios'
 import useSWR from 'swr'
 
-import { ModelCardInterface } from '../types/types'
+import { ModelCardInterface, ModelCardRevisionInterface } from '../types/v2/types'
 import { handleAxiosError } from '../utils/axios'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -45,5 +45,21 @@ export function useModelCard(modelId?: string, modelCardVersion?: number) {
     model: data ? data.modelCard : undefined,
     isModelLoading: !error && !data,
     isModelError: error,
+  }
+}
+
+export function useGetModelCardRevisions(modelId: string) {
+  const { data, error, mutate } = useSWR<
+    {
+      modelCardRevisions: ModelCardRevisionInterface[]
+    },
+    ErrorInfo
+  >(`/api/v2/model/${modelId}/model-card-revisions`, fetcher)
+
+  return {
+    mutateModelCardRevisions: mutate,
+    modelCardRevisions: data ? data.modelCardRevisions : [],
+    isModelCardRevisionsLoading: !error && !data,
+    isModelCardRevisionsError: error,
   }
 }

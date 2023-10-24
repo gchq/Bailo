@@ -41,7 +41,7 @@ export abstract class BaseAuthorisationConnector {
     model: ModelDoc,
     accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
-  )
+  ): Promise<boolean>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<{ email: string }>
   abstract getEntityMembers(entity: string): Promise<Array<string>>

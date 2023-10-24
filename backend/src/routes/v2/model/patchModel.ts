@@ -11,6 +11,14 @@ export const patchModelSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
     visibility: z.nativeEnum(ModelVisibility).optional(),
+    collaborators: z
+      .array(
+        z.object({
+          entity: z.string(),
+          roles: z.array(z.string()),
+        }),
+      )
+      .optional(),
   }),
   params: z.object({
     modelId: z.string({
