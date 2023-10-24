@@ -28,7 +28,7 @@ export async function postRelease(release: Partial<ReleaseInterface>, modelId: s
 }
 
 export async function postFile(artefact: File, modelId: string, name: string, mime: string) {
-  return fetch(`/api/v2/model/${modelId}/files/uploadss/simple?name=${name}&mine=${mime}`, {
+  return fetch(`/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: artefact,
