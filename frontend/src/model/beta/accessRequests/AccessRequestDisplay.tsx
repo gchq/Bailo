@@ -125,7 +125,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             </Stack>
             {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
             {inactiveReviews.map((review) => (
-              <ReviewDisplay review={review} key={review.semver} />
+              <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
         </Box>

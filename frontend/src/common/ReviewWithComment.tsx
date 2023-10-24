@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useMemo, useState } from 'react'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
@@ -60,21 +60,22 @@ export default function ReviewWithComment({
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
   const [selectOpen, setSelectOpen] = useState(false)
-  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface | undefined>()
 
-  const [modelId, semver] = useMemo(
-    () => (release ? [release.modelId, release.semver] : [accessRequest.modelId, '']),
+  const [modelId, semverOrAccessRequestIdObject] = useMemo(
+    () =>
+      release
+        ? [release.modelId, { semver: release.semver }]
+        : [accessRequest.modelId, { accessRequestId: accessRequest.id }],
     [release, accessRequest],
   )
 
-  const { reviews } = useGetReviewRequestsForModel({ modelId, semver, isActive: true })
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
+    modelId,
+    isActive: true,
+    ...semverOrAccessRequestIdObject,
+  })
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-
-  useEffect(() => {
-    if (reviews) {
-      setReviewRequest(reviews[0])
-    }
-  }, [reviews])
+  const [reviewRequest, setReviewRequest] = useState(reviews[0])
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -85,11 +86,7 @@ export default function ReviewWithComment({
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
-      if (reviewRequest) {
-        onSubmit(decision, reviewComment, reviewRequest.role)
-      } else {
-        return <MessageAlert message='Could not find associated access requests' severity='error' />
-      }
+      onSubmit(decision, reviewComment, reviewRequest.role)
     }
   }
 
@@ -99,13 +96,17 @@ export default function ReviewWithComment({
     }
   }
 
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
+
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
   return (
     <>
-      {isModelRolesLoading && <Loading />}
+      {(isReviewsLoading || isModelRolesLoading) && <Loading />}
       <Dialog fullWidth open={open} onClose={onClose}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>

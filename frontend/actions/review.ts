@@ -93,9 +93,12 @@ export async function postReviewResponse({
   semver,
   accessRequestId,
 }: PostReviewResponseParams) {
-  return fetch(`/api/v2/model/${modelId}/release/${semver || accessRequestId}/review`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ comment, decision, role }),
-  })
+  return fetch(
+    `/api/v2/model/${modelId}/${semver ? 'release' : 'access-request'}/${semver || accessRequestId}/review`,
+    {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment, decision, role }),
+    },
+  )
 }
