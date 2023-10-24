@@ -30,11 +30,11 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [postResponseError, setPostResponseError] = useState('')
 
-  const [modelId, semver, reviewTitle, dynamicReviewWithCommentProps] = useMemo(
+  const [modelId, reviewTitle, semverOrAccessRequestIdObject, dynamicReviewWithCommentProps] = useMemo(
     () =>
       release
-        ? [release.modelId, release.semver, 'Release Review', { release }]
-        : [accessRequest.modelId, '', 'Access Request Review', { accessRequest }],
+        ? [release.modelId, 'Release Review', { semver: release.semver }, { release }]
+        : [accessRequest.modelId, 'Access Request Review', { accessRequestId: accessRequest.id }, { accessRequest }],
     [release, accessRequest],
   )
 
@@ -42,13 +42,13 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews: mutateActiveReviews } = useGetReviewRequestsForModel({
     modelId,
-    semver,
     isActive: true,
+    ...semverOrAccessRequestIdObject,
   })
   const { mutateReviews: mutateInactiveReviews } = useGetReviewRequestsForModel({
     modelId,
-    semver,
     isActive: false,
+    ...semverOrAccessRequestIdObject,
   })
 
   const handleReviewOpen = () => {
@@ -59,9 +59,15 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     setIsReviewOpen(false)
   }
 
-  async function handleSubmit(kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) {
+  async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
     setPostResponseError('')
-    const res = await postReviewResponse(modelId, semver, reviewRole, reviewComment, kind) // TODO me - is this reusable for access request reviews?
+    const res = await postReviewResponse({
+      modelId,
+      decision,
+      comment,
+      role,
+      ...semverOrAccessRequestIdObject,
+    })
     if (res.status === 200) {
       mutate(
         (key) => {

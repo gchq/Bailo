@@ -80,13 +80,13 @@ export default function ReviewWithComment({
     return reviewComment.trim() === '' ? true : false
   }
 
-  function submitForm(kind: ResponseTypeKeys) {
+  function submitForm(decision: ResponseTypeKeys) {
     setShowError(false)
-    if (invalidComment() && kind === ResponseTypes.RequestChanges) {
+    if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
       if (reviewRequest) {
-        onSubmit(kind, reviewComment, reviewRequest.role)
+        onSubmit(decision, reviewComment, reviewRequest.role)
       } else {
         return <MessageAlert message='Could not find associated access requests' severity='error' />
       }
