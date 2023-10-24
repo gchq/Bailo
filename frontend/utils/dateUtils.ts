@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { plural } from 'utils/stringUtils'
 
 export const formatDate = (date: Date) => {
   return date.toDateString()
@@ -15,10 +16,6 @@ export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T,
   }
 
   return new Date(a.createdAt) > new Date(b.createdAt) ? -1 : 1
-}
-
-export const plural = (value: number, phrase: string) => {
-  return `${value} ${phrase}${value === 1 ? '' : 's'}`
 }
 
 export const timeDifference = (current: Date, previous: Date) => {
