@@ -1,4 +1,5 @@
 import { DesignServices } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Button,
@@ -16,7 +17,7 @@ import {
 import { FormEvent, useState } from 'react'
 import semver from 'semver'
 
-import { postRelease } from '../../../../actions/release'
+import { postFile, postRelease } from '../../../../actions/release'
 import { ReleaseInterface } from '../../../../types/types'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
@@ -43,21 +44,36 @@ export default function DraftNewReleaseDialog({
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [artefacts, setArtefacts] = useState<File[]>([])
   const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
+    setLoading(true)
     if (!model.card.version) {
+      setLoading(false)
       return setErrorMessage('Please make sure your model has a schema set before drafting a release.')
     }
     if (isValidSemver(semanticVersion)) {
+      const fileIds: string[] = []
+      for (const artefact of artefacts) {
+        const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
+        if (postArtefactResponse.ok) {
+          const res = await postArtefactResponse.json()
+          fileIds.push(res.file._id)
+        } else {
+          setLoading(false)
+          return setErrorMessage(await getErrorMessage(postArtefactResponse))
+        }
+      }
+
       const release: Partial<ReleaseInterface> = {
         modelId: model.id,
         semver: semanticVersion,
         modelCardVersion: model.card.version,
         notes: releaseNotes,
         minor: isMinorRelease,
-        files: [],
+        files: fileIds,
         images: [],
       }
 
@@ -65,12 +81,14 @@ export default function DraftNewReleaseDialog({
 
       if (!response.ok) {
         const error = await getErrorMessage(response)
+        setLoading(false)
         return setErrorMessage(error)
       }
 
       clearFormData()
       handleClose()
       mutateReleases()
+      setLoading(false)
     }
   }
 
@@ -157,13 +175,14 @@ export default function DraftNewReleaseDialog({
         </Box>
         <DialogActions sx={{ p: 3 }}>
           <Button onClick={handleCancel}>Cancel</Button>
-          <Button
+          <LoadingButton
             variant='contained'
+            loading={loading}
             type='submit'
             disabled={!semanticVersion || !artefacts || !releaseNotes || !isValidSemver(semanticVersion)}
           >
             Create Release
-          </Button>
+          </LoadingButton>
         </DialogActions>
         <Box sx={{ px: 2 }}>
           <MessageAlert message={errorMessage} severity='error' />
