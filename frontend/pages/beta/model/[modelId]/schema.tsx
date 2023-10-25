@@ -74,7 +74,7 @@ interface SchemaButtonProps {
 }
 
 function SchemaButton({ modelId, schema }: SchemaButtonProps) {
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const router = useRouter()
@@ -90,6 +90,7 @@ function SchemaButton({ modelId, schema }: SchemaButtonProps) {
   async function createModelUsingSchema(newSchema: SchemaInterface) {
     if (currentUser && model) {
       await postFromSchema(model.id, newSchema.id)
+      await mutateModel()
       router.push(`/beta/model/${modelId}`)
     }
   }
