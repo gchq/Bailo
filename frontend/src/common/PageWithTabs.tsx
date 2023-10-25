@@ -2,6 +2,7 @@ import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/materia
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
+import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useEffect, useState } from 'react'
 
 export interface PageTab {
@@ -17,12 +18,14 @@ export default function PageWithTabs({
   actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
+  requiredUrlParams,
 }: {
   title
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
+  requiredUrlParams?: ParsedUrlQuery
 }) {
   const [currentTab, setCurrentTab] = useState('')
 
@@ -36,9 +39,15 @@ export default function PageWithTabs({
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue)
-    router.replace({
-      query: { ...router.query, tab: newValue },
-    })
+    if (requiredUrlParams) {
+      router.replace({
+        query: { ...requiredUrlParams, tab: newValue },
+      })
+    } else {
+      router.replace({
+        query: { tab: newValue },
+      })
+    }
   }
 
   return (

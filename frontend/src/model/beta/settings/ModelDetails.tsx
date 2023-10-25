@@ -14,12 +14,12 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { patchModel } from '../../../../actions/model'
 import { ModelForm, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
+import useNotification from '../../../common/Snackbar'
 import TeamAndModelSelector from '../../../common/TeamAndModelSelector'
 import MessageAlert from '../../../MessageAlert'
 
@@ -34,8 +34,8 @@ export default function ModelDetails({ model }: ModelAccessProps) {
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(model.visibility)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const router = useRouter()
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   const formValid = teamName && modelName && description
 
@@ -55,8 +55,11 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       return setErrorMessage(error)
     }
 
-    const data = await response.json()
-    router.push(`/beta/model/${data.model.id}`)
+    sendNotification({
+      variant: 'success',
+      msg: 'Model updated',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
   }
 
   const privateLabel = () => {

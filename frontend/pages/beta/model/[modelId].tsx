@@ -33,6 +33,7 @@ export default function Model() {
           displayActionButton
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
+          requiredUrlParams={{ modelId: model.id }}
         />
       )}
     </Wrapper>

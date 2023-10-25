@@ -1,22 +1,34 @@
 import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 import { ModelInterface } from '../../../types/v2/types'
 import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 import ModelDetails from './settings/ModelDetails'
 
-type SettingsCategory = 'general' | 'danger' | 'access' | 'permissions'
+type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
 
 type SettingsProps = {
   model: ModelInterface
 }
 
 export default function Settings({ model }: SettingsProps) {
-  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('general')
+  const router = useRouter()
+
+  const { section } = router.query
+
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('details')
+
+  useEffect(() => {
+    section ? setSelectedCategory(section as SettingsCategory) : setSelectedCategory('details')
+  }, [section, setSelectedCategory])
 
   const handleListItemClick = (category: SettingsCategory) => {
     setSelectedCategory(category)
+    router.replace({
+      query: { ...router.query, section: category },
+    })
   }
   return (
     <Stack
@@ -26,7 +38,7 @@ export default function Settings({ model }: SettingsProps) {
     >
       <List>
         <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'general'} onClick={() => handleListItemClick('general')}>
+          <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
             Details
           </ListItemButton>
         </ListItem>
@@ -50,7 +62,7 @@ export default function Settings({ model }: SettingsProps) {
         </ListItem>
       </List>
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
-        {selectedCategory === 'general' && <ModelDetails model={model} />}
+        {selectedCategory === 'details' && <ModelDetails model={model} />}
         {selectedCategory === 'permissions' && <ModelAccess model={model} />}
         {selectedCategory === 'access' && <AccessRequestSettings />}
         {selectedCategory === 'danger' && (

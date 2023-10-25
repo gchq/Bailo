@@ -15,12 +15,14 @@ import {
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
-import { patchModel } from '../../../../actions/model'
+import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 import Loading from '../../../common/Loading'
+import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
@@ -31,9 +33,11 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
-  const { users, isUsersLoading, isUsersError } = useListUsers()
 
+  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   useEffect(() => {
     if (model) {
@@ -54,7 +58,24 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   }
 
   async function updateAccessList() {
-    await patchModel(model.id, { collaborators: accessList })
+    const res = await patchModel(model.id, { collaborators: accessList })
+    if (!res.ok) {
+      if (!res.ok) {
+        const error = await getErrorMessage(res)
+        sendNotification({
+          variant: 'success',
+          msg: error,
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Model access list updated',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+      mutateModel()
+    }
   }
 
   if (isUsersError) {
