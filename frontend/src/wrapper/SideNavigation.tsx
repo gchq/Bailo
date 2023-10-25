@@ -80,7 +80,7 @@ export default function SideNavigation({
   toggleDrawer,
   currentUser,
 }: SideNavigationProps) {
-  const [reviewCount, setReviewCount] = useState(0)
+  const [reviewCount, setReviewCount] = useState('')
 
   const theme = useTheme()
 
@@ -91,7 +91,7 @@ export default function SideNavigation({
   }, [])
 
   async function fetchReviewCount() {
-    setReviewCount((await getReviewCount()).headers.get('x-count') as unknown as number)
+    setReviewCount((await getReviewCount()).headers.get('x-count') as string)
   }
 
   return (
@@ -147,12 +147,12 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount == 0}>
+                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === '0'}>
                           <ListAltIcon />
                         </Badge>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount == 0}>
+                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === '0'}>
                         <ListAltIcon />
                       </Badge>
                     )}
