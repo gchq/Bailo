@@ -1,7 +1,7 @@
 import { Lock, LockOpen } from '@mui/icons-material'
+import LoadingButton from '@mui/lab/LoadingButton'
 import {
   Box,
-  Button,
   Card,
   Container,
   Divider,
@@ -31,6 +31,7 @@ export default function NewModel() {
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
   const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const router = useRouter()
   const theme = useTheme()
@@ -39,6 +40,7 @@ export default function NewModel() {
 
   async function onSubmit(event) {
     event.preventDefault()
+    setLoading(true)
     setErrorMessage('')
     const formData: ModelForm = {
       name: modelName,
@@ -151,9 +153,16 @@ export default function NewModel() {
               <Box sx={{ textAlign: 'right' }}>
                 <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                   <span>
-                    <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
+                    <LoadingButton
+                      variant='contained'
+                      disabled={!formValid}
+                      type='submit'
+                      data-test='createModelButton'
+                      onClick={onSubmit}
+                      loading={loading}
+                    >
                       Create Model
-                    </Button>
+                    </LoadingButton>
                   </span>
                 </Tooltip>
                 <MessageAlert message={errorMessage} severity='error' />
