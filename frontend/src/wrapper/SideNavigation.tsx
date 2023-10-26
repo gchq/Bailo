@@ -25,6 +25,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
+import useNotification from '../common/Snackbar'
 import Link from '../Link'
 
 const StyledList = styled(List)(({ theme }) => ({
@@ -82,17 +83,29 @@ export default function SideNavigation({
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
 
+  const sendNotification = useNotification()
+
   const theme = useTheme()
 
   // We should add some error handling here, such as an error message appearing in a snackbar
   // Additional error messages should be added for screen-readers
   useEffect(() => {
-    fetchReviewCount()
-  }, [])
+    async function fetchReviewCount() {
+      const response = (await getReviewCount()).headers.get('x-count')
+      if (response === null) {
+        sendNotification({
+          variant: 'error',
+          msg: 'Response was null, number expected',
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+        setReviewCount(0)
+        return
+      }
 
-  async function fetchReviewCount() {
-    setReviewCount((await getReviewCount()).headers.get('x-count') as unknown as number)
-  }
+      setReviewCount(parseInt(response))
+    }
+    fetchReviewCount()
+  }, [sendNotification])
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
@@ -147,12 +160,12 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={reviewCount} color='secondary'>
+                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
                           <ListAltIcon />
                         </Badge>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={reviewCount} color='secondary'>
+                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
                         <ListAltIcon />
                       </Badge>
                     )}
