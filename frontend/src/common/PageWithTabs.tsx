@@ -2,7 +2,8 @@ import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/materia
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { ReactElement, SyntheticEvent, useEffect, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
   title: string
@@ -27,6 +28,7 @@ export default function PageWithTabs({
   const [currentTab, setCurrentTab] = useState(tabs[0].path)
 
   const router = useRouter()
+  const { unsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   const { tab } = router.query
 
@@ -35,10 +37,14 @@ export default function PageWithTabs({
   }, [tab, setCurrentTab, tabs])
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
-    setCurrentTab(newValue)
-    router.replace({
-      query: { ...router.query, tab: newValue },
-    })
+    if (unsavedChanges) {
+      sendWarning()
+    } else {
+      setCurrentTab(newValue)
+      router.replace({
+        query: { ...router.query, tab: newValue },
+      })
+    }
   }
 
   return (
