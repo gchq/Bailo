@@ -14,6 +14,12 @@ vi.mock('../../../src/utils/v2/config.js', () => ({
   default: configMock,
 }))
 
+vi.mock('../../../src/connectors/v2/authentication/index.js', () => ({
+  default: {
+    getUserModelRoles: vi.fn(),
+  },
+}))
+
 describe('connectors > authorisation', () => {
   test('silly', () => {
     const connector = getAuthorisationConnector(false)

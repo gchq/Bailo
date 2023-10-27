@@ -55,10 +55,10 @@ vi.mock('nodemailer', async () => ({
   default: nodemailerMock,
 }))
 
-const authorisationMock = vi.hoisted(() => ({
+const authenticationMock = vi.hoisted(() => ({
   getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
 }))
-vi.mock('../../../src/connectors/v2/authorisation/index.js', async () => ({ default: authorisationMock }))
+vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: authenticationMock }))
 
 const emailBuilderMock = vi.hoisted(() => ({
   buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
@@ -123,7 +123,7 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {
-    authorisationMock.getUserInformationList.mockReturnValueOnce([
+    authenticationMock.getUserInformationList.mockReturnValueOnce([
       Promise.resolve({ email: 'member1@email.com' }),
       Promise.resolve({ email: 'member2@email.com' }),
     ])
@@ -138,7 +138,7 @@ describe('services > smtp > smtp', () => {
     for (let i = 0; i < 20; i += 1) {
       users[i] = Promise.resolve({ email: `member${i}@email.com` })
     }
-    authorisationMock.getUserInformationList.mockReturnValueOnce(users)
+    authenticationMock.getUserInformationList.mockReturnValueOnce(users)
 
     await requestReviewForRelease('group:group1', new Review({ role: 'owner' }), new Release())
 
@@ -146,7 +146,7 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that we log when an email cannot be sent', async () => {
-    authorisationMock.getUserInformationList.mockReturnValueOnce([
+    authenticationMock.getUserInformationList.mockReturnValueOnce([
       Promise.resolve({ email: 'member1@email.com' }),
       Promise.resolve({ email: 'member2@email.com' }),
     ])
