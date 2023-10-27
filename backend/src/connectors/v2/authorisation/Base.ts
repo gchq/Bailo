@@ -1,7 +1,9 @@
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
+import { FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelDoc, ModelVisibility } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { UserDoc } from '../../../models/v2/User.js'
+import { Access } from '../../../routes/v1/registryAuth.js'
 import authentication from '../authentication/index.js'
 
 export const ModelAction = {
@@ -29,6 +31,17 @@ export const AccessRequestAction = {
 }
 export type AccessRequestActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
 
+export const FileAction = {
+  Download: 'download',
+}
+export type FileActionKeys = (typeof FileAction)[keyof typeof FileAction]
+
+export const ImageAction = {
+  Pull: 'pull',
+  Push: 'push',
+}
+export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
+
 export abstract class BaseAuthorisationConnector {
   abstract userModelAction(user: UserDoc, model: ModelDoc, action: ModelActionKeys): Promise<boolean>
   abstract userReleaseAction(
@@ -43,7 +56,13 @@ export abstract class BaseAuthorisationConnector {
     accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
   ): Promise<boolean>
-
+  abstract userFileAction(
+    user: UserDoc,
+    model: ModelDoc,
+    file: FileInterfaceDoc,
+    action: FileActionKeys,
+  ): Promise<boolean>
+  abstract userImageAction(user: UserDoc, model: ModelDoc, access: Access, action: ImageActionKeys): Promise<boolean>
   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
     if (model.visibility === ModelVisibility.Public) {
       return true
