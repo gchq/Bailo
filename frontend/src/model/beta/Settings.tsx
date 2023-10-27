@@ -1,4 +1,5 @@
-import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 import { ModelInterface } from '../../../types/v2/types'
@@ -13,6 +14,7 @@ type SettingsProps = {
 
 export default function Settings({ model }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('general')
+  const [loading, setLoading] = useState(false)
 
   const handleListItemClick = (category: SettingsCategory) => {
     setSelectedCategory(category)
@@ -48,9 +50,9 @@ export default function Settings({ model }: SettingsProps) {
             <Typography variant='h6' component='h2'>
               Danger Zone!
             </Typography>
-            <Button variant='contained' disabled>
+            <LoadingButton variant='contained' disabled onClick={() => setLoading(true)} loading={loading}>
               Delete model
-            </Button>
+            </LoadingButton>
           </Stack>
         )}
       </Box>

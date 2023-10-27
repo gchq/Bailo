@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { LoadingButton } from '@mui/lab'
 import {
   Box,
+  Button,
   Chip,
   FilledInput,
   FormControl,
@@ -36,7 +36,6 @@ export default function ExploreModels() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | ''>('')
   const debouncedFilter = useDebounce(filter, 250)
-  const [loading, setLoading] = useState(false)
 
   const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
 
@@ -73,15 +72,9 @@ export default function ExploreModels() {
     <Wrapper title='Explore Models' page='marketplace'>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Stack spacing={2} sx={{ maxWidth: '250px' }}>
-          <LoadingButton
-            component={Link}
-            href='/beta/model/new'
-            variant='contained'
-            onClick={() => setLoading(true)}
-            loading={loading}
-          >
+          <Button component={Link} href='/beta/model/new' variant='contained'>
             Add new model
-          </LoadingButton>
+          </Button>
           <FormControl
             sx={{
               display: 'flex',

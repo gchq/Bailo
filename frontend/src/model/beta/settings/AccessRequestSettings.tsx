@@ -1,8 +1,10 @@
-import { Button, Checkbox, Stack, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Checkbox, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function AccessRequestSettings() {
   const [allowUngoverned, setAllowUngoverned] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   return (
     <Stack spacing={2}>
@@ -14,7 +16,9 @@ export default function AccessRequestSettings() {
         <Typography>Allow users to make ungoverned access requests</Typography>
       </Stack>
       <div>
-        <Button>Save</Button>
+        <LoadingButton onClick={() => setLoading(true)} loading={loading}>
+          Save
+        </LoadingButton>
       </div>
     </Stack>
   )

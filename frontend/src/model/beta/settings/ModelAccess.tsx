@@ -1,7 +1,7 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Box,
-  Button,
   Stack,
   Table,
   TableBody,
@@ -31,6 +31,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const { users, isUsersLoading, isUsersError } = useListUsers()
+  const [loading, setLoading] = useState(false)
 
   const theme = useTheme()
 
@@ -55,6 +56,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
     await patchModel(model.id, { collaborators: accessList })
+    setLoading(true)
   }
 
   if (isUsersError) {
@@ -130,9 +132,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             </Table>
           </Box>
           <div>
-            <Button aria-label='Save access list' onClick={updateAccessList}>
+            <LoadingButton aria-label='Save access list' onClick={updateAccessList} loading={loading}>
               Save
-            </Button>
+            </LoadingButton>
           </div>
         </Stack>
       )}

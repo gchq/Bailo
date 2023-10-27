@@ -1,4 +1,5 @@
-import { Box, Button, Stack } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Stack } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
@@ -11,7 +12,7 @@ import ModelReleaseDisplay from './releases/ModelReleaseDisplay'
 export default function Releases({ model }: { model: ModelInterface }) {
   const [latestRelease, setLatestRelease] = useState<string>('')
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
-
+  const [loading, setLoading] = useState(false)
   const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
 
   const modelReleaseDisplays = useMemo(
@@ -30,15 +31,20 @@ export default function Releases({ model }: { model: ModelInterface }) {
 
   function handleDraftNewReleaseClose() {
     setOpenDraftNewRelease(false)
+    setLoading(false)
   }
 
+  function handleButtonClick() {
+    setOpenDraftNewRelease(true)
+    setLoading(true)
+  }
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
-          <Button variant='outlined' onClick={() => setOpenDraftNewRelease(true)} disabled={!model.card}>
+          <LoadingButton variant='outlined' onClick={handleButtonClick} loading={loading} disabled={!model.card}>
             Draft new Release
-          </Button>
+          </LoadingButton>
         </Box>
         {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}

@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Button,
@@ -60,6 +61,7 @@ export default function ReviewWithComment({
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
   const [selectOpen, setSelectOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -83,6 +85,7 @@ export default function ReviewWithComment({
 
   function submitForm(decision: ResponseTypeKeys) {
     setShowError(false)
+    setLoading(true)
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
@@ -156,12 +159,20 @@ export default function ReviewWithComment({
               >
                 <Button onClick={onClose}>Cancel</Button>
                 <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                  <Button variant='outlined' onClick={() => submitForm(ResponseTypes.RequestChanges)}>
+                  <LoadingButton
+                    variant='outlined'
+                    onClick={() => submitForm(ResponseTypes.RequestChanges)}
+                    loading={loading}
+                  >
                     Request Changes
-                  </Button>
-                  <Button variant='contained' onClick={() => submitForm(ResponseTypes.Approve)}>
+                  </LoadingButton>
+                  <LoadingButton
+                    variant='contained'
+                    onClick={() => submitForm(ResponseTypes.Approve)}
+                    loading={loading}
+                  >
                     Approve
-                  </Button>
+                  </LoadingButton>
                 </Stack>
               </Stack>
               {errorText && (
