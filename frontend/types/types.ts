@@ -364,6 +364,7 @@ export interface ModelInterface {
 }
 
 export interface FileInterface {
+  _id: string
   modelId: string
 
   name: string
