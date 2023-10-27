@@ -1,7 +1,7 @@
 import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
-import authorisation from '../../../connectors/v2/authorisation/index.js'
+import authentication from '../../../connectors/v2/authentication/index.js'
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
@@ -32,7 +32,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
   )
 
-  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
     userInfoList = userInfoList.slice(0, 20)
@@ -71,7 +71,7 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
-  let userInfoList = await Promise.all(await authorisation.getUserInformationList(entity))
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
     userInfoList = userInfoList.slice(0, 20)

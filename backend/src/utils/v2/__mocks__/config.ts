@@ -1,6 +1,6 @@
 const config = {
   connectors: {
-    user: {
+    authentication: {
       kind: 'silly',
     },
     authorisation: {

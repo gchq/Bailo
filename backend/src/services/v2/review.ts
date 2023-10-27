@@ -1,4 +1,4 @@
-import authorisation from '../../connectors/v2/authorisation/index.js'
+import authentication from '../../connectors/v2/authentication/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
@@ -157,7 +157,7 @@ async function findUserInCollaborators(user: UserDoc) {
               cond: {
                 $and: [
                   {
-                    $in: ['$$item.entity', await authorisation.getEntities(user)],
+                    $in: ['$$item.entity', await authentication.getEntities(user)],
                   },
                   {
                     $in: ['$role', '$$item.roles'],
