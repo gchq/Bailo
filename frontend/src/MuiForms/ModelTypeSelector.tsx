@@ -42,7 +42,7 @@ export default function ModelTypeSelector(props: any) {
           required={!formContext.editMode ? false : true}
           InputProps={{
             ...params.InputProps,
-            disableUnderline: !formContext.editMode ? true : false,
+            ...(!formContext.editMode && { disableUnderline: true }),
           }}
         />
       )}

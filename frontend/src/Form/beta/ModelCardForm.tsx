@@ -94,7 +94,6 @@ export default function ModelCardForm({
           </List>
         </Stepper>
       </div>
-
       <Form
         schema={currentStep.schema}
         formData={currentStep.state}

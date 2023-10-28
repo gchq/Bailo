@@ -1,10 +1,13 @@
 import dayjs from 'dayjs'
+import { plural } from 'utils/stringUtils'
 
-export const formatDate = (date: Date) => date.toLocaleDateString('en-GB')
+export const formatDate = (date: Date) => {
+  return date.toDateString()
+}
 
 export const formatDateString = (value: string) => {
   const date = new Date(value)
-  return date.toLocaleDateString('en-GB')
+  return formatDate(date)
 }
 
 export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T, b: T) => {
@@ -14,8 +17,6 @@ export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T,
 
   return new Date(a.createdAt) > new Date(b.createdAt) ? -1 : 1
 }
-
-export const plural = (value: number, phrase: string) => `${value} ${phrase}${value === 1 ? '' : 's'}`
 
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Decision, ReviewInterface } from '../../../models/v2/Review.js'
 import { respondToReview } from '../../../services/v2/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/v2/specification.js'
+import { ReviewKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const postReleaseReviewResponseSchema = z.object({
@@ -51,7 +52,7 @@ export const postReleaseReviewResponse = [
       body: { role, ...body },
     } = parse(req, postReleaseReviewResponseSchema)
 
-    const review = await respondToReview(req.user, modelId, semver, role, body)
+    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
 
     return res.json({
       review,

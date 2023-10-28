@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
-import authorisation from '../../connectors/v2/authorisation/index.js'
+import authentication from '../../connectors/v2/authentication/index.js'
 import { ModelDoc } from '../../models/v2/Model.js'
 import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
 import { findDeploymentByUuid } from '../../services/deployment.js'
@@ -175,7 +175,7 @@ async function checkAccessV2(access: Access, user: UserDocV2) {
     return false
   }
 
-  const entities = await authorisation.getEntities(user)
+  const entities = await authentication.getEntities(user)
   if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
     // They are a collaborator to the model, let them push or pull.
     return true

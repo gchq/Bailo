@@ -48,7 +48,6 @@ export default function ViewModelCardHistoryDialog({
   return (
     <>
       {isModelCardRevisionsLoading && <Loading />}
-
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle>
           History details for <span style={{ color: theme.palette.primary.main }}>{model.name}</span>
@@ -67,7 +66,6 @@ export default function ViewModelCardHistoryDialog({
             ))}
           </Table>
         </TableContainer>
-
         <DialogActions>
           <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>
             Close
