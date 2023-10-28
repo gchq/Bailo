@@ -4,43 +4,29 @@ import { z } from 'zod'
 
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { getModelById } from '../../../services/v2/model.js'
-import { errorSchemaContent, modelInterfaceSchema, registry } from '../../../services/v2/specification.js'
+import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getModelSchema = z.object({
   params: z.object({
-    modelId: z
-      .string({
-        required_error: 'Must specify model id as param',
-      })
-      .openapi({ example: 'yolo-v4-abcdef' }),
+    modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
 })
 
-registry.registerPath({
+registerPath({
   method: 'get',
-  path: 'api/v2/model/{modelId}',
+  path: '/api/v2/model/{modelId}',
   tags: ['model'],
   description: "Get a model by it's ID",
-  request: {
-    params: getModelSchema.shape.params,
-  },
+  schema: getModelSchema,
   responses: {
     200: {
       description: 'Object with model information.',
       content: {
         'application/json': {
-          schema: modelInterfaceSchema,
+          schema: z.object({ model: modelInterfaceSchema }),
         },
       },
-    },
-    403: {
-      description: 'Permission denied',
-      content: errorSchemaContent,
-    },
-    404: {
-      description: 'Model not found',
-      content: errorSchemaContent,
     },
   },
 })

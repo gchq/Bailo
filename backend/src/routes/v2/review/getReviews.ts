@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { findReviews } from '../../../services/v2/review.js'
+import { registerPath, reviewInterfaceSchema } from '../../../services/v2/specification.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
 import { parse, strictCoerceBoolean } from '../../../utils/v2/validate.js'
 
@@ -15,6 +16,26 @@ export const getReviewsSchema = z.object({
     accessRequestId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
   }),
+})
+
+registerPath({
+  method: 'post',
+  path: '/api/v2/reviews',
+  tags: ['review'],
+  description: 'Find reviews matching criteria.',
+  schema: getReviewsSchema,
+  responses: {
+    200: {
+      description: 'An array of review instances.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            reviews: z.array(reviewInterfaceSchema),
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface GetReviewResponse {

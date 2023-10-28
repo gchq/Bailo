@@ -4,27 +4,44 @@ import { z } from 'zod'
 
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 import { updateModel } from '../../../services/v2/model.js'
+import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const patchModelSchema = z.object({
   body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    visibility: z.nativeEnum(ModelVisibility).optional(),
+    name: z.string().optional().openapi({ example: 'Yolo v4' }),
+    description: z.string().optional().openapi({ example: 'You only look once' }),
+    visibility: z.nativeEnum(ModelVisibility).optional().openapi({ example: 'private' }),
     collaborators: z
       .array(
         z.object({
-          entity: z.string(),
-          roles: z.array(z.string()),
+          entity: z.string().openapi({ example: 'user:user' }),
+          roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
         }),
       )
       .optional(),
   }),
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as URL parameter',
-    }),
+    modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
+})
+
+registerPath({
+  method: 'patch',
+  path: '/api/v2/model/{modelId}',
+  tags: ['model'],
+  description: 'Patch the values of a model',
+  schema: patchModelSchema,
+  responses: {
+    200: {
+      description: 'Object with model information.',
+      content: {
+        'application/json': {
+          schema: z.object({ model: modelInterfaceSchema }),
+        },
+      },
+    },
+  },
 })
 
 interface PatchModelResponse {
