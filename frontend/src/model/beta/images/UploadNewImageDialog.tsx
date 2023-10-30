@@ -65,9 +65,7 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
           <DialogContent>
             <Stack spacing={2}>
               <Typography fontWeight='bold'>User authentication token</Typography>
-              <Typography>
-                Use the token below to authenticate when you try and run the dockiner login command
-              </Typography>
+              <Typography>Use the token below to authenticate when you try and run the docker login command</Typography>
               <Stack direction='row'>
                 <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='showTokenButton'>
                   Regenerate Token
