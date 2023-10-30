@@ -52,6 +52,7 @@ export default function NewModel() {
 
     if (!response.ok) {
       const error = await getErrorMessage(response)
+      setLoading(false)
       return setErrorMessage(error)
     }
 
@@ -158,7 +159,6 @@ export default function NewModel() {
                       disabled={!formValid}
                       type='submit'
                       data-test='createModelButton'
-                      onClick={onSubmit}
                       loading={loading}
                     >
                       Create Model

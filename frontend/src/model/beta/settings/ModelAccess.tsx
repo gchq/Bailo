@@ -14,6 +14,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { patchModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
@@ -32,6 +33,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const { users, isUsersLoading, isUsersError } = useListUsers()
   const [loading, setLoading] = useState(false)
+  const [patchModelErrorMessage, setPatchModelErrorMessage] = useState('')
 
   const theme = useTheme()
 
@@ -55,12 +57,24 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
-    await patchModel(model.id, { collaborators: accessList })
     setLoading(true)
-  }
+    const response = await patchModel(model.id, { collaborators: accessList })
 
-  if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
+    if (!response.ok) {
+      const error = await getErrorMessage(response)
+      setLoading(false)
+      setPatchModelErrorMessage(error)
+    }
+
+    // TODO - Provide user feedback on success
+
+    if (patchModelErrorMessage) {
+      return <MessageAlert message={patchModelErrorMessage} severity='error' />
+    }
+
+    if (isUsersError) {
+      return <MessageAlert message={isUsersError.info.message} severity='error' />
+    }
   }
 
   return (

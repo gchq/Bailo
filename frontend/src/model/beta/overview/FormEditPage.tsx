@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -25,6 +26,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   async function onSubmit() {
     if (schema) {
@@ -32,7 +34,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
-
+        setLoading(false)
         mutateModelCardRevisions()
       }
     }
@@ -110,9 +112,11 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               <Button variant='outlined' onClick={onCancel}>
                 Cancel
               </Button>
-              <Button variant='contained' onClick={onSubmit}>
-                Save
-              </Button>
+              {!loading && (
+                <LoadingButton variant='contained' onClick={onSubmit} loading={loading}>
+                  Save
+                </LoadingButton>
+              )}
             </Stack>
           )}
         </Stack>

@@ -85,11 +85,13 @@ export default function ReviewWithComment({
 
   function submitForm(decision: ResponseTypeKeys) {
     setShowError(false)
-    setLoading(true)
+    setLoading(false)
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
+      setLoading(false)
     } else {
       onSubmit(decision, reviewComment, reviewRequest.role)
+      setLoading(true)
     }
   }
 

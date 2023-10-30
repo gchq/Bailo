@@ -1,9 +1,7 @@
 import { PostAdd } from '@mui/icons-material'
-import LoadingButton from '@mui/lab/LoadingButton'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 
 import { ModelInterface } from '../../../../types/v2/types'
 
@@ -14,11 +12,9 @@ type TemplatePageProps = {
 export default function TemplatePage({ model }: TemplatePageProps) {
   const theme = useTheme()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
 
   function handleCreateFromScratchClick() {
     router.push(`/beta/model/${model.id}/schema`)
-    setLoading(true)
   }
 
   return (
@@ -72,9 +68,9 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                 Create from scratch
               </Typography>
               <Typography variant='body1'>Create a model from scratch using a predefined schema.</Typography>
-              <LoadingButton variant='contained' onClick={handleCreateFromScratchClick} loading={loading}>
+              <Button variant='contained' onClick={handleCreateFromScratchClick}>
                 Create
-              </LoadingButton>
+              </Button>
             </Stack>
           </Box>
         </Stack>

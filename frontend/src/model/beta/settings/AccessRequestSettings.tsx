@@ -6,6 +6,12 @@ export default function AccessRequestSettings() {
   const [allowUngoverned, setAllowUngoverned] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const handleSave = () => {
+    setLoading(true)
+
+    //TODO - Save settings API request and setLoading(false) on error
+  }
+
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
@@ -16,7 +22,7 @@ export default function AccessRequestSettings() {
         <Typography>Allow users to make ungoverned access requests</Typography>
       </Stack>
       <div>
-        <LoadingButton onClick={() => setLoading(true)} loading={loading}>
+        <LoadingButton onClick={handleSave} loading={loading}>
           Save
         </LoadingButton>
       </div>

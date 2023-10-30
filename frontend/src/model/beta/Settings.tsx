@@ -19,6 +19,12 @@ export default function Settings({ model }: SettingsProps) {
   const handleListItemClick = (category: SettingsCategory) => {
     setSelectedCategory(category)
   }
+
+  const handleDeleteModel = () => {
+    setLoading(true)
+
+    // TODO - Delete model API request and setLoading(false) on error
+  }
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
@@ -50,7 +56,7 @@ export default function Settings({ model }: SettingsProps) {
             <Typography variant='h6' component='h2'>
               Danger Zone!
             </Typography>
-            <LoadingButton variant='contained' disabled onClick={() => setLoading(true)} loading={loading}>
+            <LoadingButton variant='contained' disabled onClick={handleDeleteModel} loading={loading}>
               Delete model
             </LoadingButton>
           </Stack>
