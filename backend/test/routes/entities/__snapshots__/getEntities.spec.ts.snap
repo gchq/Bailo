@@ -10,7 +10,7 @@ exports[`routes > entities > getEntities > 200 > ok 1`] = `
 
 exports[`routes > entities > getEntities > 200 > ok 2`] = `
 {
-  "queryResults": [
+  "results": [
     {
       "entities": [
         "user:alice",

@@ -12,7 +12,7 @@ export const getEntitiesSchema = z.object({
 })
 
 interface GetEntitiesResponse {
-  queryResults: Array<{ kind: string; entities: Array<string> }>
+  results: Array<{ kind: string; entities: Array<string> }>
 }
 
 export const getEntities = [
@@ -24,6 +24,6 @@ export const getEntities = [
 
     const queryResults = await authentication.queryEntities(q)
 
-    return res.json({ queryResults: queryResults })
+    return res.json({ results: queryResults })
   },
 ]
