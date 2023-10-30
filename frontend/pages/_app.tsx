@@ -15,7 +15,9 @@ import { useEffect } from 'react'
 
 import createEmotionCache from '../components/createEmotionCache'
 import ThemeModeContext from '../src/contexts/themeModeContext'
+import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
 import useThemeMode from '../utils/hooks/useThemeMode'
+import useUnsavedChanges from '../utils/hooks/useUnsavedChanges'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
@@ -28,6 +30,7 @@ export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   const themeModeValue = useThemeMode()
+  const unsavedChangesValue = useUnsavedChanges()
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
@@ -41,12 +44,14 @@ export default function MyApp(props: MyAppProps) {
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
       <ThemeProvider theme={themeModeValue.theme}>
-        <ThemeModeContext.Provider value={themeModeValue}>
-          <SnackbarProvider>
-            <CssBaseline />
-            <Component {...pageProps} />
-          </SnackbarProvider>
-        </ThemeModeContext.Provider>
+        <UnsavedChangesContext.Provider value={unsavedChangesValue}>
+          <ThemeModeContext.Provider value={themeModeValue}>
+            <SnackbarProvider>
+              <CssBaseline />
+              <Component {...pageProps} />
+            </SnackbarProvider>
+          </ThemeModeContext.Provider>
+        </UnsavedChangesContext.Provider>
       </ThemeProvider>
     </CacheProvider>
   )
