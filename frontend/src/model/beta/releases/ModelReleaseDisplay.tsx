@@ -1,6 +1,7 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
+import prettyBytes from 'pretty-bytes'
 import Markdown from 'src/common/MarkdownRenderer'
 import { formatDateString } from 'utils/dateUtils'
 
@@ -108,15 +109,14 @@ export default function ModelReleaseDisplay({
             <Stack>
               {release.files.map((file) => (
                 <Stack
-                  key={file}
+                  key={file._id}
                   direction={{ sm: 'row', xs: 'column' }}
                   justifyContent='space-between'
                   alignItems='center'
                   spacing={2}
                 >
-                  <Link href='/beta'>{file}</Link>
-                  {/* TODO - Add file size here */}
-                  {/* <Typography variant='caption'>123GB</Typography> */}
+                  <Link href='/beta'>{file.name}</Link>
+                  <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                 </Stack>
               ))}
               {release.images.map((image) => (

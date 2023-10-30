@@ -81,6 +81,7 @@ import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewR
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
+import { getSpecification as getSpecificationV2 } from './routes/v2/specification.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
@@ -266,6 +267,8 @@ if (config.experimental.v2) {
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
   // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
   // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+
+  server.get('/api/v2/specification', ...getSpecificationV2)
 } else {
   logger.info('Not using experimental V2 endpoints')
 }

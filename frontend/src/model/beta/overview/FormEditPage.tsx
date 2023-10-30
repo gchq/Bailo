@@ -1,5 +1,6 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 import { useGetModel } from '../../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../../actions/modelCard'
@@ -19,12 +20,15 @@ type FormEditPageProps = {
 
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
     if (schema) {
@@ -61,6 +65,10 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, model])
+
+  useEffect(() => {
+    setUnsavedChanges(isEdit)
+  }, [isEdit, setUnsavedChanges])
 
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
