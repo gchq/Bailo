@@ -21,7 +21,7 @@ export const postReleaseSchema = z.object({
     minor: z.coerce.boolean().optional().default(false),
     draft: z.coerce.boolean().optional().default(false),
 
-    files: z.array(z.string()),
+    fileIds: z.array(z.string()),
     images: z.array(z.string()),
   }),
 })

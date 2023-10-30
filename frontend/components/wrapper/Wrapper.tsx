@@ -2,7 +2,7 @@ import { ChevronLeft, DashboardTwoTone, Menu, Notifications, ViewListTwoTone } f
 import { Badge, Box, Divider, Drawer as MuiDrawer, IconButton, List, Toolbar, Typography } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import CssBaseline from '@mui/material/CssBaseline'
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import Head from 'next/head'
 import * as React from 'react'
 
@@ -69,9 +69,6 @@ export default function Wrapper({ page, config, title, children }: Props) {
   const toggleDrawer = () => {
     setOpen(!open)
   }
-
-  const isNumApprovalsLoading = false
-  const numApprovals = 10
 
   return (
     <>

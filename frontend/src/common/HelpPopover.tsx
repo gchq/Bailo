@@ -30,7 +30,6 @@ function HelpPopover({ anchorOrigin, transformOrigin, children }: Props) {
         onMouseLeave={handlePopoverClose}
         data-test='helpIcon'
       />
-
       <Popover
         id='help-popover'
         sx={{ pointerEvents: 'none', maxWidth: '65%' }}

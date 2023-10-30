@@ -46,7 +46,6 @@ function ModelOverview({ version }: ModelOverviewProps) {
           </Box>
           <Box sx={{ p: 2 }}>
             <Typography variant='h6'>Model overview</Typography>
-
             <Typography variant='body1' style={{ whiteSpace: 'pre-wrap' }}>
               {printProperty(version.metadata.highLevelDetails.modelOverview)}
             </Typography>
@@ -73,7 +72,6 @@ function ModelOverview({ version }: ModelOverviewProps) {
           <Box sx={{ p: 2 }}>
             <Stack spacing={0.5} direction='row' alignItems='center'>
               <Typography variant='h6'>{schema?.schema.properties.contacts.properties.uploader.title}</Typography>
-
               <HelpPopover>{schema?.schema.properties.contacts.properties.uploader.description}</HelpPopover>
             </Stack>
             <Typography variant='body1'>
@@ -83,7 +81,6 @@ function ModelOverview({ version }: ModelOverviewProps) {
           <Box sx={{ p: 2 }}>
             <Stack spacing={0.5} direction='row' alignItems='center'>
               <Typography variant='h6'>{schema?.schema.properties.contacts.properties.reviewer.title}</Typography>
-
               <HelpPopover>{schema?.schema.properties.contacts.properties.reviewer.description}</HelpPopover>
             </Stack>
             <Typography variant='body1'>

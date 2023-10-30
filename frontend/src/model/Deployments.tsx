@@ -47,7 +47,6 @@ export default function Deployments({ version }: Props) {
               {deployment.metadata.highLevelDetails.name}
             </MuiLink>
           </Link>
-
           <Box sx={{ mb: 1 }}>
             <Stack direction='row'>
               <Typography variant='subtitle2' sx={{ mt: 'auto', mb: 'auto', mr: 1 }}>
@@ -63,7 +62,6 @@ export default function Deployments({ version }: Props) {
               ))}
             </Stack>
           </Box>
-
           <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 1 }} />
         </Box>
       ))}

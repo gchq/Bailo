@@ -299,15 +299,11 @@ export default function Deployment() {
             </Tabs>
           </Box>
           <Box sx={{ marginBottom: 3 }} />
-
           {group === 'overview' && <DeploymentOverview deployment={deployment} />}
-
           {group === 'compliance' && (
             <ComplianceFlow initialEdges={complianceFlow.edges} initialNodes={complianceFlow.nodes} />
           )}
-
           {group === 'build' && <TerminalLog logs={deployment.logs} title='Deployment Build Logs' />}
-
           {group === 'settings' && (
             <>
               <Typography variant='h6' sx={{ mb: 1 }}>
@@ -320,7 +316,6 @@ export default function Deployment() {
               </Box>
             </>
           )}
-
           {group === 'exports' && deployment.managerApproved === 'Accepted' && (
             <RawModelExportList deployment={deployment} />
           )}
@@ -361,19 +356,15 @@ export default function Deployment() {
                   </p>
                   <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
                   <br />
-
                   <p style={{ margin: 0 }}># Pull model</p>
                   <CodeLine line={`docker pull ${imageName}:${selectedImageTag}`} />
                   <br />
-
                   <p style={{ margin: 0 }}># Run Docker image</p>
                   <CodeLine line={`docker run -p 9000 ${imageName}:${selectedImageTag}`} />
                   <br />
-
                   <p style={{ margin: 0 }}># Check that the Docker container is running</p>
                   <CodeLine line='docker ps' />
                   <br />
-
                   <p style={{ margin: 0 }}># The model is accessible at localhost:9000</p>
                 </Box>
               )}

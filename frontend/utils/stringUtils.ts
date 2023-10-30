@@ -3,3 +3,7 @@ export const toTitleCase = (value: string): string =>
     .split(' ')
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
     .join(' ')
+
+export const plural = (value: number, phrase: string) => {
+  return `${value} ${phrase}${value === 1 ? '' : 's'}`
+}

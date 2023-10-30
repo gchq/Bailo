@@ -31,7 +31,6 @@ export default function Form({
           <Tab label='Upload Existing' value='upload' data-test='uploadJsonTab' />
         </Tabs>
       </Box>
-
       {tab === 'designer' && (
         <FormDesigner
           splitSchema={splitSchema}

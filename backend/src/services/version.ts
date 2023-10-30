@@ -2,7 +2,7 @@ import { basename } from 'path'
 
 import Authorisation from '../connectors/Authorisation.js'
 import VersionModel from '../models/Version.js'
-import { DateString, ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
+import { ModelDoc, ModelId, UserDoc, VersionDoc } from '../types/types.js'
 import { FileRef } from '../utils/build/build.js'
 import config from '../utils/config.js'
 import { asyncFilter } from '../utils/general.js'
@@ -115,19 +115,11 @@ export async function createVersion(user: UserDoc, data: CreateVersion) {
 }
 
 export async function updateManagerLastViewed(id: ModelId) {
-  return VersionModel.findOneAndUpdate(
-    { _id: id },
-    { $set: { managerLastViewed: new Date() as DateString } },
-    { timestamps: false },
-  )
+  return VersionModel.findOneAndUpdate({ _id: id }, { $set: { managerLastViewed: new Date() } }, { timestamps: false })
 }
 
 export async function updateReviewerLastViewed(id: ModelId) {
-  return VersionModel.findOneAndUpdate(
-    { _id: id },
-    { $set: { reviewerLastViewed: new Date() as DateString } },
-    { timestamps: false },
-  )
+  return VersionModel.findOneAndUpdate({ _id: id }, { $set: { reviewerLastViewed: new Date() } }, { timestamps: false })
 }
 
 export async function findVersionFileList(version: VersionDoc) {

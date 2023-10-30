@@ -103,13 +103,43 @@ export interface ReviewResponse {
   comment?: string
 }
 
-export interface ReviewRequestInterface {
+type PartialReviewRequestInterface =
+  | {
+      accessRequestId: string
+      semver?: never
+    }
+  | {
+      accessRequestId?: never
+      semver: string
+    }
+
+export type ReviewRequestInterface = {
   model: ModelInterface
-  semver: string
   role: string
-  kind: 'release' | 'acess'
+  kind: 'release' | 'access'
   responses: ReviewResponse[]
   isActive: boolean
+  createdAt: string
+  updatedAt: string
+} & PartialReviewRequestInterface
+
+export interface AccessRequestMetadata {
+  overview: {
+    name: string
+    entities: Array<string>
+    endDate?: string
+    [x: string]: unknown
+  }
+  [x: string]: unknown
+}
+
+export interface AccessRequestInterface {
+  id: string
+  modelId: string
+  schemaId: string
+  deleted: boolean
+  metadata: AccessRequestMetadata
+  createdBy: string
   createdAt: string
   updatedAt: string
 }
