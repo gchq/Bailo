@@ -4,6 +4,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import AccessRequests from 'src/model/beta/AccessRequests'
+import ModelImages from 'src/model/beta/ModelImages'
 import Overview from 'src/model/beta/Overview'
 import Releases from 'src/model/beta/Releases'
 import Settings from 'src/model/beta/Settings'
@@ -29,6 +30,7 @@ export default function Model() {
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
             { title: 'Access Requests', path: 'access', view: <AccessRequests model={model} /> },
+            { title: 'Images', path: 'images', view: <ModelImages model={model} /> },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]}
           displayActionButton
