@@ -1,5 +1,6 @@
 import { Document, Types } from 'mongoose'
 
+import { FlattenedModelImage } from './interfaces'
 import { SchemaKindKeys } from './v2/types'
 
 export enum ModelUploadType {
@@ -389,7 +390,7 @@ export type ReleaseInterface = {
   draft?: boolean
   fileIds: Array<string>
   files: Array<FileInterface>
-  images: Array<string>
+  images: Array<FlattenedModelImage>
   deleted: boolean
   createdBy: string
   createdAt: string

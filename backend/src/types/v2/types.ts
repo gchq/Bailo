@@ -7,3 +7,9 @@ export interface Role {
   name: string
   short?: string
 }
+
+export interface FlattenedModelImage {
+  namespace: string
+  model: string
+  version: string
+}

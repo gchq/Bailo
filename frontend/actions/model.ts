@@ -1,6 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
+import { ModelImage } from '../types/interfaces'
 import { ListModelType } from '../types/types'
 import { ModelForm, ModelInterface, Role } from '../types/v2/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
@@ -63,6 +64,22 @@ export function useGetModelRoles(id?: string) {
     modelRoles: data ? data.roles : [],
     isModelRolesLoading: !error && !data,
     isModelRolesError: error,
+  }
+}
+
+export function useGetModelImages(id?: string) {
+  const { data, error, mutate } = useSWR<
+    {
+      images: ModelImage[]
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/images` : null, fetcher)
+
+  return {
+    mutateModelImages: mutate,
+    modelImages: data ? data.images : [],
+    isModelImagesLoading: !error && !data,
+    isModelImagesError: error,
   }
 }
 

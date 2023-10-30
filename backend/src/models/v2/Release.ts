@@ -1,6 +1,8 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { FlattenedModelImage } from '../../types/v2/types.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -15,7 +17,7 @@ export interface ReleaseInterface {
   draft: boolean
 
   fileIds: Array<string>
-  images: Array<string>
+  images: Array<FlattenedModelImage>
 
   deleted: boolean
 
@@ -41,7 +43,13 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     draft: { type: Boolean, required: true },
 
     fileIds: [{ type: Schema.Types.ObjectId }],
-    images: [{ type: String }],
+    images: [
+      {
+        namespace: { type: String },
+        model: { type: String },
+        version: { type: String },
+      },
+    ],
 
     createdBy: { type: String, required: true },
   },

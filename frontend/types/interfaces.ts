@@ -143,3 +143,15 @@ export interface AccessRequestInterface {
   createdAt: string
   updatedAt: string
 }
+
+export interface ModelImage {
+  namespace: string
+  model: string
+  versions: Array<string>
+}
+
+export interface FlattenedModelImage {
+  namespace: string
+  model: string
+  version: string
+}

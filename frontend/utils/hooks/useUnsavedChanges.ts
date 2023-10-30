@@ -33,7 +33,9 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
   }, [unsavedChanges])
 
   const sendWarning = () => {
-    return window.confirm(warningText)
+    const res = window.confirm(warningText)
+    if (res) setUnsavedChanges(false)
+    return res
   }
 
   return {

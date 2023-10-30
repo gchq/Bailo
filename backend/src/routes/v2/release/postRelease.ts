@@ -22,7 +22,13 @@ export const postReleaseSchema = z.object({
     draft: z.coerce.boolean().optional().default(false),
 
     fileIds: z.array(z.string()),
-    images: z.array(z.string()),
+    images: z.array(
+      z.object({
+        namespace: z.string(),
+        model: z.string(),
+        version: z.string(),
+      }),
+    ),
   }),
 })
 

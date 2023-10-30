@@ -72,7 +72,7 @@ export default function ModelReleaseDisplay({
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
-          <Stack p={2}>
+          <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
               justifyContent='space-between'
@@ -105,33 +105,41 @@ export default function ModelReleaseDisplay({
               </Typography>
             </Typography>
             <Markdown>{release.notes}</Markdown>
-            {(release.files.length > 0 || release.images.length > 0) && <Divider />}
-            <Stack>
-              {release.files.map((file) => (
-                <Stack
-                  key={file._id}
-                  direction={{ sm: 'row', xs: 'column' }}
-                  justifyContent='space-between'
-                  alignItems='center'
-                  spacing={2}
-                >
-                  <Link href='/beta'>{file.name}</Link>
-                  <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                </Stack>
-              ))}
-              {release.images.map((image) => (
-                <Stack
-                  key={image}
-                  direction={{ sm: 'row', xs: 'column' }}
-                  justifyContent='space-between'
-                  alignItems='center'
-                  spacing={2}
-                >
-                  <Link href='/beta'>{image}</Link>
-                  {/* TODO - Add file size here */}
-                  {/* <Typography variant='caption'>123GB</Typography> */}
-                </Stack>
-              ))}
+            <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
+            <Stack spacing={2}>
+              {release.files.length > 0 && (
+                <Box>
+                  <Typography fontWeight='bold'>Artefacts</Typography>
+                  {release.files.map((file) => (
+                    <Stack
+                      key={file._id}
+                      direction={{ sm: 'row', xs: 'column' }}
+                      justifyContent='space-between'
+                      alignItems='center'
+                      spacing={2}
+                    >
+                      <Link href='/beta'>{file.name}</Link>
+                      <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                    </Stack>
+                  ))}{' '}
+                </Box>
+              )}
+              {release.images.length > 0 && (
+                <Box>
+                  <Typography fontWeight='bold'>Docker images</Typography>
+                  {release.images.map((image) => (
+                    <Stack
+                      key={`${image.model}-${image.version}`}
+                      direction={{ sm: 'row', xs: 'column' }}
+                      justifyContent='space-between'
+                      alignItems='center'
+                      spacing={2}
+                    >
+                      <Link href='/beta'>{`${image.model}-${image.version}`}</Link>
+                    </Stack>
+                  ))}
+                </Box>
+              )}
               {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
               {inactiveReviews.map((review) => (
                 <ReviewDisplay review={review} key={review.semver} />
