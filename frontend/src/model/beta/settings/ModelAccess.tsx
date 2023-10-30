@@ -61,19 +61,18 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     const res = await patchModel(model.id, { collaborators: accessList })
     if (!res.ok) {
       const error = await getErrorMessage(res)
-      sendNotification({
+      return sendNotification({
         variant: 'success',
         msg: error,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-    } else {
-      sendNotification({
-        variant: 'success',
-        msg: 'Model access list updated',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-      mutateModel()
     }
+    sendNotification({
+      variant: 'success',
+      msg: 'Model access list updated',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+    mutateModel()
   }
 
   if (isUsersError) {

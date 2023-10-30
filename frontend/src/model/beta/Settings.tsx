@@ -9,6 +9,10 @@ import ModelDetails from './settings/ModelDetails'
 
 type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
 
+function isSettingsCategory(settingsCategory: string | string[] | undefined): settingsCategory is SettingsCategory {
+  return (settingsCategory as SettingsCategory) !== undefined
+}
+
 type SettingsProps = {
   model: ModelInterface
 }
@@ -21,7 +25,9 @@ export default function Settings({ model }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('details')
 
   useEffect(() => {
-    section ? setSelectedCategory(section as SettingsCategory) : setSelectedCategory('details')
+    if (isSettingsCategory(section)) {
+      setSelectedCategory(section ?? 'details')
+    }
   }, [section, setSelectedCategory])
 
   const handleListItemClick = (category: SettingsCategory) => {

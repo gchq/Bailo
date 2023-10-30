@@ -18,7 +18,7 @@ export default function PageWithTabs({
   actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
-  requiredUrlParams,
+  requiredUrlParams = {},
 }: {
   title
   tabs: PageTab[]
@@ -39,15 +39,9 @@ export default function PageWithTabs({
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue)
-    if (requiredUrlParams) {
-      router.replace({
-        query: { ...requiredUrlParams, tab: newValue },
-      })
-    } else {
-      router.replace({
-        query: { tab: newValue },
-      })
-    }
+    router.replace({
+      query: { ...requiredUrlParams, tab: newValue },
+    })
   }
 
   return (

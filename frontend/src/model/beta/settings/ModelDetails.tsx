@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import _ from 'lodash-es'
 import { useState } from 'react'
 
 import { patchModel } from '../../../../actions/model'
