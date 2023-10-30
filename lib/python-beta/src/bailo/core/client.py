@@ -5,6 +5,7 @@ from typing import Any
 import validators
 from bailo.core.agent import Agent
 from bailo.core.enums import ModelVisibility, SchemaKind
+from bailo.core.utils import filter_none
 
 
 class Client:
@@ -101,13 +102,11 @@ class Client:
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
+        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
+
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}",
-            json={
-                "name": name,
-                "description": description,
-                "visibility": visibility
-            },
+            json=filtered_json
         ).json()
 
     def get_model_card(
@@ -487,10 +486,9 @@ class Client:
         :param description: Description of team, defaults to None
         :return: JSON response object
         """
+        filtered_json = filter_none({"name": name, "description": description})
+
         return self.agent.patch(
             f"{self.url}/v2/team/{team_id}",
-            json={
-                "name": name,
-                "description": description
-            },
+            json=filtered_json,
         ).json()

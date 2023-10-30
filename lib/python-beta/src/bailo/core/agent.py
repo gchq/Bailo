@@ -6,14 +6,10 @@ import requests
 class Agent:
     def __init__(self):
         self.get = requests.get
+        self.patch = requests.patch
         self.post = requests.post
         self.put = requests.put
         self.delete = requests.delete
-
-    def patch(self, *args, json, **kwargs):
-        res = {k: v for k, v in json.items() if v}
-
-        return requests.patch(*args, json=res, **kwargs)
 
 
 class PkiAgent():
