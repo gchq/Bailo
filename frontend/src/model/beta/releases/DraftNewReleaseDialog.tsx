@@ -73,7 +73,7 @@ export default function DraftNewReleaseDialog({
         modelCardVersion: model.card.version,
         notes: releaseNotes,
         minor: isMinorRelease,
-        files: fileIds,
+        fileIds: fileIds,
         images: [],
       }
 

@@ -12,7 +12,7 @@ import { createReleaseReviews } from './review.js'
 
 export type CreateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'files' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
 >
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
@@ -55,6 +55,7 @@ export async function getModelReleases(
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
+    .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
 
   return asyncFilter(results, (result) => authorisation.userReleaseAction(user, result.model, result, ModelAction.View))
 }

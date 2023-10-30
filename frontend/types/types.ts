@@ -363,6 +363,23 @@ export interface ModelInterface {
   entities: Entity[]
 }
 
+export interface FileInterface {
+  _id: string
+  modelId: string
+
+  name: string
+  size: number
+  mime: string
+
+  bucket: string
+  path: string
+
+  complete: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}
+
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
@@ -370,7 +387,8 @@ export type ReleaseInterface = {
   notes: string
   minor?: boolean
   draft?: boolean
-  files: Array<string>
+  fileIds: Array<string>
+  files: Array<FileInterface>
   images: Array<string>
   deleted: boolean
   createdBy: string
