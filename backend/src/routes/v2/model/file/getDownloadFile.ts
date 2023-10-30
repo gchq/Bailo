@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser'
 import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
+import stream from 'stream'
 import { z } from 'zod'
 
 import { FileInterface } from '../../../../models/v2/File.js'
@@ -10,9 +11,7 @@ import { parse } from '../../../../utils/validate.js'
 
 export const getDownloadFileSchema = z.object({
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+    modelId: z.string(),
     fileId: z.string(),
   }),
 })
@@ -51,6 +50,6 @@ export const getDownloadFile = [
     }
 
     // The AWS library doesn't seem to properly type 'Body' as being pipeable?
-    ;(stream.Body as any).pipe(res)
+    ;(stream.Body as stream.Readable).pipe(res)
   },
 ]
