@@ -39,7 +39,7 @@
     "lodash-es": "^4.17.21",
     "markdown-to-jsx": "^7.3.2",
     "mongoose": "^7.5.0",
-    "next": "13.4.5",
+    "next": "13.5.0",
     "next-remove-imports": "^1.0.12",
     "notistack": "^3.0.1",
     "pretty-bytes": "^6.1.1",
