@@ -23,6 +23,6 @@ describe('connectors > user', () => {
   test('invalid', () => {
     configMock.connectors.authentication.kind = 'invalid'
 
-    expect(() => getAutheticationConnector(false)).toThrowError('No valid user connector provided.')
+    expect(() => getAutheticationConnector(false)).toThrowError('No valid authentication connector provided.')
   })
 })

@@ -7,6 +7,7 @@ import { User } from '../../../types/v2/types.js'
 export abstract class BaseAuthenticationConnector {
   abstract getUserFromReq(req: Request): Promise<User>
 
+  abstract queryEntities(query: string): Promise<Array<{ kind: string; entities: Array<string> }>>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<{ email: string }>
   abstract getEntityMembers(entity: string): Promise<Array<string>>

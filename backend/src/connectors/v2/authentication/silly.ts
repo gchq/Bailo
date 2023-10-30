@@ -20,6 +20,19 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     }
   }
 
+  async queryEntities(_query: string) {
+    return [
+      {
+        kind: SillyEntityKind.User,
+        entities: [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')],
+      },
+      {
+        kind: SillyEntityKind.Group,
+        entities: [toEntity(SillyEntityKind.Group, 'group1'), toEntity(SillyEntityKind.Group, 'group2')],
+      },
+    ]
+  }
+
   async getEntities(user: UserDoc) {
     return [toEntity(SillyEntityKind.User, user.dn)]
   }
