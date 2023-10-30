@@ -28,7 +28,7 @@ export default function PageWithTabs({
   const [currentTab, setCurrentTab] = useState(tabs[0].path)
 
   const router = useRouter()
-  const { unsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   const { tab } = router.query
 
@@ -36,15 +36,23 @@ export default function PageWithTabs({
     tab ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
   }, [tab, setCurrentTab, tabs])
 
-  const handleChange = (_event: SyntheticEvent, newValue: string) => {
+  function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
-      sendWarning()
+      if (sendWarning()) {
+        continueNavigation(newValue)
+      }
+      // Do nothing if user does not confirm
     } else {
-      setCurrentTab(newValue)
-      router.replace({
-        query: { ...router.query, tab: newValue },
-      })
+      continueNavigation(newValue)
     }
+  }
+
+  function continueNavigation(tab: string) {
+    setCurrentTab(tab)
+    setUnsavedChanges(false)
+    router.replace({
+      query: { ...router.query, tab: tab },
+    })
   }
 
   return (

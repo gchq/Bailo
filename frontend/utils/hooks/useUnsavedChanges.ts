@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 export type UnsavedChangesHook = {
   unsavedChanges: boolean
   setUnsavedChanges: (newValue: boolean) => void
-  sendWarning: () => void
+  sendWarning: () => boolean
 }
 
 export default function useUnsavedChanges(): UnsavedChangesHook {
@@ -33,7 +33,7 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
   }, [unsavedChanges])
 
   const sendWarning = () => {
-    window.confirm(warningText)
+    return window.confirm(warningText)
   }
 
   return {
