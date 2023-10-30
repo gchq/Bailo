@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > user > silly > queryEntities 1`] = `
+[
+  {
+    "entities": [
+      "user:user1",
+      "user:user2",
+    ],
+    "kind": "user",
+  },
+  {
+    "entities": [
+      "group:group1",
+      "group:group2",
+    ],
+    "kind": "group",
+  },
+]
+`;
