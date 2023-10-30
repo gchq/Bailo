@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { FileInterface } from '../../../../models/v2/File.js'
 import { uploadFile } from '../../../../services/v2/file.js'
+import { fileInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
@@ -13,6 +14,26 @@ export const postSimpleUploadSchema = z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
   }),
+})
+
+registerPath({
+  method: 'post',
+  path: '/api/v2/model/{modelId}/files/upload/simple',
+  tags: ['file'],
+  description: 'Upload a new file to a model.',
+  schema: postSimpleUploadSchema,
+  responses: {
+    200: {
+      description: 'The newly created file instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            file: fileInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface PostSimpleUpload {

@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { ModelCardRevisionInterface } from '../../../../models/v2/ModelCardRevision.js'
 import { updateModelCard } from '../../../../services/v2/model.js'
+import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const putModelCardSchema = z.object({
@@ -15,6 +16,26 @@ export const putModelCardSchema = z.object({
   body: z.object({
     metadata: z.unknown(),
   }),
+})
+
+registerPath({
+  method: 'put',
+  path: '/api/v2/model/{modelId}/model-cards',
+  tags: ['modelcard'],
+  description: 'Update the model card for a model.',
+  schema: putModelCardSchema,
+  responses: {
+    200: {
+      description: 'A model card revision instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            card: modelCardRevisionInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface PutModelCardResponse {

@@ -19,6 +19,17 @@ export const getTeams = [
     return res.json({
       teams: [
         {
+          id: 'uncategorised',
+
+          name: 'Uncategorised',
+          description: 'Default team category',
+
+          deleted: false,
+
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
           id: 'example-team',
 
           name: 'Example Team',

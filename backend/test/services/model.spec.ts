@@ -63,10 +63,16 @@ vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks }))
 
 const authorisationMocks = vi.hoisted(() => ({
   userModelAction: vi.fn(() => true),
-  getEntities: vi.fn(() => ['user']),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: authorisationMocks,
+}))
+
+const authenticationMocks = vi.hoisted(() => ({
+  getEntities: vi.fn(() => ['user']),
+}))
+vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
+  default: authenticationMocks,
 }))
 
 describe('services > model', () => {

@@ -224,7 +224,7 @@ module.exports = {
   },
 
   connectors: {
-    user: {
+    authentication: {
       kind: 'silly',
     },
 

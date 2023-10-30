@@ -18,7 +18,7 @@ export default function TeamAndModelSelector({
   setModelValue,
   teamValue,
   modelValue,
-  teamReadOnly = false,
+  teamReadOnly = true, // Disabled until teams are implimented
   teamOnly = false,
   modelOnly = false,
 }: TeamAndModelSelectorProps) {

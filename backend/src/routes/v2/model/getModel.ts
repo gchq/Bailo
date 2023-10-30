@@ -4,14 +4,31 @@ import { z } from 'zod'
 
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { getModelById } from '../../../services/v2/model.js'
+import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getModelSchema = z.object({
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+    modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/model/{modelId}',
+  tags: ['model'],
+  description: "Get a model by it's ID",
+  schema: getModelSchema,
+  responses: {
+    200: {
+      description: 'Object with model information.',
+      content: {
+        'application/json': {
+          schema: z.object({ model: modelInterfaceSchema }),
+        },
+      },
+    },
+  },
 })
 
 interface GetModelResponse {

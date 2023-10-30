@@ -26,7 +26,7 @@ import Wrapper from '../../../src/Wrapper.beta'
 import { ModelForm, ModelVisibility } from '../../../types/v2/types'
 
 export default function NewModel() {
-  const [teamName, setTeamName] = useState('')
+  const [teamName, setTeamName] = useState('Uncategorised')
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)

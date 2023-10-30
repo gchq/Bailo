@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { findSchemaById } from '../../../services/v2/schema.js'
+import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
@@ -12,6 +13,26 @@ export const getSchemaSchema = z.object({
       required_error: 'Must specify schema id as URL parameter',
     }),
   }),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/schema/{schemaId}',
+  tags: ['schema'],
+  description: 'Get a specific schema instance.',
+  schema: getSchemaSchema,
+  responses: {
+    200: {
+      description: 'A schema instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            schema: schemaInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface GetSchemaResponse {

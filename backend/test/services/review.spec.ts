@@ -6,7 +6,7 @@ import { Decision, ReviewInterface } from '../../src/models/v2/Review.js'
 import { createReleaseReviews, findReviews, respondToReview } from '../../src/services/v2/review.js'
 import { ReviewKind } from '../../src/types/v2/enums.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
+vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 
