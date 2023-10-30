@@ -2,6 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { ModelInterface } from '../../../models/v2/Model.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { findReviews } from '../../../services/v2/review.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
@@ -18,7 +19,7 @@ export const getReviewsSchema = z.object({
 })
 
 interface GetReviewResponse {
-  reviews: Array<ReviewInterface>
+  reviews: Array<ReviewInterface & { model: ModelInterface }>
 }
 
 export const getReviews = [
