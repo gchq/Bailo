@@ -136,7 +136,7 @@ export default function ModelReleaseDisplay({
                   <Typography fontWeight='bold'>Docker images</Typography>
                   {release.images.map((image) => (
                     <Stack
-                      key={`${image.name}-${image.tag}`}
+                      key={`${image.repository}-${image.name}-${image.tag}`}
                       direction={{ sm: 'row', xs: 'column' }}
                       justifyContent='space-between'
                       alignItems='center'

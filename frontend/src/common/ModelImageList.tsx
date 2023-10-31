@@ -32,9 +32,11 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
     setFlattenedImageList(updatedImageList)
   }, [modelImages])
 
-  const sortedImageListByName = useMemo(() => {
-    return flattenedImageList.sort((a, b) => a.name.localeCompare(b.name))
-  }, [flattenedImageList])
+  const sortByNameAscending = <T extends { name: string }>(a: T, b: T) => {
+    return a.name.localeCompare(b.name)
+  }
+
+  const sortedImageList = useMemo(() => flattenedImageList.sort(sortByNameAscending), [flattenedImageList])
 
   function handleChange(_event: SyntheticEvent<Element, Event>, FlattenedImageList: FlattenedModelImage[]) {
     setImages(FlattenedImageList)
@@ -52,7 +54,7 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
         onChange={handleChange}
         getOptionLabel={(option) => option.tag}
         groupBy={(option) => option.name}
-        options={sortedImageListByName}
+        options={sortedImageList}
         value={value}
         renderInput={(params) => <TextField {...params} size='small' value={flattenedImageList} />}
       />

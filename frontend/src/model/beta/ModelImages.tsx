@@ -21,8 +21,8 @@ export default function ModelImages({ model }: AccessRequestsProps) {
   const modelImageList = useMemo(
     () =>
       modelImages.length ? (
-        modelImages.map((modelImage, index) => (
-          <ModelImageDisplay modelImage={modelImage} key={`${modelImage.repository}-${index}`} />
+        modelImages.map((modelImage) => (
+          <ModelImageDisplay modelImage={modelImage} key={`${modelImage.repository}-${modelImage.name}`} />
         ))
       ) : (
         <EmptyBlob text={`No images found for model ${model.name}`} />
