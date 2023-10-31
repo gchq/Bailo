@@ -14,6 +14,10 @@ interface ModelImageListProps {
   setImages: Dispatch<SetStateAction<FlattenedModelImage[]>>
 }
 
+const sortByNameAscending = <T extends { name: string }>(a: T, b: T) => {
+  return a.name.localeCompare(b.name)
+}
+
 export default function ModelImageList({ model, value, setImages }: ModelImageListProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
   const [flattenedImageList, setFlattenedImageList] = useState<FlattenedModelImage[]>([])
@@ -31,10 +35,6 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
     }
     setFlattenedImageList(updatedImageList)
   }, [modelImages])
-
-  const sortByNameAscending = <T extends { name: string }>(a: T, b: T) => {
-    return a.name.localeCompare(b.name)
-  }
 
   const sortedImageList = useMemo(() => flattenedImageList.sort(sortByNameAscending), [flattenedImageList])
 

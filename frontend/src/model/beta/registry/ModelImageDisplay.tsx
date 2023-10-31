@@ -22,7 +22,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
       uiConfig &&
       modelImage.tags.map((imageTag) => (
         <CodeLine
-          key={`${modelImage.name}-${imageTag}`}
+          key={`${modelImage.repository}-${modelImage.name}-${imageTag}`}
           line={`${uiConfig.registry.host}/${modelImage.repository}/${modelImage.name}:${imageTag}`}
         />
       )),
