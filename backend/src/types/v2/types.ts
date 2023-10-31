@@ -7,9 +7,3 @@ export interface Role {
   name: string
   short?: string
 }
-
-export interface FlattenedModelImage {
-  repository: string
-  name: string
-  tag: string
-}

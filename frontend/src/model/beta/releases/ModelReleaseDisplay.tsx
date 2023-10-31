@@ -4,7 +4,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import Markdown from 'src/common/MarkdownRenderer'
-import CodeLine from 'src/model/beta/images/CodeLine'
+import CodeLine from 'src/model/beta/registry/CodeLine'
 import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'

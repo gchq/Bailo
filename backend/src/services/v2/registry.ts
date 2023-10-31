@@ -15,12 +15,6 @@ export interface RepoRef {
   name: string
 }
 
-export interface ImageRef {
-  repository: string
-  name: string
-  tag: string
-}
-
 // Currently limited to a maximum 100 image names
 export async function listModelRepos(user: UserDoc, modelId: string) {
   const token = await getAccessToken({ id: user.dn, _id: user.dn }, [

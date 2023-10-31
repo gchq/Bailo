@@ -6,8 +6,8 @@ import { ModelInterface } from '../../../types/v2/types'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
 import MessageAlert from '../../MessageAlert'
-import UploadNewImageDialog from '../../model/beta/images/UploadNewImageDialog'
-import ModelImageDisplay from '../beta/images/ModelImageDisplay'
+import ModelImageDisplay from './registry/ModelImageDisplay'
+import UploadNewImageDialog from './registry/UploadNewImageDialog'
 
 type AccessRequestsProps = {
   model: ModelInterface
