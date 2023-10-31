@@ -1,5 +1,6 @@
-import { Box, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
+import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDisplay'
@@ -13,6 +14,8 @@ type AccessRequestsProps = {
 }
 
 export default function AccessRequests({ model }: AccessRequestsProps) {
+  const router = useRouter()
+
   const { accessRequests, isAccessRequestsLoading, isAccessRequestsError } = useGetAccessRequestsForModelId(model.id)
 
   const accessRequestsList = useMemo(
@@ -27,6 +30,10 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
     [accessRequests, model.name],
   )
 
+  function requestAccess() {
+    router.push(`/beta/model/${model.id}/access/schema`)
+  }
+
   if (isAccessRequestsError) {
     return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
   }
@@ -34,6 +41,11 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
+        <Box sx={{ textAlign: 'right' }}>
+          <Button variant='outlined' onClick={requestAccess} disabled={!model.card}>
+            Request Access
+          </Button>
+        </Box>
         {isAccessRequestsLoading && <Loading />}
         {accessRequestsList}
       </Stack>
