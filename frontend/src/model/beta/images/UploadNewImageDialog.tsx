@@ -19,13 +19,16 @@ import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/beta/images/CodeLine'
+import { ModelInterface } from 'types/v2/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 interface UploadModelImageDialogProps {
   open: boolean
   handleClose: () => void
+  model: ModelInterface
 }
 
-export default function UploadModelImageDialog({ open, handleClose }: UploadModelImageDialogProps) {
+export default function UploadModelImageDialog({ open, handleClose, model }: UploadModelImageDialogProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -33,11 +36,26 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
 
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
+  const [tokenErrorText, setTokenErrorText] = useState('')
 
   const regenerateToken = async () => {
-    const { token } = await fetch('/api/v1/user/token', {
+    const res = await fetch('/api/v1/user/token', {
       method: 'POST',
-    }).then((res) => res.json())
+    })
+
+    if (!res.ok) {
+      setTokenErrorText(await getErrorMessage(res))
+      return // Either return nothing or a string perhaps?
+    }
+
+    let token
+
+    try {
+      const body = await res.json()
+      token = body.token
+    } catch (error) {
+      setTokenErrorText('Recieved invalid response from server.')
+    }
 
     return token
   }
@@ -46,6 +64,14 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
     const token = await regenerateToken()
     setDisplayedToken(token)
     setDisplayToken(true)
+  }
+
+  const copyTokenOnClick = async () => {
+    const token = await regenerateToken()
+    if (token) {
+      setDisplayedToken(token)
+      navigator.clipboard.writeText(token)
+    }
   }
 
   if (isUiConfigError) {
@@ -61,7 +87,7 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
       {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
       {uiConfig && currentUser && (
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle color='primary'>Uploading an Image for this Model</DialogTitle>
+          <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
             <Stack spacing={2}>
               <Typography fontWeight='bold'>User authentication token</Typography>
@@ -73,8 +99,7 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
                 <Box
                   sx={{
                     backgroundColor: theme.palette.container.main,
-                    pr: 2,
-                    pl: 2,
+                    px: 2,
                     display: 'flex',
                     mr: 1,
                   }}
@@ -86,18 +111,14 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
                   </Box>
                 </Box>
                 <Tooltip title='Regenerate & Copy to clipboard'>
-                  <IconButton
-                    onClick={async () => {
-                      const token = await regenerateToken()
-                      setDisplayedToken(token)
-                      navigator.clipboard.writeText(token)
-                    }}
-                    aria-label='regenerate and copy to clipboard'
-                  >
+                  <IconButton onClick={copyTokenOnClick} aria-label='regenerate token and copy to clipboard'>
                     <ContentCopy />
                   </IconButton>
                 </Tooltip>
               </Stack>
+              <Typography variant='caption' color={theme.palette.error.main}>
+                {tokenErrorText}
+              </Typography>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
@@ -107,15 +128,14 @@ export default function UploadModelImageDialog({ open, handleClose }: UploadMode
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Pushing an image to the registry</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker tag <image> ${window.location.host}/<namespace>/<model>:<version>`} />
-                  <CodeLine line={`docker push ${window.location.host}/<namespace>/<model>:<version>`} />
-                  <CodeLine line={`${window.location.host}/api/v2/model/myModelId/images`} />
+                  <CodeLine line={`docker tag <image> ${window.location.host}/${model.id}/<name>:<tag>`} />
+                  <CodeLine line={`docker push ${window.location.host}/${model.id}/<name>:<tag>`} />
                 </Stack>
               </Stack>
             </Stack>
           </DialogContent>
           <Box sx={{ mx: 3 }}>
-            <Divider sx={{ margin: 'auto' }} />
+            <Divider />
           </Box>
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={handleClose}>Cancel</Button>

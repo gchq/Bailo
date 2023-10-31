@@ -145,13 +145,13 @@ export interface AccessRequestInterface {
 }
 
 export interface ModelImage {
-  namespace: string
-  model: string
-  versions: Array<string>
+  repository: string
+  name: string
+  tags: Array<string>
 }
 
 export interface FlattenedModelImage {
-  namespace: string
-  model: string
-  version: string
+  repository: string
+  name: string
+  tag: string
 }

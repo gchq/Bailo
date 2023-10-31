@@ -21,8 +21,8 @@ export default function ModelImages({ model }: AccessRequestsProps) {
   const modelImageList = useMemo(
     () =>
       modelImages.length ? (
-        modelImages.map((modelImage) => (
-          <ModelImageDisplay modelImage={modelImage} key={`${modelImage.namespace}-${modelImage.model}`} />
+        modelImages.map((modelImage, index) => (
+          <ModelImageDisplay modelImage={modelImage} key={`${modelImage.repository}-${index}`} />
         ))
       ) : (
         <EmptyBlob text={`No images found for model ${model.name}`} />
@@ -41,9 +41,13 @@ export default function ModelImages({ model }: AccessRequestsProps) {
         <Stack spacing={4}>
           <Box sx={{ textAlign: 'right' }}>
             <Button variant='outlined' onClick={() => setOpenUploadImageDialog(true)} disabled={!model.card}>
-              Upload image
+              Push image
             </Button>
-            <UploadNewImageDialog open={openUploadImageDialog} handleClose={() => setOpenUploadImageDialog(false)} />
+            <UploadNewImageDialog
+              open={openUploadImageDialog}
+              handleClose={() => setOpenUploadImageDialog(false)}
+              model={model}
+            />
           </Box>
           {modelImageList}
         </Stack>

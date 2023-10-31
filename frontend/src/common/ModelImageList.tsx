@@ -1,7 +1,7 @@
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
-import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { ModelInterface } from 'types/v2/types'
 
 import { FlattenedModelImage } from '../../types/interfaces'
@@ -19,22 +19,24 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
   const [flattenedImageList, setFlattenedImageList] = useState<FlattenedModelImage[]>([])
 
   useEffect(() => {
-    if (modelImages) {
-      const updatedImageList: FlattenedModelImage[] = []
-      for (const modelImage of modelImages) {
-        for (const modelImageVersion of modelImage.versions) {
-          updatedImageList.push({
-            namespace: modelImage.namespace,
-            model: modelImage.model,
-            version: modelImageVersion,
-          })
-        }
+    const updatedImageList: FlattenedModelImage[] = []
+    for (const modelImage of modelImages) {
+      for (const modelImageVersion of modelImage.tags) {
+        updatedImageList.push({
+          repository: modelImage.repository,
+          name: modelImage.name,
+          tag: modelImageVersion,
+        })
       }
-      setFlattenedImageList(updatedImageList)
     }
+    setFlattenedImageList(updatedImageList)
   }, [modelImages])
 
-  const handleChange = (_event: SyntheticEvent<Element, Event>, FlattenedImageList: FlattenedModelImage[]) => {
+  const sortedImageListByName = useMemo(() => {
+    return flattenedImageList.sort((a, b) => a.name.localeCompare(b.name))
+  }, [flattenedImageList])
+
+  function handleChange(_event: SyntheticEvent<Element, Event>, FlattenedImageList: FlattenedModelImage[]) {
     setImages(FlattenedImageList)
   }
 
@@ -48,9 +50,9 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
       <Autocomplete
         multiple
         onChange={handleChange}
-        getOptionLabel={(option) => option.version}
-        groupBy={(option) => option.model}
-        options={flattenedImageList.sort((a, b) => -b.model.localeCompare(a.model))}
+        getOptionLabel={(option) => option.tag}
+        groupBy={(option) => option.name}
+        options={sortedImageListByName}
         value={value}
         renderInput={(params) => <TextField {...params} size='small' value={flattenedImageList} />}
       />

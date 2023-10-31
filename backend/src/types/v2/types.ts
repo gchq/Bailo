@@ -9,7 +9,7 @@ export interface Role {
 }
 
 export interface FlattenedModelImage {
-  namespace: string
-  model: string
-  version: string
+  repository: string
+  name: string
+  tag: string
 }

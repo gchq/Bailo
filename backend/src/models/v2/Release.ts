@@ -45,9 +45,9 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     fileIds: [{ type: Schema.Types.ObjectId }],
     images: [
       {
-        namespace: { type: String },
-        model: { type: String },
-        version: { type: String },
+        repository: { type: String },
+        name: { type: String },
+        tag: { type: String },
       },
     ],
 

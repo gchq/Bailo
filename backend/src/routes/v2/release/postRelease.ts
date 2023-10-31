@@ -24,9 +24,9 @@ export const postReleaseSchema = z.object({
     fileIds: z.array(z.string()),
     images: z.array(
       z.object({
-        namespace: z.string(),
-        model: z.string(),
-        version: z.string(),
+        repository: z.string(),
+        name: z.string(),
+        tag: z.string(),
       }),
     ),
   }),

@@ -15,9 +15,9 @@ export const getImagesSchema = z.object({
 
 interface GetImagesResponse {
   images: Array<{
-    namespace: string
-    model: string
-    versions: Array<string>
+    repository: string
+    name: string
+    tags: Array<string>
   }>
 }
 
