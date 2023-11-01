@@ -36,7 +36,7 @@
     "execa": "^8.0.1",
     "express": "^5.0.0-beta.1",
     "express-session": "^1.17.3",
-    "form-data-encoder": "^3.0.0",
+    "form-data-encoder": "^4.0.2",
     "formdata-node": "^5.0.1",
     "grant": "^5.4.21",
     "indent-string": "^5.0.0",
