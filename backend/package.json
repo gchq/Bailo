@@ -91,7 +91,7 @@
     "@types/nodemailer": "^6.4.9",
     "@types/pako": "^2.0.0",
     "@types/shelljs": "^0.8.12",
-    "@types/supertest": "^2.0.12",
+    "@types/supertest": "^2.0.15",
     "@types/unzipper": "^0.10.7",
     "@types/uuid": "^9.0.1",
     "@types/yauzl": "^2.10.0",
