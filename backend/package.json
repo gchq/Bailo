@@ -29,7 +29,7 @@
     "bunyan": "^1.8.15",
     "chalk": "^5.2.0",
     "config": "^3.3.9",
-    "connect-mongo": "^5.0.0",
+    "connect-mongo": "^5.1.0",
     "cross-fetch": "^3.1.8",
     "dedent-js": "^1.0.1",
     "dev-null": "^0.1.1",
