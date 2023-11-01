@@ -11,14 +11,8 @@ const httpsAgent = getHttpsAgent({
 })
 
 export interface RepoRef {
-  namespace: string
-  model: string
-}
-
-export interface ImageRef {
-  namespace: string
-  model: string
-  version: string
+  repository: string
+  name: string
 }
 
 // Currently limited to a maximum 100 image names
@@ -40,7 +34,7 @@ export async function listModelRepos(user: UserDoc, modelId: string) {
 }
 
 export async function listImageTags(user: UserDoc, imageRef: RepoRef) {
-  const repo = `${imageRef.namespace}/${imageRef.model}`
+  const repo = `${imageRef.repository}/${imageRef.name}`
   const token = await getAccessToken({ id: user.dn, _id: user.dn }, [
     { type: 'repository', class: '', name: repo, actions: ['pull'] },
   ])
@@ -61,8 +55,8 @@ export async function listModelImages(user: UserDoc, modelId: string) {
   const repos = await listModelRepos(user, modelId)
   const versions = await Promise.all(
     repos.map(async (repo) => {
-      const [namespace, model] = repo.split('/')
-      return { namespace, model, versions: await listImageTags(user, { namespace, model }) }
+      const [repository, name] = repo.split('/')
+      return { repository, name, tags: await listImageTags(user, { repository, name }) }
     }),
   )
 
