@@ -23,7 +23,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.135",
     "@mui/material": "^5.13.2",
-    "@next/mdx": "^13.4.4",
+    "@next/mdx": "^14.0.1",
     "@rjsf/core": "^5.10.0",
     "@rjsf/mui": "^5.10.0",
     "@rjsf/utils": "^5.10.0",
