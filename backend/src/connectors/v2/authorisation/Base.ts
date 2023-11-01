@@ -1,6 +1,7 @@
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ModelDoc, ModelVisibility } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import authentication from '../authentication/index.js'
 
@@ -27,10 +28,16 @@ export const AccessRequestAction = {
   Update: 'update',
   Delete: 'delete',
 }
-export type AccessRequestActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
+export type AccessRequestActionKeys = (typeof AccessRequestAction)[keyof typeof AccessRequestAction]
+
+export const SchemaAction = {
+  Create: 'create',
+}
+export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
 
 export abstract class BaseAuthorisationConnector {
   abstract userModelAction(user: UserDoc, model: ModelDoc, action: ModelActionKeys): Promise<boolean>
+  abstract userSchemaAction(user: UserDoc, Schema: SchemaDoc, action: SchemaActionKeys): Promise<boolean>
   abstract userReleaseAction(
     user: UserDoc,
     model: ModelDoc,

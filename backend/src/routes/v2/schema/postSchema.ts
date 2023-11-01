@@ -60,7 +60,7 @@ export const postSchema = [
   async (req: Request, res: Response<PostSchemaResponse>) => {
     const { body } = parse(req, postSchemaSchema)
 
-    const schema = await createSchema(body)
+    const schema = await createSchema(req.user, body)
 
     return res.json({
       schema,

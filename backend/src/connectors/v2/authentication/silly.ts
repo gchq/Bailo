@@ -20,6 +20,10 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     }
   }
 
+  async isAdmin(_user: UserDoc) {
+    return true
+  }
+
   async queryEntities(_query: string) {
     return [
       {
