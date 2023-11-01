@@ -68,6 +68,8 @@ export async function addDefaultSchemas() {
     hidden: false,
   })
 
+  await Schema.deleteMany({ $or: [{ id: uploadSchemaDoc.id }, { id: accessSchemaDoc.id }] })
+
   try {
     await uploadSchemaDoc.save()
     await accessSchemaDoc.save()
