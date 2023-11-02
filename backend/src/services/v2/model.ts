@@ -211,7 +211,7 @@ export async function updateModelCard(
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Write))) {
+  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
     throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
   }
 
