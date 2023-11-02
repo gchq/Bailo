@@ -2,17 +2,19 @@ import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { UserDoc } from '../../src/models/v2/User.js'
-import { getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
+import { downloadFile, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
+  getObjectStream: vi.fn(() => 'fileStream'),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
 const authorisationMocks = vi.hoisted(() => ({
   userModelAction: vi.fn(() => true),
+  userFileAction: vi.fn(() => true),
 }))
 vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
   default: authorisationMocks,
@@ -104,5 +106,27 @@ describe('services > file', () => {
     expect(() => getFilesByModel(user, modelId)).rejects.toThrowError(/^You do not have permission to get these files./)
 
     expect(fileModelMocks.delete).not.toBeCalled()
+  })
+
+  test('downloadFile > success', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const fileId = 'testFileId'
+    const range = { start: 0, end: 50 }
+
+    const result = await downloadFile(user, fileId, range)
+
+    expect(result).toBe('fileStream')
+  })
+
+  test('downloadFile > no permission', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const fileId = 'testFileId'
+    const range = { start: 0, end: 50 }
+
+    authorisationMocks.userFileAction.mockResolvedValueOnce(false)
+
+    await expect(downloadFile(user, fileId, range)).rejects.toThrowError(
+      /^You do not have permission to download this model./,
+    )
   })
 })
