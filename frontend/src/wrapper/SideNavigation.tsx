@@ -231,7 +231,7 @@ export default function SideNavigation({
                   </Link>
                 </ListItem>
                 <ListItem disablePadding>
-                  <Link href='/schemas'>
+                  <Link href='/beta/schemas'>
                     <ListItemButton selected={page === 'schemas'}>
                       <ListItemIcon data-test='designSchemaLink'>
                         {!drawerOpen ? (

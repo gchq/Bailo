@@ -6,7 +6,7 @@ import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { createSchema } from '../../../services/v2/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
 import { SchemaKind } from '../../../types/v2/enums.js'
-import { ensureUserRole } from '../../../utils/user.js'
+//import { ensureUserRole } from '../../../utils/user.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const postSchemaSchema = z.object({
@@ -17,7 +17,9 @@ export const postSchemaSchema = z.object({
     name: z.string({
       required_error: 'Must specify schema name',
     }),
-
+    description: z.string({
+      required_error: 'Must specify schema description',
+    }),
     kind: z.nativeEnum(SchemaKind, {
       required_error: 'Must specify schema kind',
     }),
@@ -55,7 +57,7 @@ interface PostSchemaResponse {
 }
 
 export const postSchema = [
-  ensureUserRole('admin'),
+  //ensureUserRole('admin'),
   bodyParser.json(),
   async (req: Request, res: Response<PostSchemaResponse>) => {
     const { body } = parse(req, postSchemaSchema)
