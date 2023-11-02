@@ -17,7 +17,7 @@ export default function SchemaButton({ modelId, schema }: SchemaButtonProps) {
 
   async function createAccessRequestUsingSchema(newSchema: SchemaInterface) {
     setLoading(true)
-    router.push(`/beta/model/${modelId}/access/new?schemaId=${newSchema.id}`)
+    router.push(`/beta/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
   }
 
   return (

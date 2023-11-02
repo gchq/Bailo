@@ -19,13 +19,15 @@ type ReviewBannerProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
+      removeBorderRadius?: boolean
     }
   | {
       release?: never
       accessRequest: AccessRequestInterface
+      removeBorderRadius?: boolean
     }
 
-export default function ReviewBanner({ release, accessRequest }: ReviewBannerProps) {
+export default function ReviewBanner({ release, accessRequest, removeBorderRadius = false }: ReviewBannerProps) {
   const theme = useTheme()
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [postResponseError, setPostResponseError] = useState('')
@@ -98,7 +100,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: theme.palette.primary.main,
-        borderRadius: '13px 13px 0px 0px',
+        borderRadius: removeBorderRadius ? 'none' : '13px 13px 0px 0px',
       }}
     >
       <Grid container spacing={2} alignItems='center' sx={{ px: 2 }}>

@@ -6,7 +6,7 @@ import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { postAccessRequest } from '../../../../../actions/access'
+import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'

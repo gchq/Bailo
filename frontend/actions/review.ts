@@ -34,11 +34,11 @@ type SemverOrAccessRequestId =
     }
   | {
       semver?: never
-      accessRequestId: AccessRequestInterface['id']
+      accessRequestId: AccessRequestInterface['id'] | undefined
     }
 
 type GetReviewRequestsForModelQuery = {
-  modelId: ModelInterface['id']
+  modelId: ModelInterface['id'] | undefined
   isActive: boolean
 } & SemverOrAccessRequestId
 

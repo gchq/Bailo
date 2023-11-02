@@ -15,7 +15,8 @@
         "endDate": {
           "title": "What is the end date for this access request?",
           "type": "string",
-          "format": "date"
+          "format": "date",
+          "widget": "customTextInput"
         },
         "entities": {
           "title": "Additional contacts",
