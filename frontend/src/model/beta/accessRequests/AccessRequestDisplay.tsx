@@ -1,6 +1,6 @@
 import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useRouter } from 'next/router'
+import Link from 'src/Link'
 import { AccessRequestInterface } from 'types/interfaces'
 import { formatDateString } from 'utils/dateUtils'
 
@@ -16,7 +16,6 @@ type AccessRequestDisplayProps = {
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
   const theme = useTheme()
-  const router = useRouter()
 
   const {
     reviews: activeReviews,
@@ -69,11 +68,9 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               <Typography component='h2' variant='h6' color='primary'>
                 {accessRequest.metadata.overview.name}
               </Typography>
-              <Button
-                onClick={() => router.push(`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`)}
-              >
-                View Access Request
-              </Button>
+              <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
+                <Button>View Access Request</Button>
+              </Link>
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>

@@ -7,6 +7,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import ReviewComments from 'src/common/ReviewComments'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import Link from 'src/Link'
 import AccessRequestFormEditPage from 'src/model/beta/accessRequests/AccessRequestFormEditPage'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import Wrapper from 'src/Wrapper.beta'
@@ -53,13 +54,11 @@ export default function AccessRequest() {
                 spacing={2}
                 divider={<Divider flexItem orientation='vertical' />}
               >
-                <Button
-                  sx={{ width: 'fit-content' }}
-                  startIcon={<ArrowBack />}
-                  onClick={() => router.push(`/beta/model/${modelId}?tab=access`)}
-                >
-                  Back to model
-                </Button>
+                <Link href={`/beta/model/${modelId}?tab=access`}>
+                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                    Back to model
+                  </Button>
+                </Link>
                 <Typography variant='h6' color='primary' component='h2'>
                   {accessRequest ? (accessRequest.metadata.overview.name as string) : 'Loading...'}
                 </Typography>

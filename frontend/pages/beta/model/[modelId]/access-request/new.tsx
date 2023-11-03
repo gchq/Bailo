@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'src/Link'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
@@ -97,13 +98,11 @@ export default function NewAccessRequest() {
           )}
           {model && model.card && (
             <Stack spacing={4}>
-              <Button
-                sx={{ width: 'fit-content' }}
-                startIcon={<ArrowBack />}
-                onClick={() => router.push(`/beta/model/${modelId}/access/schema`)}
-              >
-                Choose a different schema
-              </Button>
+              <Link href={`/beta/model/${modelId}/access-request/schema`}>
+                <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                  Choose a different schema
+                </Button>
+              </Link>
               <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
               <Stack alignItems='flex-end'>
                 <LoadingButton

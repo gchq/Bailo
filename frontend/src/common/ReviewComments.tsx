@@ -1,3 +1,5 @@
+import Done from '@mui/icons-material/Done'
+import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReviewRequestsForModel } from 'actions/review'
@@ -30,7 +32,7 @@ export default function ReviewComments({ accessRequest }: ReviewCommentsProps) {
         return (
           <Stack direction='row' spacing={2} alignItems='center'>
             <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
-            <Typography
+            <Box
               sx={{
                 border: 'solid',
                 borderWidth: '1px',
@@ -40,15 +42,20 @@ export default function ReviewComments({ accessRequest }: ReviewCommentsProps) {
                 width: '100%',
               }}
             >
-              <span style={{ fontWeight: 'bold' }}>{username}</span> has marked this as approved.
-            </Typography>
+              <Stack direction='row' spacing={1} alignItems='center'>
+                <Typography>
+                  <span style={{ fontWeight: 'bold' }}>{username}</span> has marked this as approved.
+                </Typography>
+                <Done color='success' fontSize='small' />
+              </Stack>
+            </Box>
           </Stack>
         )
       case 'request_changes':
         return (
           <Stack direction='row' spacing={2} alignItems='center'>
             <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />
-            <Typography
+            <Box
               sx={{
                 border: 'solid',
                 borderWidth: '1px',
@@ -58,8 +65,13 @@ export default function ReviewComments({ accessRequest }: ReviewCommentsProps) {
                 width: '100%',
               }}
             >
-              <span style={{ fontWeight: 'bold' }}>{username}</span> has requested changes.
-            </Typography>
+              <Stack direction='row' spacing={1} alignItems='center'>
+                <Typography>
+                  <span style={{ fontWeight: 'bold' }}>{username}</span> has requested changes.
+                </Typography>
+                <HourglassEmpty color='warning' fontSize='small' />
+              </Stack>
+            </Box>
           </Stack>
         )
     }
