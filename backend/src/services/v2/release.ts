@@ -1,7 +1,7 @@
 import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelInterface } from '../../models/v2/Model.js'
-import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
+import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
@@ -18,16 +18,22 @@ export type CreateReleaseParams = Pick<
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
   if (releaseParams.images) {
     const registryImages = await listModelImages(user, releaseParams.modelId)
-    const missingImages = releaseParams.images.flatMap((releaseImage) =>
-      registryImages.some(
-        (registryImage) =>
-          releaseImage.name === registryImage.name &&
-          releaseImage.repository === registryImage.repository &&
-          registryImage.tags.includes(releaseImage.tag),
-      )
-        ? []
-        : releaseImage,
-    )
+
+    const initialValue: ImageRef[] = []
+    const missingImages = releaseParams.images.reduce((acc, releaseImage) => {
+      if (
+        !registryImages.some(
+          (registryImage) =>
+            releaseImage.name === registryImage.name &&
+            releaseImage.repository === registryImage.repository &&
+            registryImage.tags.includes(releaseImage.tag),
+        )
+      ) {
+        acc.push(releaseImage)
+      }
+      return acc
+    }, initialValue)
+
     if (missingImages.length > 0) {
       throw BadReq('The following images do not exist in the registry.', {
         missingImages,
