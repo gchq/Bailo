@@ -5,7 +5,6 @@ import {
   Card,
   Container,
   Divider,
-  FormControl,
   FormControlLabel,
   Radio,
   RadioGroup,
@@ -15,15 +14,15 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
+import ModelSelector from 'src/ModelSelector'
+import TeamSelector from 'src/TeamSelector'
+import Wrapper from 'src/Wrapper.beta'
+import { ModelForm, ModelVisibility } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
-
-import { postModel } from '../../../actions/model'
-import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
-import MessageAlert from '../../../src/MessageAlert'
-import Wrapper from '../../../src/Wrapper.beta'
-import { ModelForm, ModelVisibility } from '../../../types/v2/types'
 
 export default function NewModel() {
   const [teamName, setTeamName] = useState('Uncategorised')
@@ -55,6 +54,14 @@ export default function NewModel() {
 
     const data = await response.json()
     router.push(`/beta/model/${data.model.id}`)
+  }
+
+  const handleTeamChange = (value: string) => {
+    setTeamName(value)
+  }
+
+  const handleModelChange = (value: string) => {
+    setModelName(value)
   }
 
   const privateLabel = () => {
@@ -101,26 +108,20 @@ export default function NewModel() {
                 <Typography component='h2' variant='h6'>
                   Overview
                 </Typography>
-                <Box sx={{ width: '100%' }}>
-                  <TeamAndModelSelector
-                    setTeamValue={setTeamName}
-                    teamValue={teamName}
-                    setModelValue={setModelName}
-                    modelValue={modelName}
-                  />
-                </Box>
+                <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+                  <TeamSelector value={teamName} onChange={handleTeamChange} />
+                  <ModelSelector value={modelName} onChange={handleModelChange} />
+                </Stack>
                 <Stack>
-                  <FormControl>
-                    <Typography sx={{ fontWeight: 'bold' }}>
-                      Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                    </Typography>
-                    <TextField
-                      data-test='modelDescription'
-                      onChange={(event) => setDescription(event.target.value)}
-                      value={description}
-                      size='small'
-                    />
-                  </FormControl>
+                  <Typography sx={{ fontWeight: 'bold' }}>
+                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
+                  </Typography>
+                  <TextField
+                    data-test='modelDescription'
+                    onChange={(event) => setDescription(event.target.value)}
+                    value={description}
+                    size='small'
+                  />
                 </Stack>
               </>
               <Divider />
