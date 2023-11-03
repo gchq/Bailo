@@ -1,8 +1,17 @@
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { AccessRequestActionKeys, BaseAuthorisationConnector, ModelActionKeys, ReleaseActionKeys } from './Base.js'
+import { Roles } from '../authentication/Base.js'
+import authentication from '../authentication/index.js'
+import {
+  AccessRequestActionKeys,
+  BaseAuthorisationConnector,
+  ModelActionKeys,
+  ReleaseActionKeys,
+  SchemaActionKeys,
+} from './Base.js'
 
 export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
   constructor() {
@@ -47,5 +56,9 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
 
     // Allow any other action to be completed
     return true
+  }
+
+  async userSchemaAction(user: UserDoc, _schema: SchemaDoc, _action: SchemaActionKeys) {
+    return authentication.hasRole(user, Roles.Admin)
   }
 }
