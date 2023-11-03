@@ -236,7 +236,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'>
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
+>
 export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 

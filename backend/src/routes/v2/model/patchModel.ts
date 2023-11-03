@@ -12,6 +12,9 @@ export const patchModelSchema = z.object({
     name: z.string().optional().openapi({ example: 'Yolo v4' }),
     description: z.string().optional().openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(ModelVisibility).optional().openapi({ example: 'private' }),
+    settings: z.object({
+      ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+    }),
     collaborators: z
       .array(
         z.object({
