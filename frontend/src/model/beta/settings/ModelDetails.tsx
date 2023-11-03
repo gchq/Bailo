@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Divider,
-  FormControl,
   FormControlLabel,
   Radio,
   RadioGroup,
@@ -14,12 +13,13 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
+import ModelSelector from 'src/ModelSelector'
+import TeamSelector from 'src/TeamSelector'
 
 import { patchModel } from '../../../../actions/model'
 import { ModelForm, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import useNotification from '../../../common/Snackbar'
-import TeamAndModelSelector from '../../../common/TeamAndModelSelector'
 import MessageAlert from '../../../MessageAlert'
 
 type ModelAccessProps = {
@@ -92,26 +92,20 @@ export default function ModelDetails({ model }: ModelAccessProps) {
           <Typography variant='h6' component='h2'>
             Model Details
           </Typography>
-          <Box sx={{ width: '100%' }}>
-            <TeamAndModelSelector
-              setTeamValue={setTeamName}
-              teamValue={teamName}
-              setModelValue={setModelName}
-              modelValue={modelName}
-            />
-          </Box>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+            <TeamSelector value={teamName} onChange={(value) => setTeamName(value)} />
+            <ModelSelector value={modelName} onChange={(value) => setModelName(value)} />
+          </Stack>
           <Stack>
-            <FormControl>
-              <Typography sx={{ fontWeight: 'bold' }}>
-                Description <span style={{ color: theme.palette.primary.main }}>*</span>
-              </Typography>
-              <TextField
-                data-test='modelDescription'
-                onChange={(event) => setDescription(event.target.value)}
-                value={description}
-                size='small'
-              />
-            </FormControl>
+            <Typography sx={{ fontWeight: 'bold' }}>
+              Description <span style={{ color: theme.palette.primary.main }}>*</span>
+            </Typography>
+            <TextField
+              data-test='modelDescription'
+              onChange={(event) => setDescription(event.target.value)}
+              value={description}
+              size='small'
+            />
           </Stack>
         </>
         <Divider />

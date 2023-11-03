@@ -56,14 +56,6 @@ export default function NewModel() {
     router.push(`/beta/model/${data.model.id}`)
   }
 
-  const handleTeamChange = (value: string) => {
-    setTeamName(value)
-  }
-
-  const handleModelChange = (value: string) => {
-    setModelName(value)
-  }
-
   const privateLabel = () => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
@@ -109,8 +101,8 @@ export default function NewModel() {
                   Overview
                 </Typography>
                 <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                  <TeamSelector value={teamName} onChange={handleTeamChange} />
-                  <ModelSelector value={modelName} onChange={handleModelChange} />
+                  <TeamSelector value={teamName} onChange={(value) => setTeamName(value)} />
+                  <ModelSelector value={modelName} onChange={(value) => setModelName(value)} />
                 </Stack>
                 <Stack>
                   <Typography sx={{ fontWeight: 'bold' }}>
