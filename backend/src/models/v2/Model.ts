@@ -38,6 +38,7 @@ export interface ModelInterface {
   id: string
 
   name: string
+  team: string
   description: string
   card?: ModelCardInterface
 

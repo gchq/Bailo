@@ -12,6 +12,7 @@ export const postModelSchema = z.object({
     name: z.string({
       required_error: 'Must specify model name',
     }),
+    team: z.string(),
     description: z.string({
       required_error: 'Must specify model description',
     }),
