@@ -3,6 +3,7 @@ import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
+import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestActionKeys,
@@ -58,6 +59,6 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
   }
 
   async userSchemaAction(user: UserDoc, _schema: SchemaDoc, _action: SchemaActionKeys) {
-    return authentication.isAdmin(user)
+    return authentication.hasRole(user, Roles.Admin)
   }
 }
