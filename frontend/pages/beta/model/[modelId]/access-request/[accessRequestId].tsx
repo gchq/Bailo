@@ -41,7 +41,7 @@ export default function AccessRequest() {
       fullWidth
     >
       <Container maxWidth='md'>
-        <Card sx={{ p: 4, m: 'auto' }}>
+        <Card sx={{ p: 4, m: 'auto', mb: 2 }}>
           {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
           {!accessRequest && !isAccessRequestLoading && (
             <EmptyBlob text={`Oh no, it looks like access request ${accessRequest} doesn't exist!`} />

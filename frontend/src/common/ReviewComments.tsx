@@ -28,7 +28,7 @@ export default function ReviewComments({ accessRequest }: ReviewCommentsProps) {
   function getDecision(user: string, reviewDecision: string) {
     const username = user.split(':')[0]
     switch (reviewDecision) {
-      case 'approved':
+      case 'approve':
         return (
           <Stack direction='row' spacing={2} alignItems='center'>
             <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
