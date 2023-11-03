@@ -11,6 +11,7 @@ export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVis
 export interface ModelInterface {
   id: string
   name: string
+  team: string
   description: string
   card: ModelCardInterface
   visibility: ModelVisibilityKeys
