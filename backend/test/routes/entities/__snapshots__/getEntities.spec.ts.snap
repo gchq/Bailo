@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > entities > getEntities > 200 > ok 1`] = `
+[
+  [
+    "bob",
+  ],
+]
+`;
+
+exports[`routes > entities > getEntities > 200 > ok 2`] = `
+{
+  "results": [
+    {
+      "entities": [
+        "user:alice",
+      ],
+      "kind": "user",
+    },
+    {
+      "entities": [
+        "group:alicesGroup",
+      ],
+      "kind": "group",
+    },
+  ],
+}
+`;

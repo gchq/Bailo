@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { ReleaseInterface } from '../../../models/v2/Release.js'
 import { getReleaseBySemver } from '../../../services/v2/release.js'
+import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getReleaseSchema = z.object({
@@ -11,6 +12,26 @@ export const getReleaseSchema = z.object({
     modelId: z.string(),
     semver: z.string(),
   }),
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/model/{modelId}/release/{semver}',
+  tags: ['release'],
+  description: 'Get a specific release for a model.',
+  schema: getReleaseSchema,
+  responses: {
+    200: {
+      description: 'A release instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            release: releaseInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface getReleaseResponse {

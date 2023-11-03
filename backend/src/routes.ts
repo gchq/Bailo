@@ -48,6 +48,8 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
+import { getEntities } from './routes/v2/entities/getEntities.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
@@ -80,11 +82,11 @@ import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewR
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
+import { getSpecification as getSpecificationV2 } from './routes/v2/specification.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
-import { getCurrentUser } from './routes/v2/user/getCurrentUser.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -260,13 +262,15 @@ if (config.experimental.v2) {
 
   // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
-  // server.get('/api/v2/users', ...getUsers)
-  server.get('/api/v2/users/me', ...getCurrentUser)
+  server.get('/api/v2/entities', ...getEntities)
+  server.get('/api/v2/entities/me', ...getCurrentUser)
 
   // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
   // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
   // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+
+  server.get('/api/v2/specification', ...getSpecificationV2)
 } else {
   logger.info('Not using experimental V2 endpoints')
 }

@@ -10,4 +10,11 @@ describe('connectors > user > silly', () => {
 
     expect(user).toStrictEqual({ dn: 'user' })
   })
+
+  test('queryEntities', async () => {
+    const connector = new SillyAuthenticationConnector()
+    const queryResult = await connector.queryEntities('abc')
+
+    expect(queryResult).matchSnapshot()
+  })
 })

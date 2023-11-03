@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     restoreMocks: true,
+    setupFiles: ['./test/testUtils/zod.ts'],
     include: ['test/**/*.spec.ts'],
     coverage: {
       enabled: true,

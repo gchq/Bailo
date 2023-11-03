@@ -1,6 +1,6 @@
 import authentication from '../../connectors/v2/authentication/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
-import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
+import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -17,7 +17,7 @@ export async function findReviews(
   semver?: string,
   accessRequestId?: string,
   kind?: string,
-): Promise<ReviewInterface[]> {
+): Promise<(ReviewInterface & { model: ModelInterface })[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },

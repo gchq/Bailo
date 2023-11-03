@@ -14,14 +14,20 @@ export interface ReleaseInterface {
   minor: boolean
   draft: boolean
 
-  files: Array<string>
-  images: Array<string>
+  fileIds: Array<string>
+  images: Array<ImageRef>
 
   deleted: boolean
 
   createdBy: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ImageRef {
+  repository: string
+  name: string
+  tag: string
 }
 
 // The doc type includes all values in the plain interface, as well as all the
@@ -40,8 +46,14 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
     minor: { type: Boolean, required: true },
     draft: { type: Boolean, required: true },
 
-    files: [{ type: String }],
-    images: [{ type: String }],
+    fileIds: [{ type: Schema.Types.ObjectId }],
+    images: [
+      {
+        repository: { type: String },
+        name: { type: String },
+        tag: { type: String },
+      },
+    ],
 
     createdBy: { type: String, required: true },
   },
