@@ -178,7 +178,7 @@ export default function SideNavigation({
           <Divider />
           <StyledList>
             <ListItem disablePadding>
-              <Link href='/docs/api'>
+              <Link href='/beta/docs/api'>
                 <ListItemButton selected={page === 'api'} data-test='apiDocsLink'>
                   <ListItemIcon>
                     {!drawerOpen ? (

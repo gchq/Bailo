@@ -4,8 +4,14 @@ import { ModelDoc } from '../../../models/v2/Model.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { User } from '../../../types/v2/types.js'
 
+export const Roles = {
+  Admin: 'admin',
+}
+export type RoleKeys = (typeof Roles)[keyof typeof Roles]
+
 export abstract class BaseAuthenticationConnector {
   abstract getUserFromReq(req: Request): Promise<User>
+  abstract hasRole(user: UserDoc, role: RoleKeys): Promise<boolean>
 
   abstract queryEntities(query: string): Promise<Array<{ kind: string; entities: Array<string> }>>
   abstract getEntities(user: UserDoc): Promise<Array<string>>

@@ -492,3 +492,93 @@ class Client:
             f"{self.url}/v2/team/{team_id}",
             json=filtered_json,
         ).json()
+
+    def get_access_request(
+        self,
+        model_id: str,
+        access_request_id: str
+    ):
+        """
+        Retrieves a specific access request given its unique ID.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+        )
+
+    def get_access_requests(
+        self,
+        model_id: str,
+    ):
+        """
+        Retrieves all access requests given a specific model.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/access-requests",
+        )
+
+    def post_access_request(
+        self,
+        model_id: str,
+        metadata: Any,
+        schema_id: str
+    ):
+        """
+        Creates an access request given a model ID
+
+        :param model_id: Unique model ID
+        :param metadata: Metadata object, defined by access request schema
+        :param schema_id: Unique schema ID
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/access-requests",
+            json={
+                "schemaId": schema_id,
+                "metadata": metadata
+            }
+        )
+
+    def delete_access_request(
+        self,
+        model_id: str,
+        access_request_id: str
+    ):
+        """
+        Deletes a specific access request associated with a model.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+        )
+
+    def patch_access_request(
+        self,
+        model_id: str,
+        access_request_id: str,
+        metadata: Any,
+        schema_id: str | None = None
+    ):
+        """
+        Updates an access request given its unique ID
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :metadata: Metadata object, defined by access request schemas
+        :return: JSON response object
+        """
+        filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
+        return self.agent.patch(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json
+        )

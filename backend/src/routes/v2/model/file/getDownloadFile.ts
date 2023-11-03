@@ -42,12 +42,14 @@ export const getDownloadFile = [
     res.set('Content-Length', String(file.size))
     // TODO: support ranges
     // res.set('Accept-Ranges', 'bytes')
-    res.writeHead(200)
 
     const stream = await downloadFile(req.user, fileId)
+
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId })
     }
+
+    res.writeHead(200)
 
     // The AWS library doesn't seem to properly type 'Body' as being pipeable?
     ;(stream.Body as stream.Readable).pipe(res)
