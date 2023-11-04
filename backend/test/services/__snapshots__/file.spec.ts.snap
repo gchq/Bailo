@@ -20,6 +20,7 @@ exports[`services > file > getFilesByModel > success 1`] = `
   },
   "findOne": [MockFunction spy],
   "save": [MockFunction spy],
+  "size": 100,
 }
 `;
 
@@ -53,5 +54,6 @@ exports[`services > file > removeFile > success 1`] = `
     ],
   },
   "save": [MockFunction spy],
+  "size": 100,
 }
 `;
