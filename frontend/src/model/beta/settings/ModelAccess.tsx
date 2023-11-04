@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Divider,
   Stack,
   Table,
   TableBody,
@@ -15,11 +16,13 @@ import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
 
-import { patchModel } from '../../../../actions/model'
+import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
+import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
@@ -30,9 +33,11 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
-  const { users, isUsersLoading, isUsersError } = useListUsers()
 
+  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   useEffect(() => {
     if (model) {
@@ -52,9 +57,22 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }
 
-  // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
-    await patchModel(model.id, { collaborators: accessList })
+    const res = await patchModel(model.id, { collaborators: accessList })
+    if (!res.ok) {
+      const error = await getErrorMessage(res)
+      return sendNotification({
+        variant: 'success',
+        msg: error,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+    sendNotification({
+      variant: 'success',
+      msg: 'Model access list updated',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+    mutateModel()
   }
 
   if (isUsersError) {
@@ -129,8 +147,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
+          <Divider />
           <div>
-            <Button aria-label='Save access list' onClick={updateAccessList}>
+            <Button variant='contained' aria-label='Save access list' onClick={updateAccessList}>
               Save
             </Button>
           </div>

@@ -9,7 +9,7 @@ export const getSpecification = [
 
     res.json(
       generator.generateDocument({
-        openapi: '3.1.0',
+        openapi: '3.0.0',
         info: {
           version: '2.0.0',
           title: 'Bailo API',

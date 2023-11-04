@@ -2,10 +2,12 @@ import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { Access } from '../../../routes/v1/registryAuth.js'
 import { getAccessRequestsByModel } from '../../../services/v2/accessRequest.js'
 import log from '../../../services/v2/log.js'
+import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestActionKeys,
@@ -16,6 +18,7 @@ import {
   ImageActionKeys,
   ModelActionKeys,
   ReleaseActionKeys,
+  SchemaActionKeys,
 } from './Base.js'
 
 export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
@@ -136,5 +139,9 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     }
 
     return true
+  }
+
+  async userSchemaAction(user: UserDoc, _schema: SchemaDoc, _action: SchemaActionKeys) {
+    return authentication.hasRole(user, Roles.Admin)
   }
 }
