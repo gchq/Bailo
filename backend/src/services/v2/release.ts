@@ -1,3 +1,5 @@
+import { Optional } from 'utility-types'
+
 import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelInterface } from '../../models/v2/Model.js'
@@ -7,13 +9,16 @@ import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
 import log from './log.js'
-import { getModelById } from './model.js'
+import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 
-export type CreateReleaseParams = Pick<
-  ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+export type CreateReleaseParams = Optional<
+  Pick<
+    ReleaseInterface,
+    'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+  >,
+  'modelCardVersion'
 >
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
   if (releaseParams.images) {
@@ -42,6 +47,17 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   }
 
   const model = await getModelById(user, releaseParams.modelId)
+
+  if (releaseParams.modelCardVersion) {
+    // Ensure that the requested model card version exists.
+    await getModelCardRevision(user, releaseParams.modelId, releaseParams.modelCardVersion)
+  } else {
+    if (!model.card) {
+      throw BadReq('This model does not have a model card associated with it yet.', { modelId: model.id })
+    }
+
+    releaseParams.modelCardVersion = model.card?.version
+  }
 
   const release = new Release({
     createdBy: user.dn,
