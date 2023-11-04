@@ -110,7 +110,7 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
 
     const entities = await authentication.getEntities(user)
     if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
-      // Collaborators can upload or download files
+      // Collaborators can carry out any image action
       return true
     }
 
