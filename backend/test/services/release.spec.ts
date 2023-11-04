@@ -24,6 +24,11 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/v2/registry.js', () => registryMocks)
 
+const fileMocks = vi.hoisted(() => ({
+  getFileById: vi.fn(),
+}))
+vi.mock('../../src/services/v2/file.js', () => fileMocks)
+
 const releaseModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
@@ -99,6 +104,22 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
     expect(releaseModelMocks).not.toBeCalled()
     expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+  })
+
+  test('createRelease > release with bad files', async () => {
+    fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
+    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+
+    expect(() =>
+      createRelease(
+        {} as any,
+        {
+          fileIds: ['test'],
+        } as any,
+      ),
+    ).rejects.toThrowError(/^The file 'test' comes from the model/)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
   })
 
   test('createRelease > bad authorisation', async () => {
