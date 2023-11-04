@@ -96,6 +96,8 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > success', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
     const user = { dn: 'testUser' } as UserDoc
     const modelId = 'testModelId'
 
@@ -104,14 +106,16 @@ describe('services > file', () => {
     expect(result).toMatchSnapshot()
   })
 
-  // test('getFilesByModel > no permission', async () => {
-  //   authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+  test('getFilesByModel > no permission', async () => {
+    authorisationMocks.userFileAction.mockResolvedValue(false)
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-  //   const user = { dn: 'testUser' } as UserDoc
-  //   const modelId = 'testModelId'
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
 
-  //   expect(() => getFilesByModel(user, modelId)).rejects.toThrowError(/^You do not have permission to get these files./)
-  // })
+    const files = await getFilesByModel(user, modelId)
+    expect(files).toStrictEqual([])
+  })
 
   test('downloadFile > success', async () => {
     const user = { dn: 'testUser' } as UserDoc

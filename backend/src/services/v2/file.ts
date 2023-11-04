@@ -3,6 +3,7 @@ import { FileAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import FileModel from '../../models/v2/File.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { asyncFilter } from '../../utils/general.js'
 import config from '../../utils/v2/config.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { longId } from '../../utils/v2/id.js'
@@ -68,10 +69,10 @@ export async function getFileById(user: UserDoc, fileId: string) {
 }
 
 export async function getFilesByModel(user: UserDoc, modelId: string) {
-  await getModelById(user, modelId)
-
+  const model = await getModelById(user, modelId)
   const files = await FileModel.find({ modelId })
-  return files
+
+  return asyncFilter(files, (file) => authorisation.userFileAction(user, model, file, FileAction.View))
 }
 
 export async function removeFile(user: UserDoc, modelId: string, fileId: string) {
