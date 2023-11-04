@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import Model from '../../src/models/v2/Model.js'
 import Release from '../../src/models/v2/Release.js'
-import { Decision, ReviewInterface } from '../../src/models/v2/Review.js'
+import { Decision } from '../../src/models/v2/Review.js'
 import { createReleaseReviews, findReviews, respondToReview } from '../../src/services/v2/review.js'
 import { ReviewKind } from '../../src/types/v2/enums.js'
 
@@ -39,6 +39,11 @@ const smtpMock = vi.hoisted(() => ({
   requestReviewForRelease: vi.fn(),
 }))
 vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
+
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+}))
+vi.mock('../../src/services/v2/model.js', async () => modelMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),

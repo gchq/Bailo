@@ -8,6 +8,7 @@ import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
+import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviews(
@@ -96,6 +97,9 @@ export async function respondToReview(
     default:
       throw BadReq('Review Kind not recognised', reviewIdQuery)
   }
+
+  // Authorisation check to make sure the user can access a model
+  await getModelById(user, modelId)
 
   const review = (
     await Review.aggregate()
