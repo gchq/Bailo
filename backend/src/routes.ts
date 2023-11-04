@@ -56,6 +56,7 @@ import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModel
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
+import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
@@ -226,6 +227,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
+  server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)

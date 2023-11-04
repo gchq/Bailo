@@ -1,5 +1,5 @@
-import { putObjectStream } from '../../clients/s3.js'
-import { ModelAction } from '../../connectors/v2/authorisation/Base.js'
+import { getObjectStream, putObjectStream } from '../../clients/s3.js'
+import { FileAction, ModelAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import FileModel from '../../models/v2/File.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -35,6 +35,18 @@ export async function uploadFile(user: UserDoc, modelId: string, name: string, m
   await file.save()
 
   return file
+}
+
+export async function downloadFile(user: UserDoc, fileId: string, range?: { start: number; end: number }) {
+  const file = await getFileById(user, fileId)
+  const model = await getModelById(user, file.modelId)
+
+  const access = await authorisation.userFileAction(user, model, file, FileAction.Download)
+  if (!access) {
+    throw Forbidden(`You do not have permission to download this model.`, { user: user.dn, fileId })
+  }
+
+  return getObjectStream(file.bucket, file.path, range)
 }
 
 export async function getFileById(user: UserDoc, fileId: string) {

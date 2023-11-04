@@ -1,18 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { getAuthorisationConnector } from '../../../src/connectors/v2/authorisation/index.js'
+import config from '../../../src/utils/v2/__mocks__/config.js'
 
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    authorisation: {
-      kind: 'silly',
-    },
-  },
-}))
-vi.mock('../../../src/utils/v2/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+vi.mock('../../../src/utils/v2/config.js')
 
 vi.mock('../../../src/connectors/v2/authentication/index.js', () => ({
   default: {
@@ -27,7 +18,7 @@ describe('connectors > authorisation', () => {
   })
 
   test('invalid', () => {
-    configMock.connectors.authorisation.kind = 'invalid'
+    config.connectors.authorisation.kind = 'invalid'
 
     expect(() => getAuthorisationConnector(false)).toThrowError('No valid authorisation connector provided.')
   })
