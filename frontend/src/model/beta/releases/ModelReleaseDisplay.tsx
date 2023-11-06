@@ -125,7 +125,7 @@ export default function ModelReleaseDisplay({
                       alignItems='center'
                       spacing={1}
                     >
-                      <Link href='/beta'>{file.name}</Link>
+                      <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`}>{file.name}</Link>
                       <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                     </Stack>
                   ))}
