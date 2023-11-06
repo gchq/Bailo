@@ -40,6 +40,11 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+}))
+vi.mock('../../src/services/v2/model.js', async () => modelMock)
+
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
