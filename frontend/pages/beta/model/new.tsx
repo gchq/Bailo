@@ -9,39 +9,38 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
-import ModelSelector from 'src/ModelSelector'
-import TeamSelector from 'src/TeamSelector'
+import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
+import ModelNameInput from 'src/model/beta/ModelNameInput'
+import TeamSelect from 'src/TeamSelect'
 import Wrapper from 'src/Wrapper.beta'
+import { TeamInterface } from 'types/interfaces'
 import { ModelForm, ModelVisibility } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function NewModel() {
-  const [teamName, setTeamName] = useState('Uncategorised')
+  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
-  const theme = useTheme()
 
-  const formValid = teamName && modelName && description
+  const formValid = team && modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
     setErrorMessage('')
     const formData: ModelForm = {
       name: modelName,
-      team: teamName,
+      teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,
     }
@@ -101,20 +100,10 @@ export default function NewModel() {
                   Overview
                 </Typography>
                 <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                  <TeamSelector value={teamName} onChange={(value) => setTeamName(value)} />
-                  <ModelSelector value={modelName} onChange={(value) => setModelName(value)} />
+                  <TeamSelect value={team} onChange={(value) => setTeam(value)} />
+                  <ModelNameInput value={modelName} onChange={(value) => setModelName(value)} />
                 </Stack>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                  </Typography>
-                  <TextField
-                    data-test='modelDescription'
-                    onChange={(event) => setDescription(event.target.value)}
-                    value={description}
-                    size='small'
-                  />
-                </Stack>
+                <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
               </>
               <Divider />
               <>
