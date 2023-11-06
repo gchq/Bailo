@@ -19,7 +19,7 @@ import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'team' | 'description' | 'visibility'>
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
 export async function createModel(user: UserDoc, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 

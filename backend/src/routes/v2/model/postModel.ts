@@ -9,13 +9,9 @@ import { parse } from '../../../utils/validate.js'
 
 export const postModelSchema = z.object({
   body: z.object({
-    name: z.string({
-      required_error: 'Must specify model name',
-    }),
-    team: z.string(),
-    description: z.string({
-      required_error: 'Must specify model description',
-    }),
+    name: z.string(),
+    teamId: z.string(),
+    description: z.string(),
     visibility: z.nativeEnum(ModelVisibility).optional().default(ModelVisibility.Public),
   }),
 })
