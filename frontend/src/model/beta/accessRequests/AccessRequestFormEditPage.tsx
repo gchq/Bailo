@@ -10,14 +10,14 @@ import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { AccessRequestInterface, SplitSchemaNoRender } from '../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
-import ModelCardForm from '../../../Form/beta/ModelCardForm'
+import ModelCardForm from '../../../Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../MessageAlert'
 
-type FormEditPageProps = {
+type AccessRequestFormEditPageProps = {
   accessRequest: AccessRequestInterface
 }
 
-export default function AccessRequestFormEditPage({ accessRequest }: FormEditPageProps) {
+export default function AccessRequestFormEditPage({ accessRequest }: AccessRequestFormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorText, setErrorText] = useState('')
@@ -29,7 +29,7 @@ export default function AccessRequestFormEditPage({ accessRequest }: FormEditPag
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const theme = useTheme()
 
-  async function onSubmit() {
+  async function handleSubmit() {
     if (schema) {
       const data = getStepsData(splitSchema, true)
       const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
@@ -43,7 +43,7 @@ export default function AccessRequestFormEditPage({ accessRequest }: FormEditPag
     }
   }
 
-  function onCancel() {
+  function handleCancel() {
     if (schema) {
       mutateAccessRequest()
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
@@ -107,10 +107,10 @@ export default function AccessRequestFormEditPage({ accessRequest }: FormEditPag
                 divider={<Divider orientation='vertical' flexItem />}
                 sx={{ mb: { xs: 2 } }}
               >
-                <Button variant='outlined' onClick={onCancel}>
+                <Button variant='outlined' onClick={handleCancel}>
                   Cancel
                 </Button>
-                <Button variant='contained' onClick={onSubmit}>
+                <Button variant='contained' onClick={handleSubmit}>
                   Save
                 </Button>
               </Stack>
