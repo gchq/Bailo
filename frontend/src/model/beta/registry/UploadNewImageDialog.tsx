@@ -16,6 +16,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useState } from 'react'
+import shellEscape from 'shell-escape'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/beta/registry/CodeLine'
@@ -122,7 +123,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${currentUser.id}`} />
+                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([currentUser.id])}`} />
                 </Stack>
               </Stack>
               <Stack spacing={1}>
