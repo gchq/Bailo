@@ -4,6 +4,7 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { attachAuditService } from './routes/middleware/attachAuditService.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
 import { getUser as getUserV2 } from './routes/middleware/getUser.js'
@@ -113,6 +114,7 @@ server.use('/api/v1', expressLogger)
 if (config.experimental.v2) {
   server.use('/api/v2', getUserV2)
   server.use('/api/v2', expressLoggerV2)
+  server.use('/api/v2', attachAuditService)
 }
 
 if (config.oauth.enabled) {

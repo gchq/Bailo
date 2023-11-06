@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
+import { EventDetail } from '../../../services/v2/audit.js'
 import { createModel } from '../../../services/v2/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -21,6 +22,11 @@ export const postModelSchema = z.object({
     }),
   }),
 })
+
+const auditEventDetail: EventDetail = {
+  TypeId: 'CreateModel',
+  Description: 'Model Created',
+}
 
 registerPath({
   method: 'post',
@@ -47,6 +53,7 @@ interface PostModelResponse {
 export const postModel = [
   bodyParser.json(),
   async (req: Request, res: Response<PostModelResponse>) => {
+    req.eventDetail = auditEventDetail
     const { body } = parse(req, postModelSchema)
 
     const model = await createModel(req.user, body)

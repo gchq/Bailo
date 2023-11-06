@@ -5,6 +5,7 @@ type callback = (err: string | undefined) => void
 declare namespace Express {
   interface Request {
     user: UserDoc
+    eventDetail: EventDetail
 
     reqId: string
     log: Logger
