@@ -88,6 +88,10 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
       return false
     }
 
+    if (model.settings.ungovernedAccess) {
+      return true
+    }
+
     const accessRequests = await getAccessRequestsByModel(user, model.id)
     const accessRequest = accessRequests.find((accessRequest) =>
       accessRequest.metadata.overview.entities.some((entity) => entities.includes(entity)),
@@ -117,6 +121,10 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     if (action !== ImageAction.Pull) {
       log.warn({ userDn: user.dn, access }, 'Non-collaborator can only pull models')
       return false
+    }
+
+    if (model.settings.ungovernedAccess) {
+      return true
     }
 
     const accessRequests = await getAccessRequestsByModel(user, model.id)

@@ -16,6 +16,9 @@ export const postModelSchema = z.object({
       required_error: 'Must specify model description',
     }),
     visibility: z.nativeEnum(ModelVisibility).optional().default(ModelVisibility.Public),
+    settings: z.object({
+      ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+    }),
   }),
 })
 
