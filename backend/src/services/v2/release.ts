@@ -6,6 +6,7 @@ import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import { getFileById } from './file.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { listModelImages } from './registry.js'
@@ -42,6 +43,23 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   }
 
   const model = await getModelById(user, releaseParams.modelId)
+
+  if (releaseParams.fileIds) {
+    for (const fileId of releaseParams.fileIds) {
+      const file = await getFileById(user, fileId)
+
+      if (file.modelId !== model.id) {
+        throw BadReq(
+          `The file '${fileId}' comes from the model '${file.modelId}', but this release is being created for '${model.id}'`,
+          {
+            modelId: model.id,
+            fileId: fileId,
+            fileModelId: file.modelId,
+          },
+        )
+      }
+    }
+  }
 
   const release = new Release({
     createdBy: user.dn,
