@@ -8,14 +8,6 @@ exports[`routes > model > getModel > latest > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > model > getModel > returns all model card revisions 1`] = `
-{
-  "modelCard": {
-    "example": "test",
-  },
-}
-`;
-
 exports[`routes > model > getModel > version > 200 > ok 1`] = `
 {
   "modelCard": {

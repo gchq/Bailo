@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "highLevelDetails": {
+    "overview": {
       "title": "Overview",
       "description": "Summary of the model functionality.",
       "type": "object",
