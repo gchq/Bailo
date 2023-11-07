@@ -91,45 +91,13 @@ describe('services > accessRequest', () => {
     expect(arrayAsyncFilter.asyncFilter.mock.calls.at(-1)).toMatchSnapshot()
   })
 
-  //   test('getReleaseBySemver > good', async () => {
-  //     const mockRelease = { _id: 'release' }
-
-  //     modelMocks.getModelById.mockResolvedValue(undefined)
-  //     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
-  //     authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
-
-  //     expect(await getReleaseBySemver({} as any, 'test', 'test')).toBe(mockRelease)
-  //   })
-
-  //   test('getReleaseBySemver > no release', async () => {
-  //     modelMocks.getModelById.mockResolvedValue(undefined)
-  //     releaseModelMocks.findOne.mockResolvedValue(undefined)
-  //     authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
-
-  //     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-  //       /^The requested release was not found./,
-  //     )
-  //   })
-
-  //   test('getReleaseBySemver > no permission', async () => {
-  //     const mockRelease = { _id: 'release' }
-
-  //     modelMocks.getModelById.mockResolvedValue(undefined)
-  //     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
-  //     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
-
-  //     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
-  //       /^You do not have permission to view this release./,
-  //     )
-  //   })
-
-  test('deleteRelease > success', async () => {
+  test('removeAccessRequest > success', async () => {
     authorisationMocks.userAccessRequestAction.mockResolvedValueOnce(true)
 
     expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
   })
 
-  test('deleteRelease > no permission', async () => {
+  test('removeAccessRequest > no permission', async () => {
     const mockAccessRequest = { _id: 'release' }
 
     modelMocks.getModelById.mockResolvedValue(undefined)
