@@ -1,5 +1,6 @@
 import { Document, Types } from 'mongoose'
 
+import { FlattenedModelImage } from './interfaces'
 import { SchemaKindKeys } from './v2/types'
 
 export enum ModelUploadType {
@@ -92,10 +93,6 @@ export interface Schema {
   schema: any
   use: SchemaType
 }
-
-// Dates are in ISO 8601 format
-enum DateStringBrand {}
-export type DateString = string & DateStringBrand
 
 export enum EntityKind {
   USER = 'user',
@@ -313,8 +310,8 @@ export interface Version {
   managerApproved: ApprovalStates
   reviewerApproved: ApprovalStates
 
-  managerLastViewed: DateString
-  reviewerLastViewed: DateString
+  managerLastViewed: string
+  reviewerLastViewed: string
 
   files: {
     rawBinaryPath?: string
@@ -367,6 +364,23 @@ export interface ModelInterface {
   entities: Entity[]
 }
 
+export interface FileInterface {
+  _id: string
+  modelId: string
+
+  name: string
+  size: number
+  mime: string
+
+  bucket: string
+  path: string
+
+  complete: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}
+
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
@@ -374,8 +388,9 @@ export type ReleaseInterface = {
   notes: string
   minor?: boolean
   draft?: boolean
-  files: Array<string>
-  images: Array<string>
+  fileIds: Array<string>
+  files: Array<FileInterface>
+  images: Array<FlattenedModelImage>
   deleted: boolean
   createdBy: string
   createdAt: string
@@ -401,7 +416,7 @@ export interface SchemaInterface {
 export interface ReviewRequestInterface {
   model: string
   release: string
-  kind: 'release' | 'acess'
+  kind: 'release' | 'access'
   isActive: boolean
   createdAt: string
   updatedAt: string

@@ -52,7 +52,6 @@ export default function SchemaList() {
               Upload a new schema
             </Button>
           </Box>
-
           <Paper sx={{ my: 2, p: 2 }}>
             <Typography variant='h4'>Schema List</Typography>
             <Box sx={{ my: 2 }}>

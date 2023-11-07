@@ -1,13 +1,17 @@
+import authentication from '../../connectors/v2/authentication/index.js'
+import { ModelAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
-import { CollaboratorEntry, ModelDoc } from '../../models/v2/Model.js'
+import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { ReviewKind } from '../../types/v2/enums.js'
+import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
+import { asyncFilter } from '../../utils/v2/array.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
+import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export async function findReviews(
@@ -17,7 +21,7 @@ export async function findReviews(
   semver?: string,
   accessRequestId?: string,
   kind?: string,
-): Promise<ReviewInterface[]> {
+): Promise<(ReviewInterface & { model: ModelInterface })[]> {
   const reviews = await Review.aggregate()
     .match({
       responses: active ? { $size: 0 } : { $not: { $size: 0 } },
@@ -33,7 +37,7 @@ export async function findReviews(
     .unwind({ path: '$model' })
     .match(await findUserInCollaborators(user))
 
-  return reviews
+  return asyncFilter(reviews, (review) => authorisation.userModelAction(user, review.model, ModelAction.View))
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
@@ -80,15 +84,31 @@ export type ReviewResponseParams = Pick<ReviewResponse, 'decision' | 'comment'>
 export async function respondToReview(
   user: UserDoc,
   modelId: string,
-  semver: string,
   role: string,
   response: ReviewResponseParams,
+  kind: ReviewKindKeys,
+  reviewId: string,
 ): Promise<ReviewInterface> {
+  let reviewIdQuery
+  switch (kind) {
+    case ReviewKind.Access:
+      reviewIdQuery = { accessRequestId: reviewId }
+      break
+    case ReviewKind.Release:
+      reviewIdQuery = { semver: reviewId }
+      break
+    default:
+      throw BadReq('Review Kind not recognised', reviewIdQuery)
+  }
+
+  // Authorisation check to make sure the user can access a model
+  await getModelById(user, modelId)
+
   const review = (
     await Review.aggregate()
       .match({
         modelId,
-        semver,
+        ...reviewIdQuery,
         role,
       })
       .sort({ createdAt: -1 })
@@ -100,7 +120,7 @@ export async function respondToReview(
       .limit(1)
   ).at(0)
   if (!review) {
-    throw NotFound(`Unable to find Review to respond to.`, { modelId, semver, role })
+    throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
   const update = await Review.findByIdAndUpdate(
     review._id,
@@ -110,7 +130,7 @@ export async function respondToReview(
     { new: true },
   )
   if (!update) {
-    throw GenericError(500, `Adding response to Review was not successful`, { modelId, semver, role })
+    throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
   return update
 }
@@ -144,7 +164,7 @@ async function findUserInCollaborators(user: UserDoc) {
               cond: {
                 $and: [
                   {
-                    $in: ['$$item.entity', await authorisation.getEntities(user)],
+                    $in: ['$$item.entity', await authentication.getEntities(user)],
                   },
                   {
                     $in: ['$role', '$$item.roles'],

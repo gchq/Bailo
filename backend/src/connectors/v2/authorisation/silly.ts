@@ -1,14 +1,25 @@
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
+import { FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { AccessRequestActionKeys, BaseAuthorisationConnector, ModelActionKeys, ReleaseActionKeys } from './Base.js'
-
-const SillyEntityKind = {
-  User: 'user',
-  Group: 'group',
-} as const
+import { Access } from '../../../routes/v1/registryAuth.js'
+import { getAccessRequestsByModel } from '../../../services/v2/accessRequest.js'
+import log from '../../../services/v2/log.js'
+import { Roles } from '../authentication/Base.js'
+import authentication from '../authentication/index.js'
+import {
+  AccessRequestActionKeys,
+  BaseAuthorisationConnector,
+  FileAction,
+  FileActionKeys,
+  ImageAction,
+  ImageActionKeys,
+  ModelActionKeys,
+  ReleaseActionKeys,
+  SchemaActionKeys,
+} from './Base.js'
 
 export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
   constructor() {
@@ -55,31 +66,82 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     return true
   }
 
-  async getEntities(user: UserDoc) {
-    return [toEntity(SillyEntityKind.User, user.dn)]
+  async userFileAction(
+    user: UserDoc,
+    model: ModelDoc,
+    file: FileInterfaceDoc,
+    action: FileActionKeys,
+  ): Promise<boolean> {
+    // Prohibit non-collaborators from seeing private models
+    if (!(await this.hasModelVisibilityAccess(user, model))) {
+      return false
+    }
+
+    const entities = await authentication.getEntities(user)
+    if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
+      // Collaborators can upload or download files
+      return true
+    }
+
+    if (action !== FileAction.Download) {
+      log.warn({ userDn: user.dn, file: file._id }, 'Non-collaborator can only download artefacts')
+      return false
+    }
+
+    if (model.settings.ungovernedAccess) {
+      return true
+    }
+
+    const accessRequests = await getAccessRequestsByModel(user, model.id)
+    const accessRequest = accessRequests.find((accessRequest) =>
+      accessRequest.metadata.overview.entities.some((entity) => entities.includes(entity)),
+    )
+
+    if (!accessRequest) {
+      // User does not have a valid access request
+      log.warn({ userDn: user.dn, file: file._id }, 'No valid access request found')
+      return false
+    }
+
+    return true
   }
 
-  async getUserInformation(entity: string): Promise<{ email: string }> {
-    const { kind, value } = fromEntity(entity)
-
-    if (kind !== SillyEntityKind.User) {
-      throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
+  async userImageAction(user: UserDoc, model: ModelDoc, access: Access, action: ImageActionKeys): Promise<boolean> {
+    // Prohibit non-collaborators from seeing private models
+    if (!(await this.hasModelVisibilityAccess(user, model))) {
+      return false
     }
 
-    return {
-      email: `${value}@example.com`,
+    const entities = await authentication.getEntities(user)
+    if (model.collaborators.some((collaborator) => entities.includes(collaborator.entity))) {
+      // Collaborators can upload or download files
+      return true
     }
+
+    if (action !== ImageAction.Pull) {
+      log.warn({ userDn: user.dn, access }, 'Non-collaborator can only pull models')
+      return false
+    }
+
+    if (model.settings.ungovernedAccess) {
+      return true
+    }
+
+    const accessRequests = await getAccessRequestsByModel(user, model.id)
+    const accessRequest = accessRequests.find((accessRequest) =>
+      accessRequest.metadata.overview.entities.some((entity) => entities.includes(entity)),
+    )
+
+    if (!accessRequest) {
+      // User does not have a valid access request
+      log.warn({ userDn: user.dn, access }, 'No valid access request found')
+      return false
+    }
+
+    return true
   }
 
-  async getEntityMembers(entity: string): Promise<string[]> {
-    const { kind } = fromEntity(entity)
-    switch (kind) {
-      case SillyEntityKind.User:
-        return [entity]
-      case SillyEntityKind.Group:
-        return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
-      default:
-        throw new Error(`Unable to get members, entity kind not recognised: ${entity}`)
-    }
+  async userSchemaAction(user: UserDoc, _schema: SchemaDoc, _action: SchemaActionKeys) {
+    return authentication.hasRole(user, Roles.Admin)
   }
 }

@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 
+import authentication from '../../connectors/v2/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import ModelModel from '../../models/v2/Model.js'
@@ -104,7 +105,7 @@ export async function searchModels(
       case 'mine':
         query.collaborators = {
           $elemMatch: {
-            entity: { $in: await authorisation.getEntities(user) },
+            entity: { $in: await authentication.getEntities(user) },
           },
         }
         break
@@ -148,6 +149,18 @@ export async function getModelCardRevision(user: UserDoc, modelId: string, versi
   }
 
   return modelCard
+}
+
+export async function getModelCardRevisions(user: UserDoc, modelId: string) {
+  const modelCardRevisions = await ModelCardRevisionModel.find({ modelId })
+
+  if (!modelCardRevisions) {
+    throw NotFound(`Version '${modelId}' does not exist on the requested model`, { modelId })
+  }
+
+  return asyncFilter(modelCardRevisions, (modelCard) =>
+    canUserActionModelById(user, modelCard.modelId, ModelAction.View),
+  )
 }
 
 // This is an internal function.  Use an equivalent like 'updateModelCard' or 'createModelCardFromSchema'
@@ -198,7 +211,7 @@ export async function updateModelCard(
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Write))) {
+  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
     throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
   }
 
@@ -223,7 +236,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'>
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
+>
 export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 

@@ -15,7 +15,8 @@ import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import _ from 'lodash-es'
 import Link from 'next/link'
-import React, { ChangeEvent } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { formatDate } from 'utils/dateUtils'
 
 import { useGetUserDeployments } from '../data/deployment'
 import { useGetModelById } from '../data/model'
@@ -41,13 +42,13 @@ function Deployments() {
   const { currentUser, isCurrentUserError } = useGetCurrentUser()
   const { userDeployments, isUserDeploymentsLoading, isUserDeploymentsError } = useGetUserDeployments(currentUser?._id)
 
-  const [selectedOrder, setSelectedOrder] = React.useState<string>('date')
-  const [groupedDeployments, setGroupedDeployments] = React.useState<GroupedDeployments | undefined>(undefined)
-  const [orderedDeployments, setOrderedDeployments] = React.useState<Deployment[] | undefined>([])
+  const [selectedOrder, setSelectedOrder] = useState('date')
+  const [groupedDeployments, setGroupedDeployments] = useState<GroupedDeployments | undefined>(undefined)
+  const [orderedDeployments, setOrderedDeployments] = useState<Deployment[] | undefined>([])
 
   const theme = useTheme()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isUserDeploymentsLoading && !isCurrentUserError && !isUserDeploymentsError && userDeployments !== undefined) {
       const groups: GroupedDeployments = _.groupBy(userDeployments, (deployment) => deployment.model)
       setGroupedDeployments(groups)
@@ -61,9 +62,7 @@ function Deployments() {
     setSelectedOrder(event.target.value)
   }
 
-  const displayDate = (date: Date) => new Date(date).toLocaleDateString('en-UK')
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedOrder === 'name' && !isUserDeploymentsError && userDeployments !== undefined) {
       const sortedArray: Deployment[] = [...userDeployments].sort((a, b) =>
         a.metadata.highLevelDetails.name > b.metadata.highLevelDetails.name ? 1 : -1,
@@ -121,7 +120,7 @@ function Deployments() {
                     </MuiLink>
                   </Link>
                   <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                    {displayDate(deployment?.createdAt)}
+                    {formatDate(deployment.createdAt)}
                   </Typography>
                   {index !== orderedDeployments.length - 1 && (
                     <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
@@ -150,7 +149,7 @@ function Deployments() {
                           </Link>
                         </Box>
                         <Box>
-                          <Typography variant='caption'>{displayDate(deployment?.createdAt)}</Typography>
+                          <Typography variant='caption'>{formatDate(deployment.createdAt)}</Typography>
                         </Box>
                       </Box>
                     ))}

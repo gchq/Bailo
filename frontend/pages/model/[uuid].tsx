@@ -45,15 +45,7 @@ import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper'
-import {
-  ApprovalCategory,
-  ApprovalStates,
-  DateString,
-  ModelUploadType,
-  User,
-  Version,
-  VersionDoc,
-} from '../../types/types'
+import { ApprovalCategory, ApprovalStates, ModelUploadType, User, Version, VersionDoc } from '../../types/types'
 
 type TabOptions = 'overview' | 'compliance' | 'build' | 'deployments' | 'code' | 'settings'
 
@@ -79,8 +71,8 @@ function Model() {
   const [favouriteButtonDisabled, setFavouriteButtonDisabled] = useState<boolean>(false)
   const open = Boolean(anchorEl)
   const [showLastViewedWarning, setShowLastViewedWarning] = useState(false)
-  const [managerLastViewed, setManagerLastViewed] = useState<DateString | undefined>()
-  const [reviewerLastViewed, setReviewerLastViewed] = useState<DateString | undefined>()
+  const [managerLastViewed, setManagerLastViewed] = useState('')
+  const [reviewerLastViewed, setReviewerLastViewed] = useState('')
   const [isManager, setIsManager] = useState(false)
   const [isReviewer, setIsReviewer] = useState(false)
 
@@ -380,7 +372,6 @@ function Model() {
                     <ListItemText>Edit</ListItemText>
                   </MenuItem>
                 </DisabledElementTooltip>
-
                 <MenuItem onClick={uploadNewVersion} disabled={!isPotentialUploader} data-test='newVersionButton'>
                   <ListItemIcon>
                     <PostAddIcon fontSize='small' />
@@ -408,7 +399,6 @@ function Model() {
               </FormControl>
             </Stack>
           </Grid>
-
           <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
             <Tab label='Overview' value='overview' />
             <Tab label='Compliance' value='compliance' />
@@ -428,17 +418,11 @@ function Model() {
           </Tabs>
         </Box>
         <Box sx={{ marginBottom: 3 }} />
-
         {group === 'overview' && <Overview version={version} />}
-
         {group === 'compliance' && <Compliance version={version} />}
-
         {group === 'build' && <Build version={version} />}
-
         {group === 'deployments' && <Deployments version={version} />}
-
         {group === 'code' && <CodeExplorer id={version._id} addQueryParameter={addQueryParameter} />}
-
         {group === 'settings' && <Settings version={version} isPotentialUploader={isPotentialUploader} />}
       </Paper>
       <Dialog open={ungovernedDialogOpen} onClose={handleUngovernedDialogClose}>

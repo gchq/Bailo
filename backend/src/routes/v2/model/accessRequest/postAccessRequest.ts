@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
 import { createAccessRequest } from '../../../../services/v2/accessRequest.js'
+import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 const knownOverview = z.object({
@@ -28,6 +29,26 @@ export const postAccessRequestSchema = z.object({
     schemaId: z.string(),
     metadata: accessRequestMetadata,
   }),
+})
+
+registerPath({
+  method: 'post',
+  path: '/api/v2/model/{modelId}/access-requests',
+  tags: ['access-request'],
+  description: 'Create a new access request for a model.',
+  schema: postAccessRequestSchema,
+  responses: {
+    200: {
+      description: 'An access request instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            accessRequest: accessRequestInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
 })
 
 interface PostAccessRequest {

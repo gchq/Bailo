@@ -1,12 +1,13 @@
 import './utils/signals.js'
 
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import shelljs from 'shelljs'
+import { z } from 'zod'
 
 import { createModelIndexes } from './models/Model.js'
 import { createSchemaIndexes } from './models/Schema.js'
 import processDeployments from './processors/processDeployments.js'
 import processUploads from './processors/processUploads.js'
-import { server } from './routes.js'
 import { addDefaultSchemas } from './services/schema.js'
 import { addDefaultSchemas as addDefaultSchemasv2 } from './services/v2/schema.js'
 import config from './utils/config.js'
@@ -17,6 +18,9 @@ import { registerSigTerminate } from './utils/signals.js'
 
 // Update certificates based on mount
 shelljs.exec('update-ca-certificates', { fatal: false, async: false })
+
+// Let Zod types have OpenAPI attributes
+extendZodWithOpenApi(z)
 
 // technically, we do need to wait for this, but it's so quick
 // that nobody should notice unless they want to upload an image
@@ -42,6 +46,7 @@ if (config.experimental.v2) {
 
 await Promise.all([processUploads(), processDeployments()])
 
+const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
   logger.info('Listening on port', config.api.port)
 })

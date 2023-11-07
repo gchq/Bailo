@@ -12,8 +12,7 @@
           "description": "A description of what the model does.",
           "type": "string",
           "minLength": 1,
-          "maxLength": 5000,
-          "widget": "customTextInput"
+          "maxLength": 5000
         },
         "tags": {
           "title": "Descriptive tags for the model.",

@@ -97,7 +97,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.Delete))) {
+  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.View))) {
     throw Forbidden(`You do not have permission to get this access request.`, {
       userDn: user.dn,
       accessRequestId,

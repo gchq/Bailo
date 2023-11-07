@@ -56,7 +56,7 @@ export default function CustomTextInput(props: CustomTextInputProps) {
         disabled={!formContext.editMode}
         InputProps={{
           ...props.InputProps,
-          disableUnderline: !formContext.editMode,
+          ...(!formContext.editMode && { disableUnderline: true }),
         }}
       />
     </Fragment>

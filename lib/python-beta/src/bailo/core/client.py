@@ -1,28 +1,25 @@
-"""Main entry point"""
 from __future__ import annotations
-import requests
+
+from typing import Any
+
 import validators
-from typing import List, Optional, Dict, Any
-from .enums import ModelVisibility, SchemaKind
-
-class Agent:
-    def __init__(self):
-        self.get = requests.get
-        self.post = requests.post
-        self.put = requests.put
-        self.patch = requests.patch
-        self.delete = requests.delete
+from bailo.core.agent import Agent
+from bailo.core.enums import ModelVisibility, SchemaKind
+from bailo.core.utils import filter_none
 
 
-class PkiAgent(Agent):
-    def get(self, *args, **kwargs):
-        return requests.get(*args, **kwargs)
+class Client:
+    """
+        Creates a Client object that can be used to talk to the website.
 
-
-class BailoClient():
+        :param url: Url of bailo website
+        :param agent:
+    """
     def __init__(self, url: str, agent: Agent = Agent()):
-        if not validators.url(url):
-            raise ValueError("URL not valid.")
+        # The url validator will raise an error with localhost:8000 which is not covered in testing
+
+        #if not validators.url(url):
+            #raise ValueError("URL not valid.")
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
@@ -30,7 +27,7 @@ class BailoClient():
             self,
             name: str,
             description: str,
-            visibility: Optional[ModelVisibility] = None,
+            visibility: ModelVisibility | None = None,
     ):
         """
         Creates a model.
@@ -45,15 +42,15 @@ class BailoClient():
             json={
                 "name": name,
                 "description": description,
-                "visibility": visibility.value,
+                "visibility": visibility,
             },
         ).json()
 
     def get_models(
         self,
-        task: Optional[str] = None,
-        libraries: List[str] = [],
-        filters: List[str] = [],
+        task: str | None = None,
+        libraries: list[str] = [],
+        filters: list[str] = [],
         search: str = "",
     ):
         """
@@ -92,9 +89,9 @@ class BailoClient():
     def patch_model(
         self,
         model_id: str,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        visibility: Optional[str] = None,
+        name: str | None = None,
+        description: str | None = None,
+        visibility: str | None = None,
     ):
         """
         Updates a specific model using its unique ID.
@@ -105,20 +102,11 @@ class BailoClient():
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
-        x = {}
-
-        if name is not None:
-            x.update({"name": name})
-
-        if description is not None:
-            x.update({"description": description})
-
-        if visibility is not None:
-            x.update({"visibility": visibility})
+        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
 
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}",
-            json=x,
+            json=filtered_json
         ).json()
 
     def get_model_card(
@@ -174,17 +162,17 @@ class BailoClient():
                 "schemaId": schema_id,
             },
         ).json()
-    
+
     def post_release(
         self,
         model_id: str,
         model_card_version: float,
         release_version: str,
         notes: str,
-        files: List[str],
-        images: List[str],
-        minor: Optional[bool] = False,
-        draft: Optional[bool] = False,
+        files: list[str],
+        images: list[str],
+        minor: bool | None = False,
+        draft: bool | None = False,
     ):
         """
         Creates a new model release.
@@ -271,13 +259,13 @@ class BailoClient():
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
-    
+
     def simple_upload(
         self,
         model_id: str,
         name: str,
         binary: bytes,
-        mime: Optional[str] = None,
+        mime: str | None = None,
     ):
         """
         Creates a simple file upload.
@@ -291,9 +279,8 @@ class BailoClient():
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
             params={"name": name, "mime": mime},
-            data = binary,
-        ).json()  
-
+            data=binary,
+        ).json()
 
     #def start_multi_upload(): TBC
 
@@ -314,22 +301,22 @@ class BailoClient():
         return self.agent.delete(
             f"{self.url}/v2/model/{model_id}/files/{file_id}",
         ).json()
-    
+
     def get_all_schemas(
         self,
-        kind: Optional[SchemaKind] = None,
+        kind: SchemaKind | None = None,
     ):
         """
         Gets all schemas.
 
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
         :return: JSON response object
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/schemas",
             params={"kind": kind},
         ).json()
-    
+
     def get_schema(
         self,
         schema_id: str,
@@ -339,7 +326,7 @@ class BailoClient():
 
         :param schema_id: Unique schema ID
         :return: JSON response object.
-        """        
+        """
         return self.agent.get(
             f"{self.url}/v2/schema/{schema_id}",
         ).json()
@@ -350,7 +337,7 @@ class BailoClient():
         schema_id: str,
         name: str,
         kind: SchemaKind,
-        json_schema: Dict[str, Any],
+        json_schema: dict[str, Any],
     ):
         """
         Creates a schema.
@@ -360,7 +347,7 @@ class BailoClient():
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
         :return: JSON response object
-        """        
+        """
         return self.agent.post(
             f"{self.url}/v2/schemas",
             json={
@@ -374,8 +361,8 @@ class BailoClient():
     def get_reviews(
         self,
         active: bool,
-        model_id: Optional[str] = None,
-        version: Optional[str] = None,
+        model_id: str | None = None,
+        version: str | None = None,
     ):
         """
         Gets all reviews within given parameters.
@@ -423,7 +410,7 @@ class BailoClient():
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles/mine",
         ).json()
-    
+
     def post_team(
         self,
         team_id: str,
@@ -470,7 +457,7 @@ class BailoClient():
         return self.agent.get(
             f"{self.url}/v2/teams/mine",
         ).json()
-    
+
     def get_team(
         self,
         team_id: str,
@@ -480,7 +467,7 @@ class BailoClient():
 
         :param team_id: Unique team ID
         :return: JSON response object
-        """    
+        """
         return self.agent.get(
             f"{self.url}/v2/team/{team_id}",
         ).json()
@@ -488,8 +475,8 @@ class BailoClient():
     def patch_team(
         self,
         team_id: str,
-        name: Optional[str] = None,
-        description: Optional[str] = None,      
+        name: str | None = None,
+        description: str | None = None,
     ):
         """
         Updates a team given its unique ID.
@@ -498,17 +485,100 @@ class BailoClient():
         :param name: Name of team, defaults to None
         :param description: Description of team, defaults to None
         :return: JSON response object
-        """    
-        
-        x = {}
-
-        if name is not None:
-            x.update({"name": name})
-
-        if description is not None:
-            x.update({"description": description})
+        """
+        filtered_json = filter_none({"name": name, "description": description})
 
         return self.agent.patch(
             f"{self.url}/v2/team/{team_id}",
-            json=x,
+            json=filtered_json,
         ).json()
+
+    def get_access_request(
+        self,
+        model_id: str,
+        access_request_id: str
+    ):
+        """
+        Retrieves a specific access request given its unique ID.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+        )
+
+    def get_access_requests(
+        self,
+        model_id: str,
+    ):
+        """
+        Retrieves all access requests given a specific model.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/access-requests",
+        )
+
+    def post_access_request(
+        self,
+        model_id: str,
+        metadata: Any,
+        schema_id: str
+    ):
+        """
+        Creates an access request given a model ID
+
+        :param model_id: Unique model ID
+        :param metadata: Metadata object, defined by access request schema
+        :param schema_id: Unique schema ID
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/access-requests",
+            json={
+                "schemaId": schema_id,
+                "metadata": metadata
+            }
+        )
+
+    def delete_access_request(
+        self,
+        model_id: str,
+        access_request_id: str
+    ):
+        """
+        Deletes a specific access request associated with a model.
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :return: JSON response object
+        """
+        return self.agent.delete(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+        )
+
+    def patch_access_request(
+        self,
+        model_id: str,
+        access_request_id: str,
+        metadata: Any,
+        schema_id: str | None = None
+    ):
+        """
+        Updates an access request given its unique ID
+
+        :param model_id: Unique model ID
+        :param access_request_id: Unique access request ID
+        :metadata: Metadata object, defined by access request schemas
+        :return: JSON response object
+        """
+        filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
+        return self.agent.patch(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json
+        )

@@ -1,7 +1,9 @@
 import qs from 'querystring'
+import { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import useSWR from 'swr'
+import { ModelInterface, ReleaseInterface } from 'types/types'
 
-import { ReviewRequestInterface } from '../types/interfaces'
+import { AccessRequestInterface, ReviewRequestInterface } from '../types/interfaces'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReviewRequestsForUser(isActive = true) {
@@ -25,23 +27,39 @@ export function useGetReviewRequestsForUser(isActive = true) {
   }
 }
 
-export function useGetReviewRequestsForModel(modelId: string, semver?: string, isActive = true) {
+type SemverOrAccessRequestId =
+  | {
+      semver: ReleaseInterface['semver']
+      accessRequestId?: never
+    }
+  | {
+      semver?: never
+      accessRequestId: AccessRequestInterface['id']
+    }
+
+type GetReviewRequestsForModelQuery = {
+  modelId: ModelInterface['id']
+  isActive: boolean
+} & SemverOrAccessRequestId
+
+export function useGetReviewRequestsForModel({
+  modelId,
+  isActive,
+  semver,
+  accessRequestId,
+}: GetReviewRequestsForModelQuery) {
   const { data, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
     },
     ErrorInfo
   >(
-    semver
-      ? `/api/v2/reviews?${qs.stringify({
-          active: isActive,
-          modelId,
-          semver,
-        })}`
-      : `/api/v2/reviews?${qs.stringify({
-          active: isActive,
-          modelId,
-        })}`,
+    `/api/v2/reviews?${qs.stringify({
+      modelId,
+      active: isActive,
+      ...(semver && { semver }),
+      ...(accessRequestId && { accessRequestId }),
+    })}`,
     fetcher,
   )
 
@@ -60,16 +78,27 @@ export async function getReviewCount() {
   })
 }
 
-export async function postReviewResponse(
-  modelId: string,
-  semver: string,
-  role: string,
-  comment: string,
-  decision: string,
-) {
-  return fetch(`/api/v2/model/${modelId}/release/${semver}/review`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ comment, decision, role }),
-  })
+type PostReviewResponseParams = {
+  modelId: string
+  decision: ResponseTypeKeys
+  comment: string
+  role: string
+} & SemverOrAccessRequestId
+
+export async function postReviewResponse({
+  modelId,
+  role,
+  comment,
+  decision,
+  semver,
+  accessRequestId,
+}: PostReviewResponseParams) {
+  return fetch(
+    `/api/v2/model/${modelId}/${semver ? 'release' : 'access-request'}/${semver || accessRequestId}/review`,
+    {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment, decision, role }),
+    },
+  )
 }

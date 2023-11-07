@@ -247,7 +247,6 @@ export default function SchemaDesigner() {
                     />
                   ))}
                 </Tabs>
-
                 <Button
                   color='primary'
                   variant='text'
@@ -257,7 +256,6 @@ export default function SchemaDesigner() {
                   Add step
                 </Button>
               </Stack>
-
               {steps.map((step) => (
                 <Fragment key={step.reference}>
                   {step.reference === selectedStep && (

@@ -11,6 +11,7 @@ export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVis
 export interface ModelInterface {
   id: string
   name: string
+  team: string
   description: string
   card: ModelCardInterface
   visibility: ModelVisibilityKeys
@@ -23,6 +24,16 @@ export interface ModelCardInterface {
   createdBy: string
 
   metadata: unknown
+}
+
+export interface ModelCardRevisionInterface {
+  modelId: string
+  schemaId: string
+  version: number
+  metadata: unknown
+  createdBy: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CollaboratorEntry {
@@ -49,3 +60,24 @@ export const SchemaKind = {
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
+
+export interface FileInterface {
+  _id: string
+  modelId: string
+
+  name: string
+  size: number
+  mime: string
+
+  bucket: string
+  path: string
+
+  complete: boolean
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PostSimpleUpload {
+  file: FileInterface
+}

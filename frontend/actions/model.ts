@@ -1,6 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
+import { ModelImage } from '../types/interfaces'
 import { ListModelType } from '../types/types'
 import { ModelForm, ModelInterface, Role } from '../types/v2/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
@@ -66,6 +67,22 @@ export function useGetModelRoles(id?: string) {
   }
 }
 
+export function useGetModelImages(id?: string) {
+  const { data, error, mutate } = useSWR<
+    {
+      images: ModelImage[]
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/images` : null, fetcher)
+
+  return {
+    mutateModelImages: mutate,
+    modelImages: data ? data.images : [],
+    isModelImagesLoading: !error && !data,
+    isModelImagesError: error,
+  }
+}
+
 export function useGetModelRolesCurrentUser(id?: string) {
   const { data, error, mutate } = useSWR<
     {
@@ -90,10 +107,13 @@ export async function postModel(form: ModelForm) {
   })
 }
 
-export async function patchModel(model: ModelInterface) {
-  return fetch(`/api/v2/model/${model.id}`, {
-    method: 'patch',
+export async function patchModel(
+  id: string,
+  delta: Partial<Pick<ModelInterface, 'name' | 'description' | 'collaborators' | 'visibility'>>,
+) {
+  return fetch(`/api/v2/model/${id}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(model),
+    body: JSON.stringify(delta),
   })
 }
