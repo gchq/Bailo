@@ -80,14 +80,14 @@ export async function searchModels(
   const query: any = {}
 
   if (libraries.length) {
-    query['card.metadata.highLevelDetails.tags'] = { $all: libraries }
+    query['card.metadata.overview.tags'] = { $all: libraries }
   }
 
   if (task) {
-    if (query['card.metadata.highLevelDetails.tags']) {
-      query['card.metadata.highLevelDetails.tags'].$all.push(task)
+    if (query['card.metadata.overview.tags']) {
+      query['card.metadata.overview.tags'].$all.push(task)
     } else {
-      query['card.metadata.highLevelDetails.tags'] = { $all: [task] }
+      query['card.metadata.overview.tags'] = { $all: [task] }
     }
   }
 
