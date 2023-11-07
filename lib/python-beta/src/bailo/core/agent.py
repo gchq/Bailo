@@ -7,9 +7,11 @@ class Agent:
     def __init__(self):
         self.get = requests.get
         self.patch = requests.patch
-        self.post = requests.post
         self.put = requests.put
         self.delete = requests.delete
+
+    def post(self, *args, **kwargs):
+        return requests.post(*args, headers={'Content-Type': 'application/json', 'Accept':'application/json'}, **kwargs)
 
 
 class PkiAgent():

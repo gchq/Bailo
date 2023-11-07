@@ -187,17 +187,18 @@ class Client:
         :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/releases",
-            json={
+        filtered_json = filter_none(json={
                 "modelCardVersion": model_card_version,
                 "semver": release_version,
                 "notes": notes,
                 "minor": minor,
                 "draft": draft,
-                "files": files,
+                "fileIds": files,
                 "images": images
-            },
+            })
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/releases",
+            json=filtered_json
         ).json()
 
     def get_all_releases(
