@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 
+import audit from '../../connectors/v2/audit/index.js'
 import log from '../../services/v2/log.js'
 import { BailoError } from '../../types/v2/error.js'
 
@@ -32,6 +33,8 @@ export async function expressErrorHandler(err: unknown, req: Request, res: Respo
   logger.warn(err.context, err.message)
 
   delete err.context?.internal
+
+  await audit.publishModelErrorEvent(req, err)
 
   return res.status(err.code).json({
     error: {

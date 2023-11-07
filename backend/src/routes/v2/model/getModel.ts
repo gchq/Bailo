@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { TypeId } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { getModelById } from '../../../services/v2/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
@@ -38,9 +40,12 @@ interface GetModelResponse {
 export const getModel = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelResponse>) => {
+    req.eventType = TypeId.ViewModel
     const { params } = parse(req, getModelSchema)
 
     const model = await getModelById(req.user, params.modelId)
+
+    await audit.publishModelEvent(req, model)
 
     return res.json({
       model,

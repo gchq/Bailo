@@ -33,7 +33,7 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     }
 
     // Allow any other action to be completed
-    return true
+    return false
   }
 
   async userReleaseAction(
