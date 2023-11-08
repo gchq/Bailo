@@ -29,12 +29,12 @@ export function useGetReviewRequestsForUser(isActive = true) {
 
 type SemverOrAccessRequestId =
   | {
-      semver: ReleaseInterface['semver'] | ''
+      semver: ReleaseInterface['semver']
       accessRequestId?: never
     }
   | {
       semver?: never
-      accessRequestId: AccessRequestInterface['id'] | ''
+      accessRequestId: AccessRequestInterface['id']
     }
 
 type GetReviewRequestsForModelQuery = {
