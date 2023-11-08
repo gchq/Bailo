@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import AccessRequestFormEditPage from 'src/model/beta/accessRequests/AccessRequestFormEditPage'
+import EditableAccessRequestForm from 'src/model/beta/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
 import Wrapper from 'src/Wrapper.beta'
@@ -60,7 +60,7 @@ export default function AccessRequest() {
                     {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                   </Typography>
                 </Stack>
-                {accessRequest && <AccessRequestFormEditPage accessRequest={accessRequest} />}
+                {accessRequest && <EditableAccessRequestForm accessRequest={accessRequest} />}
                 <ReviewComments accessRequest={accessRequest} />
               </Stack>
             </>

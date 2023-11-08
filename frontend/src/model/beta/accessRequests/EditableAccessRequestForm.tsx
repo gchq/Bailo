@@ -13,11 +13,11 @@ import Loading from '../../../common/Loading'
 import ModelCardForm from '../../../Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../MessageAlert'
 
-type AccessRequestFormEditPageProps = {
+type EditableAccessRequestFormProps = {
   accessRequest: AccessRequestInterface
 }
 
-export default function AccessRequestFormEditPage({ accessRequest }: AccessRequestFormEditPageProps) {
+export default function EditableAccessRequestForm({ accessRequest }: EditableAccessRequestFormProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorText, setErrorText] = useState('')
