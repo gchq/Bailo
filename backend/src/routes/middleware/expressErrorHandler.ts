@@ -34,7 +34,7 @@ export async function expressErrorHandler(err: unknown, req: Request, res: Respo
 
   delete err.context?.internal
 
-  await audit.publishModelErrorEvent(req, err)
+  await audit.onError(req, err)
 
   return res.status(err.code).json({
     error: {

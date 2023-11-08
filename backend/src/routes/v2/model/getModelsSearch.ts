@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { TypeId } from '../../../connectors/v2/audit/Base.js'
+import { AuditKind, TypeId } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { searchModels } from '../../../services/v2/model.js'
 import { registerPath } from '../../../services/v2/specification.js'
@@ -61,7 +61,7 @@ interface GetModelsResponse {
 export const getModelsSearch = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
-    req.eventType = TypeId.SearchModels
+    req.audit = { typeId: TypeId.SearchModels, auditKind: AuditKind.Search }
     const {
       query: { libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)
@@ -74,7 +74,7 @@ export const getModelsSearch = [
       tags: model.card?.metadata?.overview?.tags || [],
     }))
 
-    await audit.publishModelSearchEvent(req, models)
+    await audit.onSearchModel(req, models)
 
     return res.json({ models })
   },
