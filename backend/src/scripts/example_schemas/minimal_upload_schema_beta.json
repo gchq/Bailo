@@ -44,6 +44,19 @@
           "description": "This is another question",
           "type": "string",
           "widget": "customTextInput"
+        },
+        "arrayQuestion": {
+          "title": "Array",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question1": {
+                "type": "string",
+                "widget": "customTextInput"
+              }
+            }
+          }
         }
       },
       "required": [],
