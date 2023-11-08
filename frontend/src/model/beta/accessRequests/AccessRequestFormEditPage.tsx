@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
-import { useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -43,17 +43,24 @@ export default function AccessRequestFormEditPage({ accessRequest }: AccessReque
     }
   }
 
-  function handleCancel() {
+  const resetForm = useCallback(() => {
     if (schema) {
-      mutateAccessRequest()
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
       for (const step of steps) {
         step.steps = steps
       }
       setSplitSchema({ reference: schema.id, steps })
-      setIsEdit(false)
     }
+  }, [accessRequest.metadata, schema])
+
+  function handleCancel() {
+    setIsEdit(false)
+    resetForm()
   }
+
+  useEffect(() => {
+    resetForm()
+  }, [resetForm])
 
   useEffect(() => {
     if (!accessRequest || !schema) return
