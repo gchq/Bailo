@@ -63,18 +63,6 @@ export default function AccessRequestFormEditPage({ accessRequest }: AccessReque
   }, [resetForm])
 
   useEffect(() => {
-    if (!accessRequest || !schema) return
-    const metadata = accessRequest.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
-
-    for (const step of steps) {
-      step.steps = steps
-    }
-
-    setSplitSchema({ reference: schema.id, steps })
-  }, [schema, accessRequest])
-
-  useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
