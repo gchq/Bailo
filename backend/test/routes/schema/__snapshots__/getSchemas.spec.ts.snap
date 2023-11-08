@@ -50,7 +50,7 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       "id": "example-model-schema-1",
       "jsonSchema": {
         "properties": {
-          "highLevelDetails": {
+          "overview": {
             "description": "Summary of the model functionality.",
             "properties": {
               "name": {
@@ -106,7 +106,7 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       "id": "example-model-schema-1",
       "jsonSchema": {
         "properties": {
-          "highLevelDetails": {
+          "overview": {
             "description": "Summary of the model functionality.",
             "properties": {
               "name": {

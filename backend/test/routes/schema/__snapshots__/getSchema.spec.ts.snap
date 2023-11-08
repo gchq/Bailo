@@ -10,7 +10,7 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
     "id": "example-model-schema-1",
     "jsonSchema": {
       "properties": {
-        "highLevelDetails": {
+        "overview": {
           "description": "Summary of the model functionality.",
           "properties": {
             "name": {
