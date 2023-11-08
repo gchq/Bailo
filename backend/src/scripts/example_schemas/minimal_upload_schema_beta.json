@@ -46,14 +46,19 @@
           "widget": "customTextInput"
         },
         "arrayQuestion": {
-          "title": "Array",
+          "title": "Values",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "question1": {
+              "arrQuestion1": {
+                "title": "Value name",
                 "type": "string",
                 "widget": "customTextInput"
+              },
+              "arrQuestion2": {
+                "title": "Vvalue",
+                "type": "number"
               }
             }
           }

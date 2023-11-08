@@ -24,6 +24,17 @@ export function createBaseSchema(schema: any) {
     }
   }
 
+  if (schema.type === 'array') {
+    for (const [arrayProperty, arrayValue] of Object.entries(schema.items)) {
+      if (arrayProperty === 'type' && arrayValue === 'object') {
+        for (const [property, value] of Object.entries(schema.items.properties)) {
+          uiSchema['items'] = {}
+          uiSchema['items'][property] = createBaseSchema(value)
+        }
+      }
+    }
+  }
+
   if (schema.type === 'boolean') {
     uiSchema['ui:widget'] = 'radio'
   }
