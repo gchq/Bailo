@@ -11,11 +11,11 @@ import Loading from '../../../common/Loading'
 import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
-import CodeLine from '../../../model/beta/registry/CodeLine'
+import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
-export default function ModelReleaseDisplay({
+export default function ReleaseDisplay({
   modelId,
   release,
   latestRelease,
