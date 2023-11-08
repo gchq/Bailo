@@ -99,7 +99,7 @@ def test_post_release(requests_mock):
         model_card_version=1,
         release_version='v1',
         notes='Test Note',
-        files=[],
+        file_ids=[],
         images=[],
     )
 

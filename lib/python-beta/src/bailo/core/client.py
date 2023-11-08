@@ -169,7 +169,7 @@ class Client:
         model_card_version: float,
         release_version: str,
         notes: str,
-        files: list[str],
+        file_ids: list[str],
         images: list[str],
         minor: bool | None = False,
         draft: bool | None = False,
@@ -181,7 +181,7 @@ class Client:
         :param model_card_version: Model card version
         :param release_version: Release version
         :param notes: Notes on release
-        :param files: Files for release
+        :param file_ids: Files for release
         :param images: Images for release
         :param minor: Signifies a minor release, defaults to False
         :param draft: Signifies a draft release, defaults to False
@@ -195,7 +195,7 @@ class Client:
                 "notes": notes,
                 "minor": minor,
                 "draft": draft,
-                "files": files,
+                "fileIds": file_ids,
                 "images": images
             },
         ).json()
@@ -507,7 +507,7 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        )
+        ).json()
 
     def get_access_requests(
         self,
@@ -522,7 +522,7 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/access-requests",
-        )
+        ).json()
 
     def post_access_request(
         self,
@@ -544,7 +544,7 @@ class Client:
                 "schemaId": schema_id,
                 "metadata": metadata
             }
-        )
+        ).json()
 
     def delete_access_request(
         self,
@@ -560,7 +560,7 @@ class Client:
         """
         return self.agent.delete(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        )
+        ).json()
 
     def patch_access_request(
         self,
@@ -581,4 +581,4 @@ class Client:
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
             json=filtered_json
-        )
+        ).json()
