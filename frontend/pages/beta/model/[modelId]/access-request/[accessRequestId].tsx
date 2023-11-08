@@ -35,33 +35,35 @@ export default function AccessRequest() {
 
   return (
     <Wrapper
-      title={accessRequest ? (accessRequest.metadata.overview.name as string) : 'Loading...'}
+      title={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
       page='access-request'
       fullWidth
     >
-      <Container maxWidth='md'>
-        <Card sx={{ p: 4, m: 'auto', mb: 2 }}>
+      <Container maxWidth='md' sx={{ mb: 2 }}>
+        <Card>
           {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
           {accessRequest && (
-            <Stack spacing={2}>
-              {activeReviews.length > 0 && <ReviewBanner square accessRequest={accessRequest} />}
-              <Stack
-                direction={{ sm: 'row', xs: 'column' }}
-                spacing={2}
-                divider={<Divider flexItem orientation='vertical' />}
-              >
-                <Link href={`/beta/model/${modelId}?tab=access`}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    Back to model
-                  </Button>
-                </Link>
-                <Typography variant='h6' color='primary' component='h2'>
-                  {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
-                </Typography>
+            <>
+              {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+              <Stack spacing={2} sx={{ p: 4 }}>
+                <Stack
+                  direction={{ sm: 'row', xs: 'column' }}
+                  spacing={2}
+                  divider={<Divider flexItem orientation='vertical' />}
+                >
+                  <Link href={`/beta/model/${modelId}?tab=access`}>
+                    <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                      Back to model
+                    </Button>
+                  </Link>
+                  <Typography variant='h6' color='primary' component='h2'>
+                    {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
+                  </Typography>
+                </Stack>
+                {accessRequest && <AccessRequestFormEditPage accessRequest={accessRequest} />}
+                <ReviewComments accessRequest={accessRequest} />
               </Stack>
-              {accessRequest && <AccessRequestFormEditPage accessRequest={accessRequest} />}
-              <ReviewComments accessRequest={accessRequest} />
-            </Stack>
+            </>
           )}
         </Card>
       </Container>

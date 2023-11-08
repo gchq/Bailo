@@ -119,7 +119,7 @@ export default function ReviewComments({ accessRequest }: ReviewCommentsProps) {
   return (
     <>
       {isInactiveReviewsLoading && <Loading />}
-      {inactiveReviews && <Divider />}
+      {inactiveReviews.length > 0 && <Divider />}
       {inactiveReviews.map((inactiveReview) => {
         return inactiveReview.responses.map((response) => (
           <>

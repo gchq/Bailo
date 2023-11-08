@@ -75,7 +75,7 @@ export default function ModelReleaseDisplay({
             borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 2,
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner release={release} />}

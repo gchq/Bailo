@@ -54,7 +54,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 2,
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
@@ -105,7 +105,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                   pb: 2,
                   width: '100%',
                   border: `1px solid ${theme.palette.primary.main}`,
-                  borderRadius: 4,
+                  borderRadius: 2,
                 }}
               >
                 <Typography variant='subtitle2' component='h3' mb={1}>
