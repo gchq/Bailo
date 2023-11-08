@@ -90,6 +90,20 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   return release
 }
 
+export type UpdateReleaseParams = Pick<
+  ReleaseInterface,
+  'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+>
+export async function updateRelease(user: UserDoc, modelId: string, semver: string, release: UpdateReleaseParams) {
+  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver }, { $set: release })
+
+  if (!updatedRelease) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  return updatedRelease
+}
+
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,
