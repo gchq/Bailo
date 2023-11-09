@@ -37,13 +37,11 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
+
         return self.agent.post(
             f"{self.url}/v2/models",
-            json={
-                "name": name,
-                "description": description,
-                "visibility": visibility,
-            },
+            json=filtered_json,
         ).json()
 
     def get_models(
