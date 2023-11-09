@@ -67,14 +67,14 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
 
     // TODO - Provide user feedback on success
+  }
 
-    if (patchModelErrorMessage) {
-      return <MessageAlert message={patchModelErrorMessage} severity='error' />
-    }
+  if (patchModelErrorMessage) {
+    return <MessageAlert message={patchModelErrorMessage} severity='error' />
+  }
 
-    if (isUsersError) {
-      return <MessageAlert message={isUsersError.info.message} severity='error' />
-    }
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
   return (
