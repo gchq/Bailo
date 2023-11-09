@@ -151,6 +151,17 @@ def test_get_files(requests_mock):
 
     assert result == {"success": True}
 
+def test_get_download_file(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id/file/file_id/download", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.get_download_file(
+        model_id = "test_id",
+        file_id = "file_id",
+    )
+
+    assert result is not None
+
 def test_simple_upload(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=test.txt", json={"success": True})
 

@@ -258,6 +258,23 @@ class Client:
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
 
+    def get_download_file(
+        self,
+        model_id: str,
+        file_id: str,
+    ):
+        """
+        Downloads a specific file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: Binary response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/file/{file_id}/download"
+        ).content
+
+
     def simple_upload(
         self,
         model_id: str,
