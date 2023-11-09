@@ -33,6 +33,7 @@ export default function ReviewBanner({ release, accessRequest, square = false }:
   const theme = useTheme()
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [postResponseError, setPostResponseError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const [modelId, reviewTitle, semverOrAccessRequestIdObject, dynamicReviewWithCommentProps] = useMemo(
     () =>
@@ -64,6 +65,7 @@ export default function ReviewBanner({ release, accessRequest, square = false }:
   }
 
   async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
+    setLoading(true)
     setPostResponseError('')
     const res = await postReviewResponse({
       modelId,
@@ -85,6 +87,7 @@ export default function ReviewBanner({ release, accessRequest, square = false }:
       mutateReleases()
       mutateAccessRequests()
       setIsReviewOpen(false)
+      setLoading(false)
     } else {
       setPostResponseError('There was a problem submitting this review')
     }
@@ -124,6 +127,7 @@ export default function ReviewBanner({ release, accessRequest, square = false }:
         errorText={postResponseError}
         onClose={handleReviewClose}
         onSubmit={handleSubmit}
+        loading={loading}
         {...dynamicReviewWithCommentProps}
       />
     </Paper>

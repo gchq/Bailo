@@ -33,6 +33,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
+    setLoading(true)
     if (schema) {
       const data = getStepsData(splitSchema, true)
       const res = await putModelCard(model.id, data)
@@ -53,6 +54,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       }
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(false)
+      setLoading(false)
     }
   }
 
@@ -120,11 +122,9 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               <Button variant='outlined' onClick={onCancel}>
                 Cancel
               </Button>
-              {!loading && (
-                <LoadingButton variant='contained' onClick={onSubmit} loading={loading}>
-                  Save
-                </LoadingButton>
-              )}
+              <LoadingButton variant='contained' onClick={onSubmit} loading={loading}>
+                Save
+              </LoadingButton>
             </Stack>
           )}
         </Stack>

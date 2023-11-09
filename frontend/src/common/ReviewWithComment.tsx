@@ -44,6 +44,7 @@ type ReviewWithCommentProps = {
   errorText: string
   onClose: () => void
   onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
+  loading: boolean
   description?: string
 } & PartialReviewWithCommentProps
 
@@ -53,6 +54,7 @@ export default function ReviewWithComment({
   errorText,
   onClose,
   onSubmit,
+  loading,
   description,
   release,
   accessRequest,
@@ -61,7 +63,6 @@ export default function ReviewWithComment({
   const [reviewComment, setReviewComment] = useState('')
   const [showError, setShowError] = useState(false)
   const [selectOpen, setSelectOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -85,13 +86,11 @@ export default function ReviewWithComment({
 
   function submitForm(decision: ResponseTypeKeys) {
     setShowError(false)
-    setLoading(false)
+
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
-      setLoading(false)
     } else {
       onSubmit(decision, reviewComment, reviewRequest.role)
-      setLoading(true)
     }
   }
 
