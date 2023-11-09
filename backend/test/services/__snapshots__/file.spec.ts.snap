@@ -1,26 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`services > file > getFilesByModel > success 1`] = `
-{
-  "delete": [MockFunction spy],
-  "find": [MockFunction spy] {
-    "calls": [
-      [
-        {
-          "modelId": "testModelId",
-        },
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
+[
+  {
+    "example": "file",
   },
-  "findOne": [MockFunction spy],
-  "save": [MockFunction spy],
-}
+]
 `;
 
 exports[`services > file > removeFile > success 1`] = `
@@ -53,5 +38,6 @@ exports[`services > file > removeFile > success 1`] = `
     ],
   },
   "save": [MockFunction spy],
+  "size": 100,
 }
 `;

@@ -13,7 +13,7 @@ export function getAutheticationConnector(cache = true) {
       authenticationConnector = new SillyAuthenticationConnector()
       break
     default:
-      throw new Error('No valid user connector provided.')
+      throw new Error('No valid authentication connector provided.')
   }
 
   return authenticationConnector

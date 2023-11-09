@@ -18,10 +18,12 @@ import { FormEvent, useState } from 'react'
 import semver from 'semver'
 
 import { postFile, postRelease } from '../../../../actions/release'
+import { FlattenedModelImage } from '../../../../types/interfaces'
 import { ReleaseInterface } from '../../../../types/types'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import HelpPopover from '../../../common/HelpPopover'
+import ModelImageList from '../../../common/ModelImageList'
 import MultiFileInput from '../../../common/MultiFileInput'
 import RichTextEditor from '../../../common/RichTextEditor'
 import MessageAlert from '../../../MessageAlert'
@@ -43,6 +45,7 @@ export default function DraftNewReleaseDialog({
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [artefacts, setArtefacts] = useState<File[]>([])
+  const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -74,7 +77,7 @@ export default function DraftNewReleaseDialog({
         notes: releaseNotes,
         minor: isMinorRelease,
         fileIds: fileIds,
-        images: [],
+        images: imageList,
       }
 
       const response = await postRelease(release, model.id)
@@ -102,6 +105,7 @@ export default function DraftNewReleaseDialog({
     setReleaseNotes('')
     setIsMinorRelease(false)
     setArtefacts([])
+    setImageList([])
     setErrorMessage('')
   }
 
@@ -165,7 +169,14 @@ export default function DraftNewReleaseDialog({
               <Checkbox sx={{ pl: 0 }} size='small' checked={isMinorRelease} onChange={handleMinorReleaseChecked} />
               <Typography>Minor release - No significant changes, does not require release re-approval</Typography>
             </Stack>
-            <MultiFileInput fullWidth label='Attach artefacts' files={artefacts} setFiles={setArtefacts} />
+            <Stack>
+              <Typography sx={{ fontWeight: 'bold' }}>Artefacts</Typography>
+              <MultiFileInput fullWidth label='Attach artefacts' files={artefacts} setFiles={setArtefacts} />
+            </Stack>
+            <Stack>
+              <Typography sx={{ fontWeight: 'bold' }}>Images</Typography>
+              <ModelImageList model={model} setImages={setImageList} value={imageList} />
+            </Stack>
           </Stack>
         </DialogContent>
         <Box sx={{ mx: 3 }}>

@@ -1,6 +1,7 @@
-import { Box, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo } from 'react'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDisplay'
 
@@ -34,6 +35,13 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
+        <Box sx={{ textAlign: 'right' }}>
+          <Link href={`/beta/model/${model.id}/access/schema`}>
+            <Button variant='outlined' disabled={!model.card}>
+              Request Access
+            </Button>
+          </Link>
+        </Box>
         {isAccessRequestsLoading && <Loading />}
         {accessRequestsList}
       </Stack>

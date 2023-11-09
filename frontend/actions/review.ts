@@ -38,7 +38,7 @@ type SemverOrAccessRequestId =
     }
 
 type GetReviewRequestsForModelQuery = {
-  modelId: ModelInterface['id']
+  modelId?: ModelInterface['id']
   isActive: boolean
 } & SemverOrAccessRequestId
 

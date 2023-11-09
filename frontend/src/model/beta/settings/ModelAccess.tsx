@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Box,
+  Divider,
   Stack,
   Table,
   TableBody,
@@ -14,13 +15,14 @@ import {
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { useEffect, useState } from 'react'
-import { getErrorMessage } from 'utils/fetcher'
 
-import { patchModel } from '../../../../actions/model'
+import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
 import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
+import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
@@ -31,11 +33,13 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
-  const { users, isUsersLoading, isUsersError } = useListUsers()
-  const [loading, setLoading] = useState(false)
-  const [patchModelErrorMessage, setPatchModelErrorMessage] = useState('')
 
+  const [loading, setLoading] = useState(false)
+
+  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   useEffect(() => {
     if (model) {
@@ -55,22 +59,25 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }
 
-  // TODO - add a request to update the model's collaborators field
   async function updateAccessList() {
     setLoading(true)
-    const response = await patchModel(model.id, { collaborators: accessList })
-
-    if (!response.ok) {
-      const error = await getErrorMessage(response)
+    const res = await patchModel(model.id, { collaborators: accessList })
+    if (!res.ok) {
       setLoading(false)
-      setPatchModelErrorMessage(error)
+      const error = await getErrorMessage(res)
+      return sendNotification({
+        variant: 'error',
+        msg: error,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
-
-    // TODO - Provide user feedback on success
-  }
-
-  if (patchModelErrorMessage) {
-    return <MessageAlert message={patchModelErrorMessage} severity='error' />
+    sendNotification({
+      variant: 'success',
+      msg: 'Model access list updated',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+    mutateModel()
+    setLoading(false)
   }
 
   if (isUsersError) {
@@ -145,8 +152,14 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
+          <Divider />
           <div>
-            <LoadingButton aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+            <LoadingButton
+              variant='contained'
+              aria-label='Save access list'
+              onClick={updateAccessList}
+              loading={loading}
+            >
               Save
             </LoadingButton>
           </div>

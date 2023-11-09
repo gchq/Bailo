@@ -2,8 +2,7 @@ import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Typography } f
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
@@ -25,18 +24,6 @@ export default function ModelCardForm({
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
-  const router = useRouter()
-  const formPage = router.query.formPage
-
-  useEffect(() => {
-    if (formPage) {
-      const stepFromUrl = splitSchema.steps.find((step) => step.section === formPage)
-      if (stepFromUrl) {
-        setActiveStep(stepFromUrl.index)
-      }
-    }
-  }, [formPage, splitSchema.steps])
-
   const currentStep = splitSchema.steps[activeStep]
 
   if (!currentStep) {
@@ -53,11 +40,8 @@ export default function ModelCardForm({
     return <></>
   }
 
-  function handleListItemClick(index: number, formPageKey: string) {
+  function handleListItemClick(index: number) {
     setActiveStep(index)
-    router.replace({
-      query: { ...router.query, formPage: formPageKey },
-    })
   }
 
   return (
@@ -80,10 +64,7 @@ export default function ModelCardForm({
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
-                <ListItemButton
-                  selected={activeStep === index}
-                  onClick={() => handleListItemClick(index, step.section)}
-                >
+                <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Stack direction='row' spacing={2}>
                     <Typography>{step.schema.title}</Typography>
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}

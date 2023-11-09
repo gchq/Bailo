@@ -48,12 +48,15 @@ import {
   putUpdateLastViewed,
   putVersion,
 } from './routes/v1/version.js'
+import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
+import { getEntities } from './routes/v2/entities/getEntities.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
+import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
@@ -84,7 +87,6 @@ import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
-import { getCurrentUser } from './routes/v2/user/getCurrentUser.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -225,6 +227,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
+  server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
@@ -259,8 +262,8 @@ if (config.experimental.v2) {
 
   // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
-  // server.get('/api/v2/users', ...getUsers)
-  server.get('/api/v2/users/me', ...getCurrentUser)
+  server.get('/api/v2/entities', ...getEntities)
+  server.get('/api/v2/entities/me', ...getCurrentUser)
 
   // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)

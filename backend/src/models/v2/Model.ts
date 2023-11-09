@@ -42,6 +42,9 @@ export interface ModelInterface {
   card?: ModelCardInterface
 
   collaborators: Array<CollaboratorEntry>
+  settings: {
+    ungovernedAccess: boolean
+  }
 
   visibility: ModelVisibilityKeys
   deleted: boolean
@@ -75,6 +78,9 @@ const ModelSchema = new Schema<ModelInterface>(
         roles: [{ type: String }],
       },
     ],
+    settings: {
+      ungovernedAccess: { type: Boolean, required: true, default: false },
+    },
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
   },

@@ -1,13 +1,15 @@
 import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelInterface } from '../../models/v2/Model.js'
-import Release, { ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
+import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
-import { Forbidden, NotFound } from '../../utils/v2/error.js'
+import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import { getFileById } from './file.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 
 export type CreateReleaseParams = Pick<
@@ -15,7 +17,49 @@ export type CreateReleaseParams = Pick<
   'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
 >
 export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
+  if (releaseParams.images) {
+    const registryImages = await listModelImages(user, releaseParams.modelId)
+
+    const initialValue: ImageRef[] = []
+    const missingImages = releaseParams.images.reduce((acc, releaseImage) => {
+      if (
+        !registryImages.some(
+          (registryImage) =>
+            releaseImage.name === registryImage.name &&
+            releaseImage.repository === registryImage.repository &&
+            registryImage.tags.includes(releaseImage.tag),
+        )
+      ) {
+        acc.push(releaseImage)
+      }
+      return acc
+    }, initialValue)
+
+    if (missingImages.length > 0) {
+      throw BadReq('The following images do not exist in the registry.', {
+        missingImages,
+      })
+    }
+  }
+
   const model = await getModelById(user, releaseParams.modelId)
+
+  if (releaseParams.fileIds) {
+    for (const fileId of releaseParams.fileIds) {
+      const file = await getFileById(user, fileId)
+
+      if (file.modelId !== model.id) {
+        throw BadReq(
+          `The file '${fileId}' comes from the model '${file.modelId}', but this release is being created for '${model.id}'`,
+          {
+            modelId: model.id,
+            fileId: fileId,
+            fileModelId: file.modelId,
+          },
+        )
+      }
+    }
+  }
 
   const release = new Release({
     createdBy: user.dn,

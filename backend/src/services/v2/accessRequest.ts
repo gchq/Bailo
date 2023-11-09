@@ -84,7 +84,7 @@ export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const accessRequests = await AccessRequest.find({ modelId })
 
-  return asyncFilter(await accessRequests, (request) =>
+  return asyncFilter(accessRequests, (request) =>
     authorisation.userAccessRequestAction(user, model, request, AccessRequestAction.View),
   )
 }
@@ -97,7 +97,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.Delete))) {
+  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.View))) {
     throw Forbidden(`You do not have permission to get this access request.`, {
       userDn: user.dn,
       accessRequestId,

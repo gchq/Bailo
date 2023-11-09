@@ -19,6 +19,16 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/v2/model.js', () => modelMocks)
 
+const registryMocks = vi.hoisted(() => ({
+  listModelImages: vi.fn(),
+}))
+vi.mock('../../src/services/v2/registry.js', () => registryMocks)
+
+const fileMocks = vi.hoisted(() => ({
+  getFileById: vi.fn(),
+}))
+vi.mock('../../src/services/v2/file.js', () => fileMocks)
+
 const releaseModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
@@ -56,6 +66,60 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
     expect(mockReviewService.createReleaseReviews).toBeCalled()
+  })
+
+  test('createRelease > release with image', async () => {
+    const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
+    registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
+    modelMocks.getModelById.mockResolvedValue(undefined)
+
+    await createRelease(
+      {} as any,
+      {
+        images: existingImages.flatMap(({ tags, ...rest }) => tags.map((tag) => ({ tag, ...rest }))),
+      } as any,
+    )
+
+    expect(releaseModelMocks.save).toBeCalled()
+    expect(releaseModelMocks).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).toBeCalled()
+  })
+
+  test('createRelease > missing images in the registry', async () => {
+    const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
+    registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
+    modelMocks.getModelById.mockResolvedValue(undefined)
+
+    expect(() =>
+      createRelease(
+        {} as any,
+        {
+          images: [
+            { repository: 'fake', name: 'fake', tag: 'fake1' },
+            { repository: 'fake', name: 'fake', tag: 'fake2' },
+          ].concat(existingImages.flatMap(({ tags, ...rest }) => tags.map((tag) => ({ tag, ...rest })))),
+        } as any,
+      ),
+    ).rejects.toThrowError(/^The following images do not exist in the registry/)
+    expect(releaseModelMocks.save).not.toBeCalled()
+    expect(releaseModelMocks).not.toBeCalled()
+    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
+  })
+
+  test('createRelease > release with bad files', async () => {
+    fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
+    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+
+    expect(() =>
+      createRelease(
+        {} as any,
+        {
+          fileIds: ['test'],
+        } as any,
+      ),
+    ).rejects.toThrowError(/^The file 'test' comes from the model/)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
   })
 
   test('createRelease > bad authorisation', async () => {

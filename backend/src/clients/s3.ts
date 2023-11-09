@@ -1,4 +1,4 @@
-import { S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, GetObjectRequest, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 
 import config from '../utils/v2/config.js'
@@ -30,4 +30,22 @@ export async function putObjectStream(bucket: string, key: string, body: Readabl
   return {
     fileSize,
   }
+}
+
+export async function getObjectStream(bucket: string, key: string, range?: { start: number; end: number }) {
+  const client = await getS3Client()
+
+  const input: GetObjectRequest = {
+    Bucket: bucket,
+    Key: key,
+  }
+
+  if (range) {
+    input.Range = `bytes=${range.start}-${range.end}`
+  }
+
+  const command = new GetObjectCommand(input)
+  const response = await client.send(command)
+
+  return response
 }
