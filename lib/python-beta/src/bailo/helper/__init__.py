@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-from bailo.helper.models import *
+from bailo.helper.release import Release

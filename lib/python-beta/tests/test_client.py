@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import json
 
-from bailo import Client, ModelVisibility, SchemaKind
+from bailo import Client, ModelVisibility, ReviewDecision, Role, SchemaKind
 
 mock_result = {"success": True}
 
@@ -94,8 +95,8 @@ def test_post_release(requests_mock):
 
     client = Client("https://example.com")
     result = client.post_release(
-        model_id="test_id", 
-        model_card_version=1, 
+        model_id="test_id",
+        model_card_version=1,
         release_version='v1',
         notes='Test Note',
         files=[],
@@ -219,6 +220,19 @@ def test_get_reviews(requests_mock):
     client = Client("https://example.com")
     result = client.get_reviews(
         active=True,
+    )
+
+    assert result == {"success": True}
+
+def test_post_reviews(requests_mock):
+    requests_mock.post("https://example.com/api/v2/model/test_id/release/1.0.0/review", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.post_review(
+        model_id="test_id",
+        version="1.0.0",
+        role=Role.ModelSeniorResponsibleOfficer,
+        decision=ReviewDecision.Approve
     )
 
     assert result == {"success": True}
