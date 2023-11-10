@@ -44,14 +44,14 @@ interface GetModelCardResponse {
 export const getModelCardRevisions = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelCardResponse>) => {
-    req.audit = AuditInfo.SearchModelCardRevisions
+    req.audit = AuditInfo.ViewModelCardRevisions
     const {
       params: { modelId },
     } = parse(req, getModelCardRevisionsSchema)
 
     const modelCardRevisions = await getModelCardRevisionsService(req.user, modelId)
 
-    await audit.onSearchModelCardRevisions(req, modelCardRevisions)
+    await audit.onViewModelCardRevisions(req, modelCardRevisions)
 
     return res.json({ modelCardRevisions })
   },

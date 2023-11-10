@@ -1,6 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
+import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
@@ -23,17 +24,21 @@ export const AuditInfo = {
 
   CreateModelCard: { typeId: 'CreateModelCard', description: 'Model Card Created', auditKind: AuditKind.Create },
   ViewModelCard: { typeId: 'ViewModelCard', description: 'Model Card Viewed', auditKind: AuditKind.View },
-  SearchModelCardRevisions: {
+  ViewModelCardRevisions: {
     typeId: 'SearchModelCardRevisions',
     description: 'Model Card Revisions Searched',
     auditKind: AuditKind.Search,
   },
   UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
+  CreateFile: { typeId: 'CreateFile', description: 'File Information Created', auditKind: AuditKind.Create },
+  ViewFiles: { typeId: 'ViewFiles', description: 'File Information Viewed', auditKind: AuditKind.View },
+  DeleteFile: { typeId: 'DeleteFile', description: 'File Information Deleted', auditKind: AuditKind.Delete },
+
   CreateRelease: { typeId: 'CreateRelease', description: 'Release Created', auditKind: AuditKind.Create },
   ViewRelease: { typeId: 'ViewRelease', description: 'Release Viewed', auditKind: AuditKind.View },
   UpdateRelease: { typeId: 'UpdateRelease', description: 'Release Updated', auditKind: AuditKind.Update },
-  DeleteRelease: { typeId: 'UpdateRelease', description: 'Release Deleted', auditKind: AuditKind.Update },
+  DeleteRelease: { typeId: 'DeleteRelease', description: 'Release Deleted', auditKind: AuditKind.Delete },
   SearchReleases: { typeId: 'SearchReleases', description: 'Release Searched', auditKind: AuditKind.Search },
 
   CreateAccessRequest: {
@@ -68,7 +73,11 @@ export abstract class BaseAuditConnector {
   abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
-  abstract onSearchModelCardRevisions(req: Request, modelCards: ModelCardInterface[])
+  abstract onViewModelCardRevisions(req: Request, modelCards: ModelCardInterface[])
+
+  abstract onCreateFile(req: Request, file: FileInterfaceDoc)
+  abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
+  abstract onDeleteFile(req: Request, modelId: string, fileId: string)
 
   abstract onCreateRelease(req: Request, release: ReleaseDoc)
   abstract onViewRelease(req: Request, release: ReleaseDoc)

@@ -1,6 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
+import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
@@ -63,9 +64,27 @@ export class SillyAuditConnector extends BaseAuditConnector {
     log.info(event, 'Logging Event')
   }
 
-  onSearchModelCardRevisions(req: Request, modelCards: ModelCardInterface[]) {
-    this.checkEventType(AuditInfo.SearchModelCardRevisions, req)
+  onViewModelCardRevisions(req: Request, modelCards: ModelCardInterface[]) {
+    this.checkEventType(AuditInfo.ViewModelCardRevisions, req)
     const event = this.generateEvent(req, { url: req.originalUrl, results: modelCards.map((model) => model.version) })
+    log.info(event, 'Logging Event')
+  }
+
+  onCreateFile(req: Request, file: FileInterfaceDoc) {
+    this.checkEventType(AuditInfo.CreateFile, req)
+    const event = this.generateEvent(req, { id: file._id, modelId: file.modelId })
+    log.info(event, 'Logging Event')
+  }
+
+  onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
+    this.checkEventType(AuditInfo.ViewFiles, req)
+    const event = this.generateEvent(req, { modelId, results: files.map((file) => file.name) })
+    log.info(event, 'Logging Event')
+  }
+
+  onDeleteFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.DeleteFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
     log.info(event, 'Logging Event')
   }
 
@@ -93,7 +112,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
 
   onDeleteRelease(req: Request, modelId: string, semver: string) {
     this.checkEventType(AuditInfo.DeleteRelease, req)
-    const event = this.generateEvent(req, { modelId: modelId, semver: semver })
+    const event = this.generateEvent(req, { modelId, semver })
     log.info(event, 'Logging Event')
   }
 
