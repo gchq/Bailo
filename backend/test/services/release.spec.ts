@@ -16,6 +16,7 @@ vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
+  getModelCardRevision: vi.fn(),
 }))
 vi.mock('../../src/services/v2/model.js', () => modelMocks)
 
@@ -59,7 +60,7 @@ vi.mock('../../src/services/v2/review.js', () => mockReviewService)
 
 describe('services > release', () => {
   test('createRelease > simple', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
+    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
 
     await createRelease({} as any, {} as any)
 
@@ -71,7 +72,7 @@ describe('services > release', () => {
   test('createRelease > release with image', async () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
-    modelMocks.getModelById.mockResolvedValue(undefined)
+    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
 
     await createRelease(
       {} as any,
@@ -124,7 +125,27 @@ describe('services > release', () => {
 
   test('createRelease > bad authorisation', async () => {
     authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
+    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+  })
+
+  test('createRelease > automatic model card version', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 999 } })
+
+    await createRelease({} as any, {} as any)
+
+    expect(releaseModelMocks.save).toBeCalled()
+    expect(releaseModelMocks.mock.calls.at(0)[0].modelCardVersion).toBe(999)
+  })
+
+  test('createRelease > no model card', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({ card: undefined })
+
+    expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(
+      /^This model does not have a model card associated with it/,
+    )
+
+    expect(releaseModelMocks.save).not.toBeCalled()
   })
 
   test('getModelReleases > good', async () => {
