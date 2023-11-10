@@ -117,6 +117,16 @@ describe('services > release', () => {
     expect(releaseModelMocks.mock.calls.at(0)[0].modelCardVersion).toBe(999)
   })
 
+  test('createRelease > no model card', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({ card: undefined })
+
+    expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(
+      /^This model does not have a model card associated with it/,
+    )
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('getModelReleases > good', async () => {
     await getModelReleases({} as any, 'modelId')
 
