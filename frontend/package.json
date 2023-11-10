@@ -30,7 +30,7 @@
     "@rjsf/validator-ajv8": "^5.13.0",
     "@uiw/react-md-editor": "^3.23.5",
     "@uiw/react-textarea-code-editor": "^2.1.7",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "copy-to-clipboard": "^3.3.3",
     "dagre": "^0.8.5",
     "dayjs": "^1.11.10",
