@@ -6,7 +6,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../../types/interfaces'
 import { setStepState } from '../../../utils/beta/formUtils'
-import { widgets } from '../../../utils/formUtils'
+import { widgets } from '../../../utils/beta/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import Nothing from '../../MuiForms/Nothing'
 
