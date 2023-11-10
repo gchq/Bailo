@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
-import { ModelDoc } from '../../../models/v2/Model.js'
+import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
@@ -20,6 +20,15 @@ export const AuditInfo = {
   ViewModel: { typeId: 'ViewModel', description: 'Model Viewed', auditKind: AuditKind.View },
   UpdateModel: { typeId: 'UpdateModel', description: 'Model Updated', auditKind: AuditKind.Update },
   SearchModels: { typeId: 'SearchModels', description: 'Model Searched', auditKind: AuditKind.Search },
+
+  CreateModelCard: { typeId: 'CreateModelCard', description: 'Model Card Created', auditKind: AuditKind.Create },
+  ViewModelCard: { typeId: 'ViewModelCard', description: 'Model Card Viewed', auditKind: AuditKind.View },
+  SearchModelCardRevisions: {
+    typeId: 'SearchModelCardRevisions',
+    description: 'Model Card Revisions Searched',
+    auditKind: AuditKind.Search,
+  },
+  UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
   CreateRelease: { typeId: 'CreateRelease', description: 'Release Created', auditKind: AuditKind.Create },
   ViewRelease: { typeId: 'ViewRelease', description: 'Release Viewed', auditKind: AuditKind.View },
@@ -55,6 +64,11 @@ export abstract class BaseAuditConnector {
   abstract onCreateModel(req: Request, model: ModelDoc)
   abstract onViewModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
+
+  abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onSearchModelCardRevisions(req: Request, modelCards: ModelCardInterface[])
 
   abstract onCreateRelease(req: Request, release: ReleaseDoc)
   abstract onViewRelease(req: Request, release: ReleaseDoc)

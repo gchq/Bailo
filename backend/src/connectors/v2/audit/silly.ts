@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
-import { ModelDoc } from '../../../models/v2/Model.js'
+import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import log from '../../../services/v2/log.js'
@@ -42,6 +42,30 @@ export class SillyAuditConnector extends BaseAuditConnector {
       results: models.map((model) => model.id),
     })
 
+    log.info(event, 'Logging Event')
+  }
+
+  onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+    this.checkEventType(AuditInfo.CreateModelCard, req)
+    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    log.info(event, 'Logging Event')
+  }
+
+  onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+    this.checkEventType(AuditInfo.ViewModelCard, req)
+    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    log.info(event, 'Logging Event')
+  }
+
+  onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+    this.checkEventType(AuditInfo.UpdateModelCard, req)
+    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    log.info(event, 'Logging Event')
+  }
+
+  onSearchModelCardRevisions(req: Request, modelCards: ModelCardInterface[]) {
+    this.checkEventType(AuditInfo.SearchModelCardRevisions, req)
+    const event = this.generateEvent(req, { url: req.originalUrl, results: modelCards.map((model) => model.version) })
     log.info(event, 'Logging Event')
   }
 
