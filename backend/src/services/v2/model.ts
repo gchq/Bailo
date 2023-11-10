@@ -80,14 +80,14 @@ export async function searchModels(
   const query: any = {}
 
   if (libraries.length) {
-    query['card.metadata.highLevelDetails.tags'] = { $all: libraries }
+    query['card.metadata.overview.tags'] = { $all: libraries }
   }
 
   if (task) {
-    if (query['card.metadata.highLevelDetails.tags']) {
-      query['card.metadata.highLevelDetails.tags'].$all.push(task)
+    if (query['card.metadata.overview.tags']) {
+      query['card.metadata.overview.tags'].$all.push(task)
     } else {
-      query['card.metadata.highLevelDetails.tags'] = { $all: [task] }
+      query['card.metadata.overview.tags'] = { $all: [task] }
     }
   }
 
@@ -236,7 +236,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'>
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
+>
 export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 

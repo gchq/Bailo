@@ -3,15 +3,15 @@ import { useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import Markdown from 'src/common/MarkdownRenderer'
-import CodeLine from 'src/model/beta/registry/CodeLine'
 import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
 import Loading from '../../../common/Loading'
+import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
+import CodeLine from '../../../model/beta/registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
@@ -125,7 +125,7 @@ export default function ModelReleaseDisplay({
                       alignItems='center'
                       spacing={1}
                     >
-                      <Link href='/beta'>{file.name}</Link>
+                      <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`}>{file.name}</Link>
                       <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                     </Stack>
                   ))}

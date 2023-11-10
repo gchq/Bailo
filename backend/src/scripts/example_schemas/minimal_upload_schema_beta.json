@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "highLevelDetails": {
+    "overview": {
       "title": "Overview",
       "description": "Summary of the model functionality.",
       "type": "object",
       "properties": {
-        "modelOverview": {
+        "modelSummary": {
           "title": "What does the model do?",
           "description": "A description of what the model does.",
           "type": "string",
@@ -36,14 +36,12 @@
         "questionOne": {
           "title": "Question one",
           "description": "This is a question",
-          "type": "string",
-          "widget": "customTextInput"
+          "type": "string"
         },
         "questionTwo": {
           "title": "Question two",
           "description": "This is another question",
-          "type": "string",
-          "widget": "customTextInput"
+          "type": "string"
         }
       },
       "required": [],
