@@ -38,7 +38,7 @@ export default function ReviewDecision({ user, decision }: ReviewDecisionProps) 
             <Box component='span' fontWeight='bold'>
               {username}
             </Box>
-            {` ${isApproved ? 'marked this as approved' : 'requested changes'}`}
+            {` ${isApproved ? 'approved' : 'requested changes'}`}
           </Typography>
           {isApproved ? <Done color='success' fontSize='small' /> : <HourglassEmpty color='warning' fontSize='small' />}
         </Stack>
