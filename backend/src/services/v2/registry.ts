@@ -1,9 +1,13 @@
 import fetch from 'node-fetch'
 
+import { ImageAction } from '../../connectors/v2/authorisation/Base.js'
+import authorisation from '../../connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { getAccessToken } from '../../routes/v1/registryAuth.js'
 import config from '../../utils/v2/config.js'
+import { Forbidden } from '../../utils/v2/error.js'
 import { getHttpsAgent } from './http.js'
+import { getModelById } from './model.js'
 
 const registry = config.registry.connection.internal
 const httpsAgent = getHttpsAgent({
@@ -16,7 +20,7 @@ export interface RepoRef {
 }
 
 // Currently limited to a maximum 100 image names
-export async function listModelRepos(user: UserDoc, modelId: string) {
+async function listModelRepos(user: UserDoc, modelId: string) {
   const token = await getAccessToken({ id: user.dn, _id: user.dn }, [
     { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
   ])
@@ -33,7 +37,7 @@ export async function listModelRepos(user: UserDoc, modelId: string) {
   return catalog.repositories.filter((repo) => repo.startsWith(`${modelId}/`))
 }
 
-export async function listImageTags(user: UserDoc, imageRef: RepoRef) {
+async function listImageTags(user: UserDoc, imageRef: RepoRef) {
   const repo = `${imageRef.repository}/${imageRef.name}`
   const token = await getAccessToken({ id: user.dn, _id: user.dn }, [
     { type: 'repository', class: '', name: repo, actions: ['pull'] },
@@ -52,6 +56,19 @@ export async function listImageTags(user: UserDoc, imageRef: RepoRef) {
 }
 
 export async function listModelImages(user: UserDoc, modelId: string) {
+  const model = await getModelById(user, modelId)
+
+  if (
+    !(await authorisation.userImageAction(
+      user,
+      model,
+      { type: 'repository', name: modelId, actions: ['pull'] },
+      ImageAction.List,
+    ))
+  ) {
+    throw Forbidden(`You do not have permission to list this set of images`, { userDn: user.dn, modelId })
+  }
+
   const repos = await listModelRepos(user, modelId)
   const versions = await Promise.all(
     repos.map(async (repo) => {
