@@ -19,8 +19,8 @@ import { SplitSchemaNoRender, StepNoRender, StepType } from '../../types/interfa
 import { createUiSchema } from '../uiSchemaUtils'
 
 export const widgets = {
+  TextWidget: CustomTextInput,
   TextareaWidget: RichTextInput,
-  customTextInput: CustomTextInput,
   tagSelector: TagSelector,
   tagSelectorBeta: TagSelectorBeta,
   userSelector: UserSelector,
