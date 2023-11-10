@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditKind, TypeId } from '../../../connectors/v2/audit/Base.js'
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { searchModels } from '../../../services/v2/model.js'
 import { registerPath } from '../../../services/v2/specification.js'
@@ -61,7 +61,7 @@ interface GetModelsResponse {
 export const getModelsSearch = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
-    req.audit = { typeId: TypeId.SearchModels, auditKind: AuditKind.Search }
+    req.audit = AuditInfo.SearchModels
     const {
       query: { libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)

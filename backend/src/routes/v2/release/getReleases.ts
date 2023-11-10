@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
 import { getModelReleases } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
@@ -42,11 +44,14 @@ interface getReleasesResponse {
 export const getReleases = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleasesResponse>) => {
+    req.audit = AuditInfo.SearchReleases
     const {
       params: { modelId },
     } = parse(req, getReleasesSchema)
 
     const releases = await getModelReleases(req.user, modelId)
+
+    await audit.onSearchReleases(req, releases)
 
     return res.json({
       releases,

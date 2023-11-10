@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { deleteRelease as deleteReleaseService } from '../../../services/v2/release.js'
 import { registerPath } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -40,11 +42,14 @@ interface DeleteReleaseResponse {
 export const deleteRelease = [
   bodyParser.json(),
   async (req: Request, res: Response<DeleteReleaseResponse>) => {
+    req.audit = AuditInfo.DeleteRelease
     const {
       params: { modelId, semver },
     } = parse(req, deleteReleaseSchema)
 
     await deleteReleaseService(req.user, modelId, semver)
+
+    await audit.onDeleteRelease(req, modelId, semver)
 
     return res.json({
       message: 'Successfully removed release.',

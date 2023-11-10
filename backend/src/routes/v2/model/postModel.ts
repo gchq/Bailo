@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditKind, TypeId } from '../../../connectors/v2/audit/Base.js'
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 import { createModel } from '../../../services/v2/model.js'
@@ -49,7 +49,7 @@ interface PostModelResponse {
 export const postModel = [
   bodyParser.json(),
   async (req: Request, res: Response<PostModelResponse>) => {
-    req.audit = { typeId: TypeId.CreateModel, auditKind: AuditKind.Create }
+    req.audit = AuditInfo.CreateModel
     const { body } = parse(req, postModelSchema)
 
     const model = await createModel(req.user, body)
