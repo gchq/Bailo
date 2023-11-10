@@ -49,17 +49,6 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
 
   const model = await getModelById(user, releaseParams.modelId)
 
-  if (releaseParams.modelCardVersion) {
-    // Ensure that the requested model card version exists.
-    await getModelCardRevision(user, releaseParams.modelId, releaseParams.modelCardVersion)
-  } else {
-    if (!model.card) {
-      throw BadReq('This model does not have a model card associated with it yet.', { modelId: model.id })
-    }
-
-    releaseParams.modelCardVersion = model.card?.version
-  }
-
   if (releaseParams.fileIds) {
     for (const fileId of releaseParams.fileIds) {
       const file = await getFileById(user, fileId)
@@ -75,6 +64,17 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
         )
       }
     }
+  }
+
+  if (releaseParams.modelCardVersion) {
+    // Ensure that the requested model card version exists.
+    await getModelCardRevision(user, releaseParams.modelId, releaseParams.modelCardVersion)
+  } else {
+    if (!model.card) {
+      throw BadReq('This model does not have a model card associated with it yet.', { modelId: model.id })
+    }
+
+    releaseParams.modelCardVersion = model.card?.version
   }
 
   const release = new Release({
