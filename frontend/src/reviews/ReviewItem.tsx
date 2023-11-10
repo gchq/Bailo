@@ -25,7 +25,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
       <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
         <Stack>
           <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
-            <Typography color='primary' variant='h6' component='h2' sx={{ fontWeight: 'bold' }}>
+            <Typography color='primary' variant='h6' component='h2' fontWeight='bold'>
               {review.model.name}
             </Typography>
             <Typography>{review.semver}</Typography>

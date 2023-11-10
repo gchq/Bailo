@@ -35,7 +35,10 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
           }}
         >
           <Typography>
-            <span style={{ fontWeight: 'bold' }}>{username}</span> has left the following comment
+            <Box component='span' fontWeight='bold'>
+              {username}
+            </Box>
+            {' added a comment'}
           </Typography>
         </Box>
         <Typography sx={{ px: 1, py: 0.5 }}>{comment}</Typography>

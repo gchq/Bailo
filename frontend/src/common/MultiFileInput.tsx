@@ -61,12 +61,7 @@ export default function MultiFileInput({
       {!readOnly && (
         <Box mb={2}>
           <label htmlFor={htmlId}>
-            <Button
-              component='span'
-              variant='outlined'
-              disabled={disabled}
-              sx={{ ...(fullWidth && { width: '100%' }) }}
-            >
+            <Button fullWidth component='span' variant='outlined' disabled={disabled}>
               {label}
             </Button>
           </label>

@@ -60,7 +60,7 @@ export default function ReleaseForm({
   }
 
   const releaseNotesLabel = (
-    <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
+    <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
       Release Notes {!isReadOnly && <span style={{ color: 'red' }}>*</span>}
     </Typography>
   )
@@ -70,7 +70,7 @@ export default function ReleaseForm({
       {!editable && (
         <Stack sx={{ width: '100%' }} justifyContent='center'>
           <Stack direction='row'>
-            <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+            <Typography fontWeight='bold'>Release name</Typography>
             {!editable && (
               <HelpPopover>
                 The release name is automatically generated using the model name and release semantic version
@@ -81,7 +81,7 @@ export default function ReleaseForm({
         </Stack>
       )}
       <Stack>
-        <Typography sx={{ fontWeight: 'bold' }}>
+        <Typography fontWeight='bold'>
           Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
         </Typography>
         {isReadOnly || isEdit ? (
@@ -115,7 +115,7 @@ export default function ReleaseForm({
       <Stack>
         {isReadOnly || isEdit ? (
           <>
-            <Typography sx={{ fontWeight: 'bold' }}>Minor Release</Typography>
+            <Typography fontWeight='bold'>Minor Release</Typography>
             <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
           </>
         ) : (
@@ -128,7 +128,7 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Typography sx={{ fontWeight: 'bold' }}>Artefacts</Typography>
+        <Typography fontWeight='bold'>Artefacts</Typography>
         <MultiFileInput
           fullWidth
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
@@ -140,7 +140,7 @@ export default function ReleaseForm({
         {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
       </Stack>
       <Stack>
-        <Typography sx={{ fontWeight: 'bold' }}>Images</Typography>
+        <Typography fontWeight='bold'>Images</Typography>
         <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>

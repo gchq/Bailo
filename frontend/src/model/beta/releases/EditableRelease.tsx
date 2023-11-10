@@ -104,7 +104,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
       <EditableFormHeading
         heading={
           <div>
-            <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
+            <Typography fontWeight='bold'>Release name</Typography>
             <Typography>{`${model.name} - ${release.semver}`}</Typography>
           </div>
         }
