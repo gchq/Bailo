@@ -54,12 +54,14 @@ export function useGetReviewRequestsForModel({
     },
     ErrorInfo
   >(
-    `/api/v2/reviews?${qs.stringify({
-      modelId,
-      active: isActive,
-      ...(semver && { semver }),
-      ...(accessRequestId && { accessRequestId }),
-    })}`,
+    (modelId && semver) || (modelId && accessRequestId)
+      ? `/api/v2/reviews?${qs.stringify({
+          modelId,
+          active: isActive,
+          ...(semver && { semver }),
+          ...(accessRequestId && { accessRequestId }),
+        })}`
+      : null,
     fetcher,
   )
 

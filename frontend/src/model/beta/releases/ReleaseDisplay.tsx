@@ -92,9 +92,11 @@ export default function ReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Typography component='h2' variant='h6' color='primary'>
-                  {modelId} - {release.semver}
-                </Typography>
+                <Link href={`/beta/model/${modelId}/release/${release.semver}`}>
+                  <Typography component='h2' variant='h6' color='primary'>
+                    {modelId} - {release.semver}
+                  </Typography>
+                </Link>
                 {latestVersionAdornment()}
               </Stack>
               <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
@@ -108,7 +110,7 @@ export default function ReleaseDisplay({
               </Typography>
               on
               <Typography variant='caption' fontWeight='bold'>
-                {` ${formatDateString(release.createdAt)} `}
+                {` ${formatDateString(release.createdAt)}`}
               </Typography>
             </Typography>
             <Markdown>{release.notes}</Markdown>

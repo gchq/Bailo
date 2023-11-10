@@ -1,8 +1,8 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Typography } from '@mui/material'
 import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import EditableFormHeading from 'src/Form/beta/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetSchema } from '../../../../actions/schema'
@@ -10,7 +10,7 @@ import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { AccessRequestInterface, SplitSchemaNoRender } from '../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
-import ModelCardForm from '../../../Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../MessageAlert'
 
 type EditableAccessRequestFormProps = {
@@ -19,25 +19,27 @@ type EditableAccessRequestFormProps = {
 
 export default function EditableAccessRequestForm({ accessRequest }: EditableAccessRequestFormProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [errorText, setErrorText] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-  const theme = useTheme()
 
   async function handleSubmit() {
     if (schema) {
+      setIsLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
       if (!res.ok) {
-        setErrorText(await getErrorMessage(res))
+        setErrorMessage(await getErrorMessage(res))
       } else {
+        setIsLoading(false)
         setIsEdit(false)
-        setErrorText('')
+        setErrorMessage('')
         mutateAccessRequest()
       }
     }
@@ -52,6 +54,10 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
       setSplitSchema({ reference: schema.id, steps })
     }
   }, [accessRequest.metadata, schema])
+
+  function handleEdit() {
+    setIsEdit(true)
+  }
 
   function handleCancel() {
     setIsEdit(false)
@@ -73,49 +79,27 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
+
   return (
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
       <Box sx={{ py: 1 }}>
-        <Stack
-          direction={{ sx: 'column', sm: 'row' }}
-          justifyContent={{ sx: 'center', sm: 'space-between' }}
-          alignItems='center'
-          sx={{ pb: 2 }}
-          spacing={2}
-        >
-          <div>
-            <Typography fontWeight='bold'>Schema</Typography>
-            <Typography>{schema?.name}</Typography>
-          </div>
-          {!isEdit && (
-            <Button variant='outlined' onClick={() => setIsEdit(!isEdit)} sx={{ mb: { xs: 2 } }}>
-              Edit Access Request
-            </Button>
-          )}
-          {isEdit && (
-            <Stack>
-              <Stack
-                direction='row'
-                spacing={1}
-                justifyContent='flex-end'
-                divider={<Divider orientation='vertical' flexItem />}
-                sx={{ mb: { xs: 2 } }}
-              >
-                <Button variant='outlined' onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button variant='contained' onClick={handleSubmit}>
-                  Save
-                </Button>
-              </Stack>
-              <Typography variant='caption' color={theme.palette.error.main}>
-                {errorText}
-              </Typography>
-            </Stack>
-          )}
-        </Stack>
-        <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <EditableFormHeading
+          heading={
+            <div>
+              <Typography fontWeight='bold'>Schema</Typography>
+              <Typography>{schema?.name}</Typography>
+            </div>
+          }
+          editButtonText='Edit Access Request'
+          isEdit={isEdit}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          errorMessage={errorMessage}
+        />
+        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
     </>
   )

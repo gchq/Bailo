@@ -12,7 +12,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
   const [latestRelease, setLatestRelease] = useState<string>('')
   const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
-  const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
 
   const releaseDisplays = useMemo(
     () =>
@@ -44,12 +44,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {releaseDisplays}
       </Stack>
-      <DraftNewReleaseDialog
-        open={openDraftNewRelease}
-        handleClose={handleDraftNewReleaseClose}
-        model={model}
-        mutateReleases={mutateReleases}
-      />
+      <DraftNewReleaseDialog open={openDraftNewRelease} onClose={handleDraftNewReleaseClose} model={model} />
     </Box>
   )
 }
