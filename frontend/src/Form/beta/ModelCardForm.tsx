@@ -1,8 +1,10 @@
+import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import {
   Box,
   Button,
   Divider,
+  Grid,
   IconButton,
   List,
   ListItem,
@@ -22,6 +24,41 @@ import { setStepState } from '../../../utils/beta/formUtils'
 import { widgets } from '../../../utils/formUtils'
 import ValidationErrorIcon from '../../model/beta/common/ValidationErrorIcon'
 import Nothing from '../../MuiForms/Nothing'
+
+function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
+  return (
+    <div>
+      <Typography fontWeight='bold' variant='h5' component='h3'>
+        {props.title}
+      </Typography>
+      {props.items.map((element) => (
+        <>
+          <Grid key={element.key} container spacing={2}>
+            <Grid item xs={11}>
+              <Box>{element.children}</Box>
+            </Grid>
+            <Grid item xs={1}>
+              {props.formContext.editMode && (
+                <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
+                  <RemoveIcon color='error' />
+                </IconButton>
+              )}
+            </Grid>
+          </Grid>
+        </>
+      ))}
+      {props.canAdd && props.formContext.editMode && (
+        <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
+          Add Item
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function DescriptionFieldTemplate() {
+  return <></>
+}
 
 // TODO - add validation BAI-866
 export default function ModelCardForm({
@@ -59,32 +96,6 @@ export default function ModelCardForm({
     if (form.schema.title === currentStep.schema.title) {
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
-  }
-
-  function DescriptionFieldTemplate() {
-    return <></>
-  }
-
-  function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
-    return (
-      <div>
-        {props.items.map((element) => (
-          <Stack direction='row' key={element.index} alignItems='flex-start' justifyContent='space-between' spacing={2}>
-            <Box>{element.children}</Box>
-            {canEdit && (
-              <IconButton size='small' type='button' onClick={props.onAddClick}>
-                <RemoveIcon color='error' />
-              </IconButton>
-            )}
-          </Stack>
-        ))}
-        {props.canAdd && canEdit && (
-          <Button size='small' type='button' onClick={props.onAddClick}>
-            Add Item
-          </Button>
-        )}
-      </div>
-    )
   }
 
   function handleListItemClick(index: number, formPageKey: string) {
