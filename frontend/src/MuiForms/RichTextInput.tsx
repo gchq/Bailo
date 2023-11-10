@@ -19,7 +19,7 @@ export default function RichTextInput({ label, value, formContext, onChange, req
   if (!formContext.editMode) {
     return (
       <>
-        <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+        <Typography fontWeight='bold'>{label}</Typography>
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
         ) : (
@@ -42,7 +42,7 @@ export default function RichTextInput({ label, value, formContext, onChange, req
       onChange={onChange}
       textareaProps={{ disabled: disabled }}
       label={
-        <Typography sx={{ fontWeight: 'bold' }}>
+        <Typography fontWeight='bold'>
           {label}
           {required && <span style={{ color: 'red' }}>{' *'}</span>}
         </Typography>

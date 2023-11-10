@@ -11,11 +11,11 @@ import Loading from '../../../common/Loading'
 import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
-import CodeLine from '../../../model/beta/registry/CodeLine'
+import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
-export default function ModelReleaseDisplay({
+export default function ReleaseDisplay({
   modelId,
   release,
   latestRelease,
@@ -75,7 +75,7 @@ export default function ModelReleaseDisplay({
             borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 2,
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
@@ -92,9 +92,11 @@ export default function ModelReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Typography component='h2' variant='h6' color='primary'>
-                  {modelId} - {release.semver}
-                </Typography>
+                <Link href={`/beta/model/${modelId}/release/${release.semver}`}>
+                  <Typography component='h2' variant='h6' color='primary'>
+                    {modelId} - {release.semver}
+                  </Typography>
+                </Link>
                 {latestVersionAdornment()}
               </Stack>
               <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
@@ -108,7 +110,7 @@ export default function ModelReleaseDisplay({
               </Typography>
               on
               <Typography variant='caption' fontWeight='bold'>
-                {` ${formatDateString(release.createdAt)} `}
+                {` ${formatDateString(release.createdAt)}`}
               </Typography>
             </Typography>
             <Markdown>{release.notes}</Markdown>

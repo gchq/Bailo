@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
+import { Box, Divider, Grid, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Link from 'src/Link'
 import { AccessRequestInterface } from 'types/interfaces'
@@ -54,24 +54,16 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 2,
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
-            <Stack
-              direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
-              spacing={1}
-            >
+            <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>
                 {accessRequest.metadata.overview.name}
               </Typography>
-              <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
-                <Button>View Access Request</Button>
-              </Link>
-            </Stack>
+            </Link>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
                 Created by
@@ -105,7 +97,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                   pb: 2,
                   width: '100%',
                   border: `1px solid ${theme.palette.primary.main}`,
-                  borderRadius: 4,
+                  borderRadius: 2,
                 }}
               >
                 <Typography variant='subtitle2' component='h3' mb={1}>
