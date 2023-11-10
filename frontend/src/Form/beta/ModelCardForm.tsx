@@ -1,6 +1,18 @@
-import { Divider, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
+import RemoveIcon from '@mui/icons-material/Remove'
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  Stack,
+  Stepper,
+  Typography,
+} from '@mui/material'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { ArrayFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
@@ -51,6 +63,28 @@ export default function ModelCardForm({
 
   function DescriptionFieldTemplate() {
     return <></>
+  }
+
+  function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
+    return (
+      <div>
+        {props.items.map((element) => (
+          <Stack direction='row' key={element.index} alignItems='flex-start' justifyContent='space-between' spacing={2}>
+            <Box>{element.children}</Box>
+            {canEdit && (
+              <IconButton size='small' type='button' onClick={props.onAddClick}>
+                <RemoveIcon color='error' />
+              </IconButton>
+            )}
+          </Stack>
+        ))}
+        {props.canAdd && canEdit && (
+          <Button size='small' type='button' onClick={props.onAddClick}>
+            Add Item
+          </Button>
+        )}
+      </div>
+    )
   }
 
   function handleListItemClick(index: number, formPageKey: string) {
@@ -110,8 +144,9 @@ export default function ModelCardForm({
           !canEdit
             ? {
                 DescriptionFieldTemplate,
+                ArrayFieldTemplate,
               }
-            : {}
+            : { ArrayFieldTemplate }
         }
       >
         {/* eslint-disable-next-line react/jsx-no-useless-fragment */}

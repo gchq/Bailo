@@ -55,10 +55,6 @@
                 "title": "Value name",
                 "type": "string",
                 "widget": "customTextInput"
-              },
-              "arrQuestion2": {
-                "title": "Vvalue",
-                "type": "number"
               }
             }
           }
