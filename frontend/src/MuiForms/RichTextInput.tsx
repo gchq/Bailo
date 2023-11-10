@@ -16,7 +16,7 @@ interface RichTextInputProps {
 export default function RichTextInput({ label, value, formContext, onChange, required, disabled }: RichTextInputProps) {
   const theme = useTheme()
 
-  if (formContext.editMode === false) {
+  if (!formContext.editMode) {
     return (
       <>
         <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
