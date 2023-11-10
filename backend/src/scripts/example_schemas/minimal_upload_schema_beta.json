@@ -36,14 +36,12 @@
         "questionOne": {
           "title": "Question one",
           "description": "This is a question",
-          "type": "string",
-          "widget": "customTextInput"
+          "type": "string"
         },
         "questionTwo": {
           "title": "Question two",
           "description": "This is another question",
-          "type": "string",
-          "widget": "customTextInput"
+          "type": "string"
         }
       },
       "required": [],
