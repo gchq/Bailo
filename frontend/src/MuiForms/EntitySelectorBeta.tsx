@@ -1,6 +1,8 @@
-import { Chip } from '@mui/material'
+import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { FormContextType } from '@rjsf/utils'
 import { KeyboardEvent, SyntheticEvent, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
@@ -12,6 +14,7 @@ interface EntitySelectorBetaProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
+  formContext?: FormContextType
 }
 
 export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
@@ -19,13 +22,15 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [open, setOpen] = useState(false)
 
+  const theme = useTheme()
+
   const entities = useMemo(() => {
     if (!users) return []
 
     return users.map((user) => user.id)
   }, [users])
 
-  const { onChange, value: currentValue, required, label } = props
+  const { onChange, value: currentValue, required, label, formContext } = props
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange(newValues)
@@ -38,10 +43,11 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      {currentUser && (
+      {currentUser && formContext && formContext.editMode && (
         <Autocomplete
           multiple
           open={open}
+          size='small'
           onOpen={() => {
             setOpen(true)
           }}
@@ -56,13 +62,6 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           onChange={handleChange}
           options={entities || []}
           loading={isLoading}
-          getOptionDisabled={(option) => option === currentUser.id}
-          renderTags={(tagValue, getTagProps) =>
-            tagValue.map((option, index) => (
-              // eslint-disable-next-line react/jsx-key
-              <Chip label={option} {...getTagProps({ index })} disabled={option === currentUser.id} />
-            ))
-          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -75,6 +74,28 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
             />
           )}
         />
+      )}
+      {formContext && !formContext.editMode && (
+        <>
+          <Typography fontWeight='bold'>{label}</Typography>
+          {currentValue.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((entity) => (
+                <Chip label={entity} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        </>
       )}
     </>
   )

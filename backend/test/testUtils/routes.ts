@@ -40,3 +40,9 @@ export function testGet(path: string) {
 
   return request.get(path)
 }
+
+export function testPut(path: string, fixture: Fixture) {
+  const request = supertest(server)
+
+  return request.put(path).send(fixture.body as object)
+}

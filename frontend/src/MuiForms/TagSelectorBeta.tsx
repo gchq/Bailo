@@ -20,7 +20,7 @@ export default function TagSelector({ onChange, value, label, formContext }: Tag
     <>
       {formContext && formContext.editMode && (
         <>
-          <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+          <Typography fontWeight='bold'>{label}</Typography>
           <Autocomplete
             multiple
             isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
@@ -60,7 +60,7 @@ export default function TagSelector({ onChange, value, label, formContext }: Tag
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+          <Typography fontWeight='bold'>{label}</Typography>
           {value.length === 0 && (
             <Typography
               sx={{

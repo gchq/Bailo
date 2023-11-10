@@ -4,6 +4,7 @@ import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import Link from 'src/Link'
 
 import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
@@ -31,13 +32,11 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-            <Button
-              sx={{ width: 'fit-content' }}
-              startIcon={<ArrowBack />}
-              onClick={() => router.push(`/beta/model/${modelId}`)}
-            >
-              Back to model
-            </Button>
+            <Link href={`/beta/model/${modelId}`}>
+              <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                Back to model
+              </Button>
+            </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
               <Typography variant='h6' color='primary'>
                 Choose a schema
