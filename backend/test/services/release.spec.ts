@@ -44,7 +44,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
 
-  const model: any = vi.fn(() => obj)
+  const model: any = vi.fn((params) => ({ ...obj, ...params }))
   Object.assign(model, obj)
 
   return model
@@ -62,11 +62,21 @@ describe('services > release', () => {
   test('createRelease > simple', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
 
-    await createRelease({} as any, {} as any)
+    await createRelease({} as any, { minor: false } as any)
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
     expect(mockReviewService.createReleaseReviews).toBeCalled()
+  })
+
+  test('createRelease > minor release', async () => {
+    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+
+    await createRelease({} as any, { minor: true } as any)
+
+    expect(releaseModelMocks.save).toBeCalled()
+    expect(releaseModelMocks).toBeCalled()
+    expect(mockReviewService.createReleaseReviews).not.toBeCalled()
   })
 
   test('createRelease > release with image', async () => {

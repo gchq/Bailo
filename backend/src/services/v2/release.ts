@@ -96,11 +96,13 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     throw error
   }
 
-  try {
-    await createReleaseReviews(model, release)
-  } catch (error) {
-    // Transactions here would solve this issue.
-    log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+  if (!release.minor) {
+    try {
+      await createReleaseReviews(model, release)
+    } catch (error) {
+      // Transactions here would solve this issue.
+      log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+    }
   }
 
   return release
