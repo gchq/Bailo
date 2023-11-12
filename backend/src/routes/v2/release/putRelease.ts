@@ -13,12 +13,7 @@ export const putReleaseSchema = z.object({
     semver: z.string(),
   }),
   body: z.object({
-    modelCardVersion: z.coerce.number(),
-
-    semver: z.string(),
     notes: z.string(),
-
-    minor: z.coerce.boolean().optional().default(false),
     draft: z.coerce.boolean().optional().default(false),
 
     fileIds: z.array(z.string()),

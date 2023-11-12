@@ -19,6 +19,7 @@ export const ReleaseAction = {
   Create: 'create',
   View: 'view',
   Delete: 'delete',
+  Update: 'update',
 }
 export type ReleaseActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
 
