@@ -48,6 +48,7 @@ export type FileActionKeys = (typeof FileAction)[keyof typeof FileAction]
 export const ImageAction = {
   Pull: 'pull',
   Push: 'push',
+  List: 'list',
 }
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 

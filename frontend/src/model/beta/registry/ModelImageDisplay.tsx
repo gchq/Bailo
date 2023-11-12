@@ -42,7 +42,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
           borderStyle: 'solid',
           borderColor: theme.palette.primary.main,
           width: '100%',
-          borderRadius: 4,
+          borderRadius: 2,
           p: 2,
         }}
       >

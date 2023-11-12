@@ -1,3 +1,5 @@
+import semver from 'semver'
+
 export const toTitleCase = (value: string): string =>
   value
     .split(' ')
@@ -6,4 +8,8 @@ export const toTitleCase = (value: string): string =>
 
 export const plural = (value: number, phrase: string) => {
   return `${value} ${phrase}${value === 1 ? '' : 's'}`
+}
+
+export const isValidSemver = (semverInput: string) => {
+  return !!semver.valid(semverInput)
 }

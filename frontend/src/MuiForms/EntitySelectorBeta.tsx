@@ -77,7 +77,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
+          <Typography fontWeight='bold'>{label}</Typography>
           {currentValue.length === 0 && (
             <Typography
               sx={{
