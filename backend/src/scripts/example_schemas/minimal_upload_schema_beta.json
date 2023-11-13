@@ -42,6 +42,20 @@
           "title": "Question two",
           "description": "This is another question",
           "type": "string"
+        },
+        "arrayQuestion": {
+          "title": "Datasets",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "title": "Dataset",
+            "properties": {
+              "arrQuestion1": {
+                "title": "Value name",
+                "type": "string"
+              }
+            }
+          }
         }
       },
       "required": [],
