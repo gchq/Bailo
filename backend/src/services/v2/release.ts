@@ -124,7 +124,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Create))) {
+  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update))) {
     throw Forbidden(`You do not have permission to create a release on this model.`, {
       userDn: user.dn,
       modelId: modelId,
