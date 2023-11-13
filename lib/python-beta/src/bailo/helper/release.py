@@ -34,7 +34,7 @@ class Release:
         model_id: str,
         version: Version | str,
         model_card_version: float,
-        notes: str,
+        notes: str = "",
         files: list[str] = [],
         images: list[str] = [],
         release_reviews: list[Review] = [],

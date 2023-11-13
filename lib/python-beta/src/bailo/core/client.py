@@ -169,8 +169,8 @@ class Client:
         model_card_version: float,
         release_version: str,
         notes: str,
-        files: list[str],
-        images: list[str],
+        files_ids: list[str] = None,
+        images: list[str] = None,
         minor: bool | None = False,
         draft: bool | None = False,
     ):
@@ -193,7 +193,7 @@ class Client:
                 "notes": notes,
                 "minor": minor,
                 "draft": draft,
-                "fileIds": files,
+                "fileIds": files_ids,
                 "images": images
             })
         return self.agent.post(
@@ -387,10 +387,10 @@ class Client:
     def post_review(
         self,
         model_id: str,
-        version: str,
         role: str,
         decision: str,
-        comment: str | None = None,
+        version: str | None = None,
+        comment: str | None = None
     ):
         """
         Creates a review for a release

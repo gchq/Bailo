@@ -30,8 +30,8 @@ class Review:
         model_id: str,
         kind: SchemaKind | str,
         role: Role | str,
-        version: Version | str,
-        response: list[ReviewResponse] = [],
+        responses: list[ReviewResponse] = [],
+        version: Version | str = None,
         created_at: datetime.time = None,
         updated_at: datetime.time = None
     ) -> None:
@@ -44,7 +44,7 @@ class Review:
         self.role = Role(role)
         self.kind = SchemaKind(kind)
 
-        self.response = response
+        self.responses = responses
         self.created_at = created_at
         self.updated_at = updated_at
 
@@ -53,18 +53,18 @@ class Review:
         cls,
         client: Client,
         model_id: str,
-        version: Version | str,
         role: Role | str,
         decision: ReviewDecision | str,
+        version: Version | str = None,
         comment: str = None
     ) -> Any:
         """ Creates a review within Bailo
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID
-        :param version: The semantic version of the release
         :param role: The role of the review made
         :param decision: Either approve or request changes
+        :param version: The semantic version of the release
         :param comment: A comment to go with the review
         """
 
