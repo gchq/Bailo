@@ -2,31 +2,24 @@ import { Optional } from 'utility-types'
 
 import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { ModelInterface } from '../../models/v2/Model.js'
+import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
-import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import { isMongoServerError } from '../../utils/v2/mongo.js'
 import { getFileById } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 
-export type CreateReleaseParams = Optional<
-  Pick<
-    ReleaseInterface,
-    'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
-  >,
-  'modelCardVersion'
->
-export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
-  if (releaseParams.images) {
-    const registryImages = await listModelImages(user, releaseParams.modelId)
+async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
+  if (release.images) {
+    const registryImages = await listModelImages(user, release.modelId)
 
     const initialValue: ImageRef[] = []
-    const missingImages = releaseParams.images.reduce((acc, releaseImage) => {
+    const missingImages = release.images.reduce((acc, releaseImage) => {
       if (
         !registryImages.some(
           (registryImage) =>
@@ -47,10 +40,8 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     }
   }
 
-  const model = await getModelById(user, releaseParams.modelId)
-
-  if (releaseParams.fileIds) {
-    for (const fileId of releaseParams.fileIds) {
+  if (release.fileIds) {
+    for (const fileId of release.fileIds) {
       const file = await getFileById(user, fileId)
 
       if (file.modelId !== model.id) {
@@ -65,6 +56,17 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
       }
     }
   }
+}
+
+export type CreateReleaseParams = Optional<
+  Pick<
+    ReleaseInterface,
+    'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+  >,
+  'modelCardVersion'
+>
+export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
+  const model = await getModelById(user, releaseParams.modelId)
 
   if (releaseParams.modelCardVersion) {
     // Ensure that the requested model card version exists.
@@ -82,6 +84,8 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     ...releaseParams,
   })
 
+  await validateRelease(user, model, release)
+
   if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Create))) {
     throw Forbidden(`You do not have permission to create a release on this model.`, {
       userDn: user.dn,
@@ -92,7 +96,13 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   try {
     await release.save()
   } catch (error) {
-    handleDuplicateKeys(error)
+    if (isMongoServerError(error) && error.code === 11000) {
+      throw BadReq(`A release with this semver already exists for this model.`, {
+        modelId: releaseParams.modelId,
+        semver: releaseParams.semver,
+      })
+    }
+
     throw error
   }
 
@@ -106,6 +116,30 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   }
 
   return release
+}
+
+export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
+export async function updateRelease(user: UserDoc, modelId: string, semver: string, delta: UpdateReleaseParams) {
+  const model = await getModelById(user, modelId)
+  const release = await getReleaseBySemver(user, modelId, semver)
+
+  Object.assign(release, delta)
+  await validateRelease(user, model, release)
+
+  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update))) {
+    throw Forbidden(`You do not have permission to create a release on this model.`, {
+      userDn: user.dn,
+      modelId: modelId,
+    })
+  }
+
+  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver }, { $set: release })
+
+  if (!updatedRelease) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  return updatedRelease
 }
 
 export async function getModelReleases(

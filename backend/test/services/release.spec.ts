@@ -1,6 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { createRelease, deleteRelease, getModelReleases, getReleaseBySemver } from '../../src/services/v2/release.js'
+import {
+  createRelease,
+  deleteRelease,
+  getModelReleases,
+  getReleaseBySemver,
+  updateRelease,
+} from '../../src/services/v2/release.js'
 
 const arrayAsyncFilter = vi.hoisted(() => ({
   asyncFilter: vi.fn(() => []),
@@ -43,6 +49,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
 
   const model: any = vi.fn((params) => ({ ...obj, ...params }))
   Object.assign(model, obj)
@@ -105,6 +112,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
+          modelCardVersion: 999,
           images: [
             { repository: 'fake', name: 'fake', tag: 'fake1' },
             { repository: 'fake', name: 'fake', tag: 'fake2' },
@@ -125,6 +133,7 @@ describe('services > release', () => {
       createRelease(
         {} as any,
         {
+          modelCardVersion: 999,
           fileIds: ['test'],
         } as any,
       ),
@@ -156,6 +165,33 @@ describe('services > release', () => {
     )
 
     expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
+  test('updateRelease > bad authorisation', async () => {
+    authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
+    expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
+      /^You do not have permission/,
+    )
+  })
+
+  test('updateRelease > release with bad files', async () => {
+    fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
+    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+
+    expect(() =>
+      updateRelease({} as any, 'model-id', 'v1.0.0', {
+        fileIds: ['test'],
+      } as any),
+    ).rejects.toThrowError(/^The file 'test' comes from the model/)
+  })
+
+  test('updateRelease > success', async () => {
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    releaseModelMocks.findOne.mockResolvedValue({})
+
+    await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
+
+    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
   })
 
   test('getModelReleases > good', async () => {
