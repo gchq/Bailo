@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* temporary until user roles are re-implemented */
+
 import AdminIcon from '@mui/icons-material/AdminPanelSettings'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
@@ -23,7 +26,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, useEffect, useState } from 'react'
 
 import { getReviewCount } from '../../actions/review'
-import { User } from '../../types/types'
+import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import useNotification from '../common/Snackbar'
 import Link from '../Link'
@@ -210,7 +213,8 @@ export default function SideNavigation({
               </Link>
             </ListItem>
           </StyledList>
-          {currentUser && currentUser.roles.includes('admin') && (
+          {/* TODO update v2 user type to include roles */}
+          {/* {currentUser && currentUser.roles.includes('admin') && (
             <>
               <Divider />
               <StyledList>
@@ -249,7 +253,7 @@ export default function SideNavigation({
                 </ListItem>
               </StyledList>
             </>
-          )}
+          )} */}
         </>
       )}
       <Divider />

@@ -30,7 +30,7 @@ export default function NewAccessRequest() {
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const currentUserId = useMemo(() => (currentUser ? currentUser?.id : ''), [currentUser])
+  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
   useEffect(() => {
     if (!model || !schema) return
