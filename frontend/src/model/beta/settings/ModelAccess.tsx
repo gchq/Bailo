@@ -47,9 +47,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const entities = useMemo(() => {
     if (!users) return []
 
-    const usrGroup = users.find((usrGroup) => usrGroup.kind === 'user')
-    if (usrGroup) {
-      return usrGroup.entities
+    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (userGroup) {
+      return userGroup.entities
     } else {
       return []
     }
