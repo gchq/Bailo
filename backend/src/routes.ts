@@ -76,6 +76,7 @@ import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
+import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
@@ -216,6 +217,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+  server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 

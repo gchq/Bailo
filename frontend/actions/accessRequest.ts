@@ -34,7 +34,7 @@ export function useGetAccessRequest(modelId: string | undefined, accessRequestId
   }
 }
 
-export function postAccessRequest(modelId: string, schemaId: string, form: any) {
+export function postAccessRequest(modelId: string, schemaId: string, form: Record<string, unknown>) {
   return fetch(`/api/v2/model/${modelId}/access-requests`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -42,7 +42,7 @@ export function postAccessRequest(modelId: string, schemaId: string, form: any) 
   })
 }
 
-export function patchAccessRequest(modelId: string, accessRequestId: string, form: any) {
+export function patchAccessRequest(modelId: string, accessRequestId: string, form: Record<string, unknown>) {
   return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

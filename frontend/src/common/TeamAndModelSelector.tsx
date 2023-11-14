@@ -78,7 +78,7 @@ function Selector({ data, setData, label, value, disabled = false, loading = fal
   return (
     <FormControl sx={{ width: '100%' }}>
       <Stack>
-        <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={`${label}-input`}>
+        <Typography component='label' fontWeight='bold' htmlFor={`${label}-input`}>
           {label} <span style={{ color: theme.palette.primary.main }}>*</span>
         </Typography>
         <Autocomplete

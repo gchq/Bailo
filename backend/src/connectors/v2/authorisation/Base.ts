@@ -19,6 +19,7 @@ export const ReleaseAction = {
   Create: 'create',
   View: 'view',
   Delete: 'delete',
+  Update: 'update',
 }
 export type ReleaseActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
 
@@ -47,6 +48,7 @@ export type FileActionKeys = (typeof FileAction)[keyof typeof FileAction]
 export const ImageAction = {
   Pull: 'pull',
   Push: 'push',
+  List: 'list',
 }
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 

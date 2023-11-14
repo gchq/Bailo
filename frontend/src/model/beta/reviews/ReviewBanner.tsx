@@ -15,7 +15,7 @@ import { postReviewResponse } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
 import ReviewWithComment, { ResponseTypeKeys } from '../../../common/ReviewWithComment'
 
-type ReleaseOrAccessRequest =
+type ReviewBannerProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
@@ -25,11 +25,7 @@ type ReleaseOrAccessRequest =
       accessRequest: AccessRequestInterface
     }
 
-type ReviewBannerProps = {
-  square?: boolean
-} & ReleaseOrAccessRequest
-
-export default function ReviewBanner({ release, accessRequest, square = false }: ReviewBannerProps) {
+export default function ReviewBanner({ release, accessRequest }: ReviewBannerProps) {
   const theme = useTheme()
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [postResponseError, setPostResponseError] = useState('')
@@ -105,7 +101,7 @@ export default function ReviewBanner({ release, accessRequest, square = false }:
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: theme.palette.primary.main,
-        ...(!square && { borderRadius: '13px 13px 0px 0px' }),
+        borderRadius: '4px 4px 0px 0px',
       }}
     >
       <Grid container spacing={2} alignItems='center' sx={{ px: 2 }}>
