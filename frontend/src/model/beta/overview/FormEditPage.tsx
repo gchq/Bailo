@@ -39,9 +39,9 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
-        setLoading(false)
         mutateModelCardRevisions()
       }
+      setLoading(false)
     }
   }
 
