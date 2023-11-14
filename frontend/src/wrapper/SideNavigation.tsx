@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* temporary until user roles are re-implemented */
-
 import AdminIcon from '@mui/icons-material/AdminPanelSettings'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
@@ -213,8 +210,8 @@ export default function SideNavigation({
               </Link>
             </ListItem>
           </StyledList>
-          {/* TODO update v2 user type to include roles */}
-          {/* {currentUser && currentUser.roles.includes('admin') && (
+          {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
+          {currentUser && (
             <>
               <Divider />
               <StyledList>
@@ -253,7 +250,7 @@ export default function SideNavigation({
                 </ListItem>
               </StyledList>
             </>
-          )} */}
+          )}
         </>
       )}
       <Divider />
