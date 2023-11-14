@@ -23,6 +23,8 @@ export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'descri
 export async function createModel(user: UserDoc, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
+  // TODO - Find team by teamId to check it's valid. Throw error if not found.
+
   const model = new Model({
     ...modelParams,
     id: modelId,
