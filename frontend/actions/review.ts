@@ -38,7 +38,7 @@ type SemverOrAccessRequestId =
     }
 
 type GetReviewRequestsForModelQuery = {
-  modelId: ModelInterface['id']
+  modelId?: ModelInterface['id']
   isActive: boolean
 } & SemverOrAccessRequestId
 
@@ -54,12 +54,14 @@ export function useGetReviewRequestsForModel({
     },
     ErrorInfo
   >(
-    `/api/v2/reviews?${qs.stringify({
-      modelId,
-      active: isActive,
-      ...(semver && { semver }),
-      ...(accessRequestId && { accessRequestId }),
-    })}`,
+    (modelId && semver) || (modelId && accessRequestId)
+      ? `/api/v2/reviews?${qs.stringify({
+          modelId,
+          active: isActive,
+          ...(semver && { semver }),
+          ...(accessRequestId && { accessRequestId }),
+        })}`
+      : null,
     fetcher,
   )
 

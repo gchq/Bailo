@@ -13,6 +13,11 @@ export const postModelSchema = z.object({
     teamId: z.string(),
     description: z.string(),
     visibility: z.nativeEnum(ModelVisibility).optional().default(ModelVisibility.Public),
+    settings: z
+      .object({
+        ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+      })
+      .optional(),
   }),
 })
 

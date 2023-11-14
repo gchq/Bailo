@@ -61,7 +61,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
+          <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
@@ -73,7 +73,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
+          <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>

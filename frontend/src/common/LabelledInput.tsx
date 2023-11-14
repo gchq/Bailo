@@ -14,7 +14,7 @@ export default function LabelledInput({ label, htmlFor, children, required = fal
 
   return (
     <Stack width='100%'>
-      <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={htmlFor}>
+      <Typography component='label' fontWeight='bold' htmlFor={htmlFor}>
         {label}
         {required && (
           <Box

@@ -3,19 +3,19 @@ import { useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import Markdown from 'src/common/MarkdownRenderer'
-import CodeLine from 'src/model/beta/registry/CodeLine'
 import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
 import Loading from '../../../common/Loading'
+import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
+import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
-export default function ModelReleaseDisplay({
+export default function ReleaseDisplay({
   modelId,
   release,
   latestRelease,
@@ -75,7 +75,7 @@ export default function ModelReleaseDisplay({
             borderStyle: 'solid',
             borderColor: theme.palette.primary.main,
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 2,
           }}
         >
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
@@ -92,9 +92,11 @@ export default function ModelReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Typography component='h2' variant='h6' color='primary'>
-                  {modelId} - {release.semver}
-                </Typography>
+                <Link href={`/beta/model/${modelId}/release/${release.semver}`}>
+                  <Typography component='h2' variant='h6' color='primary'>
+                    {modelId} - {release.semver}
+                  </Typography>
+                </Link>
                 {latestVersionAdornment()}
               </Stack>
               <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
@@ -108,7 +110,7 @@ export default function ModelReleaseDisplay({
               </Typography>
               on
               <Typography variant='caption' fontWeight='bold'>
-                {` ${formatDateString(release.createdAt)} `}
+                {` ${formatDateString(release.createdAt)}`}
               </Typography>
             </Typography>
             <Markdown>{release.notes}</Markdown>
@@ -125,7 +127,7 @@ export default function ModelReleaseDisplay({
                       alignItems='center'
                       spacing={1}
                     >
-                      <Link href='/beta'>{file.name}</Link>
+                      <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`}>{file.name}</Link>
                       <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                     </Stack>
                   ))}

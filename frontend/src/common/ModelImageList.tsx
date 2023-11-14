@@ -1,8 +1,10 @@
+import { Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
-import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { ModelInterface } from 'types/v2/types'
+import { sortByNameAscending } from 'utils/arrayUtils'
 
 import { FlattenedModelImage } from '../../types/interfaces'
 import Loading from '../common/Loading'
@@ -11,16 +13,13 @@ import MessageAlert from '../MessageAlert'
 interface ModelImageListProps {
   model: ModelInterface
   value: FlattenedModelImage[]
-  setImages: Dispatch<SetStateAction<FlattenedModelImage[]>>
+  onChange: (value: FlattenedModelImage[]) => void
+  readOnly?: boolean
 }
 
-const sortByNameAscending = <T extends { name: string }>(a: T, b: T) => {
-  return a.name.localeCompare(b.name)
-}
-
-export default function ModelImageList({ model, value, setImages }: ModelImageListProps) {
-  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
+export default function ModelImageList({ model, value, onChange, readOnly = false }: ModelImageListProps) {
   const [flattenedImageList, setFlattenedImageList] = useState<FlattenedModelImage[]>([])
+  const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   useEffect(() => {
     const updatedImageList: FlattenedModelImage[] = []
@@ -38,8 +37,8 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
 
   const sortedImageList = useMemo(() => flattenedImageList.sort(sortByNameAscending), [flattenedImageList])
 
-  function handleChange(_event: SyntheticEvent<Element, Event>, FlattenedImageList: FlattenedModelImage[]) {
-    setImages(FlattenedImageList)
+  function handleChange(_event: SyntheticEvent<Element, Event>, flattenedImageList: FlattenedModelImage[]) {
+    onChange(flattenedImageList)
   }
 
   if (isModelImagesError) {
@@ -49,15 +48,21 @@ export default function ModelImageList({ model, value, setImages }: ModelImageLi
   return (
     <>
       {isModelImagesLoading && <Loading />}
-      <Autocomplete
-        multiple
-        onChange={handleChange}
-        getOptionLabel={(option) => option.tag}
-        groupBy={(option) => option.name}
-        options={sortedImageList}
-        value={value}
-        renderInput={(params) => <TextField {...params} size='small' value={flattenedImageList} />}
-      />
+      {readOnly ? (
+        sortedImageList.map((modelImage) => (
+          <Typography key={`${modelImage.repository}-${modelImage.name}`}>{modelImage.tag}</Typography>
+        ))
+      ) : (
+        <Autocomplete
+          multiple
+          onChange={handleChange}
+          getOptionLabel={(option) => option.tag}
+          groupBy={(option) => option.name}
+          options={sortedImageList}
+          value={value}
+          renderInput={(params) => <TextField {...params} size='small' value={flattenedImageList} />}
+        />
+      )}
     </>
   )
 }

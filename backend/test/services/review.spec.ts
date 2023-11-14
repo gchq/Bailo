@@ -40,6 +40,11 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
 
+const modelMock = vi.hoisted(() => ({
+  getModelById: vi.fn(),
+}))
+vi.mock('../../src/services/v2/model.js', async () => modelMock)
+
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
@@ -47,6 +52,11 @@ const logMock = vi.hoisted(() => ({
 vi.mock('../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
+
+const arrayUtilMock = vi.hoisted(() => ({
+  asyncFilter: vi.fn(),
+}))
+vi.mock('../../src/utils/v2/array.js', async () => arrayUtilMock)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
@@ -56,6 +66,7 @@ describe('services > review', () => {
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > not active', async () => {
@@ -63,6 +74,7 @@ describe('services > review', () => {
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > active reviews for a specific model', async () => {
@@ -70,6 +82,7 @@ describe('services > review', () => {
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > inactive reviews for a specific model', async () => {
@@ -77,6 +90,7 @@ describe('services > review', () => {
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {

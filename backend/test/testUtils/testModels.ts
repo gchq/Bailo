@@ -12,7 +12,7 @@ export const testModelSchema = {
   kind: SchemaKind.Model,
   jsonSchema: {
     properties: {
-      highLevelDetails: {
+      overview: {
         title: 'Overview',
         description: 'Summary of the model functionality.',
         type: 'object',
