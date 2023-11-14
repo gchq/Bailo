@@ -3,7 +3,7 @@ import useSWR from 'swr'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-interface EntityKind {
+interface EntityResults {
   kind: string
   entities: string[]
 }
@@ -11,7 +11,7 @@ interface EntityKind {
 export function useListUsers(q?: string) {
   const { data, error, mutate } = useSWR<
     {
-      results: EntityKind[]
+      results: EntityResults[]
     },
     ErrorInfo
   >(

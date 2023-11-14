@@ -29,9 +29,9 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const entities = useMemo(() => {
     if (!users) return []
 
-    const userKind = users.find((userGroup) => userGroup.kind === 'user')
-    if (userKind) {
-      return userKind.entities.map((entity) => entity.split(':')[1])
+    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (userGroup) {
+      return userGroup.entities.map((entity) => entity.split(':')[1])
     } else {
       return []
     }

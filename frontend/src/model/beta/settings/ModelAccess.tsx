@@ -47,10 +47,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const entities = useMemo(() => {
     if (!users) return []
 
-    const userKind = users.find((userGroup) => userGroup.kind === 'user')
-    if (userKind) {
-      // return userKind.entities.map((entity) => entity.split(':')[1])
-      return userKind.entities
+    const usrGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (usrGroup) {
+      return usrGroup.entities
     } else {
       return []
     }
@@ -103,7 +102,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             onClose={() => {
               setOpen(false)
             }}
-            // we might get a string or an object back
             isOptionEqualToValue={(option: string, value: string) => option === value}
             getOptionLabel={(option) => option.split(':')[1]}
             onChange={onUserChange}
