@@ -33,8 +33,8 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
-    setLoading(true)
     if (schema) {
+      setLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
