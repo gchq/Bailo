@@ -83,10 +83,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
       mutateReleases()
       mutateAccessRequests()
       setIsReviewOpen(false)
-      setLoading(false)
     } else {
       setPostResponseError('There was a problem submitting this review')
     }
+    setLoading(false)
   }
 
   return (

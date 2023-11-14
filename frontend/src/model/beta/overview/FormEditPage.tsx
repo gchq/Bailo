@@ -54,7 +54,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       }
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(false)
-      setLoading(false)
     }
   }
 

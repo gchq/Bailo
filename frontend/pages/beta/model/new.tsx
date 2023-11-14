@@ -52,9 +52,10 @@ export default function NewModel() {
 
     if (!response.ok) {
       const error = await getErrorMessage(response)
-      setLoading(false)
+
       return setErrorMessage(error)
     }
+    setLoading(false)
 
     const data = await response.json()
     router.push(`/beta/model/${data.model.id}`)

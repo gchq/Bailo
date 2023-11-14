@@ -63,7 +63,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     setLoading(true)
     const res = await patchModel(model.id, { collaborators: accessList })
     if (!res.ok) {
-      setLoading(false)
       const error = await getErrorMessage(res)
       return sendNotification({
         variant: 'error',
