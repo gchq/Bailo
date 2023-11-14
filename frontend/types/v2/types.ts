@@ -81,3 +81,7 @@ export interface FileInterface {
 export interface PostSimpleUpload {
   file: FileInterface
 }
+
+export interface User {
+  dn: string
+}

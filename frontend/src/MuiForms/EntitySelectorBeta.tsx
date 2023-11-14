@@ -18,6 +18,8 @@ interface EntitySelectorBetaProps {
 }
 
 export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
+  const { onChange, value: currentValue, required, label, formContext } = props
+
   const { users, isUsersLoading: isLoading } = useListUsers()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [open, setOpen] = useState(false)
@@ -27,10 +29,13 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const entities = useMemo(() => {
     if (!users) return []
 
-    return users.map((user) => user.id)
+    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (userGroup) {
+      return userGroup.entities.map((entity) => entity.split(':')[1])
+    } else {
+      return []
+    }
   }, [users])
-
-  const { onChange, value: currentValue, required, label, formContext } = props
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange(newValues)

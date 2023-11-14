@@ -1,30 +1,46 @@
+import qs from 'querystring'
 import useSWR from 'swr'
 
-import { User } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export function useListUsers() {
+interface EntityResults {
+  kind: string
+  entities: string[]
+}
+
+export function useListUsers(q?: string) {
   const { data, error, mutate } = useSWR<
     {
-      users: User[]
+      results: EntityResults[]
     },
     ErrorInfo
-  >(`/api/v1/users`, fetcher)
+  >(
+    `/api/v2/entities?${qs.stringify({
+      q,
+    })}`,
+    fetcher,
+  )
 
   return {
     mutateUsers: mutate,
-    users: data ? data.users : [],
+    users: data ? data.results : [],
     isUsersLoading: !error && !data,
     isUsersError: error,
   }
 }
 
+interface UserResponse {
+  user: {
+    dn: string
+  }
+}
+
 export function useGetCurrentUser() {
-  const { data, error, mutate } = useSWR<User, ErrorInfo>(`/api/v1/user`, fetcher)
+  const { data, error, mutate } = useSWR<UserResponse, ErrorInfo>(`/api/v2/entities/me`, fetcher)
 
   return {
     mutateCurrentUser: mutate,
-    currentUser: data || undefined,
+    currentUser: data?.user || undefined,
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
   }
