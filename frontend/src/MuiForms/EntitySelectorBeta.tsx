@@ -21,9 +21,9 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const { onChange, value: currentValue, required, label, formContext } = props
 
   const [open, setOpen] = useState(false)
-  const [userQuery, setUserQuery] = useState('')
+  const [userListQuery, setUserListQuery] = useState('')
 
-  const { users, isUsersLoading: isLoading } = useListUsers(userQuery)
+  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -43,9 +43,9 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     onChange(newValues)
   }
 
-  function handleInputChange(_event: SyntheticEvent<Element, Event>, value: string) {
-    setUserQuery(value)
-  }
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
