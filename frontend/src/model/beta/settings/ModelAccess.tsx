@@ -20,7 +20,6 @@ import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
-import Loading from '../../../common/Loading'
 import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
@@ -34,7 +33,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const [userListQuery, setUserListQuery] = useState('')
 
-  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersError } = useListUsers(userListQuery)
   const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
   const sendNotification = useNotification()
@@ -117,12 +116,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
                 label='Add a user or group to the model access list'
                 InputProps={{
                   ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {isUsersLoading && <Loading size={20} />}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
                 }}
               />
             )}

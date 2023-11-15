@@ -20,9 +20,11 @@ interface EntitySelectorBetaProps {
 export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const { onChange, value: currentValue, required, label, formContext } = props
 
-  const { users, isUsersLoading: isLoading } = useListUsers()
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [open, setOpen] = useState(false)
+  const [userQuery, setUserQuery] = useState('')
+
+  const { users, isUsersLoading: isLoading } = useListUsers(userQuery)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
 
@@ -37,8 +39,12 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     }
   }, [users])
 
-  const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
+  function handleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     onChange(newValues)
+  }
+
+  function handleInputChange(_event: SyntheticEvent<Element, Event>, value: string) {
+    setUserQuery(value)
   }
 
   if (isCurrentUserError) {
@@ -65,6 +71,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           getOptionLabel={(option) => option}
           value={currentValue || []}
           onChange={handleChange}
+          onInputChange={handleInputChange}
           options={entities || []}
           loading={isLoading}
           renderInput={(params) => (
