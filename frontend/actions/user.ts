@@ -8,16 +8,18 @@ interface EntityResults {
   entities: string[]
 }
 
-export function useListUsers(q?: string) {
+export function useListUsers(q: string) {
   const { data, error, mutate } = useSWR<
     {
       results: EntityResults[]
     },
     ErrorInfo
   >(
-    `/api/v2/entities?${qs.stringify({
-      q,
-    })}`,
+    q !== ''
+      ? `/api/v2/entities?${qs.stringify({
+          q,
+        })}`
+      : null,
     fetcher,
   )
 
