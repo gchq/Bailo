@@ -31,7 +31,8 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefacts, setArtefacts] = useState<FileWithMetadata[]>([])
+  const [artefacts, setArtefacts] = useState<File[]>([])
+  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -49,8 +50,14 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
     if (isValidSemver(semver)) {
       const fileIds: string[] = []
       for (const artefact of artefacts) {
-        console.log(artefact)
-        const postArtefactResponse = await postFile(artefact, model.id, artefact.file.name, artefact.file.type)
+        const artefactMetadata = artefactsMetadata.find((metadata) => metadata.fileName === artefact.name)
+        const postArtefactResponse = await postFile(
+          artefact,
+          model.id,
+          artefact.name,
+          artefact.type,
+          artefactMetadata?.metadata,
+        )
         if (postArtefactResponse.ok) {
           const res = await postArtefactResponse.json()
           fileIds.push(res.file._id)
@@ -62,28 +69,28 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
 
       setLoading(false)
 
-      // const release: CreateReleaseParams = {
-      //   modelId: model.id,
-      //   semver,
-      //   modelCardVersion: model.card.version,
-      //   notes: releaseNotes,
-      //   minor: isMinorRelease,
-      //   fileIds: fileIds,
-      //   images: imageList,
-      // }
+      const release: CreateReleaseParams = {
+        modelId: model.id,
+        semver,
+        modelCardVersion: model.card.version,
+        notes: releaseNotes,
+        minor: isMinorRelease,
+        fileIds: fileIds,
+        images: imageList,
+      }
 
-      // const response = await postRelease(release)
+      const response = await postRelease(release)
 
-      // if (!response.ok) {
-      //   const error = await getErrorMessage(response)
-      //   setLoading(false)
-      //   return setErrorMessage(error)
-      // }
+      if (!response.ok) {
+        const error = await getErrorMessage(response)
+        setLoading(false)
+        return setErrorMessage(error)
+      }
 
-      // clearFormData()
-      // setLoading(false)
-      // mutateReleases()
-      // onClose()
+      clearFormData()
+      setLoading(false)
+      mutateReleases()
+      onClose()
     }
   }
 
@@ -97,6 +104,7 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
     setReleaseNotes('')
     setIsMinorRelease(false)
     setArtefacts([])
+    setArtefactsMetadata([])
     setImageList([])
     setErrorMessage('')
   }
@@ -126,6 +134,8 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
               onReleaseNotesChange={(value) => setReleaseNotes(value)}
               onMinorReleaseChange={(value) => setIsMinorRelease(value)}
               onArtefactsChange={(value) => setArtefacts(value)}
+              artefactsMetadata={artefactsMetadata}
+              onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
               onImageListChange={(value) => setImageList(value)}
             />
           </Stack>

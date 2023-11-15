@@ -1,6 +1,5 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { FileWithMetadata } from 'types/interfaces'
 import { ReleaseInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
@@ -60,15 +59,23 @@ export function putRelease(release: UpdateReleaseParams) {
   })
 }
 
-export async function postFile(artefact: FileWithMetadata, modelId: string, name: string, mime: string) {
+export async function postFile(
+  artefact: File,
+  modelId: string,
+  name: string,
+  mime: string,
+  metadata?: string | undefined,
+) {
   return fetch(
-    `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}?${qs.stringify({
-      metadata: artefact.metadata,
-    })}`,
+    metadata
+      ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}?${qs.stringify({
+          metadata,
+        })}`
+      : `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`,
     {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: artefact.file,
+      body: artefact,
     },
   )
 }

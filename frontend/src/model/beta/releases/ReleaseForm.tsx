@@ -14,7 +14,7 @@ type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  artefacts: FileWithMetadata[]
+  artefacts: File[]
   imageList: FlattenedModelImage[]
 }
 
@@ -34,7 +34,9 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onArtefactsChange: (value: FileWithMetadata[]) => void
+  onArtefactsChange: (value: File[]) => void
+  artefactsMetadata: FileWithMetadata[]
+  onArtefactsMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 
@@ -45,6 +47,8 @@ export default function ReleaseForm({
   onReleaseNotesChange,
   onMinorReleaseChange,
   onArtefactsChange,
+  artefactsMetadata,
+  onArtefactsMetadataChange,
   onImageListChange,
   editable = false,
   isEdit = false,
@@ -134,8 +138,10 @@ export default function ReleaseForm({
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
           label='Attach artefacts'
           files={formData.artefacts}
+          fileMetadata={artefactsMetadata}
           readOnly={isReadOnly}
-          onChange={onArtefactsChange}
+          onFileChange={onArtefactsChange}
+          onFileMetadataChange={onArtefactsMetadataChange}
         />
         {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
       </Stack>
