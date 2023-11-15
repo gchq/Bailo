@@ -48,30 +48,36 @@ export default function MultiFileInput({
     }
   }
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const newFiles = event.target.files ? Array.from(event.target.files) : []
-    if (newFiles) {
-      if (files) {
-        const updatedFiles = newFiles.concat(
-          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
-        )
-        onFileChange(updatedFiles)
-      } else {
-        onFileChange(newFiles)
+  const handleFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const newFiles = event.target.files ? Array.from(event.target.files) : []
+      if (newFiles) {
+        if (files) {
+          const updatedFiles = newFiles.concat(
+            files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+          )
+          onFileChange(updatedFiles)
+        } else {
+          onFileChange(newFiles)
+        }
       }
-    }
-  }
+    },
+    [files, onFileChange],
+  )
 
-  function handleFileDisplayChange(fileWithMetadata: FileWithMetadata) {
-    const tempFilesWithMetadata = fileMetadata
-    const metadataIndex = fileMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
-    if (metadataIndex === -1) {
-      tempFilesWithMetadata.push(fileWithMetadata)
-    } else {
-      tempFilesWithMetadata[metadataIndex] = fileWithMetadata
-    }
-    onFileMetadataChange(tempFilesWithMetadata)
-  }
+  const handleFileDisplayChange = useCallback(
+    (fileWithMetadata: FileWithMetadata) => {
+      const tempFilesWithMetadata = fileMetadata
+      const metadataIndex = fileMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      if (metadataIndex === -1) {
+        tempFilesWithMetadata.push(fileWithMetadata)
+      } else {
+        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
+      }
+      onFileMetadataChange(tempFilesWithMetadata)
+    },
+    [fileMetadata, onFileMetadataChange],
+  )
 
   return (
     <Box sx={{ ...(fullWidth && { width: '100%' }) }}>
