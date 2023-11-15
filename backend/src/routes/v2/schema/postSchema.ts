@@ -20,12 +20,7 @@ export const postSchemaSchema = z.object({
     kind: z.nativeEnum(SchemaKind, {
       required_error: 'Must specify schema kind',
     }),
-    jsonSchema: z.object(
-      {},
-      {
-        required_error: 'Must specify schema schema object',
-      },
-    ),
+    jsonSchema: z.object({}).passthrough(),
   }),
 })
 
