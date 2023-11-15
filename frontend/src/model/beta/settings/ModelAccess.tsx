@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
-import { useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 
 import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
@@ -32,8 +32,9 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
+  const [userListQuery, setUserListQuery] = useState('')
 
-  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
   const sendNotification = useNotification()
@@ -55,13 +56,17 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [users])
 
-  function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: string | null) {
+  function onUserChange(_event: SyntheticEvent<Element, Event>, newValue: string | null) {
     if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
       const updatedAccessList = accessList
       const newAccess = { entity: newValue, roles: [] }
       updatedAccessList.push(newAccess)
       setAccessList(accessList)
     }
+  }
+
+  function handleInputChange(_event: SyntheticEvent<Element, Event>, value: string) {
+    setUserListQuery(value)
   }
 
   async function updateAccessList() {
@@ -88,7 +93,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   return (
     <>
-      {isUsersLoading && <Loading />}
       {users && (
         <Stack spacing={2}>
           <Typography variant='h6' component='h2'>
@@ -102,6 +106,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             onClose={() => {
               setOpen(false)
             }}
+            onInputChange={handleInputChange}
             isOptionEqualToValue={(option: string, value: string) => option === value}
             getOptionLabel={(option) => option.split(':')[1]}
             onChange={onUserChange}
