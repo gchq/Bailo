@@ -3,7 +3,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
-import { KeyboardEvent, SyntheticEvent, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -39,9 +39,12 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     }
   }, [users])
 
-  function handleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
-    onChange(newValues)
-  }
+  const handleUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
+      onChange(newValues)
+    },
+    [onChange],
+  )
 
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
     setUserListQuery(value)
@@ -70,7 +73,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           isOptionEqualToValue={(option: string, value: string) => option === value}
           getOptionLabel={(option) => option}
           value={currentValue || []}
-          onChange={handleChange}
+          onChange={handleUserChange}
           onInputChange={handleInputChange}
           options={entities || []}
           loading={isLoading}

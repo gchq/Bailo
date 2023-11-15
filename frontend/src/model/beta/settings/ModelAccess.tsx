@@ -56,14 +56,17 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [users])
 
-  function onUserChange(_event: SyntheticEvent<Element, Event>, newValue: string | null) {
-    if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
-      const updatedAccessList = accessList
-      const newAccess = { entity: newValue, roles: [] }
-      updatedAccessList.push(newAccess)
-      setAccessList(accessList)
-    }
-  }
+  const onUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
+        const updatedAccessList = accessList
+        const newAccess = { entity: newValue, roles: [] }
+        updatedAccessList.push(newAccess)
+        setAccessList(accessList)
+      }
+    },
+    [accessList],
+  )
 
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
     setUserListQuery(value)
