@@ -16,7 +16,7 @@ import { CreateReleaseParams, postFile, postRelease } from 'actions/release'
 import { FormEvent, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
-import { FlattenedModelImage } from 'types/interfaces'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
@@ -31,7 +31,7 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefacts, setArtefacts] = useState<File[]>([])
+  const [artefacts, setArtefacts] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -49,7 +49,8 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
     if (isValidSemver(semver)) {
       const fileIds: string[] = []
       for (const artefact of artefacts) {
-        const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
+        console.log(artefact)
+        const postArtefactResponse = await postFile(artefact, model.id, artefact.file.name, artefact.file.type)
         if (postArtefactResponse.ok) {
           const res = await postArtefactResponse.json()
           fileIds.push(res.file._id)
@@ -59,28 +60,30 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
         }
       }
 
-      const release: CreateReleaseParams = {
-        modelId: model.id,
-        semver,
-        modelCardVersion: model.card.version,
-        notes: releaseNotes,
-        minor: isMinorRelease,
-        fileIds: fileIds,
-        images: imageList,
-      }
-
-      const response = await postRelease(release)
-
-      if (!response.ok) {
-        const error = await getErrorMessage(response)
-        setLoading(false)
-        return setErrorMessage(error)
-      }
-
-      clearFormData()
       setLoading(false)
-      mutateReleases()
-      onClose()
+
+      // const release: CreateReleaseParams = {
+      //   modelId: model.id,
+      //   semver,
+      //   modelCardVersion: model.card.version,
+      //   notes: releaseNotes,
+      //   minor: isMinorRelease,
+      //   fileIds: fileIds,
+      //   images: imageList,
+      // }
+
+      // const response = await postRelease(release)
+
+      // if (!response.ok) {
+      //   const error = await getErrorMessage(response)
+      //   setLoading(false)
+      //   return setErrorMessage(error)
+      // }
+
+      // clearFormData()
+      // setLoading(false)
+      // mutateReleases()
+      // onClose()
     }
   }
 

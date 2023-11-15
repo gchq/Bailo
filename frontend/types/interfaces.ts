@@ -155,3 +155,8 @@ export interface FlattenedModelImage {
   name: string
   tag: string
 }
+
+export interface FileWithMetadata {
+  file: File
+  metadata?: string
+}

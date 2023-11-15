@@ -6,7 +6,7 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
-import { FlattenedModelImage } from 'types/interfaces'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -14,7 +14,7 @@ type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  artefacts: File[]
+  artefacts: FileWithMetadata[]
   imageList: FlattenedModelImage[]
 }
 
@@ -34,7 +34,7 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onArtefactsChange: (value: File[]) => void
+  onArtefactsChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 

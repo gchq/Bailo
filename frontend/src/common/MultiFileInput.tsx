@@ -1,7 +1,9 @@
-import { Box, Chip } from '@mui/material'
+import { Box, Chip, Stack, TextField } from '@mui/material'
 import Button from '@mui/material/Button'
+import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/system'
-import { ChangeEvent, useMemo } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { FileWithMetadata } from 'types/interfaces'
 
 const Input = styled('input')({
   display: 'none',
@@ -16,8 +18,8 @@ const displayFilename = (filename: string) => {
 
 type MultiFileInputProps = {
   label: string
-  files: File[]
-  onChange: (value: File[]) => void
+  files: FileWithMetadata[]
+  onChange: (value: FileWithMetadata[]) => void
   accepts?: string
   disabled?: boolean
   fullWidth?: boolean
@@ -35,9 +37,17 @@ export default function MultiFileInput({
 }: MultiFileInputProps) {
   const htmlId = useMemo(() => `${label.replace(/ /g, '-').toLowerCase()}-file`, [label])
 
+  const [fileList, setFileList] = useState<File[]>([])
+
+  useEffect(() => {
+    files.forEach((file) => {
+      fileList.push(file.file)
+    })
+  }, [files, fileList])
+
   function handleDelete(fileToDelete: File) {
     if (files) {
-      const updatedFileList = files.filter((file) => file.name !== fileToDelete.name)
+      const updatedFileList = files.filter((file) => file.file.name !== fileToDelete.name)
       onChange(updatedFileList)
     }
   }
@@ -47,13 +57,24 @@ export default function MultiFileInput({
     if (newFiles) {
       if (files) {
         const updatedFiles = newFiles.concat(
-          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+          fileList.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
         )
-        onChange(updatedFiles)
+        setFileList(updatedFiles)
       } else {
-        onChange(newFiles)
+        setFileList(newFiles)
       }
     }
+  }
+
+  function handleFileDisplayChange(fileWithMetadata: FileWithMetadata) {
+    const tempFileList = files
+    const index = tempFileList.findIndex((fileToFind) => fileToFind.file.name === fileWithMetadata.file.name)
+    if (!index) {
+      tempFileList.push(fileWithMetadata)
+    } else {
+      tempFileList[index] === fileWithMetadata
+    }
+    onChange(tempFileList)
   }
 
   return (
@@ -68,15 +89,44 @@ export default function MultiFileInput({
           <Input multiple id={htmlId} type='file' onInput={handleFileChange} accept={accepts} disabled={disabled} />
         </Box>
       )}
-      {files.map((file) => (
-        <Chip
-          sx={{ mr: 1, mb: 1 }}
-          color='primary'
-          label={displayFilename(file.name)}
-          onDelete={() => handleDelete(file)}
-          key={file.name}
+      <Stack spacing={1}>
+        {fileList.map((file) => (
+          <div key={file.name}>
+            <MultiFileInputDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
+          </div>
+        ))}
+      </Stack>
+    </Box>
+  )
+}
+
+interface MultiFileInputDisplayProps {
+  file: File
+  handleDelete: (file: File) => void
+  onChange: (fileWithMetadata: FileWithMetadata) => void
+}
+
+function MultiFileInputDisplay({ file, handleDelete, onChange }: MultiFileInputDisplayProps) {
+  const theme = useTheme()
+  const [metadata, setMetadata] = useState('')
+
+  function handleMetadataChange(event: ChangeEvent<HTMLInputElement>) {
+    setMetadata(event.target.value)
+    onChange({ file, metadata })
+  }
+
+  return (
+    <Box sx={{ border: 'solid', borderWidth: '0.5px', borderColor: theme.palette.primary.main }}>
+      <Stack direction='row' alignItems='center' spacing={1} sx={{ m: 1 }}>
+        <Chip color='primary' label={displayFilename(file.name)} onDelete={() => handleDelete(file)} />
+        <TextField
+          size='small'
+          placeholder='Optional metadata'
+          sx={{ width: '100%' }}
+          value={metadata}
+          onChange={handleMetadataChange}
         />
-      ))}
+      </Stack>
     </Box>
   )
 }
