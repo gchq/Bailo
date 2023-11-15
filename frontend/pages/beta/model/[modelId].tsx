@@ -1,8 +1,8 @@
 import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
-import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
+import MessageAlert from 'src/MessageAlert'
 import AccessRequests from 'src/model/beta/AccessRequests'
 import ModelImages from 'src/model/beta/ModelImages'
 import Overview from 'src/model/beta/Overview'
@@ -19,11 +19,14 @@ export default function Model() {
     router.push(`/beta/model/${modelId}/access-request/schema`)
   }
 
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
       {isModelLoading && <Loading />}
-      {!model && !isModelLoading && <EmptyBlob text={`Oh no, it looks like model ${modelId} doesn't exist!`} />}
-      {model && !isModelLoading && !isModelError && (
+      {model && (
         <PageWithTabs
           title={model.name}
           tabs={[

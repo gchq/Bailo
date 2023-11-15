@@ -12,10 +12,10 @@ export const betaModelUrl = '/beta/model/new'
 //     cy.visit(betaModelUrl)
 
 //     //team selected. model and description typed.
-//     cy.get('[data-test=teamSelector]').click()
+//     cy.get('[data-test=teamSelectInput]').click()
 //     cy.get('[role=presentation]').click()
-//     cy.get('[data-test=modelSelector]').type('test model')
-//     cy.get('[data-test=modelDescription]').type('test description')
+//     cy.get('[data-test=modelNameInput]').type('test model')
+//     cy.get('[data-test=modelDescriptionInput]').type('test description')
 
 //     cy.get('[data-test=privateButtonSelector]').click()
 //     cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
@@ -26,9 +26,9 @@ export const betaModelUrl = '/beta/model/new'
 //     cy.visit(betaModelUrl)
 
 //     //team, model and description typed.
-//     cy.get('[data-test=teamSelector]').type('test team')
-//     cy.get('[data-test=modelSelector]').type('test model')
-//     cy.get('[data-test=modelDescription]').type('test description')
+//     cy.get('[data-test=teamSelectInput]').type('test team')
+//     cy.get('[data-test=modelNameInput]').type('test model')
+//     cy.get('[data-test=modelDescriptionInput]').type('test description')
 
 //     cy.get('[data-test=privateButtonSelector]').click()
 //     cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()

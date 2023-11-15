@@ -16,7 +16,7 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Must specify model description",
+          "message": "Required",
           "path": [
             "body",
             "description",
@@ -25,7 +25,7 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
         },
       ],
     },
-    "message": "Must specify model description",
+    "message": "Required",
     "name": "Error",
   },
 }
