@@ -1,20 +1,13 @@
-import { Box, Chip, Stack, TextField } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
-import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/system'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useMemo } from 'react'
+import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import { FileWithMetadata } from 'types/interfaces'
 
 const Input = styled('input')({
   display: 'none',
 })
-
-const displayFilename = (filename: string) => {
-  const parts = filename.split('.')
-  const ext = parts.pop()
-  const base = parts.join('.')
-  return base.length > 12 ? `${base}...${ext}` : filename
-}
 
 type MultiFileInputProps = {
   label: string
@@ -94,43 +87,9 @@ export default function MultiFileInput({
       <Stack spacing={1}>
         {files.map((file) => (
           <div key={file.name}>
-            <MultiFileInputDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
+            <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
           </div>
         ))}
-      </Stack>
-    </Box>
-  )
-}
-
-interface MultiFileInputDisplayProps {
-  file: File
-  handleDelete: (file: File) => void
-  onChange: (fileWithMetadata: FileWithMetadata) => void
-}
-
-function MultiFileInputDisplay({ file, handleDelete, onChange }: MultiFileInputDisplayProps) {
-  const theme = useTheme()
-  const [metadata, setMetadata] = useState('')
-
-  const handleMetadataChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setMetadata(event.target.value)
-      onChange({ fileName: file.name, metadata })
-    },
-    [onChange, file.name, metadata],
-  )
-
-  return (
-    <Box sx={{ border: 'solid', borderWidth: '0.5px', borderColor: theme.palette.primary.main }}>
-      <Stack direction='row' alignItems='center' spacing={1} sx={{ m: 1 }}>
-        <Chip color='primary' label={displayFilename(file.name)} onDelete={() => handleDelete(file)} />
-        <TextField
-          size='small'
-          placeholder='Optional metadata'
-          sx={{ width: '100%', display: 'none' }}
-          value={metadata}
-          onChange={handleMetadataChange}
-        />
       </Stack>
     </Box>
   )
