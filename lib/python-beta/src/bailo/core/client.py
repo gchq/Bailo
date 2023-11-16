@@ -37,13 +37,11 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
+
         return self.agent.post(
             f"{self.url}/v2/models",
-            json={
-                "name": name,
-                "description": description,
-                "visibility": visibility,
-            },
+            json=filtered_json,
         ).json()
 
     def get_models(
@@ -169,8 +167,8 @@ class Client:
         model_card_version: float,
         release_version: str,
         notes: str,
-        files_ids: list[str] = None,
-        images: list[str] = None,
+        file_ids: list[str],
+        images: list[str],
         minor: bool | None = False,
         draft: bool | None = False,
     ):
@@ -181,7 +179,7 @@ class Client:
         :param model_card_version: Model card version
         :param release_version: Release version
         :param notes: Notes on release
-        :param files: Files for release
+        :param file_ids: Files for release
         :param images: Images for release
         :param minor: Signifies a minor release, defaults to False
         :param draft: Signifies a draft release, defaults to False
@@ -193,7 +191,7 @@ class Client:
                 "notes": notes,
                 "minor": minor,
                 "draft": draft,
-                "fileIds": files_ids,
+                "fileIds": file_ids,
                 "images": images
             })
         return self.agent.post(
@@ -260,6 +258,23 @@ class Client:
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/files",
         ).json()
+
+    def get_download_file(
+        self,
+        model_id: str,
+        file_id: str,
+    ):
+        """
+        Downloads a specific file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: Binary response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/file/{file_id}/download"
+        ).content
+
 
     def simple_upload(
         self,
