@@ -127,7 +127,7 @@ function MultiFileInputDisplay({ file, handleDelete, onChange }: MultiFileInputD
         <TextField
           size='small'
           placeholder='Optional metadata'
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', display: 'none' }}
           value={metadata}
           onChange={handleMetadataChange}
         />
