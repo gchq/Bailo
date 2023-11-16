@@ -16,7 +16,7 @@ import { CreateReleaseParams, postFile, postRelease } from 'actions/release'
 import { FormEvent, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
-import { FlattenedModelImage } from 'types/interfaces'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
@@ -32,6 +32,7 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [artefacts, setArtefacts] = useState<File[]>([])
+  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -49,7 +50,14 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
     if (isValidSemver(semver)) {
       const fileIds: string[] = []
       for (const artefact of artefacts) {
-        const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
+        const artefactMetadata = artefactsMetadata.find((metadata) => metadata.fileName === artefact.name)
+        const postArtefactResponse = await postFile(
+          artefact,
+          model.id,
+          artefact.name,
+          artefact.type,
+          artefactMetadata?.metadata,
+        )
         if (postArtefactResponse.ok) {
           const res = await postArtefactResponse.json()
           fileIds.push(res.file._id)
@@ -58,6 +66,8 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
           return setErrorMessage(await getErrorMessage(postArtefactResponse))
         }
       }
+
+      setLoading(false)
 
       const release: CreateReleaseParams = {
         modelId: model.id,
@@ -94,6 +104,7 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
     setReleaseNotes('')
     setIsMinorRelease(false)
     setArtefacts([])
+    setArtefactsMetadata([])
     setImageList([])
     setErrorMessage('')
   }
@@ -123,6 +134,8 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
               onReleaseNotesChange={(value) => setReleaseNotes(value)}
               onMinorReleaseChange={(value) => setIsMinorRelease(value)}
               onArtefactsChange={(value) => setArtefacts(value)}
+              artefactsMetadata={artefactsMetadata}
+              onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
               onImageListChange={(value) => setImageList(value)}
             />
           </Stack>
