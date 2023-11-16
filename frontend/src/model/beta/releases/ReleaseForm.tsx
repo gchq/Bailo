@@ -6,7 +6,7 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
-import { FlattenedModelImage } from 'types/interfaces'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -35,6 +35,8 @@ type ReleaseFormProps = {
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
   onArtefactsChange: (value: File[]) => void
+  artefactsMetadata: FileWithMetadata[]
+  onArtefactsMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 
@@ -45,6 +47,8 @@ export default function ReleaseForm({
   onReleaseNotesChange,
   onMinorReleaseChange,
   onArtefactsChange,
+  artefactsMetadata,
+  onArtefactsMetadataChange,
   onImageListChange,
   editable = false,
   isEdit = false,
@@ -134,8 +138,10 @@ export default function ReleaseForm({
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
           label='Attach artefacts'
           files={formData.artefacts}
+          fileMetadata={artefactsMetadata}
           readOnly={isReadOnly}
-          onChange={onArtefactsChange}
+          onFileChange={onArtefactsChange}
+          onFileMetadataChange={onArtefactsMetadataChange}
         />
         {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
       </Stack>

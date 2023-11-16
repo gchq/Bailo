@@ -7,7 +7,7 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/beta/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
-import { FlattenedModelImage } from 'types/interfaces'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -21,6 +21,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
   const [artefacts, setArtefacts] = useState<File[]>([]) // TODO - Default to using the release artefact files (BAI-1026)
+  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -35,6 +36,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
     setArtefacts([]) // TODO - Reset the release artefact files (BAI-1026)
+    setArtefactsMetadata([])
     setImageList(release.images)
   }, [release.images, release.minor, release.notes, release.semver])
 
@@ -127,10 +129,12 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
           artefacts,
           imageList,
         }}
+        artefactsMetadata={artefactsMetadata}
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
         onArtefactsChange={(value) => setArtefacts(value)}
+        onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
       />
     </Box>

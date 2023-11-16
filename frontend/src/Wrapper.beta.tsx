@@ -6,8 +6,8 @@ import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
 import React, { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react'
 
+import { useGetCurrentUser } from '../actions/user'
 import { useGetUiConfig } from '../data/uiConfig'
-import { useGetCurrentUser } from '../data/user'
 import Banner from './Banner'
 import Copyright from './Copyright'
 import SideNavigation from './wrapper/SideNavigation'
@@ -75,7 +75,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
             currentUser={currentUser}
           />
         )}
-        {currentUser && currentUser.roles && currentUser.roles.length > 0 && (
+        {currentUser && (
           <SideNavigation
             page={page}
             drawerOpen={open}

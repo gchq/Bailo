@@ -14,11 +14,10 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
-import { useEffect, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
-import { User } from '../../../../types/types'
 import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
@@ -33,10 +32,11 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
+  const [userListQuery, setUserListQuery] = useState('')
 
   const [loading, setLoading] = useState(false)
 
-  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
   const sendNotification = useNotification()
@@ -47,17 +47,32 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [model, setAccessList])
 
-  function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: User | null) {
-    if (
-      newValue &&
-      !accessList.find(({ entity }) => entity === `user:${newValue.id}` || entity === `group:${newValue.id}`)
-    ) {
-      const updatedAccessList = accessList
-      const newAccess = { entity: `user:${newValue.id}`, roles: [] }
-      updatedAccessList.push(newAccess)
-      setAccessList(accessList)
+  const entities = useMemo(() => {
+    if (!users) return []
+
+    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (userGroup) {
+      return userGroup.entities
+    } else {
+      return []
     }
-  }
+  }, [users])
+
+  const onUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
+        const updatedAccessList = accessList
+        const newAccess = { entity: newValue, roles: [] }
+        updatedAccessList.push(newAccess)
+        setAccessList(accessList)
+      }
+    },
+    [accessList],
+  )
+
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
 
   async function updateAccessList() {
     setLoading(true)
@@ -85,7 +100,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   return (
     <>
-      {isUsersLoading && <Loading />}
       {users && (
         <Stack spacing={2}>
           <Typography variant='h6' component='h2'>
@@ -99,11 +113,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             onClose={() => {
               setOpen(false)
             }}
-            // we might get a string or an object back
-            isOptionEqualToValue={(option: User, value: User) => option.id === value.id}
+            onInputChange={handleInputChange}
+            isOptionEqualToValue={(option: string, value: string) => option === value}
+            getOptionLabel={(option) => option.split(':')[1]}
             onChange={onUserChange}
-            getOptionLabel={(option) => option.id}
-            options={users}
+            options={entities}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -112,7 +126,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
                   ...params.InputProps,
                   endAdornment: (
                     <>
-                      {isUsersLoading && <Loading size={20} />}
+                      {userListQuery !== '' && isUsersLoading && <Loading size={20} />}
                       {params.InputProps.endAdornment}
                     </>
                   ),

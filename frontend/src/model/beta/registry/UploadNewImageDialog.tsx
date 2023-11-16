@@ -123,7 +123,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([currentUser.id])}`} />
+                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([currentUser.dn])}`} />
                 </Stack>
               </Stack>
               <Stack spacing={1}>

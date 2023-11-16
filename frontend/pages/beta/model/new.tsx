@@ -5,28 +5,27 @@ import {
   Card,
   Container,
   Divider,
-  FormControl,
   FormControlLabel,
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
+import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
+import ModelNameInput from 'src/model/beta/ModelNameInput'
+import TeamSelect from 'src/TeamSelect'
+import Wrapper from 'src/Wrapper.beta'
+import { TeamInterface } from 'types/interfaces'
+import { ModelForm, ModelVisibility } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 
-import { postModel } from '../../../actions/model'
-import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
-import MessageAlert from '../../../src/MessageAlert'
-import Wrapper from '../../../src/Wrapper.beta'
-import { ModelForm, ModelVisibility } from '../../../types/v2/types'
-
 export default function NewModel() {
-  const [teamName, setTeamName] = useState('Uncategorised')
+  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
@@ -34,9 +33,7 @@ export default function NewModel() {
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
-  const theme = useTheme()
-
-  const formValid = teamName && modelName && description
+  const formValid = modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
@@ -44,7 +41,7 @@ export default function NewModel() {
     setErrorMessage('')
     const formData: ModelForm = {
       name: modelName,
-      team: teamName,
+      teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,
     }
@@ -106,27 +103,11 @@ export default function NewModel() {
                 <Typography component='h2' variant='h6'>
                   Overview
                 </Typography>
-                <Box sx={{ width: '100%' }}>
-                  <TeamAndModelSelector
-                    setTeamValue={setTeamName}
-                    teamValue={teamName}
-                    setModelValue={setModelName}
-                    modelValue={modelName}
-                  />
-                </Box>
-                <Stack>
-                  <FormControl>
-                    <Typography fontWeight='bold'>
-                      Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                    </Typography>
-                    <TextField
-                      data-test='modelDescription'
-                      onChange={(event) => setDescription(event.target.value)}
-                      value={description}
-                      size='small'
-                    />
-                  </FormControl>
+                <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+                  <TeamSelect value={team} onChange={(value) => setTeam(value)} />
+                  <ModelNameInput value={modelName} onChange={(value) => setModelName(value)} />
                 </Stack>
+                <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
               </>
               <Divider />
               <>

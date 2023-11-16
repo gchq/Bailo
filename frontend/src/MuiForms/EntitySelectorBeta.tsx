@@ -3,7 +3,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
-import { KeyboardEvent, SyntheticEvent, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -18,23 +18,37 @@ interface EntitySelectorBetaProps {
 }
 
 export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
-  const { users, isUsersLoading: isLoading } = useListUsers()
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { onChange, value: currentValue, required, label, formContext } = props
+
   const [open, setOpen] = useState(false)
+  const [userListQuery, setUserListQuery] = useState('')
+
+  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
 
   const entities = useMemo(() => {
     if (!users) return []
 
-    return users.map((user) => user.id)
+    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
+    if (userGroup) {
+      return userGroup.entities.map((entity) => entity.split(':')[1])
+    } else {
+      return []
+    }
   }, [users])
 
-  const { onChange, value: currentValue, required, label, formContext } = props
+  const handleUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
+      onChange(newValues)
+    },
+    [onChange],
+  )
 
-  const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
-    onChange(newValues)
-  }
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -59,7 +73,8 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           isOptionEqualToValue={(option: string, value: string) => option === value}
           getOptionLabel={(option) => option}
           value={currentValue || []}
-          onChange={handleChange}
+          onChange={handleUserChange}
+          onInputChange={handleInputChange}
           options={entities || []}
           loading={isLoading}
           renderInput={(params) => (
