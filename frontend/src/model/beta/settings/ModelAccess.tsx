@@ -1,7 +1,7 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Box,
-  Button,
   Divider,
   Stack,
   Table,
@@ -33,6 +33,8 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const [userListQuery, setUserListQuery] = useState('')
+
+  const [loading, setLoading] = useState(false)
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { mutateModel } = useGetModel(model.id)
@@ -73,11 +75,12 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   }, [])
 
   async function updateAccessList() {
+    setLoading(true)
     const res = await patchModel(model.id, { collaborators: accessList })
     if (!res.ok) {
       const error = await getErrorMessage(res)
       return sendNotification({
-        variant: 'success',
+        variant: 'error',
         msg: error,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
@@ -88,6 +91,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
       anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
     })
     mutateModel()
+    setLoading(false)
   }
 
   if (isUsersError) {
@@ -163,9 +167,14 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           </Box>
           <Divider />
           <div>
-            <Button variant='contained' aria-label='Save access list' onClick={updateAccessList}>
+            <LoadingButton
+              variant='contained'
+              aria-label='Save access list'
+              onClick={updateAccessList}
+              loading={loading}
+            >
               Save
-            </Button>
+            </LoadingButton>
           </div>
         </Stack>
       )}

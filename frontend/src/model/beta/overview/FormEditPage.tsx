@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -21,24 +22,26 @@ type FormEditPageProps = {
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
     if (schema) {
+      setLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
-
         mutateModelCardRevisions()
       }
+      setLoading(false)
     }
   }
 
@@ -118,9 +121,9 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               <Button variant='outlined' onClick={onCancel}>
                 Cancel
               </Button>
-              <Button variant='contained' onClick={onSubmit}>
+              <LoadingButton variant='contained' onClick={onSubmit} loading={loading}>
                 Save
-              </Button>
+              </LoadingButton>
             </Stack>
           )}
         </Stack>
