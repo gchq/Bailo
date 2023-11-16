@@ -32,8 +32,7 @@ export default function NewModel() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const router = useRouter()
-
-  const formValid = team && modelName && description
+  const formValid = modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
