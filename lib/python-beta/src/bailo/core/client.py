@@ -169,8 +169,8 @@ class Client:
         model_card_version: float,
         release_version: str,
         notes: str,
-        files: list[str],
-        images: list[str],
+        files_ids: list[str] = None,
+        images: list[str] = None,
         minor: bool | None = False,
         draft: bool | None = False,
     ):
@@ -187,17 +187,18 @@ class Client:
         :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/releases",
-            json={
+        filtered_json = filter_none(json={
                 "modelCardVersion": model_card_version,
                 "semver": release_version,
                 "notes": notes,
                 "minor": minor,
                 "draft": draft,
-                "files": files,
+                "fileIds": files_ids,
                 "images": images
-            },
+            })
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/releases",
+            json=filtered_json
         ).json()
 
     def get_all_releases(
@@ -383,6 +384,33 @@ class Client:
             }
         ).json()
 
+    def post_review(
+        self,
+        model_id: str,
+        role: str,
+        decision: str,
+        version: str | None = None,
+        comment: str | None = None
+    ):
+        """
+        Creates a review for a release
+
+        :param model_id: A unique model ID
+        :param version: A semantic version for a release
+        :param role: The role of the user making the review
+        :param decision: Either approve or request changes
+        :param comment: A comment to go with the review
+        """
+        filtered_json = filter_none({
+            "role": role,
+            "decision": decision,
+            "comment": comment
+        })
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/release/{version}/review",
+            json=filtered_json
+        ).json()
+
     def get_model_roles(
         self,
         model_id: str,
@@ -507,7 +535,7 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        )
+        ).json()
 
     def get_access_requests(
         self,
@@ -522,7 +550,7 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/access-requests",
-        )
+        ).json()
 
     def post_access_request(
         self,
@@ -544,7 +572,7 @@ class Client:
                 "schemaId": schema_id,
                 "metadata": metadata
             }
-        )
+        ).json()
 
     def delete_access_request(
         self,
@@ -560,7 +588,7 @@ class Client:
         """
         return self.agent.delete(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
-        )
+        ).json()
 
     def patch_access_request(
         self,
@@ -581,4 +609,4 @@ class Client:
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
             json=filtered_json
-        )
+        ).json()

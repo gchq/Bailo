@@ -20,9 +20,3 @@ def pytest_collection_modifyitems(items: list[Item]):
             item.add_marker(pytest.mark.spark)
         elif "_int_" in item.nodeid:
             item.add_marker(pytest.mark.integration)
-
-
-@pytest.fixture
-def unit_test_mocks(monkeypatch: None):
-    """Include Mocks here to execute all commands offline and fast."""
-    pass

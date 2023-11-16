@@ -96,11 +96,9 @@ def test_post_release(requests_mock):
     client = Client("https://example.com")
     result = client.post_release(
         model_id="test_id",
-        model_card_version=1,
+        model_card_version=1.0,
         release_version='v1',
-        notes='Test Note',
-        files=[],
-        images=[],
+        notes='Test Note'
     )
 
     assert result == {"success": True}
