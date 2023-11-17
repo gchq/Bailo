@@ -1,7 +1,7 @@
 import { PostAdd } from '@mui/icons-material'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useRouter } from 'next/router'
+import Link from 'src/Link'
 
 import { ModelInterface } from '../../../../types/v2/types'
 
@@ -11,11 +11,6 @@ type TemplatePageProps = {
 
 export default function TemplatePage({ model }: TemplatePageProps) {
   const theme = useTheme()
-  const router = useRouter()
-
-  function handleCreateFromScratchClick() {
-    router.push(`/beta/model/${model.id}/schema`)
-  }
 
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
@@ -49,7 +44,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                 Create from a template
               </Typography>
               <Typography variant='body1'>Create a model using an existing model as a template.</Typography>
-              <Button variant='contained' disabled>
+              <Button sx={{ width: '100%' }} variant='contained' disabled>
                 Create
               </Button>
             </Stack>
@@ -68,9 +63,11 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                 Create from scratch
               </Typography>
               <Typography variant='body1'>Create a model from scratch using a predefined schema.</Typography>
-              <Button variant='contained' onClick={handleCreateFromScratchClick}>
-                Create
-              </Button>
+              <Link href={`/beta/model/${model.id}/schema`}>
+                <Button sx={{ width: '100%' }} variant='contained'>
+                  Create
+                </Button>
+              </Link>
             </Stack>
           </Box>
         </Stack>
