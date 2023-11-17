@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { listModelImages } from '../../../../services/v2/registry.js'
 import { registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/validate.js'
@@ -51,12 +53,16 @@ interface GetImagesResponse {
 export const getImages = [
   bodyParser.json(),
   async (req: Request, res: Response<GetImagesResponse>) => {
+    req.audit = AuditInfo.SearchImages
     const {
       params: { modelId },
     } = parse(req, getImagesSchema)
 
+    const images = await listModelImages(req.user, modelId)
+    await audit.onSearchImages(req, images)
+
     return res.json({
-      images: await listModelImages(req.user, modelId),
+      images,
     })
   },
 ]

@@ -249,6 +249,15 @@ export class SillyAuditConnector extends BaseAuditConnector {
     log.info(event, 'Logging Event')
   }
 
+  onSearchImages(req: Request, images: { repository: string; name: string; tags: string[] }[]) {
+    this.checkEventType(AuditInfo.SearchImages, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: images.map((image) => ({ repository: image.repository, name: image.name })),
+    })
+    log.info(event, 'Logging Event')
+  }
+
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
     if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
       throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
