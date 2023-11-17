@@ -249,11 +249,11 @@ export class SillyAuditConnector extends BaseAuditConnector {
     log.info(event, 'Logging Event')
   }
 
-  onSearchImages(req: Request, images: { repository: string; name: string; tags: string[] }[]) {
-    this.checkEventType(AuditInfo.SearchImages, req)
+  onViewModelImages(req: Request, modelId: string, images: { repository: string; name: string; tags: string[] }[]) {
+    this.checkEventType(AuditInfo.ViewModelImages, req)
     const event = this.generateEvent(req, {
-      url: req.originalUrl,
-      results: images.map((image) => ({ repository: image.repository, name: image.name })),
+      modelId,
+      images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
     log.info(event, 'Logging Event')
   }

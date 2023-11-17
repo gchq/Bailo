@@ -53,13 +53,13 @@ interface GetImagesResponse {
 export const getImages = [
   bodyParser.json(),
   async (req: Request, res: Response<GetImagesResponse>) => {
-    req.audit = AuditInfo.SearchImages
+    req.audit = AuditInfo.ViewModelImages
     const {
       params: { modelId },
     } = parse(req, getImagesSchema)
 
     const images = await listModelImages(req.user, modelId)
-    await audit.onSearchImages(req, images)
+    await audit.onViewModelImages(req, modelId, images)
 
     return res.json({
       images,

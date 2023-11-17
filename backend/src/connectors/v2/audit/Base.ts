@@ -80,7 +80,7 @@ export const AuditInfo = {
   SearchSchemas: { typeId: 'SearchedSchemas', description: 'Schemas Searched', auditKind: AuditKind.Search },
   ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
 
-  SearchImages: { typeId: 'SearchedImages', description: 'Images Searched', auditKind: AuditKind.Search },
+  ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 }
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -118,7 +118,11 @@ export abstract class BaseAuditConnector {
   abstract onCreateSchema(req: Request, schema: SchemaInterface)
   abstract onViewSchema(req: Request, schema: SchemaInterface)
 
-  abstract onSearchImages(req: Request, images: { repository: string; name: string; tags: string[] }[])
+  abstract onViewModelImages(
+    req: Request,
+    modelId: string,
+    images: { repository: string; name: string; tags: string[] }[],
+  )
 
   abstract onError(req: Request, error: BailoError)
 }
