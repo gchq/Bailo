@@ -2,7 +2,6 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import { ModelImage } from '../types/interfaces'
-import { ListModelType } from '../types/types'
 import { ModelForm, ModelInterface, Role } from '../types/v2/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -13,7 +12,7 @@ interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(type: ListModelType, search?: string) {
+export function useListModels(types: string, task?: string, libraries?: string, search?: string) {
   const { data, error, mutate } = useSWR<
     {
       models: ModelSearchResult[]
@@ -21,7 +20,9 @@ export function useListModels(type: ListModelType, search?: string) {
     ErrorInfo
   >(
     `/api/v2/models/search?${qs.stringify({
-      type,
+      types,
+      task,
+      libraries,
       search,
     })}`,
     fetcher,

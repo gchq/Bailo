@@ -17,43 +17,31 @@ import {
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 
 import { useListModels } from '../../actions/model'
-import { ListModelType } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 export default function ExploreModels() {
-  const [group, setGroup] = useState<ListModelType>('all')
   // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
-  const [selectedLibrary, setSelectedLibrary] = useState('')
+  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
-  const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | ''>('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+  const { models, isModelsError } = useListModels(
+    selectedTypes.join(),
+    selectedTask,
+    selectedLibraries.join(),
+    debouncedFilter,
+  )
 
   const theme = useTheme()
-
-  useEffect(() => {
-    switch (selectedType) {
-      case MarketPlaceModelSelectType.MY_MODELS:
-        setGroup(MarketPlaceModelGroup.MY_MODELS)
-        break
-      case MarketPlaceModelSelectType.FAVOURITES:
-        setGroup(MarketPlaceModelGroup.FAVOURITES)
-        break
-      default:
-        setGroup(MarketPlaceModelGroup.ALL)
-        mutateModels()
-    }
-  }, [selectedType, mutateModels])
 
   const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
     isModelsError,
@@ -125,17 +113,19 @@ export default function ExploreModels() {
               // TODO fetch all model libraries
               tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
               expandThreshold={10}
-              selectedTags={selectedLibrary}
-              onChange={setSelectedLibrary}
+              multiple
+              selectedTags={selectedLibraries}
+              onChange={setSelectedLibraries}
               size='small'
             />
           </Box>
           <Box>
-            <ChipSelector<MarketPlaceModelSelectType>
+            <ChipSelector
               label='Other'
-              tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-              onChange={setSelectedType}
-              selectedTags={selectedType}
+              multiple
+              tags={['mine']}
+              onChange={setSelectedTypes}
+              selectedTags={selectedTypes}
               size='small'
             />
           </Box>
