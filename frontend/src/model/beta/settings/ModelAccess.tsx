@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { debounce } from 'lodash'
 import _ from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -74,6 +75,10 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     setUserListQuery(value)
   }, [])
 
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
+
   async function updateAccessList() {
     setLoading(true)
     const res = await patchModel(model.id, { collaborators: accessList })
@@ -113,7 +118,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             onClose={() => {
               setOpen(false)
             }}
-            onInputChange={handleInputChange}
+            size='small'
+            noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+            onInputChange={debounceOnInputChange}
             isOptionEqualToValue={(option: string, value: string) => option === value}
             getOptionLabel={(option) => option.split(':')[1]}
             onChange={onUserChange}
