@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import UserAvatar from 'src/common/UserAvatar'
-import { EntityKind } from 'types/types'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 type ReviewCommentProps = {
   user: string
@@ -10,12 +10,13 @@ type ReviewCommentProps = {
 
 export default function ReviewComment({ user, comment }: ReviewCommentProps) {
   const theme = useTheme()
+  const entityUtils = new EntityUtils()
 
-  const username = user.split(':')[0]
+  const username = entityUtils.formatDisplayName(user)
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
-      <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />
+      <UserAvatar entityDn={username} size='chip' />
       <Box
         sx={{
           border: 'solid',

@@ -8,6 +8,7 @@ import Link from 'next/link'
 import EmptyBlob from 'src/common/EmptyBlob'
 import UserAvatar from 'src/common/UserAvatar'
 import { Deployment, Entity, Version } from 'types/types'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 interface Props {
   version: Version
@@ -15,6 +16,7 @@ interface Props {
 
 export default function Deployments({ version }: Props) {
   const theme = useTheme()
+  const entityUtils = new EntityUtils()
 
   if (!('uuid' in version.model)) {
     throw new Error('Deployments requires a version with a populated model field.')
@@ -56,7 +58,7 @@ export default function Deployments({ version }: Props) {
                 <Chip
                   key={owner.id}
                   color='primary'
-                  avatar={<UserAvatar entity={owner} size='chip' />}
+                  avatar={<UserAvatar entityDn={entityUtils.formatDisplayName(owner.id)} size='chip' />}
                   label={owner.id}
                 />
               ))}

@@ -33,11 +33,11 @@ import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
 import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 import { useGetNumApprovals } from '../data/approvals'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
-import { EntityKind } from '../types/types'
 import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
 import ThemeModeContext from './contexts/themeModeContext'
@@ -106,6 +106,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     setOpen(!open)
   }
 
+  const entityUtils = new EntityUtils()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
 
@@ -228,7 +229,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                  <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.id }} size='chip' />
+                  <UserAvatar entityDn={entityUtils.formatDisplayName(currentUser.id)} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>
