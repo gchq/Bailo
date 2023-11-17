@@ -2,8 +2,10 @@ import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
-import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
+import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { ReviewInterface } from '../../../models/v2/Review.js'
+import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
 
@@ -62,12 +64,28 @@ export const AuditInfo = {
     description: 'Access Request Searched',
     auditKind: AuditKind.Search,
   },
+
+  SearchReviews: {
+    typeId: 'SearchReviews',
+    description: 'Reviews Searched',
+    auditKind: AuditKind.Search,
+  },
+  CreateReviewResponse: {
+    typeId: 'CreateReviewResponse',
+    description: 'Review Response Created',
+    auditKind: AuditKind.Create,
+  },
+
+  CreateSchema: { typeId: 'CreateSchema', description: 'Schema Created', auditKind: AuditKind.Create },
+  SearchSchemas: { typeId: 'SearchedSchemas', description: 'Schemas Searched', auditKind: AuditKind.Search },
+  ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
 }
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
 export abstract class BaseAuditConnector {
   abstract onCreateModel(req: Request, model: ModelDoc)
   abstract onViewModel(req: Request, model: ModelDoc)
+  abstract onUpdateModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
 
   abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
@@ -90,6 +108,15 @@ export abstract class BaseAuditConnector {
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onDeleteAccessRequest(req: Request, accessRequestId: string)
   abstract onSearchAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
+
+  abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
+  abstract onCreateReviewResponse(req: Request, review: ReviewInterface)
+
+  abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
+  abstract onCreateSchema(req: Request, schema: SchemaInterface)
+  abstract onViewSchema(req: Request, schema: SchemaInterface)
+
+  //Image
 
   abstract onError(req: Request, error: BailoError)
 }

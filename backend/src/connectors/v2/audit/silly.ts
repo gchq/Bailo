@@ -2,8 +2,10 @@ import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
-import { ModelCardInterface, ModelDoc } from '../../../models/v2/Model.js'
+import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
+import { ReviewInterface } from '../../../models/v2/Review.js'
+import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import log from '../../../services/v2/log.js'
 import { BailoError } from '../../../types/v2/error.js'
@@ -33,6 +35,12 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.ViewModel, req)
     const event = this.generateEvent(req, { name: model.name })
+    log.info(event, 'Logging Event')
+  }
+
+  onUpdateModel(req: Request, model: ModelDoc) {
+    this.checkEventType(AuditInfo.UpdateModel, req)
+    const event = this.generateEvent(req, { id: model.id })
     log.info(event, 'Logging Event')
   }
 
@@ -160,6 +168,29 @@ export class SillyAuditConnector extends BaseAuditConnector {
     log.info(event, 'Logging Event')
   }
 
+  onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]) {
+    this.checkEventType(AuditInfo.SearchReviews, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: reviews.map((review) => ({
+        modelId: review.modelId,
+        ...(review.semver && { semver: review.semver }),
+        ...(review.accessRequestId && { semver: review.accessRequestId }),
+      })),
+    })
+    log.info(event, 'Logging Event')
+  }
+
+  onCreateReviewResponse(req: Request, review: ReviewInterface) {
+    this.checkEventType(AuditInfo.CreateAccessRequest, req)
+    const event = this.generateEvent(req, {
+      modelId: review.modelId,
+      ...(review.semver && { semver: review.semver }),
+      ...(review.accessRequestId && { semver: review.accessRequestId }),
+    })
+    log.info(event, 'Logging Event')
+  }
+
   onError(req: Request, error: BailoError) {
     const outcome =
       error.code === 403
@@ -195,6 +226,27 @@ export class SillyAuditConnector extends BaseAuditConnector {
         ...(outcome && { outcome }),
       },
     }
+  }
+
+  onCreateSchema(req: Request, schema: SchemaInterface) {
+    this.checkEventType(AuditInfo.CreateSchema, req)
+    const event = this.generateEvent(req, { id: schema.id })
+    log.info(event, 'Logging Event')
+  }
+
+  onViewSchema(req: Request, schema: SchemaInterface) {
+    this.checkEventType(AuditInfo.ViewSchema, req)
+    const event = this.generateEvent(req, { id: schema.id })
+    log.info(event, 'Logging Event')
+  }
+
+  onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
+    this.checkEventType(AuditInfo.SearchSchemas, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: schemas.map((schema) => ({ id: schema.id })),
+    })
+    log.info(event, 'Logging Event')
   }
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
