@@ -15,6 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
@@ -33,13 +34,13 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const [userListQuery, setUserListQuery] = useState('')
-
   const [loading, setLoading] = useState(false)
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
   const sendNotification = useNotification()
+  const entityUtils = new EntityUtils()
 
   useEffect(() => {
     if (model) {
@@ -115,7 +116,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             }}
             onInputChange={handleInputChange}
             isOptionEqualToValue={(option: string, value: string) => option === value}
-            getOptionLabel={(option) => option.split(':')[1]}
+            getOptionLabel={(option) => entityUtils.formatDisplayName(option)}
             onChange={onUserChange}
             options={entities}
             renderInput={(params) => (

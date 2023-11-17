@@ -3,14 +3,12 @@ import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
 import React, { useEffect, useState } from 'react'
 
-import { Entity } from '../../types/types'
-
 export default function UserAvatar({
-  entity,
+  entityDn,
   size,
   luminosity,
 }: {
-  entity: Entity
+  entityDn: string
   size?: UserAvatarSizes
   luminosity?: Luminosity
 }) {
@@ -19,7 +17,7 @@ export default function UserAvatar({
   const [fontColour, setFontColour] = useState<string>()
 
   const color = randomColor({
-    seed: entity.id,
+    seed: entityDn,
     luminosity: luminosity || 'light',
     format: 'hex',
   })
@@ -57,7 +55,7 @@ export default function UserAvatar({
         fontSize,
       }}
     >
-      <Typography>{entity.id.charAt(0).toUpperCase()}</Typography>
+      <Typography>{entityDn.charAt(0).toUpperCase()}</Typography>
     </Avatar>
   )
 }

@@ -6,6 +6,7 @@ import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'src/Link'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
@@ -30,7 +31,10 @@ export default function NewAccessRequest() {
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
+  const currentUserId = useMemo(() => {
+    const entityUtils = new EntityUtils()
+    return currentUser ? entityUtils.formatDisplayName(currentUser?.dn) : ''
+  }, [currentUser])
 
   useEffect(() => {
     if (!model || !schema) return

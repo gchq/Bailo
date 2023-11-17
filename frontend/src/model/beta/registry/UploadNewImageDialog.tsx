@@ -21,6 +21,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/beta/registry/CodeLine'
 import { ModelInterface } from 'types/v2/types'
+import EntityUtils from 'utils/entities/EntityUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface UploadModelImageDialogProps {
@@ -34,6 +35,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
+  const entityUtils = new EntityUtils()
 
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
@@ -123,7 +125,11 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([currentUser.dn])}`} />
+                  <CodeLine
+                    line={`docker login ${uiConfig.registry.host} -u ${shellEscape([
+                      entityUtils.formatDisplayName(currentUser.dn),
+                    ])}`}
+                  />
                 </Stack>
               </Stack>
               <Stack spacing={1}>

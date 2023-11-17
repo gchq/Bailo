@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -33,7 +34,8 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
 
     const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
     if (userGroup) {
-      return userGroup.entities.map((entity) => entity.split(':')[1])
+      const entityUtils = new EntityUtils()
+      return userGroup.entities.map((entity) => entityUtils.formatDisplayName(entity))
     } else {
       return []
     }

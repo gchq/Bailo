@@ -20,8 +20,8 @@ import { styled, useTheme } from '@mui/material/styles'
 import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
+import EntityUtils from 'utils/entities/EntityUtils'
 
-import { EntityKind } from '../../types/types'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
@@ -73,6 +73,7 @@ export default function TopNavigation({
   const router = useRouter()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
+  const entityUtils = new EntityUtils()
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -141,7 +142,7 @@ export default function TopNavigation({
           {currentUser ? (
             <>
               <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
+                <UserAvatar entityDn={entityUtils.formatDisplayName(currentUser.dn)} size='chip' />
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>

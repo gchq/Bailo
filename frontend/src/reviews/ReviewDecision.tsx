@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 import UserAvatar from 'src/common/UserAvatar'
 import { DecisionKeys } from 'types/interfaces'
-import { EntityKind } from 'types/types'
+import EntityUtils from 'utils/entities/EntityUtils'
 
 type ReviewDecisionProps = {
   user: string
@@ -14,14 +14,14 @@ type ReviewDecisionProps = {
 
 export default function ReviewDecision({ user, decision }: ReviewDecisionProps) {
   const theme = useTheme()
-
+  const entityUtils = new EntityUtils()
   const isApproved = useMemo(() => decision === 'approve', [decision])
 
-  const username = user.split(':')[0]
+  const username = entityUtils.formatDisplayName(user)
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
-      <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
+      <UserAvatar entityDn={username} size='chip' />{' '}
       <Box
         sx={{
           border: 'solid',
