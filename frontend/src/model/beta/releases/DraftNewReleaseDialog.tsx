@@ -96,6 +96,7 @@ export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNew
 
   const handleCancel = () => {
     clearFormData()
+    setLoading(false)
     onClose()
   }
 
