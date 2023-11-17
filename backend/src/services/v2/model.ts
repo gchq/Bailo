@@ -19,9 +19,11 @@ import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'>
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
 export async function createModel(user: UserDoc, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
+
+  // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
   const model = new Model({
     ...modelParams,
@@ -80,14 +82,14 @@ export async function searchModels(
   const query: any = {}
 
   if (libraries.length) {
-    query['card.metadata.highLevelDetails.tags'] = { $all: libraries }
+    query['card.metadata.overview.tags'] = { $all: libraries }
   }
 
   if (task) {
-    if (query['card.metadata.highLevelDetails.tags']) {
-      query['card.metadata.highLevelDetails.tags'].$all.push(task)
+    if (query['card.metadata.overview.tags']) {
+      query['card.metadata.overview.tags'].$all.push(task)
     } else {
-      query['card.metadata.highLevelDetails.tags'] = { $all: [task] }
+      query['card.metadata.overview.tags'] = { $all: [task] }
     }
   }
 

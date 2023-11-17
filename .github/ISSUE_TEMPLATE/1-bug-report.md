@@ -1,12 +1,12 @@
 ---
 name: "\U0001F41B Bug report"
-about: Create a report to help us improve
+about: Create a report to help us improve Bailo
 ---
 
 <!--
-Thank you for reporting a possible bug in Bailo.
+Thank you for reporting a possible bug in Bailo.  Below is a template of useful information you can provide to help us out.
 
-Please fill in as much of the template below as you can.
+Sometimes the issue is obvious, feel free to remove any categories that don't apply.
 -->
 
 ### Subject of the issue

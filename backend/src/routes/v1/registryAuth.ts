@@ -128,6 +128,7 @@ export function getRefreshToken(user: UserDoc) {
 
 export type Action = 'push' | 'pull' | 'delete' | '*'
 
+// Documented here: https://distribution.github.io/distribution/spec/auth/scope/
 export interface Access {
   type: string
   name: string

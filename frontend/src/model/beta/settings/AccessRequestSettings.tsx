@@ -1,8 +1,16 @@
-import { Button, Checkbox, Divider, Stack, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Checkbox, Divider, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function AccessRequestSettings() {
   const [allowUngoverned, setAllowUngoverned] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleSave = () => {
+    setLoading(true)
+
+    //TODO - Save settings API request and setLoading(false) on error
+  }
 
   return (
     <Stack spacing={2}>
@@ -15,7 +23,9 @@ export default function AccessRequestSettings() {
       </Stack>
       <Divider />
       <div>
-        <Button variant='contained'>Save</Button>
+        <LoadingButton onClick={handleSave} loading={loading}>
+          Save
+        </LoadingButton>
       </div>
     </Stack>
   )

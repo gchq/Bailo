@@ -1,48 +1,47 @@
 import { Lock, LockOpen } from '@mui/icons-material'
+import LoadingButton from '@mui/lab/LoadingButton'
 import {
   Box,
-  Button,
   Card,
   Container,
   Divider,
-  FormControl,
   FormControlLabel,
   Radio,
   RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
+import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
+import ModelNameInput from 'src/model/beta/ModelNameInput'
+import TeamSelect from 'src/TeamSelect'
+import Wrapper from 'src/Wrapper.beta'
+import { TeamInterface } from 'types/interfaces'
+import { ModelForm, ModelVisibility } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 
-import { postModel } from '../../../actions/model'
-import TeamAndModelSelector from '../../../src/common/TeamAndModelSelector'
-import MessageAlert from '../../../src/MessageAlert'
-import Wrapper from '../../../src/Wrapper.beta'
-import { ModelForm, ModelVisibility } from '../../../types/v2/types'
-
 export default function NewModel() {
-  const [teamName, setTeamName] = useState('Uncategorised')
+  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [modelName, setModelName] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(ModelVisibility.Public)
   const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const router = useRouter()
-  const theme = useTheme()
-
-  const formValid = teamName && modelName && description
+  const formValid = modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
+    setLoading(true)
     setErrorMessage('')
     const formData: ModelForm = {
       name: modelName,
-      team: teamName,
+      teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,
     }
@@ -50,8 +49,10 @@ export default function NewModel() {
 
     if (!response.ok) {
       const error = await getErrorMessage(response)
+
       return setErrorMessage(error)
     }
+    setLoading(false)
 
     const data = await response.json()
     router.push(`/beta/model/${data.model.id}`)
@@ -62,7 +63,7 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
+          <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
@@ -74,7 +75,7 @@ export default function NewModel() {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
+          <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>
@@ -88,8 +89,9 @@ export default function NewModel() {
           <Typography
             component='h1'
             variant='h4'
-            sx={{ fontWeight: 'bold', mb: 2 }}
             color='primary'
+            fontWeight='bold'
+            mb={2}
             data-test='createModelPageTitle'
           >
             Create a new model
@@ -101,27 +103,11 @@ export default function NewModel() {
                 <Typography component='h2' variant='h6'>
                   Overview
                 </Typography>
-                <Box sx={{ width: '100%' }}>
-                  <TeamAndModelSelector
-                    setTeamValue={setTeamName}
-                    teamValue={teamName}
-                    setModelValue={setModelName}
-                    modelValue={modelName}
-                  />
-                </Box>
-                <Stack>
-                  <FormControl>
-                    <Typography sx={{ fontWeight: 'bold' }}>
-                      Description <span style={{ color: theme.palette.primary.main }}>*</span>
-                    </Typography>
-                    <TextField
-                      data-test='modelDescription'
-                      onChange={(event) => setDescription(event.target.value)}
-                      value={description}
-                      size='small'
-                    />
-                  </FormControl>
+                <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+                  <TeamSelect value={team} onChange={(value) => setTeam(value)} />
+                  <ModelNameInput value={modelName} onChange={(value) => setModelName(value)} />
                 </Stack>
+                <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
               </>
               <Divider />
               <>
@@ -151,9 +137,15 @@ export default function NewModel() {
               <Box sx={{ textAlign: 'right' }}>
                 <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
                   <span>
-                    <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
+                    <LoadingButton
+                      variant='contained'
+                      disabled={!formValid}
+                      type='submit'
+                      data-test='createModelButton'
+                      loading={loading}
+                    >
                       Create Model
-                    </Button>
+                    </LoadingButton>
                   </span>
                 </Tooltip>
                 <MessageAlert message={errorMessage} severity='error' />

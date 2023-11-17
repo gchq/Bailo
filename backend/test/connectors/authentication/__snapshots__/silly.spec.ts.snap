@@ -4,7 +4,7 @@ exports[`connectors > user > silly > queryEntities 1`] = `
 [
   {
     "entities": [
-      "user:user1",
+      "user:user",
       "user:user2",
     ],
     "kind": "user",

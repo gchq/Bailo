@@ -1,4 +1,5 @@
-import { Box, Button, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -18,6 +19,7 @@ type SettingsProps = {
 }
 
 export default function Settings({ model }: SettingsProps) {
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const { section } = router.query
@@ -35,6 +37,12 @@ export default function Settings({ model }: SettingsProps) {
     router.replace({
       query: { ...router.query, section: category },
     })
+  }
+
+  const handleDeleteModel = () => {
+    setLoading(true)
+
+    // TODO - Delete model API request and setLoading(false) on error
   }
   return (
     <Stack
@@ -76,9 +84,9 @@ export default function Settings({ model }: SettingsProps) {
             <Typography variant='h6' component='h2'>
               Danger Zone!
             </Typography>
-            <Button variant='contained' disabled>
+            <LoadingButton variant='contained' disabled onClick={handleDeleteModel} loading={loading}>
               Delete model
-            </Button>
+            </LoadingButton>
           </Stack>
         )}
       </Box>

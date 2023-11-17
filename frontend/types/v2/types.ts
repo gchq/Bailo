@@ -11,7 +11,7 @@ export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVis
 export interface ModelInterface {
   id: string
   name: string
-  team: string
+  teamId: string
   description: string
   card: ModelCardInterface
   visibility: ModelVisibilityKeys
@@ -43,7 +43,7 @@ export interface CollaboratorEntry {
 
 export type ModelForm = {
   name: string
-  team: string
+  teamId: string
   description: string
   visibility: ModelVisibilityKeys
 }
@@ -80,4 +80,8 @@ export interface FileInterface {
 
 export interface PostSimpleUpload {
   file: FileInterface
+}
+
+export interface User {
+  dn: string
 }

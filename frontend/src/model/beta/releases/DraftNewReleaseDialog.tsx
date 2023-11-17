@@ -3,53 +3,43 @@ import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
+import { CreateReleaseParams, postFile, postRelease } from 'actions/release'
 import { FormEvent, useState } from 'react'
-import semver from 'semver'
-
-import { postFile, postRelease } from '../../../../actions/release'
-import { FlattenedModelImage } from '../../../../types/interfaces'
-import { ReleaseInterface } from '../../../../types/types'
-import { ModelInterface } from '../../../../types/v2/types'
-import { getErrorMessage } from '../../../../utils/fetcher'
-import HelpPopover from '../../../common/HelpPopover'
-import ModelImageList from '../../../common/ModelImageList'
-import MultiFileInput from '../../../common/MultiFileInput'
-import RichTextEditor from '../../../common/RichTextEditor'
-import MessageAlert from '../../../MessageAlert'
+import MessageAlert from 'src/MessageAlert'
+import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
+import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
+import { ModelInterface } from 'types/v2/types'
+import { getErrorMessage } from 'utils/fetcher'
+import { isValidSemver } from 'utils/stringUtils'
 
 type DraftNewReleaseDialogProps = {
   open: boolean
-  handleClose: () => void
   model: ModelInterface
-  mutateReleases: () => void
+  onClose: () => void
 }
 
-export default function DraftNewReleaseDialog({
-  open,
-  handleClose,
-  model,
-  mutateReleases,
-}: DraftNewReleaseDialogProps) {
-  const [semanticVersion, setSemanticVersion] = useState('')
+export default function DraftNewReleaseDialog({ open, model, onClose }: DraftNewReleaseDialogProps) {
+  const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [artefacts, setArtefacts] = useState<File[]>([])
+  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  const { mutateReleases } = useGetReleasesForModelId(model.id)
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
@@ -57,10 +47,17 @@ export default function DraftNewReleaseDialog({
       setLoading(false)
       return setErrorMessage('Please make sure your model has a schema set before drafting a release.')
     }
-    if (isValidSemver(semanticVersion)) {
+    if (isValidSemver(semver)) {
       const fileIds: string[] = []
       for (const artefact of artefacts) {
-        const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
+        const artefactMetadata = artefactsMetadata.find((metadata) => metadata.fileName === artefact.name)
+        const postArtefactResponse = await postFile(
+          artefact,
+          model.id,
+          artefact.name,
+          artefact.type,
+          artefactMetadata?.metadata,
+        )
         if (postArtefactResponse.ok) {
           const res = await postArtefactResponse.json()
           fileIds.push(res.file._id)
@@ -70,9 +67,11 @@ export default function DraftNewReleaseDialog({
         }
       }
 
-      const release: Partial<ReleaseInterface> = {
+      setLoading(false)
+
+      const release: CreateReleaseParams = {
         modelId: model.id,
-        semver: semanticVersion,
+        semver,
         modelCardVersion: model.card.version,
         notes: releaseNotes,
         minor: isMinorRelease,
@@ -80,7 +79,7 @@ export default function DraftNewReleaseDialog({
         images: imageList,
       }
 
-      const response = await postRelease(release, model.id)
+      const response = await postRelease(release)
 
       if (!response.ok) {
         const error = await getErrorMessage(response)
@@ -89,113 +88,73 @@ export default function DraftNewReleaseDialog({
       }
 
       clearFormData()
-      handleClose()
-      mutateReleases()
       setLoading(false)
+      mutateReleases()
+      onClose()
     }
   }
 
-  function handleCancel() {
+  const handleCancel = () => {
     clearFormData()
-    handleClose()
+    onClose()
   }
 
-  function clearFormData() {
-    setSemanticVersion('')
+  const clearFormData = () => {
+    setSemver('')
     setReleaseNotes('')
     setIsMinorRelease(false)
     setArtefacts([])
+    setArtefactsMetadata([])
     setImageList([])
     setErrorMessage('')
   }
 
-  function handleMinorReleaseChecked() {
-    setIsMinorRelease(!isMinorRelease)
-  }
-
-  function isValidSemver(semverInput: string) {
-    return semver.valid(semverInput) ? true : false
-  }
-
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <Box component='form' onSubmit={onSubmit}>
+    <Dialog open={open} onClose={onClose}>
+      <Box component='form' onSubmit={handleSubmit}>
         <DialogTitle color='primary'>Draft New Release</DialogTitle>
-        <Box sx={{ mx: 3 }}>
-          <Divider sx={{ margin: 'auto' }} />
-        </Box>
-        <DialogContent>
+        <Divider sx={{ mx: 3 }} />
+        <DialogContent sx={{ py: 2 }}>
           <Stack spacing={2}>
             <DesignServices color='primary' fontSize='large' sx={{ margin: 'auto' }} />
-            <DialogContentText>
-              A release takes a snapshoot of the current state of the model code, artefacts and model card. Access
+            <Typography>
+              A release takes a snapshot of the current state of the model code, artefacts and model card. Access
               requests will be able to select for any release of a model for deployment.
-            </DialogContentText>
-            <Stack sx={{ width: '100%' }} justifyContent='center'>
-              <Stack direction='row'>
-                <Typography sx={{ fontWeight: 'bold' }}>Release name</Typography>
-                <HelpPopover>
-                  The release name is automatically generated using the model name and release semantic version
-                </HelpPopover>
-              </Stack>
-              <Typography>{`${model.name} - ${semanticVersion}`}</Typography>
-            </Stack>
-            <Stack>
-              <Typography sx={{ fontWeight: 'bold' }}>
-                Semantic version <span style={{ color: 'red' }}>*</span>
-              </Typography>
-              <TextField
-                required
-                size='small'
-                error={semanticVersion !== '' && !isValidSemver(semanticVersion)}
-                helperText={semanticVersion !== '' && !isValidSemver(semanticVersion) ? 'Must follow format #.#.#' : ''}
-                value={semanticVersion}
-                onChange={(e) => setSemanticVersion(e.target.value)}
-              />
-            </Stack>
-            <Stack>
-              <RichTextEditor
-                value={releaseNotes}
-                onChange={(value) => setReleaseNotes(value)}
-                aria-label='Release notes'
-                label={
-                  <Typography component='label' sx={{ fontWeight: 'bold' }} htmlFor={'new-model-description'}>
-                    Release Notes <span style={{ color: 'red' }}>*</span>
-                  </Typography>
-                }
-              />
-            </Stack>
-            <Stack direction='row'>
-              <Checkbox sx={{ pl: 0 }} size='small' checked={isMinorRelease} onChange={handleMinorReleaseChecked} />
-              <Typography>Minor release - No significant changes, does not require release re-approval</Typography>
-            </Stack>
-            <Stack>
-              <Typography sx={{ fontWeight: 'bold' }}>Artefacts</Typography>
-              <MultiFileInput fullWidth label='Attach artefacts' files={artefacts} setFiles={setArtefacts} />
-            </Stack>
-            <Stack>
-              <Typography sx={{ fontWeight: 'bold' }}>Images</Typography>
-              <ModelImageList model={model} setImages={setImageList} value={imageList} />
-            </Stack>
+            </Typography>
+            <ReleaseForm
+              model={model}
+              formData={{
+                semver,
+                releaseNotes,
+                isMinorRelease,
+                artefacts,
+                imageList,
+              }}
+              onSemverChange={(value) => setSemver(value)}
+              onReleaseNotesChange={(value) => setReleaseNotes(value)}
+              onMinorReleaseChange={(value) => setIsMinorRelease(value)}
+              onArtefactsChange={(value) => setArtefacts(value)}
+              artefactsMetadata={artefactsMetadata}
+              onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
+              onImageListChange={(value) => setImageList(value)}
+            />
           </Stack>
         </DialogContent>
-        <Box sx={{ mx: 3 }}>
-          <Divider sx={{ margin: 'auto' }} />
+        <Divider sx={{ mx: 3 }} />
+        <Box sx={{ px: 2 }}>
+          <MessageAlert message={errorMessage} severity='error' />
         </Box>
-        <DialogActions sx={{ p: 3 }}>
+        <DialogActions sx={{ px: 2, py: 1 }}>
           <Button onClick={handleCancel}>Cancel</Button>
           <LoadingButton
             variant='contained'
             loading={loading}
             type='submit'
-            disabled={!semanticVersion || !artefacts || !releaseNotes || !isValidSemver(semanticVersion)}
+            disabled={!semver || !artefacts || !releaseNotes || !isValidSemver(semver)}
           >
             Create Release
           </LoadingButton>
         </DialogActions>
-        <Box sx={{ px: 2 }}>
-          <MessageAlert message={errorMessage} severity='error' />
-        </Box>
       </Box>
     </Dialog>
   )

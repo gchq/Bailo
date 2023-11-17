@@ -15,7 +15,7 @@ export function isMongoServerError(err: unknown): err is MongoServerError {
 }
 
 export function handleDuplicateKeys(error: unknown) {
-  if (isMongoServerError(error) && error.code == 11000) {
+  if (isMongoServerError(error) && error.code === 11000) {
     throw BadReq(`The following is not unique: ${JSON.stringify(error.keyValue)}`)
   }
 }

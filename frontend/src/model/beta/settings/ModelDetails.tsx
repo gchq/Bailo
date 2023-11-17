@@ -1,25 +1,16 @@
 import { Lock, LockOpen } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import { useState } from 'react'
+import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
+import { useGetTeam } from 'actions/team'
+import { useEffect, useState } from 'react'
+import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
+import ModelNameInput from 'src/model/beta/ModelNameInput'
+import TeamSelect from 'src/TeamSelect'
+import { TeamInterface } from 'types/interfaces'
 
 import { patchModel } from '../../../../actions/model'
 import { ModelForm, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import useNotification from '../../../common/Snackbar'
-import TeamAndModelSelector from '../../../common/TeamAndModelSelector'
 import MessageAlert from '../../../MessageAlert'
 
 type ModelAccessProps = {
@@ -27,23 +18,27 @@ type ModelAccessProps = {
 }
 
 export default function ModelDetails({ model }: ModelAccessProps) {
-  const [teamName, setTeamName] = useState(model.team)
+  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [modelName, setModelName] = useState(model.name)
   const [description, setDescription] = useState(model.description)
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(model.visibility)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const theme = useTheme()
   const sendNotification = useNotification()
+  const { team: modelTeam, isTeamLoading, isTeamError } = useGetTeam(model.teamId)
 
-  const formValid = teamName && modelName && description
+  useEffect(() => {
+    setTeam(modelTeam)
+  }, [modelTeam])
+
+  const formValid = team && modelName && description
 
   async function onSubmit(event) {
     event.preventDefault()
     setErrorMessage('')
     const formData: ModelForm = {
       name: modelName,
-      team: teamName,
+      teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,
     }
@@ -66,7 +61,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Private</Typography>
+          <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
         </Stack>
       </Stack>
@@ -78,11 +73,15 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography sx={{ fontWeight: 'bold' }}>Public</Typography>
+          <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
         </Stack>
       </Stack>
     )
+  }
+
+  if (isTeamError) {
+    return <MessageAlert message={isTeamError.info.message} severity='error' />
   }
 
   return (
@@ -92,27 +91,11 @@ export default function ModelDetails({ model }: ModelAccessProps) {
           <Typography variant='h6' component='h2'>
             Model Details
           </Typography>
-          <Box sx={{ width: '100%' }}>
-            <TeamAndModelSelector
-              setTeamValue={setTeamName}
-              teamValue={teamName}
-              setModelValue={setModelName}
-              modelValue={modelName}
-            />
-          </Box>
-          <Stack>
-            <FormControl>
-              <Typography sx={{ fontWeight: 'bold' }}>
-                Description <span style={{ color: theme.palette.primary.main }}>*</span>
-              </Typography>
-              <TextField
-                data-test='modelDescription'
-                onChange={(event) => setDescription(event.target.value)}
-                value={description}
-                size='small'
-              />
-            </FormControl>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+            <TeamSelect value={team} loading={isTeamLoading} onChange={(value) => setTeam(value)} />
+            <ModelNameInput value={modelName} onChange={(value) => setModelName(value)} />
           </Stack>
+          <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>
         <Divider />
         <>

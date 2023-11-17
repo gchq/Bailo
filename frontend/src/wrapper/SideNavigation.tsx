@@ -23,7 +23,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, useEffect, useState } from 'react'
 
 import { getReviewCount } from '../../actions/review'
-import { User } from '../../types/types'
+import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import useNotification from '../common/Snackbar'
 import Link from '../Link'
@@ -210,7 +210,8 @@ export default function SideNavigation({
               </Link>
             </ListItem>
           </StyledList>
-          {currentUser && currentUser.roles.includes('admin') && (
+          {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
+          {currentUser && (
             <>
               <Divider />
               <StyledList>

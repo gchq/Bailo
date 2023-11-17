@@ -1,15 +1,15 @@
+import qs from 'querystring'
 import useSWR from 'swr'
+import { ReleaseInterface } from 'types/types'
+import { ErrorInfo, fetcher } from 'utils/fetcher'
 
-import { ReleaseInterface } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
-
-export function useGetReleasesForModelId(id?: string) {
+export function useGetReleasesForModelId(modelId?: string) {
   const { data, error, mutate } = useSWR<
     {
       releases: ReleaseInterface[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/releases` : null, fetcher)
+  >(modelId ? `/api/v2/model/${modelId}/releases` : null, fetcher)
 
   return {
     mutateReleases: mutate,
@@ -19,18 +19,63 @@ export function useGetReleasesForModelId(id?: string) {
   }
 }
 
-export async function postRelease(release: Partial<ReleaseInterface>, modelId: string) {
-  return fetch(`/api/v2/model/${modelId}/releases`, {
+export function useGetRelease(modelId?: string, semver?: string) {
+  const { data, error, mutate } = useSWR<{ release: ReleaseInterface }, ErrorInfo>(
+    modelId && semver ? `/api/v2/model/${modelId}/release/${semver}` : null,
+    fetcher,
+  )
+
+  return {
+    mutateRelease: mutate,
+    release: data ? data.release : undefined,
+    isReleaseLoading: !error && !data,
+    isReleaseError: error,
+  }
+}
+
+export type CreateReleaseParams = Pick<
+  ReleaseInterface,
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+>
+
+export async function postRelease(release: CreateReleaseParams) {
+  return fetch(`/api/v2/model/${release.modelId}/releases`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(release),
   })
 }
 
-export async function postFile(artefact: File, modelId: string, name: string, mime: string) {
-  return fetch(`/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`, {
-    method: 'post',
+export type UpdateReleaseParams = Pick<
+  ReleaseInterface,
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+>
+
+export function putRelease(release: UpdateReleaseParams) {
+  return fetch(`/api/v2/model/${release.modelId}/release/${release.semver}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: artefact,
+    body: JSON.stringify(release),
   })
+}
+
+export async function postFile(
+  artefact: File,
+  modelId: string,
+  name: string,
+  mime: string,
+  metadata?: string | undefined,
+) {
+  return fetch(
+    metadata
+      ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}?${qs.stringify({
+          metadata,
+        })}`
+      : `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`,
+    {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: artefact,
+    },
+  )
 }

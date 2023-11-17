@@ -21,7 +21,8 @@ import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 
-import { EntityKind, User } from '../../types/types'
+import { EntityKind } from '../../types/types'
+import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import UserAvatar from '../common/UserAvatar'
@@ -140,7 +141,7 @@ export default function TopNavigation({
           {currentUser ? (
             <>
               <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.id }} size='chip' />
+                <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>

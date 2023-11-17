@@ -31,7 +31,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     return [
       {
         kind: SillyEntityKind.User,
-        entities: [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')],
+        entities: [toEntity(SillyEntityKind.User, 'user'), toEntity(SillyEntityKind.User, 'user2')],
       },
       {
         kind: SillyEntityKind.Group,
@@ -62,7 +62,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
       case SillyEntityKind.User:
         return [entity]
       case SillyEntityKind.Group:
-        return [toEntity(SillyEntityKind.User, 'user1'), toEntity(SillyEntityKind.User, 'user2')]
+        return [toEntity(SillyEntityKind.User, 'user'), toEntity(SillyEntityKind.User, 'user2')]
       default:
         throw new Error(`Unable to get members, entity kind not recognised: ${entity}`)
     }
