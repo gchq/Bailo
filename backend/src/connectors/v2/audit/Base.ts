@@ -120,7 +120,5 @@ export abstract class BaseAuditConnector {
 
   abstract onSearchImages(req: Request, images: { repository: string; name: string; tags: string[] }[])
 
-  //Image
-
   abstract onError(req: Request, error: BailoError)
 }
