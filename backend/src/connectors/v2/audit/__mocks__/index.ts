@@ -6,6 +6,11 @@ const audit = {
   onUpdateModel: vi.fn(),
   onSearchModel: vi.fn(),
 
+  onCreateModelCard: vi.fn(),
+  onViewModelCard: vi.fn(),
+  onViewModelCardRevisions: vi.fn(),
+  onUpdateModelCard: vi.fn(),
+
   onCreateAccessRequest: vi.fn(),
   onViewAccessRequest: vi.fn(),
   onUpdateAccessRequest: vi.fn(),

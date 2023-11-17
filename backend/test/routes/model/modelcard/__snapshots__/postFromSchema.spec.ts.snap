@@ -30,3 +30,11 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
   },
 }
 `;
+
+exports[`routes > model > postModel > audit > expected call 1`] = `"example"`;
+
+exports[`routes > model > postModel > audit > expected call 2`] = `
+{
+  "_id": "test",
+}
+`;

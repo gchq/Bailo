@@ -84,5 +84,5 @@ export const testReleaseReview = {
 export const testModelCardRevision = {
   modelId: 'abc',
   CreatedBy: 'user',
-  createdAt: new Date(),
+  createdAt: '2023-11-17T14:25:39.004Z',
 }
