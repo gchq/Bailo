@@ -27,6 +27,7 @@ class Client:
             self,
             name: str,
             description: str,
+            team_id: str,
             visibility: ModelVisibility | None = None,
     ):
         """
@@ -37,7 +38,7 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
-        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
+        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility, "teamId": team_id})
 
         return self.agent.post(
             f"{self.url}/v2/models",
