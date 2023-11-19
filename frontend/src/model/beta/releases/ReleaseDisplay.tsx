@@ -6,7 +6,7 @@ import prettyBytes from 'pretty-bytes'
 import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
-import { ReleaseInterface } from '../../../../types/types'
+import { ModelInterface, ReleaseInterface } from '../../../../types/types'
 import Loading from '../../../common/Loading'
 import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
@@ -16,11 +16,11 @@ import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
 export default function ReleaseDisplay({
-  modelId,
+  model,
   release,
   latestRelease,
 }: {
-  modelId: string
+  model: ModelInterface
   release: ReleaseInterface
   latestRelease: string
 }) {
@@ -32,7 +32,7 @@ export default function ReleaseDisplay({
     isReviewsLoading: isActiveReviewsLoading,
     isReviewsError: isActiveReviewsError,
   } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: model.id,
     semver: release.semver,
     isActive: true,
   })
@@ -41,7 +41,7 @@ export default function ReleaseDisplay({
     isReviewsLoading: isInactiveReviewsLoading,
     isReviewsError: isInactiveReviewsError,
   } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: model.id,
     semver: release.semver,
     isActive: false,
   })
@@ -92,14 +92,14 @@ export default function ReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Link href={`/beta/model/${modelId}/release/${release.semver}`}>
+                <Link href={`/beta/model/${model.id}/release/${release.semver}`}>
                   <Typography component='h2' variant='h6' color='primary'>
-                    {modelId} - {release.semver}
+                    {model.name} - {release.semver}
                   </Typography>
                 </Link>
                 {latestVersionAdornment()}
               </Stack>
-              <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
+              <Button onClick={() => router.push(`/beta/model/${model.id}/history/${release.modelCardVersion}`)}>
                 View Model Card
               </Button>
             </Stack>
@@ -127,7 +127,7 @@ export default function ReleaseDisplay({
                       alignItems='center'
                       spacing={1}
                     >
-                      <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`}>{file.name}</Link>
+                      <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>{file.name}</Link>
                       <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                     </Stack>
                   ))}
@@ -145,7 +145,7 @@ export default function ReleaseDisplay({
                       spacing={1}
                     >
                       {uiConfig && (
-                        <CodeLine line={`${uiConfig.registry.host}/${modelId}/${image.name}:${image.tag}`} />
+                        <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
                       )}
                     </Stack>
                   ))}
