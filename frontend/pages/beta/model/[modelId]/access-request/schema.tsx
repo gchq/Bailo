@@ -39,7 +39,7 @@ export default function NewSchemaSelection() {
             </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
               <Typography variant='h6' color='primary'>
-                Choose a schema
+                Select a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
               <Typography variant='body1'>
