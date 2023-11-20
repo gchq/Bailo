@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from tempfile import _TemporaryFileWrapper
 from typing import Any
 
@@ -122,7 +123,7 @@ class Release:
             draft
         )
 
-    def get_file(self, file_id:str, localfile_name:str = None) -> _TemporaryFileWrapper[bytes] | str:
+    def download(self, local_dir: str = None) -> _TemporaryFileWrapper[bytes] | str:
         """ Gives the user a tempfile from file id requested.
 
         Files have to be explicitly closed at runtime once processed via `.close()`
@@ -138,18 +139,24 @@ class Release:
         >>> tp.readlines()
 
         :param file_name: The name of the file to retrieve
-        :return: Tempfile containing a binary of the file
         """
 
-        return self.client.get_download_file(self.model_id, file_id, localfile_name)
+        os.makedirs(local_dir, exist_ok=True)
+        for file in self.files:
+            for remote_file in self.client.get_files(model_id=self.model_id)['files']:
+                if file == remote_file['id']:
+                    file_name = remote_file['name']
+                    file_path = f"{local_dir}/{file_name}"
+                    temp_file = self.client.get_download_file(model_id=self.model_id, file_id=file, localfile_name=file_path)
 
-    def upload_file(self, file_id:str):
-        """ Uploads a file to bailo and adds it to the given release
+    def upload(self, local_dir: str):
+        """ Uploads files in a given directory to the release.
 
-        :param file_id: the name of the file to upload to bailo from local directory
+        :param local_dir: Local directory path, relative or absolute
         """
-        res = self.client.simple_upload(self.model_id, file_id)
-        self.files.append(res['file']['id'])
+        for file in os.listdir(local_dir):
+            res = self.client.simple_upload(self.model_id, f"{local_dir}/{file}")
+            self.files.append(res['file']['id'])
         self.update()
         return res
 
