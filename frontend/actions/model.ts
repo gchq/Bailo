@@ -12,7 +12,7 @@ interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(types: string, task?: string, libraries?: string, search?: string) {
+export function useListModels(types: string[], task?: string, libraries?: string[], search?: string) {
   const { data, error, mutate } = useSWR<
     {
       models: ModelSearchResult[]

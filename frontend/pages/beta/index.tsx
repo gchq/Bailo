@@ -17,7 +17,7 @@ import {
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import React, { Fragment, useState } from 'react'
+import React, { ChangeEvent, Fragment, useCallback, useMemo, useState } from 'react'
 
 import { useListModels } from '../../actions/model'
 import ChipSelector from '../../src/common/ChipSelector'
@@ -34,27 +34,53 @@ export default function ExploreModels() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError } = useListModels(
-    selectedTypes.join(),
-    selectedTask,
-    selectedLibraries.join(),
-    debouncedFilter,
-  )
+  const { models, isModelsError } = useListModels(selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
 
   const theme = useTheme()
 
-  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
-    isModelsError,
-  })
-  if (error) return error
+  interface KeyAndLabel {
+    key: string
+    label: string
+  }
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const typeLabels: KeyAndLabel[] = useMemo(() => {
+    const mineLabel: KeyAndLabel = {
+      key: 'mine',
+      label: 'Mine',
+    }
+    return [mineLabel]
+  }, [])
+
+  const handleSelectedTypesOnChange = useCallback(
+    (selected: string[]) => {
+      if (selected.length > 0) {
+        const types: string[] = []
+        selected.forEach((value) => {
+          const typeToAdd = typeLabels.find((typeLabel) => typeLabel.label === value)
+          if (typeToAdd && typeToAdd.label) {
+            types.push(typeToAdd.key)
+          }
+        })
+        setSelectedTypes(types)
+      } else {
+        setSelectedTypes([])
+      }
+    },
+    [typeLabels],
+  )
+
+  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
   }
 
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
+
+  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
+    isModelsError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
@@ -123,9 +149,9 @@ export default function ExploreModels() {
             <ChipSelector
               label='Other'
               multiple
-              tags={['mine']}
-              onChange={setSelectedTypes}
-              selectedTags={selectedTypes}
+              tags={[...typeLabels.map((type) => type.label)]}
+              onChange={handleSelectedTypesOnChange}
+              selectedTags={typeLabels.filter((label) => selectedTypes.includes(label.key)).map((type) => type.label)}
               size='small'
             />
           </Box>
