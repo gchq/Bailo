@@ -3,19 +3,26 @@ from __future__ import annotations
 from typing import Any
 
 from bailo.core import Client, ModelVisibility
-from bailo.helper import Release
 from semantic_version import Version
+
+from .release import Release
 
 
 class Model:
-    def __init__(self):
-        #instantiate normally
-        self.client = None
+    def __init__(
+        self,
+        client: Client,
+        name: str,
+        description: str,
+        visibility: ModelVisibility | None = None,
+    ) -> None:
+
+        self.client = client
 
         self.model_id = None
-        self.name = None
-        self.description = None
-        self.visibility = None
+        self.name = name
+        self.description = description
+        self.visibility = visibility
 
         self.model_card = None
         self.model_card_version = None
@@ -30,8 +37,7 @@ class Model:
         team_id: str,
         visibility: ModelVisibility | None = None,
     ):
-        model = cls()
-        model.client = client
+        model = cls(client=client, name=name, description=description, visibility=visibility)
         res = model.client.post_model(
             name=name,
             description=description,
@@ -44,8 +50,7 @@ class Model:
 
     @classmethod
     def from_id(cls, client: Client, model_id: str):
-        model = cls()
-        model.client = client
+        model = cls(client=client, name="temp", description="temp")
         res = model.client.get_model(model_id=model_id)
         model.__unpack(res['model'])
 
@@ -59,14 +64,16 @@ class Model:
 
     #MODEL CARD
     #Should model_card be a param? Or should we call the attribute?
-    def update_model_card(self, model_card: dict[str, Any]):
+    def update_model_card(self, model_card: dict[str, Any] = None):
+        if model_card is None:
+            model_card = self.model_card
         res = self.client.put_model_card(model_id=self.model_id, metadata=model_card)
         self.__unpack_mc(res['card'])
 
     def card_from_schema(self, schema_id: str):
         res = self.client.model_card_from_schema(model_id=self.model_id, schema_id=schema_id)
         self.__unpack_mc(res['card'])
-        #generate empty model card
+        #generate empty model card?
 
     def card_from_model(self):
         pass
