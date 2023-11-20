@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-import datetime
+from tempfile import _TemporaryFileWrapper
 from typing import Any
 
-import dateutil.parser
 from bailo.core.client import Client
-from bailo.core.enums import ReviewDecision, Role, SchemaKind
-from bailo.helper.reviews import Review
 from semantic_version import Version
 
 
@@ -18,30 +15,24 @@ class Release:
     :param version: A semantic version for the release
     :param model_card_version: Version of the model card
     :param notes: Notes on release
-    :param files: A list of files for release
-    :param images: A list of images for release
-    :param created_at: DateTime the release was created at
-    :param created_at: DateTime of when the release was last updated
+    :param files: (optional) A list of files for release
+    :param images: (optional) A list of images for release
     :param minor: Is a minor release?
     :param draft: Is a draft release?
 
     ..note:: Currently files and images are stored as string references
     """
-
     def __init__(
         self,
         client: Client,
         model_id: str,
         version: Version | str,
-        model_card_version: float,
+        model_card_version: float = 1,
         notes: str = "",
         files: list[str] = [],
         images: list[str] = [],
-        release_reviews: list[Review] = [],
-        created_at: datetime.time = None,
-        updated_at: datetime.time = None,
         minor: bool = False,
-        draft: bool = False,
+        draft: bool = True,
     ) -> None:
 
         self.client = client
@@ -56,24 +47,48 @@ class Release:
         self.notes = notes
         self.files = files
         self.images = images
-        self.reviews = release_reviews
         self.draft = draft
         self.files = files
 
-        self.created_at = created_at
-        self.updated_at = updated_at
+    @classmethod
+    def create(
+        cls,
+        client: Client,
+        model_id: str,
+        version: Version | str,
+        model_card_version: float,
+        notes: str = "",
+        files: list[str] = [],
+        images: list[str] = [],
+        minor: bool = False,
+        draft: bool = True,
+    ) -> Release:
+        """ Builds a release from Bailo and uploads it
 
-    def publish(
-        self,
-    ) -> Any:
-        """Publishes a new release to Bailo
-        :return: A JSON response object
+        :param client: A client object used to interact with Bailo
+        :param model_id: A Unique Model ID
+        :param version: A semantic version of a model release
         """
-        return self.client.post_release(self.model_id, self.model_card_version, self.version, self.notes, self.files, self.images, self.minor, self.draft)
+        if type(version) == Version:
+            version = Version(version)
+
+        client.post_release(model_id, version, notes, files, images, minor, draft)
+
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft
+        )
 
 
     @classmethod
-    def retrieve(
+    def from_id(
         cls,
         client: Client,
         model_id: str,
@@ -86,84 +101,64 @@ class Release:
         :param version: A semantic version of a model release
         """
 
-        release_json = client.get_release(model_id, str(version))['release']
+        res = client.get_release(model_id, str(version)).get('release')
 
-        model_card_version = release_json['modelCardVersion']
-        minor = release_json['minor']
-        notes = release_json['notes']
-        files = release_json['fileIds']
-        images = release_json['images']
-        draft = release_json['draft']
+        model_card_version = res.get('modelCardVersion')
+        notes = res.get('notes')
+        files = res.get('fileIds')
+        images = res.get('images')
+        minor = res.get('minor')
+        draft = res.get('draft')
 
-        # Get all active reviews for this release
-        release_reviews = []
-        reviews = client.get_reviews(True, model_id, version)['reviews']
-        for review in reviews:
-            kind = SchemaKind(review['kind'])
-            role = Role(review['role'])
-            created_at = dateutil.parser.parser(review['createdAt'])
-            updated_at = dateutil.parser.parser(review['updatedAt'])
-            release_reviews.append(Review(client, model_id, kind, role, created_at, updated_at, version))
-
-
-        created_at = dateutil.parser.parser(release_json['createdAt'])
-        updated_at = dateutil.parser.parser(release_json['updatedAt'])
-        return cls(client, model_id, version, model_card_version, notes, files, images,release_reviews, created_at, updated_at, minor, draft)
-
-    @classmethod
-    def retrieve_latest(
-        cls,
-        client: Client,
-        model_id: str,
-    ) -> Release:
-        """ Returns the most recent release of a model within Bailo.
-
-        This method assumes the highest order semantic version as the latest release for a model
-
-        :param client: A client object used to interact with Bailo
-        :param model_id: A Unique Model ID
-        """
-
-        # Get the latest release of the model
-        sorted_release_list = sorted(client.get_all_releases(model_id)['releases'], key=lambda version: Version(version['semver']))
-        latest_release = sorted_release_list[-1]
-
-        model_card_version = latest_release['modelCardVersion']
-        version = latest_release['semver']
-        minor = latest_release['minor']
-        notes = latest_release['notes']
-        files = latest_release['fileIds']
-        images = latest_release['images']
-        draft = latest_release['draft']
-
-        # Get all active reviews for this release
-        release_reviews = []
-        reviews = client.get_reviews(True, model_id)['reviews']
-        for review in reviews:
-            kind = SchemaKind(review['kind'])
-            role = Role(review['role'])
-            created_at = dateutil.parser.parser(review['createdAt'])
-            updated_at = dateutil.parser.parser(review['updatedAt'])
-            release_reviews.append(Review(client, model_id, kind, role, created_at, updated_at, version))
-
-
-        created_at = dateutil.parser.parser(latest_release['createdAt'])
-        updated_at = dateutil.parser.parser(latest_release['updatedAt'])
-        return cls(client, model_id, version, model_card_version, notes, files, images,release_reviews, created_at, updated_at, minor, draft)
-
-    def publish(self) -> None:
-        """ Publishes a release to Bailo
-        """
-        return self.client.post_release(
-            self.model_id,
-            self.model_card_version,
-            str(self.version),
-            self.notes,
-            self.files,
-            self.images,
-            self.minor,
-            self.draft
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft
         )
+
+    def get_file(self, file_id:str, localfile_name:str = None) -> _TemporaryFileWrapper[bytes] | str:
+        """ Gives the user a tempfile from file id requested.
+
+        Files have to be explicitly closed at runtime once processed via `.close()`
+
+        Examples
+        >>> release = Release.from_id(client, "test-abcdef")
+
+        >>> tp = release.get_file('<file-id>') # Save to temp
+        >>> tp.seek(0)
+        >>> tp.readlines()
+
+        >>> tp = release.get_file('<file-id>', '<localfile-name>') # Save to local
+        >>> tp.readlines()
+
+        :param file_name: The name of the file to retrieve
+        :return: Tempfile containing a binary of the file
+        """
+
+        return self.client.get_download_file(self.model_id, file_id, localfile_name)
+
+    def upload_file(self, file_id:str):
+        """ Uploads a file to bailo and adds it to the given release
+
+        :param file_id: the name of the file to upload to bailo from local directory
+        """
+        res = self.client.simple_upload(self.model_id, file_id)
+        self.files.append(res['file']['id'])
+        self.update()
+        return res
+
+    def update(self) -> Any:
+        """ Updates the any changes to this release on Bailo
+
+        :return: JSON Response object
+        """
+        return self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
 
     def delete(self) -> Any:
         """ Deletes a release from Bailo
@@ -172,25 +167,41 @@ class Release:
         """
         return self.client.delete_release(self.model_id, str(self.version))
 
-    def review(
-        self,
-        role: Role | str,
-        decision: ReviewDecision | str,
-        comment: str
-    ) -> Review:
-        """ Request the version to be reviewed
-
-        :param role: The role of the reviewer (MTR, MSRO, Owner)
-        :param decision: Either Request Changes or Approve
-        :param comment: A comment to go with the review
-
-        :return: A Review object
-        """
-        if type(decision) == str:
-            decision = ReviewDecision(decision)
-        self._review = Review.make_review(self.client, self.model_id, self.version, role, decision, comment)
-        return self._review
-
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
-        return f"{self.model_id} v {self.version}"
+        return f"{self.model_id} v{self.version}"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.version == other.version
+
+    def __ne__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self != other
+
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.version < other.version
+
+    def __le__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.version <= other.version
+
+    def __gt__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.version > other.version
+
+    def __ge__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.version >= other.version
+
+    def __hash__(self) -> int:
+        return hash((self.model_id, self.version))

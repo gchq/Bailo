@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import shutil
+import tempfile
 from typing import Any
 
 import validators
@@ -199,6 +202,38 @@ class Client:
             json=filtered_json
         ).json()
 
+    def put_release(
+        self,
+        model_id: str,
+        release_version: str,
+        notes: str,
+        draft: bool,
+        file_ids: list[str],
+        images: list[str]
+    ):
+        """
+        Creates a new model release.
+
+        :param model_id: Unique model ID
+        :param model_card_version: Model card version
+        :param release_version: Release version
+        :param notes: Notes on release
+        :param file_ids: Files for release
+        :param images: Images for release
+        :param minor: Signifies a minor release, defaults to False
+        :param draft: Signifies a draft release, defaults to False
+        :return: JSON response object
+        """
+        return self.agent.put(
+            f"{self.url}/v2/model/{model_id}/release/{release_version}",
+            json={
+                "notes": notes,
+                "draft": draft,
+                "fileIds": file_ids,
+                "images": images
+            }
+        ).json()
+
     def get_all_releases(
         self,
         model_id: str,
@@ -263,25 +298,29 @@ class Client:
         self,
         model_id: str,
         file_id: str,
+        localfile_name:str = None,
     ):
         """
         Downloads a specific file.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
-        :return: Binary response object
+        :param local_file: (optional) The file on the local machine to be copied to
+        :return: A file object
         """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/file/{file_id}/download"
-        ).content
+        with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as r:
+            if localfile_name is None:
+                fp = tempfile.NamedTemporaryFile()
+            else:
+                fp = open(localfile_name, 'wb')
+            shutil.copyfileobj(r.raw, fp)
+            return fp
 
 
     def simple_upload(
         self,
         model_id: str,
         name: str,
-        binary: bytes,
-        mime: str | None = None,
     ):
         """
         Creates a simple file upload.
@@ -292,11 +331,13 @@ class Client:
         :param mime: MIME aka media type, defaults to None
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/files/upload/simple",
-            params={"name": name, "mime": mime},
-            data=binary,
-        ).json()
+        with open(name, 'rb') as f:
+            return self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/simple/",
+                params={"name":name},
+                files={name: f}
+            ).json()
+
 
     #def start_multi_upload(): TBC
 

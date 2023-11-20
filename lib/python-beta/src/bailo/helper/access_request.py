@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-import datetime
 from typing import Any
 
-import dateutil.parser
 from bailo.core.client import Client
-from bailo.core.enums import ReviewDecision, Role
-from bailo.helper.reviews import Review
-from bailo.helper.schema import Schema
+from bailo.core.utils import filter_none
 
 
 class AccessRequest:
@@ -30,8 +26,7 @@ class AccessRequest:
         created_by:str,
         schema_id: str,
         deleted: bool = False,
-        created_at: datetime.time = None,
-        updated_at: datetime.time = None,
+        end_date: str = None
     ) -> None:
 
         self.client = client
@@ -40,17 +35,21 @@ class AccessRequest:
         self.deleted = deleted
         self.schema_id = schema_id
         self.created_by = created_by
-        self.created_at = created_at
-        self.updated_at = updated_at
+        self.end_date = end_date
 
     @classmethod
-    def retrieve(
+    def from_id(
         cls,
         client: Client,
         model_id: str,
         access_request_id: str
     ) -> AccessRequest:
-        """ Returns an existing review from Bailo
+        """ Returns an existing review from Bailo given it's unique ID
+
+        >>> from bailo import AccessRequest, Client
+        >>> client = Client("https://example.com")
+
+        >>> ar = AccessRequest.from_id(client, "test-abcdef", "minimal-general-v10-beta")
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID within Bailo
@@ -58,56 +57,48 @@ class AccessRequest:
         """
 
         json_access_request = client.get_access_request(model_id, access_request_id)['accessRequest']
-        name = json_access_request['metadata']['overview']['name']
-        deleted = json_access_request['deleted']
-        created_by = json_access_request['created_by']
+        name = json_access_request.get('metadata').get('overview').get('name')
+        end_date = json_access_request.get('metadata').get('overview').get('entities')[0]
+        deleted = json_access_request.get('deleted')
+        created_by = json_access_request.get('created_by')
 
-        schema_id = json_access_request['schemaId']
-        created_at = dateutil.parser.parser(json_access_request['createdAt'])
-        updated_at = dateutil.parser.parser(json_access_request['updatedAt'])
+        schema_id = json_access_request.get('schemaId')
 
-        return cls(client, access_request_id, model_id, schema_id, created_by, name, deleted, created_at, updated_at)
+        return cls(client, access_request_id, model_id, schema_id, created_by, name, deleted, end_date)
 
-    def create(self) -> Any:
+    @classmethod
+    def create(cls, client: Client, model_id: str, schema_id: str, name: str, created_by: str, end_date: str) -> Any:
         """ Makes an access request for the model
 
         Posts an access request to Bailo to be reviewed
 
+        :param client: A client object used to interact with Bailo
+        :param model_id: A unique model ID within Bailo
+        :param schema_id: A unique schema ID
+        :param name: The name of the access request
+        :param created_by: The name of the user that created the access request
+        :param end_date: The date of the end
         :return: JSON response object
         """
 
-        # Contains the name of the access request and the entities
-        metadata = {
+        # Parses the endDate, name and creator into a single object
+        metadata = filter_none({
             "overview":{
-            "entities":[self.created_by],
-            "name":self.name
-        }}
+            "endDate": end_date,
+            "entities":[created_by],
+            "name":name
+        }})
 
-        access_request_json = self.client.post_access_request(self.model_id, metadata, self.schema_id)['accessRequest']
+        access_request_json = client.post_access_request(model_id, metadata, schema_id)['accessRequest']
 
-        self.deleted = access_request_json['deleted']
-        self.created_at = dateutil.parser.parser(access_request_json['createdAt'])
-        self.updated_at = dateutil.parser.parser(access_request_json['updatedAt'])
+        deleted = access_request_json.get('deleted')
 
-        return access_request_json
-
-    def review(self, role: Role | str, decision: ReviewDecision | str, comment: str) -> Review:
-        """ Sends a response for the access request
-
-        :param role: The role of the reviewer
-        :param decision: Either an approve or a request changes
-        :param comment: A comment to go with the review
-        :return: JSON response object of the review
-        """
-
-        return Review.make_review(
-            client=self.client,
-            model_id=self.model_id,
-            kind=self.schema_id,
-            role=role
-        )
+        return cls(client, name, model_id, created_by, deleted,)
 
     def __str__(self) -> str:
         """ Pretty print of the json file
         """
         return f"Access Request: {self.name} - {self.model_id}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.access})"
