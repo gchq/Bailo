@@ -340,13 +340,6 @@ export type VersionDoc = Version & Document<any, any, Version>
 
 export enum MarketPlaceModelSelectType {
   MY_MODELS = 'My Models',
-  FAVOURITES = 'Favourites',
-}
-
-export enum MarketPlaceModelGroup {
-  MY_MODELS = 'user',
-  FAVOURITES = 'favourites',
-  ALL = 'all',
 }
 
 export const ModelVisibility = {
