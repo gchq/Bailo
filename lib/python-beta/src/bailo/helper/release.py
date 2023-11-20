@@ -88,7 +88,7 @@ class Release:
 
 
     @classmethod
-    def from_id(
+    def from_version(
         cls,
         client: Client,
         model_id: str,

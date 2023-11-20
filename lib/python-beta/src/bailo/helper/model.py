@@ -3,10 +3,13 @@ from __future__ import annotations
 from typing import Any
 
 from bailo.core import Client, ModelVisibility
+from bailo.helper import Release
+from semantic_version import Version
 
 
 class Model:
     def __init__(self):
+        #instantiate normally
         self.client = None
 
         self.model_id = None
@@ -63,6 +66,7 @@ class Model:
     def card_from_schema(self, schema_id: str):
         res = self.client.model_card_from_schema(model_id=self.model_id, schema_id=schema_id)
         self.__unpack_mc(res['card'])
+        #generate empty model card
 
     def card_from_model(self):
         pass
@@ -79,16 +83,35 @@ class Model:
         self.__unpack_mc(res['modelCard'])
 
     #RELEASE
-    def create_release(self):
-        pass
+    def create_release(self, version, notes = "", files = [], images = [], minor = False, draft = True):
+        Release.create(client=self.client,
+        model_id=self.model_id,
+        version=version,
+        model_card_version = self.model_version,
+        notes = notes,
+        files = files,
+        images = images,
+        minor = minor,
+        draft = draft)
 
-    def get_releases(self):
-        pass
+    def get_releases(self) -> list[Release]:
+        res = self.client.get_all_releases(model_id=self.model_id)
+        releases = []
 
-    def get_release(self):
-        pass
+        for release in res['releases']:
+            releases.append(self.get_release(version=release['semver']))
+
+        return releases
+
+    def get_release(self, version: Version | str):
+        return Release.from_version(self.client, self.model_id, version)
+
+    def get_latest_release(self):
+        return max(self.get_releases())
 
     #FILES ??
+    def upload_files(self):
+        pass
 
     #IMAGES
     def get_images(self):
