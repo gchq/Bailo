@@ -17,7 +17,7 @@ import {
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import React, { ChangeEvent, Fragment, useCallback, useMemo, useState } from 'react'
+import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
 
 import { useListModels } from '../../actions/model'
 import ChipSelector from '../../src/common/ChipSelector'
@@ -25,6 +25,13 @@ import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
 import useDebounce from '../../utils/hooks/useDebounce'
+
+interface KeyAndLabel {
+  key: string
+  label: string
+}
+
+const searchFilterTypeLabels: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
 
 export default function ExploreModels() {
   // TODO - fetch model tags from API
@@ -38,36 +45,20 @@ export default function ExploreModels() {
 
   const theme = useTheme()
 
-  interface KeyAndLabel {
-    key: string
-    label: string
-  }
-
-  const typeLabels: KeyAndLabel[] = useMemo(() => {
-    const mineLabel: KeyAndLabel = {
-      key: 'mine',
-      label: 'Mine',
+  const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
+    if (selected.length > 0) {
+      const types: string[] = []
+      selected.forEach((value) => {
+        const typeToAdd = searchFilterTypeLabels.find((typeLabel) => typeLabel.label === value)
+        if (typeToAdd && typeToAdd.label) {
+          types.push(typeToAdd.key)
+        }
+      })
+      setSelectedTypes(types)
+    } else {
+      setSelectedTypes([])
     }
-    return [mineLabel]
   }, [])
-
-  const handleSelectedTypesOnChange = useCallback(
-    (selected: string[]) => {
-      if (selected.length > 0) {
-        const types: string[] = []
-        selected.forEach((value) => {
-          const typeToAdd = typeLabels.find((typeLabel) => typeLabel.label === value)
-          if (typeToAdd && typeToAdd.label) {
-            types.push(typeToAdd.key)
-          }
-        })
-        setSelectedTypes(types)
-      } else {
-        setSelectedTypes([])
-      }
-    },
-    [typeLabels],
-  )
 
   const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
@@ -149,9 +140,11 @@ export default function ExploreModels() {
             <ChipSelector
               label='Other'
               multiple
-              tags={[...typeLabels.map((type) => type.label)]}
+              tags={[...searchFilterTypeLabels.map((type) => type.label)]}
               onChange={handleSelectedTypesOnChange}
-              selectedTags={typeLabels.filter((label) => selectedTypes.includes(label.key)).map((type) => type.label)}
+              selectedTags={searchFilterTypeLabels
+                .filter((label) => selectedTypes.includes(label.key))
+                .map((type) => type.label)}
               size='small'
             />
           </Box>
