@@ -14,7 +14,8 @@ def test_post_model(requests_mock):
     result = client.post_model(
         name="test",
         description="test",
-        visibility=ModelVisibility.Public
+        visibility=ModelVisibility.Public,
+        team_id="uncategorised"
     )
 
     assert result == {"success": True}
