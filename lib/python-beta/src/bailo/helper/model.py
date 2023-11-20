@@ -1,105 +1,129 @@
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from bailo.core import Client, ModelVisibility
-from bailo.helper.utils import retrieve_model
 
 
 class Model:
-    def __init__(
-        self,
+    def __init__(self):
+        self.client = None
+
+        self.model_id = None
+        self.name = None
+        self.description = None
+        self.visibility = None
+
+        self.model_card = None
+        self.model_card_version = None
+        self.model_card_schema = None
+
+    @classmethod
+    def create(
+        cls,
         client: Client,
         name: str,
         description: str,
-        visibility: ModelVisibility | None = ModelVisibility.Public,
-        model_card: dict[str, Any] | None = None
+        team_id: str,
+        visibility: ModelVisibility | None = None,
     ):
-        self.client = client
-        self.name, self.description, self.visibility = name, description, visibility
-        self.model_id = None
-        self.model_version = None
-        self.model_card_version = None
-        self.model_card_schema = 'minimal-general-v10-beta'
-        self.__model_card_original = model_card
-        self.__model_card = model_card
-        self.__local_dir = f"./temp_{name.strip(' ')}"  # property tbc
-        self.__mc_change = 0
-        self.__file_change = 0  # property tbc
-
-    @classmethod
-    def from_id(cls, client: Client, model_id: str):
-        name, description, visibility, model_card, model_card_version, model_card_schema = retrieve_model(client=client, model_id=model_id)
-        model = cls(
-            client=client,
+        model = cls()
+        model.client = client
+        res = model.client.post_model(
             name=name,
             description=description,
-            visibility=visibility,
-            model_card=model_card
+            team_id=team_id,
+            visibility=visibility
         )
-        model.model_id = model_id
-        model.model_card_version = model_card_version
-        model.model_card_schema = model_card_schema
+        model.__unpack(res['model'])
 
         return model
 
-    def refresh(self):
-        self.name, self.description, self.visibility, self.__model_card, self.model_card_version, self.model_card_schema = retrieve_model(client=self.client, model_id=self.model_id)
+    @classmethod
+    def from_id(cls, client: Client, model_id: str):
+        model = cls()
+        model.client = client
+        res = model.client.get_model(model_id=model_id)
+        model.__unpack(res['model'])
 
-    def publish(self):
-        if self.model_id is None:
-            res = self.client.post_model(name=self.name, description=self.description, visibility=self.visibility)
-            self.model_id = res['model']['id']
+        #get latest model card?
 
-            # Upload model card
-            if self.__model_card is not None:
-                self.client.model_card_from_schema(model_id=self.model_id, schema_id=self.model_card_schema)
-                self.client.put_model_card(model_id=self.model_id, metadata=self.__model_card)
+        return model
 
-            # Upload files (TBC)
+    def update(self):
+        res = self.client.patch_model(model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility)
+        self.__unpack(res['model'])
 
+    #MODEL CARD
+    #Should model_card be a param? Or should we call the attribute?
+    def update_model_card(self, model_card: dict[str, Any]):
+        res = self.client.put_model_card(model_id=self.model_id, metadata=model_card)
+        self.__unpack_mc(res['card'])
+
+    def card_from_schema(self, schema_id: str):
+        res = self.client.model_card_from_schema(model_id=self.model_id, schema_id=schema_id)
+        self.__unpack_mc(res['card'])
+
+    def card_from_model(self):
+        pass
+
+    def card_from_template(self):
+        pass
+
+    def get_card_latest(self):
+        res = self.client.get_model(model_id=self.model_id)
+        self.__unpack_mc(res['model']['card'])
+
+    def get_card_revision(self, version: str):
+        res = self.client.get_model_card(model_id=self.model_id, version=version)
+        self.__unpack_mc(res['modelCard'])
+
+    #RELEASE
+    def create_release(self):
+        pass
+
+    def get_releases(self):
+        pass
+
+    def get_release(self):
+        pass
+
+    #FILES ??
+
+    #IMAGES
+    def get_images(self):
+        pass
+
+    def get_image(self): #gets image ref
+        pass
+
+    #ROLES
+    def get_roles(self):
+        res = self.client.get_model_roles(model_id=self.model_id)
+
+        return res['roles']
+
+    def get_user_roles(self):
+        res = self.client.get_model_user_roles(model_id=self.model_id)
+
+        return res['roles']
+
+    #MISC
+    def __unpack(self, res):
+        self.model_id = res['id']
+        self.name = res['name']
+        self.description = res['description']
+
+        if res['visibility'] == 'private':
+            self.visibility = ModelVisibility.Private
         else:
-            self.client.patch_model(model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility)
+            self.visibility = ModelVisibility.Public
 
-            if self.__mc_change == 1:
-                if self.__model_card_original is None:
-                    self.client.model_card_from_schema(model_id=self.model_id, schema_id=self.model_card_schema)
+    def __unpack_mc(self, res):
+        self.model_card_version = res['version']
+        self.model_card_schema = res['schemaId']
 
-                self.client.put_model_card(model_id=self.model_id, metadata=self.__model_card)
-
-            # Check files, new release? (TBC)
-
-        self.refresh()
-        self.__mc_change = 0
-        self.__file_change = 0
-
-    def download(self):
-        os.makedirs(self.__local_dir, exist_ok=True)
-        res = self.client.get_files(model_id=self.model_id)
-        files = res['files']
-        for file in files:
-            file_path = f"{self.__local_dir}/{file['name']}"
-            file_binary = self.client.get_download_file(model_id=self.model_id, file_id=file["id"])
-            with open(file_path, mode="wb") as x:
-                x.write(file_binary)
-
-    #def __upload():
-
-    @property
-    def model_card(self):
-        return self.__model_card
-
-    @model_card.setter
-    def model_card(self, new):
-        self.__mc_change = 1
-        self.__model_card = new
-
-    @property
-    def local_dir(self):
-        return self.__local_dir
-
-    @local_dir.setter
-    def local_dir(self, new):
-        self.__file_change = 1
-        self.__local_dir = new
+        try:
+            self.model_card = res['metadata']
+        except:
+            self.model_card = None
