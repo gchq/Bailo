@@ -4,6 +4,7 @@ import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 
 import { useGetSchemas } from '../../../../../actions/schema'
@@ -21,6 +22,11 @@ export default function NewSchemaSelection() {
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
+
+  const error = MultipleErrorWrapper(`Unable to fetch schemas`, {
+    isSchemasError,
+  })
+  if (error) return error
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
