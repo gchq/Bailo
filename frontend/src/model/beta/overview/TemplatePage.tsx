@@ -1,8 +1,8 @@
 import { PostAdd } from '@mui/icons-material'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 
 import { useGetSchemas } from '../../../../actions/schema'
@@ -14,12 +14,7 @@ type TemplatePageProps = {
 
 export default function TemplatePage({ model }: TemplatePageProps) {
   const theme = useTheme()
-  const router = useRouter()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(model.card.schemaId)
-
-  function handleCreateFromScratchClick() {
-    router.push(`/beta/model/${model.id}/schema`)
-  }
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
@@ -60,7 +55,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                     Create from a template
                   </Typography>
                   <Typography variant='body1'>Create a model using an existing model as a template.</Typography>
-                  <Button variant='contained' disabled>
+                  <Button sx={{ width: '100%' }} variant='contained' disabled>
                     Create
                   </Button>
                 </Stack>
@@ -79,9 +74,11 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                     Create from scratch
                   </Typography>
                   <Typography variant='body1'>Create a model from scratch using a predefined schema.</Typography>
-                  <Button variant='contained' onClick={handleCreateFromScratchClick}>
-                    Create
-                  </Button>
+                  <Link href={`/beta/model/${model.id}/schema`}>
+                    <Button sx={{ width: '100%' }} variant='contained'>
+                      Create
+                    </Button>
+                  </Link>
                 </Stack>
               </Box>
             </Stack>

@@ -4,11 +4,11 @@ import { DeploymentDoc, ModelDoc, UserDoc, VersionDoc } from '../../types/types.
 import { Model } from '../../types/types.js'
 
 export default class AuthorisationDefault {
-  async getUserFromReq(req: Request) {
+  async getUserFromReq(_req: Request) {
     const userId = 'user'
     const email = 'user@example.com'
-    const data = JSON.parse(req.get('x-user') ?? '{}')
-    const roles = JSON.parse(req.get('x-roles') ?? '["user", "admin"]')
+    const data = {}
+    const roles = ['user', 'admin']
 
     return {
       userId,

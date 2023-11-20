@@ -3,6 +3,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
+import { debounce } from 'lodash'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
@@ -50,6 +51,10 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     setUserListQuery(value)
   }, [])
 
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
+
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
@@ -74,7 +79,8 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           getOptionLabel={(option) => option}
           value={currentValue || []}
           onChange={handleUserChange}
-          onInputChange={handleInputChange}
+          noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+          onInputChange={debounceOnInputChange}
           options={entities || []}
           loading={isLoading}
           renderInput={(params) => (
