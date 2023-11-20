@@ -99,10 +99,14 @@ class Model:
 
     #ROLES
     def get_roles(self):
-        pass
+        res = self.client.get_model_roles(model_id=self.model_id)
+
+        return res['roles']
 
     def get_user_roles(self):
-        pass
+        res = self.client.get_model_user_roles(model_id=self.model_id)
+
+        return res['roles']
 
     #MISC
     def __unpack(self, res):
