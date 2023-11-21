@@ -1,5 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Card, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -13,8 +12,6 @@ type ModelImageDisplayProps = {
 }
 
 export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps) {
-  const theme = useTheme()
-
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const modelImageTags = useMemo(
@@ -36,13 +33,10 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <Box
+      <Card
+        variant='outlined'
         sx={{
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: theme.palette.primary.main,
           width: '100%',
-          borderRadius: 2,
           p: 2,
         }}
       >
@@ -52,7 +46,7 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
           </Typography>
           {modelImageTags}
         </Stack>
-      </Box>
+      </Card>
     </>
   )
 }
