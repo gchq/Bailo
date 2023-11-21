@@ -15,7 +15,7 @@ export function useListUsers(q: string) {
     },
     ErrorInfo
   >(
-    q !== ''
+    q.length >= 3
       ? `/api/v2/entities?${qs.stringify({
           q,
         })}`
