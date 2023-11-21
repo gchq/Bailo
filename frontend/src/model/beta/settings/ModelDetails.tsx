@@ -99,7 +99,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
         </>
         <Divider />
         <>
-          <Typography component='h3' variant='h6'>
+          <Typography variant='h6' component='h2'>
             Access control
           </Typography>
           <RadioGroup

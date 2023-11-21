@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Checkbox, Divider, Stack, Typography } from '@mui/material'
+import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 export default function AccessRequestSettings() {
@@ -17,10 +17,16 @@ export default function AccessRequestSettings() {
       <Typography variant='h6' component='h2'>
         Manage access requests
       </Typography>
-      <Stack direction='row' alignItems='center'>
-        <Checkbox onChange={(event) => setAllowUngoverned(event.target.checked)} value={allowUngoverned} size='small' />
-        <Typography>Allow users to make ungoverned access requests</Typography>
-      </Stack>
+      <FormControlLabel
+        label='Allow users to make ungoverned access requests'
+        control={
+          <Checkbox
+            onChange={(event) => setAllowUngoverned(event.target.checked)}
+            value={allowUngoverned}
+            size='small'
+          />
+        }
+      />
       <Divider />
       <div>
         <LoadingButton onClick={handleSave} loading={loading}>

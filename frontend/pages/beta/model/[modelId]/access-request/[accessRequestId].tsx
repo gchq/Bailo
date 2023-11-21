@@ -56,7 +56,7 @@ export default function AccessRequest() {
                       Back to model
                     </Button>
                   </Link>
-                  <Typography variant='h6' color='primary' component='h2'>
+                  <Typography variant='h6' color='primary' component='h1'>
                     {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                   </Typography>
                 </Stack>

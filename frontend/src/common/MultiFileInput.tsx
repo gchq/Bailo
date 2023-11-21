@@ -75,22 +75,24 @@ export default function MultiFileInput({
   return (
     <Box sx={{ ...(fullWidth && { width: '100%' }) }}>
       {!readOnly && (
-        <Box mb={2}>
+        <>
           <label htmlFor={htmlId}>
             <Button fullWidth component='span' variant='outlined' disabled={disabled}>
               {label}
             </Button>
           </label>
           <Input multiple id={htmlId} type='file' onInput={handleFileChange} accept={accepts} disabled={disabled} />
-        </Box>
+        </>
       )}
-      <Stack spacing={1}>
-        {files.map((file) => (
-          <div key={file.name}>
-            <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
-          </div>
-        ))}
-      </Stack>
+      {files.length > 0 && (
+        <Stack spacing={1} mt={2}>
+          {files.map((file) => (
+            <div key={file.name}>
+              <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
+            </div>
+          ))}
+        </Stack>
+      )}
     </Box>
   )
 }
