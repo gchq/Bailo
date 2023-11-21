@@ -32,7 +32,7 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-            <Link href={`/beta/model/${modelId}`}>
+            <Link href={`/beta/model/${modelId}?tab=access`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
               </Button>
@@ -42,7 +42,7 @@ export default function NewSchemaSelection() {
                 Choose a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
-              <Typography variant='body1'>
+              <Typography>
                 Each organisation may have a different set of questions they require you to answer about any access
                 request you create. Select from the list below:
               </Typography>

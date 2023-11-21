@@ -47,7 +47,7 @@ export default function ViewModelCardVersion() {
   }
 
   return (
-    <Wrapper title='Modelcard Revision' page='modelcard'>
+    <Wrapper title='Model Card Revision' page='Model'>
       {(isSchemaLoading || isUiConfigLoading || isModelLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
         {!isSchemaLoading && !isUiConfigLoading && (
