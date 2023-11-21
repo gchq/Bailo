@@ -55,7 +55,7 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Typography variant='h6' color='primary' component='h2'>
+                <Typography variant='h6' component='h1' color='primary'>
                   {release ? release.semver : 'Loading...'}
                 </Typography>
               </Stack>

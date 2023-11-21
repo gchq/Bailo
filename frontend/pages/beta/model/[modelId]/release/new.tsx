@@ -104,7 +104,7 @@ export default function NewRelease() {
                 </Button>
               </Link>
               <Stack spacing={2} alignItems='center' justifyContent='center'>
-                <Typography variant='h6' color='primary'>
+                <Typography variant='h6' component='h1' color='primary'>
                   Draft New Release
                 </Typography>
                 <DesignServices color='primary' fontSize='large' />
