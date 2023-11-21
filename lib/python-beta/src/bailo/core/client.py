@@ -328,13 +328,11 @@ class Client:
 
         :param model_id: Unique model ID
         :param name: File name
-        :param binary: File data
-        :param mime: MIME aka media type, defaults to None
         :return: JSON response object
         """
         with open(name, 'rb') as f:
             return self.agent.post(
-                f"{self.url}/v2/model/{model_id}/files/upload/simple/",
+                f"{self.url}/v2/model/{model_id}/files/upload/simple",
                 params={"name":name},
                 files={name: f}
             ).json()
