@@ -6,6 +6,13 @@ from bailo.core import Client, SchemaKind
 
 
 class Schema:
+    """ Represents a schema within Bailo
+    :param client: A client object used to interact with Bailo
+    :param schema_id: A unique schema ID
+    :param name: Name of schema
+    :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
+    :param json_schema: Schema JSON
+    """
     def __init__(
         self,
         client: Client,
@@ -13,7 +20,7 @@ class Schema:
         name: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
-    ):
+    ) -> None:
         self.client = client
         self.schema_id = schema_id
         self.name = name
@@ -21,42 +28,56 @@ class Schema:
         self.json_schema = json_schema
 
     @classmethod
-    def from_id(cls, client: Client, schema_id: str):
-        res = client.get_schema(schema_id=schema_id)
-        schema_id, name, kind, json_schema = Schema.__unpack__(res)
-        schema = cls(
-            client=client,
-            schema_id=schema_id,
-            name=name,
-            kind=kind,
-            json_schema=json_schema,
-        )
+    def create(cls, client: Client, schema_id: str, name: str, kind: SchemaKind, json_schema: dict[str, Any]) -> Schema:
+        """ Builds a schema from Bailo and uploads it
+
+        :param client: A client object used to interact with Bailo
+        :param schema_id: A unique schema ID
+        :param name: Name of schema
+        :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
+        :param json_schema: Schema JSON
+        :return: Schema object
+        """
+        schema = cls(client=client, schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
+        res = client.post_schema(schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
+        schema.__unpack(res['schema'])
 
         return schema
 
-    @staticmethod
-    def __unpack__(res):
-        res = res['schema']
-        schema_id = res['id']
-        name = res['name']
+    @classmethod
+    def from_id(cls, client: Client, schema_id: str) -> Schema:
+        """ Returns an existing schema from Bailo
+
+        :param client: A client object used to interact with Bailo
+        :param schema_id: A unique schema ID
+        :return: Schema object
+        """
+        schema = cls(
+            client=client,
+            schema_id=schema_id,
+            name="temp",
+            kind=SchemaKind.Model,
+            json_schema={"temp":"temp"},
+        )
+        res = client.get_schema(schema_id=schema_id)
+        schema.__unpack(res['schema'])
+
+        return schema
+
+    def update(self) -> None:
+        """ Uploads and retrieves any changes to the schema on Bailo
+        """
+        res = self.client.post_schema(schema_id=self.schema_id, name=self.name, kind=self.kind, json_schema=self.json_schema)
+
+        self.__unpack(res)
+
+    def __unpack(self, res) -> None:
+        self.schema_id = res['id']
+        self.name = res['name']
         kind = res['kind']
-        json_schema = res['jsonSchema']
+        self.json_schema = res['jsonSchema']
 
         if kind == 'model':
-            kind = SchemaKind.Model
+            self.kind = SchemaKind.Model
         if kind == 'accessRequest':
-            kind = SchemaKind.AccessRequest
-
-        return schema_id, name, kind, json_schema
-
-    def publish(self):
-        res = self.client.post_schema(
-            schema_id=self.schema_id,
-            name=self.name,
-            kind=self.kind,
-            json_schema=self.json_schema,
-        )
-
-        print(res)
-
-        self.schema_id, self.name, self.kind, self.json_schema = Schema.__unpack__(res)
+            self.kind = SchemaKind.AccessRequest
