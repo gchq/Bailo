@@ -30,3 +30,9 @@ exports[`routes > model > file > postSimpleUpload > 400 > no name 1`] = `
   },
 }
 `;
+
+exports[`routes > model > file > postSimpleUpload > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;

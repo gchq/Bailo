@@ -50,7 +50,6 @@ export const getReleases = [
     } = parse(req, getReleasesSchema)
 
     const releases = await getModelReleases(req.user, modelId)
-
     await audit.onSearchReleases(req, releases)
 
     return res.json({

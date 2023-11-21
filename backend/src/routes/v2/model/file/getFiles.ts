@@ -50,7 +50,6 @@ export const getFiles = [
     } = parse(req, getFilesSchema)
 
     const files = await getFilesByModel(req.user, modelId)
-
     await audit.onViewFiles(req, modelId, files)
 
     return res.json({

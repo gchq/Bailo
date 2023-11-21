@@ -58,7 +58,6 @@ export const postSimpleUpload = [
     // In practice, it is fine, as the only reason this assignment is not possible is due
     // to a missing `.locked` parameter which is not a required field for our uploads.
     const file = await uploadFile(req.user, modelId, name, mime, req as unknown as ReadableStream)
-
     await audit.onCreateFile(req, file)
 
     return res.json({

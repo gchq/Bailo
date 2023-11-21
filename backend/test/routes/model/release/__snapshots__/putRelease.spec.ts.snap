@@ -36,3 +36,17 @@ exports[`routes > release > postRelease > audit > expected call 1`] = `
   "_id": "test",
 }
 `;
+
+exports[`routes > release > putRelease > 200 > ok 1`] = `
+{
+  "release": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > release > putRelease > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;

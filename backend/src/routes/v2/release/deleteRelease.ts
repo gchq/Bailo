@@ -48,7 +48,6 @@ export const deleteRelease = [
     } = parse(req, deleteReleaseSchema)
 
     await deleteReleaseService(req.user, modelId, semver)
-
     await audit.onDeleteRelease(req, modelId, semver)
 
     return res.json({

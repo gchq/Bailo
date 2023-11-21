@@ -49,7 +49,6 @@ export const getRelease = [
     } = parse(req, getReleaseSchema)
 
     const release = await getReleaseBySemver(req.user, modelId, semver)
-
     await audit.onViewRelease(req, release)
 
     return res.json({
