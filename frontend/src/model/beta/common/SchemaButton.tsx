@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Divider, Grid, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Card, CardActions, CardContent, Divider, Grid, Stack, Typography } from '@mui/material'
 import { useCallback, useState } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Link from 'src/Link'
 
 interface SchemaButtonProps {
@@ -12,7 +12,6 @@ interface SchemaButtonProps {
 
 export default function SchemaButton({ modelId, schema, onClickAction }: SchemaButtonProps) {
   const [loading, setLoading] = useState(false)
-  const theme = useTheme()
 
   const handleOnClick = useCallback(() => {
     setLoading(true)
@@ -21,24 +20,29 @@ export default function SchemaButton({ modelId, schema, onClickAction }: SchemaB
 
   return (
     <Grid item md={6} sm={12}>
-      <Box sx={{ border: 'solid', borderRadius: 2, borderWidth: 1, borderColor: theme.palette.primary.main, p: 2 }}>
-        <Stack sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} spacing={2}>
-          <Typography variant='button' fontWeight='bold' color='primary'>
-            {schema.name}
-          </Typography>
-          <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} variant='caption'>
-            {schema.description}
-          </Typography>
-          <Divider />
-          <Link href={`/beta/model/${modelId}/access-request/new?schemaId=${schema.id}`}>
-            <Box sx={{ textAlign: 'right' }}>
-              <LoadingButton loading={loading} variant='outlined' size='small' onClick={handleOnClick}>
+      <Card
+        variant='outlined'
+        sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+      >
+        <CardContent>
+          <Stack spacing={1}>
+            <Typography variant='button' fontWeight='bold' color='primary'>
+              {schema.name}
+            </Typography>
+            <MarkdownDisplay>{schema.description}</MarkdownDisplay>
+          </Stack>
+        </CardContent>
+        <CardActions sx={{ px: 2, pb: 2, textAlign: 'right' }}>
+          <Stack spacing={2} sx={{ width: '100%' }}>
+            <Divider />
+            <Link href={`/beta/model/${modelId}/access-request/new?schemaId=${schema.id}`}>
+              <LoadingButton loading={loading} variant='contained' size='small' onClick={handleOnClick}>
                 Select schema
               </LoadingButton>
-            </Box>
-          </Link>
-        </Stack>
-      </Box>
+            </Link>
+          </Stack>
+        </CardActions>
+      </Card>
     </Grid>
   )
 }

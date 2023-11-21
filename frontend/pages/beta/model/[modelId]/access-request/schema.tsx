@@ -1,6 +1,6 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -56,18 +56,20 @@ export default function NewSchemaSelection() {
               <Typography color='primary' variant='h6'>
                 Active Schemas
               </Typography>
-              <Grid container spacing={2}>
-                {modelId &&
-                  activeSchemas.map((activeSchema) => (
-                    <SchemaButton
-                      key={activeSchema.id}
-                      schema={activeSchema}
-                      modelId={modelId}
-                      onClickAction={() => handleSchemaSelectionOnClick(activeSchema)}
-                    />
-                  ))}
-                {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
-              </Grid>
+              <Box sx={{ m: 2 }}>
+                <Grid container spacing={2}>
+                  {modelId &&
+                    activeSchemas.map((activeSchema) => (
+                      <SchemaButton
+                        key={activeSchema.id}
+                        schema={activeSchema}
+                        modelId={modelId}
+                        onClickAction={() => handleSchemaSelectionOnClick(activeSchema)}
+                      />
+                    ))}
+                  {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
+                </Grid>
+              </Box>
               <Typography color='primary' variant='h6'>
                 Inactive Schemas
               </Typography>
