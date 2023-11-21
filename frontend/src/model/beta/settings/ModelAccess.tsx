@@ -51,12 +51,16 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const entities = useMemo(() => {
     if (!users) return []
 
-    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
-    if (userGroup) {
-      return userGroup.entities
-    } else {
-      return []
+    const userList = users.find((usrGroup) => usrGroup.kind === 'user')
+    const groupList = users.find((usrGroup) => usrGroup.kind === 'group')
+    const entityList: string[] = []
+    if (userList) {
+      entityList.push(...userList.entities)
     }
+    if (groupList) {
+      entityList.push(...groupList.entities)
+    }
+    return entityList
   }, [users])
 
   const onUserChange = useCallback(
