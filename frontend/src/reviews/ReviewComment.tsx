@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Card, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import UserAvatar from 'src/common/UserAvatar'
 import { EntityKind } from 'types/types'
@@ -16,14 +16,11 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
       <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />
-      <Box
+      <Card
         sx={{
-          border: 'solid',
-          borderWidth: '1px',
-          borderColor: theme.palette.primary.main,
-          borderRadius: 2,
           width: '100%',
         }}
+        variant='outlined'
       >
         <Box
           sx={{
@@ -42,7 +39,7 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
           </Typography>
         </Box>
         <Typography sx={{ px: 1, py: 0.5 }}>{comment}</Typography>
-      </Box>
+      </Card>
     </Stack>
   )
 }

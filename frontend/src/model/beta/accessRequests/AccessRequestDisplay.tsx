@@ -1,5 +1,4 @@
-import { Box, Divider, Grid, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
 import Link from 'src/Link'
 import { AccessRequestInterface } from 'types/interfaces'
 import { formatDateString } from 'utils/dateUtils'
@@ -15,8 +14,6 @@ type AccessRequestDisplayProps = {
 }
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
-  const theme = useTheme()
-
   const {
     reviews: activeReviews,
     isReviewsLoading: isActiveReviewsLoading,
@@ -48,15 +45,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Box
-          sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: theme.palette.primary.main,
-            width: '100%',
-            borderRadius: 2,
-          }}
-        >
+        <Card variant='outlined' sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
@@ -90,15 +79,14 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               justifyContent='space-between'
               spacing={4}
             >
-              <Box
+              <Card
                 sx={{
                   px: 2,
                   pt: 1,
                   pb: 2,
                   width: '100%',
-                  border: `1px solid ${theme.palette.primary.main}`,
-                  borderRadius: 2,
                 }}
+                variant='outlined'
               >
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
@@ -110,14 +98,14 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                     </Grid>
                   ))}
                 </Grid>
-              </Box>
+              </Card>
             </Stack>
             {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
             {inactiveReviews.map((review) => (
               <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
-        </Box>
+        </Card>
       </Stack>
     </>
   )
