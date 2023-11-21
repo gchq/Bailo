@@ -15,21 +15,16 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { debounce } from 'lodash'
 import _ from 'lodash-es'
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useState } from 'react'
 
 import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
-import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import { CollaboratorEntry, EntityObject, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
 import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
-
-type EntityForGrouping = {
-  kind: string
-  label: string
-}
 
 type ModelAccessProps = {
   model: ModelInterface
@@ -53,26 +48,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [model, setAccessList])
 
-  const entities = useMemo(() => {
-    if (!users) return []
-
-    const userList = users.find((usrGroup) => usrGroup.kind === 'user')
-    const groupList = users.find((usrGroup) => usrGroup.kind === 'group')
-    const entityList: EntityForGrouping[] = []
-    if (userList) {
-      userList.entities.forEach((entity) => entityList.push({ kind: 'User', label: entity }))
-    }
-    if (groupList) {
-      groupList.entities.forEach((entity) => entityList.push({ kind: 'Group', label: entity }))
-    }
-    return entityList
-  }, [users])
-
   const onUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: EntityForGrouping | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === newValue.label)) {
+    (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue.name)) {
         const updatedAccessList = accessList
-        const newAccess = { entity: newValue.label, roles: [] }
+        const newAccess = { entity: newValue.name, roles: [] }
         updatedAccessList.push(newAccess)
         setAccessList(accessList)
       }
@@ -131,10 +111,10 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
             groupBy={(option) => option.kind}
-            getOptionLabel={(option: EntityForGrouping) => option.label.split(':')[1]}
+            getOptionLabel={(option: EntityObject) => option.name}
             isOptionEqualToValue={(option: any, value: any) => option === value}
             onChange={onUserChange}
-            options={entities}
+            options={users || []}
             renderInput={(params) => (
               <TextField
                 {...params}

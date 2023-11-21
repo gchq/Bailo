@@ -85,3 +85,8 @@ export interface PostSimpleUpload {
 export interface User {
   dn: string
 }
+
+export interface EntityObject {
+  kind: string
+  name: string
+}
