@@ -32,7 +32,7 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-            <Link href={`/beta/model/${modelId}?tab=access`}>
+            <Link href={`/beta/model/${modelId}`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
               </Button>
