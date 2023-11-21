@@ -31,13 +31,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
 
   const entities = useMemo(() => {
     if (!users) return []
-
-    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
-    if (userGroup) {
-      return userGroup.entities.map((entity) => entity.split(':')[1])
-    } else {
-      return []
-    }
+    return users.map((entity) => entity.id)
   }, [users])
 
   const handleUserChange = useCallback(

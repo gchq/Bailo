@@ -1,21 +1,17 @@
 import qs from 'querystring'
 import useSWR from 'swr'
+import { EntityObject } from 'types/v2/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
-
-interface EntityResults {
-  kind: string
-  entities: string[]
-}
 
 export function useListUsers(q: string) {
   const { data, error, mutate } = useSWR<
     {
-      results: EntityResults[]
+      results: EntityObject[]
     },
     ErrorInfo
   >(
-    q !== ''
+    q.length >= 3
       ? `/api/v2/entities?${qs.stringify({
           q,
         })}`
