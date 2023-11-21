@@ -26,6 +26,11 @@ import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
+type EntityForGrouping = {
+  kind: string
+  label: string
+}
+
 type ModelAccessProps = {
   model: ModelInterface
 }
@@ -53,21 +58,21 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
     const userList = users.find((usrGroup) => usrGroup.kind === 'user')
     const groupList = users.find((usrGroup) => usrGroup.kind === 'group')
-    const entityList: string[] = []
+    const entityList: EntityForGrouping[] = []
     if (userList) {
-      entityList.push(...userList.entities)
+      userList.entities.forEach((entity) => entityList.push({ kind: 'User', label: entity }))
     }
     if (groupList) {
-      entityList.push(...groupList.entities)
+      groupList.entities.forEach((entity) => entityList.push({ kind: 'Group', label: entity }))
     }
     return entityList
   }, [users])
 
   const onUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
+    (_event: SyntheticEvent<Element, Event>, newValue: EntityForGrouping | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue.label)) {
         const updatedAccessList = accessList
-        const newAccess = { entity: newValue, roles: [] }
+        const newAccess = { entity: newValue.label, roles: [] }
         updatedAccessList.push(newAccess)
         setAccessList(accessList)
       }
@@ -125,8 +130,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             size='small'
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
-            isOptionEqualToValue={(option: string, value: string) => option === value}
-            getOptionLabel={(option) => option.split(':')[1]}
+            groupBy={(option) => option.kind}
+            getOptionLabel={(option: EntityForGrouping) => option.label.split(':')[1]}
+            isOptionEqualToValue={(option: any, value: any) => option === value}
             onChange={onUserChange}
             options={entities}
             renderInput={(params) => (
