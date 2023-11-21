@@ -12,7 +12,7 @@ export const getEntitiesSchema = z.object({
 })
 
 interface GetEntitiesResponse {
-  results: Array<{ kind: string; name: string }>
+  results: Array<{ kind: string; id: string }>
 }
 
 export const getEntities = [

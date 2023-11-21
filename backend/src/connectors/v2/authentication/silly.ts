@@ -31,19 +31,19 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     return [
       {
         kind: SillyEntityKind.User,
-        name: 'user',
+        id: 'user',
       },
       {
         kind: SillyEntityKind.User,
-        name: 'user2',
+        id: 'user2',
       },
       {
         kind: SillyEntityKind.Group,
-        name: 'group1',
+        id: 'group1',
       },
       {
         kind: SillyEntityKind.Group,
-        name: 'group2',
+        id: 'group2',
       },
     ]
   }

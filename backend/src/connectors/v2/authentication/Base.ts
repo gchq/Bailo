@@ -13,7 +13,7 @@ export abstract class BaseAuthenticationConnector {
   abstract getUserFromReq(req: Request): Promise<User>
   abstract hasRole(user: UserDoc, role: RoleKeys): Promise<boolean>
 
-  abstract queryEntities(query: string): Promise<Array<{ kind: string; name: string }>>
+  abstract queryEntities(query: string): Promise<Array<{ kind: string; id: string }>>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<{ email: string }>
   abstract getEntityMembers(entity: string): Promise<Array<string>>

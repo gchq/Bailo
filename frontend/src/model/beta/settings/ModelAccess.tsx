@@ -50,9 +50,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === newValue.name)) {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue.id)) {
         const updatedAccessList = accessList
-        const newAccess = { entity: newValue.name, roles: [] }
+        const newAccess = { entity: newValue.id, roles: [] }
         updatedAccessList.push(newAccess)
         setAccessList(accessList)
       }
@@ -111,7 +111,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
             groupBy={(option) => option.kind}
-            getOptionLabel={(option: EntityObject) => option.name}
+            getOptionLabel={(option: EntityObject) => option.id}
             isOptionEqualToValue={(option: any, value: any) => option === value}
             onChange={onUserChange}
             options={users || []}

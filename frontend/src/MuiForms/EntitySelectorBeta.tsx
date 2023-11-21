@@ -31,7 +31,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
 
   const entities = useMemo(() => {
     if (!users) return []
-    return users.map((entity) => entity.name)
+    return users.map((entity) => entity.id)
   }, [users])
 
   const handleUserChange = useCallback(

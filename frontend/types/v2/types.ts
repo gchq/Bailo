@@ -88,5 +88,5 @@ export interface User {
 
 export interface EntityObject {
   kind: string
-  name: string
+  id: string
 }
