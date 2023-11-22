@@ -19,6 +19,7 @@ class Model:
     def __init__(
         self,
         client: Client,
+        model_id: str,
         name: str,
         description: str,
         visibility: ModelVisibility | None = None,
@@ -26,7 +27,7 @@ class Model:
 
         self.client = client
 
-        self.model_id = None
+        self.model_id = model_id
         self.name = name
         self.description = description
         self.visibility = visibility
@@ -53,13 +54,14 @@ class Model:
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
-        model = cls(client=client, name=name, description=description, visibility=visibility)
-        res = model.client.post_model(
+        res = client.post_model(
             name=name,
             description=description,
             team_id=team_id,
             visibility=visibility
         )
+        model = cls(client=client, model_id=res['model']['id'], name=name, description=description, visibility=visibility)
+
         model.__unpack(res['model'])
 
         return model
@@ -72,7 +74,7 @@ class Model:
         :param model_id: A unique model ID
         :return: Model object
         """
-        model = cls(client=client, name="temp", description="temp")
+        model = cls(client=client, model_id=model_id, name="temp", description="temp")
         res = model.client.get_model(model_id=model_id)
         model.__unpack(res['model'])
 
@@ -86,7 +88,7 @@ class Model:
         res = self.client.patch_model(model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility)
         self.__unpack(res['model'])
 
-    def update_model_card(self, model_card: dict[str, Any] = None) -> None:
+    def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
         """ Uploads and retrieves any changes to the model card on Bailo
 
         :param model_card: Model card dictionary, defaults to None
@@ -127,7 +129,7 @@ class Model:
         res = self.client.get_model_card(model_id=self.model_id, version=version)
         self.__unpack_mc(res['modelCard'])
 
-    def create_release(self, version: Version | str, notes: str | None = "", files: list[str] = [], images: list[str] = [], minor: bool = False, draft: bool = True) -> Release:
+    def create_release(self, version: Version | str, notes: str = "", files: list[str] = [], images: list[str] = [], minor: bool = False, draft: bool = True) -> Release:
         """Calls the Release.create method to build a release from Bailo and upload it
 
         :param version: A semantic version for the release
@@ -141,7 +143,7 @@ class Model:
         Release.create(client=self.client,
             model_id=self.model_id,
             version=version,
-            model_card_version = self.model_version,
+            model_card_version = self.model_card_version,
             notes = notes,
             files = files,
             images = images,

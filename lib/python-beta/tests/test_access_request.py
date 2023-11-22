@@ -13,15 +13,16 @@ def test_access_request():
                                    model_id="test_id",
                                    created_by="user",
                                    schema_id="test_id",
-                                   )
+                                   access_request_id="example"
+                                )
 
     assert isinstance(access_request, AccessRequest)
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("schema_id","created_by", "end_date"),
+    ("name","schema_id","created_by", "end_date"),
     [
-        ("test","minimal-access-request-general-v10-beta", "user", "1970.01.01")
+        ("test","minimal-access-request-general-v10-beta", "user", "1970-01-01")
     ]
 )
 def test_create_get_from_version_update_and_delete_access_request(name, schema_id, created_by, end_date, integration_client, example_model):
@@ -29,8 +30,16 @@ def test_create_get_from_version_update_and_delete_access_request(name, schema_i
     ar = AccessRequest.create(
         client=integration_client,
         name=name,
-        model_id=example_model,
+        model_id=example_model.model_id,
         schema_id=schema_id,
         created_by=created_by,
         end_date=end_date
     )
+
+    # Get access request
+    get_ar = AccessRequest.from_id(integration_client, example_model.model_id, ar.access_request_id)
+
+    # Check they're the same access request
+    assert ar == get_ar
+
+    ar.delete()

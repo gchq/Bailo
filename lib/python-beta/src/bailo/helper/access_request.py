@@ -4,6 +4,7 @@ import datetime
 from typing import Any
 
 from bailo.core.client import Client
+from bailo.core.exceptions import BailoError
 from bailo.core.utils import filter_none
 
 
@@ -16,7 +17,7 @@ class AccessRequest:
     :param name: The name of the access request
     :param model_id: The unique model id of the model that the access request is being made with
     :param schema_id: An ID for the schema within Bailo
-    :param access_request_schema_id: The Unique ID for this access request
+    :param access_request_id: The Unique ID for this access request
     :param deleted: Whether the access request has been deleted
     :param end_date: The date of the end (YYYY/MM/DD)
     """
@@ -66,14 +67,14 @@ class AccessRequest:
         end_date = json_access_request['metadata']['overview']['endDate']
 
         deleted = json_access_request['deleted']
-        created_by = json_access_request['created_by']
+        created_by = json_access_request['createdBy']
 
         schema_id = json_access_request['schemaId']
 
-        return cls(client, name, model_id, schema_id, created_by, deleted, end_date)
+        return cls(client, name, model_id, created_by, schema_id, access_request_id, deleted, end_date)
 
     @classmethod
-    def create(cls, client: Client, name: str, model_id: str, schema_id: str, created_by: str, end_date: str) -> Any:
+    def create(cls, client: Client, name: str, model_id: str, schema_id: str, created_by: str, end_date: str) -> AccessRequest:
         """ Makes an access request for the model
 
         Posts an access request to Bailo to be reviewed
@@ -90,9 +91,9 @@ class AccessRequest:
         # Parses the endDate, name and creator into a single object
         metadata = filter_none({
             "overview":{
-            "endDate": end_date,
             "entities":[created_by],
-            "name":name
+            "name":name,
+            "endDate": end_date
         }})
 
         access_request_json = client.post_access_request(model_id, metadata, schema_id)['accessRequest']
@@ -105,7 +106,10 @@ class AccessRequest:
     def delete(self) -> bool:
         """ Deletes the access request on bailo
         """
-        self.client.delete_access_request(self.model_id, self.access_request_id)
+        try:
+            self.client.delete_access_request(self.model_id, self.access_request_id)
+        except BailoError:
+            return False
         return True
 
     def update(self):
@@ -125,4 +129,9 @@ class AccessRequest:
         return f"Access Request: {self.name} - {self.model_id}"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.model_id},{self.end_date})"
+        return f"{self.__class__.__name__}({self.model_id},{self.schema_id})"
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.access_request_id == other.access_request_id

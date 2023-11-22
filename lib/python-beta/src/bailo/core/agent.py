@@ -2,14 +2,36 @@ from __future__ import annotations
 
 import requests
 
+from .exceptions import BailoError
+
 
 class Agent:
     def __init__(self):
-        self.get = requests.get
-        self.patch = requests.patch
-        self.post = requests.post
-        self.put = requests.put
-        self.delete = requests.delete
+        pass
+
+    def __request(self, *args, method, **kwargs):
+        res = requests.request(method, *args, **kwargs)
+        if 200 <= res.status_code < 300:
+            return res
+        raise BailoError(res.json()['error']['message'])
+
+    def get(self, *args, **kwargs):
+        return self.__request(*args, method="GET", **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.__request(*args, method="POST", **kwargs)
+
+    def patch(self, *args, **kwargs):
+        return self.__request(*args, method="PATCH", **kwargs)
+
+    def push(self, *args, **kwargs):
+        return self.__request(*args, method="PUSH", **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.__request(*args, method="DELETE", **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.__request(*args, method="PUT", **kwargs)
 
 
 class PkiAgent():

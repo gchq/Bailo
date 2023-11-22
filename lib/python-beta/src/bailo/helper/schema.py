@@ -64,14 +64,8 @@ class Schema:
 
         return schema
 
-    def update(self) -> None:
-        """ Uploads and retrieves any changes to the schema on Bailo
-        """
-        res = self.client.post_schema(schema_id=self.schema_id, name=self.name, kind=self.kind, json_schema=self.json_schema)
-
-        self.__unpack(res)
-
     def __unpack(self, res) -> None:
+        print(res)
         self.schema_id = res['id']
         self.name = res['name']
         kind = res['kind']
