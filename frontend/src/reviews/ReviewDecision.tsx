@@ -1,11 +1,12 @@
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Box, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Card, Stack, Typography } from '@mui/material'
+import { useGetIdentity } from 'actions/user'
 import { useMemo } from 'react'
+import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
+import MessageAlert from 'src/MessageAlert'
 import { DecisionKeys } from 'types/interfaces'
-import EntityUtils from 'utils/entities/EntityUtils'
 
 type ReviewDecisionProps = {
   user: string
@@ -13,36 +14,41 @@ type ReviewDecisionProps = {
 }
 
 export default function ReviewDecision({ user, decision }: ReviewDecisionProps) {
-  const theme = useTheme()
-  const entityUtils = new EntityUtils()
   const isApproved = useMemo(() => decision === 'approve', [decision])
 
-  const username = entityUtils.formatDisplayName(user)
+  const { entity, isEntityLoading, isEntityError } = useGetIdentity(user || '')
+
+  if (isEntityError) {
+    return <MessageAlert message={isEntityError.info.message} severity='error' />
+  }
 
   return (
-    <Stack direction='row' spacing={2} alignItems='center'>
-      <UserAvatar entityDn={username} size='chip' />{' '}
-      <Box
-        sx={{
-          border: 'solid',
-          borderWidth: '1px',
-          borderColor: theme.palette.primary.main,
-          borderRadius: 2,
-          px: 1,
-          py: 0.5,
-          width: '100%',
-        }}
-      >
-        <Stack direction='row' spacing={1} alignItems='center'>
-          <Typography>
-            <Box component='span' fontWeight='bold'>
-              {username}
-            </Box>
-            {` ${isApproved ? 'approved' : 'requested changes'}`}
-          </Typography>
-          {isApproved ? <Done color='success' fontSize='small' /> : <HourglassEmpty color='warning' fontSize='small' />}
-        </Stack>
-      </Box>
-    </Stack>
+    <>
+      {isEntityLoading && <Loading />}
+      <Stack direction='row' spacing={2} alignItems='center'>
+        <UserAvatar entityDn={entity} size='chip' />{' '}
+        <Card
+          sx={{
+            width: '100%',
+            p: 1,
+          }}
+          variant='outlined'
+        >
+          <Stack direction='row' spacing={1} alignItems='center'>
+            <Typography>
+              <Box component='span' fontWeight='bold'>
+                {entity}
+              </Box>
+              {` ${isApproved ? 'approved' : 'requested changes'}`}
+            </Typography>
+            {isApproved ? (
+              <Done color='success' fontSize='small' />
+            ) : (
+              <HourglassEmpty color='warning' fontSize='small' />
+            )}
+          </Stack>
+        </Card>
+      </Stack>
+    </>
   )
 }

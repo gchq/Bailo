@@ -30,10 +30,10 @@ import Switch from '@mui/material/Switch'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import { useGetIdentity } from 'actions/user'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
 import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
-import EntityUtils from 'utils/entities/EntityUtils'
 
 import { useGetNumApprovals } from '../data/approvals'
 import { useGetUiConfig } from '../data/uiConfig'
@@ -106,13 +106,13 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
     setOpen(!open)
   }
 
-  const entityUtils = new EntityUtils()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { numApprovals, isNumApprovalsLoading } = useGetNumApprovals()
   const { currentUser } = useGetCurrentUser()
+  const { entity } = useGetIdentity(currentUser?.id || '')
 
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
@@ -226,10 +226,10 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               </Link>
             </Box>
             {headerTitle}
-            {currentUser ? (
+            {entity ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                  <UserAvatar entityDn={entityUtils.formatDisplayName(currentUser.id)} size='chip' />
+                  <UserAvatar entityDn={entity} size='chip' />
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>

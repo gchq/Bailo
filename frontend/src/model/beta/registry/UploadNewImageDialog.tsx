@@ -14,14 +14,13 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useGetCurrentUser } from 'actions/user'
+import { useGetCurrentUser, useGetIdentity } from 'actions/user'
 import { useState } from 'react'
 import shellEscape from 'shell-escape'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/beta/registry/CodeLine'
 import { ModelInterface } from 'types/v2/types'
-import EntityUtils from 'utils/entities/EntityUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface UploadModelImageDialogProps {
@@ -33,9 +32,9 @@ interface UploadModelImageDialogProps {
 export default function UploadModelImageDialog({ open, handleClose, model }: UploadModelImageDialogProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { entity, isEntityLoading, isEntityError } = useGetIdentity(currentUser?.dn || '')
 
   const theme = useTheme()
-  const entityUtils = new EntityUtils()
 
   const [displayToken, setDisplayToken] = useState(false)
   const [displayedToken, setDisplayedToken] = useState('')
@@ -85,9 +84,13 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isEntityError) {
+    return <MessageAlert message={isEntityError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
+      {(isUiConfigLoading || isCurrentUserLoading || isEntityLoading) && <Loading />}
       {uiConfig && currentUser && (
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
@@ -125,11 +128,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
-                  <CodeLine
-                    line={`docker login ${uiConfig.registry.host} -u ${shellEscape([
-                      entityUtils.formatDisplayName(currentUser.dn),
-                    ])}`}
-                  />
+                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([entity])}`} />
                 </Stack>
               </Stack>
               <Stack spacing={1}>

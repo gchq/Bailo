@@ -3,12 +3,13 @@ import MuiLink from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
+import { useGetIdentity } from 'actions/user'
 import { useGetModelDeployments } from 'data/model'
 import Link from 'next/link'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import { Deployment, Entity, Version } from 'types/types'
-import EntityUtils from 'utils/entities/EntityUtils'
 
 interface Props {
   version: Version
@@ -16,7 +17,6 @@ interface Props {
 
 export default function Deployments({ version }: Props) {
   const theme = useTheme()
-  const entityUtils = new EntityUtils()
 
   if (!('uuid' in version.model)) {
     throw new Error('Deployments requires a version with a populated model field.')
@@ -55,12 +55,7 @@ export default function Deployments({ version }: Props) {
                 Contacts:
               </Typography>
               {deployment.metadata.contacts.owner.map((owner: Entity) => (
-                <Chip
-                  key={owner.id}
-                  color='primary'
-                  avatar={<UserAvatar entityDn={entityUtils.formatDisplayName(owner.id)} size='chip' />}
-                  label={owner.id}
-                />
+                <DeploymentOwnerChip key={owner.id} owner={owner.id} />
               ))}
             </Stack>
           </Box>
@@ -68,5 +63,23 @@ export default function Deployments({ version }: Props) {
         </Box>
       ))}
     </>
+  )
+}
+
+interface DeploymentOwnerChipProps {
+  owner: string
+}
+
+function DeploymentOwnerChip({ owner }: DeploymentOwnerChipProps) {
+  const { entity, isEntityLoading, isEntityError } = useGetIdentity(owner || '')
+
+  if (isEntityError) {
+    return <Alert severity='error'>Failed to find owner identity...</Alert>
+  }
+
+  return isEntityLoading ? (
+    <Loading />
+  ) : (
+    <Chip color='primary' avatar={<UserAvatar entityDn={entity} size='chip' />} label={owner} />
   )
 }

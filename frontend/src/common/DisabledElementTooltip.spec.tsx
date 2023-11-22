@@ -16,7 +16,7 @@ describe('DisabledElementTooltip', () => {
     )
 
     await waitFor(async () => {
-      userEvent.hover(screen.getByTestId('trigger'))
+      userEvent.hover(await screen.findByTestId('trigger'))
       expect(await screen.findByText(testMessage)).not.toBeUndefined()
     })
   })

@@ -1,5 +1,4 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
@@ -24,7 +23,6 @@ export default function ReleaseDisplay({
   release: ReleaseInterface
   latestRelease: string
 }) {
-  const theme = useTheme()
   const router = useRouter()
 
   const {
@@ -69,15 +67,7 @@ export default function ReleaseDisplay({
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Box
-          sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: theme.palette.primary.main,
-            width: '100%',
-            borderRadius: 2,
-          }}
-        >
+        <Card variant='outlined' sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
@@ -157,7 +147,7 @@ export default function ReleaseDisplay({
               ))}
             </Stack>
           </Stack>
-        </Box>
+        </Card>
       </Stack>
     </>
   )

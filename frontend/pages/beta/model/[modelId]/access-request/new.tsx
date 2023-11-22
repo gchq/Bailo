@@ -1,12 +1,10 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import { useGetCurrentUser } from 'actions/user'
+import { useGetCurrentUser, useGetIdentity } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'src/Link'
-import EntityUtils from 'utils/entities/EntityUtils'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
@@ -20,26 +18,21 @@ import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 
 
 export default function NewAccessRequest() {
   const router = useRouter()
-  const theme = useTheme()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { entity, isEntityLoading, isEntityError } = useGetIdentity(currentUser?.dn || '')
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const currentUserId = useMemo(() => {
-    const entityUtils = new EntityUtils()
-    return currentUser ? entityUtils.formatDisplayName(currentUser?.dn) : ''
-  }, [currentUser])
-
   useEffect(() => {
     if (!model || !schema) return
     const defaultState = {
-      overview: { entities: [currentUserId] },
+      overview: { entities: [entity] },
     }
     const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
@@ -47,7 +40,7 @@ export default function NewAccessRequest() {
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model, currentUserId])
+  }, [schema, model, entity])
 
   async function onSubmit() {
     setSubmissionErrorText('')
@@ -72,7 +65,7 @@ export default function NewAccessRequest() {
         const res = await postAccessRequest(modelId, schemaId, data)
         if (res.status && res.status < 400) {
           setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}`)
+          router.push(`/beta/model/${modelId}?tab=access`)
         } else {
           setSubmitButtonLoading(false)
         }
@@ -92,9 +85,13 @@ export default function NewAccessRequest() {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isEntityError) {
+    return <MessageAlert message={isEntityError.info.message} severity='error' />
+  }
+
   return (
     <Wrapper title='Access Request' page='Model'>
-      {(isSchemaLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
+      {(isSchemaLoading || isModelLoading || isCurrentUserLoading || isEntityLoading) && <Loading />}
       {!isSchemaLoading && !isModelLoading && (
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           {(!model || !model.card) && (
@@ -117,9 +114,7 @@ export default function NewAccessRequest() {
                 >
                   Submit
                 </LoadingButton>
-                <Typography variant='caption' color={theme.palette.error.main}>
-                  {submissionErrorText}
-                </Typography>
+                <MessageAlert message={submissionErrorText} severity='error' />
               </Stack>
             </Stack>
           )}

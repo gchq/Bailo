@@ -3,10 +3,10 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
-import EntityUtils from 'utils/entities/EntityUtils'
+import { debounce } from 'lodash'
+import { KeyboardEvent, SyntheticEvent, useCallback, useState } from 'react'
 
-import { useGetCurrentUser, useListUsers } from '../../actions/user'
+import { useGetCurrentUser, useGetIdentitiesFromEntityObjects, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
@@ -25,21 +25,10 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const [userListQuery, setUserListQuery] = useState('')
 
   const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { entities, isEntitiesLoading, isEntitiesError } = useGetIdentitiesFromEntityObjects(users)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
-
-  const entities = useMemo(() => {
-    if (!users) return []
-
-    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
-    if (userGroup) {
-      const entityUtils = new EntityUtils()
-      return userGroup.entities.map((entity) => entityUtils.formatDisplayName(entity))
-    } else {
-      return []
-    }
-  }, [users])
 
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
@@ -52,13 +41,21 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     setUserListQuery(value)
   }, [])
 
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
+
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isEntitiesError) {
+    return <MessageAlert message={isEntitiesError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {isCurrentUserLoading && <Loading />}
+      {(isCurrentUserLoading || isEntitiesLoading) && <Loading />}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete
           multiple
@@ -76,8 +73,9 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           getOptionLabel={(option) => option}
           value={currentValue || []}
           onChange={handleUserChange}
-          onInputChange={handleInputChange}
-          options={entities || []}
+          noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+          onInputChange={debounceOnInputChange}
+          options={entities.map((entity) => entity.id) || []}
           loading={isLoading}
           renderInput={(params) => (
             <TextField

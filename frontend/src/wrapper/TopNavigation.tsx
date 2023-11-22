@@ -17,10 +17,12 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
+import { useGetIdentity } from 'actions/user'
 import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
-import EntityUtils from 'utils/entities/EntityUtils'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
@@ -73,7 +75,8 @@ export default function TopNavigation({
   const router = useRouter()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
-  const entityUtils = new EntityUtils()
+
+  const { entity, isEntityLoading, isEntityError } = useGetIdentity(currentUser.dn || '')
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -93,94 +96,101 @@ export default function TopNavigation({
     </Box>
   )
 
+  if (isEntityError) {
+    return <MessageAlert message={isEntityError.info.message} severity='error' />
+  }
+
   return (
-    <AppBar
-      open={drawerOpen}
-      position='absolute'
-      data-test='appBar'
-      sx={{
-        ...pageTopStyling,
-        top: 'unset',
-        background:
-          theme.palette.mode === 'light'
-            ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
-            : '#242424',
-      }}
-    >
-      <Toolbar
+    <>
+      {isEntityLoading && <Loading />}
+      <AppBar
+        open={drawerOpen}
+        position='absolute'
+        data-test='appBar'
         sx={{
-          pr: '24px', // keep right padding when drawer closed
+          ...pageTopStyling,
+          top: 'unset',
+          background:
+            theme.palette.mode === 'light'
+              ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
+              : '#242424',
         }}
       >
-        <IconButton
-          edge='start'
-          color='inherit'
-          aria-label='open drawer'
-          onClick={toggleDrawer}
+        <Toolbar
           sx={{
-            marginRight: 2,
-            ...(drawerOpen && { display: 'none' }),
+            pr: '24px', // keep right padding when drawer closed
           }}
         >
-          <MenuIcon />
-        </IconButton>
-        <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-            <Typography variant='h5' component='div'>
-              <span className={pacifico.className}>Bailo</span>
-              {betaAdornment}
-            </Typography>
-          </Link>
-        </Box>
-        <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-          <ExpandableButton
-            label='Add Model'
-            icon={<Add />}
-            onClick={() => handleNewModelClicked()}
-            ariaLabel='Add a new model'
-          />
-          {currentUser ? (
-            <>
-              <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                <UserAvatar entityDn={entityUtils.formatDisplayName(currentUser.dn)} size='chip' />
-              </IconButton>
-              <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
-                <MenuList>
-                  <MenuItem data-test='toggleDarkMode'>
-                    <ListItemIcon>
-                      <DarkModeIcon fontSize='small' />
-                    </ListItemIcon>
-                    <Switch
-                      size='small'
-                      checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                      onChange={toggleDarkMode}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </MenuItem>
-                  <Link href='/settings' color='inherit' underline='none'>
-                    <MenuItem data-test='settingsLink'>
+          <IconButton
+            edge='start'
+            color='inherit'
+            aria-label='open drawer'
+            onClick={toggleDrawer}
+            sx={{
+              marginRight: 2,
+              ...(drawerOpen && { display: 'none' }),
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
+            <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+              <Typography variant='h5' component='div'>
+                <span className={pacifico.className}>Bailo</span>
+                {betaAdornment}
+              </Typography>
+            </Link>
+          </Box>
+          <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+            <ExpandableButton
+              label='Add Model'
+              icon={<Add />}
+              onClick={() => handleNewModelClicked()}
+              ariaLabel='Add a new model'
+            />
+            {currentUser ? (
+              <>
+                <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
+                  <UserAvatar entityDn={entity} size='chip' />
+                </IconButton>
+                <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
+                  <MenuList>
+                    <MenuItem data-test='toggleDarkMode'>
                       <ListItemIcon>
-                        <Settings fontSize='small' />
+                        <DarkModeIcon fontSize='small' />
                       </ListItemIcon>
-                      <ListItemText>Settings</ListItemText>
+                      <Switch
+                        size='small'
+                        checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                        onChange={toggleDarkMode}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                      />
                     </MenuItem>
-                  </Link>
-                  <Link href='/api/logout' color='inherit' underline='none'>
-                    <MenuItem data-test='logoutLink'>
-                      <ListItemIcon>
-                        <LogoutIcon fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Sign Out</ListItemText>
-                    </MenuItem>
-                  </Link>
-                </MenuList>
-              </Menu>
-            </>
-          ) : (
-            <Typography variant='caption'>Loading...</Typography>
-          )}
-        </Stack>
-      </Toolbar>
-    </AppBar>
+                    <Link href='/settings' color='inherit' underline='none'>
+                      <MenuItem data-test='settingsLink'>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                    </Link>
+                    <Link href='/api/logout' color='inherit' underline='none'>
+                      <MenuItem data-test='logoutLink'>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Sign Out</ListItemText>
+                      </MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+              </>
+            ) : (
+              <Typography variant='caption'>Loading...</Typography>
+            )}
+          </Stack>
+        </Toolbar>
+      </AppBar>
+    </>
   )
 }

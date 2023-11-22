@@ -1,21 +1,17 @@
 import qs from 'querystring'
 import useSWR from 'swr'
+import { EntityObject } from 'types/v2/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
-
-interface EntityResults {
-  kind: string
-  entities: string[]
-}
 
 export function useListUsers(q: string) {
   const { data, error, mutate } = useSWR<
     {
-      results: EntityResults[]
+      results: EntityObject[]
     },
     ErrorInfo
   >(
-    q !== ''
+    q.length >= 3
       ? `/api/v2/entities?${qs.stringify({
           q,
         })}`
@@ -45,5 +41,31 @@ export function useGetCurrentUser() {
     currentUser: data?.user || undefined,
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
+  }
+}
+
+function formatDisplayName(dn: string) {
+  return dn.includes(':') ? dn.split(':')[1] : dn
+}
+
+function formatArrayDisplayNameFromEntityObject(entityList: EntityObject[]) {
+  return entityList.map((entity) => ({ id: formatDisplayName(entity.id), kind: entity.kind }))
+}
+
+export function useGetIdentity(dn: string) {
+  return {
+    mutateEntity: () => undefined,
+    entity: formatDisplayName(dn),
+    isEntityLoading: false,
+    isEntityError: undefined as ErrorInfo | undefined,
+  }
+}
+
+export function useGetIdentitiesFromEntityObjects(dnList: EntityObject[]) {
+  return {
+    mutateEntities: () => undefined,
+    entities: formatArrayDisplayNameFromEntityObject(dnList),
+    isEntitiesLoading: false,
+    isEntitiesError: undefined as ErrorInfo | undefined,
   }
 }

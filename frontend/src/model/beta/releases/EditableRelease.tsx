@@ -61,6 +61,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   }
 
   const handleCancel = () => {
+    resetForm()
     setIsEdit(false)
   }
 
