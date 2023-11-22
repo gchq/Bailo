@@ -10,7 +10,6 @@ import Link from 'src/Link'
 import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
 import Loading from '../../../../../src/common/Loading'
-import MessageAlert from '../../../../../src/MessageAlert'
 import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SchemaKind } from '../../../../../types/v2/types'
@@ -27,10 +26,6 @@ export default function NewSchemaSelection() {
     isSchemasError,
   })
   if (error) return error
-
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
-  }
 
   return (
     <Wrapper title='Select a schema' page='upload'>
