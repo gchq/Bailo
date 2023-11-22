@@ -1,5 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
-import { ChangeEvent, useMemo } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import ModelImageList from 'src/common/ModelImageList'
@@ -54,6 +54,21 @@ export default function ReleaseForm({
   isEdit = false,
 }: ReleaseFormProps) {
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
+  const [latestRelease, setLatestRelease] = useState<string>('')
+
+  useEffect(() => {
+    const versions = [...formData.semver].sort((a, b) => {
+      const versionA = a.split('.').map(Number)
+      const versionB = b.split('.').map(Number)
+      for (let i = 0; i < versionA.length; i++) {
+        if (versionA[i] !== versionB[i]) {
+          return versionB[i] - versionA[i]
+        }
+      }
+      return 0
+    })
+    setLatestRelease(versions.length > 0 ? versions[0] : '')
+  }, [formData.semver])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -85,8 +100,16 @@ export default function ReleaseForm({
         </Stack>
       )}
       <Stack>
+        {!editable && (
+          <>
+            <Typography fontWeight='bold'>Latest semantic version</Typography>
+            <Typography>{latestRelease}</Typography>
+          </>
+        )}
+      </Stack>
+      <Stack>
         <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
+          New semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
         </Typography>
         {isReadOnly || isEdit ? (
           <ReadOnlyAnswer value={formData.semver} />
