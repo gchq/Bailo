@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-def filter_none(json: dict[str, str | None]) -> dict[str, str]:
+def filter_none(json: dict[str, Any | None]) -> dict[str, str]:
     """
     Removes None attributes from a dictionary.
 

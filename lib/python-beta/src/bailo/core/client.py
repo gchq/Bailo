@@ -189,7 +189,7 @@ class Client:
         :param draft: Signifies a draft release, defaults to False
         :return: JSON response object
         """
-        filtered_json = filter_none(json={
+        filtered_json = filter_none({
                 "modelCardVersion": model_card_version,
                 "semver": release_version,
                 "notes": notes,
@@ -299,7 +299,7 @@ class Client:
         self,
         model_id: str,
         file_id: str,
-        localfile_name:str = None,
+        localfile_name:str | None = None,
     ):
         """
         Downloads a specific file.

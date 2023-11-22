@@ -73,7 +73,7 @@ class Release:
         if type(version) == Version:
             version = Version(version)
 
-        client.post_release(model_id, version, notes, files, images, minor, draft)
+        client.post_release(model_id,model_card_version, str(version), notes, files, images, minor, draft)
 
         return cls(
             client,
@@ -102,14 +102,14 @@ class Release:
         :param version: A semantic version of a model release
         """
 
-        res = client.get_release(model_id, str(version)).get('release')
+        res = client.get_release(model_id, str(version))['release']
 
-        model_card_version = res.get('modelCardVersion')
-        notes = res.get('notes')
-        files = res.get('fileIds')
-        images = res.get('images')
-        minor = res.get('minor')
-        draft = res.get('draft')
+        model_card_version = res['modelCardVersion']
+        notes = res['notes']
+        files = res['fileIds']
+        images = res['images']
+        minor = res['minor']
+        draft = res['draft']
 
         return cls(
             client,
@@ -123,7 +123,7 @@ class Release:
             draft
         )
 
-    def download(self, local_dir: str = None) -> _TemporaryFileWrapper[bytes] | str:
+    def download(self, local_dir: str) -> None:
         """ Gives the user a tempfile from file id requested.
 
         Files have to be explicitly closed at runtime once processed via `.close()`
@@ -158,21 +158,21 @@ class Release:
             res = self.client.simple_upload(self.model_id, f"{local_dir}/{file}")
             self.files.append(res['file']['id'])
         self.update()
-        return res
 
     def update(self) -> Any:
         """ Updates the any changes to this release on Bailo
 
         :return: JSON Response object
         """
-        return self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
+        res = self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
 
     def delete(self) -> Any:
         """ Deletes a release from Bailo
 
         :return: JSON Response object
         """
-        return self.client.delete_release(self.model_id, str(self.version))
+        self.client.delete_release(self.model_id, str(self.version))
+        return True
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({str(self)})"
