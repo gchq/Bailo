@@ -1,7 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
@@ -19,7 +18,6 @@ import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 
 
 export default function NewAccessRequest() {
   const router = useRouter()
-  const theme = useTheme()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
@@ -68,7 +66,7 @@ export default function NewAccessRequest() {
         const res = await postAccessRequest(modelId, schemaId, data)
         if (res.status && res.status < 400) {
           setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}`)
+          router.push(`/beta/model/${modelId}?tab=access`)
         } else {
           setSubmitButtonLoading(false)
         }
@@ -113,9 +111,7 @@ export default function NewAccessRequest() {
                 >
                   Submit
                 </LoadingButton>
-                <Typography variant='caption' color={theme.palette.error.main}>
-                  {submissionErrorText}
-                </Typography>
+                <MessageAlert message={submissionErrorText} severity='error' />
               </Stack>
             </Stack>
           )}

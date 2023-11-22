@@ -1,8 +1,13 @@
 import { Schema } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Card, Container, Grid, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import { useMemo } from 'react'
+import Link from 'src/Link'
 import SchemaButton from 'src/model/beta/common/SchemaButton'
 
 import { useGetModel } from '../../../../actions/model'
@@ -48,8 +53,13 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && !isSchemasError && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+            <Link href={`/beta/model/${modelId}`}>
+              <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                Back to model
+              </Button>
+            </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
-              <Typography variant='h6' color='primary'>
+              <Typography variant='h6' component='h1' color='primary'>
                 Choose a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
@@ -59,7 +69,7 @@ export default function NewSchemaSelection() {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2}>
-              <Typography color='primary' variant='h6'>
+              <Typography color='primary' variant='h6' component='h2'>
                 Active Schemas
               </Typography>
               <Grid container spacing={2}>
@@ -74,7 +84,7 @@ export default function NewSchemaSelection() {
                   ))}
                 {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
               </Grid>
-              <Typography color='primary' variant='h6'>
+              <Typography color='primary' variant='h6' component='h2'>
                 Inactive Schemas
               </Typography>
               <Grid container spacing={2}>

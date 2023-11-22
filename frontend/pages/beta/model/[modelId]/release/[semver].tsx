@@ -34,34 +34,35 @@ export default function Release() {
 
   if (error) return error
 
+  if (!release || (isReleaseLoading && isActiveReviewsLoading)) {
+    return <Loading />
+  }
+
   return (
     <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
       <Container maxWidth='md'>
-        <Card>
-          {isReleaseLoading && isActiveReviewsLoading && <Loading />}
-          {release && (
-            <>
-              {activeReviews.length > 0 && <ReviewBanner release={release} />}
-              <Stack spacing={2} sx={{ p: 4 }}>
-                <Stack
-                  direction={{ sm: 'row', xs: 'column' }}
-                  spacing={2}
-                  divider={<Divider flexItem orientation='vertical' />}
-                >
-                  <Link href={`/beta/model/${modelId}?tab=releases`}>
-                    <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                      Back to model
-                    </Button>
-                  </Link>
-                  <Typography variant='h6' color='primary' component='h2'>
-                    {release ? release.semver : 'Loading...'}
-                  </Typography>
-                </Stack>
-                {release && <EditableRelease release={release} />}
-                <ReviewComments release={release} />
+        <Card sx={{ my: 4 }}>
+          <>
+            {activeReviews.length > 0 && <ReviewBanner release={release} />}
+            <Stack spacing={2} sx={{ p: 4 }}>
+              <Stack
+                direction={{ sm: 'row', xs: 'column' }}
+                spacing={2}
+                divider={<Divider flexItem orientation='vertical' />}
+              >
+                <Link href={`/beta/model/${modelId}?tab=releases`}>
+                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                    Back to model
+                  </Button>
+                </Link>
+                <Typography variant='h6' component='h1' color='primary'>
+                  {release ? release.semver : 'Loading...'}
+                </Typography>
               </Stack>
-            </>
-          )}
+              {release && <EditableRelease release={release} />}
+              <ReviewComments release={release} />
+            </Stack>
+          </>
         </Card>
       </Container>
     </Wrapper>

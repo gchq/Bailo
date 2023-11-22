@@ -47,13 +47,13 @@ export default function NewSchemaSelection() {
                 Select a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
-              <Typography variant='body1'>
+              <Typography>
                 Each organisation may have a different set of questions they require you to answer about any access
                 request you create. Select from the list below:
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2}>
-              <Typography color='primary' variant='h6'>
+              <Typography color='primary' component='h2' variant='h6'>
                 Active Schemas
               </Typography>
               <Box sx={{ m: 2 }}>
@@ -70,7 +70,7 @@ export default function NewSchemaSelection() {
                   {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
                 </Grid>
               </Box>
-              <Typography color='primary' variant='h6'>
+              <Typography color='primary' component='h2' variant='h6'>
                 Inactive Schemas
               </Typography>
               <Grid container spacing={2}>
