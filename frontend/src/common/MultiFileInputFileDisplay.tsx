@@ -1,5 +1,4 @@
-import { Box, Chip, Stack, TextField } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Chip, Stack, TextField } from '@mui/material'
 import { ChangeEvent, useCallback, useState } from 'react'
 import { FileWithMetadata } from 'types/interfaces'
 
@@ -10,7 +9,6 @@ interface MultiFileInputDisplayProps {
 }
 
 export default function MultiFileInputFileDisplay({ file, handleDelete, onChange }: MultiFileInputDisplayProps) {
-  const theme = useTheme()
   const [metadata, setMetadata] = useState('')
 
   const handleMetadataChange = useCallback(
@@ -22,17 +20,15 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
   )
 
   return (
-    <Box sx={{ border: 'solid', borderWidth: '0.5px', borderColor: theme.palette.primary.main }}>
-      <Stack direction='row' alignItems='center' spacing={1} sx={{ m: 1 }}>
-        <Chip color='primary' label={file.name} onDelete={() => handleDelete(file)} />
-        <TextField
-          size='small'
-          placeholder='Optional metadata'
-          sx={{ width: '100%', display: 'none' }}
-          value={metadata}
-          onChange={handleMetadataChange}
-        />
-      </Stack>
-    </Box>
+    <Stack direction='row' alignItems='center' spacing={1}>
+      <Chip color='primary' label={file.name} onDelete={() => handleDelete(file)} />
+      <TextField
+        size='small'
+        placeholder='Optional metadata'
+        sx={{ width: '100%', display: 'none' }}
+        value={metadata}
+        onChange={handleMetadataChange}
+      />
+    </Stack>
   )
 }
