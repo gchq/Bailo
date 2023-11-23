@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
@@ -118,7 +118,13 @@ export default function ReleaseDisplay({
                       alignItems='center'
                       spacing={1}
                     >
-                      <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>{file.name}</Link>
+                      <Tooltip title={file.name}>
+                        <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
+                          <Typography noWrap textOverflow='ellipsis'>
+                            {file.name}
+                          </Typography>
+                        </Link>
+                      </Tooltip>
                       <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                     </Stack>
                   ))}
