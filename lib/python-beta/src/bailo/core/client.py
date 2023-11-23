@@ -358,6 +358,20 @@ class Client:
             f"{self.url}/v2/model/{model_id}/files/{file_id}",
         ).json()
 
+    def get_all_images(
+        self,
+        model_id: str,
+    ):
+        """
+        Gets all images.
+
+        :param model_id: A unique model ID
+        :return: JSON response object
+        """
+        return self.agent.get(
+            f"{self.url}/v2/model/{model_id}/images"
+        ).json()
+
     def get_all_schemas(
         self,
         kind: SchemaKind | None = None,

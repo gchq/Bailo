@@ -191,6 +191,16 @@ def test_delete_file(requests_mock):
 
     assert result == {"success": True}
 
+def test_get_all_images(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_id/images", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.get_all_images(
+        model_id="test_id",
+    )
+
+    assert result == {"success": True}
+
 def test_get_all_schemas(requests_mock):
     requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 

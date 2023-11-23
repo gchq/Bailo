@@ -9,7 +9,7 @@ from .release import Release
 
 
 class Model:
-    """ Represents a model within Bailo
+    """Represents a model within Bailo
 
     :param client: A client object used to interact with Bailo
     :param name: Name of model
@@ -22,7 +22,7 @@ class Model:
         model_id: str,
         name: str,
         description: str,
-        visibility: ModelVisibility | None = None,
+        visibility: ModelVisibility = None,
     ) -> None:
 
         self.client = client
@@ -43,9 +43,9 @@ class Model:
         name: str,
         description: str,
         team_id: str,
-        visibility: ModelVisibility | None = None,
+        visibility: ModelVisibility = None,
     ) -> Model:
-        """ Builds a model from Bailo and uploads it
+        """Builds a model from Bailo and uploads it
 
         :param client: A client object used to interact with Bailo
         :param name: Name of model
@@ -68,7 +68,7 @@ class Model:
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> Model:
-        """ Returns an existing model from Bailo
+        """Returns an existing model from Bailo
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID
@@ -78,18 +78,18 @@ class Model:
         res = model.client.get_model(model_id=model_id)
         model.__unpack(res['model'])
 
-        #get latest model card?
+        model.get_card_latest()
 
         return model
 
     def update(self) -> None:
-        """ Uploads and retrieves any changes to the model summary on Bailo
+        """Uploads and retrieves any changes to the model summary on Bailo
         """
         res = self.client.patch_model(model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility)
         self.__unpack(res['model'])
 
-    def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
-        """ Uploads and retrieves any changes to the model card on Bailo
+    def update_model_card(self, model_card: dict[str, Any] = None) -> None:
+        """Uploads and retrieves any changes to the model card on Bailo
 
         :param model_card: Model card dictionary, defaults to None
 
@@ -101,19 +101,26 @@ class Model:
         self.__unpack_mc(res['card'])
 
     def card_from_schema(self, schema_id: str) -> None:
-        """ Creates a model card using a schema on Bailo
+        """Creates a model card using a schema on Bailo
 
         :param schema_id: A unique schema ID
         """
         res = self.client.model_card_from_schema(model_id=self.model_id, schema_id=schema_id)
         self.__unpack_mc(res['card'])
-        #generate empty model card?
 
     def card_from_model(self):
-        pass
+        """Copies a model card from a different model (not yet implemented)
+
+        :raises NotImplementedError: Not implemented error
+        """
+        raise NotImplementedError
 
     def card_from_template(self):
-        pass
+        """Creates a model card using a template (not yet implemented)
+
+        :raises NotImplementedError: Not implemented error
+        """
+        raise NotImplementedError
 
     def get_card_latest(self) -> None:
         """Gets the latest model card from Bailo
@@ -182,10 +189,20 @@ class Model:
         return max(self.get_releases())
 
     def get_images(self):
-        pass
+        """Gets all model image references for the model
 
-    def get_image(self): #gets image ref
-        pass
+        :return: List of images
+        """
+        res = self.client.get_all_images(model_id=self.model_id)
+
+        return res['images']
+
+    def get_image(self):
+        """Gets a model image reference
+
+        :raises NotImplementedError: Not implemented error
+        """
+        raise NotImplementedError
 
     def get_roles(self):
         """Gets all roles for the model
