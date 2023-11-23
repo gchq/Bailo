@@ -52,7 +52,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
       if (newValue && !accessList.find(({ entity }) => entity === newValue.id)) {
         const updatedAccessList = accessList
-        const newAccess = { entity: newValue.id, roles: [] }
+        const newAccess = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
         updatedAccessList.push(newAccess)
         setAccessList(accessList)
       }
