@@ -1,13 +1,17 @@
+import { useMemo } from 'react'
+import { ModelInterface } from 'types/v2/types'
+
 import FormEditPage from './overview/FormEditPage'
 import TemplatePage from './overview/TemplatePage'
 
-type OverviewPages = 'form' | 'template'
-export default function Overview({ model }: { model: any }) {
-  let page: OverviewPages = 'form'
+type OverviewPage = 'form' | 'template'
 
-  if (!model.card || !model.card.schemaId) {
-    page = 'template'
-  }
+type OverviewProps = {
+  model: ModelInterface
+}
+
+export default function Overview({ model }: OverviewProps) {
+  const page: OverviewPage = useMemo(() => (model.card && model.card.schemaId ? 'form' : 'template'), [model.card])
 
   return (
     <>
