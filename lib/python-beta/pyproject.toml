@@ -20,7 +20,7 @@ classifiers = [
 requires-python = ">=3.8.1"
 dynamic = ["version"]
 dependencies = [
-    "validators==0.22.0"
+    "semantic-version==2.10.0"
 ]
 
 [project.optional-dependencies]

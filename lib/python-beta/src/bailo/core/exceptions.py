@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 
-class BailoError(Exception):
+class BailoException(Exception):
     pass
 
 # Model Already Exists

@@ -4,7 +4,7 @@ import datetime
 from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.exceptions import BailoError
+from bailo.core.exceptions import BailoException
 from bailo.core.utils import filter_none
 
 
@@ -105,12 +105,10 @@ class AccessRequest:
 
     def delete(self) -> bool:
         """ Deletes the access request on bailo
+
+        :return: A message confirming the removal of the access request.
         """
-        try:
-            self.client.delete_access_request(self.model_id, self.access_request_id)
-        except BailoError:
-            return False
-        return True
+        return self.client.delete_access_request(self.model_id, self.access_request_id)
 
     def update(self):
         """"""

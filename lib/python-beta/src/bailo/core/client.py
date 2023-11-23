@@ -19,10 +19,6 @@ class Client:
         :param agent:
     """
     def __init__(self, url: str, agent: Agent = Agent()):
-        # The url validator will raise an error with localhost:8000 which is not covered in testing
-
-        #if not validators.url(url):
-            #raise ValueError("URL not valid.")
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
