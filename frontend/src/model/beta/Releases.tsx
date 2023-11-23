@@ -17,9 +17,9 @@ export default function Releases({ model }: { model: ModelInterface }) {
   const releaseDisplays = useMemo(
     () =>
       releases.map((release) => (
-        <ReleaseDisplay key={release.semver} modelId={model.id} release={release} latestRelease={latestRelease} />
+        <ReleaseDisplay key={release.semver} model={model} release={release} latestRelease={latestRelease} />
       )),
-    [latestRelease, model.id, releases],
+    [latestRelease, model, releases],
   )
 
   useEffect(() => {
