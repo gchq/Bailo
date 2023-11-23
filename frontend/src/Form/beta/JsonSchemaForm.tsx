@@ -60,7 +60,7 @@ function DescriptionFieldTemplate() {
 }
 
 // TODO - add validation BAI-866
-export default function ModelCardForm({
+export default function JsonSchemaForm({
   splitSchema,
   setSplitSchema,
   canEdit = false,

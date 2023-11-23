@@ -10,7 +10,7 @@ import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
-import ModelCardForm from '../../../../../src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
@@ -101,7 +101,12 @@ export default function NewAccessRequest() {
                   Choose a different schema
                 </Button>
               </Link>
-              <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
+              <JsonSchemaForm
+                splitSchema={splitSchema}
+                setSplitSchema={setSplitSchema}
+                canEdit
+                displayLabelValidation
+              />
               <Stack alignItems='flex-end'>
                 <LoadingButton
                   sx={{ width: 'fit-content' }}
