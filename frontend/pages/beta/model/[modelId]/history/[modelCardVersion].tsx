@@ -7,7 +7,7 @@ import { useModelCard } from '../../../../../actions/modelCard'
 import { useGetSchema } from '../../../../../actions/schema'
 import { useGetUiConfig } from '../../../../../actions/uiConfig'
 import Loading from '../../../../../src/common/Loading'
-import ModelCardForm from '../../../../../src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
@@ -56,7 +56,7 @@ export default function ViewModelCardVersion() {
               <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/beta/model/${modelId}`)}>
                 Back To Model
               </Button>
-              <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
+              <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
             </Card>
           </Container>
         )}

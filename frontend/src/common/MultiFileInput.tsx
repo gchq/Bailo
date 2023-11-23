@@ -85,7 +85,7 @@ export default function MultiFileInput({
         </>
       )}
       {files.length > 0 && (
-        <Stack spacing={1} mt={2}>
+        <Stack spacing={1} mt={1}>
           {files.map((file) => (
             <div key={file.name}>
               <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
