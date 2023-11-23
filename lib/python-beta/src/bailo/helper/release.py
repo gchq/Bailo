@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from tempfile import _TemporaryFileWrapper
+from io import BufferedReader, BufferedWriter
 from typing import Any
 
 from bailo.core.client import Client
@@ -9,7 +9,7 @@ from semantic_version import Version
 
 
 class Release:
-    """ Represents a release within Bailo
+    """Represents a release within Bailo
 
     :param client: A client object used to interact with Bailo
     :param model_id: A unique model ID
@@ -23,19 +23,19 @@ class Release:
 
     ..note:: Currently files and images are stored as string references
     """
+
     def __init__(
         self,
         client: Client,
         model_id: str,
         version: Version | str,
-        model_card_version: float = 1,
+        model_card_version: int | None = None,
         notes: str = "",
         files: list[str] = [],
         images: list[str] = [],
         minor: bool = False,
         draft: bool = True,
     ) -> None:
-
         self.client = client
         self.model_id = model_id
 
@@ -57,117 +57,71 @@ class Release:
         client: Client,
         model_id: str,
         version: Version | str,
-        model_card_version: float,
+        model_card_version: int | None = None,
         notes: str = "",
         files: list[str] = [],
         images: list[str] = [],
         minor: bool = False,
         draft: bool = True,
     ) -> Release:
-        """ Builds a release from Bailo and uploads it
+        """Builds a release from Bailo and uploads it
 
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         """
-        if type(version) == Version:
-            version = Version(version)
 
-        client.post_release(model_id,model_card_version, str(version), notes, files, images, minor, draft)
+        client.post_release(model_id, str(version), notes, files, images, model_card_version, minor, draft)
 
-        return cls(
-            client,
-            model_id,
-            version,
-            model_card_version,
-            notes,
-            files,
-            images,
-            minor,
-            draft
-        )
-
+        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
 
     @classmethod
-    def from_version(
-        cls,
-        client: Client,
-        model_id: str,
-        version: Version | str
-    ) -> Release:
-        """ Returns an existing release from Bailo
+    def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
+        """Returns an existing release from Bailo
 
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         """
 
-        res = client.get_release(model_id, str(version))['release']
+        res = client.get_release(model_id, str(version))["release"]
 
-        model_card_version = res['modelCardVersion']
-        notes = res['notes']
-        files = res['fileIds']
-        images = res['images']
-        minor = res['minor']
-        draft = res['draft']
+        model_card_version = res["modelCardVersion"]
+        notes = res["notes"]
+        files = res["fileIds"]
+        images = res["images"]
+        minor = res["minor"]
+        draft = res["draft"]
 
-        return cls(
-            client,
-            model_id,
-            version,
-            model_card_version,
-            notes,
-            files,
-            images,
-            minor,
-            draft
-        )
+        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
 
-    def download(self, local_dir: str) -> None:
-        """ Gives the user a tempfile from file id requested.
-
-        Files have to be explicitly closed at runtime once processed via `.close()`
-
-        Examples
-        >>> release = Release.from_id(client, "test-abcdef")
-
-        >>> tp = release.get_file('<file-id>') # Save to temp
-        >>> tp.seek(0)
-        >>> tp.readlines()
-
-        >>> tp = release.get_file('<file-id>', '<localfile-name>') # Save to local
-        >>> tp.readlines()
+    def download(self, file_id: str) -> BufferedWriter:
+        """Gives returns a Reading object given the file id
 
         :param file_name: The name of the file to retrieve
         """
 
-        os.makedirs(local_dir, exist_ok=True)
-        for file in self.files:
-            for remote_file in self.client.get_files(model_id=self.model_id)['files']:
-                if file == remote_file['id']:
-                    file_name = remote_file['name']
-                    file_path = f"{local_dir}/{file_name}"
-                    temp_file = self.client.get_download_file(model_id=self.model_id, file_id=file, localfile_name=file_path)
+        return self.client.get_download_file(self.model_id, file_id)
 
-    def upload(self, local_dir: str):
-        """ Uploads files in a given directory to the release.
+    def upload(self, name: str, f: BufferedReader) -> BufferedReader:
+        """Uploads files in a given directory to the release.
 
         :param local_dir: Local directory path, relative or absolute
         """
-        for file in os.listdir(local_dir):
-            res = self.client.simple_upload(self.model_id, f"{local_dir}/{file}")
-            self.files.append(res['file']['id'])
+        res = self.client.simple_upload(self.model_id, name, f)
+        self.files.append(res["file"]["id"])
         self.update()
+        return res
 
     def update(self) -> Any:
-        """ Updates the any changes to this release on Bailo
+        """Updates the any changes to this release on Bailo
 
         :return: JSON Response object
         """
         res = self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
 
     def delete(self) -> Any:
-        """ Deletes a release from Bailo
+        """Deletes a release from Bailo
 
         :return: JSON Response object
         """

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import pytest
 from bailo.core.client import Client
+from bailo.core.enums import ModelVisibility
 from bailo.helper.model import Model
 
 
@@ -19,8 +20,15 @@ from bailo.helper.model import Model
 def integration_client():
     return Client("http://localhost:8080")
 
+
 @pytest.fixture
 def example_model(integration_client):
-    model = Model.create(client=integration_client, name="Yolo-v4", description="You only look once!", team_id="team_id")
-    model.card_from_schema('minimal-general-v10-beta')
+    model = Model.create(
+        client=integration_client,
+        name="Yolo-v4",
+        description="You only look once!",
+        team_id="team_id",
+        visibility=ModelVisibility.Public,
+    )
+    model.card_from_schema("minimal-general-v10-beta")
     return model

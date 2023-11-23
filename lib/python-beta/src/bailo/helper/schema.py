@@ -6,13 +6,14 @@ from bailo.core import Client, SchemaKind
 
 
 class Schema:
-    """ Represents a schema within Bailo
+    """Represents a schema within Bailo
     :param client: A client object used to interact with Bailo
     :param schema_id: A unique schema ID
     :param name: Name of schema
     :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
     :param json_schema: Schema JSON
     """
+
     def __init__(
         self,
         client: Client,
@@ -29,7 +30,7 @@ class Schema:
 
     @classmethod
     def create(cls, client: Client, schema_id: str, name: str, kind: SchemaKind, json_schema: dict[str, Any]) -> Schema:
-        """ Builds a schema from Bailo and uploads it
+        """Builds a schema from Bailo and uploads it
 
         :param client: A client object used to interact with Bailo
         :param schema_id: A unique schema ID
@@ -40,13 +41,13 @@ class Schema:
         """
         schema = cls(client=client, schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
         res = client.post_schema(schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
-        schema.__unpack(res['schema'])
+        schema.__unpack(res["schema"])
 
         return schema
 
     @classmethod
     def from_id(cls, client: Client, schema_id: str) -> Schema:
-        """ Returns an existing schema from Bailo
+        """Returns an existing schema from Bailo
 
         :param client: A client object used to interact with Bailo
         :param schema_id: A unique schema ID
@@ -57,21 +58,21 @@ class Schema:
             schema_id=schema_id,
             name="temp",
             kind=SchemaKind.Model,
-            json_schema={"temp":"temp"},
+            json_schema={"temp": "temp"},
         )
         res = client.get_schema(schema_id=schema_id)
-        schema.__unpack(res['schema'])
+        schema.__unpack(res["schema"])
 
         return schema
 
     def __unpack(self, res) -> None:
         print(res)
-        self.schema_id = res['id']
-        self.name = res['name']
-        kind = res['kind']
-        self.json_schema = res['jsonSchema']
+        self.schema_id = res["id"]
+        self.name = res["name"]
+        kind = res["kind"]
+        self.json_schema = res["jsonSchema"]
 
-        if kind == 'model':
+        if kind == "model":
             self.kind = SchemaKind.Model
-        if kind == 'accessRequest':
+        if kind == "accessRequest":
             self.kind = SchemaKind.AccessRequest

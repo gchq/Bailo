@@ -248,18 +248,6 @@ spelling-store-unknown-words="no"
 [tool.pylint.'STRING']
 check-str-concat-over-line-jumps="no"
 
-[tool.pylint.'TYPECHECK']
-contextmanager-decorators="contextlib.contextmanager"
-generated-members="numpy.*,np.*,pyspark.sql.functions,collect_list"
-ignore-mixin-members="yes"
-ignore-none="yes"
-ignore-on-opaque-inference="yes"
-ignored-classes="optparse.Values,thread._local,_thread._local,numpy,torch,swagger_client"
-ignored-modules="numpy,torch,swagger_client,netCDF4,scipy"
-missing-member-hint="yes"
-missing-member-hint-distance=1
-missing-member-max-choices=1
-
 [tool.pylint.'VARIABLES']
 additional-builtins="dbutils"
 allow-global-unused-variables="yes"

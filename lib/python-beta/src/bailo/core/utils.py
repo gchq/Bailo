@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def filter_none(json: dict[Any, Any]) -> dict[Any, Any]:
+def filter_none(json: dict[str, Any]) -> dict[str, Any]:
     """
     Removes None attributes from a dictionary.
 

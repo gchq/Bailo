@@ -12,10 +12,7 @@ def test_post_model(requests_mock):
 
     client = Client("https://example.com")
     result = client.post_model(
-        name="test",
-        description="test",
-        visibility=ModelVisibility.Public,
-        team_id="uncategorised"
+        name="test", description="test", visibility=ModelVisibility.Public, team_id="uncategorised"
     )
 
     assert result == {"success": True}
@@ -25,9 +22,7 @@ def test_get_models(requests_mock):
     requests_mock.get("https://example.com/api/v2/models/search?task=image_classification", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_models(
-        task="image_classification"
-    )
+    result = client.get_models(task="image_classification")
 
     assert result == {"success": True}
 
@@ -36,9 +31,7 @@ def test_get_model(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_model(
-        model_id="test_id"
-    )
+    result = client.get_model(model_id="test_id")
 
     assert result == {"success": True}
 
@@ -59,9 +52,7 @@ def test_get_model_card(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/model-card/v1", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_model_card(
-        model_id="test_id", version="v1"
-    )
+    result = client.get_model_card(model_id="test_id", version="v1")
 
     assert result == {"success": True}
 
@@ -69,13 +60,11 @@ def test_get_model_card(requests_mock):
 def test_put_model_card(requests_mock):
     requests_mock.put("https://example.com/api/v2/model/test_id/model-cards", json={"success": True})
 
-    x = {"test" : "object"}
+    x = {"test": "object"}
     y = json.dumps(x)
 
     client = Client("https://example.com")
-    result = client.put_model_card(
-        model_id="test_id", metadata=y
-    )
+    result = client.put_model_card(model_id="test_id", metadata=y)
 
     assert result == {"success": True}
 
@@ -84,9 +73,7 @@ def test_model_card_from_schema(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/setup/from-schema", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.model_card_from_schema(
-        model_id="test_id", schema_id='test_id'
-    )
+    result = client.model_card_from_schema(model_id="test_id", schema_id="test_id")
 
     assert result == {"success": True}
 
@@ -97,9 +84,9 @@ def test_post_release(requests_mock):
     client = Client("https://example.com")
     result = client.post_release(
         model_id="test_id",
-        model_card_version=1.0,
-        release_version='v1',
-        notes='Test Note',
+        model_card_version=1,
+        release_version="v1",
+        notes="Test Note",
         file_ids=[],
         images=[],
     )
@@ -152,21 +139,25 @@ def test_get_files(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_download_file(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/file/file_id/download", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_download_file(
-        model_id = "test_id",
-        file_id = "file_id",
+        model_id="test_id",
+        file_id="file_id",
     )
 
     assert result is not None
 
-def test_simple_upload(requests_mock):
-    requests_mock.post("https://example.com/api/v2/model/test_id/files/upload/simple?name=test.txt", json={"success": True})
 
-    file = 'test.txt'
+def test_simple_upload(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/files/upload/simple?name=test.txt", json={"success": True}
+    )
+
+    file = "test.txt"
 
     client = Client("https://example.com")
     result = client.simple_upload(
@@ -176,9 +167,11 @@ def test_simple_upload(requests_mock):
 
     assert result == {"success": True}
 
-#def test_start_multi_upload(requests_mock):
 
-#def test_finish_multi_upload(requests_mock):
+# def test_start_multi_upload(requests_mock):
+
+# def test_finish_multi_upload(requests_mock):
+
 
 def test_delete_file(requests_mock):
     requests_mock.delete("https://example.com/api/v2/model/test_id/files/test_id", json={"success": True})
@@ -191,6 +184,7 @@ def test_delete_file(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_all_images(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/images", json={"success": True})
 
@@ -201,38 +195,33 @@ def test_get_all_images(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_all_schemas(requests_mock):
     requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_all_schemas(
-        kind=SchemaKind.Model
-    )
+    result = client.get_all_schemas(kind=SchemaKind.Model)
 
     assert result == {"success": True}
+
 
 def test_get_schema(requests_mock):
     requests_mock.get("https://example.com/api/v2/schema/test_id", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_schema(
-        schema_id="test_id"
-    )
+    result = client.get_schema(schema_id="test_id")
 
     assert result == {"success": True}
+
 
 def test_post_schema(requests_mock):
     requests_mock.post("https://example.com/api/v2/schemas", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.post_schema(
-        schema_id="test_id",
-        name="test",
-        kind=SchemaKind.Model,
-        json_schema={"test": "test"}
-    )
+    result = client.post_schema(schema_id="test_id", name="test", kind=SchemaKind.Model, json_schema={"test": "test"})
 
     assert result == {"success": True}
+
 
 def test_get_reviews(requests_mock):
     requests_mock.get("https://example.com/api/v2/reviews?active=true", json={"success": True})
@@ -244,6 +233,7 @@ def test_get_reviews(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_model_roles(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})
 
@@ -254,6 +244,7 @@ def test_get_model_roles(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_model_user_roles(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/roles/mine", json={"success": True})
 
@@ -263,6 +254,7 @@ def test_get_model_user_roles(requests_mock):
     )
 
     assert result == {"success": True}
+
 
 def test_post_team(requests_mock):
     requests_mock.post("https://example.com/api/v2/teams", json={"success": True})
@@ -276,6 +268,7 @@ def test_post_team(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_all_teams(requests_mock):
     requests_mock.get("https://example.com/api/v2/teams", json={"success": True})
 
@@ -284,6 +277,7 @@ def test_get_all_teams(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_user_teams(requests_mock):
     requests_mock.get("https://example.com/api/v2/teams/mine", json={"success": True})
 
@@ -291,6 +285,7 @@ def test_get_user_teams(requests_mock):
     result = client.get_user_teams()
 
     assert result == {"success": True}
+
 
 def test_get_team(requests_mock):
     requests_mock.get("https://example.com/api/v2/team/test_id", json={"success": True})
@@ -301,6 +296,7 @@ def test_get_team(requests_mock):
     )
 
     assert result == {"success": True}
+
 
 def test_patch_team(requests_mock):
     requests_mock.patch("https://example.com/api/v2/team/test_id", json={"success": True})
@@ -313,66 +309,56 @@ def test_patch_team(requests_mock):
 
     assert result == {"success": True}
 
+
 def test_get_access_request(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_access_request(
-        model_id="test_id",
-        access_request_id="test_id"
-    )
+    result = client.get_access_request(model_id="test_id", access_request_id="test_id")
 
     assert result == {"success": True}
+
 
 def test_get_access_requests(requests_mock):
     requests_mock.get("https://example.com/api/v2/model/test_id/access-requests", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_access_requests(
-        model_id="test_id"
-    )
+    result = client.get_access_requests(model_id="test_id")
 
     assert result == {"success": True}
+
 
 def test_post_access_request(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/access-requests", json={"success": True})
 
-    x = {"overview":{"entities":["user"],"name":"test"}}
+    x = {"overview": {"entities": ["user"], "name": "test"}}
     y = json.dumps(x)
 
     client = Client("https://example.com")
-    result = client.post_access_request(
-        model_id="test_id",
-        metadata=y,
-        schema_id="test_id"
-    )
+    result = client.post_access_request(model_id="test_id", metadata=y, schema_id="test_id")
 
     assert result == {"success": True}
+
 
 def test_delete_access_request(requests_mock):
     requests_mock.delete("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.delete_access_request(
-        model_id="test_id",
-        access_request_id="test_id"
-    )
+    result = client.delete_access_request(model_id="test_id", access_request_id="test_id")
 
     assert result == {"success": True}
+
 
 def test_patch_access_request(requests_mock):
     requests_mock.patch("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
 
     client = Client("https://example.com")
 
-    x = {"overview":{"entities":["user"],"name":"test"}}
+    x = {"overview": {"entities": ["user"], "name": "test"}}
     y = json.dumps(x)
 
     result = client.patch_access_request(
-        model_id="test_id",
-        access_request_id="test_id",
-        metadata=y,
-        schema_id="test_id"
+        model_id="test_id", access_request_id="test_id", metadata=y, schema_id="test_id"
     )
 
     assert result == {"success": True}
