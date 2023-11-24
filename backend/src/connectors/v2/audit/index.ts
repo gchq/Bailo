@@ -1,7 +1,7 @@
 import config from '../../../utils/v2/config.js'
 import { BaseAuditConnector } from './Base.js'
-import { ElasticAuditConnector } from './elastic.js'
 import { SillyAuditConnector } from './silly.js'
+import { StdoutAuditConnector } from './stdout.js'
 
 let auditConnector: undefined | BaseAuditConnector = undefined
 export function getAutheticationConnector(cache = true) {
@@ -13,8 +13,8 @@ export function getAutheticationConnector(cache = true) {
     case 'silly':
       auditConnector = new SillyAuditConnector()
       break
-    case 'elastic':
-      auditConnector = new ElasticAuditConnector()
+    case 'stdout':
+      auditConnector = new StdoutAuditConnector()
       break
     default:
       throw new Error('No valid audit connector provided.')

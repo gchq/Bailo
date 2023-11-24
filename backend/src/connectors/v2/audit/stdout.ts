@@ -17,7 +17,7 @@ interface Outcome {
   Permitted?: boolean
 }
 
-export class ElasticAuditConnector extends BaseAuditConnector {
+export class StdoutAuditConnector extends BaseAuditConnector {
   constructor() {
     super()
   }
