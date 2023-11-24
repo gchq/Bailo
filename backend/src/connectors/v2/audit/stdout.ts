@@ -22,26 +22,22 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     super()
   }
 
-  /**
-   * Model Events
-   */
-
   onCreateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.CreateModel, req)
     const event = this.generateEvent(req, { id: model.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.ViewModel, req)
     const event = this.generateEvent(req, { name: model.name })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onUpdateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.UpdateModel, req)
     const event = this.generateEvent(req, { id: model.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onSearchModel(req: Request, models: ModelSearchResult[]) {
@@ -51,77 +47,73 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       results: models.map((model) => model.id),
     })
 
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
     const event = this.generateEvent(req, { modelId, version: modelCard.version })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.ViewModelCard, req)
     const event = this.generateEvent(req, { modelId, version: modelCard.version })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.UpdateModelCard, req)
     const event = this.generateEvent(req, { modelId, version: modelCard.version })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewModelCardRevisions(req: Request, modelCards: ModelCardInterface[]) {
     this.checkEventType(AuditInfo.ViewModelCardRevisions, req)
     const event = this.generateEvent(req, { url: req.originalUrl, results: modelCards.map((model) => model.version) })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
     const event = this.generateEvent(req, { id: file._id, modelId: file.modelId })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
     this.checkEventType(AuditInfo.ViewFiles, req)
     const event = this.generateEvent(req, { modelId, results: files.map((file) => file.name) })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onDeleteFile(req: Request, modelId: string, fileId: string) {
     this.checkEventType(AuditInfo.DeleteFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
-
-  /**
-   * Release Events
-   */
 
   onCreateRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.CreateRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.ViewRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onUpdateRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.UpdateRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onDeleteRelease(req: Request, modelId: string, semver: string) {
     this.checkEventType(AuditInfo.DeleteRelease, req)
     const event = this.generateEvent(req, { modelId, semver })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onSearchReleases(req: Request, releases: ReleaseDoc[]) {
@@ -130,31 +122,31 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       url: req.originalUrl,
       results: releases.map((release) => ({ modelId: release.modelId, semver: release.semver })),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.CreateAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.ViewAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.UpdateAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onDeleteAccessRequest(req: Request, accessRequestId: string) {
     this.checkEventType(AuditInfo.DeleteAccessRequest, req)
     const event = this.generateEvent(req, { accessRequestId })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onSearchAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
@@ -165,7 +157,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
         id: accessRequest.id,
       })),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]) {
@@ -178,7 +170,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
         ...(review.accessRequestId && { semver: review.accessRequestId }),
       })),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onCreateReviewResponse(req: Request, review: ReviewInterface) {
@@ -188,7 +180,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       ...(review.semver && { semver: review.semver }),
       ...(review.accessRequestId && { semver: review.accessRequestId }),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onError(req: Request, error: BailoError) {
@@ -205,23 +197,14 @@ export class StdoutAuditConnector extends BaseAuditConnector {
           }
     const event = this.generateEvent(req, { url: req.originalUrl, httpMethod: req.method }, outcome)
 
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   generateEvent(req: Request, resourceInfo: object, outcome?: Outcome) {
     return {
-      EventTime: new Date().toString(),
-      EventSource: {
-        System: 'BAILO',
-        Device: {
-          Hostname: 'http://localhost:8080',
-        },
-        Client: req.ip,
-        User: req.user,
-      },
+      User: req.user,
       EventDetail: {
         typeId: req.audit.typeId,
-        description: req.audit.description,
         resource: JSON.stringify(resourceInfo),
         ...(outcome && { outcome }),
       },
@@ -231,13 +214,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   onCreateSchema(req: Request, schema: SchemaInterface) {
     this.checkEventType(AuditInfo.CreateSchema, req)
     const event = this.generateEvent(req, { id: schema.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewSchema(req: Request, schema: SchemaInterface) {
     this.checkEventType(AuditInfo.ViewSchema, req)
     const event = this.generateEvent(req, { id: schema.id })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
@@ -246,7 +229,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       url: req.originalUrl,
       results: schemas.map((schema) => ({ id: schema.id })),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   onViewModelImages(req: Request, modelId: string, images: { repository: string; name: string; tags: string[] }[]) {
@@ -255,7 +238,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
-    log.info(event, 'Logging Event')
+    log.info(event, req.audit.description)
   }
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
