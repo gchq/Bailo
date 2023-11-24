@@ -1,10 +1,19 @@
 import { GetObjectCommand, GetObjectRequest, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 
+import { getHttpsAgent } from '../services/v2/http.js'
 import config from '../utils/v2/config.js'
 
+let client: S3Client | undefined
+
 export async function getS3Client() {
-  const client = new S3Client(config.s3)
+  if (!client) {
+    client = new S3Client({
+      ...config.s3,
+      requestHandler: new NodeHttpHandler({ httpsAgent: getHttpsAgent({ rejectUnauthorized: false }) }),
+    })
+  }
 
   return client
 }

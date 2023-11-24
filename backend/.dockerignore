@@ -1,7 +1,6 @@
-Dockerfile
-.dockerignore
-npm-debug.log
+Dockerfile.dockerignore
+npm - debug.log
 README.md
-node_modules
-.git
+node_modules.git
 dist
+config / local.cjs
