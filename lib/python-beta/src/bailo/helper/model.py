@@ -123,7 +123,6 @@ class Model:
     def get_card_latest(self) -> None:
         """Gets the latest model card from Bailo"""
         res = self.client.get_model(model_id=self.model_id)
-        print(res)
         self.__unpack_mc(res["model"]["card"])
 
     def get_card_revision(self, version: str) -> None:
