@@ -95,20 +95,20 @@ class Release:
 
         return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
 
-    def download(self, file_id: str) -> BufferedWriter:
+    def download(self, file_id: str, buffer) -> BufferedWriter:
         """Gives returns a Reading object given the file id
 
         :param file_name: The name of the file to retrieve
         """
 
-        return self.client.get_download_file(self.model_id, file_id)
+        return self.client.get_download_file(self.model_id, file_id, buffer)
 
     def upload(self, name: str, f: BufferedReader) -> BufferedReader:
         """Uploads files in a given directory to the release.
 
         :param local_dir: Local directory path, relative or absolute
         """
-        res = self.client.simple_upload(self.model_id, name, f)
+        res = self.client.simple_upload(self.model_id, name, f).json()
         self.files.append(res["file"]["id"])
         self.update()
         return res

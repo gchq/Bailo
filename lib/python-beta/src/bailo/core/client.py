@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from io import BufferedReader, BufferedWriter
+import shutil
+from io import BytesIO
 from typing import Any
 
 from bailo.core.agent import Agent
@@ -276,20 +277,22 @@ class Client:
         self,
         model_id: str,
         file_id: str,
+        buffer: BytesIO,
     ):
         """
         Downloads a specific file.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
-        :param local_file: (optional) The file on the local machine to be copied to
-        :return: A file object
+        :param buffer: BytesIO object for bailo to write to
+        :return: The unique file ID
         """
         with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as r:
-            bw = BufferedWriter(r.raw)
-            return bw
+            with buffer as f:
+                shutil.copyfileobj(r.raw, f)
+        return file_id
 
-    def simple_upload(self, model_id: str, name: str, f: BufferedReader):
+    def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
         """
         Creates a simple file upload.
 
@@ -297,10 +300,9 @@ class Client:
         :param name: File name
         :return: JSON response object
         """
-        with open(name, "rb") as f:
-            return self.agent.post(
-                f"{self.url}/v2/model/{model_id}/files/upload/simple", params={"name": name}, data=f.read(), mime="application/bytes"
-            ).json()
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/files/upload/simple", params={"name": name}, data=buffer, stream=True
+        )
 
     # def start_multi_upload(): TBC
 
