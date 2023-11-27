@@ -73,7 +73,7 @@ class Release:
 
         client.post_release(model_id, str(version), notes, files, images, model_card_version, minor, draft)
 
-        return cls(client, model_id, version,notes, model_card_version, files, images, minor, draft)
+        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
 
     @classmethod
     def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
