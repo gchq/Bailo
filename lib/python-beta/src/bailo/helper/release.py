@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from io import BufferedReader, BufferedWriter
+from io import BytesIO
 from typing import Any
 
 from bailo.core.client import Client
@@ -95,18 +95,23 @@ class Release:
 
         return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
 
-    def download(self, file_id: str, buffer) -> BufferedWriter:
+    def download(self, file_id: str, buffer: BytesIO) -> str:
         """Gives returns a Reading object given the file id
 
         :param file_name: The name of the file to retrieve
+        :param buffer: A BytesIO object
+        :return: A JSON response object
         """
 
         return self.client.get_download_file(self.model_id, file_id, buffer)
 
-    def upload(self, name: str, f: BufferedReader) -> BufferedReader:
+    def upload(self, name: str, f: BytesIO) -> Any:
         """Uploads files in a given directory to the release.
 
-        :param local_dir: Local directory path, relative or absolute
+        :param name: The name of the file to upload to bailo
+        :param f: A BytesIO object
+
+        :return: A JSON response object
         """
         res = self.client.simple_upload(self.model_id, name, f).json()
         self.files.append(res["file"]["id"])
