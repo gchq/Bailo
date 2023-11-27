@@ -194,7 +194,7 @@ class Client:
                 "images": images,
             }
         )
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json).json()
+        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json)
 
     def put_release(
         self, model_id: str, release_version: str, notes: str, draft: bool, file_ids: list[str], images: list[str]

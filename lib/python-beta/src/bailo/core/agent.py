@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import requests
 
 from .exceptions import BailoException
@@ -11,36 +9,36 @@ class Agent:
     def __init__(self):
         pass
 
-    def __request(self, method:str, **kwargs):
-        res = requests.request(method, **kwargs)
+    def __request(self, method, *args, **kwargs):
+        res = requests.request(method, *args, **kwargs)
 
         # Check response for a valid range
         if 200 <= res.status_code < 400:
             return res
 
         # Give the error message issued by bailo
-        raise BailoException(res.json()["error"]["message"])
+        raise BailoException(res.json()['error']['message'])
 
-    def get(self, **kwargs):
-        return self.__request("GET", **kwargs)
+    def get(self, *args, **kwargs):
+        return self.__request("GET", *args, **kwargs)
 
-    def post(self, **kwargs: Any):
-        return self.__request("POST", **kwargs)
+    def post(self, *args, **kwargs):
+        return self.__request("POST", *args, **kwargs)
 
-    def patch(self, **kwargs: Any):
-        return self.__request("PATCH", **kwargs)
+    def patch(self, *args, **kwargs):
+        return self.__request("PATCH", *args, **kwargs)
 
-    def push(self, **kwargs: Any):
-        return self.__request("PUSH", **kwargs)
+    def push(self, *args, **kwargs):
+        return self.__request("PUSH", *args, **kwargs)
 
-    def delete(self,url:str, **kwargs: Any):
-        return self.__request("DELETE", **kwargs)
+    def delete(self, *args, **kwargs):
+        return self.__request("DELETE", *args, **kwargs)
 
-    def put(self,url:str, json:Any, **kwargs: Any):
-        return self.__request("PUT", **kwargs)
+    def put(self, *args, **kwargs):
+        return self.__request("PUT", *args, **kwargs)
 
 
-class PkiAgent:
+class PkiAgent():
     def __init__(
         self,
         cert: str,

@@ -137,7 +137,7 @@ class Model:
     def create_release(
         self,
         version: Version | str,
-        notes: str = "",
+        notes: str,
         files: list[str] = [],
         images: list[str] = [],
         minor: bool = False,
@@ -153,19 +153,17 @@ class Model:
         :param draft: Is a draft release?, defaults to True
         :return: Release object
         """
-        Release.create(
+        return Release.create(
             client=self.client,
             model_id=self.model_id,
             version=version,
-            model_card_version=self.model_card_version,
             notes=notes,
+            model_card_version=self.model_card_version,
             files=files,
             images=images,
             minor=minor,
             draft=draft,
         )
-
-        return self.get_release(version=version)
 
     def get_releases(self) -> list[Release]:
         """Gets all releases for the model.
