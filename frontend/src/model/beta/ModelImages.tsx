@@ -1,6 +1,7 @@
 import { Box, Button, Stack } from '@mui/material'
 import { useGetModelImages } from 'actions/model'
 import { useMemo, useState } from 'react'
+import Forbidden from 'src/common/Forbidden'
 
 import { ModelInterface } from '../../../types/v2/types'
 import EmptyBlob from '../../common/EmptyBlob'
@@ -31,7 +32,11 @@ export default function ModelImages({ model }: AccessRequestsProps) {
   )
 
   if (isModelImagesError) {
-    return <MessageAlert message={isModelImagesError.info.message} severity='error' />
+    if (isModelImagesError.status === 403) {
+      return <Forbidden errorMessage='If you think this is in error please contact the model owners.' />
+    } else {
+      return <MessageAlert message={isModelImagesError.info.message} severity='error' />
+    }
   }
 
   return (

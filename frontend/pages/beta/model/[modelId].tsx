@@ -1,6 +1,7 @@
 import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import MessageAlert from 'src/MessageAlert'
@@ -35,7 +36,11 @@ export default function Model() {
   }
 
   if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
+    if (isModelError.status === 403) {
+      return <Forbidden errorMessage='If you think this is in error please contact the model owners.' />
+    } else {
+      return <MessageAlert message={isModelError.info.message} severity='error' />
+    }
   }
 
   return (
