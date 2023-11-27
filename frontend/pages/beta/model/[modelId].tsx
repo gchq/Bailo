@@ -1,3 +1,4 @@
+import { Box } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -37,7 +38,15 @@ export default function Model() {
 
   if (isModelError) {
     if (isModelError.status === 403) {
-      return <Forbidden errorMessage='If you think this is in error please contact the model owners.' />
+      return (
+        <Box sx={{ height: '100vh' }}>
+          <Forbidden
+            errorMessage='If you think this is in error please contact the model owners.'
+            noMargin
+            additionalStyling={{ height: '100vh' }}
+          />
+        </Box>
+      )
     } else {
       return <MessageAlert message={isModelError.info.message} severity='error' />
     }

@@ -33,7 +33,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
 
   if (isModelImagesError) {
     if (isModelImagesError.status === 403) {
-      return <Forbidden errorMessage='If you think this is in error please contact the model owners.' />
+      return <Forbidden errorMessage='If you think this is in error please contact the model owners.' noMargin />
     } else {
       return <MessageAlert message={isModelImagesError.info.message} severity='error' />
     }
