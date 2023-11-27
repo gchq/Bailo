@@ -98,7 +98,7 @@ export default function NewAccessRequest() {
             <Stack spacing={4}>
               <Link href={`/beta/model/${modelId}/access-request/schema`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                  Choose a different schema
+                  Select a different schema
                 </Button>
               </Link>
               <JsonSchemaForm

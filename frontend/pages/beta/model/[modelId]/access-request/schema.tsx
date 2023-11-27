@@ -1,10 +1,11 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Link from 'src/Link'
+import { SchemaInterface } from 'types/types'
 
 import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
@@ -22,6 +23,10 @@ export default function NewSchemaSelection() {
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
+  async function handleSchemaSelectionOnClick(newSchema: SchemaInterface) {
+    router.push(`/beta/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
+  }
+
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
   }
@@ -38,8 +43,8 @@ export default function NewSchemaSelection() {
               </Button>
             </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
-              <Typography variant='h6' component='h1' color='primary'>
-                Choose a schema
+              <Typography variant='h6' color='primary'>
+                Select a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
               <Typography>
@@ -51,20 +56,32 @@ export default function NewSchemaSelection() {
               <Typography color='primary' component='h2' variant='h6'>
                 Active Schemas
               </Typography>
-              <Grid container spacing={2}>
-                {modelId &&
-                  activeSchemas.map((activeSchema) => (
-                    <SchemaButton key={activeSchema.id} schema={activeSchema} modelId={modelId} />
-                  ))}
-                {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
-              </Grid>
+              <Box sx={{ m: 2 }}>
+                <Grid container spacing={2}>
+                  {modelId &&
+                    activeSchemas.map((activeSchema) => (
+                      <SchemaButton
+                        key={activeSchema.id}
+                        schema={activeSchema}
+                        modelId={modelId}
+                        onClickAction={() => handleSchemaSelectionOnClick(activeSchema)}
+                      />
+                    ))}
+                  {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
+                </Grid>
+              </Box>
               <Typography color='primary' component='h2' variant='h6'>
                 Inactive Schemas
               </Typography>
               <Grid container spacing={2}>
                 {modelId &&
                   inactiveSchemas.map((inactiveSchema) => (
-                    <SchemaButton key={inactiveSchema.id} schema={inactiveSchema} modelId={modelId} />
+                    <SchemaButton
+                      key={inactiveSchema.id}
+                      schema={inactiveSchema}
+                      modelId={modelId}
+                      onClickAction={() => handleSchemaSelectionOnClick(inactiveSchema)}
+                    />
                   ))}
                 {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}
               </Grid>

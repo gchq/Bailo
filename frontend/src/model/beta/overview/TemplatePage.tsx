@@ -1,6 +1,5 @@
 import { PostAdd } from '@mui/icons-material'
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import Link from 'src/Link'
 
 import { ModelInterface } from '../../../../types/v2/types'
@@ -10,8 +9,6 @@ type TemplatePageProps = {
 }
 
 export default function TemplatePage({ model }: TemplatePageProps) {
-  const theme = useTheme()
-
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4} justifyContent='center' alignItems='center'>
@@ -30,46 +27,42 @@ export default function TemplatePage({ model }: TemplatePageProps) {
           alignItems='center'
           divider={<Divider orientation='vertical' flexItem />}
         >
-          <Box
+          <Card
+            variant='outlined'
             sx={{
-              border: 'solid 2px',
-              borderColor: theme.palette.primary.main,
-              p: 4,
-              borderRadius: 2,
               width: '300px',
+              p: 2,
             }}
           >
             <Stack spacing={2}>
-              <Typography component='h3' variant='h6'>
+              <Typography component='h3' variant='h6' color='primary'>
                 Create from a template
               </Typography>
-              <Typography variant='body1'>Create a model using an existing model as a template.</Typography>
+              <Typography>Create a model using an existing model as a template.</Typography>
               <Button sx={{ width: '100%' }} variant='contained' disabled>
                 Create
               </Button>
             </Stack>
-          </Box>
-          <Box
+          </Card>
+          <Card
+            variant='outlined'
             sx={{
-              border: 'solid 2px',
-              borderColor: theme.palette.primary.main,
-              p: 4,
-              borderRadius: 2,
               width: '300px',
+              p: 2,
             }}
           >
             <Stack spacing={2}>
-              <Typography component='h3' variant='h6'>
+              <Typography component='h3' variant='h6' color='primary'>
                 Create from scratch
               </Typography>
-              <Typography variant='body1'>Create a model from scratch using a predefined schema.</Typography>
+              <Typography>Create a model from scratch using a predefined schema.</Typography>
               <Link href={`/beta/model/${model.id}/schema`}>
                 <Button sx={{ width: '100%' }} variant='contained'>
                   Create
                 </Button>
               </Link>
             </Stack>
-          </Box>
+          </Card>
         </Stack>
       </Stack>
     </Box>

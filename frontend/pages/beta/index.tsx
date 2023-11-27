@@ -99,7 +99,7 @@ export default function ExploreModels() {
               onChange={handleFilterChange}
               endAdornment={
                 <InputAdornment position='end'>
-                  <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                  <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
