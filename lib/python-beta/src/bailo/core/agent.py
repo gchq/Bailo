@@ -13,7 +13,7 @@ class Agent:
         res = requests.request(method, *args, **kwargs)
 
         # Check response for a valid range
-        if 200 <= res.status_code < 400:
+        if res.status_code < 400:
             return res
 
         # Give the error message issued by bailo
