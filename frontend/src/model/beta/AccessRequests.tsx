@@ -19,9 +19,11 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   const accessRequestsList = useMemo(
     () =>
       accessRequests.length ? (
-        accessRequests.map((accessRequest) => (
-          <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
-        ))
+        accessRequests
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+          .map((accessRequest) => (
+            <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
+          ))
       ) : (
         <EmptyBlob text={`No access requests found for model ${model.name}`} />
       ),

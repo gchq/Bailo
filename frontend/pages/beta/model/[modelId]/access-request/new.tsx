@@ -66,7 +66,8 @@ export default function NewAccessRequest() {
         const res = await postAccessRequest(modelId, schemaId, data)
         if (res.status && res.status < 400) {
           setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}?tab=access`)
+          const data = await res.json()
+          router.push(`/beta/model/${modelId}/access-request/${data.accessRequest.id}`)
         } else {
           setSubmitButtonLoading(false)
         }

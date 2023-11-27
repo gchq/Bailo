@@ -8,7 +8,7 @@ type LoadingProps = {
 export default function Loading({ size = 40 }: LoadingProps): ReactElement {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <CircularProgress size={size} />
+      <CircularProgress color='primary' size={size} />
     </Box>
   )
 }
