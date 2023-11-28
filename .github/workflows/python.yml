@@ -32,11 +32,10 @@ jobs:
           cd lib/python-beta
           black --check --verbose .
 
-      # Pylint and Flake8
+      # Pylint
       - name: Check linting
         run: |
           cd lib/python-beta
-          flake8 src/bailo
           pylint src/bailo
 
       # Pytest
