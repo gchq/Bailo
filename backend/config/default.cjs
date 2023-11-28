@@ -1,11 +1,11 @@
 /** @type {import('../src/utils/v2/config.js').Config} */
 module.exports = {
   api: {
-    // Port to listen on
-    port: 3001,
-
     // Publicly accessible host
     host: '',
+
+    // Port to listen on
+    port: 3001,
   },
 
   app: {
@@ -246,6 +246,7 @@ module.exports = {
     endpoint: 'http://minio:9000',
     region: 'ignored',
     forcePathStyle: true,
+    rejectUnauthorized: true,
 
     // Names of buckets that Bailo uses
     buckets: {

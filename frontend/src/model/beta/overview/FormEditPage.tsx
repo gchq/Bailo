@@ -11,7 +11,7 @@ import { SplitSchemaNoRender } from '../../../../types/interfaces'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
-import ModelCardForm from '../../../Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../MessageAlert'
 import ModelCardHistoryDialog from '../overview/ModelCardHistoryDialog'
 
@@ -127,7 +127,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             </Stack>
           )}
         </Stack>
-        <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
     </>

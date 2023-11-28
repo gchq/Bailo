@@ -15,11 +15,11 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { debounce } from 'lodash'
 import _ from 'lodash-es'
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useState } from 'react'
 
 import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
-import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import { CollaboratorEntry, EntityObject, ModelInterface } from '../../../../types/v2/types'
 import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
 import useNotification from '../../../common/Snackbar'
@@ -48,22 +48,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [model, setAccessList])
 
-  const entities = useMemo(() => {
-    if (!users) return []
-
-    const userGroup = users.find((usrGroup) => usrGroup.kind === 'user')
-    if (userGroup) {
-      return userGroup.entities
-    } else {
-      return []
-    }
-  }, [users])
-
   const onUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === newValue)) {
+    (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue.id)) {
         const updatedAccessList = accessList
-        const newAccess = { entity: newValue, roles: [] }
+        const newAccess = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
         updatedAccessList.push(newAccess)
         setAccessList(accessList)
       }
@@ -121,10 +110,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             size='small'
             noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
             onInputChange={debounceOnInputChange}
-            isOptionEqualToValue={(option: string, value: string) => option === value}
-            getOptionLabel={(option) => option.split(':')[1]}
+            groupBy={(option) => option.kind}
+            getOptionLabel={(option: EntityObject) => option.id}
+            isOptionEqualToValue={(option: any, value: any) => option === value}
             onChange={onUserChange}
-            options={entities}
+            options={users || []}
             renderInput={(params) => (
               <TextField
                 {...params}

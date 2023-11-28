@@ -17,56 +17,61 @@ import {
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
 
 import { useListModels } from '../../actions/model'
-import { ListModelType } from '../../data/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
-import { MarketPlaceModelGroup, MarketPlaceModelSelectType } from '../../types/types'
 import useDebounce from '../../utils/hooks/useDebounce'
 
+interface KeyAndLabel {
+  key: string
+  label: string
+}
+
+const searchFilterTypeLabels: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
+
 export default function ExploreModels() {
-  const [group, setGroup] = useState<ListModelType>('all')
   // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
-  const [selectedLibrary, setSelectedLibrary] = useState('')
+  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
-  const [selectedType, setSelectedType] = useState<MarketPlaceModelSelectType | ''>('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+  const { models, isModelsError } = useListModels(selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
 
   const theme = useTheme()
 
-  useEffect(() => {
-    switch (selectedType) {
-      case MarketPlaceModelSelectType.MY_MODELS:
-        setGroup(MarketPlaceModelGroup.MY_MODELS)
-        break
-      case MarketPlaceModelSelectType.FAVOURITES:
-        setGroup(MarketPlaceModelGroup.FAVOURITES)
-        break
-      default:
-        setGroup(MarketPlaceModelGroup.ALL)
-        mutateModels()
+  const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
+    if (selected.length > 0) {
+      const types: string[] = []
+      selected.forEach((value) => {
+        const typeToAdd = searchFilterTypeLabels.find((typeLabel) => typeLabel.label === value)
+        if (typeToAdd && typeToAdd.label) {
+          types.push(typeToAdd.key)
+        }
+      })
+      setSelectedTypes(types)
+    } else {
+      setSelectedTypes([])
     }
-  }, [selectedType, mutateModels])
+  }, [])
 
-  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
-    isModelsError,
-  })
-  if (error) return error
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
   }
 
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
+
+  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
+    isModelsError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Explore Models' page='marketplace'>
@@ -94,7 +99,7 @@ export default function ExploreModels() {
               onChange={handleFilterChange}
               endAdornment={
                 <InputAdornment position='end'>
-                  <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                  <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -125,17 +130,21 @@ export default function ExploreModels() {
               // TODO fetch all model libraries
               tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
               expandThreshold={10}
-              selectedTags={selectedLibrary}
-              onChange={setSelectedLibrary}
+              multiple
+              selectedTags={selectedLibraries}
+              onChange={setSelectedLibraries}
               size='small'
             />
           </Box>
           <Box>
-            <ChipSelector<MarketPlaceModelSelectType>
+            <ChipSelector
               label='Other'
-              tags={[MarketPlaceModelSelectType.MY_MODELS, MarketPlaceModelSelectType.FAVOURITES]}
-              onChange={setSelectedType}
-              selectedTags={selectedType}
+              multiple
+              tags={[...searchFilterTypeLabels.map((type) => type.label)]}
+              onChange={handleSelectedTypesOnChange}
+              selectedTags={searchFilterTypeLabels
+                .filter((label) => selectedTypes.includes(label.key))
+                .map((type) => type.label)}
               size='small'
             />
           </Box>

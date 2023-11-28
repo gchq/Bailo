@@ -1,14 +1,6 @@
-import { Box, Chip, Stack, TextField } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Chip, Grid, TextField, Tooltip } from '@mui/material'
 import { ChangeEvent, useCallback, useState } from 'react'
 import { FileWithMetadata } from 'types/interfaces'
-
-const displayFilename = (filename: string) => {
-  const parts = filename.split('.')
-  const ext = parts.pop()
-  const base = parts.join('.')
-  return base.length > 12 ? `${base}...${ext}` : filename
-}
 
 interface MultiFileInputDisplayProps {
   file: File
@@ -17,7 +9,6 @@ interface MultiFileInputDisplayProps {
 }
 
 export default function MultiFileInputFileDisplay({ file, handleDelete, onChange }: MultiFileInputDisplayProps) {
-  const theme = useTheme()
   const [metadata, setMetadata] = useState('')
 
   const handleMetadataChange = useCallback(
@@ -29,9 +20,18 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
   )
 
   return (
-    <Box sx={{ border: 'solid', borderWidth: '0.5px', borderColor: theme.palette.primary.main }}>
-      <Stack direction='row' alignItems='center' spacing={1} sx={{ m: 1 }}>
-        <Chip color='primary' label={displayFilename(file.name)} onDelete={() => handleDelete(file)} />
+    <Grid container spacing={1} alignItems='center'>
+      <Grid item xs={4}>
+        <Tooltip title={file.name}>
+          <Chip
+            color='primary'
+            label={file.name}
+            onDelete={() => handleDelete(file)}
+            sx={{ width: '100%', justifyContent: 'space-between' }}
+          />
+        </Tooltip>
+      </Grid>
+      <Grid item xs={8}>
         <TextField
           size='small'
           placeholder='Optional metadata'
@@ -39,7 +39,7 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
           value={metadata}
           onChange={handleMetadataChange}
         />
-      </Stack>
-    </Box>
+      </Grid>
+    </Grid>
   )
 }

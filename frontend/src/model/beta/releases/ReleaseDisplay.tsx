@@ -1,5 +1,4 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
@@ -7,6 +6,7 @@ import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
+import { ModelInterface } from '../../../../types/v2/types'
 import Loading from '../../../common/Loading'
 import Markdown from '../../../common/MarkdownDisplay'
 import Link from '../../../Link'
@@ -16,15 +16,14 @@ import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
 export default function ReleaseDisplay({
-  modelId,
+  model,
   release,
   latestRelease,
 }: {
-  modelId: string
+  model: ModelInterface
   release: ReleaseInterface
   latestRelease: string
 }) {
-  const theme = useTheme()
   const router = useRouter()
 
   const {
@@ -32,7 +31,7 @@ export default function ReleaseDisplay({
     isReviewsLoading: isActiveReviewsLoading,
     isReviewsError: isActiveReviewsError,
   } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: model.id,
     semver: release.semver,
     isActive: true,
   })
@@ -41,7 +40,7 @@ export default function ReleaseDisplay({
     isReviewsLoading: isInactiveReviewsLoading,
     isReviewsError: isInactiveReviewsError,
   } = useGetReviewRequestsForModel({
-    modelId,
+    modelId: model.id,
     semver: release.semver,
     isActive: false,
   })
@@ -69,15 +68,7 @@ export default function ReleaseDisplay({
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Box
-          sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: theme.palette.primary.main,
-            width: '100%',
-            borderRadius: 2,
-          }}
-        >
+        <Card variant='outlined' sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
@@ -92,14 +83,14 @@ export default function ReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Link href={`/beta/model/${modelId}/release/${release.semver}`}>
+                <Link href={`/beta/model/${model.id}/release/${release.semver}`}>
                   <Typography component='h2' variant='h6' color='primary'>
-                    {modelId} - {release.semver}
+                    {model.name} - {release.semver}
                   </Typography>
                 </Link>
                 {latestVersionAdornment()}
               </Stack>
-              <Button onClick={() => router.push(`/beta/model/${modelId}/history/${release.modelCardVersion}`)}>
+              <Button onClick={() => router.push(`/beta/model/${model.id}/history/${release.modelCardVersion}`)}>
                 View Model Card
               </Button>
             </Stack>
@@ -120,16 +111,22 @@ export default function ReleaseDisplay({
                 <>
                   <Typography fontWeight='bold'>Artefacts</Typography>
                   {release.files.map((file) => (
-                    <Stack
-                      key={file._id}
-                      direction={{ sm: 'row', xs: 'column' }}
-                      justifyContent='space-between'
-                      alignItems='center'
-                      spacing={1}
-                    >
-                      <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`}>{file.name}</Link>
-                      <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                    </Stack>
+                    <div key={file._id}>
+                      <Grid container spacing={1} alignItems='center'>
+                        <Grid item xs>
+                          <Tooltip title={file.name}>
+                            <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
+                              <Typography noWrap textOverflow='ellipsis' display='inline'>
+                                {file.name}
+                              </Typography>
+                            </Link>
+                          </Tooltip>
+                        </Grid>
+                        <Grid item xs={1} textAlign='right'>
+                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                        </Grid>
+                      </Grid>
+                    </div>
                   ))}
                 </>
               )}
@@ -145,7 +142,7 @@ export default function ReleaseDisplay({
                       spacing={1}
                     >
                       {uiConfig && (
-                        <CodeLine line={`${uiConfig.registry.host}/${modelId}/${image.name}:${image.tag}`} />
+                        <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
                       )}
                     </Stack>
                   ))}
@@ -157,7 +154,7 @@ export default function ReleaseDisplay({
               ))}
             </Stack>
           </Stack>
-        </Box>
+        </Card>
       </Stack>
     </>
   )

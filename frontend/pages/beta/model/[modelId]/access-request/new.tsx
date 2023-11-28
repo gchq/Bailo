@@ -1,7 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
@@ -11,7 +10,7 @@ import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
-import ModelCardForm from '../../../../../src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
@@ -19,7 +18,6 @@ import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 
 
 export default function NewAccessRequest() {
   const router = useRouter()
-  const theme = useTheme()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
@@ -68,7 +66,7 @@ export default function NewAccessRequest() {
         const res = await postAccessRequest(modelId, schemaId, data)
         if (res.status && res.status < 400) {
           setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}`)
+          router.push(`/beta/model/${modelId}?tab=access`)
         } else {
           setSubmitButtonLoading(false)
         }
@@ -100,10 +98,15 @@ export default function NewAccessRequest() {
             <Stack spacing={4}>
               <Link href={`/beta/model/${modelId}/access-request/schema`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                  Choose a different schema
+                  Select a different schema
                 </Button>
               </Link>
-              <ModelCardForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit displayLabelValidation />
+              <JsonSchemaForm
+                splitSchema={splitSchema}
+                setSplitSchema={setSplitSchema}
+                canEdit
+                displayLabelValidation
+              />
               <Stack alignItems='flex-end'>
                 <LoadingButton
                   sx={{ width: 'fit-content' }}
@@ -113,9 +116,7 @@ export default function NewAccessRequest() {
                 >
                   Submit
                 </LoadingButton>
-                <Typography variant='caption' color={theme.palette.error.main}>
-                  {submissionErrorText}
-                </Typography>
+                <MessageAlert message={submissionErrorText} severity='error' />
               </Stack>
             </Stack>
           )}

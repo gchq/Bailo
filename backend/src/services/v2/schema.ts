@@ -51,7 +51,8 @@ export async function addDefaultSchemas() {
   const uploadSchemaDoc = new Schema({
     name: 'Minimal Schema v10 Beta',
     id: 'minimal-general-v10-beta',
-    description: 'This is a test beta schema',
+    description:
+      "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
     jsonSchema: modelSchemaBeta,
     kind: SchemaKind.Model,
     active: true,
@@ -59,9 +60,10 @@ export async function addDefaultSchemas() {
   })
 
   const accessSchemaDoc = new Schema({
-    name: 'Minimal Access RequestSchema v10 Beta',
+    name: 'Minimal Access Request Schema v10 Beta',
     id: 'minimal-access-request-general-v10-beta',
-    description: 'This is a test beta schema',
+    description:
+      'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work\n\n ✔ Operational Deployments\n\n ✖ Second Party Sharing',
     jsonSchema: accessRequestSchemaBeta,
     kind: SchemaKind.AccessRequest,
     active: true,
