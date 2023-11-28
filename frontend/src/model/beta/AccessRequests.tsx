@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDisplay'
+import { sortByCreatedAtDescending } from 'utils/dateUtils'
 
 import { ModelInterface } from '../../../types/v2/types'
 import EmptyBlob from '../../common/EmptyBlob'
@@ -20,7 +21,7 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
     () =>
       accessRequests.length ? (
         accessRequests
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+          .sort(sortByCreatedAtDescending)
           .map((accessRequest) => (
             <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
           ))
