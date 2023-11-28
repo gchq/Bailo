@@ -5,10 +5,16 @@ import Link from 'src/Link'
 interface ForbiddenProps {
   errorMessage?: string
   noMargin?: boolean
+  hideNavButton?: boolean
   additionalStyling?: any
 }
 
-export default function Forbidden({ errorMessage, noMargin = false, additionalStyling }: ForbiddenProps) {
+export default function Forbidden({
+  errorMessage,
+  noMargin = false,
+  additionalStyling,
+  hideNavButton = false,
+}: ForbiddenProps) {
   return (
     <Stack justifyContent='center' alignItems='center' sx={additionalStyling}>
       <Box sx={{ m: noMargin ? 0 : 5, p: 2, width: 'fit-content' }}>
@@ -23,9 +29,11 @@ export default function Forbidden({ errorMessage, noMargin = false, additionalSt
             Uh oh! Looks like you don&apos;t have permission to view this content.
           </Typography>
           <Typography>{errorMessage}</Typography>
-          <Link href='/'>
-            <Button>Click here to go back to the main page</Button>
-          </Link>
+          {!hideNavButton && (
+            <Link href='/'>
+              <Button>Click here to go back to the main page</Button>
+            </Link>
+          )}
         </Stack>
       </Box>
     </Stack>
