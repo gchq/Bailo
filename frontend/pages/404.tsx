@@ -14,7 +14,7 @@ export default function NotFound() {
             </Typography>
           </Stack>
           <Typography component='h3' variant='h5' color='primary' fontWeight='bold'>
-            Hmm... We&apos;re having trouble finding this page.
+            {`Hmm... We're having trouble finding this page.`}
           </Typography>
           <Link href='/'>
             <Button>Click here to go back to the main page</Button>

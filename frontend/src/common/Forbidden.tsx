@@ -1,16 +1,17 @@
 import { GppBad } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
+import { CSSProperties } from 'react'
 import Link from 'src/Link'
 
 interface ForbiddenProps {
   errorMessage?: string
   noMargin?: boolean
   hideNavButton?: boolean
-  additionalStyling?: any
+  additionalStyling?: CSSProperties
 }
 
 export default function Forbidden({
-  errorMessage,
+  errorMessage = '',
   noMargin = false,
   additionalStyling,
   hideNavButton = false,
