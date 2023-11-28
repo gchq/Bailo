@@ -1,6 +1,6 @@
 import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -8,6 +8,7 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
@@ -56,8 +57,8 @@ export default function ReleaseForm({
   isEdit = false,
 }: ReleaseFormProps) {
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
-  const [latestRelease, setLatestRelease] = useState<string>('')
-  const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
+
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -67,11 +68,7 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
-  useEffect(() => {
-    if (model && releases.length > 0) {
-      setLatestRelease(releases[0].semver)
-    }
-  }, [model, releases])
+  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : ''), [releases])
 
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
@@ -79,6 +76,9 @@ export default function ReleaseForm({
     </Typography>
   )
 
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
   return (
     <>
       {isReleasesLoading && <Loading />}
@@ -99,7 +99,7 @@ export default function ReleaseForm({
         <Stack>
           {!editable && (
             <>
-              <Typography fontWeight='bold'>Latest semantic version</Typography>
+              <Typography fontWeight='bold'>Latest version</Typography>
               <Typography>{latestRelease}</Typography>
             </>
           )}
