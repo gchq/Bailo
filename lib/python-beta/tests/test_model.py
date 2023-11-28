@@ -22,14 +22,23 @@ def test_model():
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "team_id", "visibility"), [("test-model", "test", "Uncategorised", ModelVisibility.Public)]
+    ("name", "description", "team_id", "visibility"),
+    [("test-model", "test", "Uncategorised", ModelVisibility.Public)],
 )
 def test_create_get_from_version_and_update(
-    name: str, description: str, team_id: str, visibility: ModelVisibility | None, integration_client
+    name: str,
+    description: str,
+    team_id: str,
+    visibility: ModelVisibility | None,
+    integration_client,
 ):
     # Create model
     model = Model.create(
-        client=integration_client, name=name, description=description, team_id=team_id, visibility=visibility
+        client=integration_client,
+        name=name,
+        description=description,
+        team_id=team_id,
+        visibility=visibility,
     )
     model.card_from_schema("minimal-general-v10-beta")
     assert isinstance(model, Model)

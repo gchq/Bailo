@@ -29,7 +29,14 @@ class Schema:
         self.json_schema = json_schema
 
     @classmethod
-    def create(cls, client: Client, schema_id: str, name: str, kind: SchemaKind, json_schema: dict[str, Any]) -> Schema:
+    def create(
+        cls,
+        client: Client,
+        schema_id: str,
+        name: str,
+        kind: SchemaKind,
+        json_schema: dict[str, Any],
+    ) -> Schema:
         """Builds a schema from Bailo and uploads it
 
         :param client: A client object used to interact with Bailo
@@ -39,7 +46,13 @@ class Schema:
         :param json_schema: Schema JSON
         :return: Schema object
         """
-        schema = cls(client=client, schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
+        schema = cls(
+            client=client,
+            schema_id=schema_id,
+            name=name,
+            kind=kind,
+            json_schema=json_schema,
+        )
         res = client.post_schema(schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
         schema.__unpack(res["schema"])
 

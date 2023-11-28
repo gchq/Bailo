@@ -53,8 +53,9 @@ repos:
       - id: rst-directive-colons
       - id: rst-inline-touching-normal
 
-  - repo: https://github.com/psf/black
-    rev: 19.10b0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 23.11.0
     hooks:
       - id: black
-        stages: [push]
+        language_version: python3.10
+        args: [--line-length=120]

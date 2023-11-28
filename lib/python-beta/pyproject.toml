@@ -13,9 +13,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.12",
 ]
 requires-python = ">=3.8.1"
 dynamic = ["version"]
@@ -25,14 +23,8 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "bandit[toml]==1.7.5",
     "black==23.3.0",
     "check-manifest==0.49",
-    "flake8-bugbear==23.5.9",
-    "flake8-docstrings",
-    "flake8-formatter_junit_xml",
-    "flake8",
-    "flake8-pyproject",
     "pre-commit==3.3.1",
     "pylint==2.17.4",
     "pylint_junit",
@@ -53,12 +45,6 @@ Tracker = "https://github.com/gchq/bailo/issues"
 [tool.flit.module]
 name = "bailo"
 
-[tool.bandit]
-exclude_dirs = ["build","dist","tests","scripts"]
-number = 4
-recursive = true
-targets = "src"
-
 [tool.black]
 line-length = 120
 fast = true
@@ -68,28 +54,6 @@ branch = true
 
 [tool.coverage.report]
 fail_under = 100
-
-[tool.flake8]
-max-line-length = 120
-select = "F,E,W,B,B901,B902,B903"
-exclude = [
-    ".eggs",
-    ".git",
-    ".tox",
-    "nssm",
-    "obj",
-    "out",
-    "packages",
-    "pywin32",
-    "tests",
-    "swagger_client"
-]
-ignore = [
-    "E722",
-    "B001",
-    "W503",
-    "E203"
-]
 
 [tool.pyright]
 include = ["src"]
@@ -118,41 +82,7 @@ testpaths = "tests"
 junit_family = "xunit2"
 markers = [
     "integration: marks as integration test",
-    "notebooks: marks as notebook test",
-    "gpu: marks as gpu test",
-    "slow: marks tests as slow",
-    "unit: fast offline tests",
 ]
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py, integration, spark, all
-
-[testenv]
-commands =
-    pytest -m "not integration and not spark" {posargs}
-
-[testenv:integration]
-commands =
-    pytest -m "integration" {posargs}
-
-[testenv:spark]
-extras = spark
-setenv =
-       PYSPARK_DRIVER_PYTHON = {envpython}
-       PYSPARK_PYTHON = {envpython}
-commands =
-    pytest -m "spark" {posargs}
-
-[testenv:all]
-extras = all
-setenv =
-       PYSPARK_DRIVER_PYTHON = {envpython}
-       PYSPARK_PYTHON = {envpython}
-commands =
-    pytest {posargs}
-"""
 
 [tool.pylint]
 extension-pkg-whitelist= [

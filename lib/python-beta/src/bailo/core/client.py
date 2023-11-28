@@ -37,7 +37,12 @@ class Client:
         :return: JSON response object
         """
         filtered_json = filter_none(
-            {"name": name, "description": description, "visibility": visibility, "teamId": team_id}
+            {
+                "name": name,
+                "description": description,
+                "visibility": visibility,
+                "teamId": team_id,
+            }
         )
 
         return self.agent.post(
@@ -197,7 +202,13 @@ class Client:
         return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json).json()
 
     def put_release(
-        self, model_id: str, release_version: str, notes: str, draft: bool, file_ids: list[str], images: list[str]
+        self,
+        model_id: str,
+        release_version: str,
+        notes: str,
+        draft: bool,
+        file_ids: list[str],
+        images: list[str],
     ):
         """
         Creates a new model release.
@@ -214,7 +225,12 @@ class Client:
         """
         return self.agent.put(
             f"{self.url}/v2/model/{model_id}/release/{release_version}",
-            json={"notes": notes, "draft": draft, "fileIds": file_ids, "images": images},
+            json={
+                "notes": notes,
+                "draft": draft,
+                "fileIds": file_ids,
+                "images": images,
+            },
         ).json()
 
     def get_all_releases(
@@ -301,7 +317,10 @@ class Client:
         :return: JSON response object
         """
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/files/upload/simple", params={"name": name}, data=buffer, stream=True
+            f"{self.url}/v2/model/{model_id}/files/upload/simple",
+            params={"name": name},
+            data=buffer,
+            stream=True,
         )
 
     # def start_multi_upload(): TBC
@@ -417,7 +436,12 @@ class Client:
         ).json()
 
     def post_review(
-        self, model_id: str, role: str, decision: str, version: str | None = None, comment: str | None = None
+        self,
+        model_id: str,
+        role: str,
+        decision: str,
+        version: str | None = None,
+        comment: str | None = None,
     ):
         """
         Creates a review for a release
@@ -429,7 +453,10 @@ class Client:
         :param comment: A comment to go with the review
         """
         filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/release/{version}/review", json=filtered_json).json()
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/release/{version}/review",
+            json=filtered_json,
+        ).json()
 
     def get_model_roles(
         self,
@@ -578,7 +605,8 @@ class Client:
         :return: JSON response object
         """
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/access-requests", json={"schemaId": schema_id, "metadata": metadata}
+            f"{self.url}/v2/model/{model_id}/access-requests",
+            json={"schemaId": schema_id, "metadata": metadata},
         ).json()
 
     def delete_access_request(self, model_id: str, access_request_id: str):
@@ -593,7 +621,13 @@ class Client:
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
         ).json()
 
-    def patch_access_request(self, model_id: str, access_request_id: str, metadata: Any, schema_id: str | None = None):
+    def patch_access_request(
+        self,
+        model_id: str,
+        access_request_id: str,
+        metadata: Any,
+        schema_id: str | None = None,
+    ):
         """
         Updates an access request given its unique ID
 
@@ -604,5 +638,6 @@ class Client:
         """
         filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
         return self.agent.patch(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}", json=filtered_json
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json,
         ).json()

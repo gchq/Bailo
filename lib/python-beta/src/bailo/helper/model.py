@@ -56,7 +56,11 @@ class Model:
         """
         res = client.post_model(name=name, description=description, team_id=team_id, visibility=visibility)
         model = cls(
-            client=client, model_id=res["model"]["id"], name=name, description=description, visibility=visibility
+            client=client,
+            model_id=res["model"]["id"],
+            name=name,
+            description=description,
+            visibility=visibility,
         )
 
         model.__unpack(res["model"])
@@ -72,7 +76,12 @@ class Model:
         :return: Model object
         """
         res = client.get_model(model_id=model_id)["model"]
-        model = cls(client=client, model_id=model_id, name=res["name"], description=res["description"])
+        model = cls(
+            client=client,
+            model_id=model_id,
+            name=res["name"],
+            description=res["description"],
+        )
         model.__unpack(res)
 
         model.get_card_latest()
@@ -82,7 +91,10 @@ class Model:
     def update(self) -> None:
         """Uploads and retrieves any changes to the model summary on Bailo"""
         res = self.client.patch_model(
-            model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility
+            model_id=self.model_id,
+            name=self.name,
+            description=self.description,
+            visibility=self.visibility,
         )
         self.__unpack(res["model"])
 

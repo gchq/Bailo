@@ -59,7 +59,15 @@ class AccessRequest:
 
         schema_id = json_access_request["schemaId"]
 
-        return cls(client, model_id, schema_id, metadata, access_request_id, created_by, deleted)
+        return cls(
+            client,
+            model_id,
+            schema_id,
+            metadata,
+            access_request_id,
+            created_by,
+            deleted,
+        )
 
     @classmethod
     def create(cls, client: Client, name: str, model_id: str, schema_id: str, metadata: Any) -> AccessRequest:
@@ -81,7 +89,15 @@ class AccessRequest:
         metadata = access_request_json["metadata"]
         created_by = access_request_json["createdBy"]
 
-        return cls(client, model_id, schema_id, metadata, access_request_id, created_by, deleted)
+        return cls(
+            client,
+            model_id,
+            schema_id,
+            metadata,
+            access_request_id,
+            created_by,
+            deleted,
+        )
 
     def delete(self) -> bool:
         """Deletes the access request on Bailo

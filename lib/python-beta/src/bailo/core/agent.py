@@ -17,7 +17,7 @@ class Agent:
             return res
 
         # Give the error message issued by bailo
-        raise BailoException(res.json()['error']['message'])
+        raise BailoException(res.json()["error"]["message"])
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)
@@ -38,7 +38,7 @@ class Agent:
         return self.__request("PUT", *args, **kwargs)
 
 
-class PkiAgent():
+class PkiAgent:
     def __init__(
         self,
         cert: str,

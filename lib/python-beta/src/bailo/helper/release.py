@@ -71,9 +71,28 @@ class Release:
         :param version: A semantic version of a model release
         """
 
-        client.post_release(model_id, str(version), notes, files, images, model_card_version, minor, draft)
+        client.post_release(
+            model_id,
+            str(version),
+            notes,
+            files,
+            images,
+            model_card_version,
+            minor,
+            draft,
+        )
 
-        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft,
+        )
 
     @classmethod
     def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
@@ -93,7 +112,17 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
-        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft,
+        )
 
     def download(self, file_id: str, buffer: BytesIO) -> str:
         """Gives returns a Reading object given the file id
@@ -123,7 +152,14 @@ class Release:
 
         :return: JSON Response object
         """
-        res = self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
+        res = self.client.put_release(
+            self.model_id,
+            str(self.version),
+            self.notes,
+            self.draft,
+            self.files,
+            self.images,
+        )
 
     def delete(self) -> Any:
         """Deletes a release from Bailo

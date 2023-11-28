@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 from basemodel import BaseModel
+
 
 class FileNotFoundError(Exception):
     """
     File not found error
     """
+
     pass
+
 
 class Model(BaseModel):
     """
@@ -15,16 +20,16 @@ class Model(BaseModel):
 
     def __init__(self):
         """
-        Constructor, which loads the lid model and calls the constructor method 
+        Constructor, which loads the lid model and calls the constructor method
         of the BaseModel super class.
         """
-        with open("model.bin", "r") as f:
+        with open("model.bin") as f:
             if not "" in f.readlines()[0]:
                 raise FileNotFoundError("Failed to find model binary")
 
     def predict(self, input, features_names=None):
         data = input["data"]
-        return [''.join(reversed(line)) for line in data]
+        return ["".join(reversed(line)) for line in data]
 
     def metrics(self):
         """
@@ -32,8 +37,8 @@ class Model(BaseModel):
         :return: Array of dictionary tuples
         """
         # Add metrics for prediction count and metadata
-        metrics =  [
-          {"type": "COUNTER", "key": "predictions_total", "value": 1},
-          {"type": "GAUGE", "key": "model_meta", "value": 1}
+        metrics = [
+            {"type": "COUNTER", "key": "predictions_total", "value": 1},
+            {"type": "GAUGE", "key": "model_meta", "value": 1},
         ]
         return metrics
