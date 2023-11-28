@@ -637,7 +637,7 @@ jobs:
       # Run tests
       - name: Test with pytest
         run: |
-          cd lib/python
+          cd lib/python-beta
           python -m pytest -m integration
 
       - name: Dump docker-compose logs
