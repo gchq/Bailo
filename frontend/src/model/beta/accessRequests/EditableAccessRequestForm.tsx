@@ -24,7 +24,7 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
   const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
-  const { mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
+  const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
@@ -79,6 +79,10 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
 
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isAccessRequestError) {
+    return <MessageAlert message={isAccessRequestError.info.message} severity='error' />
   }
 
   return (
