@@ -5,6 +5,7 @@ import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'src/Link'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
@@ -64,11 +65,12 @@ export default function NewAccessRequest() {
       if (modelId && schemaId) {
         const data = getStepsData(splitSchema, true)
         const res = await postAccessRequest(modelId, schemaId, data)
-        if (res.status && res.status < 400) {
-          setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}?tab=access`)
-        } else {
+        if (!res.ok) {
+          const errorResponse = await getErrorMessage(res)
+          setSubmissionErrorText(errorResponse)
           setSubmitButtonLoading(false)
+        } else {
+          router.push(`/beta/model/${modelId}?tab=access`)
         }
       }
     }
