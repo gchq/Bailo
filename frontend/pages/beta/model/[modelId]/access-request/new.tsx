@@ -4,6 +4,7 @@ import { Button, Card, Stack, Typography } from '@mui/material'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
@@ -29,6 +30,10 @@ export default function NewAccessRequest() {
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
+  const isLoading = useMemo(
+    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
+    [isCurrentUserLoading, isModelLoading, isSchemaLoading],
+  )
 
   useEffect(() => {
     if (!model || !schema) return
@@ -74,22 +79,17 @@ export default function NewAccessRequest() {
     }
   }
 
-  if (isSchemaError) {
-    return <MessageAlert message={isSchemaError.info.message} severity='error' />
-  }
-
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load access request page`, {
+    isModelError,
+    isSchemaError,
+    isCurrentUserError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Access Request' page='Model'>
-      {(isSchemaLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
-      {!isSchemaLoading && !isModelLoading && (
+      {isLoading && <Loading />}
+      {!isLoading && (
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           {(!model || !model.card) && (
             <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>

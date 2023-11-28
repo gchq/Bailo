@@ -1,7 +1,8 @@
 import { Lock, LockOpen } from '@mui/icons-material'
-import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetTeam } from 'actions/team'
-import { useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
 import ModelNameInput from 'src/model/beta/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
@@ -22,6 +23,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
   const [modelName, setModelName] = useState(model.name)
   const [description, setDescription] = useState(model.description)
   const [visibility, setVisibility] = useState<ModelForm['visibility']>(model.visibility)
+  const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
@@ -33,9 +35,11 @@ export default function ModelDetails({ model }: ModelAccessProps) {
 
   const formValid = team && modelName && description
 
-  async function onSubmit(event) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
+    setIsLoading(true)
+
     const formData: ModelForm = {
       name: modelName,
       teamId: team?.id ?? 'Uncategorised',
@@ -46,14 +50,15 @@ export default function ModelDetails({ model }: ModelAccessProps) {
 
     if (!response.ok) {
       const error = await getErrorMessage(response)
-      return setErrorMessage(error)
+      setErrorMessage(error)
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Model updated',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
-
-    sendNotification({
-      variant: 'success',
-      msg: 'Model updated',
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
+    setIsLoading(false)
   }
 
   const privateLabel = () => {
@@ -124,9 +129,9 @@ export default function ModelDetails({ model }: ModelAccessProps) {
         <Divider />
         <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
           <span>
-            <Button variant='contained' disabled={!formValid} type='submit' data-test='createModelButton'>
+            <LoadingButton variant='contained' loading={isLoading} disabled={!formValid} type='submit'>
               Save
-            </Button>
+            </LoadingButton>
           </span>
         </Tooltip>
         <MessageAlert message={errorMessage} severity='error' />
