@@ -1,4 +1,4 @@
-import { Chip, Grid, TextField } from '@mui/material'
+import { Chip, Grid, TextField, Tooltip } from '@mui/material'
 import { ChangeEvent, useCallback, useState } from 'react'
 import { FileWithMetadata } from 'types/interfaces'
 
@@ -22,12 +22,14 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
   return (
     <Grid container spacing={1} alignItems='center'>
       <Grid item xs={4}>
-        <Chip
-          color='primary'
-          label={file.name}
-          onDelete={() => handleDelete(file)}
-          sx={{ width: '100%', justifyContent: 'space-between' }}
-        />
+        <Tooltip title={file.name}>
+          <Chip
+            color='primary'
+            label={file.name}
+            onDelete={() => handleDelete(file)}
+            sx={{ width: '100%', justifyContent: 'space-between' }}
+          />
+        </Tooltip>
       </Grid>
       <Grid item xs={8}>
         <TextField
