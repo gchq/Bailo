@@ -112,7 +112,7 @@ export default function ReleaseDisplay({
                   <Typography fontWeight='bold'>Artefacts</Typography>
                   {release.files.map((file) => (
                     <div key={file._id}>
-                      <Grid container spacing={1}>
+                      <Grid container spacing={1} alignItems='center'>
                         <Grid item xs>
                           <Tooltip title={file.name}>
                             <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
