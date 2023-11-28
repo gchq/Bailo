@@ -18,6 +18,14 @@ export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T,
   return new Date(a.createdAt) > new Date(b.createdAt) ? -1 : 1
 }
 
+export const sortByCreatedAtAscending = <T extends { createdAt: string }>(a: T, b: T) => {
+  if (!dayjs(a.createdAt).isValid() || !dayjs(b.createdAt).isValid()) {
+    throw new Error('Invalid date provided to sortByCreatedAtAscending')
+  }
+
+  return new Date(b.createdAt) > new Date(a.createdAt) ? -1 : 1
+}
+
 export const timeDifference = (current: Date, previous: Date) => {
   const msPerMinute = 60 * 1000
   const msPerHour = msPerMinute * 60

@@ -70,7 +70,8 @@ export default function NewAccessRequest() {
           setSubmissionErrorText(errorResponse)
           setSubmitButtonLoading(false)
         } else {
-          router.push(`/beta/model/${modelId}?tab=access`)
+          const data = await res.json()
+          router.push(`/beta/model/${modelId}/access-request/${data.accessRequest.id}`)
         }
       }
     }
