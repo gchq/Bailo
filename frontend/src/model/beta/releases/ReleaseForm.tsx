@@ -12,8 +12,6 @@ import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
-//import { ReleaseInterface } from '../../../../types/types'
-
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
