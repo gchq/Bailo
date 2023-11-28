@@ -27,9 +27,9 @@ export const AuditInfo = {
   CreateModelCard: { typeId: 'CreateModelCard', description: 'Model Card Created', auditKind: AuditKind.Create },
   ViewModelCard: { typeId: 'ViewModelCard', description: 'Model Card Viewed', auditKind: AuditKind.View },
   ViewModelCardRevisions: {
-    typeId: 'SearchModelCardRevisions',
-    description: 'Model Card Revisions Searched',
-    auditKind: AuditKind.Search,
+    typeId: 'ViewModelCardRevisions',
+    description: 'Model Card Revisions Viewed',
+    auditKind: AuditKind.View,
   },
   UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
