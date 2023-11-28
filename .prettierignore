@@ -9,3 +9,4 @@ frontend/node_modules
 infrastructure
 lib/python-beta/docs/pylint.md
 node_modules
+.dockerignore
