@@ -27,7 +27,7 @@ export default function NewSchemaSelection() {
     router.push(`/beta/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
   }
 
-  const error = MultipleErrorWrapper(`Unable to fetch schemas`, {
+  const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isSchemasError,
   })
   if (error) return error
