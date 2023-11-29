@@ -1,20 +1,25 @@
 from __future__ import annotations
 
+from json import JSONDecodeError
+
 import requests
-from bailo.core.exceptions import BailoException
+from bailo.core.exceptions import BailoException, ResponseException
 
 
 class Agent:
     def __request(self, method, *args, **kwargs):
-        """ """
         res = requests.request(method, *args, timeout=1, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
             return res
 
-        # Give the error message issued by bailo
-        raise BailoException(res.json()["error"]["message"])
+        try:
+            # Give the error message issued by bailo
+            raise BailoException(res.json()["error"]["message"])
+        except JSONDecodeError:
+            # No response given
+            raise ResponseException(f"Cannot {method} to {res.request.url}, body={res.request.body}")
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)
