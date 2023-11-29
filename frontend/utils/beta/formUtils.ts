@@ -6,6 +6,7 @@ import remove from 'lodash/remove'
 import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
+import DateSelector from 'src/MuiForms/DateSelector'
 import EntitySelector from 'src/MuiForms/EntitySelector'
 import EntitySelectorBeta from 'src/MuiForms/EntitySelectorBeta'
 import Nothing from 'src/MuiForms/Nothing'
@@ -21,6 +22,7 @@ import { createUiSchema } from '../uiSchemaUtils'
 export const widgets = {
   TextWidget: CustomTextInput,
   TextareaWidget: RichTextInput,
+  DateWidget: DateSelector,
   tagSelector: TagSelector,
   tagSelectorBeta: TagSelectorBeta,
   userSelector: UserSelector,
