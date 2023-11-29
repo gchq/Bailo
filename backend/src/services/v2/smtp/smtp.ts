@@ -1,3 +1,5 @@
+//import { release } from 'node:os'
+
 import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
@@ -71,6 +73,39 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
+
+export async function requestResponsePostReleaseReviewResponse(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `Release ${release.semver} has been reviewed`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Reviewer', data: review.role.toUpperCase() },
+      { title: 'Reviewed', data: review.createdAt.toString() },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
