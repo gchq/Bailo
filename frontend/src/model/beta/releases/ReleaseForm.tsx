@@ -14,7 +14,7 @@ type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  artefacts: File[]
+  files: File[]
   imageList: FlattenedModelImage[]
 }
 
@@ -34,9 +34,9 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onArtefactsChange: (value: File[]) => void
-  artefactsMetadata: FileWithMetadata[]
-  onArtefactsMetadataChange: (value: FileWithMetadata[]) => void
+  onFilesChange: (value: File[]) => void
+  filesMetadata: FileWithMetadata[]
+  onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 
@@ -46,9 +46,9 @@ export default function ReleaseForm({
   onSemverChange,
   onReleaseNotesChange,
   onMinorReleaseChange,
-  onArtefactsChange,
-  artefactsMetadata,
-  onArtefactsMetadataChange,
+  onFilesChange,
+  filesMetadata,
+  onFilesMetadataChange,
   onImageListChange,
   editable = false,
   isEdit = false,
@@ -132,18 +132,18 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Typography fontWeight='bold'>Artefacts</Typography>
+        <Typography fontWeight='bold'>Files</Typography>
         <MultiFileInput
           fullWidth
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
-          label='Attach artefacts'
-          files={formData.artefacts}
-          fileMetadata={artefactsMetadata}
+          label='Attach files'
+          files={formData.files}
+          fileMetadata={filesMetadata}
           readOnly={isReadOnly}
-          onFileChange={onArtefactsChange}
-          onFileMetadataChange={onArtefactsMetadataChange}
+          onFileChange={onFilesChange}
+          onFileMetadataChange={onFilesMetadataChange}
         />
-        {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
+        {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>

@@ -19,8 +19,8 @@ export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [artefacts, setArtefacts] = useState<File[]>([])
-  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
+  const [files, setFiles] = useState<File[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -48,22 +48,16 @@ export default function NewRelease() {
     setLoading(true)
 
     const fileIds: string[] = []
-    for (const artefact of artefacts) {
-      const artefactMetadata = artefactsMetadata.find((metadata) => metadata.fileName === artefact.name)
-      const postArtefactResponse = await postFile(
-        artefact,
-        model.id,
-        artefact.name,
-        artefact.type,
-        artefactMetadata?.metadata,
-      )
+    for (const file of files) {
+      const fileMetadata = filesMetadata.find((metadata) => metadata.fileName === file.name)
+      const postFileResponse = await postFile(file, model.id, file.name, file.type, fileMetadata?.metadata)
 
-      if (!postArtefactResponse.ok) {
+      if (!postFileResponse.ok) {
         setLoading(false)
-        return setErrorMessage(await getErrorMessage(postArtefactResponse))
+        return setErrorMessage(await getErrorMessage(postFileResponse))
       }
 
-      const res = await postArtefactResponse.json()
+      const res = await postFileResponse.json()
       fileIds.push(res.file._id)
     }
 
@@ -114,7 +108,7 @@ export default function NewRelease() {
                   </Typography>
                   <DesignServices color='primary' fontSize='large' />
                   <Typography>
-                    A release takes a snapshot of the current state of the model code, artefacts and model card. Access
+                    A release takes a snapshot of the current state of the model code, files and model card. Access
                     requests will be able to select for any release of a model for deployment.
                   </Typography>
                 </Stack>
@@ -124,15 +118,15 @@ export default function NewRelease() {
                     semver,
                     releaseNotes,
                     isMinorRelease,
-                    artefacts,
+                    files,
                     imageList,
                   }}
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
                   onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-                  onArtefactsChange={(value) => setArtefacts(value)}
-                  artefactsMetadata={artefactsMetadata}
-                  onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
+                  onFilesChange={(value) => setFiles(value)}
+                  filesMetadata={filesMetadata}
+                  onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}
                 />
                 <Stack alignItems='flex-end'>
