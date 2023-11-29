@@ -17,7 +17,7 @@ RUN if [[ $user_id -eq 1000 ]]; then groupmod -g 1001 node && usermod -u 1001 -g
   && adduser -D -u $user_id user \
   && mkdir -p /run/user/$user_id \
   && chown -R user /run/user/$user_id /home/user \
-  && chmod -R o+x /s2i \ 
+  && chmod -R o+x /s2i \
   && addgroup -S certs \
   && addgroup user certs \
   && chgrp certs /etc/ssl/certs \
@@ -25,8 +25,9 @@ RUN if [[ $user_id -eq 1000 ]]; then groupmod -g 1001 node && usermod -u 1001 -g
   && echo user:100000:65536 | tee /etc/subuid | tee /etc/subgid \
   && chmod -R 775 /usr/share/ca-certificates
 
+ENV npm_config_cache=/cache/npm
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/cache/npm npm install --verbose
 
 COPY . .
 
