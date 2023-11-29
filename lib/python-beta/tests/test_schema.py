@@ -4,8 +4,7 @@ import random
 import string
 
 import pytest
-from bailo.core import Client, SchemaKind
-from bailo.helper import Schema
+from bailo import Client, Schema, SchemaKind
 
 MINIMAL_JSON_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -47,7 +46,7 @@ def random_generator(N=10):
 
 def test_schema():
     client = Client("https://example.com")
-    kind = SchemaKind.Model
+    kind = SchemaKind.MODEL
 
     schema = Schema(
         client=client,
@@ -61,7 +60,7 @@ def test_schema():
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(("name", "kind", "json_schema"), [("Test", SchemaKind.Model, MINIMAL_JSON_SCHEMA)])
+@pytest.mark.parametrize(("name", "kind", "json_schema"), [("Test", SchemaKind.MODEL, MINIMAL_JSON_SCHEMA)])
 def test_create_get_from_version_and_update(name, kind, json_schema, integration_client):
     # Create schema
     schema_id = random_generator()

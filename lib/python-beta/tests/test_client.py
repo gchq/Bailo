@@ -14,7 +14,7 @@ def test_post_model(requests_mock):
     result = client.post_model(
         name="test",
         description="test",
-        visibility=ModelVisibility.Public,
+        visibility=ModelVisibility.PUBLIC,
         team_id="uncategorised",
     )
 
@@ -169,7 +169,7 @@ def test_get_all_schemas(requests_mock):
     requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_all_schemas(kind=SchemaKind.Model)
+    result = client.get_all_schemas(kind=SchemaKind.MODEL)
 
     assert result == {"success": True}
 
@@ -190,7 +190,7 @@ def test_post_schema(requests_mock):
     result = client.post_schema(
         schema_id="test_id",
         name="test",
-        kind=SchemaKind.Model,
+        kind=SchemaKind.MODEL,
         json_schema={"test": "test"},
     )
 

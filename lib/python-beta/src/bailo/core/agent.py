@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import requests
-
-from .exceptions import BailoException
+from bailo.core.exceptions import BailoException
 
 
 class Agent:
-    def __init__(self):
-        pass
-
     def __request(self, method, *args, **kwargs):
-        res = requests.request(method, *args, **kwargs)
+        """ """
+        res = requests.request(method, *args, timeout=1, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
@@ -57,16 +54,16 @@ class PkiAgent:
         self.auth = auth
 
     def get(self, *args, **kwargs):
-        return requests.get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return requests.get(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
 
     def post(self, *args, **kwargs):
-        return requests.post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return requests.post(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
 
     def put(self, *args, **kwargs):
-        return requests.put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return requests.put(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return requests.patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return requests.patch(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return requests.delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return requests.delete(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)

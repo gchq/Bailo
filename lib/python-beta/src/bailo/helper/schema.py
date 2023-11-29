@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from bailo.core import Client, SchemaKind
+from bailo.core.client import Client
+from bailo.core.enums import SchemaKind
 
 
 class Schema:
     """Represents a schema within Bailo
+
     :param client: A client object used to interact with Bailo
     :param schema_id: A unique schema ID
     :param name: Name of schema
@@ -70,7 +72,7 @@ class Schema:
             client=client,
             schema_id=schema_id,
             name="temp",
-            kind=SchemaKind.Model,
+            kind=SchemaKind.MODEL,
             json_schema={"temp": "temp"},
         )
         res = client.get_schema(schema_id=schema_id)
@@ -86,6 +88,6 @@ class Schema:
         self.json_schema = res["jsonSchema"]
 
         if kind == "model":
-            self.kind = SchemaKind.Model
+            self.kind = SchemaKind.MODEL
         if kind == "accessRequest":
-            self.kind = SchemaKind.AccessRequest
+            self.kind = SchemaKind.ACCESS_REQUEST

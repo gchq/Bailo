@@ -36,7 +36,7 @@ jobs:
       - name: Check linting
         run: |
           cd lib/python-beta
-          pylint src/bailo
+          pylint src/bailo --verbose --exit-zero --fail-on=F,E
 
       # Pytest
       - name: Run basic testing

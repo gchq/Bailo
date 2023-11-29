@@ -40,7 +40,7 @@ class Client:
             {
                 "name": name,
                 "description": description,
-                "visibility": visibility,
+                "visibility": str(visibility),
                 "teamId": team_id,
             }
         )
@@ -53,12 +53,11 @@ class Client:
     def get_models(
         self,
         task: str | None = None,
-        libraries: list[str] = [],
-        filters: list[str] = [],
+        libraries: list[str] | None = None,
+        filters: list[str] | None = None,
         search: str = "",
     ):
-        """
-        Finds and returns a list of models based on provided search terms.
+        """Find and returns a list of models based on provided search terms.
 
         :param task: Model task (e.g. image classification), defaults to None
         :param libraries: Model library (e.g. TensorFlow), defaults to []
@@ -66,6 +65,12 @@ class Client:
         :param search: String to be located in model cards, defaults to ""
         :return: JSON response object
         """
+        if libraries is None:
+            libraries = []
+
+        if filters is None:
+            filters = []
+
         return self.agent.get(
             f"{self.url}/v2/models/search",
             params={
@@ -303,9 +308,9 @@ class Client:
         :param buffer: BytesIO object for bailo to write to
         :return: The unique file ID
         """
-        with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as r:
-            with buffer as f:
-                shutil.copyfileobj(r.raw, f)
+        with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as req:
+            with buffer as file:
+                shutil.copyfileobj(req.raw, file)
         return file_id
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
@@ -405,7 +410,7 @@ class Client:
             json={
                 "id": schema_id,
                 "name": name,
-                "kind": kind,
+                "kind": str(kind),
                 "jsonSchema": json_schema,
             },
         ).json()

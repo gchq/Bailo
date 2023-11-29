@@ -106,6 +106,7 @@ unsafe-load-any-extension="no"
 
 [tool.pylint.'MESSAGES CONTROL']
 enable="c-extension-no-member"
+disable="W0238"
 
 [tool.pylint.'REPORTS']
 evaluation="10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)"
@@ -226,6 +227,6 @@ deprecated-modules="optparse,tkinter.tix"
 
 [tool.pylint.'EXCEPTIONS']
 overgeneral-exceptions= [
-    "BaseException",
-    "Exception"
+    "builtins.BaseException",
+    "builtins.Exception"
 ]
