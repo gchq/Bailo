@@ -201,11 +201,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   generateEvent(req: Request, resourceInfo: object, outcome?: Outcome) {
     return {
-      eventDetail: {
-        typeId: req.audit.typeId,
-        resource: resourceInfo,
-        ...(outcome && { outcome }),
-      },
+      typeId: req.audit.typeId,
+      resource: resourceInfo,
+      ...(outcome && { outcome }),
     }
   }
 
