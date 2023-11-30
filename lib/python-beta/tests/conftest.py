@@ -18,7 +18,7 @@ from bailo.helper.model import Model
 
 @pytest.fixture
 def integration_client():
-    return Client("http://localhost:8080", verify=True)
+    return Client("http://localhost:8080")
 
 
 @pytest.fixture
