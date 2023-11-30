@@ -6,7 +6,6 @@ import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
 import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import log from './log.js'
@@ -45,11 +44,9 @@ export async function createAccessRequest(
     ...accessRequestInfo,
   })
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.Create))) {
-    throw Forbidden(`You do not have permission to create this access request.`, {
-      userDn: user.dn,
-      accessRequestId,
-    })
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
   await accessRequest.save()
@@ -68,11 +65,9 @@ export async function removeAccessRequest(user: UserDoc, accessRequestId: string
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.Delete))) {
-    throw Forbidden(`You do not have permission to delete this access request.`, {
-      userDn: user.dn,
-      accessRequestId,
-    })
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
   await accessRequest.delete()
@@ -84,9 +79,8 @@ export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const accessRequests = await AccessRequest.find({ modelId })
 
-  return asyncFilter(accessRequests, (request) =>
-    authorisation.userAccessRequestAction(user, model, request, AccessRequestAction.View),
-  )
+  const auths = await authorisation.accessRequestBatch(user, model, accessRequests, AccessRequestAction.View)
+  return accessRequests.filter((_, i) => auths[i].success)
 }
 
 export async function getAccessRequestById(user: UserDoc, accessRequestId: string) {
@@ -97,11 +91,9 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.View))) {
-    throw Forbidden(`You do not have permission to get this access request.`, {
-      userDn: user.dn,
-      accessRequestId,
-    })
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
   return accessRequest
@@ -116,11 +108,9 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  if (!(await authorisation.userAccessRequestAction(user, model, accessRequest, AccessRequestAction.Update))) {
-    throw Forbidden(`You do not have permission to update this access request.`, {
-      userDn: user.dn,
-      accessRequestId,
-    })
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
   if (diff.metadata) {

@@ -6,7 +6,6 @@ import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
-import { ImageAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelDoc } from '../../models/v2/Model.js'
 import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
@@ -126,7 +125,7 @@ export function getRefreshToken(user: UserDoc) {
   )
 }
 
-export type Action = 'push' | 'pull' | 'delete' | '*'
+export type Action = 'push' | 'pull' | 'delete' | '*' | 'list'
 
 // Documented here: https://distribution.github.io/distribution/spec/auth/scope/
 export interface Access {
@@ -176,8 +175,8 @@ async function checkAccessV2(access: Access, user: UserDocV2) {
     return false
   }
 
-  const action = isEqual(access.actions, ['pull']) ? ImageAction.Pull : ImageAction.Push
-  return authorisation.userImageAction(user, model, access, action)
+  const auth = await authorisation.image(user, model, access)
+  return auth.success
 }
 
 async function checkAccess(access: Access, user: UserDoc) {

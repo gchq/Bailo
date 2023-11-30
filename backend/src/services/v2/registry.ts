@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 import { ImageAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { getAccessToken } from '../../routes/v1/registryAuth.js'
+import { Action, getAccessToken } from '../../routes/v1/registryAuth.js'
 import config from '../../utils/v2/config.js'
 import { Forbidden } from '../../utils/v2/error.js'
 import { getHttpsAgent } from './http.js'
@@ -58,15 +58,13 @@ async function listImageTags(user: UserDoc, imageRef: RepoRef) {
 export async function listModelImages(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
 
-  if (
-    !(await authorisation.userImageAction(
-      user,
-      model,
-      { type: 'repository', name: modelId, actions: ['pull'] },
-      ImageAction.List,
-    ))
-  ) {
-    throw Forbidden(`You do not have permission to list this set of images`, { userDn: user.dn, modelId })
+  const auth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: [ImageAction.List as Action],
+  })
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   const repos = await listModelRepos(user, modelId)

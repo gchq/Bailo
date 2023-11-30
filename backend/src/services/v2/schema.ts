@@ -28,8 +28,9 @@ export async function findSchemaById(schemaId: string): Promise<SchemaInterface>
 export async function createSchema(user: UserDoc, schema: Partial<SchemaInterface>, overwrite = false) {
   const schemaDoc = new Schema(schema)
 
-  if (!(await authorisation.userSchemaAction(user, schemaDoc, SchemaAction.Create))) {
-    throw Forbidden(`You do not have permission to create this schema.`, {
+  const auth = await authorisation.schema(user, schemaDoc, SchemaAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
       userDn: user.dn,
       schemaId: schemaDoc.id,
     })
@@ -63,7 +64,7 @@ export async function addDefaultSchemas() {
     name: 'Minimal Access Request Schema v10 Beta',
     id: 'minimal-access-request-general-v10-beta',
     description:
-      'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work\n\n ✔ Operational Deployments\n\n ✖ Second Party Sharing',
+      'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
     jsonSchema: accessRequestSchemaBeta,
     kind: SchemaKind.AccessRequest,
     active: true,

@@ -3,7 +3,7 @@ import { BaseAuthorisationConnector } from './Base.js'
 import { SillyAuthorisationConnector } from './silly.js'
 
 let authConnector: undefined | BaseAuthorisationConnector = undefined
-export function getAuthorisationConnector(cache = true) {
+export function getAuthorisationConnector(cache = true): BaseAuthorisationConnector {
   if (authConnector && cache) {
     return authConnector
   }
