@@ -1,89 +1,98 @@
-import { Box, Chip } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/system'
-import { ChangeEvent, Dispatch, SetStateAction } from 'react'
+import { ChangeEvent, useCallback, useMemo } from 'react'
+import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
+import { FileWithMetadata } from 'types/interfaces'
 
 const Input = styled('input')({
   display: 'none',
 })
 
-const displayFilename = (filename: string) => {
-  const parts = filename.split('.')
-  const ext = parts.pop()
-  const base = parts.join('.')
-  return base.length > 12 ? `${base}...${ext}` : filename
-}
-
 type MultiFileInputProps = {
   label: string
-  setFiles: Dispatch<SetStateAction<File[]>>
-  files?: File[]
+  files: File[]
+  fileMetadata: FileWithMetadata[]
+  onFileChange: (value: File[]) => void
+  onFileMetadataChange: (value: FileWithMetadata[]) => void
   accepts?: string
   disabled?: boolean
   fullWidth?: boolean
+  readOnly?: boolean
 }
 
 export default function MultiFileInput({
   label,
-  setFiles,
+  onFileChange,
+  fileMetadata,
+  onFileMetadataChange,
   files,
-  accepts,
-  disabled,
+  accepts = '',
+  disabled = false,
   fullWidth = false,
+  readOnly = false,
 }: MultiFileInputProps) {
-  const id = `${label.replace(/ /g, '-').toLowerCase()}-file`
+  const htmlId = useMemo(() => `${label.replace(/ /g, '-').toLowerCase()}-file`, [label])
 
   function handleDelete(fileToDelete: File) {
     if (files) {
       const updatedFileList = files.filter((file) => file.name !== fileToDelete.name)
-      setFiles(updatedFileList)
+      onFileChange(updatedFileList)
     }
   }
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const newFiles = event.target.files ? Array.from(event.target.files) : []
-    if (newFiles) {
-      if (files) {
-        const updatedFiles = newFiles.concat(
-          files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
-        )
-        setFiles(updatedFiles)
-      } else {
-        setFiles(newFiles)
+  const handleFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const newFiles = event.target.files ? Array.from(event.target.files) : []
+      if (newFiles) {
+        if (files) {
+          const updatedFiles = newFiles.concat(
+            files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+          )
+          onFileChange(updatedFiles)
+        } else {
+          onFileChange(newFiles)
+        }
       }
-    }
-  }
+    },
+    [files, onFileChange],
+  )
+
+  const handleFileDisplayChange = useCallback(
+    (fileWithMetadata: FileWithMetadata) => {
+      const tempFilesWithMetadata = fileMetadata
+      const metadataIndex = fileMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      if (metadataIndex === -1) {
+        tempFilesWithMetadata.push(fileWithMetadata)
+      } else {
+        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
+      }
+      onFileMetadataChange(tempFilesWithMetadata)
+    },
+    [fileMetadata, onFileMetadataChange],
+  )
 
   return (
-    <Box sx={{ width: fullWidth ? '100%' : 'unset' }}>
-      <label htmlFor={id}>
-        <Input
-          style={{ margin: '10px' }}
-          id={id}
-          type='file'
-          onInput={handleFileChange}
-          multiple
-          accept={accepts}
-          disabled={disabled}
-        />
-        <Button sx={{ width: fullWidth ? '100%' : 'unset' }} variant='outlined' component='span' disabled={disabled}>
-          {label}
-        </Button>
-      </label>
-      <Box sx={{ mt: 2 }}>
-        {files &&
-          files.length > 0 &&
-          Array.from(files).map((file) => (
-            <span key={file.name}>
-              <Chip
-                sx={{ mr: 1, mb: 1 }}
-                color='primary'
-                label={displayFilename(file.name)}
-                onDelete={() => handleDelete(file)}
-              />
-            </span>
+    <Box sx={{ ...(fullWidth && { width: '100%' }) }}>
+      {!readOnly && (
+        <>
+          <label htmlFor={htmlId}>
+            <Button fullWidth component='span' variant='outlined' disabled={disabled}>
+              {label}
+            </Button>
+          </label>
+          <Input multiple id={htmlId} type='file' onInput={handleFileChange} accept={accepts} disabled={disabled} />
+        </>
+      )}
+      {files.length > 0 && (
+        <Stack spacing={1} mt={1}>
+          {files.map((file) => (
+            <div key={file.name}>
+              <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
+            </div>
           ))}
-      </Box>
+        </Stack>
+      )}
     </Box>
   )
 }

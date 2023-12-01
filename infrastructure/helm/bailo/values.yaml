@@ -234,6 +234,9 @@ config:
     protocol: "https"
     port: 443
 
+  experimental:
+    v2: false
+
 # logging https://github.com/gchq/stroom
 stroom:
   enabled: false
@@ -249,3 +252,10 @@ stroom:
 nginxcert:
   cert: cert.pem #use san.cnf to create certs
   key: key.pem
+
+connectors:
+  authentication:
+    kind: 'silly'
+
+  authorisation:
+    kind: 'silly'

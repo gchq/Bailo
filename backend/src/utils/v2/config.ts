@@ -52,6 +52,7 @@ export interface Config {
     endpoint: string
     region: string
     forcePathStyle: boolean
+    rejectUnauthorized: boolean
 
     buckets: {
       uploads: string

@@ -1,25 +1,25 @@
 import { Box, Button, Stack } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { ModelInterface } from '../../../types/v2/types'
 import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
-import DraftNewReleaseDialog from './releases/DraftNewReleaseDialog'
-import ModelReleaseDisplay from './releases/ModelReleaseDisplay'
+import ReleaseDisplay from './releases/ReleaseDisplay'
 
 export default function Releases({ model }: { model: ModelInterface }) {
+  const router = useRouter()
   const [latestRelease, setLatestRelease] = useState<string>('')
-  const [openDraftNewRelease, setOpenDraftNewRelease] = useState(false)
 
-  const { releases, isReleasesLoading, mutateReleases } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading } = useGetReleasesForModelId(model.id)
 
-  const modelReleaseDisplays = useMemo(
+  const releaseDisplays = useMemo(
     () =>
       releases.map((release) => (
-        <ModelReleaseDisplay key={release.semver} modelId={model.id} release={release} latestRelease={latestRelease} />
+        <ReleaseDisplay key={release.semver} model={model} release={release} latestRelease={latestRelease} />
       )),
-    [latestRelease, model.id, releases],
+    [latestRelease, model, releases],
   )
 
   useEffect(() => {
@@ -28,28 +28,22 @@ export default function Releases({ model }: { model: ModelInterface }) {
     }
   }, [model, releases])
 
-  function handleDraftNewReleaseClose() {
-    setOpenDraftNewRelease(false)
+  function handleDraftNewRelease() {
+    router.push(`/beta/model/${model.id}/release/new`)
   }
 
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
-          <Button variant='outlined' onClick={() => setOpenDraftNewRelease(true)} disabled={!model.card}>
+          <Button variant='outlined' onClick={handleDraftNewRelease} disabled={!model.card}>
             Draft new Release
           </Button>
         </Box>
         {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
-        {modelReleaseDisplays}
+        {releaseDisplays}
       </Stack>
-      <DraftNewReleaseDialog
-        open={openDraftNewRelease}
-        handleClose={handleDraftNewReleaseClose}
-        model={model}
-        mutateReleases={mutateReleases}
-      />
     </Box>
   )
 }

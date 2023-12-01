@@ -1,7 +1,10 @@
-import { Chip } from '@mui/material'
+import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { KeyboardEvent, SyntheticEvent, useMemo, useState } from 'react'
+import { FormContextType } from '@rjsf/utils'
+import { debounce } from 'lodash'
+import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -12,24 +15,39 @@ interface EntitySelectorBetaProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
+  formContext?: FormContextType
 }
 
 export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
-  const { users, isUsersLoading: isLoading } = useListUsers()
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { onChange, value: currentValue, required, label, formContext } = props
+
   const [open, setOpen] = useState(false)
+  const [userListQuery, setUserListQuery] = useState('')
+
+  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  const theme = useTheme()
 
   const entities = useMemo(() => {
     if (!users) return []
-
-    return users.map((user) => user.id)
+    return users.map((entity) => entity.id)
   }, [users])
 
-  const { onChange, value: currentValue, required, label } = props
+  const handleUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
+      onChange(newValues)
+    },
+    [onChange],
+  )
 
-  const handleChange = (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
-    onChange(newValues)
-  }
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
+
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -38,10 +56,11 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      {currentUser && (
+      {currentUser && formContext && formContext.editMode && (
         <Autocomplete
           multiple
           open={open}
+          size='small'
           onOpen={() => {
             setOpen(true)
           }}
@@ -53,16 +72,11 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           isOptionEqualToValue={(option: string, value: string) => option === value}
           getOptionLabel={(option) => option}
           value={currentValue || []}
-          onChange={handleChange}
+          onChange={handleUserChange}
+          noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+          onInputChange={debounceOnInputChange}
           options={entities || []}
           loading={isLoading}
-          getOptionDisabled={(option) => option === currentUser.id}
-          renderTags={(tagValue, getTagProps) =>
-            tagValue.map((option, index) => (
-              // eslint-disable-next-line react/jsx-key
-              <Chip label={option} {...getTagProps({ index })} disabled={option === currentUser.id} />
-            ))
-          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -75,6 +89,28 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
             />
           )}
         />
+      )}
+      {formContext && !formContext.editMode && (
+        <>
+          <Typography fontWeight='bold'>{label}</Typography>
+          {currentValue.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((entity) => (
+                <Chip label={entity} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        </>
       )}
     </>
   )

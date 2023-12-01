@@ -143,3 +143,20 @@ export interface AccessRequestInterface {
   createdAt: string
   updatedAt: string
 }
+
+export interface ModelImage {
+  repository: string
+  name: string
+  tags: Array<string>
+}
+
+export interface FlattenedModelImage {
+  repository: string
+  name: string
+  tag: string
+}
+
+export interface FileWithMetadata {
+  fileName: string
+  metadata?: string
+}

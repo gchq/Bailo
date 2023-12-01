@@ -1,8 +1,10 @@
-import { Box, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo } from 'react'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDisplay'
+import { sortByCreatedAtDescending } from 'utils/dateUtils'
 
 import { ModelInterface } from '../../../types/v2/types'
 import EmptyBlob from '../../common/EmptyBlob'
@@ -18,9 +20,11 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   const accessRequestsList = useMemo(
     () =>
       accessRequests.length ? (
-        accessRequests.map((accessRequest) => (
-          <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
-        ))
+        accessRequests
+          .sort(sortByCreatedAtDescending)
+          .map((accessRequest) => (
+            <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
+          ))
       ) : (
         <EmptyBlob text={`No access requests found for model ${model.name}`} />
       ),
@@ -34,6 +38,13 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   return (
     <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
       <Stack spacing={4}>
+        <Box sx={{ textAlign: 'right' }}>
+          <Link href={`/beta/model/${model.id}/access-request/schema`}>
+            <Button variant='outlined' disabled={!model.card}>
+              Request Access
+            </Button>
+          </Link>
+        </Box>
         {isAccessRequestsLoading && <Loading />}
         {accessRequestsList}
       </Stack>

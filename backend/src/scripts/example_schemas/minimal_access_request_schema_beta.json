@@ -9,8 +9,7 @@
         "name": {
           "title": "What is the name of the access request?",
           "description": "This will be used to distinguish your access request from other access requests of this model",
-          "type": "string",
-          "widget": "customTextInput"
+          "type": "string"
         },
         "endDate": {
           "title": "What is the end date for this access request?",

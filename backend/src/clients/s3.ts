@@ -1,12 +1,20 @@
-import { S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, GetObjectRequest, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
+import { NodeHttpHandler } from '@smithy/node-http-handler'
 
+import { getHttpsAgent } from '../services/v2/http.js'
 import config from '../utils/v2/config.js'
 
 export async function getS3Client() {
-  const client = new S3Client(config.s3)
-
-  return client
+  return new S3Client({
+    credentials: config.s3.credentials,
+    endpoint: config.s3.endpoint,
+    region: config.s3.region,
+    forcePathStyle: config.s3.forcePathStyle,
+    requestHandler: new NodeHttpHandler({
+      httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
+    }),
+  })
 }
 
 export async function putObjectStream(bucket: string, key: string, body: ReadableStream) {
@@ -30,4 +38,22 @@ export async function putObjectStream(bucket: string, key: string, body: Readabl
   return {
     fileSize,
   }
+}
+
+export async function getObjectStream(bucket: string, key: string, range?: { start: number; end: number }) {
+  const client = await getS3Client()
+
+  const input: GetObjectRequest = {
+    Bucket: bucket,
+    Key: key,
+  }
+
+  if (range) {
+    input.Range = `bytes=${range.start}-${range.end}`
+  }
+
+  const command = new GetObjectCommand(input)
+  const response = await client.send(command)
+
+  return response
 }

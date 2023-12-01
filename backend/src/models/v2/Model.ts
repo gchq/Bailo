@@ -38,10 +38,14 @@ export interface ModelInterface {
   id: string
 
   name: string
+  teamId?: string
   description: string
   card?: ModelCardInterface
 
   collaborators: Array<CollaboratorEntry>
+  settings: {
+    ungovernedAccess: boolean
+  }
 
   visibility: ModelVisibilityKeys
   deleted: boolean
@@ -58,6 +62,7 @@ export type ModelDoc = ModelInterface & Document<any, any, ModelInterface>
 const ModelSchema = new Schema<ModelInterface>(
   {
     id: { type: String, required: true, unique: true, index: true },
+    teamId: { type: String, required: true, index: true, default: 'Uncategorised' },
 
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -75,6 +80,9 @@ const ModelSchema = new Schema<ModelInterface>(
         roles: [{ type: String }],
       },
     ],
+    settings: {
+      ungovernedAccess: { type: Boolean, required: true, default: false },
+    },
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
   },

@@ -1,6 +1,5 @@
-import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import { useRouter } from 'next/router'
+import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
+import Link from 'src/Link'
 import { AccessRequestInterface } from 'types/interfaces'
 import { formatDateString } from 'utils/dateUtils'
 
@@ -15,9 +14,6 @@ type AccessRequestDisplayProps = {
 }
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
-  const theme = useTheme()
-  const router = useRouter()
-
   const {
     reviews: activeReviews,
     isReviewsLoading: isActiveReviewsLoading,
@@ -49,32 +45,14 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Box
-          sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: theme.palette.primary.main,
-            width: '100%',
-            borderRadius: 4,
-          }}
-        >
+        <Card variant='outlined' sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
-            <Stack
-              direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
-              spacing={1}
-            >
+            <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>
                 {accessRequest.metadata.overview.name}
               </Typography>
-              <Button
-                onClick={() => router.push(`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`)}
-              >
-                View Access Request
-              </Button>
-            </Stack>
+            </Link>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
                 Created by
@@ -101,15 +79,14 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               justifyContent='space-between'
               spacing={4}
             >
-              <Box
+              <Card
                 sx={{
                   px: 2,
                   pt: 1,
                   pb: 2,
                   width: '100%',
-                  border: `1px solid ${theme.palette.primary.main}`,
-                  borderRadius: 4,
                 }}
+                variant='outlined'
               >
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
@@ -121,14 +98,14 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                     </Grid>
                   ))}
                 </Grid>
-              </Box>
+              </Card>
             </Stack>
             {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
             {inactiveReviews.map((review) => (
               <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
-        </Box>
+        </Card>
       </Stack>
     </>
   )

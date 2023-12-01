@@ -2,7 +2,8 @@ import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/materia
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { ParsedUrlQuery } from 'querystring'
+import { ReactElement, SyntheticEvent, useContext, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -18,23 +19,20 @@ export default function PageWithTabs({
   actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
+  requiredUrlParams = {},
 }: {
   title: string
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
+  requiredUrlParams?: ParsedUrlQuery
 }) {
-  const [currentTab, setCurrentTab] = useState(tabs[0].path)
-
   const router = useRouter()
-  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
-
   const { tab } = router.query
+  const [currentTab, setCurrentTab] = useState(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
 
-  useEffect(() => {
-    tab ? setCurrentTab(tab as string) : setCurrentTab(tabs[0].path)
-  }, [tab, setCurrentTab, tabs])
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
@@ -47,11 +45,11 @@ export default function PageWithTabs({
     }
   }
 
-  function continueNavigation(tab: string) {
-    setCurrentTab(tab)
+  function continueNavigation(newTab: string) {
+    setCurrentTab(newTab)
     setUnsavedChanges(false)
     router.replace({
-      query: { ...router.query, tab: tab },
+      query: { ...requiredUrlParams, tab: newTab },
     })
   }
 

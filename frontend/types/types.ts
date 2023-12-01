@@ -1,5 +1,6 @@
 import { Document, Types } from 'mongoose'
 
+import { FlattenedModelImage } from './interfaces'
 import { SchemaKindKeys } from './v2/types'
 
 export enum ModelUploadType {
@@ -339,13 +340,6 @@ export type VersionDoc = Version & Document<any, any, Version>
 
 export enum MarketPlaceModelSelectType {
   MY_MODELS = 'My Models',
-  FAVOURITES = 'Favourites',
-}
-
-export enum MarketPlaceModelGroup {
-  MY_MODELS = 'user',
-  FAVOURITES = 'favourites',
-  ALL = 'all',
 }
 
 export const ModelVisibility = {
@@ -389,7 +383,7 @@ export type ReleaseInterface = {
   draft?: boolean
   fileIds: Array<string>
   files: Array<FileInterface>
-  images: Array<string>
+  images: Array<FlattenedModelImage>
   deleted: boolean
   createdBy: string
   createdAt: string

@@ -1,7 +1,8 @@
+import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Box,
-  Button,
+  Divider,
   Stack,
   Table,
   TableBody,
@@ -12,14 +13,16 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { debounce } from 'lodash'
 import _ from 'lodash-es'
-import { useEffect, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useState } from 'react'
 
-import { patchModel } from '../../../../actions/model'
+import { patchModel, useGetModel } from '../../../../actions/model'
 import { useListUsers } from '../../../../actions/user'
-import { User } from '../../../../types/types'
-import { CollaboratorEntry, ModelInterface } from '../../../../types/v2/types'
+import { CollaboratorEntry, EntityObject, ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
 import Loading from '../../../common/Loading'
+import useNotification from '../../../common/Snackbar'
 import MessageAlert from '../../../MessageAlert'
 import EntityItem from './EntityItem'
 
@@ -30,9 +33,14 @@ type ModelAccessProps = {
 export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
-  const { users, isUsersLoading, isUsersError } = useListUsers()
+  const [userListQuery, setUserListQuery] = useState('')
 
+  const [loading, setLoading] = useState(false)
+
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
+  const { mutateModel } = useGetModel(model.id)
   const theme = useTheme()
+  const sendNotification = useNotification()
 
   useEffect(() => {
     if (model) {
@@ -40,21 +48,44 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     }
   }, [model, setAccessList])
 
-  function onUserChange(_event: React.SyntheticEvent<Element, Event>, newValue: User | null) {
-    if (
-      newValue &&
-      !accessList.find(({ entity }) => entity === `user:${newValue.id}` || entity === `group:${newValue.id}`)
-    ) {
-      const updatedAccessList = accessList
-      const newAccess = { entity: `user:${newValue.id}`, roles: [] }
-      updatedAccessList.push(newAccess)
-      setAccessList(accessList)
-    }
-  }
+  const onUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
+      if (newValue && !accessList.find(({ entity }) => entity === newValue.id)) {
+        const updatedAccessList = accessList
+        const newAccess = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
+        updatedAccessList.push(newAccess)
+        setAccessList(accessList)
+      }
+    },
+    [accessList],
+  )
 
-  // TODO - add a request to update the model's collaborators field
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
+
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
+
   async function updateAccessList() {
-    await patchModel(model.id, { collaborators: accessList })
+    setLoading(true)
+    const res = await patchModel(model.id, { collaborators: accessList })
+    if (!res.ok) {
+      const error = await getErrorMessage(res)
+      return sendNotification({
+        variant: 'error',
+        msg: error,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+    sendNotification({
+      variant: 'success',
+      msg: 'Model access list updated',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+    mutateModel()
+    setLoading(false)
   }
 
   if (isUsersError) {
@@ -63,7 +94,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   return (
     <>
-      {isUsersLoading && <Loading />}
       {users && (
         <Stack spacing={2}>
           <Typography variant='h6' component='h2'>
@@ -77,11 +107,14 @@ export default function ModelAccess({ model }: ModelAccessProps) {
             onClose={() => {
               setOpen(false)
             }}
-            // we might get a string or an object back
-            isOptionEqualToValue={(option: User, value: User) => option.id === value.id}
+            size='small'
+            noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+            onInputChange={debounceOnInputChange}
+            groupBy={(option) => option.kind}
+            getOptionLabel={(option: EntityObject) => option.id}
+            isOptionEqualToValue={(option: any, value: any) => option === value}
             onChange={onUserChange}
-            getOptionLabel={(option) => option.id}
-            options={users}
+            options={users || []}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -90,7 +123,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
                   ...params.InputProps,
                   endAdornment: (
                     <>
-                      {isUsersLoading && <Loading size={20} />}
+                      {userListQuery !== '' && isUsersLoading && <Loading size={20} />}
                       {params.InputProps.endAdornment}
                     </>
                   ),
@@ -129,10 +162,16 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               </TableBody>
             </Table>
           </Box>
+          <Divider />
           <div>
-            <Button aria-label='Save access list' onClick={updateAccessList}>
+            <LoadingButton
+              variant='contained'
+              aria-label='Save access list'
+              onClick={updateAccessList}
+              loading={loading}
+            >
               Save
-            </Button>
+            </LoadingButton>
           </div>
         </Stack>
       )}
