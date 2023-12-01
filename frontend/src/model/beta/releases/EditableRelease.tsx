@@ -35,7 +35,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
-    setFiles([]) // TODO - Reset the release file files (BAI-1026)
+    setFiles([]) // TODO - Reset the release files (BAI-1026)
     setFilesMetadata([])
     setImageList(release.images)
   }, [release.images, release.minor, release.notes, release.semver])

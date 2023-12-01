@@ -33,7 +33,7 @@ export default function NewRelease() {
     event.preventDefault()
 
     if (!model) {
-      return
+      return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
     }
 
     if (!model.card.version) {
@@ -53,8 +53,8 @@ export default function NewRelease() {
       const postFileResponse = await postFile(file, model.id, file.name, file.type, fileMetadata?.metadata)
 
       if (!postFileResponse.ok) {
-        setLoading(false)
-        return setErrorMessage(await getErrorMessage(postFileResponse))
+        setErrorMessage(await getErrorMessage(postFileResponse))
+        return setLoading(false)
       }
 
       const res = await postFileResponse.json()
@@ -74,8 +74,8 @@ export default function NewRelease() {
     const response = await postRelease(release)
 
     if (!response.ok) {
-      setLoading(false)
-      return setErrorMessage(await getErrorMessage(response))
+      setErrorMessage(await getErrorMessage(response))
+      return setLoading(false)
     }
 
     setLoading(false)

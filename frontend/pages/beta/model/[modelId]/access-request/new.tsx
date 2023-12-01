@@ -54,7 +54,7 @@ export default function NewAccessRequest() {
     setSubmitButtonLoading(true)
 
     if (!modelId || !schemaId) {
-      setSubmissionErrorText(`Please wait until the page has hydrated before attempting to submit.`)
+      setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
       setSubmitButtonLoading(false)
       return
     }

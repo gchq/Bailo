@@ -22,13 +22,13 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
 
   return (
     <Grid container spacing={1} alignItems='center'>
-      <Grid item>
+      <Grid item xs>
         <Tooltip title={file.name}>
           <Chip
             color='primary'
             label={file.name}
             onDelete={() => handleDelete(file)}
-            sx={{ width: '100%', justifyContent: 'space-between' }}
+            sx={{ justifyContent: 'space-between' }}
           />
         </Tooltip>
       </Grid>
