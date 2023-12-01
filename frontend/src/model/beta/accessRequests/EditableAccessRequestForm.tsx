@@ -36,8 +36,7 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
       const data = getStepsData(splitSchema, true)
       const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
       if (!res.ok) {
-        const errorResponse = await getErrorMessage(res)
-        setErrorMessage(errorResponse)
+        setErrorMessage(await getErrorMessage(res))
       } else {
         setIsEdit(false)
         mutateAccessRequest()
