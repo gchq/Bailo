@@ -84,7 +84,7 @@ export class SillyAuthorisationConnector extends BaseAuthorisationConnector {
     }
 
     if (action !== FileAction.Download) {
-      log.warn({ userDn: user.dn, file: file._id }, 'Non-collaborator can only download artefacts')
+      log.warn({ userDn: user.dn, file: file._id }, 'Non-collaborator can only download files')
       return false
     }
 

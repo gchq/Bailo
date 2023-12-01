@@ -4,6 +4,7 @@ import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import SchemaButton from 'src/model/beta/common/SchemaButton'
 
@@ -13,7 +14,6 @@ import { useGetSchemas } from '../../../../actions/schema'
 import { useGetCurrentUser } from '../../../../actions/user'
 import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
-import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
 import { SchemaInterface } from '../../../../types/types'
 import { SchemaKind } from '../../../../types/v2/types'
@@ -25,6 +25,10 @@ export default function NewSchemaSelection() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
 
+  const isLoading = useMemo(
+    () => isSchemasLoading || isModelLoading || isCurrentUserLoading,
+    [isCurrentUserLoading, isModelLoading, isSchemasLoading],
+  )
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
@@ -36,18 +40,17 @@ export default function NewSchemaSelection() {
     }
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load schema selection page`, {
+    isSchemasError,
+    isCurrentUserError,
+    isModelError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Select a schema' page='upload'>
-      {(isSchemasLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
-      {schemas && !isSchemasLoading && !isSchemasError && (
+      {isLoading && <Loading />}
+      {!isLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Link href={`/beta/model/${modelId}`}>

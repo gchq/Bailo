@@ -24,7 +24,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
-  const { mutateModel } = useGetModel(model.id)
+  const { isModelError, mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
   const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -80,6 +80,11 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
+
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
   return (
     <>
       {(isSchemaLoading || isUiConfigLoading) && <Loading />}
