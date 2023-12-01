@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
@@ -51,32 +52,41 @@ export default function NewAccessRequest() {
   async function onSubmit() {
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)
+
+    if (!modelId || !schemaId) {
+      setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
+      setSubmitButtonLoading(false)
+      return
+    }
+
+    for (const step of splitSchema.steps) {
+      // The user has tried to submit, so let's enable schema validation for each page
+      setStepValidate(splitSchema, setSplitSchema, step, true)
+    }
+
     for (const step of splitSchema.steps) {
       const isValid = validateForm(step)
-      setStepValidate(splitSchema, setSplitSchema, step, true)
+
       if (!isValid) {
         setSubmissionErrorText('Please make sure that all sections have been completed.')
         setSubmitButtonLoading(false)
-      }
-      if (!modelId) {
-        setSubmissionErrorText('Unknown model ID')
-        setSubmitButtonLoading(false)
-      }
-      if (!schemaId) {
-        setSubmissionErrorText('Unknown schema ID')
-        setSubmitButtonLoading(false)
-      }
-      if (modelId && schemaId) {
-        const data = getStepsData(splitSchema, true)
-        const res = await postAccessRequest(modelId, schemaId, data)
-        if (res.status && res.status < 400) {
-          setSubmissionErrorText('')
-          router.push(`/beta/model/${modelId}?tab=access`)
-        } else {
-          setSubmitButtonLoading(false)
-        }
+        return
       }
     }
+
+    const data = getStepsData(splitSchema, true)
+    const res = await postAccessRequest(modelId, schemaId, data)
+
+    if (!res.ok) {
+      setSubmissionErrorText(await getErrorMessage(res))
+      setSubmitButtonLoading(false)
+      return
+    }
+
+    setSubmitButtonLoading(false)
+
+    const body = await res.json()
+    router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
