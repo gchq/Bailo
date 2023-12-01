@@ -12,9 +12,9 @@ const Input = styled('input')({
 type MultiFileInputProps = {
   label: string
   files: File[]
-  fileMetadata: FileWithMetadata[]
+  filesMetadata: FileWithMetadata[]
   onFileChange: (value: File[]) => void
-  onFileMetadataChange: (value: FileWithMetadata[]) => void
+  onFilesMetadataChange: (value: FileWithMetadata[]) => void
   accepts?: string
   disabled?: boolean
   fullWidth?: boolean
@@ -24,8 +24,8 @@ type MultiFileInputProps = {
 export default function MultiFileInput({
   label,
   onFileChange,
-  fileMetadata,
-  onFileMetadataChange,
+  filesMetadata,
+  onFilesMetadataChange,
   files,
   accepts = '',
   disabled = false,
@@ -53,23 +53,29 @@ export default function MultiFileInput({
         } else {
           onFileChange(newFiles)
         }
+        onFilesMetadataChange([
+          ...filesMetadata.filter(
+            (fileMetadata) => !newFiles.some((newFile) => newFile.name === fileMetadata.fileName),
+          ),
+          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: '' })),
+        ])
       }
     },
-    [files, onFileChange],
+    [files, filesMetadata, onFileChange, onFilesMetadataChange],
   )
 
   const handleFileDisplayChange = useCallback(
     (fileWithMetadata: FileWithMetadata) => {
-      const tempFilesWithMetadata = fileMetadata
-      const metadataIndex = fileMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      const tempFilesWithMetadata = [...filesMetadata]
+      const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
       if (metadataIndex === -1) {
         tempFilesWithMetadata.push(fileWithMetadata)
       } else {
         tempFilesWithMetadata[metadataIndex] = fileWithMetadata
       }
-      onFileMetadataChange(tempFilesWithMetadata)
+      onFilesMetadataChange(tempFilesWithMetadata)
     },
-    [fileMetadata, onFileMetadataChange],
+    [filesMetadata, onFilesMetadataChange],
   )
 
   return (
