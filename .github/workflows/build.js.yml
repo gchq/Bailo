@@ -586,6 +586,9 @@ jobs:
               accessKey: 'minioadmin',
               secretKey: 'minioadmin',
             },
+            experimental: {
+              v2: true,
+            },
 
             smtp: {
               auth: {
