@@ -3,6 +3,7 @@
 exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
 {
   "schema": {
+    "description": "recusandae",
     "id": "recusandae",
     "jsonSchema": {},
     "kind": "accessRequest",
