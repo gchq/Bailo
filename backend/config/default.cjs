@@ -231,6 +231,10 @@ module.exports = {
     authorisation: {
       kind: 'silly',
     },
+
+    audit: {
+      kind: 'silly',
+    },
   },
 
   log: {
@@ -246,6 +250,7 @@ module.exports = {
     endpoint: 'http://minio:9000',
     region: 'ignored',
     forcePathStyle: true,
+    rejectUnauthorized: true,
 
     // Names of buckets that Bailo uses
     buckets: {

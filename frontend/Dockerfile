@@ -5,8 +5,9 @@ RUN apk update
 
 WORKDIR /app
 
+ENV npm_config_cache=/cache/npm
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/cache/npm npm ci
 
 COPY . .
 

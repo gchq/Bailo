@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
 import ModelNameInput from 'src/model/beta/ModelNameInput'
@@ -35,10 +35,11 @@ export default function NewModel() {
   const router = useRouter()
   const formValid = modelName && description
 
-  async function onSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
     setErrorMessage('')
+
     const formData: ModelForm = {
       name: modelName,
       teamId: team?.id ?? 'Uncategorised',
@@ -48,14 +49,12 @@ export default function NewModel() {
     const response = await postModel(formData)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
-
-      return setErrorMessage(error)
+      setErrorMessage(await getErrorMessage(response))
+      setLoading(false)
+    } else {
+      const data = await response.json()
+      router.push(`/beta/model/${data.model.id}`)
     }
-    setLoading(false)
-
-    const data = await response.json()
-    router.push(`/beta/model/${data.model.id}`)
   }
 
   const privateLabel = () => {
@@ -97,7 +96,7 @@ export default function NewModel() {
             Create a new model
           </Typography>
           <Typography>A model repository contains all files, history and information related to a model.</Typography>
-          <Box component='form' sx={{ mt: 4 }} onSubmit={onSubmit}>
+          <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
             <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
               <>
                 <Typography component='h2' variant='h6'>

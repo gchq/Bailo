@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { findSchemasByKind } from '../../../services/v2/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
@@ -41,9 +43,11 @@ interface GetSchemaResponse {
 export const getSchemas = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaResponse>) => {
+    req.audit = AuditInfo.SearchSchemas
     const { query } = parse(req, getSchemasSchema)
 
     const schemas = await findSchemasByKind(query.kind)
+    await audit.onSearchSchemas(req, schemas)
 
     return res.json({
       schemas,

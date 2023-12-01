@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
@@ -109,24 +109,24 @@ export default function ReleaseDisplay({
             <Stack spacing={2}>
               {release.files.length > 0 && (
                 <>
-                  <Typography fontWeight='bold'>Artefacts</Typography>
+                  <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
-                    <Stack
-                      key={file._id}
-                      direction={{ sm: 'row', xs: 'column' }}
-                      justifyContent='space-between'
-                      alignItems='center'
-                      spacing={1}
-                    >
-                      <Tooltip title={file.name}>
-                        <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
-                          <Typography noWrap textOverflow='ellipsis'>
-                            {file.name}
-                          </Typography>
-                        </Link>
-                      </Tooltip>
-                      <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                    </Stack>
+                    <div key={file._id}>
+                      <Grid container spacing={1} alignItems='center'>
+                        <Grid item xs>
+                          <Tooltip title={file.name}>
+                            <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
+                              <Typography noWrap textOverflow='ellipsis' display='inline'>
+                                {file.name}
+                              </Typography>
+                            </Link>
+                          </Tooltip>
+                        </Grid>
+                        <Grid item xs={1} textAlign='right'>
+                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                        </Grid>
+                      </Grid>
+                    </div>
                   ))}
                 </>
               )}

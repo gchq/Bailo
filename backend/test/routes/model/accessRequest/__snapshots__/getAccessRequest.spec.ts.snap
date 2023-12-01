@@ -7,3 +7,9 @@ exports[`routes > accessRequest > getAccessRequest > 200 > ok 1`] = `
   },
 }
 `;
+
+exports[`routes > accessRequest > getAccessRequest > audit > expected call 1`] = `
+{
+  "example": "test",
+}
+`;

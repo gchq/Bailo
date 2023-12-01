@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
-import MessageAlert from 'src/MessageAlert'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AccessRequests from 'src/model/beta/AccessRequests'
 import ModelImages from 'src/model/beta/ModelImages'
 import Overview from 'src/model/beta/Overview'
@@ -34,9 +34,10 @@ export default function Model() {
     router.push(`/beta/model/${modelId}/access-request/schema`)
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load model page`, {
+    isModelError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>

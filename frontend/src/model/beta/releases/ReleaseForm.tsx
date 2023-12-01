@@ -1,4 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -6,6 +7,7 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
@@ -14,7 +16,7 @@ type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  artefacts: File[]
+  files: File[]
   imageList: FlattenedModelImage[]
 }
 
@@ -34,9 +36,9 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onArtefactsChange: (value: File[]) => void
-  artefactsMetadata: FileWithMetadata[]
-  onArtefactsMetadataChange: (value: FileWithMetadata[]) => void
+  onFilesChange: (value: File[]) => void
+  filesMetadata: FileWithMetadata[]
+  onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 
@@ -46,14 +48,18 @@ export default function ReleaseForm({
   onSemverChange,
   onReleaseNotesChange,
   onMinorReleaseChange,
-  onArtefactsChange,
-  artefactsMetadata,
-  onArtefactsMetadataChange,
+  onFilesChange,
+  filesMetadata,
+  onFilesMetadataChange,
   onImageListChange,
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
+
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+
+  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -69,6 +75,9 @@ export default function ReleaseForm({
     </Typography>
   )
 
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
   return (
     <Stack spacing={2}>
       {!editable && (
@@ -84,6 +93,10 @@ export default function ReleaseForm({
           <Typography>{`${model.name} - ${formData.semver}`}</Typography>
         </Stack>
       )}
+      <Stack>
+        <Typography fontWeight='bold'>Latest version</Typography>
+        <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+      </Stack>
       <Stack>
         <Typography fontWeight='bold'>
           Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
@@ -132,18 +145,18 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Typography fontWeight='bold'>Artefacts</Typography>
+        <Typography fontWeight='bold'>Files</Typography>
         <MultiFileInput
           fullWidth
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
-          label='Attach artefacts'
-          files={formData.artefacts}
-          fileMetadata={artefactsMetadata}
+          label='Attach files'
+          files={formData.files}
+          fileMetadata={filesMetadata}
           readOnly={isReadOnly}
-          onFileChange={onArtefactsChange}
-          onFileMetadataChange={onArtefactsMetadataChange}
+          onFileChange={onFilesChange}
+          onFileMetadataChange={onFilesMetadataChange}
         />
-        {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
+        {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>

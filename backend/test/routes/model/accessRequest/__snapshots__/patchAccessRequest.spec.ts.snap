@@ -32,3 +32,9 @@ exports[`routes > accessRequest > patchAccessRequest > 400 > no name 1`] = `
   },
 }
 `;
+
+exports[`routes > accessRequest > patchAccessRequest > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;
