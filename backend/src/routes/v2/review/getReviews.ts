@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { ModelInterface } from '../../../models/v2/Model.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { findReviews } from '../../../services/v2/review.js'
@@ -20,7 +22,7 @@ export const getReviewsSchema = z.object({
 })
 
 registerPath({
-  method: 'post',
+  method: 'get',
   path: '/api/v2/reviews',
   tags: ['review'],
   description: 'Find reviews matching criteria.',
@@ -46,10 +48,14 @@ interface GetReviewResponse {
 export const getReviews = [
   bodyParser.json(),
   async (req: Request, res: Response<GetReviewResponse>) => {
+    req.audit = AuditInfo.SearchReviews
     const {
       query: { active, modelId, semver, accessRequestId, kind },
     } = parse(req, getReviewsSchema)
+
     const reviews = await findReviews(req.user, active, modelId, semver, accessRequestId, kind)
+    await audit.onSearchReviews(req, reviews)
+
     res.setHeader('x-count', reviews.length)
     return res.json({
       reviews,

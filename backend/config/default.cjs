@@ -231,6 +231,10 @@ module.exports = {
     authorisation: {
       kind: 'silly',
     },
+
+    audit: {
+      kind: 'silly',
+    },
   },
 
   log: {

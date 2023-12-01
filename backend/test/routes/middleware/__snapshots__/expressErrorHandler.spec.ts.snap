@@ -1,5 +1,16 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`middleware > expressErrorHandler > audit > expected call 1`] = `
+{
+  "code": 299,
+  "context": {
+    "fake": true,
+  },
+  "message": "message",
+  "name": "test",
+}
+`;
+
 exports[`middleware > expressErrorHandler > good error 1`] = `
 [
   {

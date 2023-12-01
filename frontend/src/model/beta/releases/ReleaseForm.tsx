@@ -1,4 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -6,6 +7,7 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
@@ -55,6 +57,10 @@ export default function ReleaseForm({
 }: ReleaseFormProps) {
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+
+  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
+
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
   }
@@ -69,6 +75,9 @@ export default function ReleaseForm({
     </Typography>
   )
 
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
   return (
     <Stack spacing={2}>
       {!editable && (
@@ -84,6 +93,10 @@ export default function ReleaseForm({
           <Typography>{`${model.name} - ${formData.semver}`}</Typography>
         </Stack>
       )}
+      <Stack>
+        <Typography fontWeight='bold'>Latest version</Typography>
+        <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+      </Stack>
       <Stack>
         <Typography fontWeight='bold'>
           Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}

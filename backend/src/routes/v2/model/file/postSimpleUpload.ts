@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { FileInterface } from '../../../../models/v2/File.js'
 import { uploadFile } from '../../../../services/v2/file.js'
 import { fileInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
@@ -42,6 +44,7 @@ interface PostSimpleUpload {
 
 export const postSimpleUpload = [
   async (req: Request, res: Response<PostSimpleUpload>) => {
+    req.audit = AuditInfo.CreateFile
     // Does user have permission to upload a file?
     const {
       params: { modelId },
@@ -55,6 +58,7 @@ export const postSimpleUpload = [
     // In practice, it is fine, as the only reason this assignment is not possible is due
     // to a missing `.locked` parameter which is not a required field for our uploads.
     const file = await uploadFile(req.user, modelId, name, mime, req as unknown as ReadableStream)
+    await audit.onCreateFile(req, file)
 
     return res.json({
       file,

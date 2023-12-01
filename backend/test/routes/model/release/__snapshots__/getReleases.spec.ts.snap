@@ -9,3 +9,11 @@ exports[`routes > release > getReleases > 200 > ok 1`] = `
   ],
 }
 `;
+
+exports[`routes > release > getReleases > audit > expected call 1`] = `
+[
+  {
+    "_id": "test",
+  },
+]
+`;
