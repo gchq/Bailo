@@ -30,3 +30,9 @@ exports[`routes > release > postRelease > 400 > no semver 1`] = `
   },
 }
 `;
+
+exports[`routes > release > postRelease > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;

@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { searchModels } from '../../../services/v2/model.js'
 import { registerPath } from '../../../services/v2/specification.js'
 import { GetModelFilters } from '../../../types/v2/enums.js'
@@ -45,7 +47,7 @@ registerPath({
   },
 })
 
-interface ModelSearchResult {
+export interface ModelSearchResult {
   id: string
   name: string
   description: string
@@ -59,6 +61,7 @@ interface GetModelsResponse {
 export const getModelsSearch = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
+    req.audit = AuditInfo.SearchModels
     const {
       query: { libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)
@@ -70,6 +73,8 @@ export const getModelsSearch = [
       description: model.description,
       tags: model.card?.metadata?.overview?.tags || [],
     }))
+
+    await audit.onSearchModel(req, models)
 
     return res.json({ models })
   },

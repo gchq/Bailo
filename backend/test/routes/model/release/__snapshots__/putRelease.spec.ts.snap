@@ -1,14 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > postModel > 200 > ok 1`] = `
+exports[`routes > release > postRelease > 200 > ok 1`] = `
 {
-  "model": {
+  "release": {
     "_id": "test",
   },
 }
 `;
 
-exports[`routes > model > postModel > 400 > no description 1`] = `
+exports[`routes > release > postRelease > 400 > no semver 1`] = `
 {
   "error": {
     "context": {
@@ -19,7 +19,7 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
           "message": "Required",
           "path": [
             "body",
-            "description",
+            "semver",
           ],
           "received": "undefined",
         },
@@ -31,7 +31,21 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
 }
 `;
 
-exports[`routes > model > postModel > audit > expected call 1`] = `
+exports[`routes > release > postRelease > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;
+
+exports[`routes > release > putRelease > 200 > ok 1`] = `
+{
+  "release": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > release > putRelease > audit > expected call 1`] = `
 {
   "_id": "test",
 }

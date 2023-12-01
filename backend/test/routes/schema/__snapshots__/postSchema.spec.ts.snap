@@ -1,5 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`routes > schema > postSchema > audit > expected call 1`] = `
+{
+  "id": "recusandae",
+  "jsonSchema": {},
+  "kind": "accessRequest",
+  "name": "Jaime Hilll",
+}
+`;
+
 exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
 {
   "schema": {

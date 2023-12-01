@@ -1,7 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`routes > release > deleteRelease > 200 > ok 1`] = `
-{
-  "message": "Successfully removed release.",
-}
-`;

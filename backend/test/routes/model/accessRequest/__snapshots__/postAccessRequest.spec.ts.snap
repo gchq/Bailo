@@ -30,3 +30,9 @@ exports[`routes > accessRequest > postAccessRequest > 400 > no description 1`] =
   },
 }
 `;
+
+exports[`routes > accessRequest > postAccessRequest > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;
