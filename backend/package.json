@@ -71,7 +71,7 @@
     "uuid": "^9.0.0",
     "yargs": "^17.7.1",
     "yauzl": "^2.10.0",
-    "zod": "^3.22.3"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@anatine/zod-mock": "^3.13.2",
