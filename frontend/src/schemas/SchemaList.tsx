@@ -23,14 +23,19 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
           <ListItem
             key={schema.id}
             divider={index + 1 !== schemas.length}
+            disableGutters
             secondaryAction={
               <>
                 <Button disabled>Edit</Button>
-                <Button>{schema.active ? 'Set as inactive' : 'Mark as active'}</Button>
+                <Button disabled>{schema.active ? 'Set as inactive' : 'Mark as active'}</Button>
               </>
             }
           >
-            <ListItemText primary={schema.name} secondary={schema.description} />
+            <ListItemText
+              primary={schema.name}
+              primaryTypographyProps={{}}
+              sx={{ maxWidth: 'fit-content', wordBreak: 'break-all', pr: 20 }}
+            />
           </ListItem>
         ))}
       </List>
