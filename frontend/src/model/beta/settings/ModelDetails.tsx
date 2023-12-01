@@ -49,8 +49,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
     const response = await patchModel(model.id, formData)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
-      setErrorMessage(error)
+      setErrorMessage(await getErrorMessage(response))
     } else {
       sendNotification({
         variant: 'success',

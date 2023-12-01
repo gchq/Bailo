@@ -80,13 +80,10 @@ export default function NewAccessRequest() {
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
       setSubmitButtonLoading(false)
-      return
+    } else {
+      const body = await res.json()
+      router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
     }
-
-    setSubmitButtonLoading(false)
-
-    const body = await res.json()
-    router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {

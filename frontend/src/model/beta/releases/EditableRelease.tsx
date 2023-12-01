@@ -92,14 +92,12 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     const response = await putRelease(updatedRelease)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
-      setIsLoading(false)
-      return setErrorMessage(error)
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      setIsEdit(false)
+      mutateReleases()
     }
-
     setIsLoading(false)
-    setIsEdit(false)
-    mutateReleases()
   }
 
   return (

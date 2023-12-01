@@ -49,8 +49,7 @@ export default function NewModel() {
     const response = await postModel(formData)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
-      setErrorMessage(error)
+      setErrorMessage(await getErrorMessage(response))
       setLoading(false)
     } else {
       const data = await response.json()

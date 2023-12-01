@@ -41,7 +41,7 @@ export default function NewRelease() {
     }
 
     if (!isValidSemver(semver)) {
-      return setErrorMessage('Please set a valid semver value before drafing a release.')
+      return setErrorMessage('Please set a valid semver value before drafting a release.')
     }
 
     setErrorMessage('')
@@ -75,13 +75,11 @@ export default function NewRelease() {
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
-      return setLoading(false)
+      setLoading(false)
+    } else {
+      const body = await response.json()
+      router.push(`/beta/model/${modelId}/release/${body.release.semver}`)
     }
-
-    setLoading(false)
-
-    const body = await response.json()
-    router.push(`/beta/model/${modelId}/release/${body.release.semver}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load release page`, {
