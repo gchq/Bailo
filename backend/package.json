@@ -18,9 +18,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^6.2.0",
+    "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@aws-sdk/client-s3": "^3.421.0",
-    "@aws-sdk/lib-storage": "^3.440.0",
+    "@aws-sdk/lib-storage": "^3.462.0",
     "@smithy/node-http-handler": "^2.1.10",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
@@ -71,7 +71,7 @@
     "uuid": "^9.0.0",
     "yargs": "^17.7.1",
     "yauzl": "^2.10.0",
-    "zod": "^3.22.3"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@anatine/zod-mock": "^3.13.2",
@@ -85,7 +85,7 @@
     "@types/jsonwebtoken": "^9.0.1",
     "@types/lodash": "^4.14.197",
     "@types/lodash-es": "^4.17.10",
-    "@types/memoizee": "^0.4.10",
+    "@types/memoizee": "^0.4.11",
     "@types/minio": "^7.1.1",
     "@types/mjml": "^4.7.1",
     "@types/mongoose-delete": "^1.0.1",

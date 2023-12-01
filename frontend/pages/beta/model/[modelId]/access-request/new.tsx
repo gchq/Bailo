@@ -4,6 +4,7 @@ import { Button, Card, Stack, Typography } from '@mui/material'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -30,6 +31,10 @@ export default function NewAccessRequest() {
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
+  const isLoading = useMemo(
+    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
+    [isCurrentUserLoading, isModelLoading, isSchemaLoading],
+  )
 
   useEffect(() => {
     if (!model || !schema) return
@@ -47,52 +52,51 @@ export default function NewAccessRequest() {
   async function onSubmit() {
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)
+
+    if (!modelId || !schemaId) {
+      setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
+      setSubmitButtonLoading(false)
+      return
+    }
+
+    for (const step of splitSchema.steps) {
+      // The user has tried to submit, so let's enable schema validation for each page
+      setStepValidate(splitSchema, setSplitSchema, step, true)
+    }
+
     for (const step of splitSchema.steps) {
       const isValid = validateForm(step)
-      setStepValidate(splitSchema, setSplitSchema, step, true)
+
       if (!isValid) {
         setSubmissionErrorText('Please make sure that all sections have been completed.')
         setSubmitButtonLoading(false)
+        return
       }
-      if (!modelId) {
-        setSubmissionErrorText('Unknown model ID')
-        setSubmitButtonLoading(false)
-      }
-      if (!schemaId) {
-        setSubmissionErrorText('Unknown schema ID')
-        setSubmitButtonLoading(false)
-      }
-      if (modelId && schemaId) {
-        const data = getStepsData(splitSchema, true)
-        const res = await postAccessRequest(modelId, schemaId, data)
-        if (!res.ok) {
-          const errorResponse = await getErrorMessage(res)
-          setSubmissionErrorText(errorResponse)
-          setSubmitButtonLoading(false)
-        } else {
-          const data = await res.json()
-          router.push(`/beta/model/${modelId}/access-request/${data.accessRequest.id}`)
-        }
-      }
+    }
+
+    const data = getStepsData(splitSchema, true)
+    const res = await postAccessRequest(modelId, schemaId, data)
+
+    if (!res.ok) {
+      setSubmissionErrorText(await getErrorMessage(res))
+      setSubmitButtonLoading(false)
+    } else {
+      const body = await res.json()
+      router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
     }
   }
 
-  if (isSchemaError) {
-    return <MessageAlert message={isSchemaError.info.message} severity='error' />
-  }
-
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load access request page`, {
+    isModelError,
+    isSchemaError,
+    isCurrentUserError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Access Request' page='Model'>
-      {(isSchemaLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
-      {!isSchemaLoading && !isModelLoading && (
+      {isLoading && <Loading />}
+      {!isLoading && (
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           {(!model || !model.card) && (
             <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>

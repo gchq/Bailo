@@ -10,8 +10,9 @@ RUN mkdir /s2i && \
     tar -xvf s2i.tar.gz -C /s2i && \
     rm -rf s2i.tar.gz
 
+ENV npm_config_cache=/cache/npm
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/cache/npm npm install
 
 COPY . .
 RUN npm run build
@@ -40,8 +41,9 @@ RUN chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
 COPY --from=installer /s2i /s2i
 RUN chmod -R o+x /s2i
 
+ENV npm_config_cache=/cache/npm
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN --mount=type=cache,target=/cache/npm npm install --omit=dev
 
 COPY --from=installer /app/config config
 COPY --from=installer /app/dist .

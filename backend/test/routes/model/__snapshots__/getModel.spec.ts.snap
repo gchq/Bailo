@@ -7,3 +7,9 @@ exports[`routes > model > getModel > 200 > ok 1`] = `
   },
 }
 `;
+
+exports[`routes > model > getModel > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;

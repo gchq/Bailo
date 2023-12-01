@@ -109,7 +109,7 @@ export default function ReleaseDisplay({
             <Stack spacing={2}>
               {release.files.length > 0 && (
                 <>
-                  <Typography fontWeight='bold'>Artefacts</Typography>
+                  <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
                     <div key={file._id}>
                       <Grid container spacing={1} alignItems='center'>
