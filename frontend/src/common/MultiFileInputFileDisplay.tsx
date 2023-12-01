@@ -24,15 +24,10 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
     <Grid container spacing={1} alignItems='center'>
       <Grid item xs>
         <Tooltip title={file.name}>
-          <Chip
-            color='primary'
-            label={file.name}
-            onDelete={() => handleDelete(file)}
-            sx={{ justifyContent: 'space-between' }}
-          />
+          <Chip color='primary' label={file.name} onDelete={() => handleDelete(file)} />
         </Tooltip>
       </Grid>
-      <Grid item xs>
+      <Grid item xs={7}>
         <TextField
           size='small'
           placeholder='Optional metadata'
@@ -41,7 +36,7 @@ export default function MultiFileInputFileDisplay({ file, handleDelete, onChange
           onChange={handleMetadataChange}
         />
       </Grid>
-      <Grid item textAlign='right'>
+      <Grid item xs={1} textAlign='right'>
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
       </Grid>
     </Grid>
