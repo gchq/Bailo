@@ -6,6 +6,7 @@ import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 import { mutate } from 'swr'
 import { AccessRequestInterface } from 'types/interfaces'
 
@@ -40,7 +41,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   )
 
   const { mutateReleases } = useGetReleasesForModelId(modelId)
-  const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
+  const { isAccessRequestsError, mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews: mutateActiveReviews } = useGetReviewRequestsForModel({
     modelId,
     isActive: true,
@@ -87,6 +88,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
       setPostResponseError('There was a problem submitting this review')
     }
     setLoading(false)
+  }
+
+  if (isAccessRequestsError) {
+    return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
   }
 
   return (
