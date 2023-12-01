@@ -20,7 +20,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.2.0",
     "@aws-sdk/client-s3": "^3.421.0",
-    "@aws-sdk/lib-storage": "^3.440.0",
+    "@aws-sdk/lib-storage": "^3.462.0",
     "@smithy/node-http-handler": "^2.1.10",
     "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
