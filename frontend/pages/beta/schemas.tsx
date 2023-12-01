@@ -122,7 +122,9 @@ export default function Schemas() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>Schema Type</Typography>
-                <Typography variant='caption'>Schemas are used for both releases and access request forms</Typography>
+                <Typography variant='caption'>
+                  Schemas are used for both model cards and access request forms
+                </Typography>
                 <TextField
                   select
                   size='small'
