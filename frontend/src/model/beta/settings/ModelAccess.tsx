@@ -34,11 +34,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
   const [userListQuery, setUserListQuery] = useState('')
-
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
-  const { mutateModel } = useGetModel(model.id)
+  const { isModelError, mutateModel } = useGetModel(model.id)
   const theme = useTheme()
   const sendNotification = useNotification()
 
@@ -72,24 +72,24 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     setLoading(true)
     const res = await patchModel(model.id, { collaborators: accessList })
     if (!res.ok) {
-      const error = await getErrorMessage(res)
-      return sendNotification({
-        variant: 'error',
-        msg: error,
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Model access list updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      mutateModel()
     }
-    sendNotification({
-      variant: 'success',
-      msg: 'Model access list updated',
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
-    mutateModel()
     setLoading(false)
   }
 
   if (isUsersError) {
     return <MessageAlert message={isUsersError.info.message} severity='error' />
+  }
+
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
   return (
@@ -173,6 +173,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
               Save
             </LoadingButton>
           </div>
+          <MessageAlert message={errorMessage} severity='error' />
         </Stack>
       )}
     </>

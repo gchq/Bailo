@@ -5,3 +5,5 @@ exports[`routes > accessRequest > deleteAccessRequest > 200 > ok 1`] = `
   "message": "Successfully removed access request.",
 }
 `;
+
+exports[`routes > accessRequest > deleteAccessRequest > audit > expected call 1`] = `"recusandae"`;

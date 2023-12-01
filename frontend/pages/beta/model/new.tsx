@@ -49,13 +49,12 @@ export default function NewModel() {
     const response = await postModel(formData)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
+      setErrorMessage(await getErrorMessage(response))
       setLoading(false)
-      return setErrorMessage(error)
+    } else {
+      const data = await response.json()
+      router.push(`/beta/model/${data.model.id}`)
     }
-
-    const data = await response.json()
-    router.push(`/beta/model/${data.model.id}`)
   }
 
   const privateLabel = () => {
