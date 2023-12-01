@@ -106,7 +106,7 @@ export default function ReleaseDisplay({
             </Typography>
             <Markdown>{release.notes}</Markdown>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
-            <Stack spacing={2}>
+            <Stack spacing={1}>
               {release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>

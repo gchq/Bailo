@@ -40,8 +40,8 @@ export default function Release() {
 
   return (
     <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
-      <Container maxWidth='md'>
-        <Card sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }}>
+        <Card>
           <>
             {activeReviews.length > 0 && <ReviewBanner release={release} />}
             <Stack spacing={2} sx={{ p: 4 }}>

@@ -39,7 +39,7 @@ export default function AccessRequest() {
       page='access-request'
       fullWidth
     >
-      <Container maxWidth='md' sx={{ mb: 2 }}>
+      <Container maxWidth='md' sx={{ my: 4 }}>
         <Card>
           {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
           {accessRequest && (
