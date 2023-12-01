@@ -3,10 +3,10 @@ import 'dayjs/locale/en-gb'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import dayjs, { Dayjs } from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
+dayjs.extend(customParseFormat)
 
 interface CustomTextInputProps {
   label?: string
@@ -20,30 +20,27 @@ interface CustomTextInputProps {
 }
 
 export default function DateInput(props: CustomTextInputProps) {
-  const { onChange, value, label, formContext } = props
+  const { onChange, value, label, formContext, required } = props
 
   const theme = useTheme()
   const handleChange = (dateInput: Dayjs | null) => {
     if (dateInput && dateInput.isValid()) {
-      onChange(dateInput.toDate().toISOString().split('T')[0])
+      onChange(dateInput.format('YYYY-MM-DD'))
     }
-    if (dateInput === null) {
-      onChange('')
-    }
-  }
-
-  const displayValue = (dateValue: string) => {
-    const [year, month, date] = dateValue.split('-')
-    return `${date}/${month}/${year}`
   }
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>{label}</Typography>
+      <Typography fontWeight='bold'>
+        {label} <span>{required && formContext.editMode ? '*' : ''}</span>
+      </Typography>
       {formContext.editMode && (
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
-          <DatePicker value={dayjs(value)} onChange={handleChange} sx={{ '.MuiInputBase-input': { p: '10px' } }} />
-        </LocalizationProvider>
+        <DatePicker
+          value={dayjs(value)}
+          onChange={handleChange}
+          format='DD-MM-YYYY'
+          sx={{ '.MuiInputBase-input': { p: '10px' } }}
+        />
       )}
       {!formContext.editMode && (
         <Typography
@@ -52,7 +49,7 @@ export default function DateInput(props: CustomTextInputProps) {
             color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
           }}
         >
-          {value ? displayValue(value) : 'Unanswered'}
+          {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
         </Typography>
       )}
     </Fragment>
