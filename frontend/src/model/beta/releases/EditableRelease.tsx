@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { postFile, putRelease, UpdateReleaseParams, useGetReleasesForModelId } from 'actions/release'
+import { putRelease, UpdateReleaseParams, useGetReleasesForModelId } from 'actions/release'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -68,7 +68,8 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const handleSubmit = async () => {
     setIsLoading(true)
 
-    const fileIds: string[] = []
+    // TODO: Uncomment below and use fileIds instead of release.fileIds when creating updatedRelease (BAI-1026)
+    /* const fileIds: string[] = []
     for (const file of files) {
       const postFileResponse = await postFile(file, model.id, file.name, file.type)
       if (postFileResponse.ok) {
@@ -77,7 +78,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
       } else {
         return setErrorMessage(await getErrorMessage(postFileResponse))
       }
-    }
+    } */
 
     const updatedRelease: UpdateReleaseParams = {
       modelId: model.id,
@@ -85,7 +86,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds: fileIds,
+      fileIds: release.fileIds, // TODO: Use fileIds from above (BAI-1026)
       images: imageList,
     }
 
