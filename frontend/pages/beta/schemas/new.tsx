@@ -1,32 +1,16 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import { postSchema, SchemaKind, useGetSchemas } from 'actions/schema'
+import { ArrowBack, FileUpload } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
+import { postSchema, SchemaKind } from 'actions/schema'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
-import PageWithTabs from 'src/common/PageWithTabs'
 import RichTextEditor from 'src/common/RichTextEditor'
-import SchemaTab from 'src/schemas/SchemaTab'
+import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper.beta'
 import { getErrorMessage } from 'utils/fetcher'
 
-export default function Schemas() {
-  const theme = useTheme()
-
-  const { mutateSchemas: mutateModelSchemas } = useGetSchemas('model')
-  const { mutateSchemas: mutateAccessRequestSchemas } = useGetSchemas('accessRequest')
-
-  const [open, setOpen] = useState(false)
+export default function NewSchema() {
   const [jsonSchema, setJsonSchema] = useState('')
   const [schemaId, setSchemaId] = useState('')
   const [schemaDescription, setSchemaDescription] = useState('')
@@ -34,6 +18,9 @@ export default function Schemas() {
   const [errorMessage, setErrorMessage] = useState('')
   const [schemaKind, setSchemaKind] = useState<SchemaKind>(SchemaKind.MODEL)
   const [filename, setFilename] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
 
   const handleUploadChange = (event) => {
     const fileReader = new FileReader()
@@ -46,11 +33,13 @@ export default function Schemas() {
     }
   }
 
-  async function onSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     setErrorMessage('')
+    setLoading(true)
     if (!jsonSchema) {
       setErrorMessage('Please select a schema')
+      setLoading(false)
       return
     }
     try {
@@ -64,54 +53,41 @@ export default function Schemas() {
 
       if (!response.ok) {
         const error = await getErrorMessage(response)
+        setLoading(false)
         return setErrorMessage(error)
       }
 
-      mutateModelSchemas()
-      mutateAccessRequestSchemas()
-      clearFormData()
-      setOpen(false)
+      router.push('/beta/schemas/list')
     } catch (e: any) {
       if (e.name == 'SyntaxError') {
         setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
+        setLoading(false)
       }
     }
   }
 
-  function clearFormData() {
-    setJsonSchema('')
-    setSchemaId('')
-    setSchemaName('')
-    setSchemaDescription('')
-    setSchemaKind(SchemaKind.MODEL)
-  }
-
-  function handleClose() {
-    setErrorMessage('')
-    setOpen(false)
-    clearFormData()
-  }
-
   return (
-    <Wrapper title='Schemas' page='schemas' fullWidth>
-      <PageWithTabs
-        title='Schemas'
-        tabs={[
-          { title: 'Schemas', path: 'overview', view: <SchemaTab /> },
-          { title: 'Designer (beta)', path: 'releases', view: <></>, disabled: true },
-        ]}
-        displayActionButton
-        actionButtonTitle='Upload a new schema'
-        actionButtonOnClick={() => setOpen(true)}
-      />
-      <Dialog open={open} onClose={handleClose} sx={{ mt: 2 }}>
-        <Box component='form' onSubmit={onSubmit}>
-          <DialogTitle color='primary'>Upload a new schema</DialogTitle>
-          <DialogContent sx={{ pb: 0 }}>
-            <FormControl />
-            <Stack spacing={2}>
+    <Wrapper title='Upload a new Schema' page='upload'>
+      <Container maxWidth='sm'>
+        <Paper sx={{ p: 4, m: 'auto' }}>
+          <Link href={`/beta/schemas/list`}>
+            <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+              Back to schema list
+            </Button>
+          </Link>
+          <Stack spacing={2} alignItems='center' justifyContent='center' sx={{ mt: 2 }}>
+            <Typography variant='h6' component='h1' color='primary'>
+              Upload a new Schema
+            </Typography>
+            <FileUpload color='primary' fontSize='large' />
+            <Typography>Schemas are used to construct both model and access request forms.</Typography>
+          </Stack>
+          <Box onSubmit={handleSubmit} component='form'>
+            <Stack spacing={2} sx={{ mt: 2 }}>
               <Stack>
-                <Typography fontWeight='bold'>Id *</Typography>
+                <Typography fontWeight='bold'>
+                  Id <span style={{ color: 'red' }}>*</span>
+                </Typography>
                 <TextField
                   fullWidth
                   required
@@ -123,7 +99,9 @@ export default function Schemas() {
                 <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>Name *</Typography>
+                <Typography fontWeight='bold'>
+                  Name <span style={{ color: 'red' }}>*</span>
+                </Typography>
                 <TextField
                   fullWidth
                   required
@@ -135,7 +113,9 @@ export default function Schemas() {
                 <Typography variant='caption'>Please specify a name for your schema</Typography>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>Description *</Typography>
+                <Typography fontWeight='bold'>
+                  Description <span style={{ color: 'red' }}>*</span>
+                </Typography>
                 <RichTextEditor
                   value={schemaDescription}
                   onChange={(input) => setSchemaDescription(input)}
@@ -144,7 +124,9 @@ export default function Schemas() {
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>Schema Type *</Typography>
+                <Typography fontWeight='bold'>
+                  Schema Type <span style={{ color: 'red' }}>*</span>
+                </Typography>
                 <TextField
                   select
                   size='small'
@@ -163,22 +145,22 @@ export default function Schemas() {
                 {filename !== '' ? filename : 'Select schema'}
                 <input type='file' hidden onChange={handleUploadChange} />
               </Button>
-              <Typography variant='caption' color={theme.palette.error.main}>
-                {errorMessage}
-              </Typography>
+              <Stack alignItems='flex-end'>
+                <LoadingButton
+                  variant='contained'
+                  loading={loading}
+                  type='submit'
+                  disabled={!schemaId || !schemaName || !schemaDescription || !jsonSchema}
+                  sx={{ width: 'fit-content' }}
+                >
+                  Upload schema
+                </LoadingButton>
+                <MessageAlert message={errorMessage} severity='error' />
+              </Stack>
             </Stack>
-            <FormControl />
-          </DialogContent>
-          <DialogActions sx={{ pr: 2 }}>
-            <Button onClick={handleClose} variant='outlined'>
-              Cancel
-            </Button>
-            <Button type='submit' variant='contained'>
-              Submit
-            </Button>
-          </DialogActions>
-        </Box>
-      </Dialog>
+          </Box>
+        </Paper>
+      </Container>
     </Wrapper>
   )
 }

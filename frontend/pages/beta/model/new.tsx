@@ -1,4 +1,4 @@
-import { Lock, LockOpen } from '@mui/icons-material'
+import { FileUpload, Lock, LockOpen } from '@mui/icons-material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import {
   Box,
@@ -85,17 +85,13 @@ export default function NewModel() {
     <Wrapper title='Create a new Model' page='upload'>
       <Container maxWidth='sm'>
         <Card sx={{ p: 4, m: 'auto' }}>
-          <Typography
-            component='h1'
-            variant='h4'
-            color='primary'
-            fontWeight='bold'
-            mb={2}
-            data-test='createModelPageTitle'
-          >
-            Create a new model
-          </Typography>
-          <Typography>A model repository contains all files, history and information related to a model.</Typography>
+          <Stack spacing={2} alignItems='center' justifyContent='center'>
+            <Typography variant='h6' component='h1' color='primary'>
+              Upload a new Model
+            </Typography>
+            <FileUpload color='primary' fontSize='large' />
+            <Typography>A model repository contains all files, history and information related to a model.</Typography>
+          </Stack>
           <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
             <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
               <>
