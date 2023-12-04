@@ -1,5 +1,5 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Card, Container, Divider, Stack, Typography } from '@mui/material'
+import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
@@ -40,7 +40,7 @@ export default function AccessRequest() {
       fullWidth
     >
       <Container maxWidth='md' sx={{ my: 4 }}>
-        <Card>
+        <Paper>
           {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
           {accessRequest && (
             <>
@@ -65,7 +65,7 @@ export default function AccessRequest() {
               </Stack>
             </>
           )}
-        </Card>
+        </Paper>
       </Container>
     </Wrapper>
   )

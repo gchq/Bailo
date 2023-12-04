@@ -20,7 +20,6 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
         sx={{
           width: '100%',
         }}
-        variant='outlined'
       >
         <Box
           sx={{
