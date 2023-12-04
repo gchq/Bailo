@@ -20,9 +20,7 @@ export default function DropDown(props: DropDownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValue: any) => {
-    if (newValue) {
-      onChange(newValue.value)
-    }
+    newValue ? onChange(newValue) : onChange('')
   }
 
   const disabledWebkitTextFillColor = useMemo(() => {
@@ -57,9 +55,11 @@ export default function DropDown(props: DropDownProps) {
             },
           }}
           onChange={handleChange}
-          value={value || (!formContext.editMode ? 'Unanswered' : '')}
+          value={value}
           disabled={!formContext.editMode}
-          renderInput={(params) => <TextField {...params} label='Select an option below' size='small' />}
+          renderInput={(params) => (
+            <TextField {...params} label='Select an option below' size='small' placeholder='Unanswered' />
+          )}
         />
       )}
       {!formContext.editMode && (
