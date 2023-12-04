@@ -14,11 +14,6 @@
           "minLength": 1,
           "maxLength": 5000
         },
-        "enum": {
-          "type": "string",
-          "title": "Enums",
-          "enum": ["One", "Two"]
-        },
         "tags": {
           "title": "Descriptive tags for the model.",
           "description": "These tags will be searchable and will help others find this model.",
