@@ -5,4 +5,4 @@ README.md
 node_modules
 .git
 dist
-config / local.cjs
+config/local.cjs
