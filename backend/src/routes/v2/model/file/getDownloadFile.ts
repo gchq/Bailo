@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { FileInterface } from '../../../../models/v2/File.js'
 import { downloadFile, getFileById } from '../../../../services/v2/file.js'
 import { BadReq, InternalError } from '../../../../utils/v2/error.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getDownloadFileSchema = z.object({
   params: z.object({

@@ -6,7 +6,7 @@ import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { deleteRelease as deleteReleaseService } from '../../../services/v2/release.js'
 import { registerPath } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const deleteReleaseSchema = z.object({
   params: z.object({
