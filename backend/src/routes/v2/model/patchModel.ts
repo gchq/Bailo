@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 import { updateModel } from '../../../services/v2/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
@@ -56,12 +58,14 @@ interface PatchModelResponse {
 export const patchModel = [
   bodyParser.json(),
   async (req: Request, res: Response<PatchModelResponse>) => {
+    req.audit = AuditInfo.UpdateModel
     const {
       body,
       params: { modelId },
     } = parse(req, patchModelSchema)
 
     const model = await updateModel(req.user, modelId, body)
+    await audit.onUpdateModel(req, model)
 
     return res.json({
       model,

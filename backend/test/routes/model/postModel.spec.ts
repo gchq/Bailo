@@ -1,10 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
 import { postModelSchema } from '../../../src/routes/v2/model/postModel.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
+vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/connectors/v2/audit/index.js')
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
@@ -17,6 +20,19 @@ describe('routes > model > postModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    vi.mock('../../../src/services/v2/model.js', () => ({
+      createModel: vi.fn(() => ({ _id: 'test' })),
+    }))
+
+    const fixture = createFixture(postModelSchema)
+    const res = await testPost('/api/v2/models', fixture)
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onCreateModel).toBeCalled()
+    expect(audit.onCreateModel.mock.calls.at(0).at(1)).toMatchSnapshot()
   })
 
   test('400 > no description', async () => {

@@ -33,3 +33,9 @@ exports[`routes > model > patchModel > 400 > bad visibility 1`] = `
   },
 }
 `;
+
+exports[`routes > model > patchModel > audit > expected call 1`] = `
+{
+  "_id": "test",
+}
+`;
