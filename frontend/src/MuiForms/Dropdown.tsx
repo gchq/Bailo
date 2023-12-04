@@ -2,10 +2,6 @@ import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
 
-interface SelectWidgetOptions {
-  enumOptions: string[]
-}
-
 interface DropDownProps {
   label?: string
   required?: boolean
@@ -15,7 +11,7 @@ interface DropDownProps {
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
-  options: SelectWidgetOptions
+  options: any
 }
 
 export default function DropDown(props: DropDownProps) {
@@ -24,7 +20,9 @@ export default function DropDown(props: DropDownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValue: any) => {
-    onChange(newValue.value)
+    if (newValue) {
+      onChange(newValue.value)
+    }
   }
 
   const disabledWebkitTextFillColor = useMemo(() => {
@@ -36,7 +34,7 @@ export default function DropDown(props: DropDownProps) {
   }, [theme, value])
 
   const dropDownOptions = useMemo(() => {
-    return options.enumOptions
+    return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
 
   return (
@@ -57,7 +55,6 @@ export default function DropDown(props: DropDownProps) {
             '& .MuiInputBase-input.Mui-disabled': {
               WebkitTextFillColor: disabledWebkitTextFillColor,
             },
-            fontStyle: value ? 'unset' : 'italic',
           }}
           onChange={handleChange}
           value={value || (!formContext.editMode ? 'Unanswered' : '')}
