@@ -2,6 +2,7 @@
 
 exports[`routes > schema > postSchema > audit > expected call 1`] = `
 {
+  "description": "recusandae",
   "id": "recusandae",
   "jsonSchema": {},
   "kind": "accessRequest",
