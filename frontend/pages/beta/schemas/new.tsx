@@ -1,4 +1,4 @@
-import { ArrowBack, FileUpload } from '@mui/icons-material'
+import { ArrowBack, Schema } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
@@ -99,7 +99,7 @@ export default function NewSchema() {
             <Typography variant='h6' component='h1' color='primary'>
               Upload a new Schema
             </Typography>
-            <FileUpload color='primary' fontSize='large' />
+            <Schema color='primary' fontSize='large' />
             <Typography>Schemas are used to construct both model and access request forms.</Typography>
           </Stack>
           <Box onSubmit={handleSubmit} component='form'>
