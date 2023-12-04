@@ -151,10 +151,10 @@ export default function ReleaseForm({
           disabled={isEdit} // TODO - Can be removed as part of BAI-1026
           label='Attach files'
           files={formData.files}
-          fileMetadata={filesMetadata}
+          filesMetadata={filesMetadata}
           readOnly={isReadOnly}
           onFileChange={onFilesChange}
-          onFileMetadataChange={onFilesMetadataChange}
+          onFilesMetadataChange={onFilesMetadataChange}
         />
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>

@@ -20,10 +20,7 @@ export default function SchemaButton({ modelId, schema, onClickAction }: SchemaB
 
   return (
     <Grid item md={6} sm={12}>
-      <Card
-        variant='outlined'
-        sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-      >
+      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <CardContent>
           <Stack spacing={1}>
             <Typography variant='button' fontWeight='bold' color='primary'>

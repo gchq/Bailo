@@ -34,7 +34,6 @@ export default function ModelImageDisplay({ modelImage }: ModelImageDisplayProps
     <>
       {isUiConfigLoading && <Loading />}
       <Card
-        variant='outlined'
         sx={{
           width: '100%',
           p: 2,
