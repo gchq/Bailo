@@ -6,7 +6,7 @@ interface SelectWidgetOptions {
   enumOptions: string[]
 }
 
-interface CustomTextInputProps {
+interface DropDownProps {
   label?: string
   required?: boolean
   disabled?: boolean
@@ -18,7 +18,7 @@ interface CustomTextInputProps {
   options: SelectWidgetOptions
 }
 
-export default function CustomTextInput(props: CustomTextInputProps) {
+export default function DropDown(props: DropDownProps) {
   const { onChange, value, label, formContext, options } = props
 
   const theme = useTheme()
