@@ -5,7 +5,7 @@ export default function SchemaTab() {
   return (
     <>
       <Grid container spacing={2}>
-        <Grid item lg={6} xs={12} width='100%'>
+        <Grid item lg={6} xs={12}>
           <Card sx={{ p: 2 }}>
             <Typography color='primary' variant='h6' component='h2'>
               Model Schemas
@@ -13,7 +13,7 @@ export default function SchemaTab() {
             <SchemaList schemaKind='model' />
           </Card>
         </Grid>
-        <Grid item lg={6} xs={12} width='100%'>
+        <Grid item lg={6} xs={12}>
           <Card sx={{ p: 2 }}>
             <Typography color='primary' variant='h6' component='h2'>
               Access Request Schemas

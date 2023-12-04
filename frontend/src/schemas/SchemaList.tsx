@@ -11,9 +11,25 @@ interface SchemaDisplayProps {
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind)
 
-  const schemaArray = useMemo(() => {
-    return schemas
-  }, [schemas])
+  const schemaList = useMemo(
+    () =>
+      schemas.map((schema, index) => (
+        <ListItem
+          key={schema.id}
+          divider={index + 1 !== schemas.length}
+          disableGutters
+          secondaryAction={
+            <>
+              <Button disabled>Edit</Button>
+              <Button disabled>{schema.active ? 'Set as inactive' : 'Mark as active'}</Button>
+            </>
+          }
+        >
+          <ListItemText primary={schema.name} sx={{ maxWidth: 'fit-content', wordBreak: 'break-all', pr: 20 }} />
+        </ListItem>
+      )),
+    [schemas],
+  )
 
   const error = MultipleErrorWrapper('Unable to load schemas', {
     isSchemasError,
@@ -23,23 +39,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   return (
     <>
       {isSchemasLoading && <Loading />}
-      <List>
-        {schemaArray.map((schema, index) => (
-          <ListItem
-            key={schema.id}
-            divider={index + 1 !== schemas.length}
-            disableGutters
-            secondaryAction={
-              <>
-                <Button disabled>Edit</Button>
-                <Button disabled>{schema.active ? 'Set as inactive' : 'Mark as active'}</Button>
-              </>
-            }
-          >
-            <ListItemText primary={schema.name} sx={{ maxWidth: 'fit-content', pr: 20 }} />
-          </ListItem>
-        ))}
-      </List>
+      <List>{schemaList}</List>
     </>
   )
 }

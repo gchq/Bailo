@@ -11,6 +11,18 @@ import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper.beta'
 import { getErrorMessage } from 'utils/fetcher'
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+})
+
 export default function NewSchema() {
   const [jsonSchema, setJsonSchema] = useState('')
   const [schemaId, setSchemaId] = useState('')
@@ -37,7 +49,7 @@ export default function NewSchema() {
     }
   }
 
-  async function handleSubmit(event: FormEvent | undefined) {
+  async function handleSubmit(event: FormEvent) {
     if (event) {
       event.preventDefault()
       setErrorMessage('')
@@ -68,23 +80,11 @@ export default function NewSchema() {
           setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
           setLoading(false)
         } else {
-          setErrorMessage('There was a problem submitting this form. Please try again later.')
+          setErrorMessage('There was a problem submitting this form. Please contact Bailo support')
         }
       }
     }
   }
-
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-  })
 
   return (
     <Wrapper title='Upload a new Schema' page='upload'>
@@ -163,7 +163,7 @@ export default function NewSchema() {
               </Stack>
               <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
                 {filename !== '' ? filename : 'Select schema'}
-                <VisuallyHiddenInput type='file' hidden onChange={handleUploadChange} />
+                <VisuallyHiddenInput type='file' onChange={handleUploadChange} />
               </Button>
               <Stack alignItems='flex-end'>
                 <LoadingButton
