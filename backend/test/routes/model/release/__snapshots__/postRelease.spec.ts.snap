@@ -25,7 +25,7 @@ exports[`routes > release > postRelease > 400 > no semver 1`] = `
         },
       ],
     },
-    "message": "Required",
+    "message": "Path: body.semver - Message: Required",
     "name": "Error",
   },
 }

@@ -37,7 +37,7 @@ exports[`routes > review > getReviews > rejects missing active parameter 1`] = `
         },
       ],
     },
-    "message": "Required",
+    "message": "Path: query.active - Message: Required",
     "name": "Error",
   },
 }
@@ -60,7 +60,7 @@ exports[`routes > review > getReviews > rejects missing value for active paramet
         },
       ],
     },
-    "message": "Required",
+    "message": "Path: query.active - Message: Required",
     "name": "Error",
   },
 }
