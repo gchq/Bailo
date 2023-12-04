@@ -18,7 +18,9 @@ export const postSchemaSchema = z.object({
     name: z.string({
       required_error: 'Must specify schema name',
     }),
-
+    description: z.string({
+      required_error: 'Must specify schema description',
+    }),
     kind: z.nativeEnum(SchemaKind, {
       required_error: 'Must specify schema kind',
     }),

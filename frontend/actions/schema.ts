@@ -3,6 +3,19 @@ import useSWR from 'swr'
 import { SchemaInterface } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+export enum SchemaKind {
+  MODEL = 'model',
+  ACCESS = 'accessRequest',
+}
+
+export interface PostSchemaParams {
+  id: string
+  name: string
+  description: string
+  kind: SchemaKind
+  jsonSchema: any
+}
+
 export function useGetSchemas(kind?: string) {
   const { data, error, mutate } = useSWR<
     {
@@ -33,4 +46,12 @@ export function useGetSchema(id: string) {
     isSchemaLoading: !error && !data,
     isSchemaError: error,
   }
+}
+
+export async function postSchema(data: PostSchemaParams) {
+  return fetch('/api/v2/schemas', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
 }
