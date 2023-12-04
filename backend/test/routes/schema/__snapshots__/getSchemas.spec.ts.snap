@@ -67,7 +67,7 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
         },
       ],
     },
-    "message": "Invalid enum value. Expected 'model' | 'accessRequest', received 'notValid'",
+    "message": "Path: query.kind - Message: Invalid enum value. Expected 'model' | 'accessRequest', received 'notValid'",
     "name": "Error",
   },
 }

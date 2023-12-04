@@ -35,7 +35,7 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
         },
       ],
     },
-    "message": "Required",
+    "message": "Path: body.decision - Message: Required",
     "name": "Error",
   },
 }
