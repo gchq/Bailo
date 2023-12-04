@@ -29,7 +29,7 @@ export default function NewSchema() {
       const fileToUpload = event.target.files[0]
       fileReader.readAsText(fileToUpload, 'UTF-8')
       fileReader.onload = (onloadEvent) => {
-        if (onloadEvent?.target?.result !== undefined && onloadEvent?.target?.result !== null) {
+        if (onloadEvent?.target?.result) {
           setFilename(fileToUpload.name)
           setJsonSchema(onloadEvent.target.result.toString())
         }
@@ -161,7 +161,7 @@ export default function NewSchema() {
                   Schemas are used for both model cards and access request forms
                 </Typography>
               </Stack>
-              <Button component='label' aria-label='Schema JSON file upload button'>
+              <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
                 {filename !== '' ? filename : 'Select schema'}
                 <VisuallyHiddenInput type='file' hidden onChange={handleUploadChange} />
               </Button>
