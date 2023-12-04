@@ -36,11 +36,14 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        if visibility is not None:
+            visibility = str(visibility)
+
         filtered_json = filter_none(
             {
                 "name": name,
                 "description": description,
-                "visibility": str(visibility),
+                "visibility": visibility,
                 "teamId": team_id,
             }
         )
@@ -308,7 +311,9 @@ class Client:
         :param buffer: BytesIO object for bailo to write to
         :return: The unique file ID
         """
-        with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as req:
+        with self.agent.get(
+            f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+        ) as req:
             with buffer as file:
                 shutil.copyfileobj(req.raw, file)
         return file_id
@@ -326,6 +331,7 @@ class Client:
             params={"name": name},
             data=buffer,
             stream=True,
+            timeout=10_000,
         )
 
     # def start_multi_upload(): TBC

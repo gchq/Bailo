@@ -8,7 +8,10 @@ from bailo.core.exceptions import BailoException, ResponseException
 
 class Agent:
     def __request(self, method, *args, **kwargs):
-        res = requests.request(method, *args, timeout=1, verify=True, **kwargs)
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = 5
+
+        res = requests.request(method, *args, verify=True, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
