@@ -58,10 +58,12 @@ export default function NewSchema() {
       }
 
       router.push('/beta/schemas/list')
-    } catch (e: any) {
-      if (e.name == 'SyntaxError') {
+    } catch (e) {
+      if (e instanceof SyntaxError) {
         setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
         setLoading(false)
+      } else {
+        setErrorMessage('There was a problem submitting this form. Please try again later.')
       }
     }
   }
