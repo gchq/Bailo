@@ -1,9 +1,10 @@
 import { ArrowBack, FileUpload } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { postSchema, SchemaKind } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -22,55 +23,72 @@ export default function NewSchema() {
 
   const router = useRouter()
 
-  const handleUploadChange = (event) => {
+  const handleUploadChange = (event: ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader()
-    fileReader.readAsText(event.target.files[0], 'UTF-8')
-    fileReader.onload = (onloadEvent) => {
-      if (onloadEvent?.target?.result !== undefined && onloadEvent?.target?.result !== null) {
-        setFilename(event.target.files[0].name)
-        setJsonSchema(onloadEvent.target.result.toString())
+    if (event.target.files !== null && event.target.files[0]) {
+      const fileToUpload = event.target.files[0]
+      fileReader.readAsText(fileToUpload, 'UTF-8')
+      fileReader.onload = (onloadEvent) => {
+        if (onloadEvent?.target?.result !== undefined && onloadEvent?.target?.result !== null) {
+          setFilename(fileToUpload.name)
+          setJsonSchema(onloadEvent.target.result.toString())
+        }
       }
     }
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-    setErrorMessage('')
-    setLoading(true)
-    if (!jsonSchema) {
-      setErrorMessage('Please select a schema')
-      setLoading(false)
-      return
-    }
-    try {
-      const response = await postSchema({
-        id: schemaId,
-        name: schemaName,
-        description: schemaDescription,
-        kind: schemaKind,
-        jsonSchema: JSON.parse(jsonSchema),
-      })
+  async function handleSubmit(event: FormEvent | undefined) {
+    if (event) {
+      event.preventDefault()
+      setErrorMessage('')
 
-      if (!response.ok) {
-        const error = await getErrorMessage(response)
-        setLoading(false)
-        return setErrorMessage(error)
+      if (!jsonSchema) {
+        setErrorMessage('Please select a schema')
+        return
       }
+      setLoading(true)
+      try {
+        const response = await postSchema({
+          id: schemaId,
+          name: schemaName,
+          description: schemaDescription,
+          kind: schemaKind,
+          jsonSchema: JSON.parse(jsonSchema),
+        })
 
-      router.push('/beta/schemas/list')
-    } catch (e) {
-      if (e instanceof SyntaxError) {
-        setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
-        setLoading(false)
-      } else {
-        setErrorMessage('There was a problem submitting this form. Please try again later.')
+        if (!response.ok) {
+          const error = await getErrorMessage(response)
+          setLoading(false)
+          return setErrorMessage(error)
+        }
+
+        router.push('/beta/schemas/list')
+      } catch (e) {
+        if (e instanceof SyntaxError) {
+          setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
+          setLoading(false)
+        } else {
+          setErrorMessage('There was a problem submitting this form. Please try again later.')
+        }
       }
     }
   }
+
+  const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+  })
 
   return (
     <Wrapper title='Upload a new Schema' page='upload'>
-      <Container maxWidth='sm'>
+      <Container maxWidth='sm' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
           <Link href={`/beta/schemas/list`}>
             <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
@@ -136,16 +154,16 @@ export default function NewSchema() {
                   value={schemaKind}
                   onChange={(event): void => setSchemaKind(event.target.value as SchemaKind)}
                 >
-                  <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
-                  <MenuItem value={SchemaKind.ACCESS}>Access Request</MenuItem>
+                  <MenuItem>{SchemaKind.MODEL}</MenuItem>
+                  <MenuItem>{SchemaKind.ACCESS}</MenuItem>
                 </TextField>
                 <Typography variant='caption'>
                   Schemas are used for both model cards and access request forms
                 </Typography>
               </Stack>
-              <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
+              <Button component='label' aria-label='Schema JSON file upload button'>
                 {filename !== '' ? filename : 'Select schema'}
-                <input type='file' hidden onChange={handleUploadChange} />
+                <VisuallyHiddenInput type='file' hidden onChange={handleUploadChange} />
               </Button>
               <Stack alignItems='flex-end'>
                 <LoadingButton
@@ -153,7 +171,6 @@ export default function NewSchema() {
                   loading={loading}
                   type='submit'
                   disabled={!schemaId || !schemaName || !schemaDescription || !jsonSchema}
-                  sx={{ width: 'fit-content' }}
                 >
                   Upload schema
                 </LoadingButton>

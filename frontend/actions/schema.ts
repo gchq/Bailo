@@ -8,7 +8,7 @@ export enum SchemaKind {
   ACCESS = 'accessRequest',
 }
 
-export interface PostSchema {
+export interface PostSchemaParams {
   id: string
   name: string
   description: string
@@ -48,7 +48,7 @@ export function useGetSchema(id: string) {
   }
 }
 
-export async function postSchema(data: PostSchema) {
+export async function postSchema(data: PostSchemaParams) {
   return fetch('/api/v2/schemas', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },

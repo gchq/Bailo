@@ -1,5 +1,6 @@
 import { Button, List, ListItem, ListItemText } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
+import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 
@@ -10,6 +11,10 @@ interface SchemaDisplayProps {
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind)
 
+  const schemaArray = useMemo(() => {
+    return schemas
+  }, [schemas])
+
   const error = MultipleErrorWrapper('Unable to load schemas', {
     isSchemasError,
   })
@@ -19,7 +24,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     <>
       {isSchemasLoading && <Loading />}
       <List>
-        {schemas.map((schema, index) => (
+        {schemaArray.map((schema, index) => (
           <ListItem
             key={schema.id}
             divider={index + 1 !== schemas.length}
@@ -31,11 +36,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
               </>
             }
           >
-            <ListItemText
-              primary={schema.name}
-              primaryTypographyProps={{}}
-              sx={{ maxWidth: 'fit-content', wordBreak: 'break-all', pr: 20 }}
-            />
+            <ListItemText primary={schema.name} sx={{ maxWidth: 'fit-content', wordBreak: 'break-all', pr: 20 }} />
           </ListItem>
         ))}
       </List>
