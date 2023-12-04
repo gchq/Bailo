@@ -36,7 +36,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
               </>
             }
           >
-            <ListItemText primary={schema.name} sx={{ maxWidth: 'fit-content', wordBreak: 'break-all', pr: 20 }} />
+            <ListItemText primary={schema.name} sx={{ maxWidth: 'fit-content', pr: 20 }} />
           </ListItem>
         ))}
       </List>
