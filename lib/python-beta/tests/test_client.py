@@ -190,6 +190,7 @@ def test_post_schema(requests_mock):
     result = client.post_schema(
         schema_id="test_id",
         name="test",
+        description="example_description",
         kind=SchemaKind.MODEL,
         json_schema={"test": "test"},
     )

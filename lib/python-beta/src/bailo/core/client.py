@@ -399,6 +399,7 @@ class Client:
         self,
         schema_id: str,
         name: str,
+        description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ):
@@ -407,6 +408,7 @@ class Client:
 
         :param schema_id: Unique schema ID
         :param name: Name of the schema
+        :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
         :return: JSON response object
@@ -416,6 +418,7 @@ class Client:
             json={
                 "id": schema_id,
                 "name": name,
+                "description": description,
                 "kind": str(kind),
                 "jsonSchema": json_schema,
             },

@@ -12,6 +12,7 @@ class Schema:
     :param client: A client object used to interact with Bailo
     :param schema_id: A unique schema ID
     :param name: Name of schema
+    :param description: Description of the schema
     :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
     :param json_schema: Schema JSON
     """
@@ -21,12 +22,14 @@ class Schema:
         client: Client,
         schema_id: str,
         name: str,
+        description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ) -> None:
         self.client = client
         self.schema_id = schema_id
         self.name = name
+        self.description = description
         self.kind = kind
         self.json_schema = json_schema
 
@@ -36,6 +39,7 @@ class Schema:
         client: Client,
         schema_id: str,
         name: str,
+        description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ) -> Schema:
@@ -44,6 +48,7 @@ class Schema:
         :param client: A client object used to interact with Bailo
         :param schema_id: A unique schema ID
         :param name: Name of schema
+        :param description: Description of schema
         :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
         :param json_schema: Schema JSON
         :return: Schema object
@@ -52,10 +57,13 @@ class Schema:
             client=client,
             schema_id=schema_id,
             name=name,
+            description=description,
             kind=kind,
             json_schema=json_schema,
         )
-        res = client.post_schema(schema_id=schema_id, name=name, kind=kind, json_schema=json_schema)
+        res = client.post_schema(
+            schema_id=schema_id, name=name, description=description, kind=kind, json_schema=json_schema
+        )
         schema.__unpack(res["schema"])
 
         return schema
@@ -72,6 +80,7 @@ class Schema:
             client=client,
             schema_id=schema_id,
             name="temp",
+            description="temp",
             kind=SchemaKind.MODEL,
             json_schema={"temp": "temp"},
         )
@@ -84,6 +93,7 @@ class Schema:
         print(res)
         self.schema_id = res["id"]
         self.name = res["name"]
+        self.description = res["description"]
         kind = res["kind"]
         self.json_schema = res["jsonSchema"]
 
