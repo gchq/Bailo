@@ -2,29 +2,28 @@ from __future__ import annotations
 
 from typing import Any
 
-from bailo.core import Client, ModelVisibility
+from bailo.core.client import Client
+from bailo.core.enums import ModelVisibility
+from bailo.helper.release import Release
 from semantic_version import Version
-
-from .release import Release
 
 
 class Model:
-    """Represents a model within Bailo
-
-    :param client: A client object used to interact with Bailo
-    :param name: Name of model
-    :param description: Description of model
-    :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
-    """
-
     def __init__(
         self,
         client: Client,
         model_id: str,
         name: str,
         description: str,
-        visibility: ModelVisibility = None,
+        visibility: ModelVisibility | None = None,
     ) -> None:
+        """Represent a model within Bailo.
+
+        :param client: A client object used to interact with Bailo
+        :param name: Name of model
+        :param description: Description of model
+        :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
+        """
         self.client = client
 
         self.model_id = model_id
@@ -43,9 +42,9 @@ class Model:
         name: str,
         description: str,
         team_id: str,
-        visibility: ModelVisibility = None,
+        visibility: ModelVisibility | None = None,
     ) -> Model:
-        """Builds a model from Bailo and uploads it
+        """Build a model from Bailo and uploads it.
 
         :param client: A client object used to interact with Bailo
         :param name: Name of model
@@ -56,7 +55,11 @@ class Model:
         """
         res = client.post_model(name=name, description=description, team_id=team_id, visibility=visibility)
         model = cls(
-            client=client, model_id=res["model"]["id"], name=name, description=description, visibility=visibility
+            client=client,
+            model_id=res["model"]["id"],
+            name=name,
+            description=description,
+            visibility=visibility,
         )
 
         model.__unpack(res["model"])
@@ -72,7 +75,12 @@ class Model:
         :return: Model object
         """
         res = client.get_model(model_id=model_id)["model"]
-        model = cls(client=client, model_id=model_id, name=res["name"], description=res["description"])
+        model = cls(
+            client=client,
+            model_id=model_id,
+            name=res["name"],
+            description=res["description"],
+        )
         model.__unpack(res)
 
         model.get_card_latest()
@@ -82,7 +90,10 @@ class Model:
     def update(self) -> None:
         """Uploads and retrieves any changes to the model summary on Bailo"""
         res = self.client.patch_model(
-            model_id=self.model_id, name=self.name, description=self.description, visibility=self.visibility
+            model_id=self.model_id,
+            name=self.name,
+            description=self.description,
+            visibility=self.visibility,
         )
         self.__unpack(res["model"])
 
@@ -137,8 +148,8 @@ class Model:
         self,
         version: Version | str,
         notes: str,
-        files: list[str] = [],
-        images: list[str] = [],
+        files: list[str] | None = None,
+        images: list[str] | None = None,
         minor: bool = False,
         draft: bool = True,
     ) -> Release:
@@ -232,9 +243,9 @@ class Model:
         self.description = res["description"]
 
         if res["visibility"] == "private":
-            self.visibility = ModelVisibility.Private
+            self.visibility = ModelVisibility.PRIVATE
         else:
-            self.visibility = ModelVisibility.Public
+            self.visibility = ModelVisibility.PUBLIC
 
     def __unpack_mc(self, res):
         self.model_card_version = res["version"]
@@ -242,5 +253,5 @@ class Model:
 
         try:
             self.model_card = res["metadata"]
-        except:
+        except KeyError:
             self.model_card = None

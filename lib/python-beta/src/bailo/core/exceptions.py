@@ -1,17 +1,9 @@
-# Exceptions
-
-# Release Already Exists
-
 from __future__ import annotations
 
 
 class BailoException(Exception):
-    pass
+    """General exception for Bailo response errors."""
 
 
-# Model Already Exists
-# Release not found
-
-# Model not found
-
-# File not found
+class ResponseException(Exception):
+    """Exception used if an endpoint gave no response."""

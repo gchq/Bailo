@@ -28,7 +28,7 @@ def example_model(integration_client):
         name="Yolo-v4",
         description="You only look once!",
         team_id="team_id",
-        visibility=ModelVisibility.Public,
+        visibility=ModelVisibility.PUBLIC,
     )
     model.card_from_schema("minimal-general-v10-beta")
     return model
