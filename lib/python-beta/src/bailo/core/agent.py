@@ -43,7 +43,7 @@ class Agent:
         return self.__request("PUT", *args, **kwargs)
 
 
-class PkiAgent:
+class PkiAgent(Agent):
     def __init__(
         self,
         cert: str,
@@ -62,16 +62,16 @@ class PkiAgent:
         self.auth = auth
 
     def get(self, *args, **kwargs):
-        return requests.get(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
+        return self.get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def post(self, *args, **kwargs):
-        return requests.post(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
+        return self.post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def put(self, *args, **kwargs):
-        return requests.put(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
+        return self.put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return requests.patch(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
+        return self.patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return requests.delete(*args, cert=(self.cert, self.key), verify=self.auth, timeout=1, **kwargs)
+        return self.delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
