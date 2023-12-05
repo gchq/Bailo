@@ -2,6 +2,7 @@ import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@m
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
+import UserDisplay from 'src/common/UserDisplay'
 import { formatDateString } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
@@ -95,11 +96,7 @@ export default function ReleaseDisplay({
               </Button>
             </Stack>
             <Typography variant='caption' sx={{ mb: 2 }}>
-              Created by
-              <Typography variant='caption' fontWeight='bold'>
-                {` ${release.createdBy} `}
-              </Typography>
-              on
+              Created by {<UserDisplay entityId={release.createdBy} />} on
               <Typography variant='caption' fontWeight='bold'>
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>

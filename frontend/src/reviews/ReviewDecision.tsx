@@ -1,8 +1,9 @@
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Box, Card, Stack, Typography } from '@mui/material'
+import { Card, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import UserAvatar from 'src/common/UserAvatar'
+import UserDisplay from 'src/common/UserDisplay'
 import { DecisionKeys } from 'types/interfaces'
 import { EntityKind } from 'types/types'
 
@@ -27,9 +28,7 @@ export default function ReviewDecision({ user, decision }: ReviewDecisionProps) 
       >
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>
-            <Box component='span' fontWeight='bold'>
-              {username}
-            </Box>
+            <UserDisplay entityId={username} />
             {` ${isApproved ? 'approved' : 'requested changes'}`}
           </Typography>
           {isApproved ? <Done color='success' fontSize='small' /> : <HourglassEmpty color='warning' fontSize='small' />}

@@ -1,6 +1,7 @@
 import { Box, Card, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import UserAvatar from 'src/common/UserAvatar'
+import UserDisplay from 'src/common/UserDisplay'
 import { EntityKind } from 'types/types'
 
 type ReviewCommentProps = {
@@ -31,9 +32,7 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
           }}
         >
           <Typography>
-            <Box component='span' fontWeight='bold'>
-              {username}
-            </Box>
+            <UserDisplay entityId={username} />
             {' added a comment'}
           </Typography>
         </Box>
