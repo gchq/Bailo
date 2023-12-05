@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { useGetUiConfig } from '../actions/uiConfig'
 import Banner from './Banner'
 
-vi.mock('../data/uiConfig', () => ({
+vi.mock('../actions/uiConfig', () => ({
   useGetUiConfig: vi.fn(),
 }))
 
