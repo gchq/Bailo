@@ -168,7 +168,7 @@ function Marketplace() {
             {models.map((model, index) => {
               return (
                 <Fragment key={model.id}>
-                  <Link style={{ textDecoration: 'none' }} href={`beta/model/${model.id}`} passHref>
+                  <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
                     <MuiLink
                       variant='h5'
                       sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}

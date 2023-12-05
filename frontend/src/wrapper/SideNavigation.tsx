@@ -72,7 +72,6 @@ interface SideNavigationProps {
   currentUser: User
 }
 
-// This is currently only being used by the beta wrapper
 export default function SideNavigation({
   page,
   drawerOpen = false,
@@ -156,7 +155,7 @@ export default function SideNavigation({
             </ListItem> */}
             <ListItem disablePadding>
               <Link href='/review' color='inherit' underline='none'>
-                <ListItemButton selected={page === 'beta/review'} data-test='reviewLink'>
+                <ListItemButton selected={page === 'review'} data-test='reviewLink'>
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>

@@ -60,7 +60,6 @@ const AppBar = styled(MuiAppBar, {
 
 const pacifico = Pacifico({ subsets: ['latin'], weight: '400' })
 
-// This is currently only being used by the beta wrapper
 export default function TopNavigation({
   drawerOpen = false,
   toggleDrawer,

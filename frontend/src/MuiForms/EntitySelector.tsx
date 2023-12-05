@@ -10,7 +10,7 @@ import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
-interface EntitySelectorBetaProps {
+interface EntitySelectorProps {
   label?: string
   required?: boolean
   value: string[]
@@ -18,7 +18,7 @@ interface EntitySelectorBetaProps {
   formContext?: FormContextType
 }
 
-export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
+export default function EntitySelector(props: EntitySelectorProps) {
   const { onChange, value: currentValue, required, label, formContext } = props
 
   const [open, setOpen] = useState(false)
