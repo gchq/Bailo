@@ -1,8 +1,8 @@
-import { Entity } from '../src/MuiForms/EntitySelector'
+import { EntityObject } from '../types/v2/types'
 import EntityDisplay from './EntityDisplay'
 
 interface Props {
-  entities: Array<Entity>
+  entities: Array<EntityObject>
 }
 
 export default function EntitiesDisplay({ entities }: Props) {
