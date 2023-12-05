@@ -52,6 +52,7 @@ def test_schema():
         client=client,
         schema_id="test",
         name="test",
+        description="test description",
         kind=kind,
         json_schema={"test": "test"},
     )
