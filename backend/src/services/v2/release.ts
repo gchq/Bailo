@@ -190,3 +190,43 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
 export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
 }
+
+export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fileId: string) {
+  const query = {
+    modelId: model.id,
+    fileIds: fileId,
+  }
+  const releases = await Release
+    // Find only matching documents
+    .find(query)
+
+  // This auth section will be greatly simplified when an array of resources can be given to the authorisation check
+  const releasesAuthChecks = await Promise.all(
+    releases.map(async (release) => ({
+      release,
+      authorised: await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update),
+    })),
+  )
+
+  const initialValue: {
+    modelId: string
+    semver: string
+  }[] = []
+  const unauthorisedReleases = releasesAuthChecks.reduce((acc, releaseAuth) => {
+    if (!releaseAuth.authorised) {
+      acc.push({ modelId: releaseAuth.release.modelId, semver: releaseAuth.release.semver })
+    }
+    return acc
+  }, initialValue)
+  if (unauthorisedReleases.length > 0) {
+    throw Forbidden(`You do not have permission to update these releases.`, {
+      releases: unauthorisedReleases,
+    })
+  }
+
+  const result = await Release.updateMany(query, {
+    $pull: { fileIds: fileId },
+  })
+
+  return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
+}
