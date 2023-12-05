@@ -17,7 +17,7 @@ import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
 import { AccessRequestInterface, ReviewRequestInterface } from '../../types/interfaces'
 import { ReleaseInterface } from '../../types/types'
-import { getRoleDisplay } from '../../utils/beta/roles'
+import { getRoleDisplay } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
 

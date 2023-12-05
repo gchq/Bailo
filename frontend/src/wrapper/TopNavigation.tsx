@@ -79,18 +79,12 @@ export default function TopNavigation({
   }
 
   const handleNewModelClicked = () => {
-    router.push('/beta/model/new')
+    router.push('/model/new')
   }
 
   const handleMenuClose = () => {
     setAnchorEl(null)
   }
-
-  const betaAdornment = (
-    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
-      beta
-    </Box>
-  )
 
   return (
     <AppBar
@@ -124,10 +118,9 @@ export default function TopNavigation({
           <MenuIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+          <Link href='/' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Typography variant='h5' component='div'>
               <span className={pacifico.className}>Bailo</span>
-              {betaAdornment}
             </Typography>
           </Link>
         </Box>

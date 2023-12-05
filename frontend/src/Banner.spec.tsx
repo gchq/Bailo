@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useGetUiConfig } from '../data/uiConfig'
+import { useGetUiConfig } from '../actions/uiConfig'
 import Banner from './Banner'
 
 vi.mock('../data/uiConfig', () => ({

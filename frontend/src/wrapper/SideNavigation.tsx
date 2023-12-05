@@ -1,11 +1,10 @@
-import AdminIcon from '@mui/icons-material/AdminPanelSettings'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import ViewList from '@mui/icons-material/ViewList'
+// import ViewList from '@mui/icons-material/ViewList'
 import {
   Badge,
   Divider,
@@ -125,7 +124,7 @@ export default function SideNavigation({
         <>
           <StyledList>
             <ListItem disablePadding>
-              <Link href='/beta' color='inherit' underline='none'>
+              <Link href='/' color='inherit' underline='none'>
                 <ListItemButton selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
                   <ListItemIcon>
                     {!drawerOpen ? (
@@ -140,7 +139,8 @@ export default function SideNavigation({
                 </ListItemButton>
               </Link>
             </ListItem>
-            <ListItem disablePadding>
+            {/** TODO implement this page once API has been updated */}
+            {/* <ListItem disablePadding>
               <ListItemButton disabled selected={page === 'deployments'}>
                 <ListItemIcon>
                   {!drawerOpen ? (
@@ -153,9 +153,9 @@ export default function SideNavigation({
                 </ListItemIcon>
                 <ListItemText primary='Deployments' />
               </ListItemButton>
-            </ListItem>
+            </ListItem> */}
             <ListItem disablePadding>
-              <Link href='/beta/review' color='inherit' underline='none'>
+              <Link href='/review' color='inherit' underline='none'>
                 <ListItemButton selected={page === 'beta/review'} data-test='reviewLink'>
                   <ListItemIcon>
                     {!drawerOpen ? (
@@ -178,7 +178,7 @@ export default function SideNavigation({
           <Divider />
           <StyledList>
             <ListItem disablePadding>
-              <Link href='/beta/docs/api'>
+              <Link href='/docs/api'>
                 <ListItemButton selected={page === 'api'} data-test='apiDocsLink'>
                   <ListItemIcon>
                     {!drawerOpen ? (
@@ -194,7 +194,7 @@ export default function SideNavigation({
               </Link>
             </ListItem>
             <ListItem disablePadding>
-              <Link href='/beta/help'>
+              <Link href='/help'>
                 <ListItemButton selected={page === 'help'} data-test='supportLink'>
                   <ListItemIcon>
                     {!drawerOpen ? (
@@ -216,23 +216,7 @@ export default function SideNavigation({
               <Divider />
               <StyledList>
                 <ListItem disablePadding>
-                  <Link href='/admin'>
-                    <ListItemButton selected={page === 'admin'}>
-                      <ListItemIcon data-test='adminLink'>
-                        {!drawerOpen ? (
-                          <Tooltip arrow title='Admin' placement='right'>
-                            <AdminIcon />
-                          </Tooltip>
-                        ) : (
-                          <AdminIcon />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText primary='Admin' />
-                    </ListItemButton>
-                  </Link>
-                </ListItem>
-                <ListItem disablePadding>
-                  <Link href='/beta/schemas/list'>
+                  <Link href='/schemas/list'>
                     <ListItemButton selected={page === 'schemas'}>
                       <ListItemIcon data-test='designSchemaLink'>
                         {!drawerOpen ? (

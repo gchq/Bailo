@@ -36,7 +36,7 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
   },
 }
 
-export const lightTheme = createTheme({
+export const classicLightTheme = createTheme({
   components: {
     ...defaultComponentOverrides,
   },
@@ -60,7 +60,7 @@ export const lightTheme = createTheme({
   },
 })
 
-export const betaLightTheme = createTheme({
+export const lightTheme = createTheme({
   components: {
     ...defaultComponentOverrides,
     MuiMenuItem: {
