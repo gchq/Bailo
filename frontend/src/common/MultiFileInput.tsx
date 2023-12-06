@@ -4,6 +4,7 @@ import { styled } from '@mui/system'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import { FileWithMetadata } from 'types/interfaces'
+import { FileInterface } from 'types/v2/types'
 
 const Input = styled('input')({
   display: 'none',
@@ -11,9 +12,9 @@ const Input = styled('input')({
 
 type MultiFileInputProps = {
   label: string
-  files: File[]
+  files: (File | FileInterface)[]
   filesMetadata: FileWithMetadata[]
-  onFileChange: (value: File[]) => void
+  onFilesChange: (value: (File | FileInterface)[]) => void
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   accepts?: string
   disabled?: boolean
@@ -23,10 +24,10 @@ type MultiFileInputProps = {
 
 export default function MultiFileInput({
   label,
-  onFileChange,
-  filesMetadata,
-  onFilesMetadataChange,
   files,
+  filesMetadata,
+  onFilesChange,
+  onFilesMetadataChange,
   accepts = '',
   disabled = false,
   fullWidth = false,
@@ -34,24 +35,25 @@ export default function MultiFileInput({
 }: MultiFileInputProps) {
   const htmlId = useMemo(() => `${label.replace(/ /g, '-').toLowerCase()}-file`, [label])
 
-  function handleDelete(fileToDelete: File) {
+  function handleDeleteFile(fileToDelete: File | FileInterface) {
     if (files) {
       const updatedFileList = files.filter((file) => file.name !== fileToDelete.name)
-      onFileChange(updatedFileList)
+      onFilesChange(updatedFileList)
     }
   }
 
-  const handleFileChange = useCallback(
+  const handleAddFile = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const newFiles = event.target.files ? Array.from(event.target.files) : []
-      if (newFiles) {
+      if (newFiles.length) {
         if (files) {
-          const updatedFiles = newFiles.concat(
-            files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
-          )
-          onFileChange(updatedFiles)
+          const updatedFiles = [
+            ...files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+            ...newFiles,
+          ]
+          onFilesChange(updatedFiles)
         } else {
-          onFileChange(newFiles)
+          onFilesChange(newFiles)
         }
         onFilesMetadataChange([
           ...filesMetadata.filter(
@@ -61,10 +63,10 @@ export default function MultiFileInput({
         ])
       }
     },
-    [files, filesMetadata, onFileChange, onFilesMetadataChange],
+    [files, filesMetadata, onFilesChange, onFilesMetadataChange],
   )
 
-  const handleFileDisplayChange = useCallback(
+  const handleMetadataChange = useCallback(
     (fileWithMetadata: FileWithMetadata) => {
       const tempFilesWithMetadata = [...filesMetadata]
       const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
@@ -87,14 +89,19 @@ export default function MultiFileInput({
               {label}
             </Button>
           </label>
-          <Input multiple id={htmlId} type='file' onInput={handleFileChange} accept={accepts} disabled={disabled} />
+          <Input multiple id={htmlId} type='file' onInput={handleAddFile} accept={accepts} disabled={disabled} />
         </>
       )}
       {files.length > 0 && (
         <Stack spacing={1} mt={1}>
           {files.map((file) => (
             <div key={file.name}>
-              <MultiFileInputFileDisplay file={file} handleDelete={handleDelete} onChange={handleFileDisplayChange} />
+              <MultiFileInputFileDisplay
+                file={file}
+                readOnly={readOnly}
+                onDelete={handleDeleteFile}
+                onMetadataChange={handleMetadataChange}
+              />
             </div>
           ))}
         </Stack>

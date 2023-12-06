@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
+import { FileInterface } from '../../../models/v2/File.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
 import { getModelReleases } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
@@ -38,7 +39,7 @@ registerPath({
 })
 
 interface getReleasesResponse {
-  releases: Array<ReleaseInterface>
+  releases: Array<ReleaseInterface & { files: FileInterface[] }>
 }
 
 export const getReleases = [

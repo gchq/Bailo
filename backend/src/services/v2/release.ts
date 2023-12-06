@@ -2,6 +2,7 @@ import { Optional } from 'utility-types'
 
 import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
+import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -145,7 +146,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,
-): Promise<Array<ReleaseDoc & { model: ModelInterface }>> {
+): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
   const results = await Release.aggregate()
     .match({ modelId })
     .sort({ updatedAt: -1 })

@@ -12,6 +12,7 @@ import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
 import Wrapper from 'src/Wrapper.beta'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
+import { FileInterface, isFileInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -19,7 +20,7 @@ export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
@@ -49,8 +50,13 @@ export default function NewRelease() {
 
     const fileIds: string[] = []
     for (const file of files) {
-      const fileMetadata = filesMetadata.find((metadata) => metadata.fileName === file.name)
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, fileMetadata?.metadata)
+      if (isFileInterface(file)) {
+        fileIds.push(file._id)
+        continue
+      }
+
+      const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
 
       if (!postFileResponse.ok) {
         setErrorMessage(await getErrorMessage(postFileResponse))
@@ -67,7 +73,7 @@ export default function NewRelease() {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds: fileIds,
+      fileIds,
       images: imageList,
     }
 
