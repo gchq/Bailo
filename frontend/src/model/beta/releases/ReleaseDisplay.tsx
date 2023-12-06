@@ -117,7 +117,7 @@ export default function ReleaseDisplay({
                           <Tooltip title={file.name}>
                             <Link
                               href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                              className='file-grid-item'
+                              data-test={`fileLink-${file.name}`}
                             >
                               <Typography noWrap textOverflow='ellipsis' display='inline'>
                                 {file.name}
