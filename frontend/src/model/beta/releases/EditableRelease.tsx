@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { postFile, putRelease, UpdateReleaseParams, useGetReleasesForModelId } from 'actions/release'
+import { putRelease, UpdateReleaseParams, useGetReleasesForModelId } from 'actions/release'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -9,7 +9,6 @@ import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ReleaseInterface } from 'types/types'
-import { FileInterface, isFileInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {
@@ -21,7 +20,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
-  const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
+  const [files, setFiles] = useState<File[]>([]) // TODO - Default to using the release files (BAI-1026)
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
@@ -36,10 +35,10 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
-    setFiles(release.files)
-    setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: '' })))
+    setFiles([]) // TODO - Reset the release files (BAI-1026)
+    setFilesMetadata([])
     setImageList(release.images)
-  }, [release.semver, release.notes, release.minor, release.files, release.images])
+  }, [release.images, release.minor, release.notes, release.semver])
 
   useEffect(() => {
     resetForm()
@@ -69,23 +68,17 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const handleSubmit = async () => {
     setIsLoading(true)
 
-    const fileIds: string[] = []
+    // TODO: Uncomment below and use fileIds instead of release.fileIds when creating updatedRelease (BAI-1026)
+    /* const fileIds: string[] = []
     for (const file of files) {
-      if (isFileInterface(file)) {
-        fileIds.push(file._id)
-        continue
+      const postFileResponse = await postFile(file, model.id, file.name, file.type)
+      if (postFileResponse.ok) {
+        const res = await postFileResponse.json()
+        fileIds.push(res.file._id)
+      } else {
+        return setErrorMessage(await getErrorMessage(postFileResponse))
       }
-
-      const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
-      if (!postFileResponse.ok) {
-        setErrorMessage(await getErrorMessage(postFileResponse))
-        return setIsLoading(false)
-      }
-
-      const res = await postFileResponse.json()
-      fileIds.push(res.file._id)
-    }
+    } */
 
     const updatedRelease: UpdateReleaseParams = {
       modelId: model.id,
@@ -93,7 +86,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds,
+      fileIds: release.fileIds, // TODO: Use fileIds from above (BAI-1026)
       images: imageList,
     }
 

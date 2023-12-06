@@ -9,14 +9,14 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { FileInterface, ModelInterface } from 'types/v2/types'
+import { ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  files: (File | FileInterface)[]
+  files: File[]
   imageList: FlattenedModelImage[]
 }
 
@@ -36,7 +36,7 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onFilesChange: (value: (File | FileInterface)[]) => void
+  onFilesChange: (value: File[]) => void
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
@@ -148,11 +148,12 @@ export default function ReleaseForm({
         <Typography fontWeight='bold'>Files</Typography>
         <MultiFileInput
           fullWidth
+          disabled={isEdit} // TODO - Can be removed as part of BAI-1026
           label='Attach files'
           files={formData.files}
           filesMetadata={filesMetadata}
           readOnly={isReadOnly}
-          onFilesChange={onFilesChange}
+          onFileChange={onFilesChange}
           onFilesMetadataChange={onFilesMetadataChange}
         />
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}

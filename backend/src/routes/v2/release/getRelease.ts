@@ -4,9 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
-import { FileInterface } from '../../../models/v2/File.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
-import { getFilesByIds } from '../../../services/v2/file.js'
 import { getReleaseBySemver } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/v2/validate.js'
@@ -39,7 +37,7 @@ registerPath({
 })
 
 interface getReleaseResponse {
-  release: ReleaseInterface & { files: FileInterface[] }
+  release: ReleaseInterface
 }
 
 export const getRelease = [
@@ -52,11 +50,9 @@ export const getRelease = [
 
     const release = await getReleaseBySemver(req.user, modelId, semver)
     await audit.onViewRelease(req, release)
-    const files = await getFilesByIds(req.user, modelId, release.fileIds)
-    const releaseWithFiles = { ...release.toObject(), files }
 
     return res.json({
-      release: releaseWithFiles,
+      release,
     })
   },
 ]

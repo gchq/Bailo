@@ -76,18 +76,6 @@ export async function getFilesByModel(user: UserDoc, modelId: string) {
   return asyncFilter(files, (file) => authorisation.userFileAction(user, model, file, FileAction.View))
 }
 
-export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: string[]) {
-  const model = await getModelById(user, modelId)
-  const files = await FileModel.find({ _id: { $in: fileIds } })
-
-  if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file._id.toString() === id))
-    throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
-  }
-
-  return asyncFilter(files, (file) => authorisation.userFileAction(user, model, file, FileAction.View))
-}
-
 export async function removeFile(user: UserDoc, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   const file = await getFileById(user, fileId)
