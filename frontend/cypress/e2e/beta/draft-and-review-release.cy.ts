@@ -1,32 +1,32 @@
-const baseURL = '/beta/'
-let modelUuid = ''
-const modelName = 'Test Model'
+const baseURLForRelease = '/beta/'
+let modelUuidForRelease = ''
+const modelNameForRelease = 'Test Model'
 const releaseVersion = '1.0.0'
 
 describe('Draft and review a model release', () => {
   before(() => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
-      name: modelName,
+      name: modelNameForRelease,
       teamId: 'Uncategorised',
       description: 'This is a test',
       visibility: 'public',
     }).then((response) => {
       expect(response.status).to.eq(200)
-      expect(response.body.model).to.have.property('name', modelName)
-      modelUuid = response.body.model.id
-      cy.request('POST', `/api/v2/model/${modelUuid}/setup/from-schema`, { schemaId: 'minimal-general-v10-beta' }).then(
-        (response) => {
-          expect(response.status).to.eq(200)
-          expect(response.body.card).to.have.property('modelId', modelUuid)
-        },
-      )
+      expect(response.body.model).to.have.property('name', modelNameForRelease)
+      modelUuidForRelease = response.body.model.id
+      cy.request('POST', `/api/v2/model/${modelUuidForRelease}/setup/from-schema`, {
+        schemaId: 'minimal-general-v10-beta',
+      }).then((response) => {
+        expect(response.status).to.eq(200)
+        expect(response.body.card).to.have.property('modelId', modelUuidForRelease)
+      })
     })
   })
 
   it('drafts a new release for a model', () => {
-    cy.visit(`${baseURL}/model/${modelUuid}`)
-    cy.get('body').contains(modelName)
+    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}`)
+    cy.get('body').contains(modelNameForRelease)
     cy.get('[data-test=modelReleaseTab]').click({ force: true })
     cy.get('body').contains('Draft new Release')
     cy.get('[data-test=draftNewReleaseButton').click()
@@ -36,12 +36,12 @@ describe('Draft and review a model release', () => {
     cy.get('.w-md-editor-text-input').type('These are some release notes')
     cy.get('[data-test=fileInput]').selectFile('cypress/fixtures/test.txt', { force: true })
     cy.get('[data-test=createReleaseButton]', { timeout: 1500 }).click()
-    cy.get('body').contains(`${modelName} - ${releaseVersion}`)
+    cy.get('body').contains(`${modelNameForRelease} - ${releaseVersion}`)
   })
 
   it('can review a release', () => {
-    cy.visit(`${baseURL}/model/${modelUuid}/release/${releaseVersion}`)
-    cy.get('body').contains(`${modelName} - ${releaseVersion}`)
+    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}/release/${releaseVersion}`)
+    cy.get('body').contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.get('[data-test=reviewButton]').click({ force: true })
     cy.get('[data-test=releaseReviewDialog]').contains('Release Review')
     cy.get('[data-test=reviewWithCommentInput').type('This is a comment')
@@ -61,7 +61,7 @@ describe('Draft and review a model release', () => {
    *  can be downloaded from the individual release page
    *  */
   it('can download a release artefact', () => {
-    cy.visit(`${baseURL}/model/${modelUuid}?tab=releases  `)
+    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}?tab=releases  `)
     cy.get('body').contains('Draft new Release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.window()
