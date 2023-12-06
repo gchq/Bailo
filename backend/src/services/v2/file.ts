@@ -8,6 +8,7 @@ import config from '../../utils/v2/config.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { longId } from '../../utils/v2/id.js'
 import { getModelById } from './model.js'
+import { removeFileFromReleases } from './release.js'
 
 export async function uploadFile(user: UserDoc, modelId: string, name: string, mime: string, stream: ReadableStream) {
   const model = await getModelById(user, modelId)
@@ -56,7 +57,7 @@ export async function getFileById(user: UserDoc, fileId: string) {
   })
 
   if (!file) {
-    throw NotFound(`The requested model was not found.`, { fileId })
+    throw NotFound(`The requested file was not found.`, { fileId })
   }
 
   const model = await getModelById(user, file.modelId)
@@ -94,6 +95,8 @@ export async function removeFile(user: UserDoc, modelId: string, fileId: string)
   if (!(await authorisation.userFileAction(user, model, file, FileAction.Delete))) {
     throw Forbidden(`You do not have permission to delete a file from this model.`, { userDn: user.dn })
   }
+
+  await removeFileFromReleases(user, model, fileId)
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.
