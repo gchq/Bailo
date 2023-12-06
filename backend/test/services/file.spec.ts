@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/v2/authorisation/Base.js'
 import { UserDoc } from '../../src/models/v2/User.js'
-import { downloadFile, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
+import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
 
@@ -114,6 +114,42 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     const files = await getFilesByModel(user, modelId)
+    expect(files).toStrictEqual([])
+  })
+
+  test('getFilesByIds > success', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId']
+
+    const files = await getFilesByIds(user, modelId, fileIds)
+
+    expect(files).toMatchSnapshot()
+  })
+
+  test('getFilesByIds > files not found', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId', 'testFileId2']
+
+    const files = getFilesByIds(user, modelId, fileIds)
+
+    expect(files).rejects.toThrowError(/^The requested files were not found./)
+  })
+
+  test('getFilesByIds > no permission', async () => {
+    authorisationMocks.userFileAction.mockResolvedValue(false)
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId']
+
+    const files = await getFilesByIds(user, modelId, fileIds)
     expect(files).toStrictEqual([])
   })
 
