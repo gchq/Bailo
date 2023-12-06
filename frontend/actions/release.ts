@@ -59,13 +59,7 @@ export function putRelease(release: UpdateReleaseParams) {
   })
 }
 
-export async function postFile(
-  artefact: File,
-  modelId: string,
-  name: string,
-  mime: string,
-  metadata?: string | undefined,
-) {
+export async function postFile(file: File, modelId: string, name: string, mime: string, metadata?: string | undefined) {
   return fetch(
     metadata
       ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}?${qs.stringify({
@@ -75,7 +69,7 @@ export async function postFile(
     {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: artefact,
+      body: file,
     },
   )
 }
