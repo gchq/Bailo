@@ -1,5 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > file > getFilesByIds > success 1`] = `
+[
+  {
+    "example": "file",
+  },
+]
+`;
+
 exports[`services > file > getFilesByModel > success 1`] = `
 [
   {
