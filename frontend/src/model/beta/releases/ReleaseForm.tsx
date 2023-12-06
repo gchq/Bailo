@@ -107,6 +107,7 @@ export default function ReleaseForm({
           <TextField
             required
             size='small'
+            data-test='releaseSemanticVersion'
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}

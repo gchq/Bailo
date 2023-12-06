@@ -33,7 +33,13 @@ export default function SchemaButton({ modelId, schema, onClickAction }: SchemaB
           <Stack spacing={2} sx={{ width: '100%' }}>
             <Divider />
             <Link href={`/beta/model/${modelId}/access-request/new?schemaId=${schema.id}`}>
-              <LoadingButton loading={loading} variant='contained' size='small' onClick={handleOnClick}>
+              <LoadingButton
+                loading={loading}
+                variant='contained'
+                size='small'
+                onClick={handleOnClick}
+                data-test={`selectSchemaButton-${schema.id}`}
+              >
                 Select schema
               </LoadingButton>
             </Link>

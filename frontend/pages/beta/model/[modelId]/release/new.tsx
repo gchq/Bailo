@@ -134,6 +134,7 @@ export default function NewRelease() {
                     type='submit'
                     disabled={!semver || !releaseNotes || !isValidSemver(semver)}
                     sx={{ width: 'fit-content' }}
+                    data-test='createReleaseButton'
                   >
                     Create Release
                   </LoadingButton>

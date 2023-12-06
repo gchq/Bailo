@@ -21,7 +21,7 @@ export default function Model() {
       model
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
-            { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
+            { title: 'Releases', path: 'releases', view: <Releases model={model} />, datatest: 'modelReleaseTab' },
             { title: 'Access Requests', path: 'access', view: <AccessRequests model={model} /> },
             { title: 'Registry', path: 'registry', view: <ModelImages model={model} /> },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },

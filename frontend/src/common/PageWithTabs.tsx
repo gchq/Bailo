@@ -11,6 +11,7 @@ export interface PageTab {
   path: string
   view: ReactElement
   disabled?: boolean
+  datatest?: string
 }
 
 export default function PageWithTabs({
@@ -80,7 +81,9 @@ export default function PageWithTabs({
         variant='scrollable'
       >
         {tabs.map((tab: PageTab) => {
-          return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} value={tab.path} />
+          return (
+            <Tab key={tab.title} label={tab.title} disabled={tab.disabled} value={tab.path} data-test={tab.datatest} />
+          )
         })}
       </Tabs>
       {tabs.map((tab: PageTab) => {

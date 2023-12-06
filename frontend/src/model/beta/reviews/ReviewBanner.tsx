@@ -117,7 +117,14 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
           <Typography sx={{ mx: 'auto' }}>Review required</Typography>
         </Grid>
         <Grid item xs={4} sx={{ display: 'flex' }}>
-          <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} sx={{ ml: 'auto' }}>
+          <Button
+            variant='outlined'
+            color='inherit'
+            size='small'
+            onClick={handleReviewOpen}
+            sx={{ ml: 'auto' }}
+            data-test='reviewButton'
+          >
             Review
           </Button>
         </Grid>
