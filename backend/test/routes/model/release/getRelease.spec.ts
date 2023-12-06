@@ -10,7 +10,13 @@ vi.mock('../../../../src/utils/v2/config.js')
 vi.mock('../../../../src/connectors/v2/audit/index.js')
 
 vi.mock('../../../../src/services/v2/release.js', () => ({
-  getReleaseBySemver: vi.fn(() => ({ _id: 'test' })),
+  getReleaseBySemver: vi.fn(() => ({ _id: 'test', toObject: vi.fn(() => ({ _id: 'test' })) })),
+}))
+
+const getFilesByIds = vi.hoisted(() => vi.fn(() => []))
+
+vi.mock('../../../../src/services/v2/file.ts', () => ({
+  getFilesByIds,
 }))
 
 describe('routes > release > getRelease', () => {
@@ -19,6 +25,7 @@ describe('routes > release > getRelease', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/release/${fixture.params.semver}`)
 
     expect(res.statusCode).toBe(200)
+    expect(getFilesByIds).toBeCalled()
     expect(res.body).matchSnapshot()
   })
 

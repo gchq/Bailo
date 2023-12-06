@@ -4,6 +4,7 @@ exports[`routes > release > getRelease > 200 > ok 1`] = `
 {
   "release": {
     "_id": "test",
+    "files": [],
   },
 }
 `;
@@ -11,5 +12,18 @@ exports[`routes > release > getRelease > 200 > ok 1`] = `
 exports[`routes > release > getRelease > audit > expected call 1`] = `
 {
   "_id": "test",
+  "toObject": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": {
+          "_id": "test",
+        },
+      },
+    ],
+  },
 }
 `;
