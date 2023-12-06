@@ -120,6 +120,7 @@ export default function NewAccessRequest() {
                   variant='contained'
                   onClick={onSubmit}
                   loading={submitButtonLoading}
+                  data-test='submitAccessRequest'
                 >
                   Submit
                 </LoadingButton>
