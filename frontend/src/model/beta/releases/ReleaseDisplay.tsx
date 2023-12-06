@@ -68,7 +68,7 @@ export default function ReleaseDisplay({
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Card variant='outlined' sx={{ width: '100%' }}>
+        <Card sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
@@ -106,7 +106,7 @@ export default function ReleaseDisplay({
             </Typography>
             <Markdown>{release.notes}</Markdown>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
-            <Stack spacing={2}>
+            <Stack spacing={1}>
               {release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>

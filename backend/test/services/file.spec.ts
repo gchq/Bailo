@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/v2/authorisation/Base.js'
 import { UserDoc } from '../../src/models/v2/User.js'
-import { downloadFile, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
+import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
 
@@ -25,6 +25,11 @@ const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
 vi.mock('../../src/services/v2/model.js', () => modelMocks)
+
+const releaseServiceMocks = vi.hoisted(() => ({
+  removeFileFromReleases: vi.fn(),
+}))
+vi.mock('../../src/services/v2/release.js', () => releaseServiceMocks)
 
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -72,10 +77,24 @@ describe('services > file', () => {
 
     const result = await removeFile(user, modelId, fileId)
 
+    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
     expect(result).toMatchSnapshot()
   })
 
-  test('removeFile > no permission', async () => {
+  test('removeFile > no release permission', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileId = 'testFileId'
+
+    releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
+
+    const result = removeFile(user, modelId, fileId)
+
+    expect(result).rejects.toThrowError(/^Cannot update releases/)
+    expect(fileModelMocks.delete).not.toBeCalled()
+  })
+
+  test('removeFile > no file permission', async () => {
     authorisationMocks.userModelAction.mockResolvedValueOnce(true)
     authorisationMocks.userFileAction.mockImplementation((_user, _model, _file, action) => {
       if (action === FileAction.View) return true
@@ -91,7 +110,6 @@ describe('services > file', () => {
     expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(
       /^You do not have permission to delete a file from this model./,
     )
-
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 
@@ -114,6 +132,42 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     const files = await getFilesByModel(user, modelId)
+    expect(files).toStrictEqual([])
+  })
+
+  test('getFilesByIds > success', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId']
+
+    const files = await getFilesByIds(user, modelId, fileIds)
+
+    expect(files).toMatchSnapshot()
+  })
+
+  test('getFilesByIds > files not found', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId', 'testFileId2']
+
+    const files = getFilesByIds(user, modelId, fileIds)
+
+    expect(files).rejects.toThrowError(/^The requested files were not found./)
+  })
+
+  test('getFilesByIds > no permission', async () => {
+    authorisationMocks.userFileAction.mockResolvedValue(false)
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = ['testFileId']
+
+    const files = await getFilesByIds(user, modelId, fileIds)
     expect(files).toStrictEqual([])
   })
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from io import BytesIO
 from typing import Any
 
@@ -9,21 +8,6 @@ from semantic_version import Version
 
 
 class Release:
-    """Represents a release within Bailo
-
-    :param client: A client object used to interact with Bailo
-    :param model_id: A unique model ID
-    :param version: A semantic version for the release
-    :param model_card_version: Version of the model card
-    :param notes: Notes on release
-    :param files: (optional) A list of files for release
-    :param images: (optional) A list of images for release
-    :param minor: Is a minor release?
-    :param draft: Is a draft release?
-
-    ..note:: Currently files and images are stored as string references
-    """
-
     def __init__(
         self,
         client: Client,
@@ -31,15 +15,35 @@ class Release:
         version: Version | str,
         model_card_version: int | None = None,
         notes: str = "",
-        files: list[str] = [],
-        images: list[str] = [],
+        files: list[str] | None = None,
+        images: list[str] | None = None,
         minor: bool = False,
         draft: bool = True,
     ) -> None:
+        """Represent a release within Bailo.
+
+        :param client: A client object used to interact with Bailo
+        :param model_id: A unique model ID
+        :param version: A semantic version for the release
+        :param model_card_version: Version of the model card
+        :param notes: Notes on release
+        :param files: (optional) A list of files for release
+        :param images: (optional) A list of images for release
+        :param minor: Is a minor release?
+        :param draft: Is a draft release?
+
+        ..note:: Currently files and images are stored as string references
+        """
         self.client = client
         self.model_id = model_id
 
-        if type(version) == str:
+        if files is None:
+            files = []
+
+        if images is None:
+            images = []
+
+        if isinstance(version, str):
             version = Version(version)
         self.version = version
 
@@ -59,31 +63,54 @@ class Release:
         version: Version | str,
         notes: str,
         model_card_version: int | None = None,
-        files: list[str] = [],
-        images: list[str] = [],
+        files: list[str] | None = None,
+        images: list[str] | None = None,
         minor: bool = False,
         draft: bool = True,
     ) -> Release:
-        """Builds a release from Bailo and uploads it
+        """Build a release from Bailo and uploads it.
 
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         """
+        if files is None:
+            files = []
 
-        client.post_release(model_id, str(version), notes, files, images, model_card_version, minor, draft)
+        if images is None:
+            images = []
 
-        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
+        client.post_release(
+            model_id,
+            str(version),
+            notes,
+            files,
+            images,
+            model_card_version,
+            minor,
+            draft,
+        )
+
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft,
+        )
 
     @classmethod
     def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
-        """Returns an existing release from Bailo
+        """Return an existing release from Bailo.
 
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         """
-
         res = client.get_release(model_id, str(version))["release"]
 
         model_card_version = res["modelCardVersion"]
@@ -93,19 +120,28 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
-        return cls(client, model_id, version, model_card_version, notes, files, images, minor, draft)
+        return cls(
+            client,
+            model_id,
+            version,
+            model_card_version,
+            notes,
+            files,
+            images,
+            minor,
+            draft,
+        )
 
     def download(self, file_id: str, buffer: BytesIO) -> str:
-        """Gives returns a Reading object given the file id
+        """Give returns a Reading object given the file id.
 
         :param file_name: The name of the file to retrieve
         :param buffer: A BytesIO object
         :return: A JSON response object
         """
-
         return self.client.get_download_file(self.model_id, file_id, buffer)
 
-    def upload(self, name: str, f: BytesIO) -> Any:
+    def upload(self, name: str, file: BytesIO) -> Any:
         """Uploads files in a given directory to the release.
 
         :param name: The name of the file to upload to bailo
@@ -113,17 +149,24 @@ class Release:
 
         :return: A JSON response object
         """
-        res = self.client.simple_upload(self.model_id, name, f).json()
+        res = self.client.simple_upload(self.model_id, name, file).json()
         self.files.append(res["file"]["id"])
         self.update()
         return res
 
     def update(self) -> Any:
-        """Updates the any changes to this release on Bailo
+        """Updates the any changes to this release on Bailo.
 
         :return: JSON Response object
         """
-        res = self.client.put_release(self.model_id, str(self.version), self.notes, self.draft, self.files, self.images)
+        return self.client.put_release(
+            self.model_id,
+            str(self.version),
+            self.notes,
+            self.draft,
+            self.files,
+            self.images,
+        )
 
     def delete(self) -> Any:
         """Deletes a release from Bailo

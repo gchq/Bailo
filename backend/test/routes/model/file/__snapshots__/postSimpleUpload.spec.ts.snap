@@ -25,7 +25,7 @@ exports[`routes > model > file > postSimpleUpload > 400 > no name 1`] = `
         },
       ],
     },
-    "message": "Required",
+    "message": "Path: query.name - Message: Required",
     "name": "Error",
   },
 }

@@ -1,23 +1,28 @@
 from __future__ import annotations
 
-import requests
+from json import JSONDecodeError
 
-from .exceptions import BailoException
+import requests
+from bailo.core.exceptions import BailoException, ResponseException
 
 
 class Agent:
-    def __init__(self):
-        pass
-
     def __request(self, method, *args, **kwargs):
-        res = requests.request(method, *args, **kwargs)
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = 5
+
+        res = requests.request(method, *args, verify=True, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
             return res
 
-        # Give the error message issued by bailo
-        raise BailoException(res.json()['error']['message'])
+        try:
+            # Give the error message issued by bailo
+            raise BailoException(res.json()["error"]["message"])
+        except JSONDecodeError:
+            # No response given
+            raise ResponseException(f"Cannot {method} to {res.request.url}")
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)
@@ -38,7 +43,7 @@ class Agent:
         return self.__request("PUT", *args, **kwargs)
 
 
-class PkiAgent():
+class PkiAgent(Agent):
     def __init__(
         self,
         cert: str,
@@ -57,16 +62,16 @@ class PkiAgent():
         self.auth = auth
 
     def get(self, *args, **kwargs):
-        return requests.get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return self.get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def post(self, *args, **kwargs):
-        return requests.post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return self.post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def put(self, *args, **kwargs):
-        return requests.put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return self.put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return requests.patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return self.patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return requests.delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return self.delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)

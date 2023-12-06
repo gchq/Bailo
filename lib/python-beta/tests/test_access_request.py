@@ -28,13 +28,13 @@ def test_access_request():
 def test_create_get_from_version_update_and_delete_access_request(
     name, schema_id, created_by, end_date, integration_client, example_model
 ):
+    metadata = {"overview": {"entities": [created_by], "name": name, "endDate": end_date}}
     # Create access request
     ar = AccessRequest.create(
         client=integration_client,
-        name=name,
         model_id=example_model.model_id,
         schema_id=schema_id,
-        metadata={"overview": {"entities": ["user"], "name": "test"}},
+        metadata=metadata,
     )
 
     # Get access request

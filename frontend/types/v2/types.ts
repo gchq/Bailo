@@ -78,6 +78,10 @@ export interface FileInterface {
   updatedAt: Date
 }
 
+export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
+  return (file as FileInterface).bucket !== undefined
+}
+
 export interface PostSimpleUpload {
   file: FileInterface
 }

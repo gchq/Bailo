@@ -1,42 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > release > postRelease > 200 > ok 1`] = `
-{
-  "release": {
-    "_id": "test",
-  },
-}
-`;
-
-exports[`routes > release > postRelease > 400 > no semver 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "string",
-          "message": "Required",
-          "path": [
-            "body",
-            "semver",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Required",
-    "name": "Error",
-  },
-}
-`;
-
-exports[`routes > release > postRelease > audit > expected call 1`] = `
-{
-  "_id": "test",
-}
-`;
-
 exports[`routes > release > putRelease > 200 > ok 1`] = `
 {
   "release": {

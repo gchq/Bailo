@@ -106,7 +106,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: theme.palette.primary.main,
-        borderRadius: '4px 4px 0px 0px',
+        borderRadius: 0,
       }}
     >
       <Grid container spacing={2} alignItems='center' sx={{ px: 2 }}>

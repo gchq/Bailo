@@ -8,7 +8,7 @@ import { ModelCardInterface } from '../../../../models/v2/Model.js'
 import { getModelCard as getModelCardService } from '../../../../services/v2/model.js'
 import { modelCardInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getModelCardSchema = z.object({
   params: z.object({

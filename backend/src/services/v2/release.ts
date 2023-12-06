@@ -2,6 +2,7 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
+import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -146,7 +147,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,
-): Promise<Array<ReleaseDoc & { model: ModelInterface }>> {
+): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
   const results = await Release.aggregate()
     .match({ modelId })
     .sort({ updatedAt: -1 })
@@ -195,4 +196,43 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
 
 export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
+}
+
+export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fileId: string) {
+  const query = {
+    modelId: model.id,
+    // Match documents where the element exists in the array
+    fileIds: fileId,
+  }
+  const releases = await Release.find(query)
+
+  // This auth section will be greatly simplified when an array of resources can be given to the authorisation check
+  const releasesAuthChecks = await Promise.all(
+    releases.map(async (release) => ({
+      release,
+      authorised: await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update),
+    })),
+  )
+
+  const initialValue: {
+    modelId: string
+    semver: string
+  }[] = []
+  const unauthorisedReleases = releasesAuthChecks.reduce((acc, releaseAuth) => {
+    if (!releaseAuth.authorised) {
+      acc.push({ modelId: releaseAuth.release.modelId, semver: releaseAuth.release.semver })
+    }
+    return acc
+  }, initialValue)
+  if (unauthorisedReleases.length > 0) {
+    throw Forbidden(`You do not have permission to update these releases.`, {
+      releases: unauthorisedReleases,
+    })
+  }
+
+  const result = await Release.updateMany(query, {
+    $pull: { fileIds: fileId },
+  })
+
+  return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
 }

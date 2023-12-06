@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { UserDoc } from '../../../models/v2/User.js'
 import { registerPath, userInterfaceSchema } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getCurrentUserSchema = z.object({})
 

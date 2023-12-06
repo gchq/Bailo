@@ -58,7 +58,7 @@ yolo = Model.create(
 yolo.card_from_schema("minimal-general-v10-beta")
 
 # Create a new release
-release = yolo.create_release(version="0.1.0",
+my_release = yolo.create_release(version="0.1.0",
                               notes="Beta")
 
 # Upload a file to the release

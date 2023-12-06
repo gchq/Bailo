@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { Role } from '../../../../types/v2/types.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getModelCurrentUserRolesSchema = z.object({
   params: z.object({

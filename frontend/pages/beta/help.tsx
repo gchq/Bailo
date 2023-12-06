@@ -1,6 +1,7 @@
 import ArticleIcon from '@mui/icons-material/Article'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
+import { Paper } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -26,16 +27,18 @@ export default function Help() {
   return (
     <Wrapper title='Help' page='help'>
       {uiConfig && (
-        <>
-          <Box sx={{ p: 5, textAlign: 'center' }}>
-            <Typography variant='h2'>Contact us</Typography>
+        <Paper sx={{ py: 5, px: 5 }}>
+          <Box sx={{ mb: 5, textAlign: 'center' }}>
+            <Typography variant='h2' component='h1' color='primary'>
+              Contact us
+            </Typography>
           </Box>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Bug reports
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -58,7 +61,7 @@ export default function Help() {
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Documentation
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -78,7 +81,7 @@ export default function Help() {
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Get in touch
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -97,7 +100,7 @@ export default function Help() {
               </Card>
             </Grid>
           </Grid>
-        </>
+        </Paper>
       )}
     </Wrapper>
   )
