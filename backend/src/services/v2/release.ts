@@ -194,11 +194,10 @@ export function getReleaseName(release: ReleaseDoc): string {
 export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fileId: string) {
   const query = {
     modelId: model.id,
+    // Match documents where the element exists in the array
     fileIds: fileId,
   }
-  const releases = await Release
-    // Find only matching documents
-    .find(query)
+  const releases = await Release.find(query)
 
   // This auth section will be greatly simplified when an array of resources can be given to the authorisation check
   const releasesAuthChecks = await Promise.all(
