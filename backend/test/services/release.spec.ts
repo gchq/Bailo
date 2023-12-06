@@ -5,6 +5,7 @@ import {
   deleteRelease,
   getModelReleases,
   getReleaseBySemver,
+  removeFileFromReleases,
   updateRelease,
 } from '../../src/services/v2/release.js'
 
@@ -47,6 +48,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
+  obj.updateMany = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
@@ -255,5 +257,36 @@ describe('services > release', () => {
       /^You do not have permission to delete this release./,
     )
     expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
+  test('removeFileFromReleases > no permission', async () => {
+    const mockUser: any = { dn: 'test' }
+    const mockModel: any = { id: 'test' }
+    const mockRelease = { _id: 'release' }
+
+    authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
+    authorisationMocks.userReleaseAction.mockResolvedValueOnce(false)
+    releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])
+
+    const result = removeFileFromReleases(mockUser, mockModel, '123')
+
+    expect(result).rejects.toThrowError(/^You do not have permission to update these releases./)
+    expect(releaseModelMocks.updateMany).not.toBeCalled()
+  })
+
+  test('removeFileFromReleases > success', async () => {
+    const mockUser: any = { dn: 'test' }
+    const mockModel: any = { id: 'test' }
+    const mockRelease = { _id: 'release' }
+    const resultObject = { modifiedCount: 2, matchedCount: 2 }
+
+    authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
+    authorisationMocks.userReleaseAction.mockResolvedValueOnce(true)
+    releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])
+    releaseModelMocks.updateMany.mockResolvedValueOnce(resultObject)
+
+    const result = await removeFileFromReleases(mockUser, mockModel, '123')
+
+    expect(result).toEqual(resultObject)
   })
 })

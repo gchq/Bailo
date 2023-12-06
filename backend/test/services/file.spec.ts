@@ -26,6 +26,11 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/v2/model.js', () => modelMocks)
 
+const releaseServiceMocks = vi.hoisted(() => ({
+  removeFileFromReleases: vi.fn(),
+}))
+vi.mock('../../src/services/v2/release.js', () => releaseServiceMocks)
+
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
@@ -72,10 +77,24 @@ describe('services > file', () => {
 
     const result = await removeFile(user, modelId, fileId)
 
+    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
     expect(result).toMatchSnapshot()
   })
 
-  test('removeFile > no permission', async () => {
+  test('removeFile > no release permission', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileId = 'testFileId'
+
+    releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
+
+    const result = removeFile(user, modelId, fileId)
+
+    expect(result).rejects.toThrowError(/^Cannot update releases/)
+    expect(fileModelMocks.delete).not.toBeCalled()
+  })
+
+  test('removeFile > no file permission', async () => {
     authorisationMocks.userModelAction.mockResolvedValueOnce(true)
     authorisationMocks.userFileAction.mockImplementation((_user, _model, _file, action) => {
       if (action === FileAction.View) return true
@@ -91,7 +110,6 @@ describe('services > file', () => {
     expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(
       /^You do not have permission to delete a file from this model./,
     )
-
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 
