@@ -38,7 +38,7 @@ export interface ModelCardRevisionInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
 export type ModelForm = {
