@@ -46,7 +46,9 @@ describe('Make and approve an access request', () => {
         cy.exec(`docker tag ${testModelImage} ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`)
         cy.exec(`docker push ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`)
       })
+  })
 
+  it('can select the image when drafting a release', () => {
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=modelReleaseTab]').click({ force: true })
@@ -56,8 +58,4 @@ describe('Make and approve an access request', () => {
     cy.contains('1')
     cy.contains(`${testModelImage}`)
   })
-
-  // it('can select the image when drafting a release', () => {
-
-  // })
 })
