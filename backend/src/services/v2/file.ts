@@ -87,7 +87,8 @@ export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: str
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
-  return asyncFilter(files, (file) => authorisation.userFileAction(user, model, file, FileAction.View))
+  const auths = await authorisation.fileBatch(user, model, files, FileAction.View)
+  return files.filter((_, i) => auths[i].success)
 }
 
 export async function removeFile(user: UserDoc, modelId: string, fileId: string) {

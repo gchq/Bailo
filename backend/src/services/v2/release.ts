@@ -210,7 +210,7 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   const releasesAuthChecks = await Promise.all(
     releases.map(async (release) => ({
       release,
-      authorised: await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update),
+      authorised: await authorisation.release(user, model, release, ReleaseAction.Update),
     })),
   )
 
@@ -219,7 +219,7 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
     semver: string
   }[] = []
   const unauthorisedReleases = releasesAuthChecks.reduce((acc, releaseAuth) => {
-    if (!releaseAuth.authorised) {
+    if (!releaseAuth.authorised.success) {
       acc.push({ modelId: releaseAuth.release.modelId, semver: releaseAuth.release.semver })
     }
     return acc

@@ -1,9 +1,12 @@
 import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
+import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
+
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 
 const mockSchema = vi.hoisted(() => {
   const mockedMethods = {
@@ -36,13 +39,6 @@ const mockMongoUtils = vi.hoisted(() => {
 })
 vi.mock('../../utils/v2/mongo.js', () => mockMongoUtils)
 
-const authorisationMocks = vi.hoisted(() => ({
-  userSchemaAction: vi.fn(() => true),
-}))
-vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  default: authorisationMocks,
-}))
-
 describe('services > schema', () => {
   const testUser = { dn: 'user' } as UserDoc
 
@@ -60,7 +56,10 @@ describe('services > schema', () => {
   })
 
   test('a schema cannot be created due to authorisation', async () => {
-    authorisationMocks.userSchemaAction.mockResolvedValueOnce(false)
+    vi.mocked(authorisation.schema).mockResolvedValue({
+      info: 'You do not have permission to create this schema.',
+      success: false,
+    })
 
     const result = () => createSchema(testUser, testModelSchema)
     expect(result).rejects.toThrowError(/^You do not have permission to create this schema./)

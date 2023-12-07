@@ -2,24 +2,18 @@ import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/v2/authorisation/Base.js'
+import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => 'fileStream'),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
-
-const authorisationMocks = vi.hoisted(() => ({
-  userModelAction: vi.fn(() => true),
-  userFileAction: vi.fn((_user, _model, _file, _action) => true),
-}))
-vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  default: authorisationMocks,
-}))
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
@@ -63,7 +57,10 @@ describe('services > file', () => {
   })
 
   test('uploadFile > no permission', async () => {
-    authorisationMocks.userFileAction.mockResolvedValueOnce(false)
+    vi.mocked(authorisation.file).mockResolvedValue({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+    })
 
     expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
       /^You do not have permission to upload a file to this model./,
@@ -95,12 +92,12 @@ describe('services > file', () => {
   })
 
   test('removeFile > no file permission', async () => {
-    authorisationMocks.userModelAction.mockResolvedValueOnce(true)
-    authorisationMocks.userFileAction.mockImplementation((_user, _model, _file, action) => {
-      if (action === FileAction.View) return true
-      if (action === FileAction.Delete) return false
+    vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
+      if (action === FileAction.View) return { success: true }
+      if (action === FileAction.Delete)
+        return { success: false, info: 'You do not have permission to delete a file from this model.' }
 
-      return false
+      return { success: false, info: 'Unknown action.' }
     })
 
     const user = { dn: 'testUser' } as UserDoc
@@ -125,7 +122,13 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > no permission', async () => {
-    authorisationMocks.userFileAction.mockResolvedValue(false)
+    vi.mocked(authorisation.fileBatch).mockResolvedValue([
+      {
+        info: 'You do not have permission to get the files from this model.',
+        success: false,
+      },
+    ])
+
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
     const user = { dn: 'testUser' } as UserDoc
@@ -160,7 +163,12 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > no permission', async () => {
-    authorisationMocks.userFileAction.mockResolvedValue(false)
+    vi.mocked(authorisation.fileBatch).mockResolvedValue([
+      {
+        info: 'You do not have permission to get the files from this model.',
+        success: false,
+      },
+    ])
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
     const user = { dn: 'testUser' } as UserDoc
@@ -186,12 +194,14 @@ describe('services > file', () => {
     const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
 
-    authorisationMocks.userFileAction.mockImplementation((_user, _model, _file, action) => {
-      if (action === FileAction.View) return true
-      if (action === FileAction.Download) return false
+    vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
+      if (action === FileAction.View) return { success: true }
+      if (action === FileAction.Download)
+        return { success: false, info: 'You do not have permission to download this model.' }
 
-      return false
+      return { success: false, info: 'Unknown action.' }
     })
+
     await expect(downloadFile(user, fileId, range)).rejects.toThrowError(
       /^You do not have permission to download this model./,
     )

@@ -54,7 +54,7 @@ export const ImageAction = {
 }
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 
-type Response = { success: true; info: undefined } | { success: false; info: string }
+type Response = { success: true } | { success: false; info: string }
 
 export class BaseAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
