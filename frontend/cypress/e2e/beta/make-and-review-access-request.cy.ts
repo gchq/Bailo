@@ -27,7 +27,7 @@ describe('Make and approve an access request', () => {
 
   it('can make an access request', () => {
     cy.visit(`${baseURL}/model/${modelUuid}`)
-    cy.get('body').contains(modelName)
+    cy.contains(modelName)
     cy.get('[data-test=accessRequestTab]').click()
     cy.get('[data-test=accessRequestButton]').click()
     cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/access-request/schema`)
@@ -36,11 +36,11 @@ describe('Make and approve an access request', () => {
       force: true,
     })
 
-    cy.get('body').contains('What is the name of the access request?')
+    cy.contains('What is the name of the access request?')
     cy.get('#root_name').type('Test access request')
     cy.get('[data-test=submitAccessRequest]').click()
 
-    cy.get('body').contains('Edit Access Request')
+    cy.contains('Edit Access Request')
     cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/access-request`)
 
     cy.url().then((url) => {

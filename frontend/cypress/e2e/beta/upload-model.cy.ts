@@ -8,7 +8,7 @@ const schemaId = 'minimal-general-v10-beta'
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {
     cy.visit(newModelUrl)
-    cy.get('body').contains('Upload a new Model')
+    cy.contains('Upload a new Model')
   })
 
   it('creates a public new model', () => {
@@ -43,7 +43,7 @@ describe('Beta create new model', () => {
 
   it('can set a schema for a newly created model', () => {
     cy.visit(`/beta/model/${modelUuid}`)
-    cy.get('body').contains('Create a model card')
+    cy.contains('Create a model card')
     cy.get('[data-test=createSchemaFromScratchButton]', { timeout: 15000 }).click()
     cy.log('Checking URL has been updated')
     cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/schema`)
@@ -51,19 +51,19 @@ describe('Beta create new model', () => {
       multiple: true,
       force: true,
     })
-    cy.get('body').contains('Edit Model card')
+    cy.contains('Edit Model card')
   })
 
   it('can edit an existing model', () => {
     cy.visit(`/beta/model/${modelUuid}`)
-    cy.get('body').contains('Edit Model card')
+    cy.contains('Edit Model card')
     cy.get('[data-test=editModelButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=cancelEditButton]').click()
-    cy.get('body').contains('This is a test summary').should('not.exist')
+    cy.contains('This is a test summary').should('not.exist')
     cy.get('[data-test=editModelButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=saveModelCardButton]').click()
-    cy.get('body').contains('This is a test summary')
+    cy.contains('This is a test summary')
   })
 })

@@ -28,7 +28,7 @@ export default function Model() {
               view: <AccessRequests model={model} />,
               datatest: 'accessRequestTab',
             },
-            { title: 'Registry', path: 'registry', view: <ModelImages model={model} /> },
+            { title: 'Registry', path: 'registry', view: <ModelImages model={model} />, datatest: 'modelRegistryTab' },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],

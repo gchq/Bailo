@@ -26,34 +26,48 @@ describe('Draft and review a model release', () => {
 
   it('drafts a new release for a model', () => {
     cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}`)
-    cy.get('body').contains(modelNameForRelease)
+    cy.contains(modelNameForRelease)
     cy.get('[data-test=modelReleaseTab]').click({ force: true })
-    cy.get('body').contains('Draft new Release')
+    cy.contains('Draft new Release')
     cy.get('[data-test=draftNewReleaseButton').click()
-    cy.get('body').contains('A release takes a snapshot of the current state of the model code, files and model card')
+    cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
     cy.get('[data-test=releaseSemanticVersion]').type(releaseVersion)
     cy.get('.w-md-editor-text-input').type('These are some release notes')
     cy.get('[data-test=fileInput]').selectFile('cypress/fixtures/test.txt', { force: true })
     cy.get('[data-test=createReleaseButton]', { timeout: 1500 }).click()
-    cy.get('body').contains(`${modelNameForRelease} - ${releaseVersion}`)
+    cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
   })
 
   it('can review a release', () => {
     cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}/release/${releaseVersion}`)
-    cy.get('body').contains(`${modelNameForRelease} - ${releaseVersion}`)
+    cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.get('[data-test=releaseReviewDialog]').contains('Release Review')
+    cy.contains('Release Review')
     cy.get('[data-test=reviewWithCommentInput').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
     cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.get('[data-test=releaseReviewDialog]').contains('Release Review')
+    cy.contains('Release Review')
     cy.get('[data-test=approveReviewButton').click()
 
-    cy.get('[data-test=releaseContainer').contains('user added a comment')
-    cy.get('[data-test=releaseContainer').contains('user requested changes')
-    cy.get('[data-test=releaseContainer').contains('user approved')
-    cy.get('[data-test=releaseContainer').contains('This is a comment')
+    cy.contains('user added a comment')
+    cy.contains('user requested changes')
+    cy.contains('user approved')
+    cy.contains('This is a comment')
+  })
+
+  it('can edit an existing release', () => {
+    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}/release/${releaseVersion}`)
+    cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
+
+    cy.get('[data-test=editFormButton]').click({ force: true })
+    cy.get('[data-test=richTextEditor]').type('This is an edit', { force: true })
+    cy.get('[data-test=cancelEditFormButton]').click({ force: true })
+    cy.contains('This is an edit').should('not.exist')
+    cy.get('[data-test=editFormButton]').click({ force: true })
+    cy.get('[data-test=richTextEditor]').type('This is an edit', { force: true })
+    cy.get('[data-test=saveEditFormButton]').click({ force: true })
+    cy.contains('This is an edit')
   })
 
   /**
@@ -62,7 +76,7 @@ describe('Draft and review a model release', () => {
    *  */
   it('can download a release artefact', () => {
     cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}?tab=releases  `)
-    cy.get('body').contains('Draft new Release')
+    cy.contains('Draft new Release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.window()
       .document()
