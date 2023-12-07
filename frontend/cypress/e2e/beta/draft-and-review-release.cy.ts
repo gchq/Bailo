@@ -32,8 +32,8 @@ describe('Draft and review a model release', () => {
     cy.get('[data-test=draftNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
-    cy.get('[data-test=releaseSemanticVersion]').type(releaseVersion)
-    cy.get('.w-md-editor-text-input').type('These are some release notes')
+    cy.get('[data-test=releaseSemanticVersion]').type(releaseVersion, { force: true })
+    cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
     cy.get('[data-test=fileInput]').selectFile('cypress/fixtures/test.txt', { force: true })
     cy.get('[data-test=createReleaseButton]', { timeout: 1500 }).click()
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
