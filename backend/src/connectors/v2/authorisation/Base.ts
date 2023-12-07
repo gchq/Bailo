@@ -231,7 +231,9 @@ export class BaseAuthorisationConnector {
     return Promise.all(
       accesses.map(async (access) => {
         // Don't allow anything beyond pushing and pulling actions.
-        if (!access.actions.every((action) => [ImageAction.Push, ImageAction.Pull].includes(action))) {
+        if (
+          !access.actions.every((action) => [ImageAction.Push, ImageAction.Pull, ImageAction.List].includes(action))
+        ) {
           return {
             success: false,
             info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
