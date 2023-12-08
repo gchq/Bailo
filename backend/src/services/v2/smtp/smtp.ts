@@ -88,25 +88,74 @@ export async function requestReviewForAccessRequest(
   await Promise.all(sendEmailResponses)
 }
 
-export async function requestResponsePostReleaseReviewResponse(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+export async function requestResponsePostReleaseReviewResponse(review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
+  const reviewResponse = review.responses[0]
 
+  if (!reviewResponse) {
+    log.info('response not found')
+    return
+  }
   const emailContent = buildEmail(
-    `Release ${release.semver} has been reviewed`,
+    `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Reviewer', data: review.role.toUpperCase() },
-      { title: 'Reviewed', data: review.createdAt.toString() },
+      { title: 'Reviewed on', data: review.createdAt.toDateString() },
+      { title: 'Conclusion', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
       { name: 'Open Release', url: 'TODO' },
       { name: 'See Reviews', url: 'TODO' },
     ],
   )
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(release.createdBy))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
+
+export async function requestResponsePostAccessRequestReviewResponse(
+  review: ReviewDoc,
+  accessRequest: AccessRequestDoc,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+  const reviewResponse = review.responses[0]
+
+  if (!reviewResponse) {
+    log.info('response not found')
+    return
+  }
+  const emailContent = buildEmail(
+    `Access request for model ${
+      accessRequest.modelId
+    } has been reviewed by ${accessRequest.metadata.overview.entities.toString()}`,
+    [
+      { title: 'Model ID', data: accessRequest.modelId },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+      { title: 'Reviewed on', data: review.createdAt.toDateString() },
+      { title: 'Conclusion', data: reviewResponse.decision.replace(/_/g, ' ') },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(accessRequest.createdBy))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
     userInfoList = userInfoList.slice(0, 20)
