@@ -128,13 +128,13 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after a response for a release review', async () => {
-    await requestResponsePostReleaseReviewResponse('user:user', review, release)
+    await requestResponsePostReleaseReviewResponse(review, release)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent after a response for a an access request review', async () => {
-    await requestResponsePostAccessRequestReviewResponse('user:user', review, access)
+    await requestResponsePostAccessRequestReviewResponse(review, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
