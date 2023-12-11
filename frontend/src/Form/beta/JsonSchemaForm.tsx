@@ -3,6 +3,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import {
   Box,
   Button,
+  Card,
   Divider,
   Grid,
   IconButton,
@@ -26,7 +27,7 @@ import Nothing from '../../MuiForms/Nothing'
 
 function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
-    <div>
+    <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h3'>
         {props.title}
       </Typography>
@@ -51,7 +52,7 @@ function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           Add Item
         </Button>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -91,7 +92,7 @@ export default function JsonSchemaForm({
 
   return (
     <Stack
-      direction={{ xs: 'column', sm: 'row' }}
+      direction={{ xs: 'column', md: 'row' }}
       spacing={{ sm: 2 }}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}

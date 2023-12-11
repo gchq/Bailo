@@ -1,4 +1,4 @@
-import { Add, Settings } from '@mui/icons-material'
+import { Add } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -156,14 +156,6 @@ export default function TopNavigation({
                       inputProps={{ 'aria-label': 'controlled' }}
                     />
                   </MenuItem>
-                  <Link href='/settings' color='inherit' underline='none'>
-                    <MenuItem data-test='settingsLink'>
-                      <ListItemIcon>
-                        <Settings fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Settings</ListItemText>
-                    </MenuItem>
-                  </Link>
                   <Link href='/api/logout' color='inherit' underline='none'>
                     <MenuItem data-test='logoutLink'>
                       <ListItemIcon>
