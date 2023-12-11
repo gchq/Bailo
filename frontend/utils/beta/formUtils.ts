@@ -10,6 +10,7 @@ import DateSelector from 'src/MuiForms/DateSelector'
 import Dropdown from 'src/MuiForms/Dropdown'
 import EntitySelector from 'src/MuiForms/EntitySelector'
 import EntitySelectorBeta from 'src/MuiForms/EntitySelectorBeta'
+import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import SeldonVersionSelector from 'src/MuiForms/SeldonVersionSelector'
@@ -30,6 +31,7 @@ export const widgets = {
   entitySelector: EntitySelector,
   entitySelectorBeta: EntitySelectorBeta,
   SelectWidget: Dropdown,
+  multiSelector: MultipleDropdown,
   seldonVersionSelector: SeldonVersionSelector,
   nothing: Nothing,
 }
