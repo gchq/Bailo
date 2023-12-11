@@ -60,12 +60,14 @@ export function putRelease(release: UpdateReleaseParams) {
 }
 
 export async function postFile(file: File, modelId: string, name: string, mime: string, metadata?: string | undefined) {
+  const mimeParam = mime || 'application/octet-stream'
+
   return fetch(
     metadata
-      ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}?${qs.stringify({
+      ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mime=${mimeParam}?${qs.stringify({
           metadata,
         })}`
-      : `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mine=${mime}`,
+      : `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mime=${mimeParam}`,
     {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
