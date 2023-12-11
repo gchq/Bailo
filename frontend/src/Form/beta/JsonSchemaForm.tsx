@@ -31,20 +31,18 @@ function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
         {props.title}
       </Typography>
       {props.items.map((element) => (
-        <>
-          <Grid key={element.key} container spacing={2}>
-            <Grid item xs={11}>
-              <Box>{element.children}</Box>
-            </Grid>
-            <Grid item xs={1}>
-              {props.formContext.editMode && (
-                <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
-                  <RemoveIcon color='error' />
-                </IconButton>
-              )}
-            </Grid>
+        <Grid key={element.key} container spacing={2}>
+          <Grid item xs={11}>
+            <Box>{element.children}</Box>
           </Grid>
-        </>
+          <Grid item xs={1}>
+            {props.formContext.editMode && (
+              <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
+                <RemoveIcon color='error' />
+              </IconButton>
+            )}
+          </Grid>
+        </Grid>
       ))}
       {props.canAdd && props.formContext.editMode && (
         <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
