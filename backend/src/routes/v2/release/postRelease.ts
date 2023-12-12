@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { event, sendNotifications } from '../../../services/v2/notification.js'
 import { createRelease } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/v2/validate.js'
@@ -69,7 +70,9 @@ export const postRelease = [
     } = parse(req, postReleaseSchema)
 
     const release = await createRelease(req.user, { modelId, ...body })
+
     await audit.onCreateRelease(req, release)
+    sendNotifications(event.CreateRelease, modelId)
 
     return res.json({
       release,

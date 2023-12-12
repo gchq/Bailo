@@ -183,6 +183,10 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onError(req: Request, error: BailoError) {
+    if (!req.audit) {
+      // No audit information has been attached to the request
+      return
+    }
     const outcome =
       error.code === 403
         ? {
