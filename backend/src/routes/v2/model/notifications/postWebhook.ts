@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { NotificationInterface } from '../../../../models/v2/Notification.js'
-import { createWebhook } from '../../../../services/v2/notification.js'
+import { NotificationEvent, NotificationInterface } from '../../../../models/v2/Notification.js'
+import { createWebhook } from '../../../../services/v2/webhook.js'
 import { parse } from '../../../../utils/v2/validate.js'
 
 export const postWebhookSchema = z.object({
@@ -19,12 +19,12 @@ export const postWebhookSchema = z.object({
       insecureSSL: z.boolean().optional(),
     }),
 
-    events: z.array(z.string()).optional(),
+    events: z.array(z.nativeEnum(NotificationEvent)).optional(),
     active: z.boolean().optional(),
   }),
 })
 
-//Add Open API Spec
+//TODO Add Open API Spec
 
 interface PostWebhookResponse {
   webhook: NotificationInterface
@@ -33,14 +33,12 @@ interface PostWebhookResponse {
 export const postWebhook = [
   bodyParser.json(),
   async (req: Request, res: Response<PostWebhookResponse>) => {
-    //req.audit = AuditInfo.CreateRelease
     const {
       params: { modelId },
       body,
     } = parse(req, postWebhookSchema)
 
     const webhook = await createWebhook(req.user, { modelId, ...body })
-    //await audit.onCreateRelease(req, release)
 
     return res.json({
       webhook,

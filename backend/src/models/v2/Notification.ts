@@ -1,6 +1,11 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+export const NotificationEvent = {
+  CreateRelease: 'createRelease',
+} as const
+export type NotificationEventKeys = (typeof NotificationEvent)[keyof typeof NotificationEvent]
+
 export interface WebhookConfigInterface {
   uri: string
   token?: string
@@ -12,7 +17,7 @@ export interface NotificationInterface {
   modelId: string
   name: string
   config: WebhookConfigInterface
-  events?: Array<string>
+  events?: Array<NotificationEventKeys>
   active?: boolean
 }
 
@@ -30,7 +35,7 @@ const NotificationSchema = new Schema<NotificationInterface>(
       insecureSSL: { type: Boolean },
     },
 
-    events: [{ type: String }],
+    events: [{ type: String, enum: Object.values(NotificationEvent) }],
     active: { type: Boolean, default: true },
   },
   {

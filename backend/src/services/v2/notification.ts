@@ -1,45 +1,14 @@
-import fetch from 'node-fetch'
-
-import Notification, { NotificationInterface } from '../../models/v2/Notification.js'
-import { UserDoc } from '../../models/v2/User.js'
+import Notification, { NotificationEvent, NotificationEventKeys } from '../../models/v2/Notification.js'
+import { ReleaseDoc } from '../../models/v2/Release.js'
 import log from '../../services/v2/log.js'
-import { convertStringToId } from '../../utils/v2/id.js'
-import { getModelById } from './model.js'
+import { sendWebhook } from './webhook.js'
 
-export const event = {
-  CreateRelease: 'createRelease',
-} as const
-export type eventKeys = (typeof event)[keyof typeof event]
-
-export type CreateWebhookParams = Pick<NotificationInterface, 'name' | 'modelId' | 'config' | 'events' | 'active'>
-export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
-  //Check model exists and user has the permisson to view it
-  await getModelById(user, webhookParams.modelId)
-
-  const id = convertStringToId(webhookParams.name)
-  const webhook = new Notification({
-    ...webhookParams,
-    id,
-  })
-
-  // Add auth
-
-  await webhook.save()
-  return webhook
+export type EventInformation = {
+  title: string
+  metadata: Array<{ name: string; data: string }>
 }
 
-export async function sendWebhook(webhook: NotificationInterface) {
-  fetch(webhook.config.uri, {
-    method: 'POST',
-    body: JSON.stringify({ key: 'value' }),
-    headers: { 'X-Foo': 'Bar' },
-  })
-    .then((response) => response.text())
-    .then((text) => log.info(text))
-    .catch((err) => log.error(err))
-}
-
-export async function sendNotifications(event: eventKeys, modelId: string) {
+export async function sendNotifications(event: NotificationEventKeys, modelId: string, artefact: unknown) {
   try {
     const query = {
       modelId,
@@ -48,8 +17,32 @@ export async function sendNotifications(event: eventKeys, modelId: string) {
     }
     const notifications = await Notification.find(query)
 
-    await Promise.all(notifications.map(async (notification) => sendWebhook(notification)))
+    await Promise.all(
+      notifications.map(async (notification) => {
+        // TODO return if notification is not active
+        const eventContent = getEventContent(event, artefact)
+        //TODO allow for sending notifications of different types
+        return sendWebhook(event, notification, eventContent)
+      }),
+    )
   } catch (error) {
     log.error(error)
+  }
+}
+
+function getEventContent(event: NotificationEventKeys, artefact: unknown): EventInformation {
+  switch (event) {
+    case NotificationEvent.CreateRelease: {
+      const release = artefact as ReleaseDoc
+      return {
+        title: `Release ${release.semver} has been created for model ${release.modelId}`,
+        metadata: [
+          { name: 'Model ID', data: release.modelId },
+          { name: 'Semver', data: release.semver },
+          { name: 'Created By', data: release.createdBy },
+        ],
+      }
+    }
+    //TODO Add default case
   }
 }
