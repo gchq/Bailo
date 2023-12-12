@@ -104,7 +104,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
-                <Chip label={entity} key={entity} sx={{ width: 'fit-content' }} />
+                <Chip label={entity.split(':')[1] || entity} key={entity} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>

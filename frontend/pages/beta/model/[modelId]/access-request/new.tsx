@@ -70,6 +70,7 @@ export default function NewAccessRequest() {
     if (data.overview.entities.length === 0) {
       setSubmissionErrorText('You must add at least one contact to this access request.')
       setSubmitButtonLoading(false)
+      return
     }
     const res = await postAccessRequest(modelId, schemaId, data)
 
