@@ -4,7 +4,8 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useState } from 'react'
+import { EntityObject } from 'types/v2/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -23,20 +24,17 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
+  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
   const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
 
-  const entities = useMemo(() => {
-    if (!users) return []
-    return users.map((entity) => entity.id)
-  }, [users])
-
   const handleUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
-      onChange(newValues)
+    (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
+      onChange(newValues.map((value) => `${value.kind}:${value.id}`))
+      setSelectedEntities(newValues)
     },
     [onChange],
   )
@@ -69,13 +67,13 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           }}
           clearIcon={false}
           // we might get a string or an object back
-          isOptionEqualToValue={(option: string, value: string) => option === value}
-          getOptionLabel={(option) => option}
-          value={currentValue || []}
+          isOptionEqualToValue={(option: any, value: any) => option.id === value.id}
+          getOptionLabel={(option) => option.id}
+          value={selectedEntities || []}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
-          options={entities || []}
+          options={users || []}
           loading={isLoading}
           renderInput={(params) => (
             <TextField

@@ -1,7 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -24,30 +23,22 @@ export default function NewAccessRequest() {
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
-  const isLoading = useMemo(
-    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
-    [isCurrentUserLoading, isModelLoading, isSchemaLoading],
-  )
+  const isLoading = useMemo(() => isSchemaLoading || isModelLoading, [isModelLoading, isSchemaLoading])
 
   useEffect(() => {
     if (!model || !schema) return
-    const defaultState = {
-      overview: { entities: [currentUserId] },
-    }
-    const steps = getStepsFromSchema(schema, {}, [], defaultState)
+    const steps = getStepsFromSchema(schema, {}, [], {})
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model, currentUserId])
+  }, [schema, model])
 
   async function onSubmit() {
     setSubmissionErrorText('')
@@ -75,6 +66,11 @@ export default function NewAccessRequest() {
     }
 
     const data = getStepsData(splitSchema, true)
+
+    if (data.overview.entities.length === 0) {
+      setSubmissionErrorText('You must add at least one contact to this access request.')
+      setSubmitButtonLoading(false)
+    }
     const res = await postAccessRequest(modelId, schemaId, data)
 
     if (!res.ok) {
@@ -89,7 +85,6 @@ export default function NewAccessRequest() {
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
     isModelError,
     isSchemaError,
-    isCurrentUserError,
   })
   if (error) return error
 
