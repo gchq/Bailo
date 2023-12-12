@@ -67,8 +67,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           onClose={() => {
             setOpen(false)
           }}
-          clearIcon={false}
-          // we might get a string or an object back
+          disableClearable
           isOptionEqualToValue={(option: string, value: string) => option === value}
           getOptionLabel={(option) => option}
           value={currentValue || []}
@@ -77,6 +76,13 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           onInputChange={debounceOnInputChange}
           options={entities || []}
           loading={isLoading}
+          renderTags={(value: string[], getTagProps) =>
+            value.map((option: string, index: number) => (
+              <Box key={option} sx={{ maxWidth: '200px' }}>
+                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option} />
+              </Box>
+            ))
+          }
           renderInput={(params) => (
             <TextField
               {...params}
