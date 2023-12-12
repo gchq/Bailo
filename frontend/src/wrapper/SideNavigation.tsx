@@ -5,7 +5,6 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import ViewList from '@mui/icons-material/ViewList'
 import {
   Badge,
   Divider,
@@ -139,20 +138,6 @@ export default function SideNavigation({
                   <ListItemText primary='Marketplace' />
                 </ListItemButton>
               </Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton disabled selected={page === 'deployments'}>
-                <ListItemIcon>
-                  {!drawerOpen ? (
-                    <Tooltip title='My Access Requests' arrow placement='right'>
-                      <ViewList />
-                    </Tooltip>
-                  ) : (
-                    <ViewList />
-                  )}
-                </ListItemIcon>
-                <ListItemText primary='Deployments' />
-              </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
               <Link href='/beta/review' color='inherit' underline='none'>
