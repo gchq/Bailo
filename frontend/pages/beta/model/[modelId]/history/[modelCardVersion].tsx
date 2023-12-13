@@ -6,7 +6,6 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 
 import { useModelCard } from '../../../../../actions/modelCard'
 import { useGetSchema } from '../../../../../actions/schema'
-import { useGetUiConfig } from '../../../../../actions/uiConfig'
 import Loading from '../../../../../src/common/Loading'
 import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
 import Wrapper from '../../../../../src/Wrapper.beta'
@@ -20,7 +19,6 @@ export default function ViewModelCardVersion() {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const { model, isModelLoading, isModelError } = useModelCard(modelId, modelCardVersion)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaId || '')
-  const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   useEffect(() => {
     if (!model || !schema) return
@@ -36,16 +34,15 @@ export default function ViewModelCardVersion() {
 
   const error = MultipleErrorWrapper(`Unable to load history page`, {
     isSchemaError,
-    isUiConfigError,
     isModelError,
   })
   if (error) return error
 
   return (
     <Wrapper title='Model Card Revision' page='Model'>
-      {(isSchemaLoading || isUiConfigLoading || isModelLoading) && <Loading />}
+      {(isSchemaLoading || isModelLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
-        {!isSchemaLoading && !isUiConfigLoading && (
+        {!isSchemaLoading && (
           <Container>
             <Card sx={{ p: 4 }}>
               <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/beta/model/${modelId}`)}>
