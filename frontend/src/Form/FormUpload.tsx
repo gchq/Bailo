@@ -3,9 +3,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import TextField from '@mui/material/TextField'
-import { Dispatch, SetStateAction, useState } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 
 import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
@@ -48,12 +46,8 @@ export default function FormUpload({
     }
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} />
-  }
-
-  if (isUiConfigLoading) {
-    return <Loading />
+  if (isUiConfigError || isUiConfigLoading) {
+    return null
   }
 
   return (
