@@ -114,7 +114,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
                 variant='outlined'
                 onClick={() => setIsEdit(!isEdit)}
                 sx={{ mb: { xs: 2 } }}
-                data-test='editModelButton'
+                data-test='editModelCardButton'
               >
                 Edit Model card
               </Button>
@@ -128,7 +128,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
-              <Button variant='outlined' onClick={onCancel} data-test='cancelEditButton'>
+              <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
                 Cancel
               </Button>
               <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test='saveModelCardButton'>

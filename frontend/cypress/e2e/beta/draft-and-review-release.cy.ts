@@ -27,15 +27,16 @@ describe('Draft and review a model release', () => {
   it('drafts a new release for a model', () => {
     cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}`)
     cy.contains(modelNameForRelease)
-    cy.get('[data-test=modelReleaseTab]').click({ force: true })
+    cy.get('[data-test=releasesTab]').click({ force: true })
     cy.contains('Draft new Release')
     cy.get('[data-test=draftNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
-    cy.get('[data-test=releaseSemanticVersion]').type(releaseVersion, { force: true })
+    cy.get('[data-test=releaseSemanticVersionTextField]').type(releaseVersion, { force: true })
     cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
-    cy.get('[data-test=fileInput]').selectFile('cypress/fixtures/test.txt', { force: true })
-    cy.get('[data-test=createReleaseButton]', { timeout: 1500 }).click({ force: true })
+    cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
+    cy.get('[data-test=createReleaseButton]', { timeout: 15000 }).click({ force: true })
+    cy.url().should('contain', `release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.contains('Back to model')
   })
@@ -45,7 +46,7 @@ describe('Draft and review a model release', () => {
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.get('[data-test=reviewButton]').click({ force: true })
     cy.contains('Release Review')
-    cy.get('[data-test=reviewWithCommentInput').type('This is a comment')
+    cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
     cy.get('[data-test=reviewButton]').click({ force: true })
     cy.contains('Release Review')
@@ -71,10 +72,6 @@ describe('Draft and review a model release', () => {
     cy.contains('This is an edit')
   })
 
-  /**
-   * TODO -  We will need to update this test so that it once artefacts
-   *  can be downloaded from the individual release page
-   *  */
   it('can download a release artefact', () => {
     cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}?tab=releases  `)
     cy.contains('Draft new Release')

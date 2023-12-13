@@ -18,11 +18,11 @@ describe('Beta create new model', () => {
     cy.get('[data-test=modelDescriptionInput]').type('test description')
 
     cy.get('[data-test=publicButtonSelector]').click()
-    cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
+    cy.get('[data-test=createModelButton]').click()
     cy.get('[data-test=createModelCardOverview]')
 
     cy.log('Checking URL has been updated')
-    cy.url({ timeout: 15000 })
+    cy.url()
       .as('modelUrl')
       .should('contain', `/model/`)
       .then((url) => {
@@ -37,17 +37,17 @@ describe('Beta create new model', () => {
     cy.get('[data-test=modelDescriptionInput]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
-    cy.get('[data-test=createModelButton]', { timeout: 15000 }).click()
+    cy.get('[data-test=createModelButton]').click()
     cy.get('[data-test=createModelCardOverview]')
   })
 
   it('can set a schema for a newly created model', () => {
     cy.visit(`/beta/model/${modelUuid}`)
     cy.contains('Create a model card')
-    cy.get('[data-test=createSchemaFromScratchButton]', { timeout: 15000 }).click()
+    cy.get('[data-test=createSchemaFromScratchButton]').click()
     cy.log('Checking URL has been updated')
-    cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/schema`)
-    cy.get(`[data-test=selectSchemaButton-${schemaId}]`, { timeout: 15000 }).click({
+    cy.url().should('contain', `/beta/model/${modelUuid}/schema`)
+    cy.get(`[data-test=selectSchemaButton-${schemaId}]`).click({
       multiple: true,
       force: true,
     })
@@ -57,11 +57,11 @@ describe('Beta create new model', () => {
   it('can edit an existing model', () => {
     cy.visit(`/beta/model/${modelUuid}`)
     cy.contains('Edit Model card')
-    cy.get('[data-test=editModelButton]').click()
+    cy.get('[data-test=editModelCardButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
-    cy.get('[data-test=cancelEditButton]').click()
+    cy.get('[data-test=cancelEditModelCardButton]').click()
     cy.contains('This is a test summary').should('not.exist')
-    cy.get('[data-test=editModelButton]').click()
+    cy.get('[data-test=editModelCardButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=saveModelCardButton]').click()
     cy.contains('This is a test summary')

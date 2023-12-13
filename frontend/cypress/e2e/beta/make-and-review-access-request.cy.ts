@@ -28,19 +28,19 @@ describe('Make and approve an access request', () => {
   it('can make an access request', () => {
     cy.visit(`${baseURL}/model/${modelUuid}`)
     cy.contains(modelName)
-    cy.get('[data-test=accessRequestTab]').click()
-    cy.get('[data-test=accessRequestButton]').click()
-    cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/access-request/schema`)
-    cy.get(`[data-test=selectSchemaButton-${schemaId}]`, { timeout: 15000 }).click({
+    cy.get('[data-test=accessTab]').click()
+    cy.get('[data-test=requestAccessButton]').click()
+    cy.url().should('contain', `/beta/model/${modelUuid}/access-request/schema`)
+    cy.get(`[data-test=selectSchemaButton-${schemaId}]`).click({
       force: true,
     })
 
-    cy.get('body').contains('What is the name of the access request?')
+    cy.get('#root_name-label').contains('What is the name of the access request?')
     cy.get('#root_name').type('Test access request')
-    cy.get('[data-test=submitAccessRequest]').click()
+    cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
 
-    cy.get('body').contains('Test access request')
-    cy.url({ timeout: 15000 }).should('contain', `/beta/model/${modelUuid}/access-request`)
+    cy.url().should('contain', `/beta/model/${modelUuid}/access-request`)
+    cy.get('[data-test=accessRequestContainer]').contains('Test access request')
 
     cy.url().then((url) => {
       const splitUrl = url.split('/')
@@ -52,7 +52,7 @@ describe('Make and approve an access request', () => {
     cy.visit(`${baseURL}/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.get('[data-test=reviewButton]').click({ force: true })
     cy.get('[data-test=releaseReviewDialog]').contains('Access Request Review')
-    cy.get('[data-test=reviewWithCommentInput').type('This is a comment')
+    cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
     cy.get('[data-test=accessRequestContainer').contains('user added a comment')

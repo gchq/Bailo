@@ -146,7 +146,7 @@ export default function ReviewWithComment({
                 maxRows={8}
                 multiline
                 placeholder='Leave a comment'
-                data-test='reviewWithCommentInput'
+                data-test='reviewWithCommentTextField'
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
                 error={showError}

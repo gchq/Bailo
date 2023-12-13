@@ -34,7 +34,9 @@ export default function CustomTextInput(props: CustomTextInputProps) {
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>{label}</Typography>
+      <Typography id={`${id}-label`} fontWeight='bold'>
+        {label}
+      </Typography>
       <TextField
         size='small'
         id={id}

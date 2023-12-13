@@ -32,7 +32,7 @@ describe('Make and approve an access request', () => {
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
 
-    cy.get('[data-test=modelRegistryTab]').click()
+    cy.get('[data-test=registryTab]').click()
     cy.get('[data-test=pushImageButton]').click()
     cy.contains('Pushing an Image for this Model')
 
@@ -51,10 +51,10 @@ describe('Make and approve an access request', () => {
   it('can select the image when drafting a release', () => {
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
-    cy.get('[data-test=modelReleaseTab]').click({ force: true })
+    cy.get('[data-test=releasesTab]').click({ force: true })
     cy.contains('Draft new Release')
     cy.get('[data-test=draftNewReleaseButton').click({ force: true })
-    cy.get('[data-test=imageListAutoselect').type('1')
+    cy.get('[data-test=imageListAutocomplete').type('1')
     cy.contains('1')
     cy.contains(`${testModelImage}`)
   })

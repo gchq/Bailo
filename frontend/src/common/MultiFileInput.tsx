@@ -96,7 +96,7 @@ export default function MultiFileInput({
             onInput={handleAddFile}
             accept={accepts}
             disabled={disabled}
-            data-test='fileInput'
+            data-test='uploadFileButton'
           />
         </>
       )}

@@ -40,7 +40,7 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/beta/model/${model.id}/access-request/schema`}>
-            <Button variant='outlined' disabled={!model.card} data-test='accessRequestButton'>
+            <Button variant='outlined' disabled={!model.card} data-test='requestAccessButton'>
               Request Access
             </Button>
           </Link>

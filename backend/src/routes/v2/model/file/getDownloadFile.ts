@@ -30,7 +30,7 @@ export const getDownloadFile = [
     const file = await getFileById(req.user, fileId)
 
     // required to support utf-8 file names
-    res.set('Content-Disposition', contentDisposition(file.name, { type: 'inline' }))
+    res.set('Content-Disposition', contentDisposition(file.name, { type: 'attachment' }))
     res.set('Content-Type', file.mime)
     res.set('Cache-Control', 'public, max-age=604800, immutable')
 

@@ -82,7 +82,13 @@ export default function PageWithTabs({
       >
         {tabs.map((tab: PageTab) => {
           return (
-            <Tab key={tab.title} label={tab.title} disabled={tab.disabled} value={tab.path} data-test={tab.datatest} />
+            <Tab
+              key={tab.title}
+              label={tab.title}
+              disabled={tab.disabled}
+              value={tab.path}
+              data-test={`${tab.path}Tab`}
+            />
           )
         })}
       </Tabs>
