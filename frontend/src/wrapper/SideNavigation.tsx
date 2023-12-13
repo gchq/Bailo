@@ -87,8 +87,6 @@ export default function SideNavigation({
   const [reviewCount, setReviewCount] = useState(0)
   const theme = useTheme()
 
-  // We should add some error handling here, such as an error message appearing in a snackbar
-  // Additional error messages should be added for screen-readers
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
