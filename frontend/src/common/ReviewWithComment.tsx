@@ -111,7 +111,7 @@ export default function ReviewWithComment({
   return (
     <>
       {(isReviewsLoading || isModelRolesLoading) && <Loading />}
-      <Dialog fullWidth open={open} onClose={onClose}>
+      <Dialog fullWidth open={open} onClose={onClose} data-test='releaseReviewDialog'>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           {modelRoles.length === 0 && (
@@ -146,7 +146,7 @@ export default function ReviewWithComment({
                 maxRows={8}
                 multiline
                 placeholder='Leave a comment'
-                data-test='review-with-comment-input'
+                data-test='reviewWithCommentTextField'
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
                 error={showError}
@@ -164,6 +164,7 @@ export default function ReviewWithComment({
                     variant='outlined'
                     onClick={() => submitForm(ResponseTypes.RequestChanges)}
                     loading={loading}
+                    data-test='requestChangesReviewButton'
                   >
                     Request Changes
                   </LoadingButton>
@@ -171,6 +172,7 @@ export default function ReviewWithComment({
                     variant='contained'
                     onClick={() => submitForm(ResponseTypes.Approve)}
                     loading={loading}
+                    data-test='approveReviewButton'
                   >
                     Approve
                   </LoadingButton>

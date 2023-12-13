@@ -24,7 +24,13 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
         <CardActions sx={{ px: 2, pb: 2, textAlign: 'right' }}>
           <Stack spacing={2} sx={{ width: '100%' }}>
             <Divider />
-            <LoadingButton loading={loading} variant='contained' size='small' onClick={onClick}>
+            <LoadingButton
+              loading={loading}
+              variant='contained'
+              size='small'
+              onClick={onClick}
+              data-test={`selectSchemaButton-${schema.id}`}
+            >
               Select schema
             </LoadingButton>
           </Stack>

@@ -34,16 +34,16 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && (
-          <Button variant='outlined' onClick={onEdit} sx={{ mb: { xs: 2 } }}>
+          <Button variant='outlined' onClick={onEdit} sx={{ mb: { xs: 2 } }} data-test='editFormButton'>
             {editButtonText}
           </Button>
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={onCancel}>
+            <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>
               Cancel
             </Button>
-            <LoadingButton variant='contained' loading={isLoading} onClick={onSubmit}>
+            <LoadingButton variant='contained' loading={isLoading} onClick={onSubmit} data-test='saveEditFormButton'>
               Save
             </LoadingButton>
           </Stack>

@@ -40,7 +40,7 @@ export default function Release() {
 
   return (
     <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
-      <Container maxWidth='md' sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
             {activeReviews.length > 0 && <ReviewBanner release={release} />}

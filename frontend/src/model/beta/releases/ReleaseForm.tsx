@@ -111,6 +111,7 @@ export default function ReleaseForm({
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
+            inputProps={{ 'data-test': 'releaseSemanticVersionTextField' }}
             onChange={handleSemverChange}
           />
         )}
