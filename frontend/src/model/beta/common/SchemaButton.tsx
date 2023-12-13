@@ -1,23 +1,15 @@
 import { LoadingButton } from '@mui/lab'
 import { Card, CardActions, CardContent, Divider, Grid, Stack, Typography } from '@mui/material'
-import { useCallback, useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import Link from 'src/Link'
+import { SchemaInterface } from 'types/types'
 
 interface SchemaButtonProps {
-  modelId: string
-  schema: any
-  onClickAction: () => void
+  schema: SchemaInterface
+  onClick: () => void
+  loading?: boolean
 }
 
-export default function SchemaButton({ modelId, schema, onClickAction }: SchemaButtonProps) {
-  const [loading, setLoading] = useState(false)
-
-  const handleOnClick = useCallback(() => {
-    setLoading(true)
-    onClickAction()
-  }, [onClickAction])
-
+export default function SchemaButton({ schema, onClick, loading = false }: SchemaButtonProps) {
   return (
     <Grid item md={6} sm={12}>
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -32,17 +24,15 @@ export default function SchemaButton({ modelId, schema, onClickAction }: SchemaB
         <CardActions sx={{ px: 2, pb: 2, textAlign: 'right' }}>
           <Stack spacing={2} sx={{ width: '100%' }}>
             <Divider />
-            <Link href={`/beta/model/${modelId}/access-request/new?schemaId=${schema.id}`}>
-              <LoadingButton
-                loading={loading}
-                variant='contained'
-                size='small'
-                onClick={handleOnClick}
-                data-test={`selectSchemaButton-${schema.id}`}
-              >
-                Select schema
-              </LoadingButton>
-            </Link>
+            <LoadingButton
+              loading={loading}
+              variant='contained'
+              size='small'
+              onClick={onClick}
+              data-test={`selectSchemaButton-${schema.id}`}
+            >
+              Select schema
+            </LoadingButton>
           </Stack>
         </CardActions>
       </Card>

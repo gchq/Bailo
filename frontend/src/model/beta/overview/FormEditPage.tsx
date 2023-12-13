@@ -22,6 +22,7 @@ type FormEditPageProps = {
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { isModelError, mutateModel } = useGetModel(model.id)
@@ -34,12 +35,15 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
   async function onSubmit() {
     if (schema) {
+      setErrorMessage('')
       setLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
         mutateModelCardRevisions()
+      } else {
+        setErrorMessage(res.data)
       }
       setLoading(false)
     }
@@ -137,6 +141,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             </Stack>
           )}
         </Stack>
+        <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />

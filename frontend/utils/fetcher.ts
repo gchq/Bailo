@@ -66,6 +66,7 @@ export const getErrorMessage = async (res: Response) => {
     messageError = `${res.statusText}: ${(await res.json()).error.message}`
   } catch (e) {
     // unable to identify error message, possibly a network failure
+    return 'Unknown error - Please contact Bailo support'
   }
 
   return messageError
