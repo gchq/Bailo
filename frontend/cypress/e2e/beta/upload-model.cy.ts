@@ -53,6 +53,7 @@ describe('Beta create new model', () => {
       multiple: true,
       force: true,
     })
+    cy.url().should('not.contain', '/schema')
     cy.contains('Edit Model card')
   })
 

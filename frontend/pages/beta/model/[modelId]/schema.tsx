@@ -26,7 +26,7 @@ export default function NewSchemaSelection() {
   const [errorMessage, setErrorMessage] = useState('')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Model)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isModelLoading || isCurrentUserLoading,
@@ -43,6 +43,7 @@ export default function NewSchemaSelection() {
       const response = await postFromSchema(model.id, newSchema.id)
 
       if (response.status && response.status < 400) {
+        await mutateModel()
         router.push(`/beta/model/${modelId}`)
       } else {
         setErrorMessage(response.data)
