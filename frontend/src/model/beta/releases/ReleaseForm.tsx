@@ -78,6 +78,7 @@ export default function ReleaseForm({
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
+
   return (
     <Stack spacing={2}>
       {!editable && (
