@@ -64,8 +64,7 @@ export default function NewSchemaSelection() {
                       <SchemaButton
                         key={activeSchema.id}
                         schema={activeSchema}
-                        modelId={modelId}
-                        onClickAction={() => handleSchemaSelectionOnClick(activeSchema)}
+                        onClick={() => handleSchemaSelectionOnClick(activeSchema)}
                       />
                     ))}
                   {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
@@ -80,8 +79,7 @@ export default function NewSchemaSelection() {
                     <SchemaButton
                       key={inactiveSchema.id}
                       schema={inactiveSchema}
-                      modelId={modelId}
-                      onClickAction={() => handleSchemaSelectionOnClick(inactiveSchema)}
+                      onClick={() => handleSchemaSelectionOnClick(inactiveSchema)}
                     />
                   ))}
                 {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}
