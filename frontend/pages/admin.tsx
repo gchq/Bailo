@@ -3,7 +3,9 @@ import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
-import React, { ReactElement, useState } from 'react'
+import { ReactElement, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 
 import { useGetCurrentUser } from '../data/user'
 import FilterMenu, { LogFilters } from '../src/FilterMenu/FilterMenu'
@@ -13,7 +15,7 @@ import { LogLevel } from '../types/types'
 
 export default function Admin(): ReactElement {
   const theme = useTheme()
-  const { currentUser } = useGetCurrentUser()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [logFilters, setLogFilters] = useState<LogFilters>({
     level: LogLevel.TRACE,
     buildId: '',
@@ -26,8 +28,14 @@ export default function Admin(): ReactElement {
     setLogFilters(filters)
   }
 
+  const error = MultipleErrorWrapper('Unable to load admin page', {
+    isCurrentUserError,
+  })
+  if (error) return error
+
   return (
     <Wrapper title='Admin' page='admin'>
+      {isCurrentUserLoading && <Loading />}
       <Box display='flex' height='calc(100vh - 196px)'>
         {currentUser && currentUser.roles.includes('admin') ? (
           <Box

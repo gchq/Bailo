@@ -24,7 +24,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
 
-  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -53,9 +53,13 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {isCurrentUserLoading && <Loading />}
+      {(isCurrentUserLoading || isUsersLoading) && <Loading />}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete
           multiple
@@ -75,7 +79,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
           options={entities || []}
-          loading={isLoading}
+          loading={isCurrentUserLoading || isUsersLoading}
           renderTags={(value: string[], getTagProps) =>
             value.map((option: string, index: number) => (
               <Box key={option} sx={{ maxWidth: '200px' }}>

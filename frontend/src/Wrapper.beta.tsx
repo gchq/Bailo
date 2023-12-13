@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
 import { useGetCurrentUser } from '../actions/user'
@@ -31,7 +32,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
   const [errorMessage, setErrorMessage] = useState('')
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  const { currentUser } = useGetCurrentUser()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -56,10 +57,14 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
-      return <p>Error authenticating user.</p>
+      return <MessageAlert message='Error authenticating user.' severity='error' />
     }
 
-    return <p>Error loading UI Config: {isUiConfigError.info?.message}</p>
+    return <MessageAlert message={`Error loading UI Config: ${isUiConfigError.info.message}`} severity='error' />
+  }
+
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
   return (
@@ -105,6 +110,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
               children
             ) : (
               <>
+                {isCurrentUserLoading && <Loading />}
                 {!fullWidth && (
                   <Container maxWidth={fullWidth ? false : 'xl'} sx={{ mt: 4, mb: 4 }}>
                     <MessageAlert message={errorMessage} severity='error' />
