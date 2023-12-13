@@ -4,7 +4,8 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
-import React, { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetCurrentUser } from '../actions/user'
 import { useGetUiConfig } from '../data/uiConfig'
@@ -23,19 +24,14 @@ type WrapperProps = {
 export default function Wrapper({ title, page, children, fullWidth = false }: WrapperProps): ReactElement {
   const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
 
-  const [open, setOpen] = useState(false)
-  const toggleDrawer = (): void => {
-    setOpen(!open)
-  }
-
   const theme = useTheme()
-
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
-  const { currentUser } = useGetCurrentUser()
-
+  const [open, setOpen] = useState(false)
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { currentUser } = useGetCurrentUser()
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -49,6 +45,14 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
       }
     }
   }, [isUiConfigLoading, uiConfig, isDocsPage])
+
+  const handleSideNavigationError = useCallback((message: string) => setErrorMessage(message), [])
+
+  const resetErrorMessage = useCallback(() => setErrorMessage(''), [])
+
+  const toggleDrawer = (): void => {
+    setOpen(!open)
+  }
 
   if (isUiConfigError) {
     if (isUiConfigError.status === 403) {
@@ -78,10 +82,12 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
         {currentUser && (
           <SideNavigation
             page={page}
+            currentUser={currentUser}
             drawerOpen={open}
             pageTopStyling={pageTopStyling}
             toggleDrawer={toggleDrawer}
-            currentUser={currentUser}
+            onError={handleSideNavigationError}
+            onResetErrorMessage={resetErrorMessage}
           />
         )}
         <Box
@@ -101,10 +107,16 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
               <>
                 {!fullWidth && (
                   <Container maxWidth={fullWidth ? false : 'xl'} sx={{ mt: 4, mb: 4 }}>
+                    <MessageAlert message={errorMessage} severity='error' />
                     {children}
                   </Container>
                 )}
-                {fullWidth && <Box>{children}</Box>}
+                {fullWidth && (
+                  <>
+                    <MessageAlert message={errorMessage} severity='error' />
+                    {children}
+                  </>
+                )}
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}
