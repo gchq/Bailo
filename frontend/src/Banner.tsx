@@ -1,9 +1,9 @@
 import Card from '@mui/material/Card'
-import React from 'react'
 
 import { useGetUiConfig } from '../data/uiConfig'
 
 function Banner() {
+  // TODO: Use v2 UI config endpoint when we remove v1
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const style = {
@@ -19,7 +19,7 @@ function Banner() {
   }
 
   if (isUiConfigError) {
-    return <Card sx={style}>Unable to load uiConfig</Card>
+    return <Card sx={style}>Unable to load UI config</Card>
   }
 
   if (isUiConfigLoading || !uiConfig?.banner?.enabled) {

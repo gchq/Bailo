@@ -6,7 +6,6 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import { useGetModel } from '../../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../../actions/modelCard'
 import { useGetSchema } from '../../../../actions/schema'
-import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { SplitSchemaNoRender } from '../../../../types/interfaces'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
@@ -27,7 +26,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { isModelError, mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
-  const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -81,17 +79,13 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
   return (
     <>
-      {(isSchemaLoading || isUiConfigLoading) && <Loading />}
+      {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <Stack
           direction={{ sx: 'column', sm: 'row' }}
