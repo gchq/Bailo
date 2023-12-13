@@ -29,7 +29,7 @@ describe('Make and approve an access request', () => {
     cy.log('Navigating to the model page')
     cy.visit(`${baseURL}/model/${modelUuid}`)
     cy.contains(modelName)
-    cy.log('Going to the access request list tab and clicking the request access button')
+    cy.log('Navigating to the access request list tab and clicking the request access button')
     cy.get('[data-test=accessTab]').click()
     cy.get('[data-test=requestAccessButton]').click()
     cy.log('Setting a schema for the access request')
@@ -53,7 +53,7 @@ describe('Make and approve an access request', () => {
   })
 
   it('can review an access request', () => {
-    cy.log('Going to the access request page')
+    cy.log('Navigating to the access request page')
     cy.visit(`${baseURL}/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.log('Reviewing the access request and leaving comments')
     cy.get('[data-test=reviewButton]').click({ force: true })

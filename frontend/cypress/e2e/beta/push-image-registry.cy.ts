@@ -33,7 +33,7 @@ describe('Make and approve an access request', () => {
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
 
-    cy.log('Going to the registry tab and opening the push image dialog')
+    cy.log('Navigating to the registry tab and opening the push image dialog')
     cy.get('[data-test=registryTab]').click()
     cy.get('[data-test=pushImageButton]').click()
     cy.contains('Pushing an Image for this Model')
@@ -52,7 +52,7 @@ describe('Make and approve an access request', () => {
   })
 
   it('can select the image when drafting a release', () => {
-    cy.log('Navigating to the model page and going to the releases tab')
+    cy.log('Navigating to the model page and then to the releases tab')
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=releasesTab]').click({ force: true })
