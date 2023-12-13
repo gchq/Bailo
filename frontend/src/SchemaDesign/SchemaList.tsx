@@ -4,7 +4,8 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import React, { useState } from 'react'
+import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetSchemas } from '../../data/schema'
 import { Schema } from '../../types/types'
@@ -14,11 +15,13 @@ export default function SchemaList() {
   const {
     schemas: uploadSchemas,
     isSchemasLoading: isUploadSchemasLoading,
+    isSchemasError: isUploadSchemasError,
     mutateSchemas: mutateUploadSchemas,
   } = useGetSchemas('UPLOAD')
   const {
     schemas: deploymentSchemas,
     isSchemasLoading: isDeploymentSchemasLoading,
+    isSchemasError: isDeploymentSchemasError,
     mutateSchemas: mutateDeploymentSchemas,
   } = useGetSchemas('DEPLOYMENT')
   const theme = useTheme()
@@ -41,6 +44,14 @@ export default function SchemaList() {
     borderLeft: '.3rem solid #de3c30',
     p: 2,
     backgroundColor: theme.palette.container.main,
+  }
+
+  if (isUploadSchemasError) {
+    return <MessageAlert message={isUploadSchemasError.info.message} severity='error' />
+  }
+
+  if (isDeploymentSchemasError) {
+    return <MessageAlert message={isDeploymentSchemasError.info.message} severity='error' />
   }
 
   return (

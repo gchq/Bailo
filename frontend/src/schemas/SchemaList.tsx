@@ -2,7 +2,7 @@ import { Button, List, ListItem, ListItemText } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
 
 interface SchemaDisplayProps {
   schemaKind: string
@@ -31,15 +31,13 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [schemas],
   )
 
-  const error = MultipleErrorWrapper('Unable to load schemas', {
-    isSchemasError,
-  })
-  if (error) return error
+  if (isSchemasLoading) {
+    return <Loading />
+  }
 
-  return (
-    <>
-      {isSchemasLoading && <Loading />}
-      <List>{schemaList}</List>
-    </>
-  )
+  if (isSchemasError) {
+    return <MessageAlert message={isSchemasError.info.message} severity='error' />
+  }
+
+  return <List>{schemaList}</List>
 }
