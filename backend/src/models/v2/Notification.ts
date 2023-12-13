@@ -6,17 +6,10 @@ export const NotificationEvent = {
 } as const
 export type NotificationEventKeys = (typeof NotificationEvent)[keyof typeof NotificationEvent]
 
-export interface WebhookConfigInterface {
-  uri: string
-  token?: string
-  insecureSSL?: boolean
-}
-
 export interface NotificationInterface {
   id: string
   modelId: string
   name: string
-  config: WebhookConfigInterface
   events?: Array<NotificationEventKeys>
   active?: boolean
 }
@@ -29,18 +22,13 @@ const NotificationSchema = new Schema<NotificationInterface>(
     modelId: { type: String, required: true },
     name: { type: String, required: true },
 
-    config: {
-      uri: { type: String, required: true },
-      token: { type: String },
-      insecureSSL: { type: Boolean },
-    },
-
     events: [{ type: String, enum: Object.values(NotificationEvent) }],
     active: { type: Boolean, default: true },
   },
   {
     timestamps: true,
     collection: 'v2_notifications',
+    discriminatorKey: 'kind',
   },
 )
 
