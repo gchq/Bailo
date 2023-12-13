@@ -41,21 +41,21 @@ type PartialReviewWithCommentProps =
 type ReviewWithCommentProps = {
   open: boolean
   title: string
-  errorText: string
   onClose: () => void
   onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
-  loading: boolean
+  loading?: boolean
   description?: string
+  errorMessage?: string
 } & PartialReviewWithCommentProps
 
 export default function ReviewWithComment({
   open,
   title,
-  errorText,
   onClose,
   onSubmit,
-  loading,
-  description,
+  loading = false,
+  description = '',
+  errorMessage = '',
   release,
   accessRequest,
 }: ReviewWithCommentProps) {
@@ -176,11 +176,7 @@ export default function ReviewWithComment({
                   </LoadingButton>
                 </Stack>
               </Stack>
-              {errorText && (
-                <Typography color={theme.palette.error.main} variant='caption'>
-                  {errorText}
-                </Typography>
-              )}
+              <MessageAlert message={errorMessage} severity='error' />
             </Stack>
           )}
         </DialogContent>
