@@ -29,13 +29,16 @@ describe('Make and approve an access request', () => {
   })
 
   it('can push and pull to the registry', () => {
+    cy.log('Navigating to the model page')
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
 
+    cy.log('Going to the registry tab and opening the push image dialog')
     cy.get('[data-test=registryTab]').click()
     cy.get('[data-test=pushImageButton]').click()
     cy.contains('Pushing an Image for this Model')
 
+    cy.log('Fetching the docker login password and running all the docker commands to push an image')
     cy.get('[data-test=showTokenButton]').click()
     cy.get('[data-test=dockerPassword]').should('not.contain.text', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx')
     cy.get('[data-test=dockerPassword]')
@@ -49,9 +52,11 @@ describe('Make and approve an access request', () => {
   })
 
   it('can select the image when drafting a release', () => {
+    cy.log('Navigating to the model page and going to the releases tab')
     cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=releasesTab]').click({ force: true })
+    cy.log('Opening the draft release page to see if we can see our image in the drop down list')
     cy.contains('Draft new Release')
     cy.get('[data-test=draftNewReleaseButton').click({ force: true })
     cy.get('[data-test=imageListAutocomplete').type('1')

@@ -31,8 +31,10 @@ describe('Beta create new model', () => {
   })
 
   it('creates a private new model', () => {
+    cy.log('Navigating to the new model page')
     cy.visit(newModelUrl)
 
+    cy.log('Filling out the form to make a private model and submitting')
     cy.get('[data-test=modelNameInput]').type('test model')
     cy.get('[data-test=modelDescriptionInput]').type('test description')
 
@@ -55,8 +57,10 @@ describe('Beta create new model', () => {
   })
 
   it('can edit an existing model', () => {
+    cy.log('Navigating to an existing model')
     cy.visit(`/beta/model/${modelUuid}`)
     cy.contains('Edit Model card')
+    cy.log('Test that we can edit the model card')
     cy.get('[data-test=editModelCardButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=cancelEditModelCardButton]').click()
