@@ -125,7 +125,7 @@ export async function searchModels(
     // Sort by last updated
     .sort({ updatedAt: -1 })
 
-  const auths = await authorisation.modelBatch(user, results, ModelAction.View)
+  const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }
 

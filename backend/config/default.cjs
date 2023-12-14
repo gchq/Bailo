@@ -131,6 +131,11 @@ module.exports = {
         reference: '/Minimal/General/v10',
         schema: require('../src/scripts/example_schemas/minimal_upload_schema.json'),
       },
+      {
+        name: 'West Schema v1',
+        reference: '/West/General/v1',
+        schema: require('../src/scripts/example_schemas/west_upload_schema.json'),
+      },
     ],
     deployment: [
       {

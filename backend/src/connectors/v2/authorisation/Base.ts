@@ -54,7 +54,7 @@ export const ImageAction = {
 }
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 
-type Response = { success: true } | { success: false; info: string }
+type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
 export class BaseAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
@@ -80,15 +80,15 @@ export class BaseAuthorisationConnector {
   }
 
   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
-    return (await this.modelBatch(user, [model], action))[0]
+    return (await this.models(user, [model], action))[0]
   }
 
   async schema(user: UserDoc, schema: SchemaDoc, action: SchemaActionKeys) {
-    return (await this.schemaBatch(user, [schema], action))[0]
+    return (await this.schemas(user, [schema], action))[0]
   }
 
   async release(user: UserDoc, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
-    return (await this.releaseBatch(user, model, [release], action))[0]
+    return (await this.releases(user, model, [release], action))[0]
   }
 
   async accessRequest(
@@ -97,53 +97,61 @@ export class BaseAuthorisationConnector {
     accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
   ) {
-    return (await this.accessRequestBatch(user, model, [accessRequest], action))[0]
+    return (await this.accessRequests(user, model, [accessRequest], action))[0]
   }
 
   async file(user: UserDoc, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
-    return (await this.fileBatch(user, model, [file], action))[0]
+    return (await this.files(user, model, [file], action))[0]
   }
 
   async image(user: UserDoc, model: ModelDoc, access: Access) {
-    return (await this.imageBatch(user, model, [access]))[0]
+    return (await this.images(user, model, [access]))[0]
   }
 
-  async modelBatch(user: UserDoc, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
+  async models(user: UserDoc, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
         const roles = await authentication.getUserModelRoles(user, model)
 
         // Prohibit non-collaborators from seeing private models
         if (!(await this.hasModelVisibilityAccess(user, model))) {
-          return { success: false, info: 'You cannot interact with a private model that you do not have access to.' }
+          return {
+            id: model.id,
+            success: false,
+            info: 'You cannot interact with a private model that you do not have access to.',
+          }
         }
 
         // Check a user has a role before allowing write actions
         if ([ModelAction.Write, ModelAction.Update].some((a) => a === action) && roles.length === 0) {
-          return { success: false, info: 'You cannot update a model you do not have permissions for.' }
+          return { id: model.id, success: false, info: 'You cannot update a model you do not have permissions for.' }
         }
 
-        return { success: true }
+        return { id: model.id, success: true }
       }),
     )
   }
 
-  async schemaBatch(user: UserDoc, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
+  async schemas(user: UserDoc, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
     if (action === SchemaAction.Create) {
       const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
       if (!isAdmin) {
-        return new Array(schemas.length).fill({
+        return schemas.map((schema) => ({
+          id: schema.id,
           success: false,
           info: 'You cannot upload a schema if you are not an admin.',
-        })
+        }))
       }
     }
 
-    return new Array(schemas.length).fill({ success: true })
+    return schemas.map((schema) => ({
+      id: schema.id,
+      success: true,
+    }))
   }
 
-  async releaseBatch(
+  async releases(
     user: UserDoc,
     model: ModelDoc,
     _releases: Array<ReleaseDoc>,
@@ -158,10 +166,10 @@ export class BaseAuthorisationConnector {
       [ReleaseAction.View]: ModelAction.View,
     }
 
-    return this.modelBatch(user, [model], actionMap[action])
+    return this.models(user, [model], actionMap[action])
   }
 
-  async accessRequestBatch(
+  async accessRequests(
     user: UserDoc,
     model: ModelDoc,
     accessRequests: Array<AccessRequestDoc>,
@@ -188,7 +196,7 @@ export class BaseAuthorisationConnector {
     )
   }
 
-  async fileBatch(
+  async files(
     user: UserDoc,
     model: ModelDoc,
     files: Array<FileInterfaceDoc>,
@@ -221,7 +229,7 @@ export class BaseAuthorisationConnector {
     )
   }
 
-  async imageBatch(user: UserDoc, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
+  async images(user: UserDoc, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
     // Does the user hold a role on the image's model?
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 

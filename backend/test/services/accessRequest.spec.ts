@@ -75,7 +75,7 @@ describe('services > accessRequest', () => {
   test('getAccessRequestsByModel > good', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
     accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
-    vi.mocked(authorisation.accessRequestBatch).mockResolvedValue([
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([
       { info: 'You do not have permission', success: false },
       { success: true },
     ])

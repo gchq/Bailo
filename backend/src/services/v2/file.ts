@@ -74,7 +74,7 @@ export async function getFilesByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const files = await FileModel.find({ modelId })
 
-  const auths = await authorisation.fileBatch(user, model, files, FileAction.View)
+  const auths = await authorisation.files(user, model, files, FileAction.View)
   return files.filter((_, i) => auths[i].success)
 }
 
@@ -87,7 +87,7 @@ export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: str
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
-  const auths = await authorisation.fileBatch(user, model, files, FileAction.View)
+  const auths = await authorisation.files(user, model, files, FileAction.View)
   return files.filter((_, i) => auths[i].success)
 }
 

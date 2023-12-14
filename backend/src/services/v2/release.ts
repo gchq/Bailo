@@ -157,7 +157,7 @@ export async function getModelReleases(
 
   const model = await getModelById(user, modelId)
 
-  const auths = await authorisation.releaseBatch(user, model, results, ReleaseAction.View)
+  const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
   return results.filter((_, i) => auths[i].success)
 }
 

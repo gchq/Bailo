@@ -36,7 +36,7 @@ export async function findReviews(
     .unwind({ path: '$model' })
     .match(await findUserInCollaborators(user))
 
-  const auths = await authorisation.modelBatch(
+  const auths = await authorisation.models(
     user,
     reviews.map((review) => review.model),
     ModelAction.View,

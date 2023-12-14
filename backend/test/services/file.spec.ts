@@ -122,7 +122,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > no permission', async () => {
-    vi.mocked(authorisation.fileBatch).mockResolvedValue([
+    vi.mocked(authorisation.files).mockResolvedValue([
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,
@@ -163,7 +163,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > no permission', async () => {
-    vi.mocked(authorisation.fileBatch).mockResolvedValue([
+    vi.mocked(authorisation.files).mockResolvedValue([
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,

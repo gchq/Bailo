@@ -1,4 +1,4 @@
-export async function partialBatch<T, U>(
+export async function partials<T, U>(
   data: Array<T>,
   existingResponses: Array<U>,
   process: Array<boolean>,

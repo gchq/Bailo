@@ -79,7 +79,7 @@ export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const accessRequests = await AccessRequest.find({ modelId })
 
-  const auths = await authorisation.accessRequestBatch(user, model, accessRequests, AccessRequestAction.View)
+  const auths = await authorisation.accessRequests(user, model, accessRequests, AccessRequestAction.View)
   return accessRequests.filter((_, i) => auths[i].success)
 }
 
