@@ -13,6 +13,7 @@ import {
   Stack,
   Switch,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
@@ -145,17 +146,22 @@ export default function TopNavigation({
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>
-                  <MenuItem data-test='toggleDarkMode'>
-                    <ListItemIcon>
-                      <DarkModeIcon fontSize='small' />
-                    </ListItemIcon>
-                    <Switch
-                      size='small'
-                      checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                      onChange={toggleDarkMode}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </MenuItem>
+                  {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                  <Tooltip title='This feature has been temporarily disabled'>
+                    <span>
+                      <MenuItem disabled data-test='toggleDarkMode'>
+                        <ListItemIcon>
+                          <DarkModeIcon fontSize='small' />
+                        </ListItemIcon>
+                        <Switch
+                          size='small'
+                          checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                          onChange={toggleDarkMode}
+                          inputProps={{ 'aria-label': 'controlled' }}
+                        />
+                      </MenuItem>
+                    </span>
+                  </Tooltip>
                   <Link href='/api/logout' color='inherit' underline='none'>
                     <MenuItem data-test='logoutLink'>
                       <ListItemIcon>
