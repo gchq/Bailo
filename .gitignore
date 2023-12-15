@@ -19,6 +19,3 @@ backend/certs/*
 # helm
 infrastructure/helm/bailo/charts
 infrastructure/helm/bailo/local.yaml
-
-backend/src/scripts/example_schemas/west_upload_schema.json
-backend/src/scripts/example_schemas/west_access_request_schema.json
