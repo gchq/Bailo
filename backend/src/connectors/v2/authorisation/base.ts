@@ -273,64 +273,26 @@ export class BasicAuthorisationConnector {
   }
 }
 
-// type Response = { success: true; info: undefined } | { success: false; info: string }
+export async function partials<T>(
+  data: Array<T>,
+  responses: Array<Response>,
+  func: (items: Array<T>) => Array<Response>,
+): Promise<Array<Response>> {
+  const items = data.filter((_, i) => responses[i].success)
+  const newResponses = await Promise.resolve(func(items))
 
-// class BaseAuthorisation {
-//   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
-//     if (model.visibility === ModelVisibility.Public) {
-//       return true
-//     }
+  if (newResponses.length !== items.length) {
+    throw new Error('The function did not return a response for every item.')
+  }
 
-//     const roles = await authentication.getUserModelRoles(user, model)
-//     if (roles.length === 0) return false
+  let responsesIndex = 0
+  const mergedResponses = responses.map((response) => {
+    if (response.success) {
+      return newResponses[responsesIndex++]
+    }
 
-//     return true
-//   }
+    return response
+  })
 
-//   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
-//     return (await this.modelBatch(user, [model], action))[0]
-//   }
-
-//   async modelBatch(user: UserDoc, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
-//     return Promise.all(
-//       models.map(async (model) => {
-//         const roles = await authentication.getUserModelRoles(user, model)
-
-//         // Prohibit non-collaborators from seeing private models
-//         if (!(await this.hasModelVisibilityAccess(user, model))) {
-//           return { success: false, info: 'You cannot interact with a private model that you do not have access to.' }
-//         }
-
-//         // Check a user has a role before allowing write actions
-//         if ([ModelAction.Write, ModelAction.Update].some((a) => a === action) && roles.length === 0) {
-//           return { success: false, info: 'You cannot update a model you do not have permissions for.' }
-//         }
-
-//         return { success: true }
-//       }),
-//     )
-//   }
-// }
-
-// class InternalAuthorisation extends BaseAuthorisation {
-//   constructor() {
-//     super()
-//   }
-
-//   async modelBatch(user: UserDoc, models: ModelDoc[], action: ModelActionKeys): Promise<Response[]> {
-//     const responses = await super.modelBatch(user, models, action)
-
-//     await partialBatch(
-//       models,
-//       responses,
-//       responses.map((response) => response.success),
-//       (batch) =>
-//         pdp.checkUserEdhCall(
-//           user.dn,
-//           batch.map((model) => model.classification.edh),
-//         ),
-//     )
-
-//     return responses
-//   }
-// }
+  return mergedResponses
+}
