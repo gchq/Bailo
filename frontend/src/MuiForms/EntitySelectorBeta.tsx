@@ -55,7 +55,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     <>
       {isCurrentUserLoading && <Loading />}
       {currentUser && formContext && formContext.editMode && (
-        <Autocomplete
+        <Autocomplete<EntityObject, true, true>
           multiple
           open={open}
           size='small'
@@ -66,7 +66,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
             setOpen(false)
           }}
           disableClearable
-          isOptionEqualToValue={(option: any, value: any) => option.id === value.id}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.id}
           value={selectedEntities || []}
           onChange={handleUserChange}
@@ -74,8 +74,8 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           onInputChange={debounceOnInputChange}
           options={users || []}
           loading={isLoading}
-          renderTags={(value: EntityObject[], getTagProps) =>
-            value.map((option: EntityObject, index: number) => (
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
               <Box key={option.id} sx={{ maxWidth: '200px' }}>
                 <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.id} />
               </Box>
