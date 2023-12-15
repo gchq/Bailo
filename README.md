@@ -187,10 +187,8 @@ application is able to access the Docker registry internally as it will not prov
 
 List of near term goals:
 
-- K8s Helm charts
-- AWS deployment pattern
-- Azure deployment pattern
-- Deployment container watermarking
+- Model metrication
+- Instance federation
 
 <br />
 

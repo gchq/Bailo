@@ -4,6 +4,7 @@ import audit from '../../../../src/connectors/v2/audit/__mocks__/index.js'
 import { putModelCardSchema } from '../../../../src/routes/v2/model/modelcard/putModelCard.js'
 import { createFixture, testPut } from '../../../testUtils/routes.js'
 
+vi.mock('../../../../src/connectors/v2/authorisation/index.js')
 vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/utils/v2/config.js')

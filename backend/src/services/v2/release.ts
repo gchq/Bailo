@@ -1,12 +1,11 @@
 import { Optional } from 'utility-types'
 
-import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
+import { ReleaseAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { asyncFilter } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
 import { getFileById } from './file.js'
@@ -87,8 +86,9 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
 
   await validateRelease(user, model, release)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Create))) {
-    throw Forbidden(`You do not have permission to create a release on this model.`, {
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
       userDn: user.dn,
       modelId: releaseParams.modelId,
     })
@@ -127,8 +127,9 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update))) {
-    throw Forbidden(`You do not have permission to create a release on this model.`, {
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
       userDn: user.dn,
       modelId: modelId,
     })
@@ -154,7 +155,10 @@ export async function getModelReleases(
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
     .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
 
-  return asyncFilter(results, (result) => authorisation.userReleaseAction(user, result.model, result, ModelAction.View))
+  const model = await getModelById(user, modelId)
+
+  const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
+  return results.filter((_, i) => auths[i].success)
 }
 
 export async function getReleaseBySemver(user: UserDoc, modelId: string, semver: string) {
@@ -168,8 +172,9 @@ export async function getReleaseBySemver(user: UserDoc, modelId: string, semver:
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.View))) {
-    throw Forbidden(`You do not have permission to view this release.`, { userDn: user.dn })
+  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   return release
@@ -179,8 +184,9 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
   const model = await getModelById(user, modelId)
   const release = await getReleaseBySemver(user, modelId, semver)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Delete))) {
-    throw Forbidden(`You do not have permission to delete this release.`, { userDn: user.dn })
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   await release.delete()
@@ -200,27 +206,12 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   }
   const releases = await Release.find(query)
 
-  // This auth section will be greatly simplified when an array of resources can be given to the authorisation check
-  const releasesAuthChecks = await Promise.all(
-    releases.map(async (release) => ({
-      release,
-      authorised: await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update),
-    })),
-  )
+  const responses = await authorisation.releases(user, model, releases, ReleaseAction.Update)
+  const failures = responses.filter((response) => !response.success)
 
-  const initialValue: {
-    modelId: string
-    semver: string
-  }[] = []
-  const unauthorisedReleases = releasesAuthChecks.reduce((acc, releaseAuth) => {
-    if (!releaseAuth.authorised) {
-      acc.push({ modelId: releaseAuth.release.modelId, semver: releaseAuth.release.semver })
-    }
-    return acc
-  }, initialValue)
-  if (unauthorisedReleases.length > 0) {
+  if (failures.length) {
     throw Forbidden(`You do not have permission to update these releases.`, {
-      releases: unauthorisedReleases,
+      releases: failures.map((failure) => failure.id),
     })
   }
 

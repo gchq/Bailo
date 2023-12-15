@@ -258,4 +258,4 @@ connectors:
     kind: 'silly'
 
   authorisation:
-    kind: 'silly'
+    kind: 'basic'

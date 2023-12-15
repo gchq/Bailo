@@ -1,8 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelActionKeys } from '../../src/connectors/v2/authorisation/Base.js'
-import { ModelDoc } from '../../src/models/v2/Model.js'
-import { UserDoc } from '../../src/models/v2/User.js'
+import { ModelAction } from '../../src/connectors/v2/authorisation/base.js'
+import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -12,14 +11,7 @@ import {
   searchModels,
 } from '../../src/services/v2/model.js'
 
-const arrayAsyncFilter = vi.hoisted(() => {
-  return {
-    asyncFilter: vi.fn(() => []),
-  }
-})
-vi.mock('../../src/utils/v2/array.js', () => ({
-  asyncFilter: arrayAsyncFilter.asyncFilter,
-}))
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 
 const modelCardRevisionModel = vi.hoisted(() => {
   const obj: any = {}
@@ -61,13 +53,6 @@ const modelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks }))
 
-const authorisationMocks = vi.hoisted(() => ({
-  userModelAction: vi.fn(() => true),
-}))
-vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  default: authorisationMocks,
-}))
-
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
 }))
@@ -84,7 +69,8 @@ describe('services > model', () => {
   })
 
   test('createModel > bad authorisation', async () => {
-    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
     expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
     expect(modelMocks.save).not.toBeCalled()
   })
@@ -100,7 +86,7 @@ describe('services > model', () => {
 
   test('getModelById > bad authorisation', async () => {
     modelMocks.findOne.mockResolvedValueOnce({})
-    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
@@ -113,51 +99,51 @@ describe('services > model', () => {
 
   test('canUserActionModelById > allowed', async () => {
     modelMocks.findOne.mockResolvedValueOnce({} as any)
-    authorisationMocks.userModelAction.mockResolvedValue(true)
 
-    expect(await canUserActionModelById({} as any, 'example', {} as any)).toBe(true)
+    expect(await canUserActionModelById({} as any, 'example', {} as any)).toStrictEqual({ success: true })
   })
 
   test('canUserActionModelById > not allowed', async () => {
     // getModelById call should initially succeed
-    authorisationMocks.userModelAction.mockResolvedValueOnce(true)
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ success: true, id: '' })
     // But then the action trigger should fail
-    authorisationMocks.userModelAction.mockResolvedValueOnce(false)
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     modelMocks.findOne.mockResolvedValueOnce({} as any)
 
-    expect(await canUserActionModelById({} as any, 'example', {} as any)).toBe(false)
+    expect(await canUserActionModelById({} as any, 'example', {} as any)).toStrictEqual({
+      success: false,
+      info: 'You do not have permission',
+      id: '',
+    })
   })
 
   test('searchModels > no filters', async () => {
     const user: any = { dn: 'test' }
+    modelMocks.sort.mockResolvedValueOnce([])
 
     await searchModels(user, [], [], '', undefined)
-
-    expect(arrayAsyncFilter.asyncFilter).toBeCalled()
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
+    modelMocks.sort.mockResolvedValueOnce([])
 
     await searchModels(user, ['library'], ['mine'], 'search', 'task')
-
-    expect(arrayAsyncFilter.asyncFilter).toBeCalled()
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
+    modelMocks.sort.mockResolvedValueOnce([])
 
     await searchModels(user, [], [], '', 'task')
-
-    expect(arrayAsyncFilter.asyncFilter).toBeCalled()
   })
 
   test('searchModels > bad filter', async () => {
     const user: any = { dn: 'test' }
+    modelMocks.sort.mockResolvedValueOnce([])
 
     expect(() => searchModels(user, [], ['asdf' as any], '')).rejects.toThrowError()
-    expect(arrayAsyncFilter.asyncFilter).not.toBeCalled()
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {
@@ -179,7 +165,7 @@ describe('services > model', () => {
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
     modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
-    authorisationMocks.userModelAction.mockResolvedValue(false)
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
       /^You do not have permission/,
@@ -193,7 +179,6 @@ describe('services > model', () => {
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
     modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
-    authorisationMocks.userModelAction.mockResolvedValue(true)
 
     const result = await getModelCardRevision(mockUser, mockModelId, mockVersion)
 
@@ -207,15 +192,13 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockMetadata = { key: 'value' }
 
-    authorisationMocks.userModelAction.mockImplementation((async (
-      user: UserDoc,
-      model: ModelDoc,
-      action: ModelActionKeys,
-    ) => {
-      // Only deny write actions
-      if (action === 'write') return false
-      return true
-    }) as any)
+    vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
+      if (action === ModelAction.View) return { success: true, id: '' }
+      if (action === ModelAction.Write)
+        return { success: false, info: 'You do not have permission to update this model card', id: '' }
+
+      return { success: false, info: 'Unknown action.', id: '' }
+    })
 
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
       /^You do not have permission to update this model card/,
@@ -229,8 +212,6 @@ describe('services > model', () => {
     const mockSchemaId = 'abc'
     const mockVersion = 1
     const mockMetadata = { key: 'value' }
-
-    authorisationMocks.userModelAction.mockResolvedValue(true)
 
     const result = await _setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)
 
