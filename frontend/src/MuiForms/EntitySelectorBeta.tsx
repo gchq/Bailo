@@ -61,6 +61,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete<EntityObject, true, true>
           multiple
+          data-test='entitySelector'
           open={open}
           size='small'
           onOpen={() => {
