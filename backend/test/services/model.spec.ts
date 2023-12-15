@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelAction } from '../../src/connectors/v2/authorisation/Base.js'
+import { ModelAction } from '../../src/connectors/v2/authorisation/base.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   _setModelCard,
@@ -69,7 +69,7 @@ describe('services > model', () => {
   })
 
   test('createModel > bad authorisation', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
     expect(modelMocks.save).not.toBeCalled()
@@ -86,7 +86,7 @@ describe('services > model', () => {
 
   test('getModelById > bad authorisation', async () => {
     modelMocks.findOne.mockResolvedValueOnce({})
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
@@ -105,9 +105,9 @@ describe('services > model', () => {
 
   test('canUserActionModelById > not allowed', async () => {
     // getModelById call should initially succeed
-    vi.mocked(authorisation.model).mockResolvedValueOnce({ success: true })
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ success: true, id: '' })
     // But then the action trigger should fail
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     modelMocks.findOne.mockResolvedValueOnce({} as any)
 
@@ -164,7 +164,7 @@ describe('services > model', () => {
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
     modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
       /^You do not have permission/,
@@ -192,11 +192,11 @@ describe('services > model', () => {
     const mockMetadata = { key: 'value' }
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelAction.View) return { success: true }
+      if (action === ModelAction.View) return { success: true, id: '' }
       if (action === ModelAction.Write)
-        return { success: false, info: 'You do not have permission to update this model card' }
+        return { success: false, info: 'You do not have permission to update this model card', id: '' }
 
-      return { success: false, info: 'Unknown action.' }
+      return { success: false, info: 'Unknown action.', id: '' }
     })
 
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(

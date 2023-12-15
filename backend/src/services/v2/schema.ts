@@ -1,4 +1,4 @@
-import { SchemaAction } from '../../connectors/v2/authorisation/Base.js'
+import { SchemaAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import { UserDoc } from '../../models/v2/User.js'

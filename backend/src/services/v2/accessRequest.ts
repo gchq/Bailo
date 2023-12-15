@@ -1,6 +1,6 @@
 import { Validator } from 'jsonschema'
 
-import { AccessRequestAction } from '../../connectors/v2/authorisation/Base.js'
+import { AccessRequestAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
 import AccessRequest from '../../models/v2/AccessRequest.js'

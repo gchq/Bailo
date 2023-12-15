@@ -54,7 +54,7 @@ export default function NewAccessRequest() {
     setSubmitButtonLoading(true)
 
     if (!modelId || !schemaId) {
-      setSubmissionErrorText(`Please wait until the page has finished loading before attempting to submit.`)
+      setSubmissionErrorText(`Please wait until the page has hydrated before attempting to submit.`)
       setSubmitButtonLoading(false)
       return
     }
@@ -80,10 +80,13 @@ export default function NewAccessRequest() {
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
       setSubmitButtonLoading(false)
-    } else {
-      const body = await res.json()
-      router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
+      return
     }
+
+    setSubmitButtonLoading(false)
+
+    const body = await res.json()
+    router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {

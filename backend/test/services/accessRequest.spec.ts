@@ -62,7 +62,11 @@ describe('services > accessRequest', () => {
   })
 
   test('createAccessRequest > bad authorisation', async () => {
-    vi.mocked(authorisation.accessRequest).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.accessRequest).mockResolvedValue({
+      info: 'You do not have permission',
+      success: false,
+      id: '',
+    })
 
     modelMocks.getModelById.mockResolvedValue(undefined)
     schemaMocks.findSchemaById.mockResolvedValue({ jsonSchema: {} })
@@ -76,8 +80,8 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
     accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
     vi.mocked(authorisation.accessRequests).mockResolvedValue([
-      { info: 'You do not have permission', success: false },
-      { success: true },
+      { info: 'You do not have permission', success: false, id: '' },
+      { success: true, id: '' },
     ])
 
     const accessRequests = await getAccessRequestsByModel({} as any, 'modelId')
@@ -94,10 +98,11 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
     accessRequestModelMocks.findOne.mockResolvedValue(mockAccessRequest)
 
-    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true })
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true, id: '' })
     vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
       success: false,
       info: 'You do not have permission to delete this access request.',
+      id: '',
     })
 
     expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(

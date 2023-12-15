@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { FileAction } from '../../src/connectors/v2/authorisation/Base.js'
+import { FileAction } from '../../src/connectors/v2/authorisation/base.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
@@ -60,6 +60,7 @@ describe('services > file', () => {
     vi.mocked(authorisation.file).mockResolvedValue({
       info: 'You do not have permission to upload a file to this model.',
       success: false,
+      id: '',
     })
 
     expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
@@ -93,11 +94,11 @@ describe('services > file', () => {
 
   test('removeFile > no file permission', async () => {
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
-      if (action === FileAction.View) return { success: true }
+      if (action === FileAction.View) return { success: true, id: '' }
       if (action === FileAction.Delete)
-        return { success: false, info: 'You do not have permission to delete a file from this model.' }
+        return { success: false, info: 'You do not have permission to delete a file from this model.', id: '' }
 
-      return { success: false, info: 'Unknown action.' }
+      return { success: false, info: 'Unknown action.', id: '' }
     })
 
     const user = { dn: 'testUser' } as UserDoc
@@ -126,6 +127,7 @@ describe('services > file', () => {
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,
+        id: '',
       },
     ])
 
@@ -167,6 +169,7 @@ describe('services > file', () => {
       {
         info: 'You do not have permission to get the files from this model.',
         success: false,
+        id: '',
       },
     ])
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
@@ -195,11 +198,11 @@ describe('services > file', () => {
     const range = { start: 0, end: 50 }
 
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
-      if (action === FileAction.View) return { success: true }
+      if (action === FileAction.View) return { success: true, id: '' }
       if (action === FileAction.Download)
-        return { success: false, info: 'You do not have permission to download this model.' }
+        return { success: false, info: 'You do not have permission to download this model.', id: '' }
 
-      return { success: false, info: 'Unknown action.' }
+      return { success: false, info: 'Unknown action.', id: '' }
     })
 
     await expect(downloadFile(user, fileId, range)).rejects.toThrowError(

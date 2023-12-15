@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ReleaseAction } from '../../src/connectors/v2/authorisation/Base.js'
+import { ReleaseAction } from '../../src/connectors/v2/authorisation/base.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   createRelease,
@@ -138,7 +138,7 @@ describe('services > release', () => {
   })
 
   test('createRelease > bad authorisation', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
@@ -163,7 +163,7 @@ describe('services > release', () => {
   })
 
   test('updateRelease > bad authorisation', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false })
+    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
       /^You do not have permission/,
     )
@@ -228,6 +228,7 @@ describe('services > release', () => {
     vi.mocked(authorisation.release).mockResolvedValue({
       info: 'You do not have permission to view this release.',
       success: false,
+      id: '',
     })
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
@@ -248,11 +249,11 @@ describe('services > release', () => {
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
     vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
-      if (action === ReleaseAction.View) return { success: true }
+      if (action === ReleaseAction.View) return { success: true, id: '' }
       if (action === ReleaseAction.Delete)
-        return { success: false, info: 'You do not have permission to delete this release.' }
+        return { success: false, info: 'You do not have permission to delete this release.', id: '' }
 
-      return { success: false, info: 'Unknown action.' }
+      return { success: false, info: 'Unknown action.', id: '' }
     })
 
     expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
@@ -269,6 +270,7 @@ describe('services > release', () => {
     vi.mocked(authorisation.release).mockResolvedValue({
       success: false,
       info: 'You do not have permission to update these releases.',
+      id: '',
     })
 
     releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])

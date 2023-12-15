@@ -59,6 +59,7 @@ describe('services > schema', () => {
     vi.mocked(authorisation.schema).mockResolvedValue({
       info: 'You do not have permission to create this schema.',
       success: false,
+      id: '',
     })
 
     const result = () => createSchema(testUser, testModelSchema)

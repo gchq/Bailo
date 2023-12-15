@@ -1,5 +1,5 @@
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
-import { FileAction } from '../../connectors/v2/authorisation/Base.js'
+import { FileAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import FileModel from '../../models/v2/File.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -28,7 +28,7 @@ export async function uploadFile(user: UserDoc, modelId: string, name: string, m
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id })
   }
 
   const { fileSize } = await putObjectStream(bucket, path, stream)

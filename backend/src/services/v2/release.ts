@@ -1,6 +1,6 @@
 import { Optional } from 'utility-types'
 
-import { ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
+import { ReleaseAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
@@ -174,7 +174,7 @@ export async function getReleaseBySemver(user: UserDoc, modelId: string, semver:
 
   const auth = await authorisation.release(user, model, release, ReleaseAction.View)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   return release
@@ -186,7 +186,7 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
 
   const auth = await authorisation.release(user, model, release, ReleaseAction.Delete)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   await release.delete()
@@ -206,27 +206,12 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   }
   const releases = await Release.find(query)
 
-  // This auth section will be greatly simplified when an array of resources can be given to the authorisation check
-  const releasesAuthChecks = await Promise.all(
-    releases.map(async (release) => ({
-      release,
-      authorised: await authorisation.release(user, model, release, ReleaseAction.Update),
-    })),
-  )
+  const responses = await authorisation.releases(user, model, releases, ReleaseAction.Update)
+  const failures = responses.filter((response) => response.success)
 
-  const initialValue: {
-    modelId: string
-    semver: string
-  }[] = []
-  const unauthorisedReleases = releasesAuthChecks.reduce((acc, releaseAuth) => {
-    if (!releaseAuth.authorised.success) {
-      acc.push({ modelId: releaseAuth.release.modelId, semver: releaseAuth.release.semver })
-    }
-    return acc
-  }, initialValue)
-  if (unauthorisedReleases.length > 0) {
+  if (failures.length) {
     throw Forbidden(`You do not have permission to update these releases.`, {
-      releases: unauthorisedReleases,
+      releases: failures.map((failure) => failure.id),
     })
   }
 

@@ -56,7 +56,7 @@ export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 
 type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
-export class BaseAuthorisationConnector {
+export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
     if (model.visibility === ModelVisibility.Public) {
       return true
@@ -187,11 +187,11 @@ export class BaseAuthorisationConnector {
 
         // If they are not listed on the model
         if (!isNamed && !hasModelRole && [AccessRequestAction.Delete, AccessRequestAction.Update].includes(action)) {
-          return { success: false, info: 'You cannot change an access request you do not own' }
+          return { success: false, info: 'You cannot change an access request you do not own', id: request.id }
         }
 
         // Otherwise they either own the model, access request or this is a read-only action.
-        return { success: true }
+        return { success: true, id: request.id }
       }),
     )
   }
@@ -209,10 +209,10 @@ export class BaseAuthorisationConnector {
     const hasAccessRequest = await this.hasAccessRequest(user, model)
 
     return Promise.all(
-      files.map(async (_file) => {
+      files.map(async (file) => {
         // If they are not listed on the model, don't let them upload or delete files.
         if (!hasModelRole && [FileAction.Delete, FileAction.Upload].includes(action)) {
-          return { success: false, info: 'You need to hold a model role in order to upload a file' }
+          return { success: false, info: 'You need to hold a model role in order to upload a file', id: file.id }
         }
 
         if (
@@ -221,10 +221,10 @@ export class BaseAuthorisationConnector {
           [FileAction.Download].includes(action) &&
           !model.settings.ungovernedAccess
         ) {
-          return { success: false, info: 'You need to have a valid access request to download a file.' }
+          return { success: false, info: 'You need to have a valid access request to download a file.', id: file.id }
         }
 
-        return { success: true }
+        return { success: true, id: file.id }
       }),
     )
   }
@@ -245,12 +245,13 @@ export class BaseAuthorisationConnector {
           return {
             success: false,
             info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
+            id: access.name,
           }
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
         if (!hasModelRole && access.actions.includes(ImageAction.Push as Action)) {
-          return { success: false, info: 'You need to hold a model role in order to upload an image' }
+          return { success: false, info: 'You need to hold a model role in order to upload an image', id: access.name }
         }
 
         if (
@@ -259,11 +260,77 @@ export class BaseAuthorisationConnector {
           access.actions.includes(ImageAction.Pull as Action) &&
           !model.settings.ungovernedAccess
         ) {
-          return { success: false, info: 'You need to have a valid access request to download an image.' }
+          return {
+            success: false,
+            info: 'You need to have a valid access request to download an image.',
+            id: access.name,
+          }
         }
 
-        return { success: true }
+        return { success: true, id: access.name }
       }),
     )
   }
 }
+
+// type Response = { success: true; info: undefined } | { success: false; info: string }
+
+// class BaseAuthorisation {
+//   async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
+//     if (model.visibility === ModelVisibility.Public) {
+//       return true
+//     }
+
+//     const roles = await authentication.getUserModelRoles(user, model)
+//     if (roles.length === 0) return false
+
+//     return true
+//   }
+
+//   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
+//     return (await this.modelBatch(user, [model], action))[0]
+//   }
+
+//   async modelBatch(user: UserDoc, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
+//     return Promise.all(
+//       models.map(async (model) => {
+//         const roles = await authentication.getUserModelRoles(user, model)
+
+//         // Prohibit non-collaborators from seeing private models
+//         if (!(await this.hasModelVisibilityAccess(user, model))) {
+//           return { success: false, info: 'You cannot interact with a private model that you do not have access to.' }
+//         }
+
+//         // Check a user has a role before allowing write actions
+//         if ([ModelAction.Write, ModelAction.Update].some((a) => a === action) && roles.length === 0) {
+//           return { success: false, info: 'You cannot update a model you do not have permissions for.' }
+//         }
+
+//         return { success: true }
+//       }),
+//     )
+//   }
+// }
+
+// class InternalAuthorisation extends BaseAuthorisation {
+//   constructor() {
+//     super()
+//   }
+
+//   async modelBatch(user: UserDoc, models: ModelDoc[], action: ModelActionKeys): Promise<Response[]> {
+//     const responses = await super.modelBatch(user, models, action)
+
+//     await partialBatch(
+//       models,
+//       responses,
+//       responses.map((response) => response.success),
+//       (batch) =>
+//         pdp.checkUserEdhCall(
+//           user.dn,
+//           batch.map((model) => model.classification.edh),
+//         ),
+//     )
+
+//     return responses
+//   }
+// }
