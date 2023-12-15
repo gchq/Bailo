@@ -88,6 +88,7 @@ import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
+import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -266,6 +267,8 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/entities', ...getEntities)
   server.get('/api/v2/entities/me', ...getCurrentUser)
+
+  server.get('/api/v2/config/ui', ...getUiConfigV2)
 
   // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
   // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)

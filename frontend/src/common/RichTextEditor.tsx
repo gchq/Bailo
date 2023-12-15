@@ -27,6 +27,11 @@ export default function RichTextEditor({ value, onChange, textareaProps, label =
     onChange(newValue || '')
   }
 
+  const richTextareaProps = {
+    'data-test': 'richTextEditor',
+    ...textareaProps,
+  }
+
   return (
     <>
       <Box display='flex'>
@@ -41,7 +46,7 @@ export default function RichTextEditor({ value, onChange, textareaProps, label =
         preview='edit'
         hideToolbar={hideToolbar}
         height={150}
-        textareaProps={textareaProps}
+        textareaProps={richTextareaProps}
         onChange={handleChange}
       />
     </>

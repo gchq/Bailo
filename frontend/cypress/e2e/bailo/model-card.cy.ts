@@ -46,7 +46,7 @@ describe('Model with model card only', () => {
     cy.visit(modelUrl)
     cy.log('Select edit version')
     cy.get('[data-test=modelActionsButton]').click({ force: true })
-    cy.get('[data-test=editModelButton]').click({ force: true })
+    cy.get('[data-test=editModelCardButton]').click({ force: true })
 
     cy.log('Inputting edited metadata')
     cy.get('[data-test=uploadJsonTab]', { timeout: 15000 }).click({ force: true })

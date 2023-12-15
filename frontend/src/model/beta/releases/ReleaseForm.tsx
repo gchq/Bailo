@@ -78,6 +78,7 @@ export default function ReleaseForm({
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
+
   return (
     <Stack spacing={2}>
       {!editable && (
@@ -110,6 +111,7 @@ export default function ReleaseForm({
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
+            inputProps={{ 'data-test': 'releaseSemanticVersionTextField' }}
             onChange={handleSemverChange}
           />
         )}

@@ -232,17 +232,21 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 </IconButton>
                 <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                   <MenuList>
-                    <MenuItem data-test='toggleDarkMode'>
-                      <ListItemIcon>
-                        <DarkModeIcon fontSize='small' />
-                      </ListItemIcon>
-                      <Switch
-                        size='small'
-                        checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                        onChange={toggleDarkMode}
-                        inputProps={{ 'aria-label': 'controlled' }}
-                      />
-                    </MenuItem>
+                    <Tooltip title='This feature has been temporarily disabled'>
+                      <span>
+                        <MenuItem disabled data-test='toggleDarkMode'>
+                          <ListItemIcon>
+                            <DarkModeIcon fontSize='small' />
+                          </ListItemIcon>
+                          <Switch
+                            size='small'
+                            checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                            onChange={toggleDarkMode}
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
+                        </MenuItem>
+                      </span>
+                    </Tooltip>
                     <Link href='/settings' color='inherit' underline='none'>
                       <MenuItem data-test='settingsLink'>
                         <ListItemIcon>

@@ -20,11 +20,11 @@ import {
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, useEffect, useState } from 'react'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
-import useNotification from '../common/Snackbar'
 import Link from '../Link'
 
 const StyledList = styled(List)(({ theme }) => ({
@@ -66,45 +66,49 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 interface SideNavigationProps {
   page: string
+  currentUser: User
+  toggleDrawer: () => void
+  onError: (errorMessage: string) => void
+  onResetErrorMessage: () => void
   drawerOpen?: boolean
   pageTopStyling?: CSSProperties
-  toggleDrawer: () => void
-  currentUser: User
 }
 
 // This is currently only being used by the beta wrapper
 export default function SideNavigation({
   page,
+  currentUser,
+  toggleDrawer,
+  onError,
+  onResetErrorMessage,
   drawerOpen = false,
   pageTopStyling = {},
-  toggleDrawer,
-  currentUser,
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-
-  const sendNotification = useNotification()
-
   const theme = useTheme()
 
-  // We should add some error handling here, such as an error message appearing in a snackbar
-  // Additional error messages should be added for screen-readers
   useEffect(() => {
     async function fetchReviewCount() {
-      const response = (await getReviewCount()).headers.get('x-count')
-      if (response === null) {
-        sendNotification({
-          variant: 'error',
-          msg: 'Response was null, number expected',
-          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-        })
+      onResetErrorMessage()
+      const response = await getReviewCount()
+
+      if (!response.ok) {
+        onError(await getErrorMessage(response))
         setReviewCount(0)
         return
       }
 
-      setReviewCount(parseInt(response))
+      const count = response.headers.get('x-count')
+      if (count === null) {
+        onError('Review count was null, expected a number')
+        setReviewCount(0)
+        return
+      }
+
+      setReviewCount(parseInt(count))
     }
     fetchReviewCount()
-  }, [sendNotification])
+  }, [onError, onResetErrorMessage])
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>

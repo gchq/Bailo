@@ -2,6 +2,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { useListUsers } from '../../data/user'
 import { EntityKind } from '../../types/types'
@@ -22,7 +23,7 @@ interface EntitySelectorProps {
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { users, isUsersLoading: isLoading } = useListUsers()
+  const { users, isUsersLoading: isLoading, isUsersError } = useListUsers()
   const [open, setOpen] = React.useState(false)
 
   const entities = React.useMemo(() => {
@@ -44,6 +45,10 @@ export default function EntitySelector(props: EntitySelectorProps) {
 
   const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: Array<MinimalEntity>) => {
     onChange(newValues.map((value) => ({ kind: value.kind, id: value.id })))
+  }
+
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
   return (

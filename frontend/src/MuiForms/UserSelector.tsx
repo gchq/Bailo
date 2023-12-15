@@ -2,17 +2,22 @@ import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import * as React from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import { useListUsers } from '../../data/user'
 
 export default function UserSelector(props: any) {
-  const { users, isUsersLoading } = useListUsers()
+  const { users, isUsersLoading, isUsersError } = useListUsers()
   const [open, setOpen] = React.useState(false)
 
   const { onChange, value: currentValue, required, label } = props
 
   const _onChange = (_event: any, newValue: any) => {
     onChange(newValue?.id)
+  }
+
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
   return (

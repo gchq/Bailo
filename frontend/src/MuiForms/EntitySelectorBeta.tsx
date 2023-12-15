@@ -26,7 +26,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { users, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -51,6 +51,10 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
+  }
+
   return (
     <>
       {isCurrentUserLoading && <Loading />}
@@ -73,7 +77,6 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
           options={users || []}
-          loading={isLoading}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
               <Box key={option.id} sx={{ maxWidth: '200px' }}>
