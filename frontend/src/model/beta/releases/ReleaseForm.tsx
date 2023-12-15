@@ -1,5 +1,6 @@
-import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
+import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -7,9 +8,10 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { FileInterface, ModelInterface } from 'types/v2/types'
+import { FileInterface, isFileInterface, ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -67,6 +69,12 @@ export default function ReleaseForm({
 
   const handleMinorReleaseChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     onMinorReleaseChange(checked)
+  }
+
+  const getFileId = (file: File | FileInterface) => {
+    if (isFileInterface(file)) {
+      return file._id
+    }
   }
 
   const releaseNotesLabel = (
@@ -148,15 +156,37 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Files</Typography>
-        <MultiFileInput
-          fullWidth
-          label='Attach files'
-          files={formData.files}
-          filesMetadata={filesMetadata}
-          readOnly={isReadOnly}
-          onFilesChange={onFilesChange}
-          onFilesMetadataChange={onFilesMetadataChange}
-        />
+        {!isReadOnly && (
+          <MultiFileInput
+            fullWidth
+            label='Attach files'
+            files={formData.files}
+            filesMetadata={filesMetadata}
+            readOnly={isReadOnly}
+            onFilesChange={onFilesChange}
+            onFilesMetadataChange={onFilesMetadataChange}
+          />
+        )}
+        {isReadOnly &&
+          formData.files.map((file) => (
+            <Grid container spacing={1} alignItems='center' key={file.name}>
+              <Grid item xs>
+                <Tooltip title={file.name}>
+                  <Link
+                    href={`/api/v2/model/${model.id}/file/${getFileId(file)}/download`}
+                    data-test={`fileLink-${file.name}`}
+                  >
+                    <Typography noWrap textOverflow='ellipsis' display='inline'>
+                      {file.name}
+                    </Typography>
+                  </Link>
+                </Tooltip>
+              </Grid>
+              <Grid item xs={1} textAlign='right'>
+                <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              </Grid>
+            </Grid>
+          ))}
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
       <Stack>
