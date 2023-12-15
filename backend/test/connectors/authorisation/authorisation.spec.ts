@@ -12,9 +12,9 @@ vi.mock('../../../src/connectors/v2/authentication/index.js', () => ({
 }))
 
 describe('connectors > authorisation', () => {
-  test('silly', () => {
+  test('basic', () => {
     const connector = getAuthorisationConnector(false)
-    expect(connector.constructor.name).toBe('SillyAuthorisationConnector')
+    expect(connector.constructor.name).toBe('BasicAuthorisationConnector')
   })
 
   test('invalid', () => {

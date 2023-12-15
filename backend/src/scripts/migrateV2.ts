@@ -22,7 +22,7 @@ const MODEL_SCHEMA_MAP = {
   },
 }
 
-const DEPLOYMENT_SCHEMA_MAP = {
+const _DEPLOYMENT_SCHEMA_MAP = {
   '/Minimal/Deployment/v6': {
     convert: (metadata) => {
       return {
@@ -41,7 +41,7 @@ function identityConversion(old: string) {
   return old
 }
 
-async function migrateAllModels() {
+export async function migrateAllModels() {
   const models = await ModelModelV1.find({})
   for (const model of models) {
     await migrateModel(model.id)
@@ -164,11 +164,9 @@ async function migrateModel(modelId: string) {
 
   await modelV2.save()
 
-  const deployments = await DeploymentModelV1.find({
+  const _deployments = await DeploymentModelV1.find({
     model,
   })
-
-  console.log(deployments)
 }
 
 await connectToMongoose()

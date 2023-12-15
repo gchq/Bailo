@@ -267,11 +267,13 @@ describe('services > release', () => {
     const mockModel: any = { id: 'test' }
     const mockRelease = { _id: 'release' }
 
-    vi.mocked(authorisation.release).mockResolvedValue({
-      success: false,
-      info: 'You do not have permission to update these releases.',
-      id: '',
-    })
+    vi.mocked(authorisation.releases).mockResolvedValue([
+      {
+        success: false,
+        info: 'You do not have permission to update these releases.',
+        id: '',
+      },
+    ])
 
     releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])
 

@@ -114,6 +114,7 @@ describe('services > model', () => {
     expect(await canUserActionModelById({} as any, 'example', {} as any)).toStrictEqual({
       success: false,
       info: 'You do not have permission',
+      id: '',
     })
   })
 

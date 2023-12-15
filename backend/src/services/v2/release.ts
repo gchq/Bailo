@@ -207,7 +207,7 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   const releases = await Release.find(query)
 
   const responses = await authorisation.releases(user, model, releases, ReleaseAction.Update)
-  const failures = responses.filter((response) => response.success)
+  const failures = responses.filter((response) => !response.success)
 
   if (failures.length) {
     throw Forbidden(`You do not have permission to update these releases.`, {

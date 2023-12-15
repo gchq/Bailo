@@ -8,7 +8,7 @@ export function getAuthorisationConnector(cache = true): BasicAuthorisationConne
   }
 
   switch (config.connectors.authorisation.kind) {
-    case 'base':
+    case 'basic':
       authConnector = new BasicAuthorisationConnector()
       break
     default:
