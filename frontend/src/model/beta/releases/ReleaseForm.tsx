@@ -74,6 +74,8 @@ export default function ReleaseForm({
   const getFileId = (file: File | FileInterface) => {
     if (isFileInterface(file)) {
       return file._id
+    } else {
+      throw new Error(`Could not find a valid ID for this file. ${JSON.stringify(file)}`)
     }
   }
 
