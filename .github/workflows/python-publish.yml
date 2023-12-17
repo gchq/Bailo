@@ -1,0 +1,74 @@
+name: Publish Bailo Package to PyPI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    outputs:
+      files-changed-output: ${{ steps.files-changed.outputs.any_changed }}  
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Check for changed init file (for new version)
+      - name: Get changed init files
+        id: files-changed
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            lib/python-beta/src/bailo/__init__.py
+  
+      # Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # Install build package
+      - name: Install pypa/build
+        run: python3 -m pip install build --user
+
+      # Build Bailo package
+      - name: Build a binary wheel and a source tarball
+        run: |
+          cd lib/python-beta
+          python3 -m build
+
+      # Upload Bailo artifact
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package-distributions
+          path: lib/python-beta/dist/
+  
+  publish-to-pypi:
+    name: Publish Bailo package to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/bailo
+    permissions:
+      id-token: write
+
+    steps:
+      # Retrieve Bailo artifact
+      - name: Download all the dists
+        if: ${{needs.build.outputs.files-changed-output}} == 'true'
+        uses: actions/download-artifact@v3
+        with:
+          name: python-package-distributions
+          path: lib/python-beta/dist/
+
+      # Publish artifact to Bailo
+      - name: Publish distribution to PyPI
+        if: ${{needs.build.outputs.files-changed-output}} == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+    
