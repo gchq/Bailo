@@ -63,21 +63,21 @@ const pacifico = Pacifico({ subsets: ['latin'], weight: '400' })
 
 // This is currently only being used by the beta wrapper
 export default function TopNavigation({ drawerOpen = false, pageTopStyling = {}, currentUser }: TopNavigationProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const [anchorElNavbar, setAnchorElNavbar] = useState<HTMLButtonElement | null>(null)
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [navbarAnchorEl, setNavbarAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const actionOpen = anchorEl !== null
-  const navbarMenuOpen = anchorElNavbar !== null
+  const actionOpen = userMenuAnchorEl !== null
+  const navbarMenuOpen = navbarAnchorEl !== null
   const router = useRouter()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
+    setUserMenuAnchorEl(event.currentTarget)
   }
 
   const handleNavMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorElNavbar(event.currentTarget)
+    setNavbarAnchorEl(event.currentTarget)
   }
 
   const handleNewModelClicked = () => {
@@ -85,7 +85,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   }
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
+    setUserMenuAnchorEl(null)
   }
 
   const betaAdornment = (
@@ -117,13 +117,15 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           <IconButton onClick={handleNavMenuClicked}>
             <MenuIcon sx={{ color: 'white' }} />
           </IconButton>
-          <Menu anchorEl={anchorElNavbar} open={navbarMenuOpen} onClose={() => setAnchorElNavbar(null)}>
-            <MenuItem>
-              <ListItemIcon>
-                <Add fontSize='small' />
-              </ListItemIcon>
-              <ListItemText>Add new model</ListItemText>
-            </MenuItem>
+          <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
+            <Link href='/beta/model/new'>
+              <MenuItem>
+                <ListItemIcon>
+                  <Add fontSize='small' />
+                </ListItemIcon>
+                <ListItemText>Add new model</ListItemText>
+              </MenuItem>
+            </Link>
             <Divider />
             <Tooltip title='This feature has been temporarily disabled'>
               <span>
@@ -173,7 +175,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
                   <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
                 </IconButton>
-                <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
+                <Menu
+                  sx={{ mt: '10px', right: 0 }}
+                  anchorEl={userMenuAnchorEl}
+                  open={actionOpen}
+                  onClose={handleMenuClose}
+                >
                   <MenuList>
                     {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
                     <Tooltip title='This feature has been temporarily disabled'>

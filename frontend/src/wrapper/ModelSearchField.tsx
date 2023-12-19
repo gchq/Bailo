@@ -1,19 +1,9 @@
 import SearchIcon from '@mui/icons-material/Search'
-import {
-  Box,
-  Divider,
-  InputBase,
-  Link,
-  List,
-  ListItemButton,
-  ListItemText,
-  Popover,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Box, Divider, InputBase, List, ListItemButton, ListItemText, Popover, Stack, Typography } from '@mui/material'
 import { alpha, styled } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useState } from 'react'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import useDebounce from 'utils/hooks/useDebounce'
 
@@ -115,7 +105,7 @@ export default function ModelSearchField() {
             <List>
               {models.map((model) => (
                 <Box key={model.id} sx={{ maxWidth: '300px' }}>
-                  <Link href={`/beta/model/${model.id}`}>
+                  <Link href={`/beta/model/${model.id}`} noLinkStyle>
                     <ListItemButton>
                       <ListItemText
                         primary={model.id}
