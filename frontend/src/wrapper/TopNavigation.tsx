@@ -21,7 +21,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
-import TopAppBarModelSearch from 'src/wrapper/TopAppBarModelSearch'
+import ModelSearchField from 'src/wrapper/ModelSearchField'
 
 import { EntityKind } from '../../types/types'
 import { User } from '../../types/v2/types'
@@ -167,7 +167,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               ariaLabel='Add a new model'
               height='40px'
             />
-            <TopAppBarModelSearch />
+            <ModelSearchField />
             {currentUser ? (
               <>
                 <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
