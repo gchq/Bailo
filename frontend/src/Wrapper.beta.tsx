@@ -76,14 +76,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && (
-          <TopNavigation
-            drawerOpen={open}
-            pageTopStyling={pageTopStyling}
-            toggleDrawer={toggleDrawer}
-            currentUser={currentUser}
-          />
-        )}
+        {currentUser && <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />}
         {currentUser && (
           <SideNavigation
             page={page}

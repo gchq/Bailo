@@ -1,30 +1,19 @@
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import {
-  Badge,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Tooltip,
-} from '@mui/material'
+import { Divider, IconButton, List, MenuItem, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
-import { CSSProperties, ReactElement, useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
+import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
-import Link from '../Link'
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -118,15 +107,11 @@ export default function SideNavigation({
           px: [1],
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
-      >
-        <IconButton aria-label='close drawer' onClick={toggleDrawer}>
-          <ChevronLeftIcon />
-        </IconButton>
-      </Toolbar>
+      ></Toolbar>
       {drawerOpen !== undefined && (
         <>
           <StyledList>
-            <MenuItem
+            <NavMenuItem
               href='/beta'
               selectedPage={page}
               primaryText='Marketplace'
@@ -135,7 +120,7 @@ export default function SideNavigation({
               title='Marketplace'
               icon={<DashboardIcon />}
             />
-            <MenuItem
+            <NavMenuItem
               href='/beta/reviews'
               selectedPage={page}
               primaryText='Reviews'
@@ -146,7 +131,7 @@ export default function SideNavigation({
               badgeCount={reviewCount}
             />
             <Divider />
-            <MenuItem
+            <NavMenuItem
               href='/beta/docs/api'
               selectedPage={page}
               primaryText='API'
@@ -155,7 +140,7 @@ export default function SideNavigation({
               title='API'
               icon={<LinkIcon />}
             />
-            <MenuItem
+            <NavMenuItem
               href='/beta/help'
               selectedPage={page}
               primaryText='Support'
@@ -167,69 +152,35 @@ export default function SideNavigation({
             <Divider />
             {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
             {currentUser && (
-              <MenuItem
-                href='/beta/schema/list'
-                selectedPage={page}
-                primaryText='Schemas'
-                drawerOpen={drawerOpen}
-                menuPage='beta/schemas'
-                title='Schemas'
-                icon={<SchemaIcon />}
-              />
+              <>
+                <NavMenuItem
+                  href='/beta/schema/list'
+                  selectedPage={page}
+                  primaryText='Schemas'
+                  drawerOpen={drawerOpen}
+                  menuPage='beta/schemas'
+                  title='Schemas'
+                  icon={<SchemaIcon />}
+                />
+                <Divider />
+              </>
             )}
+            <MenuItem>
+              <IconButton
+                edge='start'
+                color='inherit'
+                aria-label='open drawer'
+                onClick={toggleDrawer}
+                sx={{
+                  marginRight: 2,
+                }}
+              >
+                {drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}
+              </IconButton>
+            </MenuItem>
           </StyledList>
         </>
       )}
-      <Divider />
     </Drawer>
-  )
-}
-
-interface MenuItemProps {
-  menuPage: string
-  selectedPage: string
-  drawerOpen: boolean
-  href: string
-  icon: ReactElement
-  primaryText: string
-  title: string
-  dataTest?: string
-  badgeCount?: number
-}
-function MenuItem({
-  menuPage,
-  drawerOpen,
-  icon,
-  href,
-  primaryText,
-  dataTest = '',
-  selectedPage,
-  title,
-  badgeCount = 0,
-}: MenuItemProps) {
-  return (
-    <ListItem disablePadding>
-      <Link href={href}>
-        <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon data-test={dataTest}>
-            {!drawerOpen ? (
-              <Tooltip arrow title={title} placement='right'>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
-              </Tooltip>
-            ) : (
-              <>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
-              </>
-            )}
-          </ListItemIcon>
-          <ListItemText primary={primaryText} />
-        </ListItemButton>
-        {drawerOpen}
-      </Link>
-    </ListItem>
   )
 }

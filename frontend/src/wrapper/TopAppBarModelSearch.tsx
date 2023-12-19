@@ -1,5 +1,16 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, Divider, InputBase, Link, List, ListItem, ListItemText, Popover, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Divider,
+  InputBase,
+  Link,
+  List,
+  ListItemButton,
+  ListItemText,
+  Popover,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { alpha, styled } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useState } from 'react'
@@ -40,9 +51,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
     [theme.breakpoints.up('sm')]: {
-      width: '12ch',
+      width: '16ch',
       '&:focus': {
-        width: '20ch',
+        width: '25ch',
       },
     },
   },
@@ -105,7 +116,7 @@ export default function TopAppBarModelSearch() {
               {models.map((model) => (
                 <Box key={model.id} sx={{ maxWidth: '300px' }}>
                   <Link href={`/beta/model/${model.id}`}>
-                    <ListItem>
+                    <ListItemButton>
                       <ListItemText
                         primary={model.id}
                         secondary={model.description}
@@ -116,7 +127,7 @@ export default function TopAppBarModelSearch() {
                           style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
                         }}
                       />
-                    </ListItem>
+                    </ListItemButton>
                   </Link>
                 </Box>
               ))}
