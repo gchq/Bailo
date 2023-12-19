@@ -7,9 +7,10 @@ interface ExpandableButtonProps {
   icon: ReactElement
   onClick: () => void
   ariaLabel: string
+  height?: string
 }
 
-export default function ExpandableButton({ label, icon, onClick, ariaLabel }: ExpandableButtonProps) {
+export default function ExpandableButton({ label, icon, onClick, ariaLabel, height = 'unset' }: ExpandableButtonProps) {
   const [hover, setHover] = useState(false)
 
   const StyledHoverSpan = styled('span')({
@@ -54,7 +55,7 @@ export default function ExpandableButton({ label, icon, onClick, ariaLabel }: Ex
         variant='outlined'
         data-test='expandableButton'
         aria-label={ariaLabel}
-        sx={{ color: 'white', borderColor: 'white !important' }}
+        sx={{ color: 'white', borderColor: 'white !important', height: height }}
       >
         {icon}
         {hover ? (

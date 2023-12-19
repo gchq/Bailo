@@ -1,4 +1,3 @@
-import AdminIcon from '@mui/icons-material/AdminPanelSettings'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -19,7 +18,7 @@ import {
 } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
-import { CSSProperties, useEffect, useState } from 'react'
+import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { getReviewCount } from '../../actions/review'
@@ -127,122 +126,110 @@ export default function SideNavigation({
       {drawerOpen !== undefined && (
         <>
           <StyledList>
-            <ListItem disablePadding>
-              <Link href='/beta' color='inherit' underline='none'>
-                <ListItemButton selected={page === 'marketplace' || page === 'model' || page === 'deployment'}>
-                  <ListItemIcon>
-                    {!drawerOpen ? (
-                      <Tooltip title='Marketplace' arrow placement='right'>
-                        <DashboardIcon />
-                      </Tooltip>
-                    ) : (
-                      <DashboardIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary='Marketplace' />
-                </ListItemButton>
-              </Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href='/beta/review' color='inherit' underline='none'>
-                <ListItemButton selected={page === 'beta/review'} data-test='reviewLink'>
-                  <ListItemIcon>
-                    {!drawerOpen ? (
-                      <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
-                          <ListAltIcon />
-                        </Badge>
-                      </Tooltip>
-                    ) : (
-                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
-                        <ListAltIcon />
-                      </Badge>
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary='Reviews' />
-                </ListItemButton>
-              </Link>
-            </ListItem>
+            <MenuItem
+              href='/beta'
+              selectedPage={page}
+              primaryText='Marketplace'
+              drawerOpen={drawerOpen}
+              menuPage='marketplace'
+              title='Marketplace'
+              icon={<DashboardIcon />}
+            />
+            <MenuItem
+              href='/beta/reviews'
+              selectedPage={page}
+              primaryText='Reviews'
+              drawerOpen={drawerOpen}
+              menuPage='beta/review'
+              title='Review'
+              icon={<ListAltIcon />}
+              badgeCount={reviewCount}
+            />
+            <Divider />
+            <MenuItem
+              href='/beta/docs/api'
+              selectedPage={page}
+              primaryText='API'
+              drawerOpen={drawerOpen}
+              menuPage='beta/api'
+              title='API'
+              icon={<LinkIcon />}
+            />
+            <MenuItem
+              href='/beta/help'
+              selectedPage={page}
+              primaryText='Support'
+              drawerOpen={drawerOpen}
+              menuPage='beta/help'
+              title='Help & Support'
+              icon={<ContactSupportIcon />}
+            />
+            <Divider />
+            {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
+            {currentUser && (
+              <MenuItem
+                href='/beta/schema/list'
+                selectedPage={page}
+                primaryText='Schemas'
+                drawerOpen={drawerOpen}
+                menuPage='beta/schemas'
+                title='Schemas'
+                icon={<SchemaIcon />}
+              />
+            )}
           </StyledList>
-          <Divider />
-          <StyledList>
-            <ListItem disablePadding>
-              <Link href='/beta/docs/api'>
-                <ListItemButton selected={page === 'api'} data-test='apiDocsLink'>
-                  <ListItemIcon>
-                    {!drawerOpen ? (
-                      <Tooltip title='API' arrow placement='right'>
-                        <LinkIcon />
-                      </Tooltip>
-                    ) : (
-                      <LinkIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary='API' />
-                </ListItemButton>
-              </Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href='/beta/help'>
-                <ListItemButton selected={page === 'help'} data-test='supportLink'>
-                  <ListItemIcon>
-                    {!drawerOpen ? (
-                      <Tooltip title='Help & Support' arrow placement='right'>
-                        <ContactSupportIcon />
-                      </Tooltip>
-                    ) : (
-                      <ContactSupportIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary='Support' />
-                </ListItemButton>
-              </Link>
-            </ListItem>
-          </StyledList>
-          {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
-          {currentUser && (
-            <>
-              <Divider />
-              <StyledList>
-                <ListItem disablePadding>
-                  <Link href='/admin'>
-                    <ListItemButton selected={page === 'admin'}>
-                      <ListItemIcon data-test='adminLink'>
-                        {!drawerOpen ? (
-                          <Tooltip arrow title='Admin' placement='right'>
-                            <AdminIcon />
-                          </Tooltip>
-                        ) : (
-                          <AdminIcon />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText primary='Admin' />
-                    </ListItemButton>
-                  </Link>
-                </ListItem>
-                <ListItem disablePadding>
-                  <Link href='/beta/schemas/list'>
-                    <ListItemButton selected={page === 'schemas'}>
-                      <ListItemIcon data-test='designSchemaLink'>
-                        {!drawerOpen ? (
-                          <Tooltip arrow title='Schemas' placement='right'>
-                            <SchemaIcon />
-                          </Tooltip>
-                        ) : (
-                          <SchemaIcon />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText primary='Schemas' />
-                    </ListItemButton>
-                    {drawerOpen}
-                  </Link>
-                </ListItem>
-              </StyledList>
-            </>
-          )}
         </>
       )}
       <Divider />
     </Drawer>
+  )
+}
+
+interface MenuItemProps {
+  menuPage: string
+  selectedPage: string
+  drawerOpen: boolean
+  href: string
+  icon: ReactElement
+  primaryText: string
+  title: string
+  dataTest?: string
+  badgeCount?: number
+}
+function MenuItem({
+  menuPage,
+  drawerOpen,
+  icon,
+  href,
+  primaryText,
+  dataTest = '',
+  selectedPage,
+  title,
+  badgeCount = 0,
+}: MenuItemProps) {
+  return (
+    <ListItem disablePadding>
+      <Link href={href}>
+        <ListItemButton selected={selectedPage === menuPage}>
+          <ListItemIcon data-test={dataTest}>
+            {!drawerOpen ? (
+              <Tooltip arrow title={title} placement='right'>
+                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+                  {icon}
+                </Badge>
+              </Tooltip>
+            ) : (
+              <>
+                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+                  {icon}
+                </Badge>
+              </>
+            )}
+          </ListItemIcon>
+          <ListItemText primary={primaryText} />
+        </ListItemButton>
+        {drawerOpen}
+      </Link>
+    </ListItem>
   )
 }
