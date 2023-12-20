@@ -20,7 +20,7 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
   }
 
   return (
-    <Stack direction='row'>
+    <Stack direction='row' spacing={1}>
       <Box
         sx={{ backgroundColor: theme.palette.container.main, p: 1, borderRadius: 2, width: '100%' }}
         component='div'
