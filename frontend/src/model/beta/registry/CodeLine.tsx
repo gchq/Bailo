@@ -33,7 +33,7 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
         </Stack>
       </Box>
       <Tooltip title='Copy to clipboard' arrow>
-        <IconButton onClick={() => handleButtonClick()}>
+        <IconButton onClick={() => handleButtonClick()} aria-label='Copy line to clipboard'>
           <ContentCopy />
         </IconButton>
       </Tooltip>
