@@ -94,7 +94,7 @@ jobs:
     steps:
       #Retrieve Bailo artifact
       - name: Download all the dists
-        if: ${{needs.build.outputs.files-changed-output}} == 'true'
+        if: needs.build.outputs.files-changed-output == 'true'
         uses: actions/download-artifact@v3
         with:
           name: python-package-distributions
@@ -102,7 +102,7 @@ jobs:
 
       # Publish artifact to TestPyPI
       - name: Publish distribution to TestPyPI
-        if: ${{needs.build.outputs.files-changed-output}} == 'true'
+        if: needs.build.outputs.files-changed-output == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
