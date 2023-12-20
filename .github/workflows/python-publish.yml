@@ -49,7 +49,6 @@ jobs:
           name: python-package-distributions
           path: lib/python-beta/dist/
 
-  # Publish to PyPI when pushing to merge, and when __init__.py has changed.
   publish-to-pypi:
     if: github.event_name == 'push'
     name: Publish Bailo distribution to PyPI
@@ -78,7 +77,6 @@ jobs:
         if: ${{needs.build.outputs.files-changed-output}} == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
 
-  # Publish to TestPyPI on a pull request, and when __init__.py has changed.
   publish-to-testpypi:
     if: github.event_name == 'pull_request'
     name: Publish Bailo distribution to TestPyPI
