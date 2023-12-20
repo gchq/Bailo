@@ -11,7 +11,7 @@ jobs:
     name: Build distribution
     runs-on: ubuntu-latest
     outputs:
-      files-changed-output: ${{ steps.files-changed.outputs.any_changed }}  
+      files-changed-output: ${{ steps.files-changed.outputs.any_changed }}
 
     steps:
       - uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
         with:
           files: |
             lib/python-beta/src/bailo/__init__.py
-  
+
       # Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -48,7 +48,7 @@ jobs:
         with:
           name: python-package-distributions
           path: lib/python-beta/dist/
-  
+
   # Publish to PyPI when pushing to merge, and when __init__.py has changed.
   publish-to-pypi:
     if: github.event_name == 'push'
@@ -89,13 +89,14 @@ jobs:
     environment:
       name: testpypi
       url: https://test.pypi.org/p/bailo
-      
+
     permissions:
       id-token: write
 
     steps:
       #Retrieve Bailo artifact
       - name: Download all the dists
+        if: ${{needs.build.outputs.files-changed-output}} == 'true'
         uses: actions/download-artifact@v3
         with:
           name: python-package-distributions
@@ -103,8 +104,8 @@ jobs:
 
       # Publish artifact to TestPyPI
       - name: Publish distribution to TestPyPI
+        if: ${{needs.build.outputs.files-changed-output}} == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
-    
