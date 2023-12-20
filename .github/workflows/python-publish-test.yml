@@ -1,8 +1,10 @@
-name: Publish Bailo Distribution to PyPI
+name: Publish Bailo Distribution to TestPyPI
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Publish to TestPyPI.'
 
 jobs:
   build:
@@ -47,29 +49,31 @@ jobs:
           name: python-package-distributions
           path: lib/python-beta/dist/
 
-  publish-to-pypi:
-    name: Publish Bailo distribution to PyPI
+  publish-to-testpypi:
+    name: Publish Bailo distribution to TestPyPI
     needs:
     - build
     runs-on: ubuntu-latest
 
     environment:
-      name: pypi
-      url: https://pypi.org/p/bailo
+      name: testpypi
+      url: https://test.pypi.org/p/bailo
 
     permissions:
       id-token: write
 
     steps:
-      # Retrieve Bailo artifact
+      #Retrieve Bailo artifact
       - name: Download all the dists
         if: needs.build.outputs.files-changed-output == 'true'
         uses: actions/download-artifact@v3
         with:
           name: python-package-distributions
-          path: lib/python-beta/dist/
+          path: dist/
 
-      # Publish artifact to PyPI
-      - name: Publish distribution to PyPI
+      # Publish artifact to TestPyPI
+      - name: Publish distribution to TestPyPI
         if: needs.build.outputs.files-changed-output == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
