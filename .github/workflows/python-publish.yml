@@ -3,8 +3,10 @@ name: Publish Bailo Distribution to PyPI
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Publish to TestPyPI.'
 
 jobs:
   build:
@@ -78,7 +80,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-to-testpypi:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch'
     name: Publish Bailo distribution to TestPyPI
     needs:
     - build
