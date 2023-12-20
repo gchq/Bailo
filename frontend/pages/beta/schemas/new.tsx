@@ -1,6 +1,6 @@
 import { ArrowBack, Schema } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Container, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { postSchema, SchemaKind } from 'actions/schema'
 import { useRouter } from 'next/router'
@@ -147,16 +147,15 @@ export default function NewSchema() {
                 <Typography fontWeight='bold'>
                   Schema Type <span style={{ color: 'red' }}>*</span>
                 </Typography>
-                <TextField
-                  select
+                <Select
                   size='small'
                   required
                   value={schemaKind}
-                  onChange={(event): void => setSchemaKind(event.target.value as SchemaKind)}
+                  onChange={(e) => setSchemaKind(e.target.value as SchemaKind)}
                 >
-                  <MenuItem>{SchemaKind.MODEL}</MenuItem>
-                  <MenuItem>{SchemaKind.ACCESS}</MenuItem>
-                </TextField>
+                  <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
+                  <MenuItem value={SchemaKind.ACCESS}>Access Request</MenuItem>
+                </Select>
                 <Typography variant='caption'>
                   Schemas are used for both model cards and access request forms
                 </Typography>
