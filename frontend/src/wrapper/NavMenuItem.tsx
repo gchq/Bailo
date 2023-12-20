@@ -26,7 +26,7 @@ export function NavMenuItem({
 }: MenuItemProps) {
   return (
     <ListItem disablePadding>
-      <Link href={href}>
+      <Link href={href} style={{ width: '100%' }}>
         <ListItemButton selected={selectedPage === menuPage}>
           <ListItemIcon data-test={dataTest}>
             {!drawerOpen ? (

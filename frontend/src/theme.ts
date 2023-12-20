@@ -86,6 +86,9 @@ export const betaLightTheme = createTheme({
         root: {
           '&:hover': {
             backgroundColor: '#f5f5f5',
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#f7a4c0',
           },
           '&.Mui-selected': {
             borderRight: 'solid',

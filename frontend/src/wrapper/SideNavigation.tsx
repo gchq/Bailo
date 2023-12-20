@@ -121,7 +121,7 @@ export default function SideNavigation({
               icon={<DashboardIcon />}
             />
             <NavMenuItem
-              href='/beta/reviews'
+              href='/beta/review'
               selectedPage={page}
               primaryText='Reviews'
               drawerOpen={drawerOpen}
