@@ -1,4 +1,4 @@
-name: Publish Bailo Package to PyPI
+name: Publish Bailo Distribution to PyPI
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
       - name: Install pypa/build
         run: python3 -m pip install build --user
 
-      # Build Bailo package
+      # Build Bailo distribution
       - name: Build a binary wheel and a source tarball
         run: |
           cd lib/python-beta
