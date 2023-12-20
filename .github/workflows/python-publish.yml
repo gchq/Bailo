@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: python-package-distributions
-          path: lib/python-beta/dist/
+          path: dist/
 
       # Publish artifact to PyPI
       - name: Publish distribution to PyPI
