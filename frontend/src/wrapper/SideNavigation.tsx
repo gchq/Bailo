@@ -4,7 +4,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import { Divider, IconButton, List, MenuItem, Toolbar } from '@mui/material'
+import { Divider, IconButton, List, MenuItem, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, useEffect, useState } from 'react'
@@ -109,7 +109,7 @@ export default function SideNavigation({
         }}
       ></Toolbar>
       {drawerOpen !== undefined && (
-        <>
+        <Stack sx={{ height: '100%' }} justifyContent='space-between'>
           <StyledList>
             <NavMenuItem
               href='/beta'
@@ -165,6 +165,9 @@ export default function SideNavigation({
                 <Divider />
               </>
             )}
+          </StyledList>
+          <StyledList>
+            <Divider />
             <MenuItem>
               <IconButton
                 edge='start'
@@ -179,7 +182,7 @@ export default function SideNavigation({
               </IconButton>
             </MenuItem>
           </StyledList>
-        </>
+        </Stack>
       )}
     </Drawer>
   )
