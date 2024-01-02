@@ -28,8 +28,14 @@ exports[`routes > model > patchModel > 400 > bad visibility 1`] = `
         },
       ],
     },
-    "message": "Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
+    "message": "Path: body.visibility - Message: Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
     "name": "Error",
   },
+}
+`;
+
+exports[`routes > model > patchModel > audit > expected call 1`] = `
+{
+  "_id": "test",
 }
 `;

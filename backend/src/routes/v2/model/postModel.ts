@@ -2,10 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { ModelInterface, ModelVisibility } from '../../../models/v2/Model.js'
 import { createModel } from '../../../services/v2/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const postModelSchema = z.object({
   body: z.object({
@@ -46,12 +48,13 @@ interface PostModelResponse {
 export const postModel = [
   bodyParser.json(),
   async (req: Request, res: Response<PostModelResponse>) => {
+    req.audit = AuditInfo.CreateModel
     const { body } = parse(req, postModelSchema)
 
     const model = await createModel(req.user, body)
 
-    return res.json({
-      model,
-    })
+    await audit.onCreateModel(req, model)
+
+    return res.json({ model })
   },
 ]

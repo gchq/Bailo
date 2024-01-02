@@ -25,8 +25,16 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
         },
       ],
     },
-    "message": "Must specify schema id within the body",
+    "message": "Path: body.schemaId - Message: Must specify schema id within the body",
     "name": "Error",
   },
+}
+`;
+
+exports[`routes > model > postModel > audit > expected call 1`] = `"example"`;
+
+exports[`routes > model > postModel > audit > expected call 2`] = `
+{
+  "_id": "test",
 }
 `;

@@ -4,13 +4,13 @@ import { Box, Button, Card, Container, Grid, Stack, Typography } from '@mui/mate
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import { SchemaInterface } from 'types/types'
 
 import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
 import Loading from '../../../../../src/common/Loading'
-import MessageAlert from '../../../../../src/MessageAlert'
 import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SchemaKind } from '../../../../../types/v2/types'
@@ -27,9 +27,10 @@ export default function NewSchemaSelection() {
     router.push(`/beta/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
   }
 
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load schema page`, {
+    isSchemasError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Select a schema' page='upload'>
@@ -63,8 +64,7 @@ export default function NewSchemaSelection() {
                       <SchemaButton
                         key={activeSchema.id}
                         schema={activeSchema}
-                        modelId={modelId}
-                        onClickAction={() => handleSchemaSelectionOnClick(activeSchema)}
+                        onClick={() => handleSchemaSelectionOnClick(activeSchema)}
                       />
                     ))}
                   {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
@@ -79,8 +79,7 @@ export default function NewSchemaSelection() {
                     <SchemaButton
                       key={inactiveSchema.id}
                       schema={inactiveSchema}
-                      modelId={modelId}
-                      onClickAction={() => handleSchemaSelectionOnClick(inactiveSchema)}
+                      onClick={() => handleSchemaSelectionOnClick(inactiveSchema)}
                     />
                   ))}
                 {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}

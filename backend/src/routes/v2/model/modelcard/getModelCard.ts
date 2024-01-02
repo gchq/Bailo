@@ -2,11 +2,13 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { ModelCardInterface } from '../../../../models/v2/Model.js'
 import { getModelCard as getModelCardService } from '../../../../services/v2/model.js'
 import { modelCardInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getModelCardSchema = z.object({
   params: z.object({
@@ -44,11 +46,14 @@ interface GetModelCardResponse {
 export const getModelCard = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelCardResponse>) => {
+    req.audit = AuditInfo.ViewModelCard
     const {
       params: { modelId, version },
     } = parse(req, getModelCardSchema)
 
     const modelCard = await getModelCardService(req.user, modelId, version)
+
+    await audit.onViewModelCard(req, modelId, modelCard)
 
     return res.json({ modelCard })
   },

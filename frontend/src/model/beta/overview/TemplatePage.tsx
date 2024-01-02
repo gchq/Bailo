@@ -28,7 +28,6 @@ export default function TemplatePage({ model }: TemplatePageProps) {
           divider={<Divider orientation='vertical' flexItem />}
         >
           <Card
-            variant='outlined'
             sx={{
               width: '300px',
               p: 2,
@@ -57,7 +56,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
               </Typography>
               <Typography>Create a model from scratch using a predefined schema.</Typography>
               <Link href={`/beta/model/${model.id}/schema`}>
-                <Button sx={{ width: '100%' }} variant='contained'>
+                <Button sx={{ width: '100%' }} variant='contained' data-test='createSchemaFromScratchButton'>
                   Create
                 </Button>
               </Link>

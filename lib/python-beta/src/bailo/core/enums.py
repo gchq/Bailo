@@ -3,42 +3,28 @@ from __future__ import annotations
 from enum import Enum
 
 
-class ModelVisibility(str, Enum):
+class ValuedEnum(str, Enum):
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+class ModelVisibility(ValuedEnum):
     """Whether a model is publicly visible or not"""
 
-    Private = "private"
-    Public = "public"
-
-    def __str__(self):
-        return str(self.value)
+    PRIVATE = "private"
+    PUBLIC = "public"
 
 
-class SchemaKind(str, Enum):
+class SchemaKind(ValuedEnum):
     """A type of schema"""
 
-    Model = "model"
-    AccessRequest = "accessRequest"
-
-    def __str__(self):
-        return str(self.value)
+    MODEL = "model"
+    ACCESS_REQUEST = "accessRequest"
 
 
-class Role(str, Enum):
+class Role(ValuedEnum):
     """A reviewing role"""
 
-    Owner = "owner"
-    ModelTechniqualReviewer = "mtr"
-    ModelSeniorResponsibleOfficer = "msro"
-
-    def __str__(self):
-        return str(self.value)
-
-
-class ReviewDecision(str, Enum):
-    """Outcome of a review"""
-
-    RequestChanges = "request_changes"
-    Approve = "approve"
-
-    def __str__(self):
-        return str(self.value)
+    OWNER = "owner"
+    MODEL_TECNICAL_REVIEWER = "mtr"
+    MODEL_SENIOR_RESPONSABILITY_OFFICER = "msro"

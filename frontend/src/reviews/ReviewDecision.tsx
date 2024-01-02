@@ -24,7 +24,6 @@ export default function ReviewDecision({ user, decision }: ReviewDecisionProps) 
           width: '100%',
           p: 1,
         }}
-        variant='outlined'
       >
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>

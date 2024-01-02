@@ -4,13 +4,13 @@ import { z } from 'zod'
 
 import { UserDoc } from '../../../models/v2/User.js'
 import { registerPath, userInterfaceSchema } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getCurrentUserSchema = z.object({})
 
 registerPath({
   method: 'get',
-  path: '/api/v2/users/me',
+  path: '/api/v2/entities/me',
   tags: ['user'],
   description: 'Get the current user',
   schema: getCurrentUserSchema,
@@ -19,7 +19,7 @@ registerPath({
       description: 'Details about the currently logged in user.',
       content: {
         'application/json': {
-          schema: z.object({ model: userInterfaceSchema }),
+          schema: z.object({ user: userInterfaceSchema }),
         },
       },
     },

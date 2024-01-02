@@ -45,7 +45,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     <>
       {(isActiveReviewsLoading || isInactiveReviewsLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Card variant='outlined' sx={{ width: '100%' }}>
+        <Card sx={{ width: '100%' }}>
           {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
@@ -86,7 +86,6 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                   pb: 2,
                   width: '100%',
                 }}
-                variant='outlined'
               >
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users

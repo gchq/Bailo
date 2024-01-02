@@ -9,6 +9,7 @@ import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { ReleaseInterface } from 'types/types'
+import { FileInterface, isFileInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {
@@ -20,8 +21,8 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
-  const [artefacts, setArtefacts] = useState<File[]>([]) // TODO - Default to using the release artefact files (BAI-1026)
-  const [artefactsMetadata, setArtefactsMetadata] = useState<FileWithMetadata[]>([])
+  const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -35,10 +36,10 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
-    setArtefacts([]) // TODO - Reset the release artefact files (BAI-1026)
-    setArtefactsMetadata([])
+    setFiles(release.files)
+    setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: '' })))
     setImageList(release.images)
-  }, [release.images, release.minor, release.notes, release.semver])
+  }, [release.semver, release.notes, release.minor, release.files, release.images])
 
   useEffect(() => {
     resetForm()
@@ -69,14 +70,22 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     setIsLoading(true)
 
     const fileIds: string[] = []
-    for (const artefact of artefacts) {
-      const postArtefactResponse = await postFile(artefact, model.id, artefact.name, artefact.type)
-      if (postArtefactResponse.ok) {
-        const res = await postArtefactResponse.json()
-        fileIds.push(res.file._id)
-      } else {
-        return setErrorMessage(await getErrorMessage(postArtefactResponse))
+    for (const file of files) {
+      if (isFileInterface(file)) {
+        fileIds.push(file._id)
+        continue
       }
+
+      const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
+
+      if (!postFileResponse.ok) {
+        setErrorMessage(await getErrorMessage(postFileResponse))
+        return setIsLoading(false)
+      }
+
+      const res = await postFileResponse.json()
+      fileIds.push(res.file._id)
     }
 
     const updatedRelease: UpdateReleaseParams = {
@@ -85,21 +94,19 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds: fileIds,
+      fileIds,
       images: imageList,
     }
 
     const response = await putRelease(updatedRelease)
 
     if (!response.ok) {
-      const error = await getErrorMessage(response)
-      setIsLoading(false)
-      return setErrorMessage(error)
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      setIsEdit(false)
+      mutateReleases()
     }
-
     setIsLoading(false)
-    setIsEdit(false)
-    mutateReleases()
   }
 
   return (
@@ -127,15 +134,15 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
           semver,
           releaseNotes,
           isMinorRelease,
-          artefacts,
+          files,
           imageList,
         }}
-        artefactsMetadata={artefactsMetadata}
+        filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-        onArtefactsChange={(value) => setArtefacts(value)}
-        onArtefactsMetadataChange={(value) => setArtefactsMetadata(value)}
+        onFilesChange={(value) => setFiles(value)}
+        onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
       />
     </Box>

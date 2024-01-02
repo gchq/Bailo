@@ -1,8 +1,11 @@
-"""Client for Bailo."""
-
 from __future__ import annotations
 
-from bailo.core import *
-from bailo.helper import *
+__version__ = "0.2.1"
 
-__version__ = "0.2.0"
+from bailo.core.agent import Agent
+from bailo.core.client import Client
+from bailo.core.enums import ModelVisibility, Role, SchemaKind
+from bailo.helper.access_request import AccessRequest
+from bailo.helper.model import Model
+from bailo.helper.release import Release
+from bailo.helper.schema import Schema

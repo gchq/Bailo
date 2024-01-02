@@ -4,7 +4,8 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useState } from 'react'
+import { EntityObject } from 'types/v2/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -23,20 +24,17 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
+  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersLoading: isLoading } = useListUsers(userListQuery)
+  const { users, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
 
-  const entities = useMemo(() => {
-    if (!users) return []
-    return users.map((entity) => entity.id)
-  }, [users])
-
   const handleUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValues: string[]) => {
-      onChange(newValues)
+    (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
+      onChange(newValues.map((value) => `${value.kind}:${value.id}`))
+      setSelectedEntities(newValues)
     },
     [onChange],
   )
@@ -53,12 +51,17 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
+  if (isUsersError) {
+    return <MessageAlert message={isUsersError.info.message} severity='error' />
+  }
+
   return (
     <>
       {isCurrentUserLoading && <Loading />}
       {currentUser && formContext && formContext.editMode && (
-        <Autocomplete
+        <Autocomplete<EntityObject, true, true>
           multiple
+          data-test='entitySelector'
           open={open}
           size='small'
           onOpen={() => {
@@ -67,16 +70,21 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           onClose={() => {
             setOpen(false)
           }}
-          clearIcon={false}
-          // we might get a string or an object back
-          isOptionEqualToValue={(option: string, value: string) => option === value}
-          getOptionLabel={(option) => option}
-          value={currentValue || []}
+          disableClearable
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          getOptionLabel={(option) => option.id}
+          value={selectedEntities || []}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
-          options={entities || []}
-          loading={isLoading}
+          options={users || []}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Box key={option.id} sx={{ maxWidth: '200px' }}>
+                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.id} />
+              </Box>
+            ))
+          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -106,7 +114,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
-                <Chip label={entity} key={entity} sx={{ width: 'fit-content' }} />
+                <Chip label={entity.split(':')[1] || entity} key={entity} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>

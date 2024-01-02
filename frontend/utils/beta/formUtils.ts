@@ -6,8 +6,11 @@ import remove from 'lodash/remove'
 import { cloneDeep } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
+import DateSelector from 'src/MuiForms/DateSelector'
+import Dropdown from 'src/MuiForms/Dropdown'
 import EntitySelector from 'src/MuiForms/EntitySelector'
 import EntitySelectorBeta from 'src/MuiForms/EntitySelectorBeta'
+import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import SeldonVersionSelector from 'src/MuiForms/SeldonVersionSelector'
@@ -21,11 +24,14 @@ import { createUiSchema } from '../uiSchemaUtils'
 export const widgets = {
   TextWidget: CustomTextInput,
   TextareaWidget: RichTextInput,
+  DateWidget: DateSelector,
   tagSelector: TagSelector,
   tagSelectorBeta: TagSelectorBeta,
   userSelector: UserSelector,
   entitySelector: EntitySelector,
   entitySelectorBeta: EntitySelectorBeta,
+  SelectWidget: Dropdown,
+  multiSelector: MultipleDropdown,
   seldonVersionSelector: SeldonVersionSelector,
   nothing: Nothing,
 }

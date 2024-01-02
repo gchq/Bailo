@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { ModelCardRevisionInterface } from '../../../../models/v2/ModelCardRevision.js'
 import { createModelCardFromSchema } from '../../../../services/v2/model.js'
 import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
@@ -47,13 +49,18 @@ interface PostFromSchemaResponse {
 export const postFromSchema = [
   bodyParser.json(),
   async (req: Request, res: Response<PostFromSchemaResponse>) => {
+    req.audit = AuditInfo.CreateModelCard
     const {
       params: { modelId },
       body: { schemaId },
     } = parse(req, postFromSchemaSchema)
 
+    const modelCard = await createModelCardFromSchema(req.user, modelId, schemaId)
+
+    await audit.onCreateModelCard(req, modelId, modelCard)
+
     return res.json({
-      card: await createModelCardFromSchema(req.user, modelId, schemaId),
+      card: modelCard,
     })
   },
 ]

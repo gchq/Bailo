@@ -11,6 +11,7 @@ import {
 } from '../../src/services/v2/review.js'
 import { ReviewKind } from '../../src/types/v2/enums.js'
 
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
@@ -34,6 +35,9 @@ const reviewModelMock = vi.hoisted(() => {
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
+
+  model.map = vi.fn(() => [])
+  model.filter = vi.fn(() => [])
 
   return model
 })
@@ -71,7 +75,6 @@ const logMock = vi.hoisted(() => ({
 vi.mock('../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
-
 const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))

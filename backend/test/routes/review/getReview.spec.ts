@@ -1,11 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testReleaseReview, testReleaseReviewWithResponses } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/utils/v2/config.js')
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
+vi.mock('../../../src/connectors/v2/audit/index.js')
 
 const reviews = [testReleaseReviewWithResponses]
 const mockReviewService = vi.hoisted(() => {
@@ -24,6 +26,14 @@ describe('routes > review > getReviews', () => {
     expect(res.statusCode).toBe(200)
     expect(res.header['x-count']).toBe(reviews.length.toString())
     expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    const res = await testGet(`${endpoint}?active=false`)
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onSearchReviews).toBeCalled()
+    expect(audit.onSearchReviews.mock.calls.at(0).at(1)).toMatchSnapshot()
   })
 
   test('returns only active reviews', async () => {

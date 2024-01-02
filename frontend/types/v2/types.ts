@@ -38,7 +38,7 @@ export interface ModelCardRevisionInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
 export type ModelForm = {
@@ -76,6 +76,10 @@ export interface FileInterface {
 
   createdAt: Date
   updatedAt: Date
+}
+
+export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
+  return (file as FileInterface).bucket !== undefined
 }
 
 export interface PostSimpleUpload {

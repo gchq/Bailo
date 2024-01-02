@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema'
 
 import authentication from '../../connectors/v2/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/Base.js'
+import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import ModelModel from '../../models/v2/Model.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
@@ -13,7 +13,6 @@ import {
   GetModelFiltersKeys,
 } from '../../types/v2/enums.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { asyncFilter } from '../../utils/v2/array.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
@@ -36,8 +35,9 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
     ],
   })
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Create))) {
-    throw Forbidden(`You do not have permission to create this model.`, { userDn: user.dn })
+  const auth = await authorisation.model(user, model, ModelAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
   }
 
   await model.save()
@@ -54,8 +54,9 @@ export async function getModelById(user: UserDoc, modelId: string) {
     throw NotFound(`The requested model was not found.`, { modelId })
   }
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.View))) {
-    throw Forbidden(`You do not have permission to get this model.`, { userDn: user.dn, modelId })
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   return model
@@ -69,7 +70,9 @@ export async function canUserActionModelById(user: UserDoc, modelId: string, act
   // This function is made for simplicity, most functions that call this will
   // only be infrequently called.
   const model = await getModelById(user, modelId)
-  return authorisation.userModelAction(user, model, action)
+
+  const auth = await authorisation.model(user, model, action)
+  return auth
 }
 
 export async function searchModels(
@@ -116,13 +119,14 @@ export async function searchModels(
     }
   }
 
-  const results = ModelModel
+  const results = await ModelModel
     // Find only matching documents
     .find(query)
     // Sort by last updated
     .sort({ updatedAt: -1 })
 
-  return asyncFilter(await results, (result) => authorisation.userModelAction(user, result, ModelAction.View))
+  const auths = await authorisation.models(user, results, ModelAction.View)
+  return results.filter((_, i) => auths[i].success)
 }
 
 export async function getModelCard(user: UserDoc, modelId: string, version: number | GetModelCardVersionOptionsKeys) {
@@ -141,13 +145,15 @@ export async function getModelCard(user: UserDoc, modelId: string, version: numb
 
 export async function getModelCardRevision(user: UserDoc, modelId: string, version: number) {
   const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
+  const model = await getModelById(user, modelId)
 
   if (!modelCard) {
     throw NotFound(`Version '${version}' does not exist on the requested model`, { modelId, version })
   }
 
-  if (!(await canUserActionModelById(user, modelCard.modelId, ModelAction.View))) {
-    throw Forbidden(`You do not have permission to get this model card.`, { userDn: user.dn, modelId })
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   return modelCard
@@ -160,9 +166,11 @@ export async function getModelCardRevisions(user: UserDoc, modelId: string) {
     throw NotFound(`Version '${modelId}' does not exist on the requested model`, { modelId })
   }
 
-  return asyncFilter(modelCardRevisions, (modelCard) =>
-    canUserActionModelById(user, modelCard.modelId, ModelAction.View),
-  )
+  // We don't track the classification of individual model cards.  Instead, we should
+  // ensure that the model is accessible to the user.
+  const _model = await getModelById(user, modelId)
+
+  return modelCardRevisions
 }
 
 // This is an internal function.  Use an equivalent like 'updateModelCard' or 'createModelCardFromSchema'
@@ -185,9 +193,11 @@ export async function _setModelCard(
   // a lock on the collection that would likely be a significant slowdown to the query.
   //
   // It is assumed that this race case will occur infrequently.
+  const model = await getModelById(user, modelId)
 
-  if (!(await canUserActionModelById(user, modelId, ModelAction.Write))) {
-    throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   // We don't want to copy across other values
@@ -213,8 +223,9 @@ export async function updateModelCard(
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
-    throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   if (!model.card) {
@@ -245,8 +256,9 @@ export type UpdateModelParams = Pick<
 export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
-    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
   }
 
   Object.assign(model, diff)
@@ -260,11 +272,12 @@ export async function createModelCardFromSchema(
   modelId: string,
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
-  if (!(await canUserActionModelById(user, modelId, ModelAction.Write))) {
-    throw Forbidden(`You do not have permission to update this model card.`, { userDn: user.dn, modelId })
-  }
-
   const model = await getModelById(user, modelId)
+
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
 
   if (model.card?.schemaId) {
     throw BadReq('This model already has a model card.', { modelId })

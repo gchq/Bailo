@@ -11,7 +11,7 @@ RUN mkdir /s2i && \
     rm -rf s2i.tar.gz
 
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
 RUN npm run build
@@ -41,7 +41,7 @@ COPY --from=installer /s2i /s2i
 RUN chmod -R o+x /s2i
 
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
 
 COPY --from=installer /app/config config
 COPY --from=installer /app/dist .

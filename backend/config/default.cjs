@@ -229,6 +229,10 @@ module.exports = {
     },
 
     authorisation: {
+      kind: 'basic',
+    },
+
+    audit: {
       kind: 'silly',
     },
   },

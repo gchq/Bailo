@@ -36,7 +36,7 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
             )}
             <Typography variant='caption'>
               <Box component='span' fontWeight='bold'>
-                {reviewResponse.user.split(':')[isAccepted ? 1 : 0]}
+                {reviewResponse.user.split(':')[1]}
               </Box>
               {` has ${isAccepted ? 'approved' : 'requested changes for'} this ${reviewKindText} (${getRoleDisplay(
                 review.role,
