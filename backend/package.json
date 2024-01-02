@@ -78,7 +78,7 @@
     "@anatine/zod-mock": "^3.13.3",
     "@faker-js/faker": "^8.0.2",
     "@swc/core": "^1.3.73",
-    "@types/adm-zip": "^0.5.3",
+    "@types/adm-zip": "^0.5.5",
     "@types/archiver": "^6.0.2",
     "@types/bunyan": "^1.8.10",
     "@types/config": "^3.3.2",
