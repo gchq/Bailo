@@ -14,8 +14,8 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { getReleaseBySemver } from './release.js'
 import {
-  requestResponsePostAccessRequestReviewResponse,
-  requestResponsePostReleaseReviewResponse,
+  notifyReviewResponseForAccess,
+  notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
   requestReviewForRelease,
 } from './smtp/smtp.js'
@@ -144,35 +144,35 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
-  sendReviewNotification(update, user)
+  sendReviewResponseNotification(update, user)
   return update
 }
 
-export async function sendReviewNotification(review: ReviewDoc, user: UserDoc) {
+export async function sendReviewResponseNotification(review: ReviewDoc, user: UserDoc) {
   let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
-        log.info('Cannot find modelId')
+        log.error('Unable to send notification for review response. Cannot find access request ID.')
         return
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
-      requestResponsePostAccessRequestReviewResponse(review, access)
+      notifyReviewResponseForAccess(review, access)
       break
     }
     case ReviewKind.Release: {
       if (!review.semver) {
-        log.info('Cannot find semver')
+        log.error('Unable to send notification for review response.Cannot find semver')
         return
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      requestResponsePostReleaseReviewResponse(review, release)
+      notifyReviewResponseForRelease(review, release)
       break
     }
     default:
-      throw BadReq('Review Kind not recognised', reviewIdQuery)
+      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
   }
 }
 

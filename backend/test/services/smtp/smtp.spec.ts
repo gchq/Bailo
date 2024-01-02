@@ -4,8 +4,8 @@ import AccessRequest from '../../../src/models/v2/AccessRequest.js'
 import Release from '../../../src/models/v2/Release.js'
 import Review from '../../../src/models/v2/Review.js'
 import {
-  requestResponsePostAccessRequestReviewResponse,
-  requestResponsePostReleaseReviewResponse,
+  notifyReviewResponseForAccess,
+  notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
   requestReviewForRelease,
 } from '../../../src/services/v2/smtp/smtp.js'
@@ -128,13 +128,13 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after a response for a release review', async () => {
-    await requestResponsePostReleaseReviewResponse(review, release)
+    await notifyReviewResponseForRelease(review, release)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('that an email is sent after a response for a an access request review', async () => {
-    await requestResponsePostAccessRequestReviewResponse(review, access)
+    await notifyReviewResponseForAccess(review, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })

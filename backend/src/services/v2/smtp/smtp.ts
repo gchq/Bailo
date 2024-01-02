@@ -88,7 +88,7 @@ export async function requestReviewForAccessRequest(
   await Promise.all(sendEmailResponses)
 }
 
-export async function requestResponsePostReleaseReviewResponse(review: ReviewDoc, release: ReleaseDoc) {
+export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -103,8 +103,7 @@ export async function requestResponsePostReleaseReviewResponse(review: ReviewDoc
     `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Reviewed on', data: review.createdAt.toDateString() },
-      { title: 'Conclusion', data: reviewResponse.decision.replace(/_/g, ' ') },
+      { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
       { name: 'Open Release', url: 'TODO' },
@@ -126,10 +125,7 @@ export async function requestResponsePostReleaseReviewResponse(review: ReviewDoc
   await Promise.all(sendEmailResponses)
 }
 
-export async function requestResponsePostAccessRequestReviewResponse(
-  review: ReviewDoc,
-  accessRequest: AccessRequestDoc,
-) {
+export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
@@ -141,14 +137,10 @@ export async function requestResponsePostAccessRequestReviewResponse(
     return
   }
   const emailContent = buildEmail(
-    `Access request for model ${
-      accessRequest.modelId
-    } has been reviewed by ${accessRequest.metadata.overview.entities.toString()}`,
+    `Access request for model ${accessRequest.modelId} has been reviewed by ${reviewResponse.user}`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
-      { title: 'Your Role', data: review.role.toUpperCase() },
-      { title: 'Reviewed on', data: review.createdAt.toDateString() },
-      { title: 'Conclusion', data: reviewResponse.decision.replace(/_/g, ' ') },
+      { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
       { name: 'Open Release', url: 'TODO' },

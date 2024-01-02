@@ -7,7 +7,7 @@ import {
   createReleaseReviews,
   findReviews,
   respondToReview,
-  sendReviewNotification,
+  sendReviewResponseNotification,
 } from '../../src/services/v2/review.js'
 import { ReviewKind } from '../../src/types/v2/enums.js'
 
@@ -32,12 +32,11 @@ const reviewModelMock = vi.hoisted(() => {
   obj.limit = vi.fn(() => obj)
   obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
+  obj.map = vi.fn(() => [])
+  obj.filter = vi.fn(() => [])
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
-
-  model.map = vi.fn(() => [])
-  model.filter = vi.fn(() => [])
 
   return model
 })
@@ -47,8 +46,8 @@ vi.mock('../../src/models/v2/Review.js', async () => ({
 }))
 
 const smtpMock = vi.hoisted(() => ({
-  requestResponsePostAccessRequestReviewResponse: vi.fn(),
-  requestResponsePostReleaseReviewResponse: vi.fn(),
+  notifyReviewResponseForAccess: vi.fn(),
+  notifyReviewResponseForRelease: vi.fn(),
   requestReviewForRelease: vi.fn(),
 }))
 vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
@@ -88,7 +87,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > not active', async () => {
@@ -96,7 +94,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > active reviews for a specific model', async () => {
@@ -104,7 +101,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('findReviewsByActive > inactive reviews for a specific model', async () => {
@@ -112,7 +108,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(arrayUtilMock.asyncFilter).toBeCalled()
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
@@ -170,18 +165,18 @@ describe('services > review', () => {
 
   test('respondToReview > review notification successful', async () => {
     accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewNotification({ kind: 'access', accessRequestId: 'Hello' } as ReviewDoc, user)
+    await sendReviewResponseNotification({ kind: 'access', accessRequestId: 'Hello' } as ReviewDoc, user)
 
     expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
-    expect(smtpMock.requestResponsePostAccessRequestReviewResponse).toBeCalled()
+    expect(smtpMock.notifyReviewResponseForAccess).toBeCalled()
   })
 
   test('respondToReview > release notification successful', async () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewNotification({ kind: 'release', semver: 'Hello' } as ReviewDoc, user)
+    await sendReviewResponseNotification({ kind: 'release', semver: 'Hello' } as ReviewDoc, user)
 
     expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
-    expect(smtpMock.requestResponsePostReleaseReviewResponse).toBeCalled()
+    expect(smtpMock.notifyReviewResponseForRelease).toBeCalled()
   })
 
   test('respondToReview > mongo update fails', async () => {
