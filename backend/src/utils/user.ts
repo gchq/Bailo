@@ -77,7 +77,7 @@ export async function getUserFromAuthHeader(
   }
 
   return {
-    token,
+    token: tokenDoc,
     user: {
       _id: tokenDoc.user,
       id: tokenDoc.user,
