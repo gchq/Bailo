@@ -154,7 +154,7 @@ export class BasicAuthorisationConnector {
   async releases(
     user: UserDoc,
     model: ModelDoc,
-    _releases: Array<ReleaseDoc>,
+    releases: Array<ReleaseDoc>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
     // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
@@ -166,7 +166,7 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.View]: ModelAction.View,
     }
 
-    return this.models(user, [model], actionMap[action])
+    return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
   }
 
   async accessRequests(
