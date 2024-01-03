@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash'
-import { KeyboardEvent, SyntheticEvent, useCallback, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { EntityObject } from 'types/v2/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
@@ -30,6 +30,13 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
+  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
+
+  useEffect(() => {
+    if (formContext && formContext.defaultCurrentUser) {
+      setSelectedEntities([{ id: currentUserId, kind: 'user' }])
+    }
+  }, [currentUserId, formContext])
 
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
@@ -88,6 +95,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
           renderInput={(params) => (
             <TextField
               {...params}
+              placeholder='Username or group name'
               label={label + (required ? ' *' : '')}
               onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {

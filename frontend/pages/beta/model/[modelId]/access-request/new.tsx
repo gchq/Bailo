@@ -112,6 +112,7 @@ export default function NewAccessRequest() {
                 setSplitSchema={setSplitSchema}
                 canEdit
                 displayLabelValidation
+                defaultCurrentUserInEntityList
               />
               <Stack alignItems='flex-end'>
                 <LoadingButton
