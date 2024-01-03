@@ -2,8 +2,11 @@ import { timingSafeEqual } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 
 import Authorisation from '../connectors/Authorisation.js'
+import { TokenDoc } from '../models/v2/Token.js'
+import { bailoErrorGuard } from '../routes/middleware/expressErrorHandler.js'
 import { getAdminToken } from '../routes/v1/registryAuth.js'
 import { findAndUpdateUser, findUserCached, getUserById } from '../services/user.js'
+import { getTokenFromAuthHeader } from '../services/v2/token.js'
 import { UserDoc } from '../types/types.js'
 import { Forbidden, Unauthorised } from './result.js'
 
@@ -27,7 +30,9 @@ function safelyCompareTokens(expected: string, actual: string) {
 
 // This is an authentication function.  Take care whilst editing it.  Notes:
 // - the password is not hashed, so comparisons _must_ be done in constant time
-export async function getUserFromAuthHeader(header: string): Promise<{ error?: string; user?: any; admin?: boolean }> {
+export async function getUserFromAuthHeader(
+  header: string,
+): Promise<{ error?: string; user?: any; admin?: boolean; token?: TokenDoc }> {
   const [method, code] = header.split(' ')
 
   if (method.toLowerCase() !== 'basic') {
@@ -46,17 +51,39 @@ export async function getUserFromAuthHeader(header: string): Promise<{ error?: s
 
   const user = await getUserById(username, { includeToken: true })
 
-  if (!user) {
-    return { error: 'User not found' }
+  if (user) {
+    const isValid = await user.compareToken(token)
+
+    if (!isValid) {
+      return { error: 'Incorrect token is wrong' }
+    }
+
+    return { user }
   }
 
-  const isValid = await user.compareToken(token)
-
-  if (!isValid) {
-    return { error: 'Incorrect token is wrong' }
+  let tokenDoc: TokenDoc | undefined = undefined
+  try {
+    tokenDoc = await getTokenFromAuthHeader(header)
+  } catch (e: unknown) {
+    if (bailoErrorGuard(e) && e.code) {
+      return { error: e.message }
+    } else {
+      throw e
+    }
   }
 
-  return { user }
+  if (!tokenDoc) {
+    return { error: 'No user found' }
+  }
+
+  return {
+    token,
+    user: {
+      _id: tokenDoc.user,
+      id: tokenDoc.user,
+      dn: tokenDoc.user,
+    },
+  }
 }
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {

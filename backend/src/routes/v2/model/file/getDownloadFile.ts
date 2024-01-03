@@ -5,6 +5,7 @@ import stream from 'stream'
 import { z } from 'zod'
 
 import { FileInterface } from '../../../../models/v2/File.js'
+import { TokenActions } from '../../../../models/v2/Token.js'
 import { downloadFile, getFileById } from '../../../../services/v2/file.js'
 import { validateTokenForModel } from '../../../../services/v2/token.js'
 import { BadReq, InternalError } from '../../../../utils/v2/error.js'
@@ -32,7 +33,7 @@ export const getDownloadFile = [
 
     if (req.token) {
       // Check that the token can be used for the requested model.
-      await validateTokenForModel(req.token, file.modelId)
+      await validateTokenForModel(req.token, file.modelId, TokenActions.FileRead)
     }
 
     // required to support utf-8 file names

@@ -108,12 +108,20 @@ export async function getTokenFromAuthHeader(header: string) {
   return token
 }
 
-export async function validateTokenForModel(token: TokenDoc, modelId: string) {
+export async function validateTokenForModel(token: TokenDoc, modelId: string, action: TokenActionsKeys) {
   if (token.scope === 'models' && !token.modelIds.includes(modelId)) {
     throw Unauthorized('This token may not be used for this model', {
       accessKey: token.accessKey,
       modelIds: token.modelIds,
       modelId,
+    })
+  }
+
+  if (!token.actions.includes(action)) {
+    throw Unauthorized('This token may not be used for this action', {
+      accessKey: token.accessKey,
+      actions: token.actions,
+      action,
     })
   }
 
