@@ -7,16 +7,27 @@ import { z } from 'zod'
 import { FileInterface } from '../../../../models/v2/File.js'
 import { TokenActions } from '../../../../models/v2/Token.js'
 import { downloadFile, getFileById } from '../../../../services/v2/file.js'
+import { getFileByReleaseFileName } from '../../../../services/v2/release.js'
 import { validateTokenForModel } from '../../../../services/v2/token.js'
 import { BadReq, InternalError } from '../../../../utils/v2/error.js'
 import { parse } from '../../../../utils/v2/validate.js'
 
-export const getDownloadFileSchema = z.object({
-  params: z.object({
-    modelId: z.string(),
-    fileId: z.string(),
-  }),
-})
+export const getDownloadFileSchema = z
+  .object({
+    params: z.object({
+      modelId: z.string(),
+      fileId: z.string(),
+    }),
+  })
+  .or(
+    z.object({
+      params: z.object({
+        modelId: z.string(),
+        semver: z.string(),
+        fileName: z.string(),
+      }),
+    }),
+  )
 
 interface GetDownloadFileResponse {
   files: Array<FileInterface>
@@ -25,9 +36,15 @@ interface GetDownloadFileResponse {
 export const getDownloadFile = [
   bodyParser.json(),
   async (req: Request, res: Response<GetDownloadFileResponse>) => {
-    const {
-      params: { fileId },
-    } = parse(req, getDownloadFileSchema)
+    const { params } = parse(req, getDownloadFileSchema)
+
+    let fileId: string
+    if ('semver' in params) {
+      const file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
+      fileId = String(file._id)
+    } else {
+      fileId = params.fileId
+    }
 
     const file = await getFileById(req.user, fileId)
 
