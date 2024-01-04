@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 from bailo.core.agent import Agent
 from bailo.core.client import Client
