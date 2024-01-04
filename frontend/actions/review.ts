@@ -6,18 +6,13 @@ import { ModelInterface, ReleaseInterface } from 'types/types'
 import { AccessRequestInterface, ReviewRequestInterface } from '../types/interfaces'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export function useGetReviewRequestsForUser(isActive = true) {
+export function useGetReviewRequestsForUser() {
   const { data, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
     },
     ErrorInfo
-  >(
-    `/api/v2/reviews?${qs.stringify({
-      active: isActive,
-    })}`,
-    fetcher,
-  )
+  >('/api/v2/reviews', fetcher)
 
   return {
     mutateReviews: mutate,
@@ -39,15 +34,9 @@ type SemverOrAccessRequestId =
 
 type GetReviewRequestsForModelQuery = {
   modelId?: ModelInterface['id']
-  isActive: boolean
 } & SemverOrAccessRequestId
 
-export function useGetReviewRequestsForModel({
-  modelId,
-  isActive,
-  semver,
-  accessRequestId,
-}: GetReviewRequestsForModelQuery) {
+export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
   const { data, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
@@ -57,7 +46,6 @@ export function useGetReviewRequestsForModel({
     (modelId && semver) || (modelId && accessRequestId)
       ? `/api/v2/reviews?${qs.stringify({
           modelId,
-          active: isActive,
           ...(semver && { semver }),
           ...(accessRequestId && { accessRequestId }),
         })}`
@@ -71,13 +59,6 @@ export function useGetReviewRequestsForModel({
     isReviewsLoading: !error && !data,
     isReviewsError: error,
   }
-}
-
-export async function getReviewCount() {
-  return fetch('/api/v2/reviews?active=true', {
-    method: 'head',
-    headers: { 'Content-Type': 'application/json' },
-  })
 }
 
 type PostReviewResponseParams = {

@@ -15,7 +15,6 @@ import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/s
 
 export async function findReviews(
   user: UserDoc,
-  active: boolean,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
@@ -23,7 +22,6 @@ export async function findReviews(
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
   const reviews = await Review.aggregate()
     .match({
-      responses: active ? { $size: 0 } : { $not: { $size: 0 } },
       ...(modelId ? { modelId } : {}),
       ...(semver ? { semver } : {}),
       ...(accessRequestId ? { accessRequestId } : {}),
@@ -85,7 +83,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export type ReviewResponseParams = Pick<ReviewResponse, 'decision' | 'comment'>
+export type ReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
 export async function respondToReview(
   user: UserDoc,
   modelId: string,

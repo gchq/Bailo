@@ -74,7 +74,6 @@ export default function ReviewWithComment({
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
-    isActive: true,
     ...semverOrAccessRequestIdObject,
   })
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
@@ -134,7 +133,6 @@ export default function ReviewWithComment({
                 }
                 onChange={onChange}
                 value={reviewRequest}
-                disabled={reviews.length === 1}
                 getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
                 options={reviews}
                 renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}

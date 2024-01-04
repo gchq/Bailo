@@ -26,24 +26,11 @@ export default function ReleaseDisplay({
 }) {
   const router = useRouter()
 
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: model.id,
     semver: release.semver,
-    isActive: true,
   })
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-  } = useGetReviewRequestsForModel({
-    modelId: model.id,
-    semver: release.semver,
-    isActive: false,
-  })
+
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   function latestVersionAdornment() {
@@ -52,12 +39,8 @@ export default function ReleaseDisplay({
     }
   }
 
-  if (isActiveReviewsError) {
-    return <MessageAlert message={isActiveReviewsError.info.message} severity='error' />
-  }
-
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
   if (isUiConfigError) {
@@ -66,10 +49,10 @@ export default function ReleaseDisplay({
 
   return (
     <>
-      {(isActiveReviewsLoading || isInactiveReviewsLoading || isUiConfigLoading) && <Loading />}
+      {(isReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {activeReviews.length > 0 && <ReviewBanner release={release} />}
+          {reviews.length > 0 && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
@@ -151,8 +134,8 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
-              {inactiveReviews.map((review) => (
+              {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
+              {reviews.map((review) => (
                 <ReviewDisplay review={review} key={review.semver} />
               ))}
             </Stack>

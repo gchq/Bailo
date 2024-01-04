@@ -14,39 +14,21 @@ type AccessRequestDisplayProps = {
 }
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
-    isActive: true,
-  })
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-  } = useGetReviewRequestsForModel({
-    modelId: accessRequest.modelId,
-    accessRequestId: accessRequest.id,
-    isActive: false,
   })
 
-  if (isActiveReviewsError) {
-    return <MessageAlert message={isActiveReviewsError.info.message} severity='error' />
-  }
-
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
   return (
     <>
-      {(isActiveReviewsLoading || isInactiveReviewsLoading) && <Loading />}
+      {isReviewsLoading && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+          {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>
@@ -99,8 +81,8 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Grid>
               </Card>
             </Stack>
-            {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
-            {inactiveReviews.map((review) => (
+            {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
+            {reviews.map((review) => (
               <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
