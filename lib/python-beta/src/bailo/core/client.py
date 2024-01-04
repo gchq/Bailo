@@ -311,11 +311,8 @@ class Client:
         :param buffer: BytesIO object for bailo to write to
         :return: The unique file ID
         """
-        with self.agent.get(
-            f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
-        ) as req:
-            with buffer as file:
-                shutil.copyfileobj(req.raw, file)
+        req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
+        shutil.copyfileobj(req.raw, buffer)
         return file_id
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
