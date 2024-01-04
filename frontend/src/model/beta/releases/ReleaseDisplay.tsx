@@ -13,7 +13,7 @@ import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
 import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
-import ReviewDisplay from '../reviews/ReviewDisplay'
+//import ReviewDisplay from '../reviews/ReviewDisplay'
 
 export default function ReleaseDisplay({
   model,
@@ -134,10 +134,11 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
+              {/* TODO (1097) - We need to find the latest review for each role and put it has a review "status" * }
+              {/* {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
               {reviews.map((review) => (
                 <ReviewDisplay review={review} key={review.semver} />
-              ))}
+              ))} */}
             </Stack>
           </Stack>
         </Card>
