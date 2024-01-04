@@ -1,6 +1,6 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { EntityObject } from 'types/v2/types'
+import { EntityObject, ModelInterface, TokenActionsKeys, TokenScopeKeys, User } from 'types/v2/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -28,9 +28,7 @@ export function useListUsers(q: string) {
 }
 
 interface UserResponse {
-  user: {
-    dn: string
-  }
+  user: User
 }
 
 export function useGetCurrentUser() {
@@ -42,4 +40,17 @@ export function useGetCurrentUser() {
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
   }
+}
+
+export function postUserToken(
+  description: string,
+  scope: TokenScopeKeys,
+  modelIds: ModelInterface['id'][],
+  actions: TokenActionsKeys[],
+) {
+  return fetch('/api/v2/user/tokens', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description, scope, modelIds, actions }),
+  })
 }
