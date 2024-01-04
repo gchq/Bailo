@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -31,7 +31,13 @@ export default function PageWithTabs({
 }) {
   const router = useRouter()
   const { tab } = router.query
-  const [currentTab, setCurrentTab] = useState(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+
+  const [currentTab, setCurrentTab] = useState('')
+
+  useEffect(() => {
+    if (!tabs.length) return
+    setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+  }, [tab, tabs])
 
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
