@@ -129,7 +129,8 @@ export default function NewToken() {
   const handleSubmit = async () => {
     setIsLoading(true)
     const scope = isAllModels ? TokenScope.All : TokenScope.Models
-    const response = await postUserToken(description, scope, selectedModels, selectedActions)
+    const modelIds = isAllModels ? [] : selectedModels
+    const response = await postUserToken(description, scope, modelIds, selectedActions)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
