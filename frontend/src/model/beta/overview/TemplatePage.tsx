@@ -10,7 +10,7 @@ type TemplatePageProps = {
 
 export default function TemplatePage({ model }: TemplatePageProps) {
   return (
-    <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
+    <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
       <Stack spacing={4} justifyContent='center' alignItems='center'>
         <Typography component='h2' variant='h6' color='primary' data-test='createModelCardOverview'>
           Create a model card
