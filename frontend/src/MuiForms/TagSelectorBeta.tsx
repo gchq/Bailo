@@ -23,7 +23,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
         <>
           <Typography fontWeight='bold'>
             {label}
-            {required && <span style={{ color: 'red' }}>{' *'}</span>}
+            {required && <span style={{ color: theme.palette.error.light }}>{' *'}</span>}
           </Typography>
           <Autocomplete
             multiple

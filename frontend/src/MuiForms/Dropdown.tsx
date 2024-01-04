@@ -37,7 +37,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
     <Fragment key={label}>
       <Typography fontWeight='bold'>
         {label}
-        {required && <span style={{ color: 'red' }}>{' *'}</span>}
+        {required && <span style={{ color: theme.palette.error.light }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <Autocomplete
