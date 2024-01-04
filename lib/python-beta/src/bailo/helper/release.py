@@ -147,12 +147,12 @@ class Release:
         :param name: The name of the file to upload to bailo
         :param f: A BytesIO object
 
-        :return: A JSON response object
+        :return: The unique file ID of the file uploaded
         """
         res = self.client.simple_upload(self.model_id, name, file).json()
         self.files.append(res["file"]["id"])
         self.update()
-        return res
+        return res["file"]["id"]
 
     def update(self) -> Any:
         """Updates the any changes to this release on Bailo.
