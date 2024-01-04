@@ -56,6 +56,11 @@ export const getSpecification = [
               'Schemas are used to define what contents a model card should contain.  They follow the JsonSchema specification.',
           },
           {
+            name: 'token',
+            description:
+              'Tokens are used to grant access to models.  They give constrained permissions to Bailo, allowing fine-grained permissions for deployments.',
+          },
+          {
             name: 'user',
             description: 'A user represents an individual who has accessed this service.',
           },

@@ -7,6 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
 import { BaseAuditConnector } from './Base.js'
@@ -32,6 +33,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateRelease(_req: Request, _release: ReleaseDoc) {}
   onDeleteRelease(_req: Request, _modelId: string, _semver: string) {}
   onSearchReleases(_req: Request, _releases: ReleaseDoc[]) {}
+  onCreateUserToken(_req: Request, _token: TokenDoc) {}
+  onViewUserTokens(_req: Request, _tokens: TokenDoc[]) {}
+  onDeleteUserToken(_req: Request, _accessKey: string) {}
   onCreateAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onViewAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onUpdateAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}

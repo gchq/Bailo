@@ -97,7 +97,7 @@ class Model:
         )
         self.__unpack(res["model"])
 
-    def update_model_card(self, model_card: dict[str, Any] = None) -> None:
+    def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
         """Uploads and retrieves any changes to the model card on Bailo
 
         :param model_card: Model card dictionary, defaults to None
