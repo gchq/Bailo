@@ -1,6 +1,6 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { EntityObject, ModelInterface, TokenActionsKeys, TokenScopeKeys, User } from 'types/v2/types'
+import { EntityObject, ModelInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/v2/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -32,13 +32,28 @@ interface UserResponse {
 }
 
 export function useGetCurrentUser() {
-  const { data, error, mutate } = useSWR<UserResponse, ErrorInfo>(`/api/v2/entities/me`, fetcher)
+  const { data, error, mutate } = useSWR<UserResponse, ErrorInfo>('/api/v2/entities/me', fetcher)
 
   return {
     mutateCurrentUser: mutate,
     currentUser: data?.user || undefined,
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
+  }
+}
+
+interface GetUserTokensResponse {
+  tokens: TokenInterface[]
+}
+
+export function useGetUserTokens() {
+  const { data, error, mutate } = useSWR<GetUserTokensResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
+
+  return {
+    mutateTokens: mutate,
+    tokens: data?.tokens || [],
+    isTokensLoading: !error && !data,
+    isTokensError: error,
   }
 }
 
@@ -52,5 +67,11 @@ export function postUserToken(
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ description, scope, modelIds, actions }),
+  })
+}
+
+export function deleteUserToken(accessKey: TokenInterface['accessKey']) {
+  return fetch(`/api/v2/user/token/${accessKey}`, {
+    method: 'delete',
   })
 }

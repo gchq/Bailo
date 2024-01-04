@@ -56,7 +56,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Token</DialogTitle>
+      <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
         <MessageAlert
           message='You will never be able to access this token again. Make sure to copy it to a safe place.'
