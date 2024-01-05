@@ -1,8 +1,11 @@
 import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
+import _ from 'lodash'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { formatDateString } from 'utils/dateUtils'
+import { useEffect, useState } from 'react'
+import { ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
@@ -13,7 +16,7 @@ import Link from '../../../Link'
 import MessageAlert from '../../../MessageAlert'
 import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
-//import ReviewDisplay from '../reviews/ReviewDisplay'
+import ReviewDisplay from '../reviews/ReviewDisplay'
 
 export default function ReleaseDisplay({
   model,
@@ -33,11 +36,35 @@ export default function ReleaseDisplay({
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
+
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
       return <Typography color='secondary'>(Latest)</Typography>
     }
   }
+
+  interface GroupedReviewResponse {
+    [user: string]: ReviewResponse[]
+  }
+
+  useEffect(() => {
+    if (!isReviewsLoading && reviews) {
+      const latestReviews: ReviewRequestInterface[] = []
+      reviews.forEach((review) => {
+        const reviewResult: ReviewRequestInterface = _.cloneDeep(review)
+        const groupedResponses: GroupedReviewResponse = _.groupBy(reviewResult.responses, (response) => response.user)
+        const latestResponses: ReviewResponse[] = []
+        Object.keys(groupedResponses).forEach((user) => {
+          //console.log(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
+          latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
+        })
+        reviewResult.responses = latestResponses
+        latestReviews.push(reviewResult)
+      })
+      setReviewsWithLatestResponses(latestReviews)
+    }
+  }, [reviews, isReviewsLoading])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -134,11 +161,10 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {/* TODO (1097) - We need to find the latest review for each role and put it has a review "status" * }
-              {/* {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
-              {reviews.map((review) => (
-                <ReviewDisplay review={review} key={review.semver} />
-              ))} */}
+              {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
+              {reviewsWithLatestResponses.map((review) => (
+                <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
+              ))}
             </Stack>
           </Stack>
         </Card>

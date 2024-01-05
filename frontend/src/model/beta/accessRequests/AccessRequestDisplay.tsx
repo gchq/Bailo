@@ -1,7 +1,9 @@
 import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
+import _ from 'lodash'
+import { useEffect, useState } from 'react'
 import Link from 'src/Link'
-import { AccessRequestInterface } from 'types/interfaces'
-import { formatDateString } from 'utils/dateUtils'
+import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import Loading from '../../../common/Loading'
@@ -19,8 +21,27 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
     accessRequestId: accessRequest.id,
   })
 
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
+
+  useEffect(() => {
+    if (!isReviewsLoading && reviews) {
+      const result = reviews
+      result.forEach((review) => {
+        const groupedResponses: GroupedReviewResponse = _.groupBy(review.responses, (response) => response.user)
+        Object.keys(groupedResponses).forEach((user) => {
+          review.responses = [groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1]]
+        })
+      })
+      setReviewsWithLatestResponses(result)
+    }
+  }, [reviews, isReviewsLoading])
+
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
+
+  interface GroupedReviewResponse {
+    [user: string]: ReviewResponse[]
   }
 
   return (
@@ -81,8 +102,8 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Grid>
               </Card>
             </Stack>
-            {reviews.length > 0 && <Divider sx={{ my: 2 }} />}
-            {reviews.map((review) => (
+            {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
+            {reviewsWithLatestResponses.map((review) => (
               <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
