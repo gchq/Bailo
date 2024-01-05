@@ -5,10 +5,8 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
 import audit from '../../../../connectors/v2/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
-import { WebhookEvent } from '../../../../models/v2/Webhook.js'
 import { createAccessRequest } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { sendWebhooks } from '../../../../services/v2/webhook.js'
 import { parse } from '../../../../utils/v2/validate.js'
 
 const knownOverview = z.object({
@@ -71,12 +69,6 @@ export const postAccessRequest = [
     const accessRequest = await createAccessRequest(req.user, modelId, body)
 
     await audit.onCreateAccessRequest(req, accessRequest)
-    await sendWebhooks(
-      accessRequest.modelId,
-      WebhookEvent.CreateAccessRequest,
-      `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
-      { accessRequest },
-    )
 
     return res.json({
       accessRequest,
