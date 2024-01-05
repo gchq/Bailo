@@ -20,53 +20,7 @@ exports[`routes > review > getReviews > audit > expected call 1`] = `
 ]
 `;
 
-exports[`routes > review > getReviews > rejects missing active parameter 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "boolean",
-          "message": "Required",
-          "path": [
-            "query",
-            "active",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Path: query.active - Message: Required",
-    "name": "Error",
-  },
-}
-`;
-
-exports[`routes > review > getReviews > rejects missing value for active parameter 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "boolean",
-          "message": "Required",
-          "path": [
-            "query",
-            "active",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Path: query.active - Message: Required",
-    "name": "Error",
-  },
-}
-`;
-
-exports[`routes > review > getReviews > returns only active reviews 1`] = `
+exports[`routes > review > getReviews > returns only reviews for the specified model 1`] = `
 {
   "reviews": [
     {
@@ -82,29 +36,12 @@ exports[`routes > review > getReviews > returns only active reviews 1`] = `
 }
 `;
 
-exports[`routes > review > getReviews > returns only active reviews for the specified model 1`] = `
-{
-  "reviews": [
-    {
-      "createdAt": "2023-08-13T00:00:00.000Z",
-      "kind": "release",
-      "modelId": "abc",
-      "responses": [],
-      "role": "msro",
-      "semver": "3.0.3",
-      "updatedAt": "2023-08-14T00:00:00.000Z",
-    },
-  ],
-}
-`;
-
-exports[`routes > review > getReviews > returns only active reviews for the specified model 2`] = `
+exports[`routes > review > getReviews > returns only reviews for the specified model 2`] = `
 [
   [
     {
       "dn": "user",
     },
-    true,
     "abc",
     undefined,
     undefined,
@@ -113,22 +50,16 @@ exports[`routes > review > getReviews > returns only active reviews for the spec
 ]
 `;
 
-exports[`routes > review > getReviews > returns only inactive reviews 1`] = `
+exports[`routes > review > getReviews > returns reviews 1`] = `
 {
   "reviews": [
     {
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "modelId": "abc",
-      "responses": [
-        {
-          "comment": "looks amazing!",
-          "decision": "approve",
-          "user": "user",
-        },
-      ],
+      "responses": [],
       "role": "msro",
-      "semver": "3.0.2",
+      "semver": "3.0.3",
       "updatedAt": "2023-08-14T00:00:00.000Z",
     },
   ],
