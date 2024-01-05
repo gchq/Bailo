@@ -4,7 +4,7 @@ import shutil
 from io import BytesIO
 from typing import Any
 
-from bailo.core.agent import Agent
+from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none
 
@@ -314,6 +314,28 @@ class Client:
         req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
         shutil.copyfileobj(req.raw, buffer)
         return file_id
+    
+    def get_download_file_token(
+        self,
+        model_id: str,
+        file_id: str,
+        buffer: BytesIO,
+    ):
+        """
+        Downloads a specific file, using an API token.
+
+        :param model_id: _description_
+        :param file_id: _description_
+        :param buffer: _description_
+
+        ..note:: This method requires the TokenAgent agent.
+        """
+        if isinstance(self.agent, TokenAgent):
+            req = self.agent.get(f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
+            shutil.copyfileobj(req.raw, buffer)
+            return file_id
+        else:
+            raise Exception('get_download_file_token requires the use of TokenAgent')
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
         """
