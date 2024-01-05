@@ -67,6 +67,13 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/v2/review.js', () => mockReviewService)
 
+const mockWebhookService = vi.hoisted(() => {
+  return {
+    sendWebhooks: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+
 describe('services > release', () => {
   test('createRelease > simple', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
@@ -76,6 +83,7 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
     expect(mockReviewService.createReleaseReviews).toBeCalled()
+    expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
   test('createRelease > minor release', async () => {
