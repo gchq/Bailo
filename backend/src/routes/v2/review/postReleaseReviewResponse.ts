@@ -5,8 +5,10 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { Decision, ReviewInterface } from '../../../models/v2/Review.js'
+import { WebhookEvent } from '../../../models/v2/Webhook.js'
 import { respondToReview } from '../../../services/v2/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/v2/specification.js'
+import { sendWebhooks } from '../../../services/v2/webhook.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'
 
@@ -56,7 +58,14 @@ export const postReleaseReviewResponse = [
     } = parse(req, postReleaseReviewResponseSchema)
 
     const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
+
     await audit.onCreateReviewResponse(req, review)
+    await sendWebhooks(
+      review.modelId,
+      WebhookEvent.CreateReviewResponse,
+      `User ${review.responses[0].user} has reviewed Release ${review.semver} for Model ${review.modelId}`,
+      { review },
+    )
 
     return res.json({
       review,

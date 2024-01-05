@@ -68,11 +68,11 @@ import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
-import { postWebhook } from './routes/v2/model/notifications/postWebhook.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { postWebhook } from './routes/v2/model/webhooks/postWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -236,7 +236,7 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
   server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
-  server.post('/api/v2/model/:modelId/notifications/webhooks', ...postWebhook)
+  server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)

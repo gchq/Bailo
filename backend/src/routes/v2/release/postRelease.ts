@@ -5,9 +5,10 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
-import { onCreateRelease } from '../../../services/v2/notification.js'
+import { WebhookEvent } from '../../../models/v2/Webhook.js'
 import { createRelease } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
+import { sendWebhooks } from '../../../services/v2/webhook.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const postReleaseSchema = z.object({
@@ -72,7 +73,12 @@ export const postRelease = [
     const release = await createRelease(req.user, { modelId, ...body })
 
     await audit.onCreateRelease(req, release)
-    onCreateRelease(release)
+    await sendWebhooks(
+      release.modelId,
+      WebhookEvent.CreateRelease,
+      `Release ${release.semver} has been created for model ${release.modelId}`,
+      { release },
+    )
 
     return res.json({
       release,

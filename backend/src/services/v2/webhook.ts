@@ -1,19 +1,21 @@
 import fetch from 'node-fetch'
 
-import { NotificationEventKeys, NotificationInterface } from '../../models/v2/Notification.js'
+import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
+import { ReleaseDoc } from '../../models/v2/Release.js'
+import { ReviewInterface } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
-import WebhookNotificationModel from '../../models/v2/WebhookNotification.js'
+import { WebhookEventKeys, WebhookInterface } from '../../models/v2/Webhook.js'
+import WebhookModel from '../../models/v2/Webhook.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { getModelById } from './model.js'
-import { EventInformation } from './notification.js'
 
-export type CreateWebhookParams = Pick<NotificationInterface, 'name' | 'modelId' | 'events' | 'active'>
+export type CreateWebhookParams = Pick<WebhookInterface, 'name' | 'modelId' | 'events' | 'active'>
 export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to view it
   await getModelById(user, webhookParams.modelId)
 
   const id = convertStringToId(webhookParams.name)
-  const webhook = new WebhookNotificationModel({
+  const webhook = new WebhookModel({
     ...webhookParams,
     id,
   })
@@ -24,14 +26,19 @@ export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookP
   return webhook
 }
 
-export async function sendWebhooks(eventKind: NotificationEventKeys, eventContent: EventInformation, modelId: string) {
-  const webhooks = await WebhookNotificationModel.find({ modelId, events: eventKind })
+export async function sendWebhooks(
+  modelId: string,
+  eventKind: WebhookEventKeys,
+  eventTitle: string,
+  content: { release: ReleaseDoc } | { review: ReviewInterface } | { accessRequest: AccessRequestDoc },
+) {
+  const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
   await Promise.all(
     webhooks.map((webhook) =>
       fetch(webhook.uri, {
         method: 'POST',
-        body: JSON.stringify({ eventKind, description: eventContent.title, metadata: eventContent.metadata }),
+        body: JSON.stringify({ event: eventKind, description: eventTitle, ...content }),
         headers: { 'X-Foo': 'Bar' },
       }),
     ),

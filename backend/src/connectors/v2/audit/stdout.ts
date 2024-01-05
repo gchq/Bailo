@@ -8,7 +8,7 @@ import { ReviewInterface } from '../../../models/v2/Review.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
-import { AuditInfo, AuditInfoKeys, BaseAuditConnector } from './Base.js'
+import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
   Success: boolean
@@ -173,7 +173,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onCreateReviewResponse(req: Request, review: ReviewInterface) {
-    this.checkEventType(AuditInfo.CreateAccessRequest, req)
+    this.checkEventType(AuditInfo.CreateReviewResponse, req)
     const event = this.generateEvent(req, {
       modelId: review.modelId,
       ...(review.semver && { semver: review.semver }),
@@ -239,11 +239,5 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
     req.log.info(event, req.audit.description)
-  }
-
-  checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
-      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
-    }
   }
 }
