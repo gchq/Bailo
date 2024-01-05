@@ -324,9 +324,10 @@ class Client:
         """
         Downloads a specific file, using an API token.
 
-        :param model_id: _description_
-        :param file_id: _description_
-        :param buffer: _description_
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :param buffer: BytesIO object for bailo to write to
+        :return: The unique file ID
 
         ..note:: This method requires the TokenAgent agent.
         """
