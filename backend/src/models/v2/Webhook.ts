@@ -1,7 +1,6 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-// Share this enum with auditing?
 export const WebhookEvent = {
   CreateRelease: 'createRelease',
   CreateReviewResponse: 'createReviewResponse',
