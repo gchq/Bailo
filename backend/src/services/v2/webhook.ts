@@ -13,7 +13,10 @@ import { convertStringToId } from '../../utils/v2/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 
-export type CreateWebhookParams = Pick<WebhookInterface, 'name' | 'modelId' | 'events' | 'active'>
+export type CreateWebhookParams = Pick<
+  WebhookInterface,
+  'name' | 'modelId' | 'uri' | 'token' | 'insecureSSL' | 'events' | 'active'
+>
 export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to update it
   const model = await getModelById(user, webhookParams.modelId)
@@ -46,10 +49,10 @@ export async function sendWebhooks(
         body: JSON.stringify({ event: eventKind, description: eventTitle, ...content }),
       })
       if (!response.ok) {
-        log.error({ webhook, eventKind, response }, 'Non 200 response received when sending Webhook.')
+        log.error({ eventKind, response }, 'Non 200 response received when sending Webhook.')
       }
     } catch (err) {
-      log.error({ webhook, eventKind, err }, 'Unable to send Webhook.')
+      log.error({ eventKind, err }, 'Unable to send Webhook.')
     }
   }
 }
