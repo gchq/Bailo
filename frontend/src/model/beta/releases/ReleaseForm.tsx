@@ -1,4 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
@@ -57,6 +58,8 @@ export default function ReleaseForm({
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
+  const theme = useTheme()
+
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
@@ -81,7 +84,7 @@ export default function ReleaseForm({
 
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: 'red' }}>*</span>}
+      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
 
@@ -110,7 +113,7 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
+          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly || isEdit ? (
           <ReadOnlyAnswer value={formData.semver} />

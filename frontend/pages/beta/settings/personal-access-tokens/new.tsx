@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { postUserToken } from 'actions/user'
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
@@ -24,6 +25,7 @@ import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'type
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function NewToken() {
+  const theme = useTheme()
   const [description, setDescription] = useState('')
   const [isAllModels, setIsAllModels] = useState(false)
   const [selectedModels, setSelectedModels] = useState<string[]>([])
@@ -153,20 +155,21 @@ export default function NewToken() {
             <Stack spacing={2}>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Description <span style={{ color: 'red' }}>*</span>
+                  Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
                   required
                   multiline
                   size='small'
                   value={description}
+                  maxRows={8}
                   onChange={handleDescriptionChange}
                   inputProps={{ 'data-test': 'tokenDescriptionTextField' }}
                 />
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Models <span style={{ color: 'red' }}>*</span>
+                  Models <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 {isModelsLoading ? (
                   <Loading />
@@ -184,7 +187,7 @@ export default function NewToken() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Actions <span style={{ color: 'red' }}>*</span>
+                  Actions <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Grid container>{actionCheckboxes}</Grid>
               </Stack>
