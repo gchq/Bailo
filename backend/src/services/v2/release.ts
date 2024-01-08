@@ -119,7 +119,7 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
   return release
 }
 
-export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
+export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images' | 'comments'>
 export async function updateRelease(user: UserDoc, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
   const release = await getReleaseBySemver(user, modelId, semver)

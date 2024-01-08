@@ -26,6 +26,15 @@ export const putReleaseSchema = z.object({
         tag: z.string(),
       }),
     ),
+    comments: z
+      .array(
+        z.object({
+          comment: z.string(),
+          user: z.string(),
+          createdAt: z.string(),
+        }),
+      )
+      .optional(),
   }),
 })
 
