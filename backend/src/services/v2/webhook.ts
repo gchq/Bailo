@@ -20,7 +20,8 @@ export type CreateWebhookParams = Pick<
 export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to update it
   const model = await getModelById(user, webhookParams.modelId)
-  if (!(await authorisation.model(user, model, ModelAction.Update))) {
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
     throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
   }
 

@@ -1,6 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import { createWebhook, sendWebhooks } from '../../src/services/v2/webhook.js'
+
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -15,13 +18,6 @@ const modelServiceMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
 vi.mock('../../src/services/v2/model.js', () => modelServiceMock)
-
-const authorisationMocks = vi.hoisted(() => ({
-  userModelAction: vi.fn(() => true),
-}))
-vi.mock('../../src/connectors/v2/authorisation/index.js', async () => ({
-  default: authorisationMocks,
-}))
 
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true })),
@@ -49,11 +45,11 @@ describe('services > webhook', () => {
 
     expect(webhookModelMock.save).toBeCalled()
     expect(modelServiceMock.getModelById).toBeCalled()
-    expect(authorisationMocks.userModelAction).toBeCalled()
+    expect(authorisation.model).toBeCalled()
   })
 
   test('createWebhook > no permisson', async () => {
-    authorisationMocks.userModelAction.mockReturnValueOnce(false)
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri' })
 
