@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-import { ModelAction } from '../../connectors/v2/authorisation/Base.js'
+import { ModelAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
@@ -20,7 +20,7 @@ export type CreateWebhookParams = Pick<
 export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to update it
   const model = await getModelById(user, webhookParams.modelId)
-  if (!(await authorisation.userModelAction(user, model, ModelAction.Update))) {
+  if (!(await authorisation.model(user, model, ModelAction.Update))) {
     throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
   }
 
