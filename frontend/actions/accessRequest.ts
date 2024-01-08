@@ -1,5 +1,6 @@
 import useSWR from 'swr'
 import { AccessRequestInterface } from 'types/interfaces'
+import { ReviewComment } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetAccessRequestsForModelId(modelId?: string) {
@@ -47,5 +48,13 @@ export function patchAccessRequest(modelId: string, accessRequestId: string, for
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ metadata: { ...form } }),
+  })
+}
+
+export function submitAccessRequestComment(modelId: string, accessRequestId: string, comments: Array<ReviewComment>) {
+  return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comments: comments }),
   })
 }

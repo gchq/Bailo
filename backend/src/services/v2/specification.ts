@@ -156,6 +156,16 @@ export const accessRequestInterfaceSchema = z.object({
     }),
   }),
 
+  comments: z
+    .array(
+      z.object({
+        comment: z.string().openapi({ example: 'This a comment' }),
+        user: z.string().openapi({ example: 'User' }),
+        createdAt: z.string().openapi({ example: new Date().toISOString() }),
+      }),
+    )
+    .optional(),
+
   deleted: z.boolean().openapi({ example: false }),
 
   createdBy: z.string().openapi({ example: 'user' }),

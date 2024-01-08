@@ -11,9 +11,19 @@ import { parse } from '../../../../utils/v2/validate.js'
 import { accessRequestMetadata } from './postAccessRequest.js'
 
 export const patchAccessRequestSchema = z.object({
-  body: z.object({
-    metadata: accessRequestMetadata,
-  }),
+  body: z
+    .object({
+      metadata: accessRequestMetadata,
+      comments: z.array(
+        z.object({
+          comment: z.string(),
+          user: z.string(),
+          createdAt: z.string(),
+        }),
+      ),
+    })
+    .partial()
+    .refine((data) => data.metadata || data.comments, 'You must provide either new metadata or a review comment.'),
   params: z.object({
     accessRequestId: z.string(),
   }),

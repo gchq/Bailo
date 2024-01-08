@@ -1,4 +1,6 @@
 import { Button, Divider, Stack, TextField, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { submitAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { putRelease, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
@@ -26,6 +28,9 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
+  const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
+
+  const theme = useTheme()
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -48,6 +53,9 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     if (release && release.comments) {
       decisionsAndComments = [...decisionsAndComments, ...release.comments]
     }
+    if (accessRequest && accessRequest.comments) {
+      decisionsAndComments = [...decisionsAndComments, ...accessRequest.comments]
+    }
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
       if (isReviewResponse(response)) {
@@ -56,29 +64,55 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
         return <ReviewCommentDisplay key={response.createdAt} response={response as ReviewComment} />
       }
     })
-  }, [reviews, release])
+  }, [reviews, release, accessRequest])
 
   async function submitReviewComment() {
-    if (release && currentUser) {
-      const updatedRelease: ReleaseInterface = release
-      if (!updatedRelease.comments) {
-        updatedRelease.comments = []
-      }
+    setCommentSubmissionError('')
+    if (!newReviewComment) {
+      setCommentSubmissionError('Please provide a comment before submitting.')
+      return
+    }
+    if (currentUser) {
       const newComment: ReviewComment = {
         comment: newReviewComment,
         user: currentUser.dn,
         createdAt: new Date().toISOString(),
       }
-      updatedRelease.comments.push(newComment)
-      const res = await putRelease(updatedRelease)
-      if (res.ok) {
-        mutateRelease()
-        setNewReviewComment('')
+      if (release) {
+        const updatedRelease: ReleaseInterface = release
+        if (!updatedRelease.comments) {
+          updatedRelease.comments = []
+        }
+        updatedRelease.comments.push(newComment)
+        const res = await putRelease(updatedRelease)
+        if (res.ok) {
+          mutateRelease()
+          setNewReviewComment('')
+        } else {
+          setCommentSubmissionError(await res.json())
+        }
+      } else if (accessRequest) {
+        const updatedAccessRequest: AccessRequestInterface = accessRequest
+        if (!updatedAccessRequest.comments) {
+          updatedAccessRequest.comments = []
+        }
+        updatedAccessRequest.comments.push(newComment)
+        const res = await submitAccessRequestComment(
+          accessRequest.modelId,
+          accessRequest.id,
+          updatedAccessRequest.comments,
+        )
+        if (res.ok) {
+          mutateAccessRequest()
+          setNewReviewComment('')
+        } else {
+          setCommentSubmissionError(await res.json())
+        }
       } else {
-        setCommentSubmissionError(await res.json())
+        setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
       }
     } else {
-      setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
+      setCommentSubmissionError('There was a fetching user information, please try again later.')
     }
   }
 
@@ -107,7 +141,9 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
           <Button sx={{ mt: 1, float: 'right' }} variant='contained' onClick={submitReviewComment}>
             Submit comment
           </Button>
-          <Typography variant='caption'>{commentSubmissionError}</Typography>
+          <Typography variant='caption' color={theme.palette.error.light}>
+            {commentSubmissionError}
+          </Typography>
         </Stack>
       </>
     </>

@@ -99,7 +99,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
   return accessRequest
 }
 
-export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
+export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'comments'>
 export async function updateAccessRequest(
   user: UserDoc,
   accessRequestId: string,
@@ -116,6 +116,11 @@ export async function updateAccessRequest(
   if (diff.metadata) {
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
+  }
+
+  if (diff.comments) {
+    accessRequest.comments = diff.comments
+    accessRequest.markModified('comments')
   }
 
   await accessRequest.save()
