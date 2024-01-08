@@ -78,6 +78,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
       const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
+
       if (!postFileResponse.ok) {
         setErrorMessage(await getErrorMessage(postFileResponse))
         return setIsLoading(false)

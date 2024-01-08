@@ -364,7 +364,7 @@ function Model() {
                 >
                   <MenuItem
                     onClick={() => router.push(`/model/${uuid}/edit/${version?.version}`)}
-                    data-test='editModelButton'
+                    data-test='editModelCardButton'
                   >
                     <ListItemIcon>
                       <EditIcon fontSize='small' />

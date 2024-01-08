@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import { Add, Settings } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -13,6 +13,7 @@ import {
   Stack,
   Switch,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
@@ -145,17 +146,30 @@ export default function TopNavigation({
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>
-                  <MenuItem data-test='toggleDarkMode'>
-                    <ListItemIcon>
-                      <DarkModeIcon fontSize='small' />
-                    </ListItemIcon>
-                    <Switch
-                      size='small'
-                      checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                      onChange={toggleDarkMode}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </MenuItem>
+                  {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                  <Tooltip title='This feature has been temporarily disabled'>
+                    <span>
+                      <MenuItem disabled data-test='toggleDarkMode'>
+                        <ListItemIcon>
+                          <DarkModeIcon fontSize='small' />
+                        </ListItemIcon>
+                        <Switch
+                          size='small'
+                          checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                          onChange={toggleDarkMode}
+                          inputProps={{ 'aria-label': 'controlled' }}
+                        />
+                      </MenuItem>
+                    </span>
+                  </Tooltip>
+                  <Link href='/beta/settings' color='inherit' underline='none'>
+                    <MenuItem data-test='settingsLink'>
+                      <ListItemIcon>
+                        <Settings fontSize='small' />
+                      </ListItemIcon>
+                      <ListItemText>Settings</ListItemText>
+                    </MenuItem>
+                  </Link>
                   <Link href='/api/logout' color='inherit' underline='none'>
                     <MenuItem data-test='logoutLink'>
                       <ListItemIcon>

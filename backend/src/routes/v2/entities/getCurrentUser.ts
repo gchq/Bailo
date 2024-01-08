@@ -10,7 +10,7 @@ export const getCurrentUserSchema = z.object({})
 
 registerPath({
   method: 'get',
-  path: '/api/v2/users/me',
+  path: '/api/v2/entities/me',
   tags: ['user'],
   description: 'Get the current user',
   schema: getCurrentUserSchema,
@@ -19,7 +19,7 @@ registerPath({
       description: 'Details about the currently logged in user.',
       content: {
         'application/json': {
-          schema: z.object({ model: userInterfaceSchema }),
+          schema: z.object({ user: userInterfaceSchema }),
         },
       },
     },

@@ -6,6 +6,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
@@ -121,6 +122,27 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       url: req.originalUrl,
       results: releases.map((release) => ({ modelId: release.modelId, semver: release.semver })),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateUserToken(req: Request, token: TokenDoc) {
+    this.checkEventType(AuditInfo.CreateUserToken, req)
+    const event = this.generateEvent(req, { accessKey: token.accessKey, description: token.description })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewUserTokens(req: Request, tokens: TokenDoc[]) {
+    this.checkEventType(AuditInfo.ViewUserTokens, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: tokens.map((token) => token.accessKey),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onDeleteUserToken(req: Request, accessKey: string) {
+    this.checkEventType(AuditInfo.DeleteUserToken, req)
+    const event = this.generateEvent(req, { accessKey })
     req.log.info(event, req.audit.description)
   }
 

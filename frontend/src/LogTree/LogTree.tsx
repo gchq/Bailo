@@ -1,4 +1,6 @@
-import React, { ReactElement } from 'react'
+import { ReactElement } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetAppLogs } from '../../data/admin'
 import { useGetUiConfig } from '../../data/uiConfig'
@@ -22,15 +24,23 @@ type LogTreeProps = {
 }
 
 export default function LogTree({ query }: LogTreeProps): ReactElement {
-  const { uiConfig } = useGetUiConfig()
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const { logs } = useGetAppLogs({
+  const { logs, isLogsLoading, isLogsError } = useGetAppLogs({
     ...query,
     filter: ['approval', 'build', 'misc'],
   })
 
-  if (!logs || !uiConfig) {
-    return <>Loading...</>
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} />
+  }
+
+  if (isLogsError) {
+    return <MessageAlert message={isLogsError.info.message} />
+  }
+
+  if (!logs || !uiConfig || isLogsLoading || isUiConfigLoading) {
+    return <Loading />
   }
 
   return (

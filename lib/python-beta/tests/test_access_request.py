@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.client import Client
-from bailo.helper.access_request import AccessRequest
+from bailo import AccessRequest, Client
 
 
 def test_access_request():

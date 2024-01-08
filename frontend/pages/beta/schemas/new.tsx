@@ -1,7 +1,8 @@
 import { ArrowBack, Schema } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Container, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Container, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import { postSchema, SchemaKind } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useState } from 'react'
@@ -34,6 +35,7 @@ export default function NewSchema() {
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
+  const theme = useTheme()
 
   const handleUploadChange = (event: ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader()
@@ -106,7 +108,7 @@ export default function NewSchema() {
             <Stack spacing={2} sx={{ mt: 2 }}>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Id <span style={{ color: 'red' }}>*</span>
+                  Id <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -120,7 +122,7 @@ export default function NewSchema() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Name <span style={{ color: 'red' }}>*</span>
+                  Name <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -134,7 +136,7 @@ export default function NewSchema() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Description <span style={{ color: 'red' }}>*</span>
+                  Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <RichTextEditor
                   value={schemaDescription}
@@ -145,18 +147,17 @@ export default function NewSchema() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Schema Type <span style={{ color: 'red' }}>*</span>
+                  Schema Type <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <TextField
-                  select
+                <Select
                   size='small'
                   required
                   value={schemaKind}
-                  onChange={(event): void => setSchemaKind(event.target.value as SchemaKind)}
+                  onChange={(e) => setSchemaKind(e.target.value as SchemaKind)}
                 >
-                  <MenuItem>{SchemaKind.MODEL}</MenuItem>
-                  <MenuItem>{SchemaKind.ACCESS}</MenuItem>
-                </TextField>
+                  <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
+                  <MenuItem value={SchemaKind.ACCESS}>Access Request</MenuItem>
+                </Select>
                 <Typography variant='caption'>
                   Schemas are used for both model cards and access request forms
                 </Typography>

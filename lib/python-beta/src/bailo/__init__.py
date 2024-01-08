@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-__version__ = "0.2.0"
+# SEMANTIC VERSION
+__version__ = "0.3.0"
 
-from bailo.core.agent import Agent
+from bailo.core.agent import Agent, PkiAgent, TokenAgent
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility, Role, SchemaKind
 from bailo.helper.access_request import AccessRequest

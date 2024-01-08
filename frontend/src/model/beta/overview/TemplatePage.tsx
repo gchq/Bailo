@@ -10,7 +10,7 @@ type TemplatePageProps = {
 
 export default function TemplatePage({ model }: TemplatePageProps) {
   return (
-    <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
+    <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
       <Stack spacing={4} justifyContent='center' alignItems='center'>
         <Typography component='h2' variant='h6' color='primary' data-test='createModelCardOverview'>
           Create a model card
@@ -56,7 +56,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
               </Typography>
               <Typography>Create a model from scratch using a predefined schema.</Typography>
               <Link href={`/beta/model/${model.id}/schema`}>
-                <Button sx={{ width: '100%' }} variant='contained'>
+                <Button sx={{ width: '100%' }} variant='contained' data-test='createSchemaFromScratchButton'>
                   Create
                 </Button>
               </Link>

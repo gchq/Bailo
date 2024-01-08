@@ -4,7 +4,7 @@ const config = {
       kind: 'silly',
     },
     authorisation: {
-      kind: 'silly',
+      kind: 'basic',
     },
   },
   log: {

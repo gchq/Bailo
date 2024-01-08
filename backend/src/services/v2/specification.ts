@@ -2,6 +2,7 @@ import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { Decision } from '../../models/v2/Review.js'
+import { TokenActions, TokenScope } from '../../models/v2/Token.js'
 import { SchemaKind } from '../../types/v2/enums.js'
 
 export const registry = new OpenAPIRegistry()
@@ -178,6 +179,20 @@ export const schemaInterfaceSchema = z.object({
 
   kind: z.nativeEnum(SchemaKind).openapi({ example: 'model' }),
   jsonSchema: z.object({}).openapi({ example: {} }),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const userTokenSchema = z.object({
+  description: z.string().openapi({ example: 'user token' }),
+
+  scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
+  modelIds: z.array(z.string()).openapi({ example: ['yozlo-v4-abcdef'] }),
+  actions: z.array(z.nativeEnum(TokenActions)).openapi({ example: ['image:read', 'file:read'] }),
+
+  accessKey: z.string().openapi({ example: 'bailo-iot4hj3890tqaji' }),
+  secretKey: z.string().openapi({ example: '987895347u89fj389agre' }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

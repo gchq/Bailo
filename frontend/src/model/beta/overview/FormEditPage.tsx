@@ -6,7 +6,6 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import { useGetModel } from '../../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../../actions/modelCard'
 import { useGetSchema } from '../../../../actions/schema'
-import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { SplitSchemaNoRender } from '../../../../types/interfaces'
 import { ModelInterface } from '../../../../types/v2/types'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
@@ -22,11 +21,11 @@ type FormEditPageProps = {
 export default function FormEditPage({ model }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { isModelError, mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
-  const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -34,12 +33,15 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
   async function onSubmit() {
     if (schema) {
+      setErrorMessage('')
       setLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await putModelCard(model.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
         mutateModelCardRevisions()
+      } else {
+        setErrorMessage(res.data)
       }
       setLoading(false)
     }
@@ -77,21 +79,17 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
   return (
     <>
-      {(isSchemaLoading || isUiConfigLoading) && <Loading />}
+      {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <Stack
-          direction={{ sx: 'column', sm: 'row' }}
-          justifyContent={{ sx: 'center', sm: 'space-between' }}
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent={{ xs: 'center', sm: 'space-between' }}
           alignItems='center'
           sx={{ pb: 2 }}
         >
@@ -110,7 +108,12 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               <Button variant='outlined' onClick={() => setDialogOpen(true)}>
                 View History
               </Button>
-              <Button variant='outlined' onClick={() => setIsEdit(!isEdit)} sx={{ mb: { xs: 2 } }}>
+              <Button
+                variant='outlined'
+                onClick={() => setIsEdit(!isEdit)}
+                sx={{ mb: { xs: 2 } }}
+                data-test='editModelCardButton'
+              >
                 Edit Model card
               </Button>
             </Stack>
@@ -123,15 +126,16 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
-              <Button variant='outlined' onClick={onCancel}>
+              <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
                 Cancel
               </Button>
-              <LoadingButton variant='contained' onClick={onSubmit} loading={loading}>
+              <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test='saveModelCardButton'>
                 Save
               </LoadingButton>
             </Stack>
           )}
         </Stack>
+        <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />

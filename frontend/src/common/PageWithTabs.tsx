@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -11,6 +11,7 @@ export interface PageTab {
   path: string
   view: ReactElement
   disabled?: boolean
+  datatest?: string
 }
 
 export default function PageWithTabs({
@@ -30,7 +31,13 @@ export default function PageWithTabs({
 }) {
   const router = useRouter()
   const { tab } = router.query
-  const [currentTab, setCurrentTab] = useState(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+
+  const [currentTab, setCurrentTab] = useState('')
+
+  useEffect(() => {
+    if (!tabs.length) return
+    setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+  }, [tab, tabs])
 
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
@@ -80,7 +87,15 @@ export default function PageWithTabs({
         variant='scrollable'
       >
         {tabs.map((tab: PageTab) => {
-          return <Tab key={tab.title} label={tab.title} disabled={tab.disabled} value={tab.path} />
+          return (
+            <Tab
+              key={tab.title}
+              label={tab.title}
+              disabled={tab.disabled}
+              value={tab.path}
+              data-test={`${tab.path}Tab`}
+            />
+          )
         })}
       </Tabs>
       {tabs.map((tab: PageTab) => {

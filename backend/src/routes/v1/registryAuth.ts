@@ -1,24 +1,27 @@
 import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
-import { ImageAction } from '../../connectors/v2/authorisation/Base.js'
+import audit from '../../connectors/v2/audit/index.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { ModelDoc } from '../../models/v2/Model.js'
+import { TokenActions, TokenDoc } from '../../models/v2/Token.js'
 import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
 import { findDeploymentByUuid } from '../../services/deployment.js'
 import log from '../../services/v2/log.js'
 import { getModelById } from '../../services/v2/model.js'
+import { validateTokenForModel } from '../../services/v2/token.js'
 import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { isUserInEntityList } from '../../utils/entity.js'
 import logger from '../../utils/logger.js'
-import { Forbidden } from '../../utils/result.js'
+import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
+import { bailoErrorGuard } from '../middleware/expressErrorHandler.js'
 
 let adminToken: string | undefined
 
@@ -126,7 +129,7 @@ export function getRefreshToken(user: UserDoc) {
   )
 }
 
-export type Action = 'push' | 'pull' | 'delete' | '*'
+export type Action = 'push' | 'pull' | 'delete' | '*' | 'list'
 
 // Documented here: https://distribution.github.io/distribution/spec/auth/scope/
 export interface Access {
@@ -165,7 +168,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccessV2(access: Access, user: UserDocV2) {
+async function checkAccessV2(access: Access, user: UserDocV2, token: TokenDoc | undefined) {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -176,16 +179,24 @@ async function checkAccessV2(access: Access, user: UserDocV2) {
     return false
   }
 
-  const action = isEqual(access.actions, ['pull']) ? ImageAction.Pull : ImageAction.Push
-  return authorisation.userImageAction(user, model, access, action)
+  if (token) {
+    try {
+      await validateTokenForModel(token, model.id, TokenActions.ImageRead)
+    } catch (e) {
+      return false
+    }
+  }
+
+  const auth = await authorisation.image(user, model, access)
+  return auth.success
 }
 
-async function checkAccess(access: Access, user: UserDoc) {
+async function checkAccess(access: Access, user: UserDoc, token: TokenDoc | undefined) {
   const modelUuid = access.name.split('/')[0]
   try {
     const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
     await getModelById(v2User, modelUuid)
-    return checkAccessV2(access, v2User)
+    return checkAccessV2(access, v2User, token)
   } catch (e) {
     // do nothing, assume v1 authorisation
     log.warn({ userId: user.id, access, e }, 'Falling back to V1 authorisation')
@@ -233,23 +244,23 @@ export const getDockerRegistryAuth = [
     const authorization = req.get('authorization')
 
     if (!authorization) {
-      throw Forbidden({}, 'No authorisation header found', rlog)
+      throw Unauthorised({}, 'No authorisation header found', rlog)
     }
 
-    const { error, user, admin } = await getUserFromAuthHeader(authorization)
+    const { error, user, admin, token } = await getUserFromAuthHeader(authorization)
 
     if (error) {
-      throw Forbidden({ error }, error, rlog)
+      throw Unauthorised({ error }, error, rlog)
     }
 
     if (!user) {
-      throw Forbidden({}, 'User authentication failed', rlog)
+      throw Unauthorised({}, 'User authentication failed', rlog)
     }
 
     rlog = rlog.child({ user })
 
     if (service !== config.registry.service) {
-      throw Forbidden(
+      throw Unauthorised(
         { expectedService: config.registry.service },
         'Received registry auth request from unexpected service',
         rlog,
@@ -282,14 +293,46 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
-      if (!admin && !(await checkAccess(access, user))) {
+      if (!admin && !(await checkAccess(access, user, token))) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }
     }
 
-    const token = await getAccessToken(user, accesses)
+    const accessToken = await getAccessToken(user, accesses)
     rlog.trace('Successfully generated access token')
 
-    return res.json({ token })
+    return res.json({ token: accessToken })
+  },
+  async (err: unknown, req: Request, res: Response, _next: NextFunction) => {
+    if (!bailoErrorGuard(err)) {
+      log.error({ err }, 'No error code was found, returning generic error to user.')
+      throw err
+    }
+
+    const logger = err.logger || req.log
+    logger.warn(err.context, err.message)
+
+    delete err.context?.internal
+
+    await audit.onError(req, err)
+
+    let dockerCode = 'UNKNOWN'
+    switch (err.code) {
+      case 401:
+        dockerCode = 'UNAUTHORIZED'
+        break
+      case 403:
+        dockerCode = 'DENIED'
+    }
+
+    return res.status(err.code).json({
+      errors: [
+        {
+          code: dockerCode,
+          message: err.message,
+          detail: err.context,
+        },
+      ],
+    })
   },
 ]

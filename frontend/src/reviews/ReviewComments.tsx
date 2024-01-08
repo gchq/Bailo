@@ -2,7 +2,7 @@ import { Divider } from '@mui/material'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
 import ReviewComment from 'src/reviews/ReviewComment'
 import ReviewDecision from 'src/reviews/ReviewDecision'
 import { AccessRequestInterface } from 'types/interfaces'
@@ -50,11 +50,9 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     [inactiveReviews],
   )
 
-  const error = MultipleErrorWrapper('Unable to load review responses', {
-    isInactiveReviewsError,
-  })
-
-  if (error) return error
+  if (isInactiveReviewsError) {
+    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  }
 
   return (
     <>

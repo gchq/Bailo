@@ -9,15 +9,15 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
+import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
-import React from 'react'
+import Loading from 'src/common/Loading'
 
-import { useGetUiConfig } from '../../data/uiConfig'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import Wrapper from '../../src/Wrapper.beta'
 
 export default function Help() {
-  const { uiConfig, isUiConfigError } = useGetUiConfig()
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
@@ -26,6 +26,7 @@ export default function Help() {
 
   return (
     <Wrapper title='Help' page='help'>
+      {isUiConfigLoading && <Loading />}
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
           <Box sx={{ mb: 5, textAlign: 'center' }}>

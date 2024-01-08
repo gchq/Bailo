@@ -89,7 +89,15 @@ export default function MultiFileInput({
               {label}
             </Button>
           </label>
-          <Input multiple id={htmlId} type='file' onInput={handleAddFile} accept={accepts} disabled={disabled} />
+          <Input
+            multiple
+            id={htmlId}
+            type='file'
+            onInput={handleAddFile}
+            accept={accepts}
+            disabled={disabled}
+            data-test='uploadFileButton'
+          />
         </>
       )}
       {files.length > 0 && (

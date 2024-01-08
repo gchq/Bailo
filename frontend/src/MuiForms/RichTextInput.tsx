@@ -11,9 +11,18 @@ interface RichTextInputProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
+  id: string
 }
 
-export default function RichTextInput({ label, value, formContext, onChange, required, disabled }: RichTextInputProps) {
+export default function RichTextInput({
+  label,
+  value,
+  formContext,
+  onChange,
+  required,
+  disabled,
+  id,
+}: RichTextInputProps) {
   const theme = useTheme()
 
   if (!formContext.editMode) {
@@ -40,11 +49,11 @@ export default function RichTextInput({ label, value, formContext, onChange, req
     <RichTextEditor
       value={value}
       onChange={onChange}
-      textareaProps={{ disabled: disabled }}
+      textareaProps={{ disabled: disabled, id: id }}
       label={
         <Typography fontWeight='bold'>
           {label}
-          {required && <span style={{ color: 'red' }}>{' *'}</span>}
+          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
       }
       key={label}

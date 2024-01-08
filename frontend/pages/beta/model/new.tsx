@@ -86,7 +86,7 @@ export default function NewModel() {
       <Container maxWidth='sm'>
         <Card sx={{ p: 4, m: 'auto' }}>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
-            <Typography variant='h6' component='h1' color='primary'>
+            <Typography data-test='createModelPageTitle' variant='h6' component='h1' color='primary'>
               Upload a new Model
             </Typography>
             <FileUpload color='primary' fontSize='large' />
