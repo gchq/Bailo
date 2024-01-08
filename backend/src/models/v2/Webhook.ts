@@ -14,7 +14,7 @@ export interface WebhookInterface {
   name: string
   uri: string
   token?: string
-  insecureSSL?: boolean
+  insecureSSL: boolean
   events?: Array<WebhookEventKeys>
   active?: boolean
 }
@@ -29,7 +29,7 @@ const WebhookSchema = new Schema<WebhookInterface>(
 
     uri: { type: String, required: true },
     token: { type: String },
-    insecureSSL: { type: Boolean },
+    insecureSSL: { type: Boolean, required: true },
 
     events: [{ type: String, enum: Object.values(WebhookEvent) }],
     active: { type: Boolean, default: true },

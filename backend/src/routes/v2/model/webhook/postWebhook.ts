@@ -16,7 +16,7 @@ export const postWebhookSchema = z.object({
 
     uri: z.string(),
     token: z.string().optional(),
-    insecureSSL: z.boolean().optional(),
+    insecureSSL: z.boolean().optional().default(false),
 
     events: z.array(z.nativeEnum(WebhookEvent)).optional(),
     active: z.boolean().optional(),

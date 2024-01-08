@@ -41,7 +41,7 @@ describe('services > webhook', () => {
   const user: any = { dn: 'test' }
 
   test('createWebhook > simple', async () => {
-    await createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri' })
+    await createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
     expect(webhookModelMock.save).toBeCalled()
     expect(modelServiceMock.getModelById).toBeCalled()
@@ -51,7 +51,7 @@ describe('services > webhook', () => {
   test('createWebhook > no permisson', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
-    const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri' })
+    const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
     expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()

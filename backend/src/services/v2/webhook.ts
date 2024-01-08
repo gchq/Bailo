@@ -10,6 +10,7 @@ import { WebhookEventKeys, WebhookInterface } from '../../models/v2/Webhook.js'
 import WebhookModel from '../../models/v2/Webhook.js'
 import { Forbidden } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
+import { getHttpsAgent } from './http.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 
@@ -44,10 +45,22 @@ export async function sendWebhooks(
   const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
   for (const webhook of webhooks) {
+    let headers
+    if (webhook.token) {
+      headers = {
+        Authorization: `Bearer ${webhook.token}`,
+      }
+    } else {
+      headers = {}
+    }
     try {
       const response = await fetch(webhook.uri, {
         method: 'POST',
         body: JSON.stringify({ event: eventKind, description: eventTitle, ...content }),
+        agent: getHttpsAgent({
+          rejectUnauthorized: webhook.insecureSSL,
+        }),
+        headers,
       })
       if (!response.ok) {
         log.error({ eventKind, response }, 'Non 200 response received when sending Webhook.')
