@@ -48,7 +48,7 @@ os-frontend-build:
 
 openshift-deploy:
   stage: os_build
-  needs: ["os-frontend-build","os-backend-build"]
+  needs: ['os-frontend-build', 'os-backend-build']
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
