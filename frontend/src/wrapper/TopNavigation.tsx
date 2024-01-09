@@ -124,13 +124,15 @@ export default function TopNavigation({
         >
           <MenuIcon />
         </IconButton>
-        <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-            <Typography variant='h5' component='div'>
-              <span className={pacifico.className}>Bailo</span>
-              {betaAdornment}
-            </Typography>
-          </Link>
+        <Box sx={{ flexGrow: 1, ml: 2 }}>
+          <Box sx={{ width: 'max-content', cursor: 'pointer', px: 1 }}>
+            <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+              <Typography variant='h5' component='div'>
+                <span className={pacifico.className}>Bailo</span>
+                {betaAdornment}
+              </Typography>
+            </Link>
+          </Box>
         </Box>
         <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
           <ExpandableButton
