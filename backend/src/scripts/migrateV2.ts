@@ -2,10 +2,13 @@ import { uniqWith } from 'lodash-es'
 
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
+import FileModel from '../models/v2/File.js'
 import ModelModelV2, { CollaboratorEntry, ModelVisibility } from '../models/v2/Model.js'
 import ModelCardRevisionV2 from '../models/v2/ModelCardRevision.js'
+import Release from '../models/v2/Release.js'
 import VersionModelV1 from '../models/Version.js'
 import { VersionDoc } from '../types/types.js'
+import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
 const MODEL_SCHEMA_MAP = {
@@ -49,7 +52,7 @@ export async function migrateAllModels() {
 }
 
 async function migrateModel(modelId: string) {
-  const model = await ModelModelV1.findOne({ uuid: modelId }).populate('latestVersion')
+  const model = await ModelModelV1.findOne({ _id: modelId }).populate('latestVersion')
   if (!model) throw new Error(`Model not found: ${modelId}`)
   model.latestVersion = model.latestVersion as VersionDoc
 
@@ -153,6 +156,76 @@ async function migrateModel(modelId: string) {
         timestamps: false,
       },
     )
+
+    const v2Files: string[] = []
+    const bucket = config.minio.buckets.uploads
+    if (version.files.rawBinaryPath) {
+      const file = await new FileModel({
+        modelId,
+        name: `${version.version}-rawBinaryPath.zip`,
+        size: 0, //TODO
+        mime: 'application/x-zip-compressed',
+        bucket,
+        path: version.files.rawBinaryPath,
+        complete: true,
+      })
+      await file.save()
+      v2Files.push(file._id.toString())
+    }
+    if (version.files.rawCodePath) {
+      const file = await new FileModel({
+        modelId,
+        name: `${version.version}-rawCodePath.zip`,
+        size: 1911, //TODO
+        mime: 'application/x-zip-compressed',
+        bucket,
+        path: version.files.rawCodePath,
+        complete: true,
+      })
+      await file.save()
+      v2Files.push(file._id.toString())
+    }
+    if (version.files.rawDockerPath) {
+      const file = await new FileModel({
+        modelId,
+        name: `${version.version}-rawDockerPath`,
+        size: 0, //TODO
+        mime: 'application/octet-stream',
+        bucket,
+        path: version.files.rawDockerPath,
+        complete: true,
+      })
+      await file.save()
+      v2Files.push(file._id.toString())
+    }
+
+    await Release.findOneAndUpdate(
+      { modelId, semver: `0.0.${i + 1}` },
+      {
+        modelId,
+        modelCardVersion: i,
+
+        semver: `0.0.${i + 1}`,
+        notes: `Migrated from V1. Orginal version ID: ${version.version}`,
+
+        minor: false,
+        draft: false,
+
+        fileIds: v2Files,
+        // Not sure about images
+        images: [],
+
+        createdBy: 'system',
+        createdAt: version.createdAt,
+        updatedAt: version.updatedAt,
+      },
+
+      {
+        new: true,
+        upsert: true, // Make this update into an upsert
+        timestamps: false,
+      },
+    )
   }
 
   modelV2.card = {
@@ -171,7 +244,7 @@ async function migrateModel(modelId: string) {
 
 await connectToMongoose()
 
-// await migrateAllModels()
-await migrateModel('minimal-model-for-testing-im7q59')
+await migrateAllModels()
+//await migrateModel('minimal-model-for-testing-im7q59')
 
 setTimeout(disconnectFromMongoose, 500)
