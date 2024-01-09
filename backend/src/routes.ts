@@ -51,6 +51,7 @@ import {
 } from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
+import { createAccessRequestComment } from './routes/v2/model/accessRequest/createAccessRequestComment.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
@@ -73,6 +74,7 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { createReleaseComment } from './routes/v2/release/createReviewComment.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -223,6 +225,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
   server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
+  server.patch('/api/v2/model/:modelId/release/:semver/comment', ...createReleaseComment)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
@@ -231,6 +234,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
   server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
   server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
+  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...createAccessRequestComment)
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)

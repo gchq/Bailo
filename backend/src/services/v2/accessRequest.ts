@@ -127,3 +127,20 @@ export async function updateAccessRequest(
 
   return accessRequest
 }
+
+export async function updateAccessRequestComments(user: UserDoc, accessRequestId: string, comment: string) {
+  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const model = await getModelById(user, accessRequest.modelId)
+
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
+  }
+
+  accessRequest.comments.push({ comment, user: user.dn, createdAt: new Date().toISOString() })
+  accessRequest.markModified('comments')
+
+  await accessRequest.save()
+
+  return accessRequest
+}

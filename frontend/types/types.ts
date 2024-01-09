@@ -394,7 +394,7 @@ export type ReleaseInterface = {
   minor?: boolean
   draft?: boolean
   fileIds: Array<string>
-  comments?: Array<ReviewComment>
+  comments: Array<ReviewComment>
   files: Array<FileInterface>
   images: Array<FlattenedModelImage>
   deleted: boolean

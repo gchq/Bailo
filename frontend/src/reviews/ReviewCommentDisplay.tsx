@@ -1,4 +1,5 @@
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import { EntityKind, ReviewComment } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
@@ -8,7 +9,7 @@ type ReviewCommentsProps = {
 }
 
 export default function ReviewComment({ response }: ReviewCommentsProps) {
-  const username = response.user.split(':')[0]
+  const username = response.user
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
@@ -31,7 +32,7 @@ export default function ReviewComment({ response }: ReviewCommentsProps) {
         {response.comment && (
           <div>
             <Divider sx={{ my: 2 }} />
-            <Typography>{response.comment}</Typography>
+            <MarkdownDisplay>{response.comment}</MarkdownDisplay>
           </div>
         )}
       </Card>

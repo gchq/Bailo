@@ -2,6 +2,7 @@ import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import { ReviewResponse } from 'types/interfaces'
 import { EntityKind } from 'types/types'
@@ -14,7 +15,7 @@ type ReviewDecisionProps = {
 export default function ReviewDecision({ response }: ReviewDecisionProps) {
   const isApproved = useMemo(() => response.decision === 'approve', [response.decision])
 
-  const username = response.user.split(':')[0]
+  const username = response.user.split(':')[1]
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
@@ -44,7 +45,7 @@ export default function ReviewDecision({ response }: ReviewDecisionProps) {
         {response.comment && (
           <div>
             <Divider sx={{ my: 2 }} />
-            <Typography>{response.comment}</Typography>
+            <MarkdownDisplay>{response.comment}</MarkdownDisplay>
           </div>
         )}
       </Card>

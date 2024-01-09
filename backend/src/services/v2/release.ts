@@ -144,6 +144,35 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   return updatedRelease
 }
 
+export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, comment: string) {
+  const model = await getModelById(user, modelId)
+  const release = await getReleaseBySemver(user, modelId, semver)
+
+  release.comments.push({
+    comment,
+    user: user.dn,
+    createdAt: new Date().toISOString(),
+  })
+
+  await validateRelease(user, model, release)
+
+  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      modelId: modelId,
+    })
+  }
+
+  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver }, { $set: release })
+
+  if (!updatedRelease) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  return updatedRelease
+}
+
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,

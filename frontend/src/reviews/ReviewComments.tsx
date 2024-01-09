@@ -1,17 +1,20 @@
-import { Button, Divider, Stack, TextField, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { submitAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
-import { putRelease, useGetRelease } from 'actions/release'
+import { patchAccessRequestComments, useGetAccessRequest } from 'actions/accessRequest'
+import { submitReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
 import { AccessRequestInterface, ReviewResponse } from 'types/interfaces'
 import { isReviewResponse, ReleaseInterface, ReviewComment, ReviewResponseKind } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
+import { getErrorMessage } from 'utils/fetcher'
 
 type ReviewCommentsProps =
   | {
@@ -26,6 +29,7 @@ type ReviewCommentsProps =
 export default function ReviewComments({ release, accessRequest }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
@@ -68,52 +72,32 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
+    setSubmitButtonLoading(true)
     if (!newReviewComment) {
       setCommentSubmissionError('Please provide a comment before submitting.')
+      setSubmitButtonLoading(false)
       return
     }
-    if (currentUser) {
-      const newComment: ReviewComment = {
-        comment: newReviewComment,
-        user: currentUser.dn,
-        createdAt: new Date().toISOString(),
-      }
-      if (release) {
-        const updatedRelease: ReleaseInterface = release
-        if (!updatedRelease.comments) {
-          updatedRelease.comments = []
-        }
-        updatedRelease.comments.push(newComment)
-        const res = await putRelease(updatedRelease)
-        if (res.ok) {
-          mutateRelease()
-          setNewReviewComment('')
-        } else {
-          setCommentSubmissionError(await res.json())
-        }
-      } else if (accessRequest) {
-        const updatedAccessRequest: AccessRequestInterface = accessRequest
-        if (!updatedAccessRequest.comments) {
-          updatedAccessRequest.comments = []
-        }
-        updatedAccessRequest.comments.push(newComment)
-        const res = await submitAccessRequestComment(
-          accessRequest.modelId,
-          accessRequest.id,
-          updatedAccessRequest.comments,
-        )
-        if (res.ok) {
-          mutateAccessRequest()
-          setNewReviewComment('')
-        } else {
-          setCommentSubmissionError(await res.json())
-        }
+    if (release) {
+      const res = await submitReleaseComment(modelId, release.semver, newReviewComment)
+      if (res.ok) {
+        mutateRelease()
+        setNewReviewComment('')
       } else {
-        setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
+    } else if (accessRequest) {
+      const res = await patchAccessRequestComments(accessRequest.modelId, accessRequest.id, newReviewComment)
+      if (res.ok) {
+        mutateAccessRequest()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
       }
     } else {
-      setCommentSubmissionError('There was a fetching user information, please try again later.')
+      setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
     }
+    setSubmitButtonLoading(false)
   }
 
   if (isReviewsError) {
@@ -130,21 +114,28 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
       {isReviewsLoading && isCurrentUserLoading && <Loading />}
       {reviewDetails}
       <>
-        <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
-          <TextField
-            size='small'
-            sx={{ width: '100%' }}
-            placeholder='Add a comment'
-            value={newReviewComment}
-            onChange={(e) => setNewReviewComment(e.target.value)}
-          ></TextField>
-          <Button sx={{ mt: 1, float: 'right' }} variant='contained' onClick={submitReviewComment}>
-            Submit comment
-          </Button>
-          <Typography variant='caption' color={theme.palette.error.light}>
-            {commentSubmissionError}
-          </Typography>
-        </Stack>
+        {currentUser && (
+          <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
+            <Box sx={{ width: '100%' }}>
+              <RichTextEditor
+                value={newReviewComment}
+                onChange={(e) => setNewReviewComment(e)}
+                textareaProps={{ placeholder: 'Add a comment' }}
+              />
+            </Box>
+            <LoadingButton
+              sx={{ mt: 1 }}
+              variant='contained'
+              onClick={submitReviewComment}
+              loading={submitButtonLoading}
+            >
+              Submit comment
+            </LoadingButton>
+            <Typography variant='caption' color={theme.palette.error.light}>
+              {commentSubmissionError}
+            </Typography>
+          </Stack>
+        )}
       </>
     </>
   )

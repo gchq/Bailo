@@ -17,7 +17,7 @@ export interface ReleaseInterface {
   fileIds: Array<string>
   images: Array<ImageRef>
 
-  comments?: Array<ReviewComment>
+  comments: Array<ReviewComment>
 
   deleted: boolean
 

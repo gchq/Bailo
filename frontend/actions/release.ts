@@ -59,6 +59,14 @@ export function putRelease(release: UpdateReleaseParams) {
   })
 }
 
+export function submitReleaseComment(modelId: string, semver: string, comment: string) {
+  return fetch(`/api/v2/model/${modelId}/release/${semver}/comment`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  })
+}
+
 export async function postFile(file: File, modelId: string, name: string, mime: string, metadata?: string | undefined) {
   const mimeParam = mime || 'application/octet-stream'
 
