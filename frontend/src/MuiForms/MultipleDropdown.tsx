@@ -44,7 +44,7 @@ export default function MultipleDropdown({
     <Fragment key={label}>
       <Typography fontWeight='bold'>
         {label}
-        {required && <span style={{ color: theme.palette.error.light }}>{' *'}</span>}
+        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <Autocomplete

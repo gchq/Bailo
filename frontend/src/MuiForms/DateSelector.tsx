@@ -32,7 +32,7 @@ export default function DateInput(props: CustomTextInputProps) {
   return (
     <Fragment key={label}>
       <Typography fontWeight='bold'>
-        {label} {required && <span style={{ color: theme.palette.error.light }}>{' *'}</span>}
+        {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <DatePicker

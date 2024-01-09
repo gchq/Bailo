@@ -102,7 +102,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
         <>
           <Typography fontWeight='bold'>
             {label}
-            {required && <span style={{ color: theme.palette.error.light }}>{' *'}</span>}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           {currentValue.length === 0 && (
             <Typography
