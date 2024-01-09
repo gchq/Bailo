@@ -7,6 +7,7 @@ import {
   deleteRelease,
   getModelReleases,
   getReleaseBySemver,
+  newReleaseComment,
   removeFileFromReleases,
   updateRelease,
 } from '../../src/services/v2/release.js'
@@ -185,6 +186,15 @@ describe('services > release', () => {
     releaseModelMocks.findOne.mockResolvedValue({})
 
     await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
+
+    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
+  })
+
+  test('newReleaseComment > success', async () => {
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    releaseModelMocks.findOne.mockResolvedValue({})
+
+    await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
 
     expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
   })
