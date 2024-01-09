@@ -1,6 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Divider, Stack } from '@mui/material'
 import { patchAccessRequestComments, useGetAccessRequest } from 'actions/accessRequest'
 import { submitReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
@@ -33,8 +32,6 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
-
-  const theme = useTheme()
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -131,9 +128,7 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
             >
               Submit comment
             </LoadingButton>
-            <Typography variant='caption' color={theme.palette.error.light}>
-              {commentSubmissionError}
-            </Typography>
+            <MessageAlert severity='error' message={commentSubmissionError} />
           </Stack>
         )}
       </>
