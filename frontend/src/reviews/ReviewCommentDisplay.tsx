@@ -29,10 +29,10 @@ export default function ReviewComment({ response }: ReviewCommentsProps) {
           </Typography>
           <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
         </Stack>
-        {response.comment && (
+        {response.message && (
           <div>
             <Divider sx={{ my: 2 }} />
-            <MarkdownDisplay>{response.comment}</MarkdownDisplay>
+            <MarkdownDisplay>{response.message}</MarkdownDisplay>
           </div>
         )}
       </Card>

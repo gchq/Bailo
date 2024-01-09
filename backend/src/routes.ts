@@ -51,12 +51,12 @@ import {
 } from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
-import { createAccessRequestComment } from './routes/v2/model/accessRequest/createAccessRequestComment.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
+import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -74,11 +74,11 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
-import { createReleaseComment } from './routes/v2/release/createReviewComment.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
+import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
@@ -225,7 +225,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
   server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
-  server.patch('/api/v2/model/:modelId/release/:semver/comment', ...createReleaseComment)
+  server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
@@ -234,7 +234,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
   server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
   server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
-  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...createAccessRequestComment)
+  server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)

@@ -50,9 +50,9 @@ export function patchAccessRequest(modelId: string, accessRequestId: string, for
   })
 }
 
-export function patchAccessRequestComments(modelId: string, accessRequestId: string, comment: string) {
+export function postAccessRequestComments(modelId: string, accessRequestId: string, comment: string) {
   return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}/comment`, {
-    method: 'PATCH',
+    method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment }),
   })

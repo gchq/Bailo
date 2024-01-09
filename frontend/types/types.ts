@@ -375,7 +375,7 @@ export interface FileInterface {
 }
 
 export type ReviewComment = {
-  comment: string
+  message: string
   user: string
   createdAt: string
 }

@@ -27,7 +27,7 @@ export interface ReleaseInterface {
 }
 
 export interface ReviewComment {
-  comment: string
+  message: string
   user: string
   createdAt: string
 }
@@ -65,7 +65,7 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
 
     comments: [
       {
-        comment: { type: String },
+        message: { type: String },
         user: { type: String },
         createdAt: { type: String },
       },

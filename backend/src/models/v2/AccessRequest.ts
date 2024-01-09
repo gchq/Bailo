@@ -49,7 +49,7 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
 
     comments: [
       {
-        comment: { type: String },
+        message: { type: String },
         user: { type: String },
         createdAt: { type: String },
       },

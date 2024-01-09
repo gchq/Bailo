@@ -99,7 +99,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
   return accessRequest
 }
 
-export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'comments'>
+export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserDoc,
   accessRequestId: string,
@@ -118,27 +118,15 @@ export async function updateAccessRequest(
     accessRequest.markModified('metadata')
   }
 
-  if (diff.comments) {
-    accessRequest.comments = diff.comments
-    accessRequest.markModified('comments')
-  }
-
   await accessRequest.save()
 
   return accessRequest
 }
 
-export async function updateAccessRequestComments(user: UserDoc, accessRequestId: string, comment: string) {
+export async function updateAccessRequestComments(user: UserDoc, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
-  const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
-  }
-
-  accessRequest.comments.push({ comment, user: user.dn, createdAt: new Date().toISOString() })
-  accessRequest.markModified('comments')
+  accessRequest.comments.push({ message, user: user.dn, createdAt: new Date().toISOString() })
 
   await accessRequest.save()
 

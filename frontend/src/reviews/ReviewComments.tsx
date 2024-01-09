@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Divider, Stack } from '@mui/material'
-import { patchAccessRequestComments, useGetAccessRequest } from 'actions/accessRequest'
-import { submitReleaseComment, useGetRelease } from 'actions/release'
+import { postAccessRequestComments, useGetAccessRequest } from 'actions/accessRequest'
+import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
@@ -76,7 +76,7 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
       return
     }
     if (release) {
-      const res = await submitReleaseComment(modelId, release.semver, newReviewComment)
+      const res = await postReleaseComment(modelId, release.semver, newReviewComment)
       if (res.ok) {
         mutateRelease()
         setNewReviewComment('')
@@ -84,7 +84,7 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
         setCommentSubmissionError(await getErrorMessage(res))
       }
     } else if (accessRequest) {
-      const res = await patchAccessRequestComments(accessRequest.modelId, accessRequest.id, newReviewComment)
+      const res = await postAccessRequestComments(accessRequest.modelId, accessRequest.id, newReviewComment)
       if (res.ok) {
         mutateAccessRequest()
         setNewReviewComment('')

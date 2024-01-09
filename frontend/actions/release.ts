@@ -59,9 +59,9 @@ export function putRelease(release: UpdateReleaseParams) {
   })
 }
 
-export function submitReleaseComment(modelId: string, semver: string, comment: string) {
+export function postReleaseComment(modelId: string, semver: string, comment: string) {
   return fetch(`/api/v2/model/${modelId}/release/${semver}/comment`, {
-    method: 'PATCH',
+    method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment }),
   })
