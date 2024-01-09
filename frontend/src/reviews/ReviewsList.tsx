@@ -17,13 +17,13 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const doesNotContainUserResponse = useCallback(
+  const doesNotContainUserApproval = useCallback(
     (review: ReviewRequestInterface) => {
       return (
         currentUser &&
-        review.responses.filter(
+        !review.responses.find(
           (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        ).length === 0
+        )
       )
     },
     [currentUser],
@@ -34,10 +34,10 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
       setFilteredReviews(reviews)
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && doesNotContainUserResponse(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && doesNotContainUserApproval(filteredReview)),
       )
     }
-  }, [reviews, kind, doesNotContainUserResponse])
+  }, [reviews, kind, doesNotContainUserApproval])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />

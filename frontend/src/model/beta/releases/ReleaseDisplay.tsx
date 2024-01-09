@@ -56,7 +56,6 @@ export default function ReleaseDisplay({
         const groupedResponses: GroupedReviewResponse = _.groupBy(reviewResult.responses, (response) => response.user)
         const latestResponses: ReviewResponse[] = []
         Object.keys(groupedResponses).forEach((user) => {
-          //console.log(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
           latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
         })
         reviewResult.responses = latestResponses
