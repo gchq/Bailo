@@ -141,7 +141,7 @@ export interface AccessRequestInterface {
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
-  comments?: Array<ReviewComment>
+  comments: Array<ReviewComment>
   createdBy: string
   createdAt: string
   updatedAt: string
