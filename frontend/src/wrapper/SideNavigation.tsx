@@ -93,9 +93,9 @@ export default function SideNavigation({
     (review: ReviewRequestInterface) => {
       return (
         currentUser &&
-        review.responses.filter(
+        !review.responses.find(
           (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        ).length === 0
+        )
       )
     },
     [currentUser],

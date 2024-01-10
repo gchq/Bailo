@@ -89,6 +89,7 @@ export default function ReviewWithComment({
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setShowError(true)
     } else {
+      setReviewComment('')
       onSubmit(decision, reviewComment, reviewRequest.role)
     }
   }
