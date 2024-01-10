@@ -1,3 +1,5 @@
+import CommentIcon from '@mui/icons-material/ChatBubble'
+import ReviewIcon from '@mui/icons-material/Checklist'
 import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import _ from 'lodash'
@@ -37,6 +39,7 @@ export default function ReleaseDisplay({
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
+  const [totalResponseCount, setTotalResponseCount] = useState(0)
 
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
@@ -56,7 +59,6 @@ export default function ReleaseDisplay({
         const groupedResponses: GroupedReviewResponse = _.groupBy(reviewResult.responses, (response) => response.user)
         const latestResponses: ReviewResponse[] = []
         Object.keys(groupedResponses).forEach((user) => {
-          //console.log(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
           latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
         })
         reviewResult.responses = latestResponses
@@ -64,7 +66,7 @@ export default function ReleaseDisplay({
       })
       setReviewsWithLatestResponses(latestReviews)
     }
-  }, [reviews, isReviewsLoading])
+  }, [reviews, isReviewsLoading, setTotalResponseCount, release.semver])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -161,7 +163,27 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
+              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider sx={{ my: 2 }} />}
+              <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />}>
+                {release.comments.length > 0 && (
+                  <Tooltip title='Comments'>
+                    <Stack direction='row' spacing={1}>
+                      <CommentIcon color='primary' />
+                      <Typography variant='caption'>{release.comments.length}</Typography>
+                    </Stack>
+                  </Tooltip>
+                )}
+                {reviews && totalResponseCount > 0 && (
+                  <Tooltip title='Reviews'>
+                    <Stack direction='row' spacing={1}>
+                      <ReviewIcon color='primary' />
+                      <Typography variant='caption'>
+                        {reviews.find((review) => review.semver === release.semver)?.responses.length}
+                      </Typography>
+                    </Stack>
+                  </Tooltip>
+                )}
+              </Stack>
               {reviewsWithLatestResponses.map((review) => (
                 <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
               ))}
