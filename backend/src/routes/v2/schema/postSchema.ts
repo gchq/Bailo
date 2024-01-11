@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { createSchema } from '../../../services/v2/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
@@ -16,7 +18,9 @@ export const postSchemaSchema = z.object({
     name: z.string({
       required_error: 'Must specify schema name',
     }),
-
+    description: z.string({
+      required_error: 'Must specify schema description',
+    }),
     kind: z.nativeEnum(SchemaKind, {
       required_error: 'Must specify schema kind',
     }),
@@ -51,9 +55,11 @@ interface PostSchemaResponse {
 export const postSchema = [
   bodyParser.json(),
   async (req: Request, res: Response<PostSchemaResponse>) => {
+    req.audit = AuditInfo.CreateSchema
     const { body } = parse(req, postSchemaSchema)
 
     const schema = await createSchema(req.user, body)
+    await audit.onCreateSchema(req, schema)
 
     return res.json({
       schema,

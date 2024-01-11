@@ -6,7 +6,7 @@ RUN apk update
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
 

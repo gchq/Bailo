@@ -36,8 +36,16 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        if visibility is not None:
+            visibility = str(visibility)
+
         filtered_json = filter_none(
-            {"name": name, "description": description, "visibility": visibility, "teamId": team_id}
+            {
+                "name": name,
+                "description": description,
+                "visibility": visibility,
+                "teamId": team_id,
+            }
         )
 
         return self.agent.post(
@@ -48,12 +56,11 @@ class Client:
     def get_models(
         self,
         task: str | None = None,
-        libraries: list[str] = [],
-        filters: list[str] = [],
+        libraries: list[str] | None = None,
+        filters: list[str] | None = None,
         search: str = "",
     ):
-        """
-        Finds and returns a list of models based on provided search terms.
+        """Find and returns a list of models based on provided search terms.
 
         :param task: Model task (e.g. image classification), defaults to None
         :param libraries: Model library (e.g. TensorFlow), defaults to []
@@ -61,6 +68,12 @@ class Client:
         :param search: String to be located in model cards, defaults to ""
         :return: JSON response object
         """
+        if libraries is None:
+            libraries = []
+
+        if filters is None:
+            filters = []
+
         return self.agent.get(
             f"{self.url}/v2/models/search",
             params={
@@ -197,7 +210,13 @@ class Client:
         return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json).json()
 
     def put_release(
-        self, model_id: str, release_version: str, notes: str, draft: bool, file_ids: list[str], images: list[str]
+        self,
+        model_id: str,
+        release_version: str,
+        notes: str,
+        draft: bool,
+        file_ids: list[str],
+        images: list[str],
     ):
         """
         Creates a new model release.
@@ -214,7 +233,12 @@ class Client:
         """
         return self.agent.put(
             f"{self.url}/v2/model/{model_id}/release/{release_version}",
-            json={"notes": notes, "draft": draft, "fileIds": file_ids, "images": images},
+            json={
+                "notes": notes,
+                "draft": draft,
+                "fileIds": file_ids,
+                "images": images,
+            },
         ).json()
 
     def get_all_releases(
@@ -287,9 +311,8 @@ class Client:
         :param buffer: BytesIO object for bailo to write to
         :return: The unique file ID
         """
-        with self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True) as r:
-            with buffer as f:
-                shutil.copyfileobj(r.raw, f)
+        req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
+        shutil.copyfileobj(req.raw, buffer)
         return file_id
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
@@ -301,7 +324,11 @@ class Client:
         :return: JSON response object
         """
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/files/upload/simple", params={"name": name}, data=buffer, stream=True
+            f"{self.url}/v2/model/{model_id}/files/upload/simple",
+            params={"name": name},
+            data=buffer,
+            stream=True,
+            timeout=10_000,
         )
 
     # def start_multi_upload(): TBC
@@ -369,6 +396,7 @@ class Client:
         self,
         schema_id: str,
         name: str,
+        description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ):
@@ -377,6 +405,7 @@ class Client:
 
         :param schema_id: Unique schema ID
         :param name: Name of the schema
+        :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
         :return: JSON response object
@@ -386,7 +415,8 @@ class Client:
             json={
                 "id": schema_id,
                 "name": name,
-                "kind": kind,
+                "description": description,
+                "kind": str(kind),
                 "jsonSchema": json_schema,
             },
         ).json()
@@ -417,7 +447,12 @@ class Client:
         ).json()
 
     def post_review(
-        self, model_id: str, role: str, decision: str, version: str | None = None, comment: str | None = None
+        self,
+        model_id: str,
+        role: str,
+        decision: str,
+        version: str | None = None,
+        comment: str | None = None,
     ):
         """
         Creates a review for a release
@@ -429,7 +464,10 @@ class Client:
         :param comment: A comment to go with the review
         """
         filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/release/{version}/review", json=filtered_json).json()
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/release/{version}/review",
+            json=filtered_json,
+        ).json()
 
     def get_model_roles(
         self,
@@ -578,7 +616,8 @@ class Client:
         :return: JSON response object
         """
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/access-requests", json={"schemaId": schema_id, "metadata": metadata}
+            f"{self.url}/v2/model/{model_id}/access-requests",
+            json={"schemaId": schema_id, "metadata": metadata},
         ).json()
 
     def delete_access_request(self, model_id: str, access_request_id: str):
@@ -593,7 +632,13 @@ class Client:
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
         ).json()
 
-    def patch_access_request(self, model_id: str, access_request_id: str, metadata: Any, schema_id: str | None = None):
+    def patch_access_request(
+        self,
+        model_id: str,
+        access_request_id: str,
+        metadata: Any,
+        schema_id: str | None = None,
+    ):
         """
         Updates an access request given its unique ID
 
@@ -604,5 +649,6 @@ class Client:
         """
         filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
         return self.agent.patch(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}", json=filtered_json
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json,
         ).json()

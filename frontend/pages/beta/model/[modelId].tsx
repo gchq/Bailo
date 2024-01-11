@@ -22,7 +22,12 @@ export default function Model() {
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
-            { title: 'Access Requests', path: 'access', view: <AccessRequests model={model} /> },
+            {
+              title: 'Access Requests',
+              path: 'access',
+              view: <AccessRequests model={model} />,
+              datatest: 'accessRequestTab',
+            },
             { title: 'Registry', path: 'registry', view: <ModelImages model={model} /> },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]

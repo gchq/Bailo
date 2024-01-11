@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme } from '@mui/material/styles'
+import { createTheme, ThemeOptions } from '@mui/material/styles'
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -12,7 +12,7 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
-const removeElevation = {
+const defaultComponentOverrides: ThemeOptions['components'] = {
   MuiPaper: {
     defaultProps: {
       elevation: 0,
@@ -21,6 +21,7 @@ const removeElevation = {
   MuiCard: {
     defaultProps: {
       elevation: 0,
+      variant: 'outlined',
     },
   },
   MuiAppBar: {
@@ -37,7 +38,7 @@ const removeElevation = {
 
 export const lightTheme = createTheme({
   components: {
-    ...removeElevation,
+    ...defaultComponentOverrides,
   },
   palette: {
     mode: 'light',
@@ -61,7 +62,7 @@ export const lightTheme = createTheme({
 
 export const betaLightTheme = createTheme({
   components: {
-    ...removeElevation,
+    ...defaultComponentOverrides,
     MuiMenuItem: {
       styleOverrides: {
         root: {
@@ -163,7 +164,7 @@ export const darkTheme = createTheme({
     },
   },
   components: {
-    ...removeElevation,
+    ...defaultComponentOverrides,
     MuiMenuItem: {
       styleOverrides: {
         root: {

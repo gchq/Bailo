@@ -3,8 +3,10 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import SchemaButton from 'src/model/beta/common/SchemaButton'
 
 import { useGetModel } from '../../../../actions/model'
@@ -13,7 +15,6 @@ import { useGetSchemas } from '../../../../actions/schema'
 import { useGetCurrentUser } from '../../../../actions/user'
 import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
-import MessageAlert from '../../../../src/MessageAlert'
 import Wrapper from '../../../../src/Wrapper.beta'
 import { SchemaInterface } from '../../../../types/types'
 import { SchemaKind } from '../../../../types/v2/types'
@@ -21,33 +22,47 @@ import { SchemaKind } from '../../../../types/v2/types'
 export default function NewSchemaSelection() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.Model)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
 
+  const isLoadingData = useMemo(
+    () => isSchemasLoading || isModelLoading || isCurrentUserLoading,
+    [isCurrentUserLoading, isModelLoading, isSchemasLoading],
+  )
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
   async function createModelUsingSchema(newSchema: SchemaInterface) {
     if (currentUser && model) {
-      await postFromSchema(model.id, newSchema.id)
-      await mutateModel()
-      router.push(`/beta/model/${modelId}`)
+      setLoading(true)
+      setErrorMessage('')
+
+      const response = await postFromSchema(model.id, newSchema.id)
+
+      if (response.status && response.status < 400) {
+        await mutateModel()
+        router.push(`/beta/model/${modelId}`)
+      } else {
+        setErrorMessage(response.data)
+        setLoading(false)
+      }
     }
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper(`Unable to load schema selection page`, {
+    isSchemasError,
+    isCurrentUserError,
+    isModelError,
+  })
+  if (error) return error
 
   return (
     <Wrapper title='Select a schema' page='upload'>
-      {(isSchemasLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
-      {schemas && !isSchemasLoading && !isSchemasError && (
+      {isLoadingData && <Loading />}
+      {!isLoadingData && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Link href={`/beta/model/${modelId}`}>
@@ -75,8 +90,8 @@ export default function NewSchemaSelection() {
                     <SchemaButton
                       key={activeSchema.id}
                       schema={activeSchema}
-                      modelId={modelId}
-                      onClickAction={() => createModelUsingSchema(activeSchema)}
+                      loading={loading}
+                      onClick={() => createModelUsingSchema(activeSchema)}
                     />
                   ))}
                 {activeSchemas.length === 0 && <EmptyBlob text='Could not find any active schemas' />}
@@ -90,12 +105,13 @@ export default function NewSchemaSelection() {
                     <SchemaButton
                       key={inactiveSchema.id}
                       schema={inactiveSchema}
-                      modelId={modelId}
-                      onClickAction={() => createModelUsingSchema(inactiveSchema)}
+                      loading={loading}
+                      onClick={() => createModelUsingSchema(inactiveSchema)}
                     />
                   ))}
                 {inactiveSchemas.length === 0 && <EmptyBlob text='Could not find any inactive schemas' />}
               </Grid>
+              <MessageAlert message={errorMessage} severity='error' />
             </Stack>
           </Card>
         </Container>

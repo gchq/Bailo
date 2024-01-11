@@ -8,6 +8,8 @@ import 'reactflow/dist/style.css'
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
@@ -34,8 +36,9 @@ export default function MyApp(props: MyAppProps) {
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
-    const mode = themeModeValue.theme.palette.mode === 'dark' ? 'dark' : 'light'
-    document.documentElement.setAttribute('data-color-mode', mode)
+    // TODO Once v2 is adopted we should re-implement darkmode
+    //const mode = themeModeValue.theme.palette.mode === 'dark' ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-color-mode', 'light')
   }, [themeModeValue])
 
   return (
@@ -47,8 +50,10 @@ export default function MyApp(props: MyAppProps) {
         <UnsavedChangesContext.Provider value={unsavedChangesValue}>
           <ThemeModeContext.Provider value={themeModeValue}>
             <SnackbarProvider>
-              <CssBaseline />
-              <Component {...pageProps} />
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
+                <CssBaseline />
+                <Component {...pageProps} />
+              </LocalizationProvider>
             </SnackbarProvider>
           </ThemeModeContext.Provider>
         </UnsavedChangesContext.Provider>

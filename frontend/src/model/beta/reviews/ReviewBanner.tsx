@@ -6,8 +6,10 @@ import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 import { mutate } from 'swr'
 import { AccessRequestInterface } from 'types/interfaces'
+import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetReleasesForModelId } from '../../../../actions/release'
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
@@ -28,7 +30,7 @@ type ReviewBannerProps =
 export default function ReviewBanner({ release, accessRequest }: ReviewBannerProps) {
   const theme = useTheme()
   const [isReviewOpen, setIsReviewOpen] = useState(false)
-  const [postResponseError, setPostResponseError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   const [modelId, reviewTitle, semverOrAccessRequestIdObject, dynamicReviewWithCommentProps] = useMemo(
@@ -40,7 +42,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   )
 
   const { mutateReleases } = useGetReleasesForModelId(modelId)
-  const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
+  const { isAccessRequestsError, mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews: mutateActiveReviews } = useGetReviewRequestsForModel({
     modelId,
     isActive: true,
@@ -61,8 +63,9 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   }
 
   async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
+    setErrorMessage('')
     setLoading(true)
-    setPostResponseError('')
+
     const res = await postReviewResponse({
       modelId,
       decision,
@@ -70,7 +73,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
       role,
       ...semverOrAccessRequestIdObject,
     })
-    if (res.status === 200) {
+
+    if (!res.ok) {
+      setErrorMessage(await getErrorMessage(res))
+    } else {
       mutate(
         (key) => {
           return typeof key === 'string' && key.startsWith('/api/v2/reviews')
@@ -83,10 +89,12 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
       mutateReleases()
       mutateAccessRequests()
       setIsReviewOpen(false)
-    } else {
-      setPostResponseError('There was a problem submitting this review')
     }
     setLoading(false)
+  }
+
+  if (isAccessRequestsError) {
+    return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
   }
 
   return (
@@ -101,7 +109,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: theme.palette.primary.main,
-        borderRadius: '4px 4px 0px 0px',
+        borderRadius: 0,
       }}
     >
       <Grid container spacing={2} alignItems='center' sx={{ px: 2 }}>
@@ -112,7 +120,14 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
           <Typography sx={{ mx: 'auto' }}>Review required</Typography>
         </Grid>
         <Grid item xs={4} sx={{ display: 'flex' }}>
-          <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} sx={{ ml: 'auto' }}>
+          <Button
+            variant='outlined'
+            color='inherit'
+            size='small'
+            onClick={handleReviewOpen}
+            sx={{ ml: 'auto' }}
+            data-test='reviewButton'
+          >
             Review
           </Button>
         </Grid>
@@ -120,7 +135,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
       <ReviewWithComment
         title={reviewTitle}
         open={isReviewOpen}
-        errorText={postResponseError}
+        errorMessage={errorMessage}
         onClose={handleReviewClose}
         onSubmit={handleSubmit}
         loading={loading}

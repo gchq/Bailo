@@ -1,5 +1,5 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Card, Container, Divider, Stack, Typography } from '@mui/material'
+import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
@@ -40,8 +40,8 @@ export default function Release() {
 
   return (
     <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
-      <Container maxWidth='md'>
-        <Card sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
+        <Paper>
           <>
             {activeReviews.length > 0 && <ReviewBanner release={release} />}
             <Stack spacing={2} sx={{ p: 4 }}>
@@ -63,7 +63,7 @@ export default function Release() {
               <ReviewComments release={release} />
             </Stack>
           </>
-        </Card>
+        </Paper>
       </Container>
     </Wrapper>
   )

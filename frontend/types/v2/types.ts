@@ -38,7 +38,7 @@ export interface ModelCardRevisionInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'Owner' | 'Contributor' | 'Consumer' | string>
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
 export type ModelForm = {
@@ -78,6 +78,10 @@ export interface FileInterface {
   updatedAt: Date
 }
 
+export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
+  return (file as FileInterface).bucket !== undefined
+}
+
 export interface PostSimpleUpload {
   file: FileInterface
 }
@@ -89,4 +93,32 @@ export interface User {
 export interface EntityObject {
   kind: string
   id: string
+}
+
+export const TokenScope = {
+  All: 'all',
+  Models: 'models',
+} as const
+
+export type TokenScopeKeys = (typeof TokenScope)[keyof typeof TokenScope]
+
+export const TokenActions = {
+  ImageRead: 'image:read',
+  FileRead: 'file:read',
+} as const
+
+export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]
+
+export interface TokenInterface {
+  user: string
+  description: string
+  scope: TokenScopeKeys
+  modelIds: Array<string>
+  actions: Array<TokenActionsKeys>
+  accessKey: string
+  secretKey?: string
+  deleted: boolean
+  createdAt: Date
+  updatedAt: Date
+  compareToken: (candidateToken: string) => Promise<boolean>
 }

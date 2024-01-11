@@ -2,6 +2,7 @@ import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { Decision } from '../../models/v2/Review.js'
+import { TokenActions, TokenScope } from '../../models/v2/Token.js'
 import { SchemaKind } from '../../types/v2/enums.js'
 
 export const registry = new OpenAPIRegistry()
@@ -183,8 +184,39 @@ export const schemaInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const userTokenSchema = z.object({
+  description: z.string().openapi({ example: 'user token' }),
+
+  scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
+  modelIds: z.array(z.string()).openapi({ example: ['yozlo-v4-abcdef'] }),
+  actions: z.array(z.nativeEnum(TokenActions)).openapi({ example: ['image:read', 'file:read'] }),
+
+  accessKey: z.string().openapi({ example: 'bailo-iot4hj3890tqaji' }),
+  secretKey: z.string().openapi({ example: '987895347u89fj389agre' }),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const userInterfaceSchema = z.object({
   dn: z.string().openapi({ example: 'user' }),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const webhookInterfaceSchema = z.object({
+  id: z.string().openapi({ example: 'webhook-zyxwvu' }),
+  modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  name: z.string().openapi({ example: 'webhook' }),
+
+  uri: z.string().openapi({ example: 'http://host:8080/webhook' }),
+  token: z.string().openapi({ example: 'abcd' }),
+  insecureSSL: z.boolean().openapi({ example: false }),
+  events: z.array(z.string()).openapi({ example: ['createRelease', 'createReviewResponse', 'createAccessRequest'] }),
+  active: z.boolean().openapi({ example: true }),
+
+  deleted: z.boolean().openapi({ example: false }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

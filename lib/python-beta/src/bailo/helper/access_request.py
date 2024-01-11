@@ -59,10 +59,18 @@ class AccessRequest:
 
         schema_id = json_access_request["schemaId"]
 
-        return cls(client, model_id, schema_id, metadata, access_request_id, created_by, deleted)
+        return cls(
+            client,
+            model_id,
+            schema_id,
+            metadata,
+            access_request_id,
+            created_by,
+            deleted,
+        )
 
     @classmethod
-    def create(cls, client: Client, name: str, model_id: str, schema_id: str, metadata: Any) -> AccessRequest:
+    def create(cls, client: Client, model_id: str, schema_id: str, metadata: Any) -> AccessRequest:
         """Makes an access request for the model
 
         Posts an access request to Bailo to be reviewed
@@ -81,7 +89,15 @@ class AccessRequest:
         metadata = access_request_json["metadata"]
         created_by = access_request_json["createdBy"]
 
-        return cls(client, model_id, schema_id, metadata, access_request_id, created_by, deleted)
+        return cls(
+            client,
+            model_id,
+            schema_id,
+            metadata,
+            access_request_id,
+            created_by,
+            deleted,
+        )
 
     def delete(self) -> bool:
         """Deletes the access request on Bailo
@@ -97,7 +113,7 @@ class AccessRequest:
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
     def __str__(self) -> str:
-        return f"Access Request: {self.name} - {self.model_id}"
+        return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.model_id},{self.schema_id})"

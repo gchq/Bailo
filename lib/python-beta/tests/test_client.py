@@ -12,14 +12,20 @@ def test_post_model(requests_mock):
 
     client = Client("https://example.com")
     result = client.post_model(
-        name="test", description="test", visibility=ModelVisibility.Public, team_id="uncategorised"
+        name="test",
+        description="test",
+        visibility=ModelVisibility.PUBLIC,
+        team_id="uncategorised",
     )
 
     assert result == {"success": True}
 
 
 def test_get_models(requests_mock):
-    requests_mock.get("https://example.com/api/v2/models/search?task=image_classification", json={"success": True})
+    requests_mock.get(
+        "https://example.com/api/v2/models/search?task=image_classification",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
     result = client.get_models(task="image_classification")
@@ -70,7 +76,10 @@ def test_put_model_card(requests_mock):
 
 
 def test_model_card_from_schema(requests_mock):
-    requests_mock.post("https://example.com/api/v2/model/test_id/setup/from-schema", json={"success": True})
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/setup/from-schema",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
     result = client.model_card_from_schema(model_id="test_id", schema_id="test_id")
@@ -160,7 +169,7 @@ def test_get_all_schemas(requests_mock):
     requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.get_all_schemas(kind=SchemaKind.Model)
+    result = client.get_all_schemas(kind=SchemaKind.MODEL)
 
     assert result == {"success": True}
 
@@ -178,7 +187,13 @@ def test_post_schema(requests_mock):
     requests_mock.post("https://example.com/api/v2/schemas", json={"success": True})
 
     client = Client("https://example.com")
-    result = client.post_schema(schema_id="test_id", name="test", kind=SchemaKind.Model, json_schema={"test": "test"})
+    result = client.post_schema(
+        schema_id="test_id",
+        name="test",
+        description="example_description",
+        kind=SchemaKind.MODEL,
+        json_schema={"test": "test"},
+    )
 
     assert result == {"success": True}
 
@@ -271,7 +286,10 @@ def test_patch_team(requests_mock):
 
 
 def test_get_access_request(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id/access-request/test_id",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
     result = client.get_access_request(model_id="test_id", access_request_id="test_id")
@@ -280,7 +298,10 @@ def test_get_access_request(requests_mock):
 
 
 def test_get_access_requests(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/access-requests", json={"success": True})
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id/access-requests",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
     result = client.get_access_requests(model_id="test_id")
@@ -289,7 +310,10 @@ def test_get_access_requests(requests_mock):
 
 
 def test_post_access_request(requests_mock):
-    requests_mock.post("https://example.com/api/v2/model/test_id/access-requests", json={"success": True})
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/access-requests",
+        json={"success": True},
+    )
 
     x = {"overview": {"entities": ["user"], "name": "test"}}
     y = json.dumps(x)
@@ -301,7 +325,10 @@ def test_post_access_request(requests_mock):
 
 
 def test_delete_access_request(requests_mock):
-    requests_mock.delete("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
+    requests_mock.delete(
+        "https://example.com/api/v2/model/test_id/access-request/test_id",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
     result = client.delete_access_request(model_id="test_id", access_request_id="test_id")
@@ -310,7 +337,10 @@ def test_delete_access_request(requests_mock):
 
 
 def test_patch_access_request(requests_mock):
-    requests_mock.patch("https://example.com/api/v2/model/test_id/access-request/test_id", json={"success": True})
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test_id/access-request/test_id",
+        json={"success": True},
+    )
 
     client = Client("https://example.com")
 

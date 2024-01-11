@@ -94,10 +94,10 @@ npm install
 npm run certs
 
 # This builds all the Bailo images, rerun it when you update dependencies.
-DOCKER_BUILDKIT=1 docker-compose build --parallel
+docker compose build --parallel
 
 # Then run the development instance of Bailo.
-docker-compose up -d
+docker compose up -d
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
@@ -169,7 +169,7 @@ invisibly by `p-mongo-queue` (`backend/utils/queues.ts`).
 
 _Issue: Sometimes Docker struggles when you add a new dependency._
 
-Fix: Run `docker-compose down --rmi all` followed by `docker-compose up --build`.
+Fix: Run `docker compose down --rmi all` followed by `docker compose up --build`.
 
 _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
 
@@ -187,10 +187,8 @@ application is able to access the Docker registry internally as it will not prov
 
 List of near term goals:
 
-- K8s Helm charts
-- AWS deployment pattern
-- Azure deployment pattern
-- Deployment container watermarking
+- Model metrication
+- Instance federation
 
 <br />
 

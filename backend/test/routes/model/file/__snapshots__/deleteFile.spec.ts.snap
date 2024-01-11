@@ -5,3 +5,7 @@ exports[`routes > file > deleteFile > 200 > ok 1`] = `
   "message": "Successfully removed file.",
 }
 `;
+
+exports[`routes > file > deleteFile > audit > expected call 1`] = `"recusandae"`;
+
+exports[`routes > file > deleteFile > audit > expected call 2`] = `"recusandae"`;

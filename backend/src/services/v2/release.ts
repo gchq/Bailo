@@ -1,11 +1,12 @@
 import { Optional } from 'utility-types'
 
-import { ModelAction, ReleaseAction } from '../../connectors/v2/authorisation/Base.js'
+import { ReleaseAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
+import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { asyncFilter } from '../../utils/v2/array.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
 import { getFileById } from './file.js'
@@ -13,6 +14,7 @@ import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
+import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
   if (release.images) {
@@ -86,8 +88,9 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
 
   await validateRelease(user, model, release)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Create))) {
-    throw Forbidden(`You do not have permission to create a release on this model.`, {
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
       userDn: user.dn,
       modelId: releaseParams.modelId,
     })
@@ -115,6 +118,13 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     }
   }
 
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.CreateRelease,
+    `Release ${release.semver} has been created for model ${release.modelId}`,
+    { release },
+  )
+
   return release
 }
 
@@ -126,8 +136,9 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Update))) {
-    throw Forbidden(`You do not have permission to create a release on this model.`, {
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
       userDn: user.dn,
       modelId: modelId,
     })
@@ -145,7 +156,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,
-): Promise<Array<ReleaseDoc & { model: ModelInterface }>> {
+): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
   const results = await Release.aggregate()
     .match({ modelId })
     .sort({ updatedAt: -1 })
@@ -153,7 +164,10 @@ export async function getModelReleases(
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
     .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
 
-  return asyncFilter(results, (result) => authorisation.userReleaseAction(user, result.model, result, ModelAction.View))
+  const model = await getModelById(user, modelId)
+
+  const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
+  return results.filter((_, i) => auths[i].success)
 }
 
 export async function getReleaseBySemver(user: UserDoc, modelId: string, semver: string) {
@@ -167,8 +181,9 @@ export async function getReleaseBySemver(user: UserDoc, modelId: string, semver:
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.View))) {
-    throw Forbidden(`You do not have permission to view this release.`, { userDn: user.dn })
+  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   return release
@@ -178,8 +193,9 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
   const model = await getModelById(user, modelId)
   const release = await getReleaseBySemver(user, modelId, semver)
 
-  if (!(await authorisation.userReleaseAction(user, model, release, ReleaseAction.Delete))) {
-    throw Forbidden(`You do not have permission to delete this release.`, { userDn: user.dn })
+  const auth = await authorisation.release(user, model, release, ReleaseAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
   await release.delete()
@@ -189,4 +205,28 @@ export async function deleteRelease(user: UserDoc, modelId: string, semver: stri
 
 export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
+}
+
+export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fileId: string) {
+  const query = {
+    modelId: model.id,
+    // Match documents where the element exists in the array
+    fileIds: fileId,
+  }
+  const releases = await Release.find(query)
+
+  const responses = await authorisation.releases(user, model, releases, ReleaseAction.Update)
+  const failures = responses.filter((response) => !response.success)
+
+  if (failures.length) {
+    throw Forbidden(`You do not have permission to update these releases.`, {
+      releases: failures.map((failure) => failure.id),
+    })
+  }
+
+  const result = await Release.updateMany(query, {
+    $pull: { fileIds: fileId },
+  })
+
+  return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
 }

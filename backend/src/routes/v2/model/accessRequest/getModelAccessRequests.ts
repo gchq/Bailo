@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
 import { getAccessRequestsByModel } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
@@ -40,11 +42,14 @@ interface GetModelAccessRequestsResponse {
 export const getModelAccessRequests = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelAccessRequestsResponse>) => {
+    req.audit = AuditInfo.SearchAccessRequests
     const {
       params: { modelId },
     } = parse(req, getModelAccessRequestsSchema)
 
     const accessRequests = await getAccessRequestsByModel(req.user, modelId)
+
+    await audit.onSearchAccessRequests(req, accessRequests)
 
     return res.json({ accessRequests })
   },

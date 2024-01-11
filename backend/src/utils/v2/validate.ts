@@ -1,5 +1,6 @@
 import { Request } from 'express'
 import z, { AnyZodObject, ZodError } from 'zod'
+import { ErrorMessageOptions, generateErrorMessage } from 'zod-error'
 
 import { BadReq } from './error.js'
 
@@ -8,7 +9,15 @@ export function parse<T extends AnyZodObject>(req: Request, schema: T): z.infer<
     return schema.parse(req)
   } catch (err) {
     const error = err as ZodError
-    throw BadReq(error.issues[0].message, { errors: error.issues })
+    const options: ErrorMessageOptions = {
+      delimiter: {
+        component: ' - ',
+      },
+      code: {
+        enabled: false,
+      },
+    }
+    throw BadReq(generateErrorMessage(error.issues, options), { errors: error.issues })
   }
 }
 

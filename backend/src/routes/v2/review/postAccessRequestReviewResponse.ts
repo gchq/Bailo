@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
 import { Decision, ReviewInterface } from '../../../models/v2/Review.js'
 import { respondToReview } from '../../../services/v2/review.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
@@ -26,12 +28,15 @@ interface PostAccessRequestReviewResponse {
 export const postAccessRequestReviewResponse = [
   bodyParser.json(),
   async (req: Request, res: Response<PostAccessRequestReviewResponse>) => {
+    req.audit = AuditInfo.CreateReviewResponse
     const {
       params: { modelId, accessRequestId },
       body: { role, ...body },
     } = parse(req, postAccessRequestReviewResponseSchema)
 
     const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
+
+    await audit.onCreateReviewResponse(req, review)
 
     return res.json({
       review,

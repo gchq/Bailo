@@ -1,10 +1,14 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
+vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/connectors/v2/audit/index.js')
+vi.mock('../../../src/connectors/v2/authorisation/index.js')
 
 const mockSchemaService = vi.hoisted(() => {
   return {
@@ -20,6 +24,14 @@ describe('routes > schema > getSchemas', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    const res = await testGet(`/api/v2/schemas`)
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onSearchSchemas).toBeCalled()
+    expect(audit.onSearchSchemas.mock.calls.at(0).at(1)).toMatchSnapshot()
   })
 
   test('returns only model schemas with the model parameter', async () => {

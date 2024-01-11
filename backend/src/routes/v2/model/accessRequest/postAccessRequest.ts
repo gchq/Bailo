@@ -2,10 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
 import { createAccessRequest } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 const knownOverview = z.object({
   name: z.string().nonempty(),
@@ -58,12 +60,15 @@ interface PostAccessRequest {
 export const postAccessRequest = [
   bodyParser.json(),
   async (req: Request, res: Response<PostAccessRequest>) => {
+    req.audit = AuditInfo.CreateAccessRequest
     const {
       params: { modelId },
       body,
     } = parse(req, postAccessRequestSchema)
 
     const accessRequest = await createAccessRequest(req.user, modelId, body)
+
+    await audit.onCreateAccessRequest(req, accessRequest)
 
     return res.json({
       accessRequest,

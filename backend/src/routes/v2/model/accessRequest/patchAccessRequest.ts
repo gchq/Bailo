@@ -2,10 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
 import { updateAccessRequest } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { parse } from '../../../../utils/validate.js'
+import { parse } from '../../../../utils/v2/validate.js'
 import { accessRequestMetadata } from './postAccessRequest.js'
 
 export const patchAccessRequestSchema = z.object({
@@ -44,12 +46,15 @@ interface PatchAccessRequestResponse {
 export const patchAccessRequest = [
   bodyParser.json(),
   async (req: Request, res: Response<PatchAccessRequestResponse>) => {
+    req.audit = AuditInfo.UpdateAccessRequest
     const {
       body,
       params: { accessRequestId },
     } = parse(req, patchAccessRequestSchema)
 
     const accessRequest = await updateAccessRequest(req.user, accessRequestId, body)
+
+    await audit.onUpdateAccessRequest(req, accessRequest)
 
     return res.json({
       accessRequest,

@@ -2,10 +2,14 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
+import { FileInterface } from '../../../models/v2/File.js'
 import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { getFilesByIds } from '../../../services/v2/file.js'
 import { getReleaseBySemver } from '../../../services/v2/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getReleaseSchema = z.object({
   params: z.object({
@@ -35,20 +39,24 @@ registerPath({
 })
 
 interface getReleaseResponse {
-  release: ReleaseInterface
+  release: ReleaseInterface & { files: FileInterface[] }
 }
 
 export const getRelease = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleaseResponse>) => {
+    req.audit = AuditInfo.ViewRelease
     const {
       params: { modelId, semver },
     } = parse(req, getReleaseSchema)
 
     const release = await getReleaseBySemver(req.user, modelId, semver)
+    await audit.onViewRelease(req, release)
+    const files = await getFilesByIds(req.user, modelId, release.fileIds)
+    const releaseWithFiles = { ...release.toObject(), files }
 
     return res.json({
-      release,
+      release: releaseWithFiles,
     })
   },
 ]

@@ -7,7 +7,9 @@ import Checkbox from '@mui/material/Checkbox'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetUiConfig } from '../../data/uiConfig'
 
@@ -29,8 +31,12 @@ function ModelEditSubmission({
     setWarningCheckboxVal(e.target.checked)
   }
 
-  if (isUiConfigError || isUiConfigLoading || !uiConfig) {
-    return null
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} />
+  }
+
+  if (isUiConfigLoading || !uiConfig) {
+    return <Loading />
   }
 
   return (

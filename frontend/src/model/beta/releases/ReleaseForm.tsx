@@ -1,23 +1,25 @@
-import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
+import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
-import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { ModelInterface } from 'types/v2/types'
+import { FileInterface, isFileInterface, ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  artefacts: File[]
+  files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
 }
 
@@ -37,9 +39,9 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onArtefactsChange: (value: File[]) => void
-  artefactsMetadata: FileWithMetadata[]
-  onArtefactsMetadataChange: (value: FileWithMetadata[]) => void
+  onFilesChange: (value: (File | FileInterface)[]) => void
+  filesMetadata: FileWithMetadata[]
+  onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
 } & EditableReleaseFormProps
 
@@ -49,16 +51,20 @@ export default function ReleaseForm({
   onSemverChange,
   onReleaseNotesChange,
   onMinorReleaseChange,
-  onArtefactsChange,
-  artefactsMetadata,
-  onArtefactsMetadataChange,
+  onFilesChange,
+  filesMetadata,
+  onFilesMetadataChange,
   onImageListChange,
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
+  const theme = useTheme()
+
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+
+  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -68,111 +74,131 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
-  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : ''), [releases])
+  const getFileId = (file: File | FileInterface) => {
+    if (isFileInterface(file)) {
+      return file._id
+    } else {
+      throw new Error(`Could not find a valid ID for this file. ${JSON.stringify(file)}`)
+    }
+  }
 
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: 'red' }}>*</span>}
+      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
+
   return (
-    <>
-      {isReleasesLoading && <Loading />}
-      <Stack spacing={2}>
-        {!editable && (
-          <Stack sx={{ width: '100%' }} justifyContent='center'>
-            <Stack direction='row'>
-              <Typography fontWeight='bold'>Release name</Typography>
-              {!editable && (
-                <HelpPopover>
-                  The release name is automatically generated using the model name and release semantic version
-                </HelpPopover>
-              )}
-            </Stack>
-            <Typography>{`${model.name} - ${formData.semver}`}</Typography>
+    <Stack spacing={2}>
+      {!editable && (
+        <Stack sx={{ width: '100%' }} justifyContent='center'>
+          <Stack direction='row'>
+            <Typography fontWeight='bold'>Release name</Typography>
+            {!editable && (
+              <HelpPopover>
+                The release name is automatically generated using the model name and release semantic version
+              </HelpPopover>
+            )}
           </Stack>
+          <Typography>{`${model.name} - ${formData.semver}`}</Typography>
+        </Stack>
+      )}
+      <Stack>
+        <Typography fontWeight='bold'>Latest version</Typography>
+        <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+      </Stack>
+      <Stack>
+        <Typography fontWeight='bold'>
+          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
+        </Typography>
+        {isReadOnly || isEdit ? (
+          <ReadOnlyAnswer value={formData.semver} />
+        ) : (
+          <TextField
+            required
+            size='small'
+            error={formData.semver !== '' && !isValidSemver(formData.semver)}
+            helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
+            value={formData.semver}
+            inputProps={{ 'data-test': 'releaseSemanticVersionTextField' }}
+            onChange={handleSemverChange}
+          />
         )}
-        <Stack>
-          {!editable && (
-            <>
-              <Typography fontWeight='bold'>Latest version</Typography>
-              <Typography>{latestRelease}</Typography>
-            </>
-          )}
-        </Stack>
-        <Stack>
-          <Typography fontWeight='bold'>
-            Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
-          </Typography>
-          {isReadOnly || isEdit ? (
-            <ReadOnlyAnswer value={formData.semver} />
-          ) : (
-            <TextField
-              required
-              size='small'
-              error={formData.semver !== '' && !isValidSemver(formData.semver)}
-              helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
-              value={formData.semver}
-              onChange={handleSemverChange}
+      </Stack>
+      <Stack>
+        {isReadOnly ? (
+          <>
+            {releaseNotesLabel}
+            <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
+          </>
+        ) : (
+          <RichTextEditor
+            value={formData.releaseNotes}
+            onChange={onReleaseNotesChange}
+            aria-label='Release notes'
+            label={releaseNotesLabel}
+          />
+        )}
+      </Stack>
+      <Stack>
+        {isReadOnly || isEdit ? (
+          <>
+            <Typography fontWeight='bold'>Minor Release</Typography>
+            <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
+          </>
+        ) : (
+          <FormControl>
+            <FormControlLabel
+              control={<Checkbox size='small' checked={formData.isMinorRelease} onChange={handleMinorReleaseChange} />}
+              label='Minor release - No significant changes, does not require release re-approval'
             />
-          )}
-        </Stack>
-        <Stack>
-          {isReadOnly ? (
-            <>
-              {releaseNotesLabel}
-              <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
-            </>
-          ) : (
-            <RichTextEditor
-              value={formData.releaseNotes}
-              onChange={onReleaseNotesChange}
-              aria-label='Release notes'
-              label={releaseNotesLabel}
-            />
-          )}
-        </Stack>
-        <Stack>
-          {isReadOnly || isEdit ? (
-            <>
-              <Typography fontWeight='bold'>Minor Release</Typography>
-              <ReadOnlyAnswer value={formData.isMinorRelease ? 'Yes' : 'No'} />
-            </>
-          ) : (
-            <FormControl>
-              <FormControlLabel
-                control={
-                  <Checkbox size='small' checked={formData.isMinorRelease} onChange={handleMinorReleaseChange} />
-                }
-                label='Minor release - No significant changes, does not require release re-approval'
-              />
-            </FormControl>
-          )}
-        </Stack>
-        <Stack>
-          <Typography fontWeight='bold'>Artefacts</Typography>
+          </FormControl>
+        )}
+      </Stack>
+      <Stack>
+        <Typography fontWeight='bold'>Files</Typography>
+        {!isReadOnly && (
           <MultiFileInput
             fullWidth
-            disabled={isEdit} // TODO - Can be removed as part of BAI-1026
-            label='Attach artefacts'
-            files={formData.artefacts}
-            fileMetadata={artefactsMetadata}
+            label='Attach files'
+            files={formData.files}
+            filesMetadata={filesMetadata}
             readOnly={isReadOnly}
-            onFileChange={onArtefactsChange}
-            onFileMetadataChange={onArtefactsMetadataChange}
+            onFilesChange={onFilesChange}
+            onFilesMetadataChange={onFilesMetadataChange}
           />
-          {isReadOnly && formData.artefacts.length === 0 && <ReadOnlyAnswer value='No artefacts' />}
-        </Stack>
-        <Stack>
-          <Typography fontWeight='bold'>Images</Typography>
-          <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
-          {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
-        </Stack>
+        )}
+        {isReadOnly &&
+          formData.files.map((file) => (
+            <Grid container spacing={1} alignItems='center' key={file.name}>
+              <Grid item xs>
+                <Tooltip title={file.name}>
+                  <Link
+                    href={`/api/v2/model/${model.id}/file/${getFileId(file)}/download`}
+                    data-test={`fileLink-${file.name}`}
+                  >
+                    <Typography noWrap textOverflow='ellipsis' display='inline'>
+                      {file.name}
+                    </Typography>
+                  </Link>
+                </Tooltip>
+              </Grid>
+              <Grid item xs={1} textAlign='right'>
+                <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              </Grid>
+            </Grid>
+          ))}
+        {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
-    </>
+      <Stack>
+        <Typography fontWeight='bold'>Images</Typography>
+        <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
+        {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
+      </Stack>
+    </Stack>
   )
 }

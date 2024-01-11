@@ -6,7 +6,6 @@ import EditableFormHeading from 'src/Form/beta/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetSchema } from '../../../../actions/schema'
-import { useGetUiConfig } from '../../../../actions/uiConfig'
 import { AccessRequestInterface, SplitSchemaNoRender } from '../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema } from '../../../../utils/beta/formUtils'
 import Loading from '../../../common/Loading'
@@ -24,24 +23,23 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
   const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
-  const { mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
-  const { uiConfig: _uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function handleSubmit() {
     if (schema) {
+      setErrorMessage('')
       setIsLoading(true)
       const data = getStepsData(splitSchema, true)
       const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
-        setIsLoading(false)
         setIsEdit(false)
-        setErrorMessage('')
         mutateAccessRequest()
       }
+      setIsLoading(false)
     }
   }
 
@@ -76,13 +74,13 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  if (isAccessRequestError) {
+    return <MessageAlert message={isAccessRequestError.info.message} severity='error' />
   }
 
   return (
     <>
-      {(isSchemaLoading || isUiConfigLoading) && <Loading />}
+      {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <EditableFormHeading
           heading={
