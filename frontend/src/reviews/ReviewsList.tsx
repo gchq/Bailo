@@ -40,7 +40,7 @@ export default function ReviewsList({ isActive = true, kind = 'all' }: ReviewsLi
               review={review}
               key={`${review.model.id}-${review.semver || review.accessRequestId}-${review.role}`}
             />
-            <ReviewRoleDisplay review={review} kind={'request_changes'} />
+            <ReviewRoleDisplay review={review} />
           </>
         ))}
       </List>

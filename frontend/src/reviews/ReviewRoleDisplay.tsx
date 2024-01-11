@@ -1,10 +1,7 @@
 import { Typography } from '@mui/material'
 
 import { useGetModelRoles } from '../../actions/model'
-//import { AccessRequestInterface } from '../../types/interfaces'
-//import { ReleaseInterface } from '../../types/types'
-//import { ApprovalStates } from '../../types/v2/enums'
-import { ReviewRequestInterface } from '../../types/interfaces'
+import { DecisionKeys, ReviewRequestInterface } from '../../types/interfaces'
 import Loading from '../common/Loading'
 //import { getRoleDisplay } from '../../utils/beta/roles'
 import MessageAlert from '../MessageAlert'
@@ -17,36 +14,29 @@ import MessageAlert from '../MessageAlert'
 
 // does decisionKeys need to be imported instead
 
-export const ResponseTypes = {
-  Approve: 'approve',
-  RequestChanges: 'request_changes',
-} as const
+// make message dissappear once task is complete
+// do I need to use a useState for the message so that it is not shown when release/acces has been reviewed?
 
-export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
+// export const ResponseTypes = {
+//   Approve: 'approve',
+//   RequestChanges: 'request_changes',
+// } as const
+
+// export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
 type DisplayRoleProps = {
   review: ReviewRequestInterface
-  kind: ResponseTypeKeys
+  kind?: DecisionKeys
 }
 
 export default function ReviewRoleDisplay({ review, kind }: DisplayRoleProps) {
   const { _modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
 
   const showRole = () => {
-    if ((review.kind === 'release' && kind !== ResponseTypes.Approve) || ResponseTypes.RequestChanges) {
-      return 'This release needs to be reviewed'
-    } else if (
-      (review.kind === 'release' && review.role === 'MSRO' && kind === ResponseTypes.Approve) ||
-      ResponseTypes.RequestChanges
-    ) {
-      return 'This release needs to reviewed by the MTR'
-    } else if (
-      (review.kind === 'release' && review.role === 'MTR') ||
-      kind === ResponseTypes.Approve ||
-      ResponseTypes.RequestChanges
-    ) {
-      return 'This release needs to be reviewed by the MSRO'
+    if (review.kind === 'release' || (review.kind === 'access' && kind !== 'approve') || kind !== 'request_changes') {
+      return `This ${review.kind} needs to be reviewed by the ${review.role} `
     }
+    //need to do error/bad request
   }
 
   if (isModelRolesError) {
