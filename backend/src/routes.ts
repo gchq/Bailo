@@ -51,6 +51,7 @@ import {
 } from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
+import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
@@ -276,6 +277,7 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/entities', ...getEntities)
   server.get('/api/v2/entities/me', ...getCurrentUser)
+  server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
   server.get('/api/v2/config/ui', ...getUiConfigV2)
 

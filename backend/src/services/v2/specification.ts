@@ -221,3 +221,9 @@ export const webhookInterfaceSchema = z.object({
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
+
+export const UserInformationSchema = z.object({
+  email: z.string().optional().openapi({ example: 'user@example.com' }),
+  name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
+  organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
+})
