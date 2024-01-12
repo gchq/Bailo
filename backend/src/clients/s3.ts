@@ -1,4 +1,4 @@
-import { GetObjectCommand, GetObjectRequest, HeadObjectRequest, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, GetObjectRequest, HeadObjectRequest, NoSuchKey, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 
@@ -70,4 +70,8 @@ export async function headObject(bucket: string, key: string) {
   const response = await client.send(command)
 
   return response
+}
+
+export function isNoSuchKeyException(err: any): err is NoSuchKey {
+  return err?.name === 'NoSuchKey'
 }

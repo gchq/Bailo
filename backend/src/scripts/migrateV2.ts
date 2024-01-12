@@ -1,6 +1,6 @@
 import { uniqWith } from 'lodash-es'
 
-import { headObject } from '../clients/s3.js'
+import { headObject, isNoSuchKeyException } from '../clients/s3.js'
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
 import FileModel from '../models/v2/File.js'
@@ -39,6 +39,19 @@ const _DEPLOYMENT_SCHEMA_MAP = {
     },
     schema: 'minimal-access-request-general-v10-beta',
   },
+}
+
+async function getObjectContentLength(bucket: string, object: string) {
+  let objectMeta
+  try {
+    objectMeta = await headObject(bucket, object)
+  } catch (e) {
+    if (isNoSuchKeyException(e)) {
+      return
+    }
+    throw e
+  }
+  return objectMeta.ContentLength
 }
 
 function identityConversion(old: string) {
@@ -161,51 +174,84 @@ async function migrateModel(modelId: string) {
     const v2Files: string[] = []
     const bucket = config.minio.buckets.uploads
     if (version.files.rawBinaryPath) {
-      const file = await new FileModel({
-        modelId,
-        name: `${version.version}-rawBinaryPath.zip`,
-        mime: 'application/x-zip-compressed',
-        bucket,
-        path: version.files.rawBinaryPath,
-        complete: true,
-      })
-      const size = await (await headObject(bucket, file.path)).ContentLength
+      const path = version.files.rawBinaryPath
+      const size = await getObjectContentLength(bucket, path)
       if (size) {
-        file.size = size
-        await file.save()
-        v2Files.push(file._id.toString())
+        const v2File = await FileModel.findOneAndUpdate(
+          { modelId, bucket, path },
+          {
+            modelId,
+            name: `${version.version}-rawBinaryPath.zip`,
+            mime: 'application/x-zip-compressed',
+            size,
+            bucket,
+            path,
+            complete: true,
+
+            createdAt: version.createdAt,
+            updatedAt: version.updatedAt,
+          },
+          {
+            new: true,
+            upsert: true, // Make this update into an upsert
+            timestamps: false,
+          },
+        )
+        v2Files.push(v2File._id.toString())
       }
     }
     if (version.files.rawCodePath) {
-      const file = await new FileModel({
-        modelId,
-        name: `${version.version}-rawCodePath.zip`,
-        mime: 'application/x-zip-compressed',
-        bucket,
-        path: version.files.rawCodePath,
-        complete: true,
-      })
-      const size = await (await headObject(bucket, file.path)).ContentLength
+      const path = version.files.rawCodePath
+      const size = await getObjectContentLength(bucket, path)
       if (size) {
-        file.size = size
-        await file.save()
-        v2Files.push(file._id.toString())
+        const v2File = await FileModel.findOneAndUpdate(
+          { modelId, bucket, path },
+          {
+            modelId,
+            name: `${version.version}-rawCodePath.zip`,
+            mime: 'application/x-zip-compressed',
+            bucket,
+            size,
+            path,
+            complete: true,
+
+            createdAt: version.createdAt,
+            updatedAt: version.updatedAt,
+          },
+          {
+            new: true,
+            upsert: true, // Make this update into an upsert
+            timestamps: false,
+          },
+        )
+        v2Files.push(v2File._id.toString())
       }
     }
     if (version.files.rawDockerPath) {
-      const file = await new FileModel({
-        modelId,
-        name: `${version.version}-rawDockerPath`,
-        mime: 'application/octet-stream',
-        bucket,
-        path: version.files.rawDockerPath,
-        complete: true,
-      })
-      const size = await (await headObject(bucket, file.path)).ContentLength
+      const path = version.files.rawDockerPath
+      const size = await getObjectContentLength(bucket, path)
       if (size) {
-        file.size = size
-        await file.save()
-        v2Files.push(file._id.toString())
+        const v2File = await FileModel.findOneAndUpdate(
+          { modelId, bucket, path },
+          {
+            modelId,
+            name: `${version.version}-rawDockerPath.tar`,
+            mime: 'application/octet-stream',
+            bucket,
+            size,
+            path,
+            complete: true,
+
+            createdAt: version.createdAt,
+            updatedAt: version.updatedAt,
+          },
+          {
+            new: true,
+            upsert: true, // Make this update into an upsert
+            timestamps: false,
+          },
+        )
+        v2Files.push(v2File._id.toString())
       }
     }
 
