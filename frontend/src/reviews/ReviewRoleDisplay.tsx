@@ -6,11 +6,11 @@ import { getRoleDisplay } from '../../utils/beta/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
-type DisplayRoleProps = {
+type ReviewRoleDisplayProps = {
   review: ReviewRequestInterface
 }
 
-export default function ReviewRoleDisplay({ review }: DisplayRoleProps) {
+export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
 
   if (isModelRolesError) {
