@@ -6,9 +6,9 @@ from bailo.core.client import Client
 
 
 class AccessRequest:
-    """Represents a review within Bailo
+    """Represent a review within Bailo.
 
-    A review can either be access to a model or to a specific release
+    A review can either be access to a model or to a specific release.
 
     :param client: A client object that is used to make requests to bailo
     :param name: The name of the access request
@@ -39,7 +39,7 @@ class AccessRequest:
 
     @classmethod
     def from_id(cls, client: Client, model_id: str, access_request_id: str) -> AccessRequest:
-        """Returns an existing review from Bailo given it's unique ID
+        """Return an existing review from Bailo given it's unique ID.
 
         >>> from bailo import AccessRequest, Client
         >>> client = Client("https://example.com")
@@ -50,7 +50,6 @@ class AccessRequest:
         :param model_id: A unique model ID within Bailo
         :param access_request_id: A unique ID for an access request
         """
-
         json_access_request = client.get_access_request(model_id, access_request_id)["accessRequest"]
 
         deleted = json_access_request["deleted"]
@@ -71,7 +70,7 @@ class AccessRequest:
 
     @classmethod
     def create(cls, client: Client, model_id: str, schema_id: str, metadata: Any) -> AccessRequest:
-        """Makes an access request for the model
+        """Make an access request for the model.
 
         Posts an access request to Bailo to be reviewed
 
@@ -100,7 +99,7 @@ class AccessRequest:
         )
 
     def delete(self) -> bool:
-        """Deletes the access request on Bailo
+        """Delete the access request on Bailo.
 
         :return: A message confirming the removal of the access request.
         """
@@ -108,8 +107,7 @@ class AccessRequest:
         return True
 
     def update(self):
-        """Updates the current state of the access request to Bailo"""
-
+        """Update the current state of the access request to Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
     def __str__(self) -> str:
