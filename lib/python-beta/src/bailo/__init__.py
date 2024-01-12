@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-# SEMANTIC VERSION
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
 from bailo.core.client import Client
