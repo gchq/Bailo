@@ -1,16 +1,20 @@
 import { uniqWith } from 'lodash-es'
 
 import { headObject, isNoSuchKeyException } from '../clients/s3.js'
+import ApprovalModel from '../models/Approval.js'
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
 import FileModel from '../models/v2/File.js'
 import ModelModelV2, { CollaboratorEntry, ModelVisibility } from '../models/v2/Model.js'
 import ModelCardRevisionV2 from '../models/v2/ModelCardRevision.js'
 import Release from '../models/v2/Release.js'
+import ReviewModel, { Decision, ReviewResponse } from '../models/v2/Review.js'
 import VersionModelV1 from '../models/Version.js'
-import { VersionDoc } from '../types/types.js'
+import { ApprovalCategory, ApprovalStates, ApprovalTypes, VersionDoc } from '../types/types.js'
+import { ReviewKind } from '../types/v2/enums.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { toEntity } from '../utils/v2/entity.js'
 
 const MODEL_SCHEMA_MAP = {
   '/Minimal/General/v10': {
@@ -255,13 +259,14 @@ async function migrateModel(modelId: string) {
       }
     }
 
+    const semver = `0.0.${i + 1}`
     await Release.findOneAndUpdate(
-      { modelId, semver: `0.0.${i + 1}` },
+      { modelId, semver },
       {
         modelId,
         modelCardVersion: i,
 
-        semver: `0.0.${i + 1}`,
+        semver,
         notes: `Migrated from V1. Orginal version ID: ${version.version}`,
 
         minor: false,
@@ -282,6 +287,56 @@ async function migrateModel(modelId: string) {
         timestamps: false,
       },
     )
+
+    const versionApprovals = await ApprovalModel.find({
+      version: version._id,
+      approvalCategory: ApprovalCategory.Upload,
+    }).sort({ createdAt: 1 })
+
+    for (const approval of versionApprovals) {
+      let role
+      if (approval.approvalType === ApprovalTypes.Manager) {
+        role = 'msro'
+      } else if (approval.approvalType === ApprovalTypes.Reviewer) {
+        role = 'mtr'
+      }
+
+      const responses: ReviewResponse[] = []
+      for (let i = 0; i < approval.approvers.length; i++) {
+        const approver = approval.approvers[i]
+        if (approval.status === ApprovalStates.Accepted) {
+          responses.push({
+            user: toEntity('user', approver.id),
+            decision: Decision.Approve,
+          })
+        } else if (approval.status === ApprovalStates.Declined) {
+          responses.push({
+            user: toEntity('user', approver.id),
+            decision: Decision.RequestChanges,
+          })
+        }
+      }
+      await ReviewModel.findOneAndUpdate(
+        { modelId, semver, role },
+        {
+          semver,
+          modelId,
+
+          kind: ReviewKind.Release,
+          role,
+
+          responses,
+
+          createdAt: version.createdAt,
+          updatedAt: version.updatedAt,
+        },
+        {
+          new: true,
+          upsert: true, // Make this update into an upsert
+          timestamps: false,
+        },
+      )
+    }
   }
 
   modelV2.card = {
