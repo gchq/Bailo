@@ -75,9 +75,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
                 display: 'flex',
               }}
             >
-              <Typography sx={{ mx: 'auto' }}>
-                {showAccessKey ? token?.accessKey || '' : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}
-              </Typography>
+              <Typography sx={{ mx: 'auto' }}>{showAccessKey ? token?.accessKey || '' : 'xxxxxxxxxx'}</Typography>
             </Box>
           </Grid>
           <Grid item xs={2}>
@@ -108,7 +106,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
               }}
             >
               <Typography sx={{ mx: 'auto' }}>
-                {showSecretKey ? token?.secretKey || '' : 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx'}
+                {showSecretKey ? token?.secretKey || '' : 'xxxxxxxxxxxxxxxxxxxxx'}
               </Typography>
             </Box>
           </Grid>

@@ -1,6 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import {
+  Autocomplete,
   Button,
   Card,
   Checkbox,
@@ -13,10 +14,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { ModelSearchResult, useListModels } from 'actions/model'
 import { postUserToken } from 'actions/user'
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { ChangeEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/beta/authentication/TokenDialog'
@@ -28,7 +28,7 @@ export default function NewToken() {
   const theme = useTheme()
   const [description, setDescription] = useState('')
   const [isAllModels, setIsAllModels] = useState(false)
-  const [selectedModels, setSelectedModels] = useState<string[]>([])
+  const [selectedModels, setSelectedModels] = useState<ModelSearchResult[]>([])
   const [selectedActions, setSelectedActions] = useState<TokenActionsKeys[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -44,43 +44,6 @@ export default function NewToken() {
       setIsAllModels(false)
     }
   }, [isAllModels, models.length, selectedModels.length])
-
-  const handleSelectedModelsChange = useCallback(
-    (modelId: string, checked: boolean) => {
-      if (checked) {
-        setSelectedModels([...selectedModels, modelId])
-      } else {
-        const foundIndex = selectedModels.findIndex((selectedModel) => selectedModel === modelId)
-        if (foundIndex >= 0) {
-          const updatedSelectedModels = [...selectedModels]
-          updatedSelectedModels.splice(foundIndex, 1)
-          setSelectedModels(updatedSelectedModels)
-        }
-      }
-    },
-    [selectedModels],
-  )
-
-  const modelCheckboxes = useMemo(
-    () =>
-      models.map((model) => (
-        <Grid item xs={6} key={model.id}>
-          <FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name={model.name}
-                  checked={selectedModels.includes(model.id)}
-                  onChange={(_event, checked) => handleSelectedModelsChange(model.id, checked)}
-                />
-              }
-              label={model.name}
-            />
-          </FormControl>
-        </Grid>
-      )),
-    [handleSelectedModelsChange, models, selectedModels],
-  )
 
   const handleSelectedActionsChange = useCallback(
     (action: TokenActionsKeys, checked: boolean) => {
@@ -125,13 +88,17 @@ export default function NewToken() {
 
   const handleAllSelectedModelsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setIsAllModels(checked)
-    setSelectedModels(checked ? models.map((model) => model.id) : [])
+    setSelectedModels(checked ? models : [])
+  }
+
+  const handleSelectedModelsChange = (_: SyntheticEvent<Element, Event>, value: ModelSearchResult[]) => {
+    setSelectedModels(value)
   }
 
   const handleSubmit = async () => {
     setIsLoading(true)
     const scope = isAllModels ? TokenScope.All : TokenScope.Models
-    const modelIds = isAllModels ? [] : selectedModels
+    const modelIds = isAllModels ? [] : selectedModels.map((model) => model.id)
     const response = await postUserToken(description, scope, modelIds, selectedActions)
 
     if (!response.ok) {
@@ -171,19 +138,29 @@ export default function NewToken() {
                 <Typography fontWeight='bold'>
                   Models <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                {isModelsLoading ? (
-                  <Loading />
-                ) : (
-                  <>
-                    <FormControl>
-                      <FormControlLabel
-                        control={<Checkbox name='All' checked={isAllModels} onChange={handleAllSelectedModelsChange} />}
-                        label='All'
+                <FormControl>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='All'
+                        checked={isAllModels}
+                        disabled={isModelsLoading}
+                        onChange={handleAllSelectedModelsChange}
                       />
-                    </FormControl>
-                    <Grid container>{modelCheckboxes}</Grid>
-                  </>
-                )}
+                    }
+                    label='All'
+                  />
+                </FormControl>
+                <Autocomplete
+                  multiple
+                  value={selectedModels}
+                  loading={isModelsLoading}
+                  options={models}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  renderInput={(params) => <TextField {...params} required size='small' />}
+                  onChange={handleSelectedModelsChange}
+                />
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
