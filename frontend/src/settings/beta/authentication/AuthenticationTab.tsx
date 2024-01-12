@@ -72,6 +72,7 @@ export default function AuthenticationTab() {
   }
 
   const handleCloseDialog = () => {
+    setDeleteTokenErrorMessage('')
     setTokenToDelete('')
     setIsConfirmationDialogOpen(false)
   }
