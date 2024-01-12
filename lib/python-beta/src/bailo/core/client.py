@@ -311,34 +311,15 @@ class Client:
         :param buffer: BytesIO object for bailo to write to
         :return: The unique file ID
         """
-        req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
-        shutil.copyfileobj(req.raw, buffer)
-        return file_id
-
-    def get_download_file_token(
-        self,
-        model_id: str,
-        file_id: str,
-        buffer: BytesIO,
-    ):
-        """
-        Downloads a specific file, using an API token.
-
-        :param model_id: Unique model ID
-        :param file_id: Unique file ID
-        :param buffer: BytesIO object for bailo to write to
-        :return: The unique file ID
-
-        ..note:: This method requires the TokenAgent agent.
-        """
         if isinstance(self.agent, TokenAgent):
             req = self.agent.get(
                 f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
             )
-            shutil.copyfileobj(req.raw, buffer)
-            return file_id
         else:
-            raise Exception("get_download_file_token requires the use of TokenAgent")
+            req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
+
+        shutil.copyfileobj(req.raw, buffer)
+        return file_id
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
         """
