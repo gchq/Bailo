@@ -1,8 +1,8 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Fragment, useMemo } from 'react'
+import { Fragment, SyntheticEvent, useMemo } from 'react'
 
-interface DropDownProps {
+interface DropdownProps {
   label?: string
   required?: boolean
   disabled?: boolean
@@ -11,16 +11,14 @@ interface DropDownProps {
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
-  options: any
+  options: { enumOptions?: { label: string; value: string }[] }
 }
 
-export default function DropDown(props: DropDownProps) {
-  const { onChange, value, label, formContext, options } = props
-
+export default function Dropdown({ label, formContext, value, onChange, options, required }: DropdownProps) {
   const theme = useTheme()
 
-  const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValue: any) => {
-    newValue ? onChange(newValue) : onChange('')
+  const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
+    onChange(newValue || '')
   }
 
   const disabledWebkitTextFillColor = useMemo(() => {
@@ -31,17 +29,20 @@ export default function DropDown(props: DropDownProps) {
     }
   }, [theme, value])
 
-  const dropDownOptions = useMemo(() => {
+  const dropdownOptions = useMemo(() => {
     return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>{label}</Typography>
+      <Typography fontWeight='bold'>
+        {label}
+        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+      </Typography>
       {formContext.editMode && (
         <Autocomplete
           size='small'
-          options={dropDownOptions || []}
+          options={dropdownOptions}
           sx={{
             input: {
               color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
@@ -55,7 +56,7 @@ export default function DropDown(props: DropDownProps) {
             },
           }}
           onChange={handleChange}
-          value={value}
+          value={value || ''}
           disabled={!formContext.editMode}
           renderInput={(params) => (
             <TextField {...params} label='Select an option below' size='small' placeholder='Unanswered' />

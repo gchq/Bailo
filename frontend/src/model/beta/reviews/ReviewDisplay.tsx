@@ -1,6 +1,6 @@
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { ReactElement, useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 
@@ -36,7 +36,9 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
               <HourglassEmpty color='warning' fontSize='small' />
             )}
             <Typography variant='caption'>
-              <UserDisplay entityId={reviewResponse.user.split(':')[1]} />
+              <Box component='span' fontWeight='bold'>
+                <UserDisplay entityId={reviewResponse.user.split(':')[1]} />
+              </Box>
               {` has ${isAccepted ? 'approved' : 'requested changes for'} this ${reviewKindText} (${getRoleDisplay(
                 review.role,
                 modelRoles,

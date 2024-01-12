@@ -39,7 +39,7 @@ export default function AccessRequest() {
       page='access-request'
       fullWidth
     >
-      <Container maxWidth='md' sx={{ my: 4 }}>
+      <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
           {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
           {accessRequest && (

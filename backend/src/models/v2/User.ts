@@ -7,9 +7,6 @@ export interface UserInterface {
   // Do not store user role information on this object.  This information
   // should be stored in an external corporate store.
   dn: string
-
-  createdAt: Date
-  updatedAt: Date
 }
 
 // The doc type includes all values in the plain interface, as well as all the

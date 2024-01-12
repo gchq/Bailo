@@ -1,5 +1,7 @@
-import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
+import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -7,16 +9,17 @@ import ModelImageList from 'src/common/ModelImageList'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReadOnlyAnswer from 'src/Form/beta/ReadOnlyAnswer'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { ModelInterface } from 'types/v2/types'
+import { FileInterface, isFileInterface, ModelInterface } from 'types/v2/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  files: File[]
+  files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
 }
 
@@ -36,7 +39,7 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onFilesChange: (value: File[]) => void
+  onFilesChange: (value: (File | FileInterface)[]) => void
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
@@ -55,6 +58,8 @@ export default function ReleaseForm({
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
+  const theme = useTheme()
+
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
@@ -69,15 +74,24 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
+  const getFileId = (file: File | FileInterface) => {
+    if (isFileInterface(file)) {
+      return file._id
+    } else {
+      throw new Error(`Could not find a valid ID for this file. ${JSON.stringify(file)}`)
+    }
+  }
+
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: 'red' }}>*</span>}
+      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
+
   return (
     <Stack spacing={2}>
       {!editable && (
@@ -99,7 +113,7 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
+          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly || isEdit ? (
           <ReadOnlyAnswer value={formData.semver} />
@@ -110,6 +124,7 @@ export default function ReleaseForm({
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
+            inputProps={{ 'data-test': 'releaseSemanticVersionTextField' }}
             onChange={handleSemverChange}
           />
         )}
@@ -146,16 +161,37 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Files</Typography>
-        <MultiFileInput
-          fullWidth
-          disabled={isEdit} // TODO - Can be removed as part of BAI-1026
-          label='Attach files'
-          files={formData.files}
-          filesMetadata={filesMetadata}
-          readOnly={isReadOnly}
-          onFileChange={onFilesChange}
-          onFilesMetadataChange={onFilesMetadataChange}
-        />
+        {!isReadOnly && (
+          <MultiFileInput
+            fullWidth
+            label='Attach files'
+            files={formData.files}
+            filesMetadata={filesMetadata}
+            readOnly={isReadOnly}
+            onFilesChange={onFilesChange}
+            onFilesMetadataChange={onFilesMetadataChange}
+          />
+        )}
+        {isReadOnly &&
+          formData.files.map((file) => (
+            <Grid container spacing={1} alignItems='center' key={file.name}>
+              <Grid item xs>
+                <Tooltip title={file.name}>
+                  <Link
+                    href={`/api/v2/model/${model.id}/file/${getFileId(file)}/download`}
+                    data-test={`fileLink-${file.name}`}
+                  >
+                    <Typography noWrap textOverflow='ellipsis' display='inline'>
+                      {file.name}
+                    </Typography>
+                  </Link>
+                </Tooltip>
+              </Grid>
+              <Grid item xs={1} textAlign='right'>
+                <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              </Grid>
+            </Grid>
+          ))}
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
       <Stack>

@@ -16,7 +16,7 @@ export interface Config {
     }
 
     authorisation: {
-      kind: 'silly' | string
+      kind: 'basic' | string
     }
   }
 

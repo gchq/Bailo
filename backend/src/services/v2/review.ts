@@ -1,18 +1,19 @@
 import authentication from '../../connectors/v2/authentication/index.js'
-import { ModelAction } from '../../connectors/v2/authorisation/Base.js'
+import { ModelAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
-import { asyncFilter } from '../../utils/v2/array.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
+import { sendWebhooks } from './webhook.js'
 
 export async function findReviews(
   user: UserDoc,
@@ -37,7 +38,13 @@ export async function findReviews(
     .unwind({ path: '$model' })
     .match(await findUserInCollaborators(user))
 
-  return asyncFilter(reviews, (review) => authorisation.userModelAction(user, review.model, ModelAction.View))
+  const auths = await authorisation.models(
+    user,
+    reviews.map((review) => review.model),
+    ModelAction.View,
+  )
+
+  return reviews.filter((_, i) => auths[i].success)
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
@@ -132,6 +139,14 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
+
+  sendWebhooks(
+    update.modelId,
+    WebhookEvent.CreateReviewResponse,
+    `A new response has been added to a review requested for Model ${update.modelId}`,
+    { review: update },
+  )
+
   return update
 }
 

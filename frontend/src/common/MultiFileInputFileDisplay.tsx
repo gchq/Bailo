@@ -1,30 +1,38 @@
 import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { FileWithMetadata } from 'types/interfaces'
+import { FileInterface } from 'types/v2/types'
 
 interface MultiFileInputDisplayProps {
-  file: File
-  handleDelete: (file: File) => void
-  onChange: (fileWithMetadata: FileWithMetadata) => void
+  file: File | FileInterface
+  onDelete: (file: File | FileInterface) => void
+  onMetadataChange: (fileWithMetadata: FileWithMetadata) => void
+  readOnly?: boolean
 }
 
-export default function MultiFileInputFileDisplay({ file, handleDelete, onChange }: MultiFileInputDisplayProps) {
+export default function MultiFileInputFileDisplay({
+  file,
+  onDelete,
+  onMetadataChange,
+  readOnly = false,
+}: MultiFileInputDisplayProps) {
   const [metadata, setMetadata] = useState('')
 
-  const handleMetadataChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setMetadata(event.target.value)
-      onChange({ fileName: file.name, metadata })
-    },
-    [onChange, file.name, metadata],
-  )
+  const handleDelete = () => {
+    onDelete(file)
+  }
+
+  const handleMetadataChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMetadata(event.target.value)
+    onMetadataChange({ fileName: file.name, metadata })
+  }
 
   return (
     <Grid container spacing={1} alignItems='center'>
       <Grid item xs>
         <Tooltip title={file.name}>
-          <Chip color='primary' label={file.name} onDelete={() => handleDelete(file)} />
+          <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>
       </Grid>
       <Grid item xs={7}>

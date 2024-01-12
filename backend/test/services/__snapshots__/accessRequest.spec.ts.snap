@@ -3,21 +3,7 @@
 exports[`services > accessRequest > getAccessRequestsByModel > good 1`] = `
 [
   {
-    "response": "example",
+    "_id": "b",
   },
-]
-`;
-
-exports[`services > accessRequest > getAccessRequestsByModel > good 2`] = `
-[
-  [
-    {
-      "_id": "a",
-    },
-    {
-      "_id": "b",
-    },
-  ],
-  [Function],
 ]
 `;

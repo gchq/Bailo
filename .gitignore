@@ -19,3 +19,4 @@ backend/certs/*
 # helm
 infrastructure/helm/bailo/charts
 infrastructure/helm/bailo/local.yaml
+.aider*

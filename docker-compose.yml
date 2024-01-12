@@ -2,11 +2,17 @@ version: '3.9'
 services:
   mongo:
     image: mongo:6.0.4
-    ports:
-      - 27017:27017
+    command: [--replSet, repl-set, --bind_ip_all, --port, '27017', --quiet]
     volumes:
       - mongoVolume:/data/db
-    command: --quiet
+    ports:
+      - 27017:27017
+    healthcheck:
+      test:
+        test $$(mongosh --port 27017 --quiet --eval "try
+        {rs.initiate({_id:'repl-set',members:[{_id:0,host:\"mongo:27017\"}]})} catch(e) {rs.status().ok}") -eq 1
+      interval: 10s
+      start_period: 30s
 
   minio:
     image: minio/minio:RELEASE.2023-01-31T02-24-19Z
@@ -85,6 +91,10 @@ services:
       - apparmor:unconfined
     environment:
       - NODE_CONFIG_ENV=docker_compose
+  webhook-tester:
+    image: tarampampam/webhook-tester
+    command: serve --port 8081 --create-session 00000000-0000-0000-0000-000000000000
+    ports: ['8081:8081/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
 
 volumes:
   minioVolume:

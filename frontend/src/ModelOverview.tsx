@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
+import Loading from 'src/common/Loading'
 
 import EntitiesDisplay from '../components/EntitiesDisplay'
 import { useGetSchema } from '../data/schema'
@@ -27,7 +28,7 @@ function ModelOverview({ version }: ModelOverviewProps) {
   }
 
   if (isSchemaLoading) {
-    return null
+    return <Loading />
   }
 
   return (

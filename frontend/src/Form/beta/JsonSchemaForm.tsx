@@ -3,6 +3,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import {
   Box,
   Button,
+  Card,
   Divider,
   Grid,
   IconButton,
@@ -26,32 +27,30 @@ import Nothing from '../../MuiForms/Nothing'
 
 function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
-    <div>
+    <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h3'>
         {props.title}
       </Typography>
       {props.items.map((element) => (
-        <>
-          <Grid key={element.key} container spacing={2}>
-            <Grid item xs={11}>
-              <Box>{element.children}</Box>
-            </Grid>
-            <Grid item xs={1}>
-              {props.formContext.editMode && (
-                <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
-                  <RemoveIcon color='error' />
-                </IconButton>
-              )}
-            </Grid>
+        <Grid key={element.key} container spacing={2}>
+          <Grid item xs={11}>
+            <Box>{element.children}</Box>
           </Grid>
-        </>
+          <Grid item xs={1}>
+            {props.formContext.editMode && (
+              <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
+                <RemoveIcon color='error' />
+              </IconButton>
+            )}
+          </Grid>
+        </Grid>
       ))}
       {props.canAdd && props.formContext.editMode && (
         <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -65,11 +64,13 @@ export default function JsonSchemaForm({
   setSplitSchema,
   canEdit = false,
   displayLabelValidation = false,
+  defaultCurrentUserInEntityList = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
+  defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
@@ -91,7 +92,7 @@ export default function JsonSchemaForm({
 
   return (
     <Stack
-      direction={{ xs: 'column', sm: 'row' }}
+      direction={{ xs: 'column', md: 'row' }}
       spacing={{ sm: 2 }}
       justifyContent='left'
       divider={<Divider flexItem orientation='vertical' />}
@@ -131,7 +132,11 @@ export default function JsonSchemaForm({
         omitExtraData
         disabled={!canEdit}
         liveOmit
-        formContext={{ editMode: canEdit, formSchema: currentStep.schema }}
+        formContext={{
+          editMode: canEdit,
+          formSchema: currentStep.schema,
+          defaultCurrentUser: defaultCurrentUserInEntityList,
+        }}
         templates={
           !canEdit
             ? {

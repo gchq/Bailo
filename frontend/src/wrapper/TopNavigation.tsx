@@ -1,3 +1,5 @@
+import '@fontsource/pacifico'
+
 import { Add, Settings } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -13,11 +15,11 @@ import {
   Stack,
   Switch,
   Toolbar,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
-import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 
@@ -57,8 +59,6 @@ const AppBar = styled(MuiAppBar, {
     }),
   }),
 }))
-
-const pacifico = Pacifico({ subsets: ['latin'], weight: '400' })
 
 // This is currently only being used by the beta wrapper
 export default function TopNavigation({
@@ -123,13 +123,15 @@ export default function TopNavigation({
         >
           <MenuIcon />
         </IconButton>
-        <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-            <Typography variant='h5' component='div'>
-              <span className={pacifico.className}>Bailo</span>
-              {betaAdornment}
-            </Typography>
-          </Link>
+        <Box sx={{ flexGrow: 1, ml: 2 }}>
+          <Box sx={{ width: 'max-content', cursor: 'pointer', px: 1 }}>
+            <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+              <Typography variant='h5' component='div'>
+                <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
+                {betaAdornment}
+              </Typography>
+            </Link>
+          </Box>
         </Box>
         <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
           <ExpandableButton
@@ -145,18 +147,23 @@ export default function TopNavigation({
               </IconButton>
               <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
                 <MenuList>
-                  <MenuItem data-test='toggleDarkMode'>
-                    <ListItemIcon>
-                      <DarkModeIcon fontSize='small' />
-                    </ListItemIcon>
-                    <Switch
-                      size='small'
-                      checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                      onChange={toggleDarkMode}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </MenuItem>
-                  <Link href='/settings' color='inherit' underline='none'>
+                  {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                  <Tooltip title='This feature has been temporarily disabled'>
+                    <span>
+                      <MenuItem disabled data-test='toggleDarkMode'>
+                        <ListItemIcon>
+                          <DarkModeIcon fontSize='small' />
+                        </ListItemIcon>
+                        <Switch
+                          size='small'
+                          checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                          onChange={toggleDarkMode}
+                          inputProps={{ 'aria-label': 'controlled' }}
+                        />
+                      </MenuItem>
+                    </span>
+                  </Tooltip>
+                  <Link href='/beta/settings' color='inherit' underline='none'>
                     <MenuItem data-test='settingsLink'>
                       <ListItemIcon>
                         <Settings fontSize='small' />

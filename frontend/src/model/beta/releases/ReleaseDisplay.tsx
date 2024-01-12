@@ -112,7 +112,10 @@ export default function ReleaseDisplay({
                       <Grid container spacing={1} alignItems='center'>
                         <Grid item xs>
                           <Tooltip title={file.name}>
-                            <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`}>
+                            <Link
+                              href={`/api/v2/model/${model.id}/file/${file._id}/download`}
+                              data-test={`fileLink-${file.name}`}
+                            >
                               <Typography noWrap textOverflow='ellipsis' display='inline'>
                                 {file.name}
                               </Typography>

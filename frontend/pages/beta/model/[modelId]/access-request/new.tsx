@@ -2,6 +2,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
 import { useGetCurrentUser } from 'actions/user'
+import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -30,16 +31,19 @@ export default function NewAccessRequest() {
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
-    [isCurrentUserLoading, isModelLoading, isSchemaLoading],
+    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
   )
 
   useEffect(() => {
-    if (!model || !schema) return
+    if (!model || !schema || !currentUser) return
+
     const defaultState = {
-      overview: { entities: [currentUserId] },
+      overview: {
+        entities: [`user:${currentUser.dn}`],
+        endDate: dayjs(new Date()).format('YYYY-MM-DD').toString(),
+      },
     }
     const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
@@ -47,7 +51,7 @@ export default function NewAccessRequest() {
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model, currentUserId])
+  }, [schema, model, currentUser])
 
   async function onSubmit() {
     setSubmissionErrorText('')
@@ -75,15 +79,24 @@ export default function NewAccessRequest() {
     }
 
     const data = getStepsData(splitSchema, true)
+
+    if (data.overview.entities.length === 0) {
+      setSubmissionErrorText('You must add at least one contact to this access request.')
+      setSubmitButtonLoading(false)
+      return
+    }
     const res = await postAccessRequest(modelId, schemaId, data)
 
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
       setSubmitButtonLoading(false)
-    } else {
-      const body = await res.json()
-      router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
+      return
     }
+
+    setSubmitButtonLoading(false)
+
+    const body = await res.json()
+    router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
@@ -113,6 +126,7 @@ export default function NewAccessRequest() {
                 setSplitSchema={setSplitSchema}
                 canEdit
                 displayLabelValidation
+                defaultCurrentUserInEntityList
               />
               <Stack alignItems='flex-end'>
                 <LoadingButton
@@ -120,6 +134,7 @@ export default function NewAccessRequest() {
                   variant='contained'
                   onClick={onSubmit}
                   loading={submitButtonLoading}
+                  data-test='createAccessRequestButton'
                 >
                   Submit
                 </LoadingButton>

@@ -15,7 +15,9 @@ import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import React, { createRef, Dispatch, SetStateAction, useState } from 'react'
+import { ChangeEvent, createRef, Dispatch, SetStateAction, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 
 import { useGetUiConfig } from '../../data/uiConfig'
 import { SplitSchema } from '../../types/interfaces'
@@ -118,12 +120,16 @@ function ModelExportAndSubmission({
     }
   }
 
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     setWarningCheckboxVal(e.target.checked)
   }
 
-  if (isUiConfigError || isUiConfigLoading || !uiConfig) {
-    return null
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} />
+  }
+
+  if (isUiConfigLoading || !uiConfig) {
+    return <Loading />
   }
 
   return (

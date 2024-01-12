@@ -3,8 +3,11 @@ const config = {
     authentication: {
       kind: 'silly',
     },
-    authorisation: {
+    audit: {
       kind: 'silly',
+    },
+    authorisation: {
+      kind: 'basic',
     },
   },
   log: {
