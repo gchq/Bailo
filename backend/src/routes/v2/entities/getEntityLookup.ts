@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { UserInformation } from '../../../connectors/v2/authentication/Base.js'
 import authentication from '../../../connectors/v2/authentication/index.js'
 import { registerPath, UserInformationSchema } from '../../../services/v2/specification.js'
+import { toEntity } from '../../../utils/v2/entity.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const getEntityLookupSchema = z.object({
@@ -42,7 +43,7 @@ export const getEntityLookup = [
       params: { dn },
     } = parse(req, getEntityLookupSchema)
 
-    const information = await authentication.getUserInformation(`user:${dn}`)
+    const information = await authentication.getUserInformation(toEntity('user', dn))
 
     return res.json({ entity: information })
   },
