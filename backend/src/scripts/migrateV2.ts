@@ -1,5 +1,6 @@
 import { uniqWith } from 'lodash-es'
 
+import { headObject } from '../clients/s3.js'
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
 import FileModel from '../models/v2/File.js'
@@ -163,40 +164,49 @@ async function migrateModel(modelId: string) {
       const file = await new FileModel({
         modelId,
         name: `${version.version}-rawBinaryPath.zip`,
-        size: 0, //TODO
         mime: 'application/x-zip-compressed',
         bucket,
         path: version.files.rawBinaryPath,
         complete: true,
       })
-      await file.save()
-      v2Files.push(file._id.toString())
+      const size = await (await headObject(bucket, file.path)).ContentLength
+      if (size) {
+        file.size = size
+        await file.save()
+        v2Files.push(file._id.toString())
+      }
     }
     if (version.files.rawCodePath) {
       const file = await new FileModel({
         modelId,
         name: `${version.version}-rawCodePath.zip`,
-        size: 1911, //TODO
         mime: 'application/x-zip-compressed',
         bucket,
         path: version.files.rawCodePath,
         complete: true,
       })
-      await file.save()
-      v2Files.push(file._id.toString())
+      const size = await (await headObject(bucket, file.path)).ContentLength
+      if (size) {
+        file.size = size
+        await file.save()
+        v2Files.push(file._id.toString())
+      }
     }
     if (version.files.rawDockerPath) {
       const file = await new FileModel({
         modelId,
         name: `${version.version}-rawDockerPath`,
-        size: 0, //TODO
         mime: 'application/octet-stream',
         bucket,
         path: version.files.rawDockerPath,
         complete: true,
       })
-      await file.save()
-      v2Files.push(file._id.toString())
+      const size = await (await headObject(bucket, file.path)).ContentLength
+      if (size) {
+        file.size = size
+        await file.save()
+        v2Files.push(file._id.toString())
+      }
     }
 
     await Release.findOneAndUpdate(

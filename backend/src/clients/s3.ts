@@ -1,4 +1,4 @@
-import { GetObjectCommand, GetObjectRequest, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, GetObjectRequest, HeadObjectRequest, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 
@@ -50,6 +50,20 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
 
   if (range) {
     input.Range = `bytes=${range.start}-${range.end}`
+  }
+
+  const command = new GetObjectCommand(input)
+  const response = await client.send(command)
+
+  return response
+}
+
+export async function headObject(bucket: string, key: string) {
+  const client = await getS3Client()
+
+  const input: HeadObjectRequest = {
+    Bucket: bucket,
+    Key: key,
   }
 
   const command = new GetObjectCommand(input)
