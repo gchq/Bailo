@@ -8,6 +8,7 @@ import { FileInterface } from '../../../../models/v2/File.js'
 import { TokenActions } from '../../../../models/v2/Token.js'
 import { downloadFile, getFileById } from '../../../../services/v2/file.js'
 import { getFileByReleaseFileName } from '../../../../services/v2/release.js'
+import { registerPath } from '../../../../services/v2/specification.js'
 import { validateTokenForModel } from '../../../../services/v2/token.js'
 import { BadReq, InternalError } from '../../../../utils/v2/error.js'
 import { parse } from '../../../../utils/v2/validate.js'
@@ -28,6 +29,59 @@ export const getDownloadFileSchema = z
       }),
     }),
   )
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/model/{modelId}/release/{semver}/file/{fileName}/download',
+  tags: ['file'],
+  description: 'Download a file by filename and release.',
+  schema: z.object({
+    params: z.object({
+      modelId: z.string(),
+      semver: z.string(),
+      fileName: z.string(),
+    }),
+  }),
+  responses: {
+    200: {
+      description: 'The contents of the file.',
+      content: {
+        'application/octet-stream': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  },
+})
+
+registerPath({
+  method: 'get',
+  path: '/api/v2/model/{modelId}/file/{fileId}/download',
+  tags: ['file'],
+  description: 'Download a file by file ID.',
+  schema: z.object({
+    params: z.object({
+      modelId: z.string(),
+      fileId: z.string(),
+    }),
+  }),
+  responses: {
+    200: {
+      description: 'The contents of the file.',
+      content: {
+        'application/octet-stream': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  },
+})
 
 interface GetDownloadFileResponse {
   files: Array<FileInterface>
