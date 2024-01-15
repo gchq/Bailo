@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { postFile, putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
+import { postFile, putRelease, UpdateReleaseParams, useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -28,6 +28,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
+  const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
@@ -103,6 +104,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
     } else {
+      mutateReleases()
       mutateRelease()
       setIsEdit(false)
     }
