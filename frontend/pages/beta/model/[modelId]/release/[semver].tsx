@@ -17,24 +17,19 @@ export default function Release() {
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
 
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     semver: semver || '',
-    isActive: true,
   })
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
-    isActiveReviewsError,
+    isReviewsError,
   })
 
   if (error) return error
 
-  if (!release || (isReleaseLoading && isActiveReviewsLoading)) {
+  if (!release || (isReleaseLoading && isReviewsLoading)) {
     return <Loading />
   }
 
@@ -43,7 +38,7 @@ export default function Release() {
       <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
-            {activeReviews.length > 0 && <ReviewBanner release={release} />}
+            {reviews.length > 0 && <ReviewBanner release={release} />}
             <Stack spacing={2} sx={{ p: 4 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}

@@ -1,8 +1,10 @@
 import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
+import _ from 'lodash'
+import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { AccessRequestInterface } from 'types/interfaces'
-import { formatDateString } from 'utils/dateUtils'
+import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import Loading from '../../../common/Loading'
@@ -15,39 +17,40 @@ type AccessRequestDisplayProps = {
 }
 
 export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
-    isActive: true,
-  })
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-  } = useGetReviewRequestsForModel({
-    modelId: accessRequest.modelId,
-    accessRequestId: accessRequest.id,
-    isActive: false,
   })
 
-  if (isActiveReviewsError) {
-    return <MessageAlert message={isActiveReviewsError.info.message} severity='error' />
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
+
+  useEffect(() => {
+    if (!isReviewsLoading && reviews) {
+      const result = reviews
+      result.forEach((review) => {
+        const groupedResponses: GroupedReviewResponse = _.groupBy(review.responses, (response) => response.user)
+        Object.keys(groupedResponses).forEach((user) => {
+          review.responses = [groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1]]
+        })
+      })
+      setReviewsWithLatestResponses(result)
+    }
+  }, [reviews, isReviewsLoading])
+
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  interface GroupedReviewResponse {
+    [user: string]: ReviewResponse[]
   }
 
   return (
     <>
-      {(isActiveReviewsLoading || isInactiveReviewsLoading) && <Loading />}
+      {isReviewsLoading && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+          {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>
@@ -96,8 +99,8 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Grid>
               </Card>
             </Stack>
-            {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
-            {inactiveReviews.map((review) => (
+            {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
+            {reviewsWithLatestResponses.map((review) => (
               <ReviewDisplay review={review} key={review.accessRequestId} />
             ))}
           </Stack>
