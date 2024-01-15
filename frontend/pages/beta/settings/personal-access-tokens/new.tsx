@@ -16,13 +16,14 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { ModelSearchResult, useListModels } from 'actions/model'
 import { postUserToken } from 'actions/user'
-import { ChangeEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/beta/authentication/TokenDialog'
 import Wrapper from 'src/Wrapper.beta'
 import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
   const theme = useTheme()
@@ -36,14 +37,16 @@ export default function NewToken() {
 
   const { models, isModelsLoading, isModelsError } = useListModels([])
 
-  useEffect(() => {
-    const areAllModelsSelected = selectedModels.length === models.length
-    if (!isAllModels && areAllModelsSelected) {
-      setIsAllModels(true)
-    } else if (isAllModels && !areAllModelsSelected) {
-      setIsAllModels(false)
-    }
-  }, [isAllModels, models.length, selectedModels.length])
+  const modelsAutocompletePlaceholder = useMemo(() => {
+    if (isAllModels) return 'All models selected'
+    if (selectedModels.length) return ''
+    return 'Select models'
+  }, [isAllModels, selectedModels.length])
+
+  const isGenerateButtonDisabled = useMemo(
+    () => !description || !(isAllModels || selectedModels.length) || !selectedActions.length,
+    [description, isAllModels, selectedModels.length, selectedActions.length],
+  )
 
   const handleSelectedActionsChange = useCallback(
     (action: TokenActionsKeys, checked: boolean) => {
@@ -86,9 +89,9 @@ export default function NewToken() {
     setDescription(event.target.value)
   }
 
-  const handleAllSelectedModelsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+  const handleAllModelsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setIsAllModels(checked)
-    setSelectedModels(checked ? models : [])
+    setSelectedModels([])
   }
 
   const handleSelectedModelsChange = (_: SyntheticEvent<Element, Event>, value: ModelSearchResult[]) => {
@@ -98,7 +101,7 @@ export default function NewToken() {
   const handleSubmit = async () => {
     setIsLoading(true)
     const scope = isAllModels ? TokenScope.All : TokenScope.Models
-    const modelIds = isAllModels ? [] : selectedModels.map((model) => model.id)
+    const modelIds = selectedModels.map((model) => model.id)
     const response = await postUserToken(description, scope, modelIds, selectedActions)
 
     if (!response.ok) {
@@ -116,9 +119,11 @@ export default function NewToken() {
       <Container maxWidth='md'>
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
-            <Link href={'/beta/settings?tab=authentication&category=personal'}>
-              <Button startIcon={<ArrowBack />}>Back to settings</Button>
-            </Link>
+            <div>
+              <Link href={'/beta/settings?tab=authentication&category=personal'}>
+                <Button startIcon={<ArrowBack />}>Back to settings</Button>
+              </Link>
+            </div>
             <Stack spacing={2}>
               <Stack>
                 <Typography fontWeight='bold'>
@@ -138,29 +143,38 @@ export default function NewToken() {
                 <Typography fontWeight='bold'>
                   Models <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <FormControl>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='All'
-                        checked={isAllModels}
-                        disabled={isModelsLoading}
-                        onChange={handleAllSelectedModelsChange}
-                      />
-                    }
-                    label='All'
+                <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
+                  <FormControl>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name='All'
+                          checked={isAllModels}
+                          disabled={isModelsLoading}
+                          onChange={handleAllModelsChange}
+                        />
+                      }
+                      label='All'
+                    />
+                  </FormControl>
+                  <Autocomplete
+                    multiple
+                    fullWidth
+                    value={selectedModels}
+                    loading={isModelsLoading}
+                    disabled={isAllModels}
+                    limitTags={5}
+                    getLimitTagsText={(more) => `+${plural(more, 'model')}`}
+                    options={models}
+                    getOptionLabel={(option) => option.name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    onChange={handleSelectedModelsChange}
+                    ChipProps={{ size: 'small' }}
+                    renderInput={(params) => (
+                      <TextField {...params} required size='small' placeholder={modelsAutocompletePlaceholder} />
+                    )}
                   />
-                </FormControl>
-                <Autocomplete
-                  multiple
-                  value={selectedModels}
-                  loading={isModelsLoading}
-                  options={models}
-                  getOptionLabel={(option) => option.name}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  renderInput={(params) => <TextField {...params} required size='small' />}
-                  onChange={handleSelectedModelsChange}
-                />
+                </Stack>
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
@@ -172,7 +186,7 @@ export default function NewToken() {
                 <LoadingButton
                   variant='contained'
                   loading={isLoading}
-                  disabled={!description || !selectedModels.length || !selectedActions.length}
+                  disabled={isGenerateButtonDisabled}
                   onClick={handleSubmit}
                   data-test='generatePersonalAccessTokenButton'
                 >
