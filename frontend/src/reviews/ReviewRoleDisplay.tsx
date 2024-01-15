@@ -1,5 +1,5 @@
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined'
-import { Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 
 import { useGetModelRoles } from '../../actions/model'
 import { ReviewRequestInterface } from '../../types/interfaces'
@@ -25,10 +25,12 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
-        <NotificationsNoneOutlinedIcon sx={{ fontSize: 'small', mr: 1 }} color='warning' />
-        {`This ${review.kind} needs to be reviewed by the ${getRoleDisplay(review.role, modelRoles)}.`}
-      </Typography>
+      <Stack direction='row' alignItems='center' justifyContent='center'>
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium', mr: 1 }} color='warning' />
+        <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
+          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplay(review.role, modelRoles)}.`}
+        </Typography>
+      </Stack>
     </>
   )
 }
