@@ -75,6 +75,7 @@ export default function NewToken() {
                   name={action}
                   checked={selectedActions.includes(action)}
                   onChange={(_event, checked) => handleSelectedActionsChange(action, checked)}
+                  data-test={`${action}ActionCheckbox`}
                 />
               }
               label={action}
@@ -152,6 +153,7 @@ export default function NewToken() {
                           checked={isAllModels}
                           disabled={isModelsLoading}
                           onChange={handleAllModelsChange}
+                          data-test='allModelsCheckbox'
                         />
                       }
                       label='All'

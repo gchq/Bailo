@@ -75,7 +75,9 @@ export default function TokenDialog({ token }: TokenDialogProps) {
                 display: 'flex',
               }}
             >
-              <Typography sx={{ mx: 'auto' }}>{showAccessKey ? token?.accessKey || '' : 'xxxxxxxxxx'}</Typography>
+              <Typography sx={{ mx: 'auto' }} data-test='accessKeyText'>
+                {showAccessKey ? token?.accessKey || '' : 'xxxxxxxxxx'}
+              </Typography>
             </Box>
           </Grid>
           <Grid item xs={2}>
@@ -88,6 +90,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
               <IconButton
                 onClick={handleToggleAccessKeyVisibility}
                 aria-label={`${showAccessKey ? 'Hide' : 'Show'} access key`}
+                data-test='toggleAccessKeyButton'
               >
                 {showAccessKey ? <VisibilityOff /> : <Visibility />}
               </IconButton>
@@ -105,7 +108,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
                 display: 'flex',
               }}
             >
-              <Typography sx={{ mx: 'auto' }}>
+              <Typography sx={{ mx: 'auto' }} data-test='secretKeyText'>
                 {showSecretKey ? token?.secretKey || '' : 'xxxxxxxxxxxxxxxxxxxxx'}
               </Typography>
             </Box>
@@ -120,6 +123,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
               <IconButton
                 onClick={handleToggleSecretKeyVisibility}
                 aria-label={`${showSecretKey ? 'Hide' : 'Show'} secret key`}
+                data-test='toggleSecretKeyButton'
               >
                 {showSecretKey ? <VisibilityOff /> : <Visibility />}
               </IconButton>
