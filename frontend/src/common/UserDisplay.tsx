@@ -1,44 +1,37 @@
+import OrganisationIcon from '@mui/icons-material/Business'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
 import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
-import { useListUsers } from 'actions/user'
-import { MouseEvent, useEffect, useState } from 'react'
+import { useGetUserInformation } from 'actions/user'
+import { MouseEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
-import { EntityObject } from 'types/v2/types'
+import MessageAlert from 'src/MessageAlert'
 
-type ConditionalUserDisplayProps =
-  | {
-      entityId?: string
-      entity?: never
-    }
-  | {
-      entityId?: never
-      entity?: EntityObject
-    }
+export interface UserInformation {
+  name?: string
+  organisation?: string
+  email?: string
+}
 
-type CommonUserDisplayProps = {
+type UserDisplayProps = {
+  dn: string
   hidePopover?: boolean
 }
 
-type UserDisplayProps = CommonUserDisplayProps & ConditionalUserDisplayProps
-
-export default function UserDisplay({ entity, entityId, hidePopover = false }: UserDisplayProps) {
-  const [user, setUser] = useState<EntityObject | undefined>(entity || undefined)
+export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const open = Boolean(anchorEl)
 
-  const { users, isUsersLoading } = useListUsers(entityId ? entityId : '')
+  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(dn)
 
-  useEffect(() => {
-    if (!user && users) {
-      setUser(users.find((userFromList) => userFromList.id === entityId))
-    }
-  }, [entityId, users, user])
+  if (isUserInformationError) {
+    return <MessageAlert message={isUserInformationError.info.message} severity='error' />
+  }
 
   return (
     <>
-      {isUsersLoading && <Loading />}
-      {!isUsersLoading && user && (
+      {isUserInformationLoading && <Loading />}
+      {!isUserInformationLoading && userInformation && (
         <>
           <Box
             component='span'
@@ -48,7 +41,7 @@ export default function UserDisplay({ entity, entityId, hidePopover = false }: U
             onMouseEnter={(e: MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget)}
             onMouseLeave={() => setAnchorEl(null)}
           >
-            {user.id}
+            {userInformation.name}
           </Box>
           {!hidePopover && (
             <Popover
@@ -73,14 +66,20 @@ export default function UserDisplay({ entity, entityId, hidePopover = false }: U
                 <Stack direction='row' alignItems='center' spacing={1}>
                   <UserIcon color='primary' />
                   <Typography variant='h6' color='primary' fontWeight='bold'>
-                    {user.id}
+                    {userInformation.name}
                   </Typography>
                 </Stack>
                 <Divider />
-                <Stack direction='row' spacing={1} justifyContent='center'>
+                <Stack direction='row' spacing={1}>
+                  <OrganisationIcon color='primary' />
+                  <Typography>
+                    <span style={{ fontWeight: 'bold' }}>Organisation</span>: {userInformation.organisation}
+                  </Typography>
+                </Stack>
+                <Stack direction='row' spacing={1}>
                   <EmailIcon color='primary' />
                   <Typography>
-                    <span style={{ fontWeight: 'bold' }}>Email</span>: example@example.com
+                    <span style={{ fontWeight: 'bold' }}>Email</span>: {userInformation.email}
                   </Typography>
                 </Stack>
               </Stack>
