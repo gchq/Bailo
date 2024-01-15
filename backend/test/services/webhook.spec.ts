@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
-import { createWebhook, sendWebhooks } from '../../src/services/v2/webhook.js'
+import { createWebhook, removeWebhook, sendWebhooks } from '../../src/services/v2/webhook.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js')
 
@@ -29,6 +29,7 @@ const webhookModelMock = vi.hoisted(() => {
 
   obj.find = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
+  obj.findOneAndDelete = vi.fn(() => obj)
 
   const model: any = vi.fn((params) => ({ ...obj, ...params }))
   Object.assign(model, obj)
@@ -48,6 +49,14 @@ describe('services > webhook', () => {
     expect(authorisation.model).toBeCalled()
   })
 
+  test('removeWebhook > simple', async () => {
+    await removeWebhook(user, 'model', 'webhook')
+
+    expect(webhookModelMock.findOneAndDelete).toBeCalled()
+    expect(modelServiceMock.getModelById).toBeCalled()
+    expect(authorisation.model).toBeCalled()
+  })
+
   test('createWebhook > no permisson', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
@@ -56,6 +65,25 @@ describe('services > webhook', () => {
     expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.save).not.toBeCalled()
+  })
+
+  test('deleteWebhook > no permisson', async () => {
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
+
+    const result = removeWebhook(user, 'model', 'webhook')
+
+    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toBeCalled()
+    expect(webhookModelMock.findOneAndDelete).not.toBeCalled()
+  })
+
+  test('deleteWebhook > webhook not found', async () => {
+    vi.mocked(webhookModelMock.findOneAndDelete).mockResolvedValueOnce()
+
+    const result = removeWebhook(user, 'model', 'webhook')
+
+    expect(result).rejects.toThrowError(`The requested webhook was not found.`)
+    expect(modelServiceMock.getModelById).toBeCalled()
   })
 
   test('sendWebhooks > success', async () => {

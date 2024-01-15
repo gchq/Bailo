@@ -37,7 +37,7 @@ interface DeleteWebhookResponse {
   message: string
 }
 
-export const postWebhook = [
+export const deleteWebhook = [
   bodyParser.json(),
   async (req: Request, res: Response<DeleteWebhookResponse>) => {
     const {
