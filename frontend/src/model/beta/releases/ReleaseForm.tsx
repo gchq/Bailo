@@ -74,14 +74,6 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
-  const getFileId = (file: File | FileInterface) => {
-    if (isFileInterface(file)) {
-      return file._id
-    } else {
-      throw new Error(`Could not find a valid ID for this file. ${JSON.stringify(file)}`)
-    }
-  }
-
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
       Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
@@ -176,16 +168,25 @@ export default function ReleaseForm({
           formData.files.map((file) => (
             <Grid container spacing={1} alignItems='center' key={file.name}>
               <Grid item xs>
-                <Tooltip title={file.name}>
-                  <Link
-                    href={`/api/v2/model/${model.id}/file/${getFileId(file)}/download`}
-                    data-test={`fileLink-${file.name}`}
-                  >
+                {isFileInterface(file) && (
+                  <Tooltip title={file.name}>
+                    <Link
+                      href={`/api/v2/model/${model.id}/file/${file._id}/download`}
+                      data-test={`fileLink-${file.name}`}
+                    >
+                      <Typography noWrap textOverflow='ellipsis' display='inline'>
+                        {file.name}
+                      </Typography>
+                    </Link>
+                  </Tooltip>
+                )}
+                {!isFileInterface(file) && (
+                  <Tooltip title='There was a problem finding the ID for this file.'>
                     <Typography noWrap textOverflow='ellipsis' display='inline'>
                       {file.name}
                     </Typography>
-                  </Link>
-                </Tooltip>
+                  </Tooltip>
+                )}
               </Grid>
               <Grid item xs={1} textAlign='right'>
                 <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
