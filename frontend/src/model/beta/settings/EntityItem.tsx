@@ -1,7 +1,7 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
-import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Tooltip, Typography } from '@mui/material'
+import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import _ from 'lodash-es'
 import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -106,9 +106,5 @@ type EntityNameDisplayProps = {
 
 function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
   const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
-  return (
-    <Typography>
-      <UserDisplay dn={entityName} />
-    </Typography>
-  )
+  return <UserDisplay dn={entityName} />
 }

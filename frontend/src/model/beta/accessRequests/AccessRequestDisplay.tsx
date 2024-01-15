@@ -90,9 +90,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 <Grid container>
                   {accessRequest.metadata.overview.entities.map((entity) => (
                     <Grid item xs={3} key={entity}>
-                      <Typography variant='body2'>
-                        <UserDisplay dn={entity} />
-                      </Typography>
+                      <UserDisplay dn={entity} />
                     </Grid>
                   ))}
                 </Grid>
