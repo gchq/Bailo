@@ -1,4 +1,4 @@
-import AddAlertIcon from '@mui/icons-material/AddAlertOutlined'
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined'
 import { Typography } from '@mui/material'
 
 import { useGetModelRoles } from '../../actions/model'
@@ -26,7 +26,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
     <>
       {isModelRolesLoading && <Loading />}
       <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
-        <AddAlertIcon sx={{ fontSize: 'small', mr: 1 }} color='warning' />
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: 'small', mr: 1 }} color='warning' />
         {`This ${review.kind} needs to be reviewed by the ${getRoleDisplay(review.role, modelRoles)}.`}
       </Typography>
     </>
