@@ -19,7 +19,7 @@ type UserDisplayProps = {
 }
 
 export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
 
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
@@ -41,7 +41,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
         sx={{ fontWeight: 'bold' }}
-        onMouseEnter={(e: MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget)}
+        onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
       >
         {userInformation.name}
@@ -76,7 +76,10 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
             <Stack direction='row' spacing={1}>
               <OrganisationIcon color='primary' />
               <Typography>
-                <span style={{ fontWeight: 'bold' }}>Organisation</span>: {userInformation.organisation}
+                <Box component='span' fontWeight='bold'>
+                  Organisation
+                </Box>
+                : {userInformation.organisation}
               </Typography>
             </Stack>
             <Stack direction='row' spacing={1}>
