@@ -15,7 +15,7 @@ type ReviewDecisionProps = {
 export default function ReviewDecision({ user, decision }: ReviewDecisionProps) {
   const isApproved = useMemo(() => decision === 'approve', [decision])
 
-  const username = user.split(':')[0]
+  const username = user.split(':')[1]
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
@@ -28,7 +28,7 @@ export default function ReviewDecision({ user, decision }: ReviewDecisionProps) 
       >
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>
-            <UserDisplay entityId={username} />
+            <UserDisplay dn={username} />
             {` ${isApproved ? 'approved' : 'requested changes'}`}
           </Typography>
           {isApproved ? <Done color='success' fontSize='small' /> : <HourglassEmpty color='warning' fontSize='small' />}

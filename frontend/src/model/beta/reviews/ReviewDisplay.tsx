@@ -37,7 +37,7 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
             )}
             <Typography variant='caption'>
               <Box component='span' fontWeight='bold'>
-                <UserDisplay entityId={reviewResponse.user.split(':')[1]} />
+                <UserDisplay dn={reviewResponse.user} />
               </Box>
               {` has ${isAccepted ? 'approved' : 'requested changes for'} this ${reviewKindText} (${getRoleDisplay(
                 review.role,

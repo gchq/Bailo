@@ -108,7 +108,7 @@ function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
   const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
   return (
     <Typography>
-      <UserDisplay entityId={entityName} />
+      <UserDisplay dn={entityName} />
     </Typography>
   )
 }

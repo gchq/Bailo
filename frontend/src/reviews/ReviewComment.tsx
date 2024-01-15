@@ -32,7 +32,7 @@ export default function ReviewComment({ user, comment }: ReviewCommentProps) {
           }}
         >
           <Typography>
-            <UserDisplay entityId={username} />
+            <UserDisplay dn={username} />
             {' added a comment'}
           </Typography>
         </Box>

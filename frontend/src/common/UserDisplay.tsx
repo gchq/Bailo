@@ -22,7 +22,9 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const open = Boolean(anchorEl)
 
-  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(dn)
+  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
+    dn.includes(':') ? dn.split(':')[1] : dn,
+  )
 
   if (isUserInformationError) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />

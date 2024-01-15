@@ -56,7 +56,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             </Link>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
-                Created by {<UserDisplay entityId={accessRequest.createdBy} />} on
+                Created by {<UserDisplay dn={accessRequest.createdBy} />} on
                 <Typography variant='caption' fontWeight='bold'>
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
@@ -91,7 +91,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                   {accessRequest.metadata.overview.entities.map((entity) => (
                     <Grid item xs={3} key={entity}>
                       <Typography variant='body2'>
-                        <UserDisplay entityId={entity} />
+                        <UserDisplay dn={entity} />
                       </Typography>
                     </Grid>
                   ))}

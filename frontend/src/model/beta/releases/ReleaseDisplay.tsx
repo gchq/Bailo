@@ -96,7 +96,7 @@ export default function ReleaseDisplay({
               </Button>
             </Stack>
             <Typography variant='caption' sx={{ mb: 2 }}>
-              Created by {<UserDisplay entityId={release.createdBy} />} on
+              Created by {<UserDisplay dn={release.createdBy} />} on
               <Typography variant='caption' fontWeight='bold'>
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>
