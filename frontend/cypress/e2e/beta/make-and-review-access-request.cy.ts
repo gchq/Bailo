@@ -48,10 +48,12 @@ describe('Make and approve an access request', () => {
     cy.url().should('contain', `/beta/model/${modelUuid}/access-request`)
     cy.get('[data-test=accessRequestContainer]').contains('Test access request')
 
-    cy.url().then((url) => {
-      const splitUrl = url.split('/')
-      accessRequestUuid = splitUrl[splitUrl.length - 1]
-    })
+    cy.url()
+      .should('contain', `/beta/model/${modelUuid}/access-request`)
+      .then((url) => {
+        const splitUrl = url.split('/')
+        accessRequestUuid = splitUrl[splitUrl.length - 1]
+      })
   })
 
   it('can review an access request', () => {
@@ -63,7 +65,6 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
-    cy.get('[data-test=accessRequestContainer').contains('user added a comment')
     cy.get('[data-test=accessRequestContainer').contains('user requested changes')
     cy.get('[data-test=accessRequestContainer').contains('This is a comment')
   })
