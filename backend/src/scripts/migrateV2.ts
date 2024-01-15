@@ -308,11 +308,13 @@ async function migrateModel(modelId: string) {
           responses.push({
             user: toEntity('user', approver.id),
             decision: Decision.Approve,
+            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
           })
         } else if (approval.status === ApprovalStates.Declined) {
           responses.push({
             user: toEntity('user', approver.id),
             decision: Decision.RequestChanges,
+            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
           })
         }
       }
