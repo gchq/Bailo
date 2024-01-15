@@ -245,6 +245,7 @@ if (config.experimental.v2) {
   server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
   server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
+  server.delete('/api/v2/model/:modelId/webhooks/:webhookId', ...postWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
