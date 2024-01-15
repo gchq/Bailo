@@ -75,7 +75,7 @@ export default function NewToken() {
                   name={action}
                   checked={selectedActions.includes(action)}
                   onChange={(_event, checked) => handleSelectedActionsChange(action, checked)}
-                  data-test={`${action}ActionCheckbox`}
+                  data-test={`${action.replace(':', '')}ActionCheckbox`}
                 />
               }
               label={action}

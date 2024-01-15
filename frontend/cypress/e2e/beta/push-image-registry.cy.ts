@@ -26,15 +26,13 @@ describe('Make and approve an access request', () => {
     if (BASE_URL) {
       registryUrl = BASE_URL.replace('http://', '')
     }
-  })
 
-  it('can push and pull to the registry', function () {
     cy.log('Navigating to token generation page')
     cy.visit(`${BASE_URL}/beta/settings/personal-access-tokens/new`)
     cy.get('[data-test=tokenDescriptionTextField]').type('This token works for all models')
     cy.get('[data-test=allModelsCheckbox]').click()
-    cy.get('[data-test=image:readActionCheckbox]').click()
-    cy.get('[data-test=file:readActionCheckbox]').click()
+    cy.get('[data-test=imagereadActionCheckbox]').click()
+    cy.get('[data-test=filereadActionCheckbox]').click()
     cy.get('[data-test=generatePersonalAccessTokenButton]').click()
 
     cy.log('Saving access key and secret key')
@@ -42,7 +40,9 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=accessKeyText]').invoke('text').as('accessKey')
     cy.get('[data-test=toggleSecretKeyButton]').click()
     cy.get('[data-test=secretKeyText]').invoke('text').as('secretKey')
+  })
 
+  it('can push and pull to the registry', function () {
     cy.log('Running all the docker commands to push an image')
     cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
     cy.exec(`docker build --tag ${testModelImage} cypress/fixtures/docker-image`, { timeout: 60000 })
