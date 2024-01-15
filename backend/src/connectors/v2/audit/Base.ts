@@ -6,6 +6,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
 
@@ -42,6 +43,10 @@ export const AuditInfo = {
   UpdateRelease: { typeId: 'UpdateRelease', description: 'Release Updated', auditKind: AuditKind.Update },
   DeleteRelease: { typeId: 'DeleteRelease', description: 'Release Deleted', auditKind: AuditKind.Delete },
   SearchReleases: { typeId: 'SearchReleases', description: 'Release Searched', auditKind: AuditKind.Search },
+
+  CreateUserToken: { typeId: 'CreateUserToken', description: 'Token Created', auditKind: AuditKind.Create },
+  ViewUserTokens: { typeId: 'ViewUserToken', description: 'Token Viewed', auditKind: AuditKind.View },
+  DeleteUserToken: { typeId: 'DeleteUserToken', description: 'Token Deleted', auditKind: AuditKind.Delete },
 
   CreateAccessRequest: {
     typeId: 'CreateAccessRequest',
@@ -105,6 +110,10 @@ export abstract class BaseAuditConnector {
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
   abstract onSearchReleases(req: Request, releases: ReleaseDoc[])
 
+  abstract onCreateUserToken(req: Request, token: TokenDoc)
+  abstract onViewUserTokens(req: Request, tokens: TokenDoc[])
+  abstract onDeleteUserToken(req: Request, accessKey: string)
+
   abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
@@ -125,4 +134,10 @@ export abstract class BaseAuditConnector {
   )
 
   abstract onError(req: Request, error: BailoError)
+
+  checkEventType(auditInfo: AuditInfoKeys, req: Request) {
+    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
+    }
+  }
 }

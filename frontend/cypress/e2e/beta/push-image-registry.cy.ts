@@ -39,7 +39,7 @@ describe('Make and approve an access request', () => {
     cy.contains('Pushing an Image for this Model')
 
     cy.log('Fetching the docker login password and running all the docker commands to push an image')
-    cy.get('[data-test=showTokenButton]').click()
+    cy.get('[data-test=regenerateTokenButton]').click()
     cy.get('[data-test=dockerPassword]').should('not.contain.text', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx')
     cy.get('[data-test=dockerPassword]')
       .invoke('text')

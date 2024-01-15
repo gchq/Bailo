@@ -3,6 +3,7 @@ from __future__ import annotations
 from json import JSONDecodeError
 
 import requests
+from requests.auth import HTTPBasicAuth
 from bailo.core.exceptions import BailoException, ResponseException
 
 
@@ -10,8 +11,10 @@ class Agent:
     def __request(self, method, *args, **kwargs):
         if "timeout" not in kwargs:
             kwargs["timeout"] = 5
+        if "verify" not in kwargs:
+            kwargs["verify"] = True
 
-        res = requests.request(method, *args, verify=True, **kwargs)
+        res = requests.request(method, *args, **kwargs)
 
         # Check response for a valid range
         if res.status_code < 400:
@@ -62,16 +65,48 @@ class PkiAgent(Agent):
         self.auth = auth
 
     def get(self, *args, **kwargs):
-        return self.get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def post(self, *args, **kwargs):
-        return self.post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def put(self, *args, **kwargs):
-        return self.put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return self.patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return self.delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+
+
+class TokenAgent(Agent):
+    def __init__(
+        self,
+        access_key: str,
+        secret_key: str,
+    ):
+        """
+        Initiates an agent for API token authentication.
+
+        :param access_key: Access key
+        :param secret_key: Secret key
+        """
+        self.access_key = access_key
+        self.secret_key = secret_key
+        self.basic = HTTPBasicAuth(access_key, secret_key)
+
+    def get(self, *args, **kwargs):
+        return super().get(*args, auth=self.basic, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return super().post(*args, auth=self.basic, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return super().put(*args, auth=self.basic, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        return super().patch(*args, auth=self.basic, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return super().delete(*args, auth=self.basic, **kwargs)

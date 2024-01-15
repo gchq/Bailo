@@ -55,7 +55,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
       const body = await res.json()
       token = body.token
     } catch (error) {
-      setTokenErrorText('Recieved invalid response from server.')
+      setTokenErrorText('Received invalid response from server.')
     }
 
     return token
@@ -94,7 +94,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Typography fontWeight='bold'>User authentication token</Typography>
               <Typography>Use the token below to authenticate when you try and run the docker login command</Typography>
               <Stack direction='row'>
-                <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='showTokenButton'>
+                <Button sx={{ mr: 2 }} variant='outlined' onClick={showToken} data-test='regenerateTokenButton'>
                   Regenerate Token
                 </Button>
                 <Box

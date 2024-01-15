@@ -14,7 +14,14 @@ interface MultipleDropdownProps {
   options: { enumOptions?: { label: string; value: string }[] }
 }
 
-export default function MultipleDropdown({ label, formContext, value, onChange, options }: MultipleDropdownProps) {
+export default function MultipleDropdown({
+  label,
+  formContext,
+  value,
+  onChange,
+  options,
+  required,
+}: MultipleDropdownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string[]) => {
@@ -35,7 +42,10 @@ export default function MultipleDropdown({ label, formContext, value, onChange, 
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>{label}</Typography>
+      <Typography fontWeight='bold'>
+        {label}
+        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+      </Typography>
       {formContext.editMode && (
         <Autocomplete
           multiple

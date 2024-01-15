@@ -19,10 +19,12 @@ import {
 } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
-import { CSSProperties, useEffect, useState } from 'react'
-import { getErrorMessage } from 'utils/fetcher'
+import { useGetReviewRequestsForUser } from 'actions/review'
+import { CSSProperties, useCallback, useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
+import { Decision, ReviewRequestInterface } from 'types/interfaces'
 
-import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import Link from '../Link'
@@ -79,39 +81,43 @@ export default function SideNavigation({
   page,
   currentUser,
   toggleDrawer,
-  onError,
   onResetErrorMessage,
   drawerOpen = false,
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
   const theme = useTheme()
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+
+  const doesNotContainUserApproval = useCallback(
+    (review: ReviewRequestInterface) => {
+      return (
+        currentUser &&
+        !review.responses.find(
+          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
+        )
+      )
+    },
+    [currentUser],
+  )
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      const response = await getReviewCount()
-
-      if (!response.ok) {
-        onError(await getErrorMessage(response))
-        setReviewCount(0)
-        return
+      if (reviews) {
+        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserApproval(filteredReview)).length)
       }
-
-      const count = response.headers.get('x-count')
-      if (count === null) {
-        onError('Review count was null, expected a number')
-        setReviewCount(0)
-        return
-      }
-
-      setReviewCount(parseInt(count))
     }
     fetchReviewCount()
-  }, [onError, onResetErrorMessage])
+  }, [onResetErrorMessage, doesNotContainUserApproval, reviews])
+
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
+      {isReviewsLoading && <Loading />}
       <Toolbar
         sx={{
           alignItems: 'center',
@@ -149,14 +155,22 @@ export default function SideNavigation({
                   <ListItemIcon>
                     {!drawerOpen ? (
                       <Tooltip title='Review' arrow placement='right'>
-                        <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
-                          <ListAltIcon />
-                        </Badge>
+                        <>
+                          {!isReviewsLoading && (
+                            <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
+                              <ListAltIcon />
+                            </Badge>
+                          )}
+                        </>
                       </Tooltip>
                     ) : (
-                      <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
-                        <ListAltIcon />
-                      </Badge>
+                      <>
+                        {!isReviewsLoading && (
+                          <Badge badgeContent={reviewCount} color='secondary' invisible={reviewCount === 0}>
+                            <ListAltIcon />
+                          </Badge>
+                        )}
+                      </>
                     )}
                   </ListItemIcon>
                   <ListItemText primary='Reviews' />

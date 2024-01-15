@@ -14,7 +14,7 @@ interface DropdownProps {
   options: { enumOptions?: { label: string; value: string }[] }
 }
 
-export default function Dropdown({ label, formContext, value, onChange, options }: DropdownProps) {
+export default function Dropdown({ label, formContext, value, onChange, options, required }: DropdownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
@@ -35,7 +35,10 @@ export default function Dropdown({ label, formContext, value, onChange, options 
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>{label}</Typography>
+      <Typography fontWeight='bold'>
+        {label}
+        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+      </Typography>
       {formContext.editMode && (
         <Autocomplete
           size='small'

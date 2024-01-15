@@ -6,6 +6,7 @@ import grant from 'grant'
 
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
+import { getTokenFromAuthHeader } from './routes/middleware/getToken.js'
 import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
@@ -50,6 +51,7 @@ import {
 } from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
+import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
@@ -72,6 +74,7 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -89,6 +92,9 @@ import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.js'
+import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
+import { getUserTokens } from './routes/v2/user/getUserTokens.js'
+import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
@@ -231,10 +237,14 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
+  // This is a temporary workaround to split out the URL to disable authorisation.
+  server.get('/api/v2/token/model/:modelId/file/:fileId/download', getTokenFromAuthHeader, ...getDownloadFile)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
   server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+
+  server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
@@ -267,13 +277,14 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/entities', ...getEntities)
   server.get('/api/v2/entities/me', ...getCurrentUser)
+  server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
   server.get('/api/v2/config/ui', ...getUiConfigV2)
 
-  // server.post('/api/v2/user/:userId/tokens', ...postUserToken)
-  // server.get('/api/v2/user/:userId/tokens', ...getUserTokens)
+  server.post('/api/v2/user/tokens', ...postUserToken)
+  server.get('/api/v2/user/tokens', ...getUserTokens)
   // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
-  // server.delete('/api/v2/user/:userId/token/:tokenId', ...deleteUserToken)
+  server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
   server.get('/api/v2/specification', ...getSpecificationV2)
 } else {

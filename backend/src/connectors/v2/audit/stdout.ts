@@ -6,9 +6,10 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
-import { AuditInfo, AuditInfoKeys, BaseAuditConnector } from './Base.js'
+import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
   Success: boolean
@@ -124,6 +125,27 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onCreateUserToken(req: Request, token: TokenDoc) {
+    this.checkEventType(AuditInfo.CreateUserToken, req)
+    const event = this.generateEvent(req, { accessKey: token.accessKey, description: token.description })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewUserTokens(req: Request, tokens: TokenDoc[]) {
+    this.checkEventType(AuditInfo.ViewUserTokens, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: tokens.map((token) => token.accessKey),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onDeleteUserToken(req: Request, accessKey: string) {
+    this.checkEventType(AuditInfo.DeleteUserToken, req)
+    const event = this.generateEvent(req, { accessKey })
+    req.log.info(event, req.audit.description)
+  }
+
   onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.CreateAccessRequest, req)
     const event = this.generateEvent(req, { id: accessRequest.id })
@@ -173,7 +195,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onCreateReviewResponse(req: Request, review: ReviewInterface) {
-    this.checkEventType(AuditInfo.CreateAccessRequest, req)
+    this.checkEventType(AuditInfo.CreateReviewResponse, req)
     const event = this.generateEvent(req, {
       modelId: review.modelId,
       ...(review.semver && { semver: review.semver }),
@@ -183,6 +205,10 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onError(req: Request, error: BailoError) {
+    if (!req.audit) {
+      // No audit information has been attached to the request
+      return
+    }
     const outcome =
       error.code === 403
         ? {
@@ -235,11 +261,5 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
     req.log.info(event, req.audit.description)
-  }
-
-  checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
-      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
-    }
   }
 }

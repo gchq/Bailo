@@ -17,19 +17,14 @@ export default function AccessRequest() {
   const { modelId, accessRequestId }: { modelId?: string; accessRequestId?: string } = router.query
 
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     accessRequestId: accessRequestId || '',
-    isActive: true,
   })
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
-    isActiveReviewsError,
+    isReviewsError,
   })
   if (error) return error
 
@@ -41,10 +36,10 @@ export default function AccessRequest() {
     >
       <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
-          {isAccessRequestLoading && isActiveReviewsLoading && <Loading />}
+          {isAccessRequestLoading && isReviewsLoading && <Loading />}
           {accessRequest && (
             <>
-              {activeReviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+              {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
