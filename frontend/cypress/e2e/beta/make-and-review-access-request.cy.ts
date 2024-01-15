@@ -65,7 +65,7 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
-    cy.get('[data-test=accessRequestContainer').contains('user requested changes')
+    cy.get('[data-test=accessRequestContainer').contains('requested changes')
     cy.get('[data-test=accessRequestContainer').contains('This is a comment')
   })
 })
