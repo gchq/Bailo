@@ -309,12 +309,16 @@ async function migrateModel(modelId: string) {
             user: toEntity('user', approver.id),
             decision: Decision.Approve,
             comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+            createdAt: approval.createdAt,
+            updatedAt: approval.updatedAt,
           })
         } else if (approval.status === ApprovalStates.Declined) {
           responses.push({
             user: toEntity('user', approver.id),
             decision: Decision.RequestChanges,
             comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+            createdAt: approval.createdAt,
+            updatedAt: approval.updatedAt,
           })
         }
       }
@@ -329,8 +333,8 @@ async function migrateModel(modelId: string) {
 
           responses,
 
-          createdAt: version.createdAt,
-          updatedAt: version.updatedAt,
+          createdAt: approval.createdAt,
+          updatedAt: approval.updatedAt,
         },
         {
           new: true,
