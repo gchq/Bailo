@@ -36,6 +36,22 @@ export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookP
   return webhook
 }
 
+export async function updateWebhook(user: UserDoc, webhookId: string, webhookParams: CreateWebhookParams) {
+  //Check model exists and user has the permisson to update it
+  const model = await getModelById(user, webhookParams.modelId)
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+
+  const webhook = await WebhookModel.findOneAndUpdate({ id: webhookId }, webhookParams, { new: true })
+  if (!webhook) {
+    throw NotFound(`The requested webhook was not found.`, { webhookId })
+  }
+
+  return webhook
+}
+
 export async function getWebhooksByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)

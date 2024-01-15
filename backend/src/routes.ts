@@ -77,6 +77,7 @@ import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
+import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -248,6 +249,7 @@ if (config.experimental.v2) {
 
   server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
   server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
+  server.put('/api/v2/model/:modelId/webhooks/:webhookId', ...putWebhook)
   server.delete('/api/v2/model/:modelId/webhooks/:webhookId', ...deleteWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
