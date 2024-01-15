@@ -139,6 +139,24 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
+  test('createRelease > release with duplicate file names', async () => {
+    fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
+    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+
+    expect(
+      async () =>
+        await createRelease(
+          {} as any,
+          {
+            modelCardVersion: 999,
+            fileIds: ['test', 'test2'],
+          } as any,
+        ),
+    ).rejects.toThrowError(/^Releases cannot have multiple files with the same name/)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
