@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import stream from 'stream'
 import { z } from 'zod'
 
-import { FileInterface } from '../../../../models/v2/File.js'
+import { FileInterface, FileInterfaceDoc } from '../../../../models/v2/File.js'
 import { TokenActions } from '../../../../models/v2/Token.js'
 import { downloadFile, getFileById } from '../../../../services/v2/file.js'
 import { getFileByReleaseFileName } from '../../../../services/v2/release.js'
@@ -92,15 +92,12 @@ export const getDownloadFile = [
   async (req: Request, res: Response<GetDownloadFileResponse>) => {
     const { params } = parse(req, getDownloadFileSchema)
 
-    let fileId: string
+    let file: FileInterfaceDoc
     if ('semver' in params) {
-      const file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
-      fileId = String(file._id)
+      file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
     } else {
-      fileId = params.fileId
+      file = await getFileById(req.user, params.fileId)
     }
-
-    const file = await getFileById(req.user, fileId)
 
     if (req.token) {
       // Check that the token can be used for the requested model.
@@ -114,17 +111,17 @@ export const getDownloadFile = [
 
     if (req.headers.range) {
       // TODO: support ranges
-      throw BadReq('Ranges are not supported', { fileId })
+      throw BadReq('Ranges are not supported', { fileId: file._id })
     }
 
     res.set('Content-Length', String(file.size))
     // TODO: support ranges
     // res.set('Accept-Ranges', 'bytes')
 
-    const stream = await downloadFile(req.user, fileId)
+    const stream = await downloadFile(req.user, file._id)
 
     if (!stream.Body) {
-      throw InternalError('We were not able to retrieve the body of this file', { fileId })
+      throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id })
     }
 
     res.writeHead(200)
