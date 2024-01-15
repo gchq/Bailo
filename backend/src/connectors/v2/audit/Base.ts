@@ -134,4 +134,10 @@ export abstract class BaseAuditConnector {
   )
 
   abstract onError(req: Request, error: BailoError)
+
+  checkEventType(auditInfo: AuditInfoKeys, req: Request) {
+    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
+    }
+  }
 }

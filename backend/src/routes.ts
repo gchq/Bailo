@@ -51,6 +51,7 @@ import {
 } from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
+import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
@@ -73,6 +74,7 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
@@ -222,6 +224,13 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/releases', ...postRelease)
   server.get('/api/v2/model/:modelId/releases', ...getReleases)
   server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+  server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+  // This is a temporary workaround to split out the URL to disable authorisation.
+  server.get(
+    '/api/v2/token/model/:modelId/release/:semver/file/:fileName/download',
+    getTokenFromAuthHeader,
+    ...getDownloadFile,
+  )
   server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
@@ -241,6 +250,8 @@ if (config.experimental.v2) {
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
   server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+
+  server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
@@ -273,6 +284,7 @@ if (config.experimental.v2) {
 
   server.get('/api/v2/entities', ...getEntities)
   server.get('/api/v2/entities/me', ...getCurrentUser)
+  server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
   server.get('/api/v2/config/ui', ...getUiConfigV2)
 

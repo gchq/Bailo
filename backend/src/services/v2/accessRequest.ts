@@ -5,6 +5,7 @@ import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
 import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
@@ -12,6 +13,7 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
 import { findSchemaById } from './schema.js'
+import { sendWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -57,6 +59,13 @@ export async function createAccessRequest(
     // Transactions here would solve this issue.
     log.warn('Error when creating Release Review Requests. Approval cannot be given to this Access Request', error)
   }
+
+  sendWebhooks(
+    accessRequest.modelId,
+    WebhookEvent.CreateAccessRequest,
+    `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
+    { accessRequest },
+  )
 
   return accessRequest
 }

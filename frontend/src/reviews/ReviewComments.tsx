@@ -3,7 +3,6 @@ import { useGetReviewRequestsForModel } from 'actions/review'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import ReviewComment from 'src/reviews/ReviewComment'
 import ReviewDecision from 'src/reviews/ReviewDecision'
 import { AccessRequestInterface } from 'types/interfaces'
 import { ReleaseInterface } from 'types/types'
@@ -27,37 +26,27 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     [release, accessRequest],
   )
 
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
-    isActive: false,
     ...semverOrAccessRequestIdObject,
   })
 
   const reviewDetails = useMemo(
     () =>
-      inactiveReviews.map((inactiveReview) =>
-        inactiveReview.responses.map((response) => (
-          <>
-            {response.decision && <ReviewDecision user={response.user} decision={response.decision} />}
-            {response.comment && <ReviewComment user={response.user} comment={response.comment} />}
-          </>
-        )),
+      reviews.map((review) =>
+        review.responses.map((response) => <>{response.decision && <ReviewDecision response={response} />}</>),
       ),
-    [inactiveReviews],
+    [reviews],
   )
 
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
   return (
     <>
-      {inactiveReviews.length > 0 && <Divider />}
-      {isInactiveReviewsLoading && <Loading />}
+      {reviews.length > 0 && <Divider />}
+      {isReviewsLoading && <Loading />}
       {reviewDetails}
     </>
   )

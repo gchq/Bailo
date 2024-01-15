@@ -10,31 +10,29 @@ const authenticationMocks = vi.hoisted(() => ({
   getUserFromReq: vi.fn(() => ({
     dn: 'user',
   })),
-  queryEntities: vi.fn(() => [
-    {
-      kind: 'user',
-      entities: ['user:alice'],
-    },
-    {
-      kind: 'group',
-      entities: ['group:alicesGroup'],
-    },
-  ]),
+  getUserInformation: vi.fn(() => ({
+    email: `jb@example.com`,
+    name: 'Joe Bloggs',
+    organisation: 'Acme Corp',
+  })),
 }))
 vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({
   default: authenticationMocks,
 }))
 
-describe('routes > entities > getEntities', () => {
+vi.mock('../../../src/utils/v2/entity.js', async () => ({
+  toEntity: vi.fn(() => 'user:userdn'),
+}))
+
+describe('routes > entities > getEntityLookup', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/v2/model.js', () => ({
       getModelById: vi.fn(() => ({ _id: 'test' })),
     }))
-
-    const res = await testGet(`/api/v2/entities?q=bob`)
+    const res = await testGet(`/api/v2/entity/userdn/lookup`)
 
     expect(res.statusCode).toBe(200)
-    expect(authenticationMocks.queryEntities.mock.calls).matchSnapshot()
+    expect(authenticationMocks.getUserInformation.mock.calls).matchSnapshot()
     expect(res.body).matchSnapshot()
   })
 })

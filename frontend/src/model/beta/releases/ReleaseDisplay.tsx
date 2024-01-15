@@ -1,8 +1,11 @@
 import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
+import _ from 'lodash'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { formatDateString } from 'utils/dateUtils'
+import { useEffect, useState } from 'react'
+import { ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
@@ -26,25 +29,14 @@ export default function ReleaseDisplay({
 }) {
   const router = useRouter()
 
-  const {
-    reviews: activeReviews,
-    isReviewsLoading: isActiveReviewsLoading,
-    isReviewsError: isActiveReviewsError,
-  } = useGetReviewRequestsForModel({
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: model.id,
     semver: release.semver,
-    isActive: true,
   })
-  const {
-    reviews: inactiveReviews,
-    isReviewsLoading: isInactiveReviewsLoading,
-    isReviewsError: isInactiveReviewsError,
-  } = useGetReviewRequestsForModel({
-    modelId: model.id,
-    semver: release.semver,
-    isActive: false,
-  })
+
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
 
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
@@ -52,12 +44,29 @@ export default function ReleaseDisplay({
     }
   }
 
-  if (isActiveReviewsError) {
-    return <MessageAlert message={isActiveReviewsError.info.message} severity='error' />
+  interface GroupedReviewResponse {
+    [user: string]: ReviewResponse[]
   }
 
-  if (isInactiveReviewsError) {
-    return <MessageAlert message={isInactiveReviewsError.info.message} severity='error' />
+  useEffect(() => {
+    if (!isReviewsLoading && reviews) {
+      const latestReviews: ReviewRequestInterface[] = []
+      reviews.forEach((review) => {
+        const reviewResult: ReviewRequestInterface = _.cloneDeep(review)
+        const groupedResponses: GroupedReviewResponse = _.groupBy(reviewResult.responses, (response) => response.user)
+        const latestResponses: ReviewResponse[] = []
+        Object.keys(groupedResponses).forEach((user) => {
+          latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
+        })
+        reviewResult.responses = latestResponses
+        latestReviews.push(reviewResult)
+      })
+      setReviewsWithLatestResponses(latestReviews)
+    }
+  }, [reviews, isReviewsLoading])
+
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
   if (isUiConfigError) {
@@ -66,10 +75,10 @@ export default function ReleaseDisplay({
 
   return (
     <>
-      {(isActiveReviewsLoading || isInactiveReviewsLoading || isUiConfigLoading) && <Loading />}
+      {(isReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {activeReviews.length > 0 && <ReviewBanner release={release} />}
+          {reviews.length > 0 && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
@@ -151,9 +160,9 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {inactiveReviews.length > 0 && <Divider sx={{ my: 2 }} />}
-              {inactiveReviews.map((review) => (
-                <ReviewDisplay review={review} key={review.semver} />
+              {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
+              {reviewsWithLatestResponses.map((review) => (
+                <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
               ))}
             </Stack>
           </Stack>
