@@ -7,6 +7,7 @@ import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { findDuplicates } from '../../utils/v2/array.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
@@ -14,6 +15,7 @@ import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
+import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
   if (release.images) {
@@ -132,6 +134,13 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
       log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
     }
   }
+
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.CreateRelease,
+    `Release ${release.semver} has been created for model ${release.modelId}`,
+    { release },
+  )
 
   return release
 }

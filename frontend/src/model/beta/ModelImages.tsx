@@ -48,7 +48,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
   return (
     <>
       {isModelImagesLoading && <Loading />}
-      <Box sx={{ maxWidth: '900px', mx: 'auto', my: 4 }}>
+      <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
         <Stack spacing={4}>
           <Box sx={{ textAlign: 'right' }}>
             <Button

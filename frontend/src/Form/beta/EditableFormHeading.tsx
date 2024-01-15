@@ -27,8 +27,8 @@ export default function EditableFormHeading({
   return (
     <Stack sx={{ pb: 2 }}>
       <Stack
-        direction={{ sx: 'column', sm: 'row' }}
-        justifyContent={{ sx: 'center', sm: 'space-between' }}
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent={{ xs: 'center', sm: 'space-between' }}
         alignItems='center'
         spacing={2}
       >

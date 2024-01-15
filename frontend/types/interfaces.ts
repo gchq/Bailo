@@ -101,6 +101,8 @@ export interface ReviewResponse {
   user: string
   decision: DecisionKeys
   comment?: string
+  createdAt: string
+  updatedAt: string
 }
 
 type PartialReviewRequestInterface =
@@ -118,7 +120,6 @@ export type ReviewRequestInterface = {
   role: string
   kind: 'release' | 'access'
   responses: ReviewResponse[]
-  isActive: boolean
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface

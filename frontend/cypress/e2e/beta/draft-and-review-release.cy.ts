@@ -60,7 +60,6 @@ describe('Draft and review a model release', () => {
     cy.get('[data-test=approveReviewButton').click()
 
     cy.log('Checking that we can see both review states')
-    cy.contains('user added a comment')
     cy.contains('user requested changes')
     cy.contains('user approved')
     cy.contains('This is a comment')

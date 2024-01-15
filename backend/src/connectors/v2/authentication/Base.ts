@@ -9,18 +9,24 @@ export const Roles = {
 }
 export type RoleKeys = (typeof Roles)[keyof typeof Roles]
 
+export interface UserInformation {
+  name?: string
+  organisation?: string
+  email?: string
+}
+
 export abstract class BaseAuthenticationConnector {
   abstract getUserFromReq(req: Request): Promise<User>
   abstract hasRole(user: UserDoc, role: RoleKeys): Promise<boolean>
 
   abstract queryEntities(query: string): Promise<Array<{ kind: string; id: string }>>
   abstract getEntities(user: UserDoc): Promise<Array<string>>
-  abstract getUserInformation(userEntity: string): Promise<{ email: string }>
+  abstract getUserInformation(userEntity: string): Promise<UserInformation>
   abstract getEntityMembers(entity: string): Promise<Array<string>>
 
-  async getUserInformationList(entity: string): Promise<Promise<{ email: string }>[]> {
+  async getUserInformationList(entity: string): Promise<UserInformation[]> {
     const entities = await this.getEntityMembers(entity)
-    return entities.map((member) => this.getUserInformation(member))
+    return Promise.all(entities.map((member) => this.getUserInformation(member)))
   }
   async getUserModelRoles(user: UserDoc, model: ModelDoc) {
     const entities = await this.getEntities(user)

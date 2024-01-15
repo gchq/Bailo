@@ -64,11 +64,13 @@ export default function JsonSchemaForm({
   setSplitSchema,
   canEdit = false,
   displayLabelValidation = false,
+  defaultCurrentUserInEntityList = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
+  defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
 
@@ -130,7 +132,11 @@ export default function JsonSchemaForm({
         omitExtraData
         disabled={!canEdit}
         liveOmit
-        formContext={{ editMode: canEdit, formSchema: currentStep.schema }}
+        formContext={{
+          editMode: canEdit,
+          formSchema: currentStep.schema,
+          defaultCurrentUser: defaultCurrentUserInEntityList,
+        }}
         templates={
           !canEdit
             ? {

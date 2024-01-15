@@ -1,6 +1,8 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
+import { useGetCurrentUser } from 'actions/user'
+import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -23,22 +25,33 @@ export default function NewAccessRequest() {
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
 
-  const isLoading = useMemo(() => isSchemaLoading || isModelLoading, [isModelLoading, isSchemaLoading])
+  const isLoading = useMemo(
+    () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
+    [isModelLoading, isSchemaLoading, isCurrentUserLoading],
+  )
 
   useEffect(() => {
-    if (!model || !schema) return
-    const steps = getStepsFromSchema(schema, {}, [], {})
+    if (!model || !schema || !currentUser) return
+
+    const defaultState = {
+      overview: {
+        entities: [`user:${currentUser.dn}`],
+        endDate: dayjs(new Date()).format('YYYY-MM-DD').toString(),
+      },
+    }
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model])
+  }, [schema, model, currentUser])
 
   async function onSubmit() {
     setSubmissionErrorText('')
@@ -89,6 +102,7 @@ export default function NewAccessRequest() {
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
     isModelError,
     isSchemaError,
+    isCurrentUserError,
   })
   if (error) return error
 
@@ -112,6 +126,7 @@ export default function NewAccessRequest() {
                 setSplitSchema={setSplitSchema}
                 canEdit
                 displayLabelValidation
+                defaultCurrentUserInEntityList
               />
               <Stack alignItems='flex-end'>
                 <LoadingButton

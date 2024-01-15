@@ -57,32 +57,25 @@ vi.mock('../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
 
+const mockWebhookService = vi.hoisted(() => {
+  return {
+    sendWebhooks: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
-  test('findReviewsByActive > active', async () => {
-    await findReviews(user, true)
+  test('findReviews > active', async () => {
+    await findReviews(user)
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('findReviewsByActive > not active', async () => {
-    await findReviews(user, false)
-
-    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
-  test('findReviewsByActive > active reviews for a specific model', async () => {
-    await findReviews(user, true, 'modelId')
-
-    expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
-  test('findReviewsByActive > inactive reviews for a specific model', async () => {
-    await findReviews(user, false, 'modelId')
+  test('findReviews > active reviews for a specific model', async () => {
+    await findReviews(user, 'modelId')
 
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
@@ -121,6 +114,7 @@ describe('services > review', () => {
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
     expect(ReviewModel.findByIdAndUpdate).toBeCalled()
+    expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
   test('respondToReview > access request successful', async () => {
