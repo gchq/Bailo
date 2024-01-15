@@ -36,6 +36,16 @@ export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookP
   return webhook
 }
 
+export async function getWebhooksByModel(user: UserDoc, modelId: string) {
+  const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+
+  return await WebhookModel.find({ modelId })
+}
+
 export async function removeWebhook(user: UserDoc, modelId: string, webhookId: string) {
   const auth = await authorisation.model(user, await getModelById(user, modelId), ModelAction.Update)
   if (!auth.success) {

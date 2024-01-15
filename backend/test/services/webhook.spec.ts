@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
-import { createWebhook, removeWebhook, sendWebhooks } from '../../src/services/v2/webhook.js'
+import { createWebhook, getWebhooksByModel, removeWebhook, sendWebhooks } from '../../src/services/v2/webhook.js'
 
 vi.mock('../../src/connectors/v2/authorisation/index.js')
 
@@ -57,6 +57,17 @@ describe('services > webhook', () => {
     expect(authorisation.model).toBeCalled()
   })
 
+  test('getWebhooks > simple', async () => {
+    const webhooks = ['webhook 1', 'webhook 2']
+    vi.mocked(webhookModelMock.find).mockResolvedValueOnce(webhooks)
+    const result = await getWebhooksByModel(user, 'model')
+
+    expect(result).toBe(webhooks)
+    expect(webhookModelMock.find).toBeCalled()
+    expect(modelServiceMock.getModelById).toBeCalled()
+    expect(authorisation.model).toBeCalled()
+  })
+
   test('createWebhook > no permisson', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
@@ -75,6 +86,16 @@ describe('services > webhook', () => {
     expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.findOneAndDelete).not.toBeCalled()
+  })
+
+  test('getWebhooksByModel > no permisson', async () => {
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
+
+    const result = getWebhooksByModel(user, 'model')
+
+    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    expect(modelServiceMock.getModelById).toBeCalled()
+    expect(webhookModelMock.find).not.toBeCalled()
   })
 
   test('deleteWebhook > webhook not found', async () => {
