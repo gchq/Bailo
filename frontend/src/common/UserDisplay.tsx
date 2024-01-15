@@ -1,9 +1,10 @@
 import OrganisationIcon from '@mui/icons-material/Business'
+import ContentCopy from '@mui/icons-material/ContentCopy'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
-import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'
-import { MouseEvent, useMemo, useState } from 'react'
+import { MouseEvent, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
@@ -21,10 +22,27 @@ type UserDisplayProps = {
 export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
+  const ref = useRef<HTMLDivElement>(null)
 
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     dn.includes(':') ? dn.split(':')[1] : dn,
   )
+
+  function handleCopyButtonClick() {
+    if (userInformation && userInformation.email) {
+      navigator.clipboard.writeText(userInformation.email)
+    }
+  }
+
+  const popoverEnter = () => {
+    if (ref.current) {
+      setAnchorEl(ref.current)
+    }
+  }
+
+  const popoverLeave = () => {
+    setAnchorEl(null)
+  }
 
   if (isUserInformationError) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
@@ -38,6 +56,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
     <>
       <Box
         component='span'
+        ref={ref}
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
         sx={{ fontWeight: 'bold' }}
@@ -52,6 +71,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
           sx={{
             pointerEvents: 'none',
           }}
+          PaperProps={{ onMouseEnter: popoverEnter, onMouseLeave: popoverLeave, sx: { pointerEvents: 'auto' } }}
           open={open}
           anchorEl={anchorEl}
           anchorOrigin={{
@@ -82,7 +102,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
                 : {userInformation.organisation}
               </Typography>
             </Stack>
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' spacing={1} alignItems='center'>
               <EmailIcon color='primary' />
               <Typography>
                 <Box component='span' fontWeight='bold'>
@@ -90,6 +110,9 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
                 </Box>
                 : {userInformation.email}
               </Typography>
+              <IconButton onClick={() => handleCopyButtonClick()} aria-label='Copy text to clipboard' size='small'>
+                <ContentCopy color='primary' />
+              </IconButton>
             </Stack>
           </Stack>
         </Popover>
