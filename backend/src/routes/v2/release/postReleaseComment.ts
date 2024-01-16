@@ -53,10 +53,12 @@ export const postReleaseComment = [
     } = parse(req, postReleaseCommentSchema)
 
     const release = await newReleaseComment(req.user, modelId, semver, body.comment)
-    await audit.onUpdateRelease(req, release)
+    if (release) {
+      await audit.onUpdateRelease(req, release)
 
-    return res.json({
-      release,
-    })
+      return res.json({
+        release,
+      })
+    }
   },
 ]
