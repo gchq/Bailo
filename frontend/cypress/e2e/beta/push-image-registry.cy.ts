@@ -26,29 +26,30 @@ describe('Make and approve an access request', () => {
     if (BASE_URL) {
       registryUrl = BASE_URL.replace('http://', '')
     }
+
+    cy.log('Navigating to token generation page')
+    cy.visit(`${BASE_URL}/beta/settings/personal-access-tokens/new`)
+    cy.get('[data-test=tokenDescriptionTextField]').type('This token works for all models')
+    cy.get('[data-test=allModelsCheckbox]').click()
+    cy.get('[data-test=imagereadActionCheckbox]').click()
+    cy.get('[data-test=filereadActionCheckbox]').click()
+    cy.get('[data-test=generatePersonalAccessTokenButton]').click()
+
+    cy.log('Saving access key and secret key')
+    cy.get('[data-test=toggleAccessKeyButton]').click()
+    cy.get('[data-test=accessKeyText]').invoke('text').as('accessKey')
+    cy.get('[data-test=toggleSecretKeyButton]').click()
+    cy.get('[data-test=secretKeyText]').invoke('text').as('secretKey')
   })
 
-  it('can push and pull to the registry', () => {
-    cy.log('Navigating to the model page')
-    cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
-    cy.contains(modelNameForRegistry)
-
-    cy.log('Navigating to the registry tab and opening the push image dialog')
-    cy.get('[data-test=registryTab]').click()
-    cy.get('[data-test=pushImageButton]').click()
-    cy.contains('Pushing an Image for this Model')
-
-    cy.log('Fetching the docker login password and running all the docker commands to push an image')
-    cy.get('[data-test=regenerateTokenButton]').click()
-    cy.get('[data-test=dockerPassword]').should('not.contain.text', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx')
-    cy.get('[data-test=dockerPassword]')
-      .invoke('text')
-      .then({ timeout: 60000 }, (dockerPassword) => {
-        cy.exec(`docker login ${registryUrl} -u ${'user'} -p ${dockerPassword}`)
-        cy.exec(`docker build --tag ${testModelImage} cypress/fixtures/docker-image`)
-        cy.exec(`docker tag ${testModelImage} ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`)
-        cy.exec(`docker push ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`)
-      })
+  it('can push and pull to the registry', function () {
+    cy.log('Running all the docker commands to push an image')
+    cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
+    cy.exec(`docker build --tag ${testModelImage} cypress/fixtures/docker-image`, { timeout: 60000 })
+    cy.exec(`docker tag ${testModelImage} ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`, {
+      timeout: 60000,
+    })
+    cy.exec(`docker push ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`, { timeout: 60000 })
   })
 
   it('can select the image when drafting a release', () => {
