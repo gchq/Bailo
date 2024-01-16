@@ -3,13 +3,23 @@
 exports[`routes > release > postReleaseComment > 200 > ok 1`] = `
 {
   "accessRequest": {
-    "message": "test",
+    "_id": "65a6a4cc7546a826064b8bb9",
+    "comments": [],
+    "createdBy": "user",
+    "deleted": false,
+    "id": "test",
+    "modelId": "test",
   },
 }
 `;
 
 exports[`routes > release > postReleaseComment > audit > expected call 1`] = `
 {
-  "message": "test",
+  "_id": "65a6a4cc7546a826064b8bba",
+  "comments": [],
+  "createdBy": "user",
+  "deleted": false,
+  "id": "test",
+  "modelId": "test",
 }
 `;
