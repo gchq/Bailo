@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Divider, Stack } from '@mui/material'
-import { postAccessRequestComments, useGetAccessRequest } from 'actions/accessRequest'
+import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
@@ -51,10 +51,10 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     reviews.forEach((review) => {
       review.responses.forEach((response) => decisionsAndComments.push(response))
     })
-    if (release && release.comments) {
+    if (release) {
       decisionsAndComments = [...decisionsAndComments, ...release.comments]
     }
-    if (accessRequest && accessRequest.comments) {
+    if (accessRequest) {
       decisionsAndComments = [...decisionsAndComments, ...accessRequest.comments]
     }
     decisionsAndComments.sort(sortByCreatedAtAscending)
@@ -84,7 +84,7 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
         setCommentSubmissionError(await getErrorMessage(res))
       }
     } else if (accessRequest) {
-      const res = await postAccessRequestComments(accessRequest.modelId, accessRequest.id, newReviewComment)
+      const res = await postAccessRequestComment(accessRequest.modelId, accessRequest.id, newReviewComment)
       if (res.ok) {
         mutateAccessRequest()
         setNewReviewComment('')

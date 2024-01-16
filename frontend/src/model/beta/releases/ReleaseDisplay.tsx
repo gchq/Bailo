@@ -64,7 +64,7 @@ export default function ReleaseDisplay({
       })
       setReviewsWithLatestResponses(latestReviews)
     }
-  }, [reviews, isReviewsLoading, release.semver])
+  }, [reviews, isReviewsLoading])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
