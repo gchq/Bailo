@@ -16,7 +16,7 @@ vi.mock('../../../../src/services/v2/webhook.js', () => ({
 describe('routes > webhook > postWebhook', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(putWebhookSchema)
-    const res = await testPut(`/api/v2/model/${fixture.params.modelId}/webhooks/{${fixture.params.webhookId}}`, fixture)
+    const res = await testPut(`/api/v2/model/${fixture.params.modelId}/webhook/{${fixture.params.webhookId}}`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

@@ -16,7 +16,7 @@ vi.mock('../../../../src/services/v2/webhook.js', () => ({
 
 describe('routes > webhook > deleteWebhook', () => {
   test('200 > ok', async () => {
-    const res = await testDelete(`/api/v2/model/test-model/webhooks/new-webhook`)
+    const res = await testDelete(`/api/v2/model/test-model/webhook/new-webhook`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()

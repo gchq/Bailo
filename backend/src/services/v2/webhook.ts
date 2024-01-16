@@ -54,7 +54,7 @@ export async function updateWebhook(user: UserDoc, webhookId: string, webhookPar
 
 export async function getWebhooksByModel(user: UserDoc, modelId: string) {
   const model = await getModelById(user, modelId)
-  const auth = await authorisation.model(user, model, ModelAction.Update)
+  const auth = await authorisation.model(user, model, ModelAction.View)
   if (!auth.success) {
     throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
   }

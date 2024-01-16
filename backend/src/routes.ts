@@ -249,8 +249,8 @@ if (config.experimental.v2) {
 
   server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
   server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
-  server.put('/api/v2/model/:modelId/webhooks/:webhookId', ...putWebhook)
-  server.delete('/api/v2/model/:modelId/webhooks/:webhookId', ...deleteWebhook)
+  server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
+  server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
