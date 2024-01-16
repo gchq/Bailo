@@ -23,8 +23,7 @@ def test_model():
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "description", "team_id", "visibility"),
-    [("test-model", "test", "Uncategorised", ModelVisibility.PUBLIC),
-     ("test-model", "test", "Uncategorised", None)],
+    [("test-model", "test", "Uncategorised", ModelVisibility.PUBLIC), ("test-model", "test", "Uncategorised", None)],
 )
 def test_create_get_from_version_and_update(
     name: str,

@@ -23,7 +23,7 @@ def test_access_request():
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "schema_id", "created_by", "end_date"),
-    [("test", "minimal-access-request-general-v10-beta", "user", "1970-01-01")]
+    [("test", "minimal-access-request-general-v10-beta", "user", "1970-01-01")],
 )
 def test_create_get_from_version_update_and_delete_access_request(
     name, schema_id, created_by, end_date, integration_client, example_model
