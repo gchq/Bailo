@@ -5,6 +5,7 @@ import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   createRelease,
   deleteRelease,
+  getFileByReleaseFileName,
   getModelReleases,
   getReleaseBySemver,
   removeFileFromReleases,
@@ -26,6 +27,7 @@ vi.mock('../../src/services/v2/registry.js', () => registryMocks)
 
 const fileMocks = vi.hoisted(() => ({
   getFileById: vi.fn(),
+  getFilesByIds: vi.fn(),
 }))
 vi.mock('../../src/services/v2/file.js', () => fileMocks)
 
@@ -141,6 +143,24 @@ describe('services > release', () => {
         } as any,
       ),
     ).rejects.toThrowError(/^The file 'test' comes from the model/)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
+  test('createRelease > release with duplicate file names', async () => {
+    fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
+    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+
+    expect(
+      async () =>
+        await createRelease(
+          {} as any,
+          {
+            modelCardVersion: 999,
+            fileIds: ['test', 'test2'],
+          } as any,
+        ),
+    ).rejects.toThrowError(/^Releases cannot have multiple files with the same name/)
 
     expect(releaseModelMocks.save).not.toBeCalled()
   })
@@ -303,5 +323,30 @@ describe('services > release', () => {
     const result = await removeFileFromReleases(mockUser, mockModel, '123')
 
     expect(result).toEqual(resultObject)
+  })
+
+  test('getFileByReleaseFileName > success', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    const semver = '1.0.0'
+    const fileName = 'test.png'
+
+    fileMocks.getFilesByIds.mockResolvedValueOnce([{ name: 'test.png' }])
+
+    const file = await getFileByReleaseFileName(mockUser, modelId, semver, fileName)
+
+    expect(file.name).toBe('test.png')
+  })
+
+  test('getFileByReleaseFileName > file not found', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    const semver = '1.0.0'
+    const fileName = 'test.png'
+
+    fileMocks.getFilesByIds.mockResolvedValueOnce([{ name: 'not_test.png' }])
+
+    const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
+    expect(result).rejects.toThrowError(/^The requested filename was not found on the release./)
   })
 })

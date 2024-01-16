@@ -410,7 +410,6 @@ export interface ReviewRequestInterface {
   model: string
   release: string
   kind: 'release' | 'access'
-  isActive: boolean
   createdAt: string
   updatedAt: string
 }

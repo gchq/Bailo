@@ -7,9 +7,10 @@ import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
+import { findDuplicates } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
-import { getFileById } from './file.js'
+import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
@@ -43,8 +44,11 @@ async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseD
   }
 
   if (release.fileIds) {
+    const fileNames: Array<string> = []
+
     for (const fileId of release.fileIds) {
       const file = await getFileById(user, fileId)
+      fileNames.push(file.name)
 
       if (file.modelId !== model.id) {
         throw BadReq(
@@ -56,6 +60,19 @@ async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseD
           },
         )
       }
+    }
+
+    const uniqueDuplicates = [...new Set(findDuplicates(fileNames))]
+    if (uniqueDuplicates.length) {
+      throw BadReq(
+        `Releases cannot have multiple files with the same name.  The duplicates in this file are: '${JSON.stringify(
+          uniqueDuplicates,
+        )}'`,
+        {
+          fileNames,
+          duplicates: uniqueDuplicates,
+        },
+      )
     }
   }
 }
@@ -229,4 +246,17 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   })
 
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
+}
+
+export async function getFileByReleaseFileName(user: UserDoc, modelId: string, semver: string, fileName: string) {
+  const release = await getReleaseBySemver(user, modelId, semver)
+  const files = await getFilesByIds(user, modelId, release.fileIds)
+
+  const file = files.find((file) => file.name === fileName)
+
+  if (!file) {
+    throw NotFound(`The requested filename was not found on the release.`, { modelId, semver, fileName })
+  }
+
+  return file
 }

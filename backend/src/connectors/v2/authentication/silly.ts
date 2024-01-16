@@ -2,7 +2,7 @@ import { Request } from 'express'
 
 import { UserDoc } from '../../../models/v2/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { BaseAuthenticationConnector, RoleKeys, Roles } from './Base.js'
+import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
 
 const SillyEntityKind = {
   User: 'user',
@@ -52,7 +52,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     return [toEntity(SillyEntityKind.User, user.dn)]
   }
 
-  async getUserInformation(entity: string): Promise<{ email: string }> {
+  async getUserInformation(entity: string): Promise<UserInformation> {
     const { kind, value } = fromEntity(entity)
 
     if (kind !== SillyEntityKind.User) {
@@ -61,6 +61,8 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
 
     return {
       email: `${value}@example.com`,
+      name: 'Joe Bloggs',
+      organisation: 'Acme Corp',
     }
   }
 
