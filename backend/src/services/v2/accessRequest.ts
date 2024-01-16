@@ -43,6 +43,7 @@ export async function createAccessRequest(
     id: accessRequestId,
     createdBy: user.dn,
     modelId,
+    comments: [],
     ...accessRequestInfo,
   })
 
@@ -134,7 +135,7 @@ export async function updateAccessRequest(
 
 export async function newAccessRequestComment(user: UserDoc, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
-
+  accessRequest.comments = []
   accessRequest.comments.push({ message, user: user.dn, createdAt: new Date().toISOString() })
 
   await accessRequest.save()
