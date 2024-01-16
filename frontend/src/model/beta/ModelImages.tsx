@@ -8,7 +8,7 @@ import EmptyBlob from '../../common/EmptyBlob'
 import Loading from '../../common/Loading'
 import MessageAlert from '../../MessageAlert'
 import ModelImageDisplay from './registry/ModelImageDisplay'
-import UploadNewImageDialog from './registry/UploadNewImageDialog'
+import UploadModelImageDialog from './registry/UploadModelImageDialog'
 
 type AccessRequestsProps = {
   model: ModelInterface
@@ -59,7 +59,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
             >
               Push image
             </Button>
-            <UploadNewImageDialog
+            <UploadModelImageDialog
               open={openUploadImageDialog}
               handleClose={() => setOpenUploadImageDialog(false)}
               model={model}

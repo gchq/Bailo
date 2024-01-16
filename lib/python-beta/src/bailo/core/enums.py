@@ -9,21 +9,21 @@ class ValuedEnum(str, Enum):
 
 
 class ModelVisibility(ValuedEnum):
-    """Whether a model is publicly visible or not"""
+    """Whether a model is publicly visible or not."""
 
     PRIVATE = "private"
     PUBLIC = "public"
 
 
 class SchemaKind(ValuedEnum):
-    """A type of schema"""
+    """A type of schema."""
 
     MODEL = "model"
     ACCESS_REQUEST = "accessRequest"
 
 
 class Role(ValuedEnum):
-    """A reviewing role"""
+    """A reviewing role."""
 
     OWNER = "owner"
     MODEL_TECNICAL_REVIEWER = "mtr"

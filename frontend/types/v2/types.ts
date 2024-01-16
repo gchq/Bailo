@@ -118,7 +118,7 @@ export interface TokenInterface {
   accessKey: string
   secretKey?: string
   deleted: boolean
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   compareToken: (candidateToken: string) => Promise<boolean>
 }
