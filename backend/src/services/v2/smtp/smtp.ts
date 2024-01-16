@@ -9,16 +9,36 @@ import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { buildEmail } from './emailBuilder.js'
+import { buildEmail, EmailContent } from './emailBuilder.js'
 
 let transporter: undefined | Transporter = undefined
 
-//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
-export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+function emailNotSent() {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
+}
+
+async function emailLimitForEntity(entity: string, emailContent: EmailContent) {
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
+
+//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
+export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
+  emailNotSent()
 
   const emailContent = buildEmail(
     `Release ${release.semver} has been created for model ${release.modelId}`,
@@ -34,19 +54,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
   )
 
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+  emailLimitForEntity(entity, emailContent)
 }
 
 export async function requestReviewForAccessRequest(
@@ -54,10 +62,7 @@ export async function requestReviewForAccessRequest(
   review: ReviewDoc,
   accessRequest: AccessRequestDoc,
 ) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
+  emailNotSent()
 
   const emailContent = buildEmail(
     `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
@@ -73,26 +78,11 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+  emailLimitForEntity(entity, emailContent)
 }
 
 export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
+  emailNotSent()
   const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
@@ -103,6 +93,7 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
     [
       { title: 'Model ID', data: release.modelId },
+      { title: 'Reviewer Role', data: review.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
@@ -126,10 +117,7 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
 }
 
 export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
+  emailNotSent()
   const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
@@ -140,6 +128,7 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     `Access request for model ${accessRequest.modelId} has been reviewed by ${reviewResponse.user}`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
+      { title: 'Reviewer Role', data: review.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
