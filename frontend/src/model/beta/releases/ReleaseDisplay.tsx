@@ -1,3 +1,4 @@
+import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import _ from 'lodash'
@@ -157,10 +158,22 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
-              {reviewsWithLatestResponses.map((review) => (
-                <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
-              ))}
+              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider sx={{ my: 2 }} />}
+              <Stack direction='row' justifyContent='space-between' spacing={2}>
+                <div>
+                  {reviewsWithLatestResponses.map((review) => (
+                    <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
+                  ))}
+                </div>
+                {release.comments.length > 0 && (
+                  <Tooltip title='Comments'>
+                    <Stack direction='row' spacing={1}>
+                      <CommentIcon color='primary' />
+                      <Typography variant='caption'>{release.comments.length}</Typography>
+                    </Stack>
+                  </Tooltip>
+                )}
+              </Stack>
             </Stack>
           </Stack>
         </Card>

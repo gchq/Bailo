@@ -14,9 +14,16 @@ export type RichTextEditorProps = {
   onChange: (value: string) => void
   label?: ReactNode
   textareaProps?: MDEditorProps['textareaProps']
+  dataTest?: string
 }
 
-export default function RichTextEditor({ value, onChange, textareaProps, label = <></> }: RichTextEditorProps) {
+export default function RichTextEditor({
+  value,
+  onChange,
+  textareaProps,
+  label = <></>,
+  dataTest = 'richTextEditor',
+}: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
 
   const toggleToolbar = () => {
@@ -28,7 +35,7 @@ export default function RichTextEditor({ value, onChange, textareaProps, label =
   }
 
   const richTextareaProps = {
-    'data-test': 'richTextEditor',
+    'data-test': dataTest,
     ...textareaProps,
   }
 

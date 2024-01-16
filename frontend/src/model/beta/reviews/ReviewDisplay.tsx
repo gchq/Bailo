@@ -63,7 +63,7 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Stack direction={{ sm: 'row', xs: 'column' }}>
+      <Stack>
         {acceptedReviewResponses}
         {changesRequestedReviewResponses}
       </Stack>
