@@ -27,7 +27,6 @@ const accessRequestModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -92,7 +91,7 @@ describe('services > accessRequest', () => {
 
     await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
 
-    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
+    expect(accessRequestModelMocks.save).toBeCalled()
   })
 
   test('getAccessRequestsByModel > good', async () => {
