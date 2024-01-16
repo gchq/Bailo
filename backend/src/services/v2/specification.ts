@@ -224,3 +224,26 @@ export const userInterfaceSchema = z.object({
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
+
+export const webhookInterfaceSchema = z.object({
+  id: z.string().openapi({ example: 'webhook-zyxwvu' }),
+  modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  name: z.string().openapi({ example: 'webhook' }),
+
+  uri: z.string().openapi({ example: 'http://host:8080/webhook' }),
+  token: z.string().openapi({ example: 'abcd' }),
+  insecureSSL: z.boolean().openapi({ example: false }),
+  events: z.array(z.string()).openapi({ example: ['createRelease', 'createReviewResponse', 'createAccessRequest'] }),
+  active: z.boolean().openapi({ example: true }),
+
+  deleted: z.boolean().openapi({ example: false }),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const UserInformationSchema = z.object({
+  email: z.string().optional().openapi({ example: 'user@example.com' }),
+  name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
+  organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
+})

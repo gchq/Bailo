@@ -56,6 +56,7 @@ export const postReleaseReviewResponse = [
     } = parse(req, postReleaseReviewResponseSchema)
 
     const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
+
     await audit.onCreateReviewResponse(req, review)
 
     return res.json({

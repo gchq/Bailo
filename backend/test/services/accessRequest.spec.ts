@@ -42,6 +42,13 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/v2/review.js', () => mockReviewService)
 
+const mockWebhookService = vi.hoisted(() => {
+  return {
+    sendWebhooks: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+
 const accessRequest = {
   metadata: {
     overview: {
@@ -60,6 +67,7 @@ describe('services > accessRequest', () => {
     expect(accessRequestModelMocks.save).toBeCalled()
     expect(accessRequestModelMocks).toBeCalled()
     expect(mockReviewService.createAccessRequestReviews).toBeCalled()
+    expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
   test('createAccessRequest > bad authorisation', async () => {

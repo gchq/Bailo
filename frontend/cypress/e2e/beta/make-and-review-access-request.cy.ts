@@ -39,10 +39,10 @@ describe('Make and approve an access request', () => {
     })
 
     cy.log('Creating the access request')
+    cy.get('body').contains('Select a different schema')
+    cy.get('[data-test=entitySelector]').contains('user')
     cy.get('#root_name-label').contains('What is the name of the access request?')
     cy.get('#root_name').type('Test access request')
-    cy.get('[data-test=entitySelector').type('user')
-    cy.get('li[data-option-index="0"]').click()
     cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
 
     cy.url().should('contain', `/beta/model/${modelUuid}/access-request`)
@@ -65,7 +65,7 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
-    cy.get('[data-test=accessRequestContainer').contains('user requested changes')
+    cy.get('[data-test=accessRequestContainer').contains('requested changes')
     cy.get('[data-test=accessRequestContainer').contains('This is a comment')
   })
 })

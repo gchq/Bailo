@@ -142,20 +142,20 @@ class Release:
         return self.client.get_download_file(self.model_id, file_id, buffer)
 
     def upload(self, name: str, file: BytesIO) -> Any:
-        """Uploads files in a given directory to the release.
+        """Upload files in a given directory to the release.
 
         :param name: The name of the file to upload to bailo
         :param f: A BytesIO object
 
-        :return: A JSON response object
+        :return: The unique file ID of the file uploaded
         """
         res = self.client.simple_upload(self.model_id, name, file).json()
         self.files.append(res["file"]["id"])
         self.update()
-        return res
+        return res["file"]["id"]
 
     def update(self) -> Any:
-        """Updates the any changes to this release on Bailo.
+        """Update the any changes to this release on Bailo.
 
         :return: JSON Response object
         """
@@ -169,7 +169,7 @@ class Release:
         )
 
     def delete(self) -> Any:
-        """Deletes a release from Bailo
+        """Delete a release from Bailo.
 
         :return: JSON Response object
         """

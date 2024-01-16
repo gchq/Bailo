@@ -4,6 +4,7 @@ import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
+import UserDisplay from 'src/common/UserDisplay'
 import { ReviewResponse } from 'types/interfaces'
 import { EntityKind } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
@@ -30,7 +31,7 @@ export default function ReviewDecision({ response }: ReviewDecisionProps) {
           <Stack direction='row' spacing={1} alignItems='center'>
             <Typography>
               <Box component='span' fontWeight='bold'>
-                {username}
+                <UserDisplay dn={username} />
               </Box>
               {` ${isApproved ? 'has approved this release' : 'has requested changes'}`}
             </Typography>

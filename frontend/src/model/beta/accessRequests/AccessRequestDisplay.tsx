@@ -1,6 +1,7 @@
 import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
@@ -58,11 +59,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             </Link>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
-                Created by
-                <Typography variant='caption' fontWeight='bold'>
-                  {` ${accessRequest.createdBy} `}
-                </Typography>
-                on
+                Created by {<UserDisplay dn={accessRequest.createdBy} />} on
                 <Typography variant='caption' fontWeight='bold'>
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
@@ -96,7 +93,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 <Grid container>
                   {accessRequest.metadata.overview.entities.map((entity) => (
                     <Grid item xs={3} key={entity}>
-                      <Typography variant='body2'>{entity}</Typography>
+                      <UserDisplay dn={entity} />
                     </Grid>
                   ))}
                 </Grid>

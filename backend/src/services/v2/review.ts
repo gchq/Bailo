@@ -6,12 +6,14 @@ import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Mod
 import { ReleaseDoc } from '../../models/v2/Release.js'
 import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
+import { sendWebhooks } from './webhook.js'
 
 export async function findReviews(
   user: UserDoc,
@@ -135,6 +137,14 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
+
+  sendWebhooks(
+    update.modelId,
+    WebhookEvent.CreateReviewResponse,
+    `A new response has been added to a review requested for Model ${update.modelId}`,
+    { review: update },
+  )
+
   return update
 }
 

@@ -1,4 +1,4 @@
-import ReviewRequiredIcon from '@mui/icons-material/Comment'
+import ReviewIcon from '@mui/icons-material/Comment'
 import { Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
@@ -111,7 +111,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         spacing={2}
         sx={{ px: 2, width: '100%' }}
       >
-        <ReviewRequiredIcon />
+        <ReviewIcon />
         <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} data-test='reviewButton'>
           Review
         </Button>

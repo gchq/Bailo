@@ -5,6 +5,7 @@ import _ from 'lodash'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 import { ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
@@ -105,11 +106,7 @@ export default function ReleaseDisplay({
               </Button>
             </Stack>
             <Typography variant='caption' sx={{ mb: 2 }}>
-              Created by
-              <Typography variant='caption' fontWeight='bold'>
-                {` ${release.createdBy} `}
-              </Typography>
-              on
+              Created by {<UserDisplay dn={release.createdBy} />} on
               <Typography variant='caption' fontWeight='bold'>
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>

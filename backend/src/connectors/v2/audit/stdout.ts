@@ -9,7 +9,7 @@ import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
-import { AuditInfo, AuditInfoKeys, BaseAuditConnector } from './Base.js'
+import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
   Success: boolean
@@ -195,7 +195,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onCreateReviewResponse(req: Request, review: ReviewInterface) {
-    this.checkEventType(AuditInfo.CreateAccessRequest, req)
+    this.checkEventType(AuditInfo.CreateReviewResponse, req)
     const event = this.generateEvent(req, {
       modelId: review.modelId,
       ...(review.semver && { semver: review.semver }),
@@ -205,6 +205,10 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   onError(req: Request, error: BailoError) {
+    if (!req.audit) {
+      // No audit information has been attached to the request
+      return
+    }
     const outcome =
       error.code === 403
         ? {
@@ -257,11 +261,5 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
     req.log.info(event, req.audit.description)
-  }
-
-  checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
-      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
-    }
   }
 }

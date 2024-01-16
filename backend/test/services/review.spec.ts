@@ -57,6 +57,13 @@ vi.mock('../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
 
+const mockWebhookService = vi.hoisted(() => {
+  return {
+    sendWebhooks: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
@@ -107,6 +114,7 @@ describe('services > review', () => {
     expect(ReviewModel.match.mock.calls.at(0)).toMatchSnapshot()
     expect(ReviewModel.match.mock.calls.at(1)).toMatchSnapshot()
     expect(ReviewModel.findByIdAndUpdate).toBeCalled()
+    expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
   test('respondToReview > access request successful', async () => {

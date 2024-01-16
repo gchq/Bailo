@@ -35,6 +35,7 @@ export const postAccessRequestReviewResponse = [
     } = parse(req, postAccessRequestReviewResponseSchema)
 
     const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
+
     await audit.onCreateReviewResponse(req, review)
 
     return res.json({

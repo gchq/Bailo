@@ -69,6 +69,7 @@ export const postRelease = [
     } = parse(req, postReleaseSchema)
 
     const release = await createRelease(req.user, { modelId, ...body })
+
     await audit.onCreateRelease(req, release)
 
     return res.json({
