@@ -13,14 +13,7 @@ import { buildEmail, EmailContent } from './emailBuilder.js'
 
 let transporter: undefined | Transporter = undefined
 
-function emailNotSent() {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-}
-
-async function emailLimitForEntity(entity: string, emailContent: EmailContent) {
+async function dispatchEmail(entity: string, emailContent: EmailContent) {
   let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
   if (userInfoList.length > 20) {
     log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
@@ -38,7 +31,10 @@ async function emailLimitForEntity(entity: string, emailContent: EmailContent) {
 
 //const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
-  emailNotSent()
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
 
   const emailContent = buildEmail(
     `Release ${release.semver} has been created for model ${release.modelId}`,
@@ -54,7 +50,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
   )
 
-  emailLimitForEntity(entity, emailContent)
+  await dispatchEmail(entity, emailContent)
 }
 
 export async function requestReviewForAccessRequest(
@@ -62,7 +58,10 @@ export async function requestReviewForAccessRequest(
   review: ReviewDoc,
   accessRequest: AccessRequestDoc,
 ) {
-  emailNotSent()
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
 
   const emailContent = buildEmail(
     `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
@@ -78,11 +77,14 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
-  emailLimitForEntity(entity, emailContent)
+  await dispatchEmail(entity, emailContent)
 }
 
 export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
-  emailNotSent()
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
   const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
@@ -101,23 +103,14 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
       { name: 'See Reviews', url: 'TODO' },
     ],
   )
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(release.createdBy))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+  await dispatchEmail(release.createdBy, emailContent)
 }
 
 export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
-  emailNotSent()
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
   const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
@@ -136,19 +129,7 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
       { name: 'See Reviews', url: 'TODO' },
     ],
   )
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(accessRequest.createdBy))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+  await dispatchEmail(accessRequest.createdBy, emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {
