@@ -4,6 +4,7 @@ import { headObject, isNoSuchKeyException } from '../clients/s3.js'
 import ApprovalModel from '../models/Approval.js'
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
+import AccessRequestModelV2 from '../models/v2/AccessRequest.js'
 import FileModel from '../models/v2/File.js'
 import ModelModelV2, { CollaboratorEntry, ModelVisibility } from '../models/v2/Model.js'
 import ModelCardRevisionV2 from '../models/v2/ModelCardRevision.js'
@@ -30,12 +31,12 @@ const MODEL_SCHEMA_MAP = {
   },
 }
 
-const _DEPLOYMENT_SCHEMA_MAP = {
+const DEPLOYMENT_SCHEMA_MAP = {
   '/Minimal/Deployment/v6': {
     convert: (metadata) => {
       return {
         overview: {
-          name: metadata.highLevelDetails.title,
+          name: metadata.highLevelDetails.name,
           endDate: metadata.highLevelDetails.endDate.hasEndDate ? metadata.highLevelDetails.endDate.date : undefined,
           entities: metadata.contacts.owner.map((entity) => `${entity.kind}:${identityConversion(entity.id)}`),
         },
@@ -65,12 +66,12 @@ function identityConversion(old: string) {
 export async function migrateAllModels() {
   const models = await ModelModelV1.find({})
   for (const model of models) {
-    await migrateModel(model.id)
+    await migrateModel(model.uuid)
   }
 }
 
 async function migrateModel(modelId: string) {
-  const model = await ModelModelV1.findOne({ _id: modelId }).populate('latestVersion')
+  const model = await ModelModelV1.findOne({ uuid: modelId }).populate('latestVersion')
   if (!model) throw new Error(`Model not found: ${modelId}`)
   model.latestVersion = model.latestVersion as VersionDoc
 
@@ -185,7 +186,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawBinaryPath.zip`,
+            name: `${version.version}-binary.zip`,
             mime: 'application/x-zip-compressed',
             size,
             bucket,
@@ -212,7 +213,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawCodePath.zip`,
+            name: `${version.version}-code.zip`,
             mime: 'application/x-zip-compressed',
             bucket,
             size,
@@ -239,7 +240,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawDockerPath.tar`,
+            name: `${version.version}-docker.tar`,
             mime: 'application/octet-stream',
             bucket,
             size,
@@ -280,7 +281,6 @@ async function migrateModel(modelId: string) {
         createdAt: version.createdAt,
         updatedAt: version.updatedAt,
       },
-
       {
         new: true,
         upsert: true, // Make this update into an upsert
@@ -354,9 +354,43 @@ async function migrateModel(modelId: string) {
 
   await modelV2.save()
 
-  const _deployments = await DeploymentModelV1.find({
+  const deployments = await DeploymentModelV1.find({
     model,
   })
+
+  for (const deployment of deployments) {
+    if (!deployment.schemaRef) {
+      // This is an ungoverened deployment
+      continue
+    }
+
+    const { convert, schema } = DEPLOYMENT_SCHEMA_MAP[deployment.schemaRef]
+
+    await AccessRequestModelV2.findOneAndUpdate(
+      {
+        modelId,
+        id: deployment.uuid,
+      },
+      {
+        id: deployment.uuid,
+        modelId,
+
+        schemaId: schema,
+        metadata: convert(deployment.metadata),
+
+        comments: [],
+
+        createdBy: 'system',
+        createdAt: deployment.createdAt,
+        updatedAt: deployment.updatedAt,
+      },
+      {
+        new: true,
+        upsert: true, // Make this update into an upsert
+        timestamps: false,
+      },
+    )
+  }
 }
 
 await connectToMongoose()
