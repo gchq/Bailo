@@ -172,9 +172,6 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
 
 export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, message: string) {
   const release = await getReleaseBySemver(user, modelId, semver)
-  if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelId, semver })
-  }
 
   const comment = {
     message,
@@ -189,6 +186,9 @@ export async function newReleaseComment(user: UserDoc, modelId: string, semver: 
       },
     },
   )
+  if (!updatedRelease) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
   return updatedRelease
 }
 
