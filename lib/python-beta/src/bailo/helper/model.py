@@ -5,10 +5,20 @@ from typing import Any
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility
 from bailo.helper.release import Release
+from bailo.core.exceptions import BailoException
 from semantic_version import Version
 
 
 class Model:
+    """Represent a model within Bailo.
+
+    :param client: A client object used to interact with Bailo
+    :param model_id: A unique ID for the model
+    :param name: Name of model
+    :param description: Description of model
+    :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
+    """
+
     def __init__(
         self,
         client: Client,
@@ -17,13 +27,6 @@ class Model:
         description: str,
         visibility: ModelVisibility | None = None,
     ) -> None:
-        """Represent a model within Bailo.
-
-        :param client: A client object used to interact with Bailo
-        :param name: Name of model
-        :param description: Description of model
-        :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
-        """
         self.client = client
 
         self.model_id = model_id
@@ -68,11 +71,11 @@ class Model:
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> Model:
-        """Returns an existing model from Bailo
+        """Return an existing model from Bailo.
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID
-        :return: Model object
+        :return: A model object
         """
         res = client.get_model(model_id=model_id)["model"]
         model = cls(
@@ -88,7 +91,7 @@ class Model:
         return model
 
     def update(self) -> None:
-        """Uploads and retrieves any changes to the model summary on Bailo"""
+        """Upload and retrieves any changes to the model summary on Bailo."""
         res = self.client.patch_model(
             model_id=self.model_id,
             name=self.name,
@@ -98,7 +101,7 @@ class Model:
         self.__unpack(res["model"])
 
     def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
-        """Uploads and retrieves any changes to the model card on Bailo
+        """Upload and retrieves any changes to the model card on Bailo.
 
         :param model_card: Model card dictionary, defaults to None
 
@@ -110,7 +113,7 @@ class Model:
         self.__unpack_mc(res["card"])
 
     def card_from_schema(self, schema_id: str) -> None:
-        """Creates a model card using a schema on Bailo
+        """Create a model card using a schema on Bailo.
 
         :param schema_id: A unique schema ID
         """
@@ -118,26 +121,29 @@ class Model:
         self.__unpack_mc(res["card"])
 
     def card_from_model(self):
-        """Copies a model card from a different model (not yet implemented)
+        """Copy a model card from a different model (not yet implemented).
 
         :raises NotImplementedError: Not implemented error
         """
         raise NotImplementedError
 
     def card_from_template(self):
-        """Creates a model card using a template (not yet implemented)
+        """Create a model card using a template (not yet implemented).
 
         :raises NotImplementedError: Not implemented error
         """
         raise NotImplementedError
 
     def get_card_latest(self) -> None:
-        """Gets the latest model card from Bailo"""
+        """Get the latest model card from Bailo."""
         res = self.client.get_model(model_id=self.model_id)
-        self.__unpack_mc(res["model"]["card"])
+        if "card" in res["model"]:
+            self.__unpack_mc(res["model"]["card"])
+        else:
+            raise BailoException(f"A model card doesn't exist for model {self.model_id}")
 
     def get_card_revision(self, version: str) -> None:
-        """Gets a specific model card revision from Bailo
+        """Get a specific model card revision from Bailo.
 
         :param version: Model card version
         """
@@ -153,7 +159,7 @@ class Model:
         minor: bool = False,
         draft: bool = True,
     ) -> Release:
-        """Calls the Release.create method to build a release from Bailo and upload it
+        """Call the Release.create method to build a release from Bailo and upload it.
 
         :param version: A semantic version for the release
         :param notes: Notes on release, defaults to ""
@@ -163,20 +169,22 @@ class Model:
         :param draft: Is a draft release?, defaults to True
         :return: Release object
         """
-        return Release.create(
-            client=self.client,
-            model_id=self.model_id,
-            version=version,
-            notes=notes,
-            model_card_version=self.model_card_version,
-            files=files,
-            images=images,
-            minor=minor,
-            draft=draft,
-        )
+        if self.model_card_schema:
+            return Release.create(
+                client=self.client,
+                model_id=self.model_id,
+                version=version,
+                notes=notes,
+                model_card_version=self.model_card_version,
+                files=files,
+                images=images,
+                minor=minor,
+                draft=draft,
+            )
+        raise BailoException("Create a model card before creating a release")
 
     def get_releases(self) -> list[Release]:
-        """Gets all releases for the model.
+        """Get all releases for the model.
 
         :return: List of Release objects
         """
@@ -189,7 +197,7 @@ class Model:
         return releases
 
     def get_release(self, version: Version | str) -> Release:
-        """Calls the Release.from_version method to return an existing release from Bailo
+        """Call the Release.from_version method to return an existing release from Bailo.
 
         :param version: A semantic version for the release
         :return: Release object
@@ -197,14 +205,14 @@ class Model:
         return Release.from_version(self.client, self.model_id, version)
 
     def get_latest_release(self):
-        """Gets the latest release for the model from Bailo
+        """Get the latest release for the model from Bailo.
 
         :return: Release object
         """
         return max(self.get_releases())
 
     def get_images(self):
-        """Gets all model image references for the model
+        """Get all model image references for the model.
 
         :return: List of images
         """
@@ -213,14 +221,14 @@ class Model:
         return res["images"]
 
     def get_image(self):
-        """Gets a model image reference
+        """Get a model image reference.
 
-        :raises NotImplementedError: Not implemented error
+        :raises NotImplementedError: Not implemented error.
         """
         raise NotImplementedError
 
     def get_roles(self):
-        """Gets all roles for the model
+        """Get all roles for the model.
 
         :return: List of roles
         """
@@ -229,7 +237,7 @@ class Model:
         return res["roles"]
 
     def get_user_roles(self):
-        """Gets all user roles for the model
+        """Get all user roles for the model.
 
         :return: List of user roles
         """

@@ -4,7 +4,7 @@ from typing import Any
 
 
 def filter_none(json: dict[str, Any]) -> dict[str, Any]:
-    """Removes None attributes from a dictionary.
+    """Remove None attributes from a dictionary.
 
     :param json: Dictionary to filter
     :return: Dictionary with removed Nonetypes
