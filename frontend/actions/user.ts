@@ -1,4 +1,5 @@
 import qs from 'querystring'
+import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
 import { EntityObject, ModelInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/v2/types'
 
@@ -39,6 +40,21 @@ export function useGetCurrentUser() {
     currentUser: data?.user || undefined,
     isCurrentUserLoading: !error && !data,
     isCurrentUserError: error,
+  }
+}
+
+interface UserInformationResponse {
+  entity: UserInformation
+}
+
+export function useGetUserInformation(dn: string) {
+  const { data, error, mutate } = useSWR<UserInformationResponse, ErrorInfo>(`/api/v2/entity/${dn}/lookup`, fetcher)
+
+  return {
+    mutateUserInformation: mutate,
+    userInformation: data?.entity || undefined,
+    isUserInformationLoading: !error && !data,
+    isUserInformationError: error,
   }
 }
 
