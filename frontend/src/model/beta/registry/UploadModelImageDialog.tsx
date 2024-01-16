@@ -11,7 +11,6 @@ import {
 } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
-import shellEscape from 'shell-escape'
 import Loading from 'src/common/Loading'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -55,7 +54,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker login ${uiConfig.registry.host} -u ${shellEscape([currentUser.dn])}`} />
+                  <CodeLine line={`docker login ${uiConfig.registry.host} -u <accessKey>`} />
                 </Stack>
               </Stack>
               <Stack spacing={1}>
