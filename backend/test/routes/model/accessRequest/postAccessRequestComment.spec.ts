@@ -19,7 +19,7 @@ describe('routes > release > postReleaseComment', () => {
       `/api/v2/model/${fixture.params.modelId}/access-request/${fixture.params.accessRequestId}/comment`,
       fixture,
     )
-    expect(res.statusCode).toBe(202)
+    expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
 
