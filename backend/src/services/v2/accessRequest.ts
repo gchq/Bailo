@@ -132,7 +132,7 @@ export async function updateAccessRequest(
   return accessRequest
 }
 
-export async function updateAccessRequestComments(user: UserDoc, accessRequestId: string, message: string) {
+export async function newAccessRequestComment(user: UserDoc, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
 
   accessRequest.comments.push({ message, user: user.dn, createdAt: new Date().toISOString() })

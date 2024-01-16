@@ -9,7 +9,7 @@ vi.mock('../../../../src/connectors/v2/audit/index.js')
 vi.mock('../../../../src/connectors/v2/authorisation/index.js')
 
 vi.mock('../../../../src/services/v2/accessRequest.js', () => ({
-  updateAccessRequestComments: vi.fn(() => ({ message: 'test' })),
+  newAccessRequestComment: vi.fn(() => ({ message: 'test' })),
 }))
 
 describe('routes > release > postReleaseComment', () => {

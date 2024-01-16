@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
 import audit from '../../../../connectors/v2/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
-import { updateAccessRequestComments } from '../../../../services/v2/accessRequest.js'
+import { newAccessRequestComment } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/v2/validate.js'
 
@@ -52,7 +52,7 @@ export const postAccessRequestComment = [
       params: { accessRequestId },
     } = parse(req, postAccessRequestCommentSchema)
 
-    const accessRequest = await updateAccessRequestComments(req.user, accessRequestId, body.comment)
+    const accessRequest = await newAccessRequestComment(req.user, accessRequestId, body.comment)
 
     await audit.onUpdateAccessRequest(req, accessRequest)
 
