@@ -27,6 +27,7 @@ const accessRequestModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)

@@ -3,7 +3,7 @@
 exports[`routes > release > postReleaseComment > 200 > ok 1`] = `
 {
   "accessRequest": {
-    "_id": "65a6a4cc7546a826064b8bb9",
+    "_id": "65a6a93d1d00c0c2e0a7e852",
     "comments": [],
     "createdBy": "user",
     "deleted": false,
@@ -15,7 +15,7 @@ exports[`routes > release > postReleaseComment > 200 > ok 1`] = `
 
 exports[`routes > release > postReleaseComment > audit > expected call 1`] = `
 {
-  "_id": "65a6a4cc7546a826064b8bba",
+  "_id": "65a6a93d1d00c0c2e0a7e853",
   "comments": [],
   "createdBy": "user",
   "deleted": false,
