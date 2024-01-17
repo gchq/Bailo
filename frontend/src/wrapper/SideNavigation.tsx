@@ -190,7 +190,6 @@ export default function SideNavigation({
               <ListItemButton onClick={toggleDrawer} sx={{ py: 2 }}>
                 <ListItemIcon>{drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}</ListItemIcon>
               </ListItemButton>
-              {drawerOpen}
             </ListItem>
           </StyledList>
         </Stack>
