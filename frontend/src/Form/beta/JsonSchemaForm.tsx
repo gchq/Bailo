@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  Divider,
   Grid,
   IconButton,
   List,
@@ -14,6 +13,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -73,6 +73,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -91,8 +92,8 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={3} md={2}>
+    <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
+      <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -108,7 +109,6 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Divider orientation='vertical' flexItem sx={{ mr: '-1px' }} />
       <Grid item xs={12} sm={9} md={10}>
         <Form
           schema={currentStep.schema}
