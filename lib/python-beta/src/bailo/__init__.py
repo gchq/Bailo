@@ -1,6 +1,12 @@
+"""
+Bailo Python Client
+===================
+
+This package aims to integrate with Bailo with Python's vast machine learning landscape.
+"""
 from __future__ import annotations
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
 from bailo.core.client import Client

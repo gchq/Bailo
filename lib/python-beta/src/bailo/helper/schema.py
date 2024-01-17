@@ -90,7 +90,6 @@ class Schema:
         return schema
 
     def __unpack(self, res) -> None:
-        print(res)
         self.schema_id = res["id"]
         self.name = res["name"]
         self.description = res["description"]

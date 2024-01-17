@@ -41,11 +41,6 @@ class AccessRequest:
     def from_id(cls, client: Client, model_id: str, access_request_id: str) -> AccessRequest:
         """Return an existing review from Bailo given it's unique ID.
 
-        >>> from bailo import AccessRequest, Client
-        >>> client = Client("https://example.com")
-
-        >>> ar = AccessRequest.from_id(client, "test-abcdef", "minimal-general-v10-beta")
-
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID within Bailo
         :param access_request_id: A unique ID for an access request
@@ -80,7 +75,6 @@ class AccessRequest:
         :param schema_id: A unique schema ID
         :return: JSON response object
         """
-
         access_request_json = client.post_access_request(model_id, metadata, schema_id)["accessRequest"]
 
         deleted = access_request_json["deleted"]
