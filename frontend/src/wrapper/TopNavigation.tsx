@@ -133,7 +133,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <Divider />
               <Tooltip title='This feature has been temporarily disabled'>
                 <span>
-                  <MenuItem data-test='toggleDarkMode'>
+                  <MenuItem disabled data-test='toggleDarkMode'>
                     <ListItemIcon>
                       <DarkModeIcon fontSize='small' />
                     </ListItemIcon>

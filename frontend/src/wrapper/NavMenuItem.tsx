@@ -1,4 +1,5 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { ReactElement } from 'react'
 import Link from 'src/Link'
 
@@ -22,9 +23,10 @@ export function NavMenuItem({
   title,
   badgeCount = 0,
 }: NavMenuItemProps) {
+  const theme = useTheme()
   return (
     <ListItem disablePadding>
-      <Link href={href} noLinkStyle>
+      <Link href={href} noLinkStyle sx={{ width: '100%' }}>
         <ListItemButton selected={selectedPage === menuPage}>
           <ListItemIcon>
             {!drawerOpen ? (
@@ -41,7 +43,7 @@ export function NavMenuItem({
               </>
             )}
           </ListItemIcon>
-          <ListItemText primary={primaryText} sx={{ textDecoration: 'none' }} />
+          <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />
         </ListItemButton>
         {drawerOpen}
       </Link>
