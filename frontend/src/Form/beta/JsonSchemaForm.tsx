@@ -121,34 +121,36 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </div>
-      <Form
-        schema={currentStep.schema}
-        formData={currentStep.state}
-        onChange={onFormChange}
-        validator={validator}
-        widgets={widgets}
-        uiSchema={currentStep.uiSchema}
-        liveValidate={currentStep.shouldValidate}
-        omitExtraData
-        disabled={!canEdit}
-        liveOmit
-        formContext={{
-          editMode: canEdit,
-          formSchema: currentStep.schema,
-          defaultCurrentUser: defaultCurrentUserInEntityList,
-        }}
-        templates={
-          !canEdit
-            ? {
-                DescriptionFieldTemplate,
-                ArrayFieldTemplate,
-              }
-            : { ArrayFieldTemplate }
-        }
-      >
-        {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-        <></>
-      </Form>
+      <Box width={{ xs: '100%', md: '80%' }}>
+        <Form
+          schema={currentStep.schema}
+          formData={currentStep.state}
+          onChange={onFormChange}
+          validator={validator}
+          widgets={widgets}
+          uiSchema={currentStep.uiSchema}
+          liveValidate={currentStep.shouldValidate}
+          omitExtraData
+          disabled={!canEdit}
+          liveOmit
+          formContext={{
+            editMode: canEdit,
+            formSchema: currentStep.schema,
+            defaultCurrentUser: defaultCurrentUserInEntityList,
+          }}
+          templates={
+            !canEdit
+              ? {
+                  DescriptionFieldTemplate,
+                  ArrayFieldTemplate,
+                }
+              : { ArrayFieldTemplate }
+          }
+        >
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+          <></>
+        </Form>
+      </Box>
     </Stack>
   )
 }
