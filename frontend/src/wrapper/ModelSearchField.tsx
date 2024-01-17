@@ -1,6 +1,6 @@
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, InputBase, List, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
-import { alpha, styled } from '@mui/material/styles'
+import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -24,9 +24,10 @@ const Search = styled('div')(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
-  paddingRight: theme.spacing(4),
+  paddingRight: theme.spacing(1),
   '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
     transition: theme.transitions.create('width'),
     [theme.breakpoints.up('sm')]: {
       width: '16ch',
@@ -41,9 +42,36 @@ export default function ModelSearchField() {
   const [modelFilter, setModelFilter] = useState('')
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const theme = useTheme()
   const { models, isModelsLoading, isModelsError } = useListModels([], '', [], debouncedFilter)
 
-  const modelList = useMemo(() => models, [models])
+  const modelList = useMemo(
+    () =>
+      models.map((model) => (
+        <Box key={model.id} sx={{ maxWidth: '300px' }}>
+          <Link href={`/beta/model/${model.id}`} noLinkStyle>
+            <ListItemButton>
+              <ListItemText
+                primary={model.name}
+                secondary={model.description}
+                primaryTypographyProps={{
+                  style: {
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    color: theme.palette.primary.main,
+                  },
+                }}
+                secondaryTypographyProps={{
+                  style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+                }}
+              />
+            </ListItemButton>
+          </Link>
+        </Box>
+      )),
+    [models, theme.palette.primary.main],
+  )
   const searchMenuOpen = useMemo(() => !!anchorEl, [anchorEl])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -87,31 +115,12 @@ export default function ModelSearchField() {
             horizontal: 'center',
           }}
         >
-          <>
-            {isModelsLoading && <Loading />}
-            {!isModelsLoading && (
-              <List dense disablePadding>
-                {modelList.map((model) => (
-                  <Box key={model.id} sx={{ maxWidth: '300px' }}>
-                    <Link href={`/beta/model/${model.id}`} noLinkStyle>
-                      <ListItemButton>
-                        <ListItemText
-                          primary={model.name}
-                          secondary={model.description}
-                          primaryTypographyProps={{
-                            style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
-                          }}
-                          secondaryTypographyProps={{
-                            style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
-                          }}
-                        />
-                      </ListItemButton>
-                    </Link>
-                  </Box>
-                ))}
-              </List>
-            )}
-          </>
+          {isModelsLoading && <Loading />}
+          {!isModelsLoading && (
+            <List dense disablePadding>
+              {modelList}
+            </List>
+          )}
         </Popover>
       )}
     </Stack>
