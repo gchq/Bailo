@@ -1,4 +1,6 @@
-import { Add, Menu as MenuIcon } from '@mui/icons-material'
+import '@fontsource/pacifico'
+
+import { Add, Menu as MenuIcon, Settings } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
@@ -18,7 +20,6 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
-import { Pacifico } from 'next/font/google'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
@@ -58,8 +59,6 @@ const AppBar = styled(MuiAppBar, {
     }),
   }),
 }))
-
-const pacifico = Pacifico({ subsets: ['latin'], weight: '400' })
 
 // This is currently only being used by the beta wrapper
 export default function TopNavigation({ drawerOpen = false, pageTopStyling = {}, currentUser }: TopNavigationProps) {
@@ -155,7 +154,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Typography variant='h5' component='div'>
-              <span className={pacifico.className}>Bailo</span>
+              <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
               {betaAdornment}
             </Typography>
           </Link>
@@ -198,6 +197,14 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                         </MenuItem>
                       </span>
                     </Tooltip>
+                    <Link href='/api/logout' color='inherit' underline='none'>
+                      <MenuItem data-test='settingsLink'>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                    </Link>
                     <Link href='/api/logout' color='inherit' underline='none'>
                       <MenuItem data-test='logoutLink'>
                         <ListItemIcon>

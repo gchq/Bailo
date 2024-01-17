@@ -6,13 +6,16 @@ import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
 import { UserDoc } from '../../models/v2/User.js'
+import { WebhookEvent } from '../../models/v2/Webhook.js'
+import { findDuplicates } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
-import { getFileById } from './file.js'
+import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
+import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
   if (release.images) {
@@ -41,8 +44,11 @@ async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseD
   }
 
   if (release.fileIds) {
+    const fileNames: Array<string> = []
+
     for (const fileId of release.fileIds) {
       const file = await getFileById(user, fileId)
+      fileNames.push(file.name)
 
       if (file.modelId !== model.id) {
         throw BadReq(
@@ -54,6 +60,19 @@ async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseD
           },
         )
       }
+    }
+
+    const uniqueDuplicates = [...new Set(findDuplicates(fileNames))]
+    if (uniqueDuplicates.length) {
+      throw BadReq(
+        `Releases cannot have multiple files with the same name.  The duplicates in this file are: '${JSON.stringify(
+          uniqueDuplicates,
+        )}'`,
+        {
+          fileNames,
+          duplicates: uniqueDuplicates,
+        },
+      )
     }
   }
 }
@@ -116,6 +135,13 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
     }
   }
 
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.CreateRelease,
+    `Release ${release.semver} has been created for model ${release.modelId}`,
+    { release },
+  )
+
   return release
 }
 
@@ -141,6 +167,28 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
+  return updatedRelease
+}
+
+export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, message: string) {
+  const release = await getReleaseBySemver(user, modelId, semver)
+  if (!release) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  const comment = {
+    message,
+    user: user.dn,
+    createdAt: new Date().toISOString(),
+  }
+  const updatedRelease = await Release.findOneAndUpdate(
+    { _id: release._id },
+    {
+      $push: {
+        comments: comment,
+      },
+    },
+  )
   return updatedRelease
 }
 
@@ -220,4 +268,17 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   })
 
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
+}
+
+export async function getFileByReleaseFileName(user: UserDoc, modelId: string, semver: string, fileName: string) {
+  const release = await getReleaseBySemver(user, modelId, semver)
+  const files = await getFilesByIds(user, modelId, release.fileIds)
+
+  const file = files.find((file) => file.name === fileName)
+
+  if (!file) {
+    throw NotFound(`The requested filename was not found on the release.`, { modelId, semver, fileName })
+  }
+
+  return file
 }

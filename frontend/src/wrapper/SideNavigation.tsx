@@ -1,4 +1,4 @@
-import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight } from '@mui/icons-material'
+import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Settings as SettingsIcon } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
@@ -7,11 +7,13 @@ import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, IconButton, List, MenuItem, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
-import { CSSProperties, useEffect, useState } from 'react'
+import { useGetReviewRequestsForUser } from 'actions/review'
+import { CSSProperties, useCallback, useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { getErrorMessage } from 'utils/fetcher'
+import { Decision, ReviewRequestInterface } from 'types/interfaces'
 
-import { getReviewCount } from '../../actions/review'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 
@@ -67,39 +69,43 @@ export default function SideNavigation({
   page,
   currentUser,
   toggleDrawer,
-  onError,
   onResetErrorMessage,
   drawerOpen = false,
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
   const theme = useTheme()
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+
+  const doesNotContainUserApproval = useCallback(
+    (review: ReviewRequestInterface) => {
+      return (
+        currentUser &&
+        !review.responses.find(
+          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
+        )
+      )
+    },
+    [currentUser],
+  )
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      const response = await getReviewCount()
-
-      if (!response.ok) {
-        onError(await getErrorMessage(response))
-        setReviewCount(0)
-        return
+      if (reviews) {
+        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserApproval(filteredReview)).length)
       }
-
-      const count = response.headers.get('x-count')
-      if (count === null) {
-        onError('Review count was null, expected a number')
-        setReviewCount(0)
-        return
-      }
-
-      setReviewCount(parseInt(count))
     }
     fetchReviewCount()
-  }, [onError, onResetErrorMessage])
+  }, [onResetErrorMessage, doesNotContainUserApproval, reviews])
+
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
 
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
+      {isReviewsLoading && <Loading />}
       <Toolbar
         sx={{
           alignItems: 'center',
@@ -167,6 +173,16 @@ export default function SideNavigation({
             )}
           </StyledList>
           <StyledList>
+            <Divider />
+            <NavMenuItem
+              href='/beta/settings'
+              selectedPage={page}
+              primaryText='Settings'
+              drawerOpen={drawerOpen}
+              menuPage='beta/settings'
+              title='User settings'
+              icon={<SettingsIcon />}
+            />
             <Divider />
             <MenuItem>
               <IconButton

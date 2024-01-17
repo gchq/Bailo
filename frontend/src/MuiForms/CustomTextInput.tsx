@@ -16,7 +16,7 @@ interface CustomTextInputProps {
 }
 
 export default function CustomTextInput(props: CustomTextInputProps) {
-  const { onChange, value, label, formContext, id } = props
+  const { onChange, value, label, formContext, id, required } = props
 
   const theme = useTheme()
 
@@ -36,6 +36,7 @@ export default function CustomTextInput(props: CustomTextInputProps) {
     <Fragment key={label}>
       <Typography id={`${id}-label`} fontWeight='bold'>
         {label}
+        {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       <TextField
         size='small'

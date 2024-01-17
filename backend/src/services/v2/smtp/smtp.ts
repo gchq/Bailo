@@ -1,3 +1,5 @@
+//import { release } from 'node:os'
+
 import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
@@ -7,9 +9,25 @@ import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
 import log from '../log.js'
-import { buildEmail } from './emailBuilder.js'
+import { buildEmail, EmailContent } from './emailBuilder.js'
 
 let transporter: undefined | Transporter = undefined
+
+async function dispatchEmail(entity: string, emailContent: EmailContent) {
+  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
+  if (userInfoList.length > 20) {
+    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
+    userInfoList = userInfoList.slice(0, 20)
+  }
+  const sendEmailResponses = userInfoList.map(
+    async (userInfo) =>
+      await sendEmail({
+        to: userInfo.email,
+        ...emailContent,
+      }),
+  )
+  await Promise.all(sendEmailResponses)
+}
 
 //const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
@@ -32,19 +50,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
     ],
   )
 
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
-  }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
-  )
-  await Promise.all(sendEmailResponses)
+  await dispatchEmail(entity, emailContent)
 }
 
 export async function requestReviewForAccessRequest(
@@ -71,19 +77,59 @@ export async function requestReviewForAccessRequest(
     ],
   )
 
-  let userInfoList = await Promise.all(await authentication.getUserInformationList(entity))
-  if (userInfoList.length > 20) {
-    log.info({ userListLength: userInfoList.length }, 'Refusing to send more than 20 emails. Sending 20 emails.')
-    userInfoList = userInfoList.slice(0, 20)
+  await dispatchEmail(entity, emailContent)
+}
+
+export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
   }
-  const sendEmailResponses = userInfoList.map(
-    async (userInfo) =>
-      await sendEmail({
-        to: userInfo.email,
-        ...emailContent,
-      }),
+  const reviewResponse = review.responses[0]
+
+  if (!reviewResponse) {
+    log.info('response not found')
+    return
+  }
+  const emailContent = buildEmail(
+    `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
+    [
+      { title: 'Model ID', data: release.modelId },
+      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
   )
-  await Promise.all(sendEmailResponses)
+  await dispatchEmail(release.createdBy, emailContent)
+}
+
+export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+  const reviewResponse = review.responses[0]
+
+  if (!reviewResponse) {
+    log.info('response not found')
+    return
+  }
+  const emailContent = buildEmail(
+    `Access request for model ${accessRequest.modelId} has been reviewed by ${reviewResponse.user}`,
+    [
+      { title: 'Model ID', data: accessRequest.modelId },
+      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
+    ],
+    [
+      { name: 'Open Release', url: 'TODO' },
+      { name: 'See Reviews', url: 'TODO' },
+    ],
+  )
+  await dispatchEmail(accessRequest.createdBy, emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {

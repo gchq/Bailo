@@ -1,7 +1,6 @@
-import ReviewRequiredIcon from '@mui/icons-material/InfoOutlined'
+import ReviewIcon from '@mui/icons-material/Comment'
+import { Stack } from '@mui/material'
 import Button from '@mui/material/Button'
-import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
@@ -43,14 +42,8 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
 
   const { mutateReleases } = useGetReleasesForModelId(modelId)
   const { isAccessRequestsError, mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
-  const { mutateReviews: mutateActiveReviews } = useGetReviewRequestsForModel({
+  const { mutateReviews } = useGetReviewRequestsForModel({
     modelId,
-    isActive: true,
-    ...semverOrAccessRequestIdObject,
-  })
-  const { mutateReviews: mutateInactiveReviews } = useGetReviewRequestsForModel({
-    modelId,
-    isActive: false,
     ...semverOrAccessRequestIdObject,
   })
 
@@ -84,8 +77,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         undefined,
         { revalidate: true },
       )
-      mutateActiveReviews()
-      mutateInactiveReviews()
+      mutateReviews()
       mutateReleases()
       mutateAccessRequests()
       setIsReviewOpen(false)
@@ -112,26 +104,18 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         borderRadius: 0,
       }}
     >
-      <Grid container spacing={2} alignItems='center' sx={{ px: 2 }}>
-        <Grid item xs={4} sx={{ display: 'flex' }}>
-          <ReviewRequiredIcon sx={{ my: 'auto' }} />
-        </Grid>
-        <Grid item xs={4} sx={{ display: 'flex' }}>
-          <Typography sx={{ mx: 'auto' }}>Review required</Typography>
-        </Grid>
-        <Grid item xs={4} sx={{ display: 'flex' }}>
-          <Button
-            variant='outlined'
-            color='inherit'
-            size='small'
-            onClick={handleReviewOpen}
-            sx={{ ml: 'auto' }}
-            data-test='reviewButton'
-          >
-            Review
-          </Button>
-        </Grid>
-      </Grid>
+      <Stack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
+        spacing={2}
+        sx={{ px: 2, width: '100%' }}
+      >
+        <ReviewIcon />
+        <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} data-test='reviewButton'>
+          Review
+        </Button>
+      </Stack>
       <ReviewWithComment
         title={reviewTitle}
         open={isReviewOpen}

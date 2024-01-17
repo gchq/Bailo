@@ -2,6 +2,7 @@ import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Box, Stack, Typography } from '@mui/material'
 import { ReactElement, useMemo } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 
 import { useGetModelRoles } from '../../../../actions/model'
 import { ReviewRequestInterface } from '../../../../types/interfaces'
@@ -36,7 +37,7 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
             )}
             <Typography variant='caption'>
               <Box component='span' fontWeight='bold'>
-                {reviewResponse.user.split(':')[1]}
+                <UserDisplay dn={reviewResponse.user} />
               </Box>
               {` has ${isAccepted ? 'approved' : 'requested changes for'} this ${reviewKindText} (${getRoleDisplay(
                 review.role,
@@ -62,7 +63,7 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Stack direction={{ sm: 'row', xs: 'column' }}>
+      <Stack>
         {acceptedReviewResponses}
         {changesRequestedReviewResponses}
       </Stack>

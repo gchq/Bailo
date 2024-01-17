@@ -1,5 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
+import { ReviewComment } from 'types/types'
 
 export interface SplitSchema {
   reference: string
@@ -101,6 +102,8 @@ export interface ReviewResponse {
   user: string
   decision: DecisionKeys
   comment?: string
+  createdAt: string
+  updatedAt: string
 }
 
 type PartialReviewRequestInterface =
@@ -118,7 +121,6 @@ export type ReviewRequestInterface = {
   role: string
   kind: 'release' | 'access'
   responses: ReviewResponse[]
-  isActive: boolean
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface
@@ -139,6 +141,7 @@ export interface AccessRequestInterface {
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
+  comments: Array<ReviewComment>
   createdBy: string
   createdAt: string
   updatedAt: string

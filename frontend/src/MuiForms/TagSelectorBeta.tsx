@@ -7,9 +7,10 @@ interface TagSelectorProps {
   value: string[]
   label: string
   formContext?: FormContextType
+  required?: boolean
 }
 
-export default function TagSelector({ onChange, value, label, formContext }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange([...newValues])
   }
@@ -20,7 +21,10 @@ export default function TagSelector({ onChange, value, label, formContext }: Tag
     <>
       {formContext && formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>{label}</Typography>
+          <Typography fontWeight='bold'>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
           <Autocomplete
             multiple
             isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}

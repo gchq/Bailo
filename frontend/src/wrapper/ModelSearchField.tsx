@@ -1,5 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, Divider, InputBase, List, ListItemButton, ListItemText, Popover, Stack, Typography } from '@mui/material'
+import { Box, InputBase, List, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useState } from 'react'
@@ -35,6 +35,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
+  paddingRight: 4,
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
@@ -89,7 +90,7 @@ export default function ModelSearchField() {
           disableAutoFocus={true}
           disableEnforceFocus={true}
           autoFocus={false}
-          sx={{ maxHeight: '250px' }}
+          sx={{ maxHeight: '400px' }}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
@@ -100,15 +101,13 @@ export default function ModelSearchField() {
           }}
         >
           <>
-            <Typography fontWeight='bold' sx={{ p: 2 }}>{`Models found: ${models.length}`}</Typography>
-            <Divider />
-            <List>
+            <List dense disablePadding>
               {models.map((model) => (
                 <Box key={model.id} sx={{ maxWidth: '300px' }}>
                   <Link href={`/beta/model/${model.id}`} noLinkStyle>
                     <ListItemButton>
                       <ListItemText
-                        primary={model.id}
+                        primary={model.name}
                         secondary={model.description}
                         primaryTypographyProps={{
                           style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },

@@ -17,11 +17,19 @@ export interface ReleaseInterface {
   fileIds: Array<string>
   images: Array<ImageRef>
 
+  comments: Array<ReviewComment>
+
   deleted: boolean
 
   createdBy: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ReviewComment {
+  message: string
+  user: string
+  createdAt: string
 }
 
 export interface ImageRef {
@@ -52,6 +60,14 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
         repository: { type: String },
         name: { type: String },
         tag: { type: String },
+      },
+    ],
+
+    comments: [
+      {
+        message: { type: String },
+        user: { type: String },
+        createdAt: { type: String },
       },
     ],
 

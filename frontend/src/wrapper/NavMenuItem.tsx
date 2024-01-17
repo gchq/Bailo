@@ -1,6 +1,6 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
-import Link from 'next/link'
 import { ReactElement } from 'react'
+import Link from 'src/Link'
 
 interface MenuItemProps {
   menuPage: string
@@ -26,7 +26,7 @@ export function NavMenuItem({
 }: MenuItemProps) {
   return (
     <ListItem disablePadding>
-      <Link href={href} style={{ width: '100%' }}>
+      <Link href={href} noLinkStyle>
         <ListItemButton selected={selectedPage === menuPage}>
           <ListItemIcon data-test={dataTest}>
             {!drawerOpen ? (
@@ -43,7 +43,7 @@ export function NavMenuItem({
               </>
             )}
           </ListItemIcon>
-          <ListItemText primary={primaryText} />
+          <ListItemText primary={primaryText} sx={{ textDecoration: 'none' }} />
         </ListItemButton>
         {drawerOpen}
       </Link>

@@ -13,6 +13,9 @@ export interface ReviewResponse {
   user: string
   decision: DecisionKeys
   comment?: string
+
+  createdAt: Date
+  updatedAt: Date
 }
 
 // This interface stores information about the properties on the base object.
@@ -70,9 +73,16 @@ const ReviewSchema = new Schema<ReviewInterface>(
 
     responses: [
       {
-        user: { type: String, required: true },
-        decision: { type: String, enum: Object.values(Decision), required: true },
-        comment: { type: String, required: false },
+        type: new Schema<ReviewResponse>(
+          {
+            user: { type: String, required: true },
+            decision: { type: String, enum: Object.values(Decision), required: true },
+            comment: { type: String, required: false },
+          },
+          {
+            timestamps: true,
+          },
+        ),
       },
     ],
   },

@@ -60,9 +60,8 @@ describe('Draft and review a model release', () => {
     cy.get('[data-test=approveReviewButton').click()
 
     cy.log('Checking that we can see both review states')
-    cy.contains('user added a comment')
-    cy.contains('user requested changes')
-    cy.contains('user approved')
+    cy.contains('requested changes')
+    cy.contains('approved')
     cy.contains('This is a comment')
   })
 
@@ -72,12 +71,12 @@ describe('Draft and review a model release', () => {
 
     cy.log('Editing an existing release')
     cy.get('[data-test=editFormButton]').click({ force: true })
-    cy.get('[data-test=richTextEditor]').type('This is an edit', { force: true })
+    cy.get('[data-test=releaseNotesInput]').type('This is an edit', { force: true })
     cy.log('Cancelling our changes and making sure they are no longer on the page')
     cy.get('[data-test=cancelEditFormButton]').click({ force: true })
     cy.contains('This is an edit').should('not.exist')
     cy.get('[data-test=editFormButton]').click({ force: true })
-    cy.get('[data-test=richTextEditor]').type('This is an edit', { force: true })
+    cy.get('[data-test=releaseNotesInput]').type('This is an edit', { force: true })
     cy.get('[data-test=saveEditFormButton]').click({ force: true })
     cy.log('Checking our submitting edit has persisted')
     cy.contains('This is an edit')

@@ -3,12 +3,12 @@ import { styled } from '@mui/material/styles'
 import { ReactElement, useState } from 'react'
 
 const StyledHoverSpan = styled('span')({
-  animationName: 'test-open',
+  animationName: 'button-expand',
   animationDuration: '.5s',
   animationDirection: 'forwards',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
-  '@keyframes test-open': {
+  '@keyframes button-expand': {
     '0%': {
       maxWidth: '0px',
     },
@@ -19,13 +19,13 @@ const StyledHoverSpan = styled('span')({
 })
 
 const StyledSpan = styled('span')({
-  animationName: 'test-closed',
+  animationName: 'button-shrink',
   animationDuration: '.5s',
   animationDirection: 'backwards',
   animationFillMode: 'forwards',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
-  '@keyframes test-closed': {
+  '@keyframes button-shrink': {
     '0%': {
       maxWidth: '400px',
     },
@@ -55,7 +55,7 @@ export default function ExpandableButton({ label, icon, onClick, ariaLabel, heig
         variant='outlined'
         data-test='expandableButton'
         aria-label={ariaLabel}
-        sx={{ color: 'white', borderColor: 'white !important', height: height }}
+        sx={{ color: 'white', borderColor: 'white !important', height }}
       >
         {icon}
         {hover ? (

@@ -4,6 +4,7 @@ import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   createAccessRequest,
   getAccessRequestsByModel,
+  newAccessRequestComment,
   removeAccessRequest,
 } from '../../src/services/v2/accessRequest.js'
 
@@ -41,6 +42,13 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/v2/review.js', () => mockReviewService)
 
+const mockWebhookService = vi.hoisted(() => {
+  return {
+    sendWebhooks: vi.fn(),
+  }
+})
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+
 const accessRequest = {
   metadata: {
     overview: {
@@ -59,6 +67,7 @@ describe('services > accessRequest', () => {
     expect(accessRequestModelMocks.save).toBeCalled()
     expect(accessRequestModelMocks).toBeCalled()
     expect(mockReviewService.createAccessRequestReviews).toBeCalled()
+    expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
   test('createAccessRequest > bad authorisation', async () => {
@@ -74,6 +83,15 @@ describe('services > accessRequest', () => {
     expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
       /^You do not have permission/,
     )
+  })
+
+  test('newAccessRequestComment > success', async () => {
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
+
+    await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
+
+    expect(accessRequestModelMocks.save).toBeCalled()
   })
 
   test('getAccessRequestsByModel > good', async () => {

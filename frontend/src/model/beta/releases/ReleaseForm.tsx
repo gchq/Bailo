@@ -1,4 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
@@ -57,6 +58,8 @@ export default function ReleaseForm({
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
+  const theme = useTheme()
+
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
@@ -71,17 +74,9 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
-  const getFileId = (file: File | FileInterface) => {
-    if (isFileInterface(file)) {
-      return file._id
-    } else {
-      throw new Error(`Could not find a valid ID for this file. ${JSON.stringify(file)}`)
-    }
-  }
-
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: 'red' }}>*</span>}
+      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
 
@@ -110,7 +105,7 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: 'red' }}>*</span>}
+          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>
         {isReadOnly || isEdit ? (
           <ReadOnlyAnswer value={formData.semver} />
@@ -138,6 +133,7 @@ export default function ReleaseForm({
             onChange={onReleaseNotesChange}
             aria-label='Release notes'
             label={releaseNotesLabel}
+            dataTest='releaseNotesInput'
           />
         )}
       </Stack>
@@ -173,16 +169,25 @@ export default function ReleaseForm({
           formData.files.map((file) => (
             <Grid container spacing={1} alignItems='center' key={file.name}>
               <Grid item xs>
-                <Tooltip title={file.name}>
-                  <Link
-                    href={`/api/v2/model/${model.id}/file/${getFileId(file)}/download`}
-                    data-test={`fileLink-${file.name}`}
-                  >
+                {isFileInterface(file) && (
+                  <Tooltip title={file.name}>
+                    <Link
+                      href={`/api/v2/model/${model.id}/file/${file._id}/download`}
+                      data-test={`fileLink-${file.name}`}
+                    >
+                      <Typography noWrap textOverflow='ellipsis' display='inline'>
+                        {file.name}
+                      </Typography>
+                    </Link>
+                  </Tooltip>
+                )}
+                {!isFileInterface(file) && (
+                  <Tooltip title='There was a problem finding the ID for this file.'>
                     <Typography noWrap textOverflow='ellipsis' display='inline'>
                       {file.name}
                     </Typography>
-                  </Link>
-                </Tooltip>
+                  </Tooltip>
+                )}
               </Grid>
               <Grid item xs={1} textAlign='right'>
                 <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
