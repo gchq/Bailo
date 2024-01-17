@@ -17,11 +17,12 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useContext, useState } from 'react'
+import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
 import { EntityKind } from '../../types/types'
@@ -65,11 +66,14 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [navbarAnchorEl, setNavbarAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const actionOpen = userMenuAnchorEl !== null
-  const navbarMenuOpen = navbarAnchorEl !== null
+  const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
+  const navbarMenuOpen = useMemo(() => !!navbarAnchorEl, [navbarAnchorEl])
+  const isDarkMode = useMemo(() => localStorage.getItem('dark_mode_enabled') === 'true', [])
+
   const router = useRouter()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -112,46 +116,43 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <Box sx={{ display: { xs: 'flex', sm: 'none' } }}>
-          <IconButton onClick={handleNavMenuClicked}>
-            <MenuIcon sx={{ color: 'white' }} />
-          </IconButton>
-          <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-            <Link href='/beta/model/new'>
-              <MenuItem>
-                <ListItemIcon>
-                  <Add fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Add new model</ListItemText>
-              </MenuItem>
-            </Link>
-            <Divider />
-            <Tooltip title='This feature has been temporarily disabled'>
-              <span>
-                <MenuItem disabled data-test='toggleDarkMode'>
+        {!isSmOrLarger && (
+          <Box>
+            <IconButton onClick={handleNavMenuClicked}>
+              <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
+            </IconButton>
+            <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
+              <Link href='/beta/model/new'>
+                <MenuItem>
                   <ListItemIcon>
-                    <DarkModeIcon fontSize='small' />
+                    <Add fontSize='small' />
                   </ListItemIcon>
-                  <Switch
-                    size='small'
-                    checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                    onChange={toggleDarkMode}
-                    inputProps={{ 'aria-label': 'controlled' }}
-                  />
+                  <ListItemText>Add new model</ListItemText>
                 </MenuItem>
-              </span>
-            </Tooltip>
-            <Link href='/api/logout' color='inherit' underline='none'>
-              <MenuItem data-test='logoutLink'>
-                <ListItemIcon>
-                  <LogoutIcon fontSize='small' />
-                </ListItemIcon>
-                <ListItemText>Sign Out</ListItemText>
-              </MenuItem>
-            </Link>
-          </Menu>
-        </Box>
-        <Box sx={{ flexGrow: 1, ml: 2, display: { cursor: 'pointer' } }}>
+              </Link>
+              <Divider />
+              <Tooltip title='This feature has been temporarily disabled'>
+                <span>
+                  <MenuItem data-test='toggleDarkMode'>
+                    <ListItemIcon>
+                      <DarkModeIcon fontSize='small' />
+                    </ListItemIcon>
+                    <Switch size='small' checked={isDarkMode} onChange={toggleDarkMode} />
+                  </MenuItem>
+                </span>
+              </Tooltip>
+              <Link href='/api/logout' color='inherit' underline='none'>
+                <MenuItem data-test='logoutLink'>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Sign Out</ListItemText>
+                </MenuItem>
+              </Link>
+            </Menu>
+          </Box>
+        )}
+        <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Typography variant='h5' component='div'>
               <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
@@ -159,68 +160,65 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             </Typography>
           </Link>
         </Box>
-        <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-          <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-            <ExpandableButton
-              label='Add Model'
-              icon={<Add />}
-              onClick={() => handleNewModelClicked()}
-              ariaLabel='Add a new model'
-              height='40px'
-            />
-            <ModelSearchField />
-            {currentUser ? (
-              <>
-                <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                  <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
-                </IconButton>
-                <Menu
-                  sx={{ mt: '10px', right: 0 }}
-                  anchorEl={userMenuAnchorEl}
-                  open={actionOpen}
-                  onClose={handleMenuClose}
-                >
-                  <MenuList>
-                    {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
-                    <Tooltip title='This feature has been temporarily disabled'>
-                      <span>
-                        <MenuItem disabled data-test='toggleDarkMode'>
+        {isSmOrLarger && (
+          <Box>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <ExpandableButton
+                label='Add Model'
+                icon={<Add />}
+                onClick={() => handleNewModelClicked()}
+                ariaLabel='Add a new model'
+                height='40px'
+              />
+              <ModelSearchField />
+              {currentUser ? (
+                <>
+                  <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
+                    <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
+                  </IconButton>
+                  <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
+                    <MenuList>
+                      {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                      <Tooltip title='This feature has been temporarily disabled'>
+                        <span>
+                          <MenuItem disabled data-test='toggleDarkMode'>
+                            <ListItemIcon>
+                              <DarkModeIcon fontSize='small' />
+                            </ListItemIcon>
+                            <Switch
+                              size='small'
+                              checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                              onChange={toggleDarkMode}
+                              inputProps={{ 'aria-label': 'controlled' }}
+                            />
+                          </MenuItem>
+                        </span>
+                      </Tooltip>
+                      <Link href='/beta/settings' color='inherit' underline='none'>
+                        <MenuItem data-test='settingsLink'>
                           <ListItemIcon>
-                            <DarkModeIcon fontSize='small' />
+                            <Settings fontSize='small' />
                           </ListItemIcon>
-                          <Switch
-                            size='small'
-                            checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                            onChange={toggleDarkMode}
-                            inputProps={{ 'aria-label': 'controlled' }}
-                          />
+                          <ListItemText>Settings</ListItemText>
                         </MenuItem>
-                      </span>
-                    </Tooltip>
-                    <Link href='/api/logout' color='inherit' underline='none'>
-                      <MenuItem data-test='settingsLink'>
-                        <ListItemIcon>
-                          <Settings fontSize='small' />
-                        </ListItemIcon>
-                        <ListItemText>Settings</ListItemText>
-                      </MenuItem>
-                    </Link>
-                    <Link href='/api/logout' color='inherit' underline='none'>
-                      <MenuItem data-test='logoutLink'>
-                        <ListItemIcon>
-                          <LogoutIcon fontSize='small' />
-                        </ListItemIcon>
-                        <ListItemText>Sign Out</ListItemText>
-                      </MenuItem>
-                    </Link>
-                  </MenuList>
-                </Menu>
-              </>
-            ) : (
-              <Typography variant='caption'>Loading...</Typography>
-            )}
-          </Stack>
-        </Box>
+                      </Link>
+                      <Link href='/api/logout' color='inherit' underline='none'>
+                        <MenuItem data-test='logoutLink'>
+                          <ListItemIcon>
+                            <LogoutIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Sign Out</ListItemText>
+                        </MenuItem>
+                      </Link>
+                    </MenuList>
+                  </Menu>
+                </>
+              ) : (
+                <Typography variant='caption'>Loading...</Typography>
+              )}
+            </Stack>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
   )

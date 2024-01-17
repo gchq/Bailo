@@ -101,7 +101,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props,
         ref={ref}
         {...nextjsProps}
         {...other}
-        style={{ textDecoration: 'none', width: '100%' }}
+        style={{ textDecoration: 'none' }}
       />
     )
   }

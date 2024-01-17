@@ -5,10 +5,12 @@ declare module '@mui/material/styles/createPalette' {
   interface Palette {
     container: PaletteColor
     customTextInput: PaletteColor
+    topNavigation: PaletteColor
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
+    topNavigation: PaletteColorOptions
   }
 }
 
@@ -56,6 +58,9 @@ export const lightTheme = createTheme({
     },
     customTextInput: {
       main: '#535353',
+    },
+    topNavigation: {
+      main: '#fff',
     },
   },
 })
@@ -125,6 +130,9 @@ export const betaLightTheme = createTheme({
     customTextInput: {
       main: '#535353',
     },
+    topNavigation: {
+      main: '#fff',
+    },
   },
 })
 
@@ -165,6 +173,9 @@ export const darkTheme = createTheme({
     customTextInput: {
       main: '#c8c8c8',
     },
+    topNavigation: {
+      main: '#fff',
+    },
   },
   components: {
     ...defaultComponentOverrides,
@@ -191,6 +202,14 @@ export const darkTheme = createTheme({
         root: {
           '&:hover': {
             backgroundColor: '#5c5c5c',
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#f7a4c0',
+          },
+          '&.Mui-selected': {
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#d62560',
           },
         },
       },

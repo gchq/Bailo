@@ -2,7 +2,7 @@ import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } 
 import { ReactElement } from 'react'
 import Link from 'src/Link'
 
-interface MenuItemProps {
+interface NavMenuItemProps {
   menuPage: string
   selectedPage: string
   drawerOpen: boolean
@@ -10,7 +10,6 @@ interface MenuItemProps {
   icon: ReactElement
   primaryText: string
   title: string
-  dataTest?: string
   badgeCount?: number
 }
 export function NavMenuItem({
@@ -19,16 +18,15 @@ export function NavMenuItem({
   icon,
   href,
   primaryText,
-  dataTest = '',
   selectedPage,
   title,
   badgeCount = 0,
-}: MenuItemProps) {
+}: NavMenuItemProps) {
   return (
     <ListItem disablePadding>
       <Link href={href} noLinkStyle>
         <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon data-test={dataTest}>
+          <ListItemIcon>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
                 <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>

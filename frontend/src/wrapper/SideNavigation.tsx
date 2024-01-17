@@ -6,7 +6,8 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, IconButton, List, MenuItem, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
-import { styled, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -74,8 +75,9 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const theme = useTheme()
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+
+  const theme = useTheme()
 
   const doesNotContainUserApproval = useCallback(
     (review: ReviewRequestInterface) => {
@@ -113,7 +115,7 @@ export default function SideNavigation({
           px: [1],
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
-      ></Toolbar>
+      />
       {drawerOpen !== undefined && (
         <Stack sx={{ height: '100%' }} justifyContent='space-between'>
           <StyledList>
@@ -188,7 +190,7 @@ export default function SideNavigation({
               <IconButton
                 edge='start'
                 color='inherit'
-                aria-label='open drawer'
+                aria-label='open navigation drawer'
                 onClick={toggleDrawer}
                 sx={{
                   marginRight: 2,
