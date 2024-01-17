@@ -4,7 +4,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import { Divider, IconButton, List, MenuItem, Stack, Toolbar } from '@mui/material'
+import { Divider, List, MenuItem, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
 import { useGetReviewRequestsForUser } from 'actions/review'
@@ -185,17 +185,8 @@ export default function SideNavigation({
               icon={<SettingsIcon />}
             />
             <Divider />
-            <MenuItem onClick={toggleDrawer}>
-              <IconButton
-                edge='start'
-                color='inherit'
-                aria-label='open navigation drawer'
-                sx={{
-                  marginRight: 2,
-                }}
-              >
-                {drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}
-              </IconButton>
+            <MenuItem onClick={toggleDrawer} disableRipple>
+              {drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}
             </MenuItem>
           </StyledList>
         </Stack>
