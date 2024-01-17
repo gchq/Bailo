@@ -186,12 +186,11 @@ export default function SideNavigation({
               icon={<SettingsIcon />}
             />
             <Divider />
-            <MenuItem>
+            <MenuItem onClick={toggleDrawer}>
               <IconButton
                 edge='start'
                 color='inherit'
                 aria-label='open navigation drawer'
-                onClick={toggleDrawer}
                 sx={{
                   marginRight: 2,
                 }}
