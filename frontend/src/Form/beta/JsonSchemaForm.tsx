@@ -91,22 +91,9 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Stack
-      direction={{ xs: 'column', md: 'row' }}
-      spacing={{ sm: 2 }}
-      justifyContent='left'
-      divider={<Divider flexItem orientation='vertical' />}
-      sx={{ width: '100%' }}
-    >
-      <div>
-        <Stepper
-          activeStep={activeStep}
-          nonLinear
-          alternativeLabel
-          orientation='vertical'
-          connector={<Nothing />}
-          sx={{ minWidth: 'max-content' }}
-        >
+    <Grid container spacing={2}>
+      <Grid item xs={12} sm={3} md={2}>
+        <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
@@ -120,8 +107,9 @@ export default function JsonSchemaForm({
             ))}
           </List>
         </Stepper>
-      </div>
-      <Box width={{ xs: '100%', md: '80%' }}>
+      </Grid>
+      <Divider orientation='vertical' flexItem sx={{ mr: '-1px' }} />
+      <Grid item xs={12} sm={9} md={10}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
@@ -150,7 +138,7 @@ export default function JsonSchemaForm({
           {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <></>
         </Form>
-      </Box>
-    </Stack>
+      </Grid>
+    </Grid>
   )
 }
