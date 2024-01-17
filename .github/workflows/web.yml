@@ -31,6 +31,8 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install pandoc
+        run: sudo apt-get install pandoc
       - name: Build Sphinx docs
         run: |
           python -m pip install --upgrade pip
