@@ -11,7 +11,7 @@ import ModelCardRevisionV2 from '../models/v2/ModelCardRevision.js'
 import Release from '../models/v2/Release.js'
 import ReviewModel, { Decision, ReviewResponse } from '../models/v2/Review.js'
 import VersionModelV1 from '../models/Version.js'
-import { ApprovalCategory, ApprovalStates, ApprovalTypes, VersionDoc } from '../types/types.js'
+import { ApprovalCategory, ApprovalDoc, ApprovalStates, ApprovalTypes, VersionDoc } from '../types/types.js'
 import { ReviewKind } from '../types/v2/enums.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
@@ -61,6 +61,31 @@ async function getObjectContentLength(bucket: string, object: string) {
 
 function identityConversion(old: string) {
   return old
+}
+
+function createReviewResponses(approval: ApprovalDoc) {
+  const responses: ReviewResponse[] = []
+  for (let i = 0; i < approval.approvers.length; i++) {
+    const approver = approval.approvers[i]
+    if (approval.status === ApprovalStates.Accepted) {
+      responses.push({
+        user: toEntity('user', approver.id),
+        decision: Decision.Approve,
+        comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+        createdAt: approval.createdAt,
+        updatedAt: approval.updatedAt,
+      })
+    } else if (approval.status === ApprovalStates.Declined) {
+      responses.push({
+        user: toEntity('user', approver.id),
+        decision: Decision.RequestChanges,
+        comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+        createdAt: approval.createdAt,
+        updatedAt: approval.updatedAt,
+      })
+    }
+  }
+  return responses
 }
 
 export async function migrateAllModels() {
@@ -300,28 +325,7 @@ async function migrateModel(modelId: string) {
       } else if (approval.approvalType === ApprovalTypes.Reviewer) {
         role = 'mtr'
       }
-
-      const responses: ReviewResponse[] = []
-      for (let i = 0; i < approval.approvers.length; i++) {
-        const approver = approval.approvers[i]
-        if (approval.status === ApprovalStates.Accepted) {
-          responses.push({
-            user: toEntity('user', approver.id),
-            decision: Decision.Approve,
-            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
-            createdAt: approval.createdAt,
-            updatedAt: approval.updatedAt,
-          })
-        } else if (approval.status === ApprovalStates.Declined) {
-          responses.push({
-            user: toEntity('user', approver.id),
-            decision: Decision.RequestChanges,
-            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
-            createdAt: approval.createdAt,
-            updatedAt: approval.updatedAt,
-          })
-        }
-      }
+      const responses = createReviewResponses(approval)
       await ReviewModel.findOneAndUpdate(
         { modelId, semver, role },
         {
@@ -390,6 +394,41 @@ async function migrateModel(modelId: string) {
         timestamps: false,
       },
     )
+
+    const versionApprovals = await ApprovalModel.find({
+      deployment: deployment._id,
+      approvalCategory: ApprovalCategory.Deployment,
+    }).sort({ createdAt: 1 })
+
+    for (const approval of versionApprovals) {
+      let role
+      if (approval.approvalType === ApprovalTypes.Manager) {
+        role = 'msro'
+      } else if (approval.approvalType === ApprovalTypes.Reviewer) {
+        role = 'mtr'
+      }
+      const responses = createReviewResponses(approval)
+      await ReviewModel.findOneAndUpdate(
+        { modelId, accessRequestId: deployment.uuid, role },
+        {
+          accessRequestId: deployment.uuid,
+          modelId,
+
+          kind: ReviewKind.Access,
+          role,
+
+          responses,
+
+          createdAt: approval.createdAt,
+          updatedAt: approval.updatedAt,
+        },
+        {
+          new: true,
+          upsert: true, // Make this update into an upsert
+          timestamps: false,
+        },
+      )
+    }
   }
 }
 
