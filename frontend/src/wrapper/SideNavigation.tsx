@@ -4,9 +4,10 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
-import { Divider, List, MenuItem, Stack, Toolbar } from '@mui/material'
+import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
-import { styled, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -185,9 +186,12 @@ export default function SideNavigation({
               icon={<SettingsIcon />}
             />
             <Divider />
-            <MenuItem onClick={toggleDrawer} disableRipple>
-              {drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}
-            </MenuItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={toggleDrawer} sx={{ py: 2 }}>
+                <ListItemIcon>{drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}</ListItemIcon>
+              </ListItemButton>
+              {drawerOpen}
+            </ListItem>
           </StyledList>
         </Stack>
       )}

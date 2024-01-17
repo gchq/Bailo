@@ -45,7 +45,6 @@ export function NavMenuItem({
           </ListItemIcon>
           <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />
         </ListItemButton>
-        {drawerOpen}
       </Link>
     </ListItem>
   )
