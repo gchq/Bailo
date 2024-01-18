@@ -58,7 +58,12 @@ export default function AccessRequestSettings({ model }: ModelAccessProps) {
       />
       <Divider />
       <div>
-        <LoadingButton variant='contained' aria-label='Save access list' onClick={handleSave} loading={loading}>
+        <LoadingButton
+          variant='contained'
+          aria-label='Save ungoverned access requests'
+          onClick={handleSave}
+          loading={loading}
+        >
           Save
         </LoadingButton>
         <MessageAlert message={errorMessage} severity='error' />
