@@ -66,7 +66,7 @@ describe('Model with code and binary files', () => {
 
   it('Can review, deploy and test a model', () => {
     cy.log('Navigating to review page')
-    cy.get('[data-test=reviewLink]').click({ force: true })
+    cy.get('[data-test=reviewLink]').click()
     cy.url().should('contain', '/review')
 
     cy.log('Approving model')
@@ -84,7 +84,7 @@ describe('Model with code and binary files', () => {
 
     cy.log('Deploying model')
     cy.get('[data-test="modelActionsButton"]').click({ force: true })
-    cy.get('[data-test=submitDeployment]').click({ force: true })
+    cy.get('[data-test=submitDeployment]').click()
     cy.fixture('minimal_metadata.json').then((modelMetadata) => {
       cy.url({ timeout: 10000 })
         .should('contain', `/model/${convertNameToUrlFormat(modelMetadata.highLevelDetails.name)}`)
@@ -95,7 +95,7 @@ describe('Model with code and binary files', () => {
     cy.log('Selecting schema and inputting deployment metadata')
     cy.get('[data-test=selectSchemaInput]').trigger('mousedown', { force: true, button: 0 })
     cy.fixture('schema_names.json').then((schemaNames) => {
-      cy.get(`[role=option]:contains(${schemaNames.deployment})`).click({ force: true })
+      cy.get(`[role=option]:contains(${schemaNames.deployment})`).click()
     })
     cy.fixture('deployment.json').then((metadata) => {
       cy.get('[data-test=metadataTextarea]').clear()
@@ -104,10 +104,10 @@ describe('Model with code and binary files', () => {
         delay: 0,
       })
     })
-    cy.get('[data-test=warningCheckbox]').click({ force: true })
+    cy.get('[data-test=warningCheckbox]').click()
 
     cy.log('Submitting deployment')
-    cy.get('[data-test=submitButton]').click({ force: true })
+    cy.get('[data-test=submitButton]').click()
 
     cy.log('Checking URL has been updated')
     cy.fixture('deployment.json').then({ timeout: 60000 }, (deploymentMetadata) => {
@@ -118,7 +118,7 @@ describe('Model with code and binary files', () => {
           deploymentUuid = getUuidFromUrl(url)
 
           cy.log('Navigating to review page')
-          cy.get('[data-test=reviewLink]').click({ force: true })
+          cy.get('[data-test=reviewLink]').click()
           cy.url().should('contain', '/review')
 
           cy.log('Approving deployment')
@@ -132,14 +132,14 @@ describe('Model with code and binary files', () => {
           cy.get('[data-test=approvalsChip]').should('contain.text', 'Approvals 1/1')
 
           cy.log('Checking model runs as expected')
-          cy.get('[data-test=userMenuButton]').click({ force: true })
+          cy.get('[data-test=userMenuButton]').click()
 
           cy.log('Navigating to settings page')
-          cy.get('[data-test=settingsLink]').click({ force: true })
+          cy.get('[data-test=settingsLink]').click()
           cy.url().should('contain', '/settings')
 
           cy.log('Getting docker password')
-          cy.get('[data-test=showTokenButton]').click({ force: true })
+          cy.get('[data-test=showTokenButton]').click()
           cy.get('[data-test=dockerPassword]').should('not.contain.text', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx')
           cy.get('[data-test=dockerPassword]')
             .invoke('text')
