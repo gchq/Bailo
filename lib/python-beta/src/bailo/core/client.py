@@ -331,10 +331,14 @@ class Client:
         """
         if isinstance(self.agent, TokenAgent):
             req = self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
+                stream=True,
+                timeout=10_000,
             )
         else:
-            req = self.agent.get(f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000)
+            req = self.agent.get(
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+            )
 
         shutil.copyfileobj(req.raw, buffer)
         return filename
