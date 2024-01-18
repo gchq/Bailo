@@ -1,11 +1,11 @@
 import '@fontsource/pacifico'
 
-import { Add, Settings } from '@mui/icons-material'
+import { Add, Menu as MenuIcon, Settings } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
-import MenuIcon from '@mui/icons-material/Menu'
 import {
   Box,
+  Divider,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -17,11 +17,13 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useContext, useState } from 'react'
+import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
+import ModelSearchField from 'src/wrapper/ModelSearchField'
 
 import { EntityKind } from '../../types/types'
 import { User } from '../../types/v2/types'
@@ -33,7 +35,6 @@ import Link from '../Link'
 
 type TopNavigationProps = {
   drawerOpen?: boolean
-  toggleDrawer: () => void
   pageTopStyling?: CSSProperties
   currentUser: User
 }
@@ -61,21 +62,25 @@ const AppBar = styled(MuiAppBar, {
 }))
 
 // This is currently only being used by the beta wrapper
-export default function TopNavigation({
-  drawerOpen = false,
-  toggleDrawer,
-  pageTopStyling = {},
-  currentUser,
-}: TopNavigationProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+export default function TopNavigation({ drawerOpen = false, pageTopStyling = {}, currentUser }: TopNavigationProps) {
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [navbarAnchorEl, setNavbarAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const actionOpen = anchorEl !== null
+  const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
+  const navbarMenuOpen = useMemo(() => !!navbarAnchorEl, [navbarAnchorEl])
+  const isDarkMode = useMemo(() => localStorage.getItem('dark_mode_enabled') === 'true', [])
+
   const router = useRouter()
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
+    setUserMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleNavMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
+    setNavbarAnchorEl(event.currentTarget)
   }
 
   const handleNewModelClicked = () => {
@@ -83,7 +88,7 @@ export default function TopNavigation({
   }
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
+    setUserMenuAnchorEl(null)
   }
 
   const betaAdornment = (
@@ -111,81 +116,109 @@ export default function TopNavigation({
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <IconButton
-          edge='start'
-          color='inherit'
-          aria-label='open drawer'
-          onClick={toggleDrawer}
-          sx={{
-            marginRight: 2,
-            ...(drawerOpen && { display: 'none' }),
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Box sx={{ flexGrow: 1, ml: 2 }}>
-          <Box sx={{ width: 'max-content', cursor: 'pointer', px: 1 }}>
-            <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-              <Typography variant='h5' component='div'>
-                <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
-                {betaAdornment}
-              </Typography>
-            </Link>
+        {!isSmOrLarger && (
+          <Box>
+            <IconButton onClick={handleNavMenuClicked}>
+              <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
+            </IconButton>
+            <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
+              <Link href='/beta/model/new'>
+                <MenuItem>
+                  <ListItemIcon>
+                    <Add fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Add new model</ListItemText>
+                </MenuItem>
+              </Link>
+              <Divider />
+              <Tooltip title='This feature has been temporarily disabled'>
+                <span>
+                  <MenuItem disabled data-test='toggleDarkMode'>
+                    <ListItemIcon>
+                      <DarkModeIcon fontSize='small' />
+                    </ListItemIcon>
+                    <Switch size='small' checked={isDarkMode} onChange={toggleDarkMode} />
+                  </MenuItem>
+                </span>
+              </Tooltip>
+              <Link href='/api/logout' color='inherit' underline='none'>
+                <MenuItem data-test='logoutLink'>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText>Sign Out</ListItemText>
+                </MenuItem>
+              </Link>
+            </Menu>
           </Box>
+        )}
+        <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
+          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+            <Typography variant='h5' component='div'>
+              <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
+              {betaAdornment}
+            </Typography>
+          </Link>
         </Box>
-        <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
-          <ExpandableButton
-            label='Add Model'
-            icon={<Add />}
-            onClick={() => handleNewModelClicked()}
-            ariaLabel='Add a new model'
-          />
-          {currentUser ? (
-            <>
-              <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
-              </IconButton>
-              <Menu sx={{ mt: '10px', right: 0 }} anchorEl={anchorEl} open={actionOpen} onClose={handleMenuClose}>
-                <MenuList>
-                  {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
-                  <Tooltip title='This feature has been temporarily disabled'>
-                    <span>
-                      <MenuItem disabled data-test='toggleDarkMode'>
-                        <ListItemIcon>
-                          <DarkModeIcon fontSize='small' />
-                        </ListItemIcon>
-                        <Switch
-                          size='small'
-                          checked={localStorage.getItem('dark_mode_enabled') === 'true'}
-                          onChange={toggleDarkMode}
-                          inputProps={{ 'aria-label': 'controlled' }}
-                        />
-                      </MenuItem>
-                    </span>
-                  </Tooltip>
-                  <Link href='/beta/settings' color='inherit' underline='none'>
-                    <MenuItem data-test='settingsLink'>
-                      <ListItemIcon>
-                        <Settings fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Settings</ListItemText>
-                    </MenuItem>
-                  </Link>
-                  <Link href='/api/logout' color='inherit' underline='none'>
-                    <MenuItem data-test='logoutLink'>
-                      <ListItemIcon>
-                        <LogoutIcon fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Sign Out</ListItemText>
-                    </MenuItem>
-                  </Link>
-                </MenuList>
-              </Menu>
-            </>
-          ) : (
-            <Typography variant='caption'>Loading...</Typography>
-          )}
-        </Stack>
+        {isSmOrLarger && (
+          <Box>
+            <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <ExpandableButton
+                label='Add Model'
+                icon={<Add />}
+                onClick={() => handleNewModelClicked()}
+                ariaLabel='Add a new model'
+                height='40px'
+              />
+              <ModelSearchField />
+              {currentUser ? (
+                <>
+                  <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
+                    <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
+                  </IconButton>
+                  <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
+                    <MenuList>
+                      {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                      <Tooltip title='This feature has been temporarily disabled'>
+                        <span>
+                          <MenuItem disabled data-test='toggleDarkMode'>
+                            <ListItemIcon>
+                              <DarkModeIcon fontSize='small' />
+                            </ListItemIcon>
+                            <Switch
+                              size='small'
+                              checked={localStorage.getItem('dark_mode_enabled') === 'true'}
+                              onChange={toggleDarkMode}
+                              inputProps={{ 'aria-label': 'controlled' }}
+                            />
+                          </MenuItem>
+                        </span>
+                      </Tooltip>
+                      <Link href='/beta/settings' color='inherit' underline='none'>
+                        <MenuItem data-test='settingsLink'>
+                          <ListItemIcon>
+                            <Settings fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Settings</ListItemText>
+                        </MenuItem>
+                      </Link>
+                      <Link href='/api/logout' color='inherit' underline='none'>
+                        <MenuItem data-test='logoutLink'>
+                          <ListItemIcon>
+                            <LogoutIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Sign Out</ListItemText>
+                        </MenuItem>
+                      </Link>
+                    </MenuList>
+                  </Menu>
+                </>
+              ) : (
+                <Typography variant='caption'>Loading...</Typography>
+              )}
+            </Stack>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
   )

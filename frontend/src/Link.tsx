@@ -95,7 +95,15 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props,
   }
 
   if (noLinkStyle) {
-    return <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />
+    return (
+      <NextLinkComposed
+        className={className}
+        ref={ref}
+        {...nextjsProps}
+        {...other}
+        style={{ textDecoration: 'none' }}
+      />
+    )
   }
 
   return <MuiLink component={NextLinkComposed} className={className} ref={ref} {...nextjsProps} {...other} />

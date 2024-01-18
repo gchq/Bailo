@@ -50,7 +50,7 @@ export default function Settings({ model }: SettingsProps) {
       spacing={{ sm: 2 }}
       divider={<Divider orientation='vertical' flexItem />}
     >
-      <List>
+      <List sx={{ width: '200px' }}>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
             Details

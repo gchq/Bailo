@@ -27,7 +27,7 @@ export default function Settings() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title='Settings' page='settings'>
+    <Wrapper fullWidth title='Settings' page='beta/settings'>
       {isCurrentUserLoading && <Loading />}
       <PageWithTabs title='Settings' tabs={tabs} />
     </Wrapper>
