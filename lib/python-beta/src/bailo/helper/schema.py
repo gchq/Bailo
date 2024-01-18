@@ -7,7 +7,7 @@ from bailo.core.enums import SchemaKind
 
 
 class Schema:
-    """Represents a schema within Bailo
+    """Represent a schema within Bailo.
 
     :param client: A client object used to interact with Bailo
     :param schema_id: A unique schema ID
@@ -43,7 +43,7 @@ class Schema:
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ) -> Schema:
-        """Builds a schema from Bailo and uploads it
+        """Build a schema from Bailo and uploads it.
 
         :param client: A client object used to interact with Bailo
         :param schema_id: A unique schema ID
@@ -70,7 +70,7 @@ class Schema:
 
     @classmethod
     def from_id(cls, client: Client, schema_id: str) -> Schema:
-        """Returns an existing schema from Bailo
+        """Return an existing schema from Bailo.
 
         :param client: A client object used to interact with Bailo
         :param schema_id: A unique schema ID

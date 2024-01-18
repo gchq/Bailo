@@ -8,7 +8,7 @@ import { ReviewInterface } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEventKeys, WebhookInterface } from '../../models/v2/Webhook.js'
 import WebhookModel from '../../models/v2/Webhook.js'
-import { Forbidden } from '../../utils/v2/error.js'
+import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { getHttpsAgent } from './http.js'
 import log from './log.js'
@@ -34,6 +34,43 @@ export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookP
 
   await webhook.save()
   return webhook
+}
+
+export async function updateWebhook(user: UserDoc, webhookId: string, webhookParams: CreateWebhookParams) {
+  //Check model exists and user has the permisson to update it
+  const model = await getModelById(user, webhookParams.modelId)
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+
+  const webhook = await WebhookModel.findOneAndUpdate({ id: webhookId }, webhookParams, { new: true })
+  if (!webhook) {
+    throw NotFound(`The requested webhook was not found.`, { webhookId })
+  }
+
+  return webhook
+}
+
+export async function getWebhooksByModel(user: UserDoc, modelId: string) {
+  const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+
+  return await WebhookModel.find({ modelId })
+}
+
+export async function removeWebhook(user: UserDoc, modelId: string, webhookId: string) {
+  const auth = await authorisation.model(user, await getModelById(user, modelId), ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })
+  }
+  const webhook = await WebhookModel.findOneAndDelete({ id: webhookId })
+  if (!webhook) {
+    throw NotFound(`The requested webhook was not found.`, { webhookId })
+  }
 }
 
 export async function sendWebhooks(

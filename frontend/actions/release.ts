@@ -48,7 +48,7 @@ export async function postRelease(release: CreateReleaseParams) {
 
 export type UpdateReleaseParams = Pick<
   ReleaseInterface,
-  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images'
+  'modelId' | 'modelCardVersion' | 'semver' | 'notes' | 'minor' | 'draft' | 'fileIds' | 'images' | 'comments'
 >
 
 export function putRelease(release: UpdateReleaseParams) {
@@ -56,6 +56,14 @@ export function putRelease(release: UpdateReleaseParams) {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(release),
+  })
+}
+
+export function postReleaseComment(modelId: string, semver: string, comment: string) {
+  return fetch(`/api/v2/model/${modelId}/release/${semver}/comment`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }
 

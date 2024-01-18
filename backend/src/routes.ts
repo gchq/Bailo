@@ -57,6 +57,7 @@ import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessReque
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
+import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -74,11 +75,15 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
+import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
+import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
+import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
@@ -232,6 +237,7 @@ if (config.experimental.v2) {
     ...getDownloadFile,
   )
   server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
+  server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
   server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
@@ -240,6 +246,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
   server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
   server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
+  server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
   server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
   server.get('/api/v2/model/:modelId/files', ...getFiles)
@@ -252,6 +259,9 @@ if (config.experimental.v2) {
   server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
   server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
+  server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
+  server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
+  server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
   server.get('/api/v2/model/:modelId/images', ...getImages)
   // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)

@@ -105,6 +105,16 @@ export const releaseInterfaceSchema = z.object({
   files: z.array(z.string()).openapi({ example: ['507f1f77bcf86cd799439011'] }),
   images: z.array(z.string()).openapi({ example: ['/yolo-v4-abcdef/example:v1.0.0'] }),
 
+  comments: z
+    .array(
+      z.object({
+        comment: z.string().openapi({ example: 'This a comment' }),
+        user: z.string().openapi({ example: 'User' }),
+        createdAt: z.string().openapi({ example: new Date().toISOString() }),
+      }),
+    )
+    .optional(),
+
   deleted: z.boolean().openapi({ example: false }),
 
   createdBy: z.string().openapi({ example: 'user' }),
@@ -145,6 +155,16 @@ export const accessRequestInterfaceSchema = z.object({
       endDate: z.string().optional().openapi({ example: new Date().toISOString() }),
     }),
   }),
+
+  comments: z
+    .array(
+      z.object({
+        comment: z.string().openapi({ example: 'This a comment' }),
+        user: z.string().openapi({ example: 'User' }),
+        createdAt: z.string().openapi({ example: new Date().toISOString() }),
+      }),
+    )
+    .optional(),
 
   deleted: z.boolean().openapi({ example: false }),
 

@@ -40,7 +40,7 @@ module.exports = {
   mongo: {
     // A mongo connection URI, can contain usernames, passwords, replica set information, etc.
     // See: https://www.mongodb.com/docs/manual/reference/connection-string/
-    uri: 'mongodb://localhost:27017/bailo',
+    uri: 'mongodb://localhost:27017/bailo?directConnection=true',
   },
 
   minio: {

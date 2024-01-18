@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from io import BufferedReader, BufferedWriter, BytesIO
-
 import pytest
-from bailo import Client, Model, Release
-from bailo.core.enums import SchemaKind
+from bailo import Client, Release
+from bailo.core.exceptions import BailoException, ResponseException
 from semantic_version import Version
 
 
@@ -25,7 +23,7 @@ def test_release():
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("version", "model_card_version", "notes", "files", "images", "minor", "draft"),
-    [("1.0.0", "1.0", "test", [], [], False, True)],
+    [("1.0.0", 1, "test", [], [], False, True), ("1.0.1", None, "test", [], [], True, False)],
 )
 def test_create_get_from_version_update_and_delete_release(
     version: Version | str,
@@ -63,3 +61,33 @@ def test_create_get_from_version_update_and_delete_release(
 
     # Check that the release is deleted
     assert release.delete()
+
+
+@pytest.mark.integration
+def test_nonexistant_file_ids(integration_client, example_model):
+    with pytest.raises(ResponseException):
+        release = Release.create(
+            client=integration_client,
+            model_id=example_model.model_id,
+            version="1.0.2",
+            model_card_version=1,
+            notes="test",
+            files=["test-id"],
+            minor=False,
+            draft=True,
+        )
+
+
+@pytest.mark.integration
+def create_two_release_with_same_semver(integration_client, example_model):
+    Release.create(
+        client=integration_client, model_id=example_model.model_id, version="1.1.0", model_card_version=1, notes="test"
+    )
+    with pytest.raises(BailoException):
+        Release.create(
+            client=integration_client,
+            model_id=example_model.model_id,
+            version="1.1.0",
+            model_card_version=1,
+            notes="test",
+        )

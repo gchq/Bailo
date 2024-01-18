@@ -2,6 +2,7 @@ import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import { ReviewResponse } from 'types/interfaces'
@@ -32,7 +33,7 @@ export default function ReviewDecision({ response }: ReviewDecisionProps) {
               <Box component='span' fontWeight='bold'>
                 <UserDisplay dn={username} />
               </Box>
-              {` ${isApproved ? 'approved' : 'requested changes'}`}
+              {` ${isApproved ? 'has approved this release' : 'has requested changes'}`}
             </Typography>
             {isApproved ? (
               <Done color='success' fontSize='small' />
@@ -45,7 +46,7 @@ export default function ReviewDecision({ response }: ReviewDecisionProps) {
         {response.comment && (
           <div>
             <Divider sx={{ my: 2 }} />
-            <Typography>{response.comment}</Typography>
+            <MarkdownDisplay>{response.comment}</MarkdownDisplay>
           </div>
         )}
       </Card>

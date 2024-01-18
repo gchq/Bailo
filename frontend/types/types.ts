@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose'
 
-import { FlattenedModelImage } from './interfaces'
+import { FlattenedModelImage, ReviewResponse } from './interfaces'
 import { SchemaKindKeys } from './v2/types'
 
 export enum ModelUploadType {
@@ -374,6 +374,18 @@ export interface FileInterface {
   updatedAt: Date
 }
 
+export type ReviewComment = {
+  message: string
+  user: string
+  createdAt: string
+}
+
+export type ReviewResponseKind = ReviewComment | ReviewResponse
+
+export function isReviewResponse(responseKind: ReviewResponseKind) {
+  return 'decision' in responseKind
+}
+
 export type ReleaseInterface = {
   modelId: string
   modelCardVersion: number
@@ -382,6 +394,7 @@ export type ReleaseInterface = {
   minor?: boolean
   draft?: boolean
   fileIds: Array<string>
+  comments: Array<ReviewComment>
   files: Array<FileInterface>
   images: Array<FlattenedModelImage>
   deleted: boolean

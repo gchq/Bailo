@@ -170,6 +170,28 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   return updatedRelease
 }
 
+export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, message: string) {
+  const release = await getReleaseBySemver(user, modelId, semver)
+  if (!release) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  const comment = {
+    message,
+    user: user.dn,
+    createdAt: new Date().toISOString(),
+  }
+  const updatedRelease = await Release.findOneAndUpdate(
+    { _id: release._id },
+    {
+      $push: {
+        comments: comment,
+      },
+    },
+  )
+  return updatedRelease
+}
+
 export async function getModelReleases(
   user: UserDoc,
   modelId: string,

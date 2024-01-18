@@ -4,15 +4,22 @@ import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
-import Review, { ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
+import Review, { ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
+import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
+import { getReleaseBySemver } from './release.js'
+import {
+  notifyReviewResponseForAccess,
+  notifyReviewResponseForRelease,
+  requestReviewForAccessRequest,
+  requestReviewForRelease,
+} from './smtp/smtp.js'
 import { sendWebhooks } from './webhook.js'
 
 export async function findReviews(
@@ -137,6 +144,7 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
+  sendReviewResponseNotification(update, user)
 
   sendWebhooks(
     update.modelId,
@@ -146,6 +154,34 @@ export async function respondToReview(
   )
 
   return update
+}
+
+export async function sendReviewResponseNotification(review: ReviewDoc, user: UserDoc) {
+  let reviewIdQuery
+  switch (review.kind) {
+    case ReviewKind.Access: {
+      if (!review.accessRequestId) {
+        log.error('Unable to send notification for review response. Cannot find access request ID.')
+        return
+      }
+
+      const access = await getAccessRequestById(user, review.accessRequestId)
+      notifyReviewResponseForAccess(review, access)
+      break
+    }
+    case ReviewKind.Release: {
+      if (!review.semver) {
+        log.error('Unable to send notification for review response.Cannot find semver')
+        return
+      }
+
+      const release = await getReleaseBySemver(user, review.modelId, review.semver)
+      notifyReviewResponseForRelease(review, release)
+      break
+    }
+    default:
+      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
+  }
 }
 
 function getRoleEntites(roles: string[], collaborators: CollaboratorEntry[]) {

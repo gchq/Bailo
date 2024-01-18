@@ -1,11 +1,19 @@
-import { Divider } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Divider, Stack } from '@mui/material'
+import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
+import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useMemo } from 'react'
+import { useGetCurrentUser } from 'actions/user'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
-import ReviewDecision from 'src/reviews/ReviewDecision'
-import { AccessRequestInterface } from 'types/interfaces'
-import { ReleaseInterface } from 'types/types'
+import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
+import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
+import { AccessRequestInterface, ReviewResponse } from 'types/interfaces'
+import { isReviewResponse, ReleaseInterface, ReviewComment, ReviewResponseKind } from 'types/types'
+import { sortByCreatedAtAscending } from 'utils/dateUtils'
+import { getErrorMessage } from 'utils/fetcher'
 
 type ReviewCommentsProps =
   | {
@@ -18,6 +26,13 @@ type ReviewCommentsProps =
     }
 
 export default function ReviewComments({ release, accessRequest }: ReviewCommentsProps) {
+  const [newReviewComment, setNewReviewComment] = useState('')
+  const [commentSubmissionError, setCommentSubmissionError] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
+  const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
+
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
       release
@@ -31,23 +46,92 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     ...semverOrAccessRequestIdObject,
   })
 
-  const reviewDetails = useMemo(
-    () =>
-      reviews.map((review) =>
-        review.responses.map((response) => <>{response.decision && <ReviewDecision response={response} />}</>),
-      ),
-    [reviews],
-  )
+  const reviewDetails = useMemo(() => {
+    let decisionsAndComments: Array<ReviewResponseKind> = []
+    reviews.forEach((review) => {
+      review.responses.forEach((response) => decisionsAndComments.push(response))
+    })
+    if (release) {
+      decisionsAndComments = [...decisionsAndComments, ...release.comments]
+    }
+    if (accessRequest) {
+      decisionsAndComments = [...decisionsAndComments, ...accessRequest.comments]
+    }
+    decisionsAndComments.sort(sortByCreatedAtAscending)
+    return decisionsAndComments.map((response) => {
+      if (isReviewResponse(response)) {
+        return <ReviewDecisionDisplay key={response.createdAt} response={response as ReviewResponse} />
+      } else {
+        return <ReviewCommentDisplay key={response.createdAt} response={response as ReviewComment} />
+      }
+    })
+  }, [reviews, release, accessRequest])
+
+  async function submitReviewComment() {
+    setCommentSubmissionError('')
+    setSubmitButtonLoading(true)
+    if (!newReviewComment) {
+      setCommentSubmissionError('Please provide a comment before submitting.')
+      setSubmitButtonLoading(false)
+      return
+    }
+    if (release) {
+      const res = await postReleaseComment(modelId, release.semver, newReviewComment)
+      if (res.ok) {
+        mutateRelease()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
+    } else if (accessRequest) {
+      const res = await postAccessRequestComment(accessRequest.modelId, accessRequest.id, newReviewComment)
+      if (res.ok) {
+        mutateAccessRequest()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
+    } else {
+      setCommentSubmissionError('There was a problem submitting this comment, please try again later.')
+    }
+    setSubmitButtonLoading(false)
+  }
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
     <>
       {reviews.length > 0 && <Divider />}
-      {isReviewsLoading && <Loading />}
+      {isReviewsLoading && isCurrentUserLoading && <Loading />}
       {reviewDetails}
+      <>
+        {currentUser && (
+          <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
+            <Box sx={{ width: '100%' }}>
+              <RichTextEditor
+                value={newReviewComment}
+                onChange={(e) => setNewReviewComment(e)}
+                textareaProps={{ placeholder: 'Add a comment' }}
+              />
+            </Box>
+            <LoadingButton
+              sx={{ mt: 1 }}
+              variant='contained'
+              onClick={submitReviewComment}
+              loading={submitButtonLoading}
+            >
+              Submit comment
+            </LoadingButton>
+            <MessageAlert severity='error' message={commentSubmissionError} />
+          </Stack>
+        )}
+      </>
     </>
   )
 }

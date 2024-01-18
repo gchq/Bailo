@@ -49,3 +49,11 @@ export function patchAccessRequest(modelId: string, accessRequestId: string, for
     body: JSON.stringify({ metadata: { ...form } }),
   })
 }
+
+export function postAccessRequestComment(modelId: string, accessRequestId: string, comment: string) {
+  return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}/comment`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  })
+}

@@ -5,7 +5,7 @@ import { ModelImage } from '../types/interfaces'
 import { ModelForm, ModelInterface, Role } from '../types/v2/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-interface ModelSearchResult {
+export interface ModelSearchResult {
   id: string
   name: string
   description: string

@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > webhook > deleteWebhook > 200 > ok 1`] = `
+{
+  "message": "Successfully removed file.",
+}
+`;

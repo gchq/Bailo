@@ -8,6 +8,12 @@ from bailo.core.exceptions import BailoException, ResponseException
 
 
 class Agent:
+    """Base API Agent for talking with Bailo.
+
+    Wraps each request in an exception handler that maps API errors to Python Bailo errors, among status codes less than 400.
+    Defaults request timeout to 5 seconds.
+    """
+
     def __request(self, method, *args, **kwargs):
         if "timeout" not in kwargs:
             kwargs["timeout"] = 5
@@ -25,7 +31,7 @@ class Agent:
             raise BailoException(res.json()["error"]["message"])
         except JSONDecodeError:
             # No response given
-            raise ResponseException(f"Cannot {method} to {res.request.url}")
+            raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}")
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)
@@ -53,8 +59,7 @@ class PkiAgent(Agent):
         key: str,
         auth: str,
     ):
-        """
-        Initiates an agent for PKI authentication.
+        """Initiate an agent for PKI authentication.
 
         :param cert: Path to cert file
         :param key: Path to key file
@@ -86,8 +91,7 @@ class TokenAgent(Agent):
         access_key: str,
         secret_key: str,
     ):
-        """
-        Initiates an agent for API token authentication.
+        """Initiate an agent for API token authentication.
 
         :param access_key: Access key
         :param secret_key: Secret key

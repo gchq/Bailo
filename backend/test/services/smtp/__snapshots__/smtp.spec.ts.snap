@@ -1,5 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > smtp > smtp > that an email is sent after a response for a an access request review 1`] = `undefined`;
+
+exports[`services > smtp > smtp > that an email is sent after a response for a release review 1`] = `undefined`;
+
 exports[`services > smtp > smtp > that an email is sent for Access Request Reviews 1`] = `
 [
   {

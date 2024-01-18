@@ -3,7 +3,12 @@ import { describe, expect, test, vi } from 'vitest'
 import AccessRequest from '../../../src/models/v2/AccessRequest.js'
 import Release from '../../../src/models/v2/Release.js'
 import Review from '../../../src/models/v2/Review.js'
-import { requestReviewForAccessRequest, requestReviewForRelease } from '../../../src/services/v2/smtp/smtp.js'
+import {
+  notifyReviewResponseForAccess,
+  notifyReviewResponseForRelease,
+  requestReviewForAccessRequest,
+  requestReviewForRelease,
+} from '../../../src/services/v2/smtp/smtp.js'
 import config from '../../../src/utils/v2/config.js'
 
 vi.mock('../../../src/utils/v2/config.js', () => {
@@ -118,6 +123,18 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent for Access Request Reviews', async () => {
     await requestReviewForAccessRequest('user:user', review, access)
+
+    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('that an email is sent after a response for a release review', async () => {
+    await notifyReviewResponseForRelease(review, release)
+
+    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('that an email is sent after a response for a an access request review', async () => {
+    await notifyReviewResponseForAccess(review, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })

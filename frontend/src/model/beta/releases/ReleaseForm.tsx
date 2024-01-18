@@ -133,6 +133,7 @@ export default function ReleaseForm({
             onChange={onReleaseNotesChange}
             aria-label='Release notes'
             label={releaseNotesLabel}
+            dataTest='releaseNotesInput'
           />
         )}
       </Stack>

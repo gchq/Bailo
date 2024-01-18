@@ -16,7 +16,6 @@ export default function Release() {
   const { modelId, semver }: { modelId?: string; semver?: string } = router.query
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
-
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     semver: semver || '',

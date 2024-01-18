@@ -1,5 +1,6 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
+import { ReviewComment } from 'types/types'
 
 export interface SplitSchema {
   reference: string
@@ -140,6 +141,7 @@ export interface AccessRequestInterface {
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
+  comments: Array<ReviewComment>
   createdBy: string
   createdAt: string
   updatedAt: string

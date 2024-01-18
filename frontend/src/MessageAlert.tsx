@@ -23,7 +23,7 @@ export default function MessageAlert({ message, severity, linkText, href }: Mess
   const alertRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (message && alertRef.current) {
+    if (message && alertRef.current && alertRef.current.scrollIntoView) {
       alertRef.current.scrollIntoView({
         behavior: 'smooth',
       })

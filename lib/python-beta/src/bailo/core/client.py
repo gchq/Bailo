@@ -10,8 +10,7 @@ from bailo.core.utils import filter_none
 
 
 class Client:
-    """
-    Creates a Client object that can be used to talk to the website.
+    """Create a Client object that can be used to talk to the website.
 
     :param url: Url of bailo website
     :param agent:
@@ -28,8 +27,7 @@ class Client:
         team_id: str,
         visibility: ModelVisibility | None = None,
     ):
-        """
-        Creates a model.
+        """Create a model.
 
         :param name: Name of the model
         :param description: Description of the model
@@ -88,8 +86,7 @@ class Client:
         self,
         model_id: str,
     ):
-        """
-        Retrieves a specific model using its unique ID.
+        """Retrieve a specific model using its unique ID.
 
         :param model_id: Unique model ID
         :return: JSON response object
@@ -105,8 +102,7 @@ class Client:
         description: str | None = None,
         visibility: str | None = None,
     ):
-        """
-        Updates a specific model using its unique ID.
+        """Update a specific model using its unique ID.
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
@@ -123,8 +119,7 @@ class Client:
         model_id: str,
         version: str,
     ):
-        """
-        Retrieves a specific model card, using the unique model ID and version.
+        """Retrieve a specific model card, using the unique model ID and version.
 
         :param model_id: Unique model ID
         :param version: Model card version
@@ -139,8 +134,7 @@ class Client:
         model_id: str,
         metadata: Any,
     ):
-        """
-        Updates the latest model card, using the unique model ID.
+        """Update the latest model card, using the unique model ID.
 
         :param model_id: Unique model ID
         :param metadata: Metadata object, defined by model card schema
@@ -159,7 +153,7 @@ class Client:
         schema_id: str,
     ):
         """
-        Creates a model card using a given schema ID.
+        Create a model card using a given schema ID.
 
         :param model_id: Unique model ID
         :param schema_id: Unique model card schema ID
@@ -184,7 +178,7 @@ class Client:
         draft: bool | None = False,
     ):
         """
-        Creates a new model release.
+        Create a new model release.
 
         :param model_id: Unique model ID
         :param model_card_version: Model card version
@@ -219,7 +213,7 @@ class Client:
         images: list[str],
     ):
         """
-        Creates a new model release.
+        Create a new model release.
 
         :param model_id: Unique model ID
         :param model_card_version: Model card version
@@ -246,7 +240,7 @@ class Client:
         model_id: str,
     ):
         """
-        Gets all releases for a model.
+        Get all releases for a model.
 
         :param model_id: Unique model ID
         :return: JSON response object
@@ -257,7 +251,7 @@ class Client:
 
     def get_release(self, model_id: str, release_version: str):
         """
-        Gets a specific model release.
+        Get a specific model release.
 
         :param model_id: Unique model ID
         :param release_version: Release version
@@ -273,7 +267,7 @@ class Client:
         release_version: str,
     ):
         """
-        Deletes a specific model release.
+        Delete a specific model release.
 
         :param model_id: Unique model ID
         :param release_version: Release version
@@ -288,7 +282,7 @@ class Client:
         model_id: str,
     ):
         """
-        Gets files for a model.
+        Get files for a model.
 
         :param model_id: Unique model ID
         :return: JSON response object
@@ -303,8 +297,7 @@ class Client:
         file_id: str,
         buffer: BytesIO,
     ):
-        """
-        Downloads a specific file.
+        """Download a specific file.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
@@ -322,8 +315,7 @@ class Client:
         return file_id
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
-        """
-        Creates a simple file upload.
+        """Create a simple file upload.
 
         :param model_id: Unique model ID
         :param name: File name
@@ -346,8 +338,7 @@ class Client:
         model_id: str,
         file_id: str,
     ):
-        """
-        Deletes a specific file associated with a model.
+        """Delete a specific file associated with a model.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
@@ -361,8 +352,7 @@ class Client:
         self,
         model_id: str,
     ):
-        """
-        Gets all images.
+        """Get all images.
 
         :param model_id: A unique model ID
         :return: JSON response object
@@ -373,8 +363,7 @@ class Client:
         self,
         kind: SchemaKind | None = None,
     ):
-        """
-        Gets all schemas.
+        """Get all schemas.
 
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
         :return: JSON response object
@@ -388,8 +377,7 @@ class Client:
         self,
         schema_id: str,
     ):
-        """
-        Retrieves a specific schema using its unique ID.
+        """Retrieve a specific schema using its unique ID.
 
         :param schema_id: Unique schema ID
         :return: JSON response object.
@@ -406,8 +394,7 @@ class Client:
         kind: SchemaKind,
         json_schema: dict[str, Any],
     ):
-        """
-        Creates a schema.
+        """Create a schema.
 
         :param schema_id: Unique schema ID
         :param name: Name of the schema
@@ -433,8 +420,7 @@ class Client:
         model_id: str | None = None,
         version: str | None = None,
     ):
-        """
-        Gets all reviews within given parameters.
+        """Get all reviews within given parameters.
 
         :param active: Boolean representing status of review
         :param model_id: Unique model ID, defaults to None
@@ -460,8 +446,7 @@ class Client:
         version: str | None = None,
         comment: str | None = None,
     ):
-        """
-        Creates a review for a release
+        """Create a review for a release.
 
         :param model_id: A unique model ID
         :param version: A semantic version for a release
@@ -480,7 +465,7 @@ class Client:
         model_id: str,
     ):
         """
-        Gets roles for a model.
+        Get roles for a model.
 
         :param model_id: Unique model ID
         :return: JSON response object
@@ -493,8 +478,7 @@ class Client:
         self,
         model_id: str,
     ):
-        """
-        Gets current users roles for a model.
+        """Get current users roles for a model.
 
         :param model_id: Unique model ID
         :return: JSON response object
@@ -554,8 +538,7 @@ class Client:
         self,
         team_id: str,
     ):
-        """
-        Retrieves a specific team given its unique ID.
+        """Retrieve a specific team given its unique ID.
 
         :param team_id: Unique team ID
         :return: JSON response object
@@ -570,8 +553,7 @@ class Client:
         name: str | None = None,
         description: str | None = None,
     ):
-        """
-        Updates a team given its unique ID.
+        """Update a team given its unique ID.
 
         :param team_id: Unique team ID
         :param name: Name of team, defaults to None
@@ -586,8 +568,7 @@ class Client:
         ).json()
 
     def get_access_request(self, model_id: str, access_request_id: str):
-        """
-        Retrieves a specific access request given its unique ID.
+        """Retrieve a specific access request given its unique ID.
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
@@ -601,8 +582,7 @@ class Client:
         self,
         model_id: str,
     ):
-        """
-        Retrieves all access requests given a specific model.
+        """Retrieve all access requests given a specific model.
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
@@ -613,8 +593,7 @@ class Client:
         ).json()
 
     def post_access_request(self, model_id: str, metadata: Any, schema_id: str):
-        """
-        Creates an access request given a model ID
+        """Create an access request given a model ID.
 
         :param model_id: Unique model ID
         :param metadata: Metadata object, defined by access request schema
@@ -627,8 +606,7 @@ class Client:
         ).json()
 
     def delete_access_request(self, model_id: str, access_request_id: str):
-        """
-        Deletes a specific access request associated with a model.
+        """Delete a specific access request associated with a model.
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID
@@ -645,8 +623,7 @@ class Client:
         metadata: Any,
         schema_id: str | None = None,
     ):
-        """
-        Updates an access request given its unique ID
+        """Update an access request given its unique ID.
 
         :param model_id: Unique model ID
         :param access_request_id: Unique access request ID

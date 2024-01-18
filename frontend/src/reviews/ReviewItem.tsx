@@ -1,5 +1,6 @@
 import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
+import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewRequestInterface } from 'types/interfaces'
 import { timeDifference } from 'utils/dateUtils'
 
@@ -39,6 +40,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               {editedAdornment()}
             </Typography>
           </Stack>
+          <ReviewRoleDisplay review={review} />
         </Stack>
       </ListItemButton>
     </ListItem>

@@ -1,6 +1,8 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { ReviewComment } from './Release.js'
+
 export interface AccessRequestMetadata {
   overview: {
     name: string
@@ -23,6 +25,8 @@ export interface AccessRequestInterface {
   schemaId: string
   metadata: AccessRequestMetadata
 
+  comments: Array<ReviewComment>
+
   deleted: boolean
 
   createdBy: string
@@ -42,6 +46,14 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },
+
+    comments: [
+      {
+        message: { type: String },
+        user: { type: String },
+        createdAt: { type: String },
+      },
+    ],
 
     createdBy: { type: String, required: true },
   },
