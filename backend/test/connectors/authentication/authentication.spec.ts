@@ -14,15 +14,18 @@ vi.mock('../../../src/utils/v2/config.js', () => ({
   default: configMock,
 }))
 
-describe('connectors > user', () => {
+describe('connectors > authentication', () => {
   test('silly', () => {
     const connector = getAuthenticationConnector(false)
     expect(connector.constructor.name).toBe('SillyAuthenticationConnector')
   })
 
   test('invalid', () => {
-    configMock.connectors.authentication.kind = 'invalid'
+    const invalidConnector = 'invalid'
+    configMock.connectors.authentication.kind = invalidConnector
 
-    expect(() => getAuthenticationConnector(false)).toThrowError('No valid authentication connector provided.')
+    expect(() => getAuthenticationConnector(false)).toThrowError(
+      `'${invalidConnector}' is not a valid authentication kind.`,
+    )
   })
 })

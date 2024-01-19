@@ -18,7 +18,7 @@ export function getAuthorisationConnector(cache = true): BasicAuthorisationConne
       authorisationConnector = new BasicAuthorisationConnector()
       break
     default:
-      throw ConfigurationError(`'${config.connectors.authentication.kind}' is not a valid Authorisation kind.`, {
+      throw ConfigurationError(`'${config.connectors.authorisation.kind}' is not a valid authorisation kind.`, {
         validKinds: Object.values(AuthorisationKind),
       })
   }
