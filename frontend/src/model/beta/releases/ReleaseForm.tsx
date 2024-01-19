@@ -99,10 +99,12 @@ export default function ReleaseForm({
           <Typography>{`${model.name} - ${formData.semver}`}</Typography>
         </Stack>
       )}
-      <Stack>
-        <Typography fontWeight='bold'>Latest version</Typography>
-        <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
-      </Stack>
+      {!editable && (
+        <Stack>
+          <Typography fontWeight='bold'>Latest version</Typography>
+          <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+        </Stack>
+      )}
       <Stack>
         <Typography fontWeight='bold'>
           Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
