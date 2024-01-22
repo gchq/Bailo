@@ -55,6 +55,13 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
             <pre style={{ overflowX: 'auto', backgroundColor: theme.palette.container.main }} {...props} />
           ),
         },
+        table: {
+          component: (props: any) => (
+            <div style={{ overflowX: 'auto' }}>
+              <table {...props} />
+            </div>
+          ),
+        },
       },
     }),
     [theme.palette.container.main],
