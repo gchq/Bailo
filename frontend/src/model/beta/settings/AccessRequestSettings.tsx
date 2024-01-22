@@ -34,7 +34,7 @@ export default function AccessRequestSettings({ model }: ModelAccessProps) {
     } else {
       sendNotification({
         variant: 'success',
-        msg: 'Access updated',
+        msg: 'Access request settings updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
