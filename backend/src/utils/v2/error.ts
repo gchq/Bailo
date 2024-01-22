@@ -45,5 +45,5 @@ export function InternalError(message: string, context?: BailoError['context'], 
 }
 
 export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
-  return GenericError(500, `BAILO configuration error: ${message}`, context, logger)
+  return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
 }
