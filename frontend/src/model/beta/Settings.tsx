@@ -78,7 +78,7 @@ export default function Settings({ model }: SettingsProps) {
       <Box sx={{ width: '100%', maxWidth: '1000px' }}>
         {selectedCategory === 'details' && <ModelDetails model={model} />}
         {selectedCategory === 'permissions' && <ModelAccess model={model} />}
-        {selectedCategory === 'access' && <AccessRequestSettings />}
+        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
         {selectedCategory === 'danger' && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
