@@ -162,7 +162,7 @@ export default function SideNavigation({
             {currentUser && (
               <>
                 <NavMenuItem
-                  href='/beta/schema/list'
+                  href='/beta/schemas/list'
                   selectedPage={page}
                   primaryText='Schemas'
                   drawerOpen={drawerOpen}
