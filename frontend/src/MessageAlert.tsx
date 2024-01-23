@@ -1,14 +1,12 @@
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import ContentCopy from '@mui/icons-material/ContentCopy'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import { Button, Collapse, IconButton, Tooltip, Typography } from '@mui/material'
 import Alert, { AlertProps } from '@mui/material/Alert'
-import ButtonBase from '@mui/material/ButtonBase'
-import Collapse from '@mui/material/Collapse'
 import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import copy from 'copy-to-clipboard'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-
-import useNotification from '../src/common/Snackbar'
+import useNotification from 'src/common/Snackbar'
 
 type PartialMessageAlertProps =
   | {
@@ -25,10 +23,9 @@ type MessageAlertProps = {
   severity?: AlertProps['severity']
 } & PartialMessageAlertProps
 
-export default function MessageAlert({ message, severity, linkText, href }: MessageAlertProps) {
-  const [contact, setContact] = useState(false)
+export default function MessageAlert({ message = '', severity, linkText, href }: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
-
+  const [showContactMessage, setShowContactMessage] = useState(false)
   const sendNotification = useNotification()
 
   useEffect(() => {
@@ -39,37 +36,56 @@ export default function MessageAlert({ message, severity, linkText, href }: Mess
     }
   }, [message])
 
-  if (!message) return null
-
   const handleContact = () => {
-    setContact(!contact)
+    setShowContactMessage(!showContactMessage)
   }
 
   const copyErrorMsgToClipboard = () => {
-    copy(message)
+    navigator.clipboard.writeText(message)
     sendNotification({ variant: 'success', msg: 'Copied error message to clipboard' })
   }
 
+  if (!message) return null
+
   return (
     <Alert severity={severity} sx={{ mb: 2, mt: 2 }} ref={alertRef}>
-      <Stack direction='row' spacing={1}>
-        <Typography>{message}</Typography>
-        <ContentCopyIcon
-          fontSize='small'
-          style={{
-            cursor: 'pointer',
-          }}
-          onClick={copyErrorMsgToClipboard}
-        />
+      <Stack spacing={1}>
+        <Stack direction='row' spacing={1} alignItems='center'>
+          <Typography>{message}</Typography>
+          {severity === 'error' && (
+            <Tooltip title='Copy to clipboard'>
+              <IconButton
+                size='small'
+                color='primary'
+                onClick={copyErrorMsgToClipboard}
+                aria-label='copy error message to clipboard'
+              >
+                <ContentCopy fontSize='inherit' />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
         <Typography>{!!(href && linkText) && <Link href={href}>{linkText}</Link>}</Typography>
+        {severity === 'error' && (
+          <>
+            <div>
+              <Button
+                size='small'
+                onClick={handleContact}
+                endIcon={showContactMessage ? <ExpandLess /> : <ExpandMore />}
+              >
+                Contact us
+              </Button>
+            </div>
+            <Collapse unmountOnExit in={showContactMessage} timeout='auto'>
+              <Typography>
+                {'Having trouble? Please copy the error message and report it to the '}
+                <Link href={'/beta/help'}>Bailo support team</Link>.
+              </Typography>
+            </Collapse>
+          </>
+        )}
       </Stack>
-      <ButtonBase onClick={handleContact}>Contact us</ButtonBase>
-      <Collapse in={contact} timeout='auto' unmountOnExit>
-        <Typography>
-          If you are having trouble with this error. Please copy the error message and report it to the{' '}
-          <Link href={'/beta/help'}>support team.</Link>
-        </Typography>
-      </Collapse>
     </Alert>
   )
 }
