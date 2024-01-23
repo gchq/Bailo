@@ -1,60 +1,67 @@
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Box, Stack, Typography } from '@mui/material'
-import { ReactElement, useMemo } from 'react'
-import UserDisplay from 'src/common/UserDisplay'
+import { Stack, Tooltip, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 import { useGetModelRoles } from '../../../../actions/model'
-import { ReviewRequestInterface } from '../../../../types/interfaces'
-import { ApprovalStates } from '../../../../types/v2/enums'
-import { getRoleDisplay } from '../../../../utils/beta/roles'
+import { ReviewRequestInterface, ReviewResponse } from '../../../../types/interfaces'
 import Loading from '../../../common/Loading'
 import MessageAlert from '../../../MessageAlert'
 
 interface ReviewDisplayProps {
-  review: ReviewRequestInterface
+  reviews: ReviewRequestInterface[]
 }
 
-export default function ReviewDisplay({ review }: ReviewDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
+interface ReviewResponseWithRole extends ReviewResponse {
+  role: string
+}
 
-  const reviewKindText = useMemo(() => (review.kind === 'release' ? 'release' : 'access request'), [review.kind])
+export default function ReviewDisplay({ reviews }: ReviewDisplayProps) {
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(
+    reviews[0] ? reviews[0].model.id : undefined,
+  )
 
-  const { acceptedReviewResponses, changesRequestedReviewResponses } = useMemo(() => {
-    return review.responses.reduce<{
-      acceptedReviewResponses: ReactElement[]
-      changesRequestedReviewResponses: ReactElement[]
-    }>(
-      (reviewResponses, reviewResponse) => {
-        const isAccepted = reviewResponse.decision === ApprovalStates.Accepted
+  const [acceptedReviewResponses, setAcceptedReviewResponses] = useState<ReviewResponseWithRole[]>([])
+  const [changesRequestedReviewResponses, setChangesRequestedReviewResponses] = useState<ReviewResponseWithRole[]>([])
 
-        const reviewResponseElement = (
-          <Stack direction='row' spacing={1} key={`${reviewResponse.user}-${reviewResponse.decision}`}>
-            {isAccepted ? (
-              <Done color='success' fontSize='small' />
-            ) : (
-              <HourglassEmpty color='warning' fontSize='small' />
-            )}
-            <Typography variant='caption'>
-              <Box component='span' fontWeight='bold'>
-                <UserDisplay dn={reviewResponse.user} />
-              </Box>
-              {` has ${isAccepted ? 'approved' : 'requested changes for'} this ${reviewKindText} (${getRoleDisplay(
-                review.role,
-                modelRoles,
-              )})`}
-            </Typography>
-          </Stack>
-        )
+  useEffect(() => {
+    const updatedApprovals: ReviewResponseWithRole[] = []
+    const updatedRequests: ReviewResponseWithRole[] = []
+    if (reviews) {
+      reviews.forEach((review) =>
+        review.responses.forEach((reviewResponse) => {
+          reviewResponse.decision === 'approve'
+            ? updatedApprovals.push({ ...reviewResponse, role: review.role })
+            : updatedRequests.push({ ...reviewResponse, role: review.role })
+        }),
+      )
+      setAcceptedReviewResponses(updatedApprovals)
+      setChangesRequestedReviewResponses(updatedRequests)
+    }
+  }, [reviews])
 
-        if (isAccepted) reviewResponses.acceptedReviewResponses.push(reviewResponseElement)
-        else reviewResponses.changesRequestedReviewResponses.push(reviewResponseElement)
-
-        return reviewResponses
-      },
-      { acceptedReviewResponses: [], changesRequestedReviewResponses: [] },
-    )
-  }, [review, modelRoles, reviewKindText])
+  const approvalsDisplay = () => {
+    const staticRoles = ['owner', 'contributor', 'consumer']
+    const dynamicRoles = modelRoles.filter((role) => !staticRoles.includes(role.id)).map((role) => role)
+    const roleApprovals: string[] = []
+    dynamicRoles.forEach((dynamicRole) => {
+      const acceptedResponsesForRole = acceptedReviewResponses.filter(
+        (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
+      )
+      if (acceptedResponsesForRole.length > 0) roleApprovals.push(dynamicRole.name)
+    })
+    return roleApprovals.map((role) => (
+      <Tooltip
+        title={`${acceptedReviewResponses.length} approval${acceptedReviewResponses.length > 1 ? 's' : ''}`}
+        key={role}
+      >
+        <Stack direction='row'>
+          <Done color='success' fontSize='small' />
+          <Typography variant='caption'>{`Approved by ${role}`}</Typography>
+        </Stack>
+      </Tooltip>
+    ))
+  }
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -63,10 +70,22 @@ export default function ReviewDisplay({ review }: ReviewDisplayProps) {
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Stack>
-        {acceptedReviewResponses}
-        {changesRequestedReviewResponses}
-      </Stack>
+      {changesRequestedReviewResponses.length === 0 && acceptedReviewResponses.length > 0 && approvalsDisplay()}
+      {changesRequestedReviewResponses.length > 0 && (
+        <Tooltip
+          title={`${changesRequestedReviewResponses.length} ${
+            changesRequestedReviewResponses.length > 1 ? 'reviews' : 'review'
+          } requesting changes`}
+        >
+          <Stack direction='row'>
+            <HourglassEmpty color='warning' fontSize='small' />
+            <Typography variant='caption'>Changes requested</Typography>
+          </Stack>
+        </Tooltip>
+      )}
+      {changesRequestedReviewResponses.length === 0 && acceptedReviewResponses.length === 0 && (
+        <Typography variant='caption'>Awaiting review</Typography>
+      )}
     </>
   )
 }
