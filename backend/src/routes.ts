@@ -1,4 +1,8 @@
+import parser from 'body-parser'
+import MongoStore from 'connect-mongo'
 import express from 'express'
+import session from 'express-session'
+import grant from 'grant'
 
 import authentication from './connectors/v2/authentication/index.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
@@ -101,14 +105,44 @@ import config from './utils/v2/config.js'
 
 export const server = express()
 
+/**
+ * This is only required for V1 OAuth.
+ * V2 OAuth is handled separately.
+ * Having both V1 and V1 results in duplication but this does not affect functionality.
+ */
+if (config.oauth.enabled) {
+  server.use(
+    session({
+      secret: config.session.secret,
+      resave: true,
+      saveUninitialized: true,
+      cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
+      store: MongoStore.create({
+        mongoUrl: config.mongo.uri,
+      }),
+    }),
+  )
+  server.use(parser.urlencoded({ extended: true }))
+  server.use(grant.default.express(config.oauth.grant))
+
+  server.get('/api/login', (req, res) => {
+    res.redirect(`/api/connect/${config.oauth.provider}/login`)
+  })
+
+  server.get('/api/logout', (req, res) => {
+    req.session.destroy(function (err: unknown) {
+      if (err) throw err
+      res.redirect('/')
+    })
+  })
+}
+
 server.use('/api/v1', getUser)
 server.use('/api/v1', expressLogger)
 
 if (config.experimental.v2) {
   server.use('/api/v2', expressLoggerV2)
   const middlewareConfigs = authentication.authenticationMiddleware()
-  //Need path so that user middleware doesn't break V1 but this will break login URLs
-  // Could have an array of [{ path, middlewares}] and for loop with a new server.use for each
   for (const middlewareConf of middlewareConfigs) {
     server.use(middlewareConf?.path || '/', middlewareConf.middleware)
   }
