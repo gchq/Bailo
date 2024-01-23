@@ -307,8 +307,9 @@ class Client:
                 f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
             )
         else:
-            return self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
-
+            return self.agent.get(
+                f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+            )
 
     def get_download_by_filename(
         self,
