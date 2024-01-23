@@ -1,3 +1,4 @@
+import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -140,6 +141,10 @@ export interface Config {
     enabled: boolean
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
+    cognito: {
+      CognitoIdentityProviderClient: CognitoIdentityProviderClientConfig
+      userPoolId: string
+    }
   }
 }
 

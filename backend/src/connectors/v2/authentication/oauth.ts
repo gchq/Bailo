@@ -1,3 +1,4 @@
+import { CognitoIdentityProviderClient, ListUsersCommand } from '@aws-sdk/client-cognito-identity-provider'
 import parser from 'body-parser'
 import MongoStore from 'connect-mongo'
 import { NextFunction, Request, Response, Router } from 'express'
@@ -56,7 +57,6 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
         dn: jwt.id_token.payload.email,
       }
     }
-
     return next()
   }
 
@@ -82,25 +82,31 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return false
   }
 
-  async queryEntities(_query: string) {
-    return [
-      {
-        kind: SillyEntityKind.User,
-        id: 'user',
-      },
-      {
-        kind: SillyEntityKind.User,
-        id: 'user2',
-      },
-      {
-        kind: SillyEntityKind.Group,
-        id: 'group1',
-      },
-      {
-        kind: SillyEntityKind.Group,
-        id: 'group2',
-      },
-    ]
+  async queryEntities(query: string) {
+    const results = await this.listUsers(query)
+    const mapped = results.Users?.map((user) => ({
+      kind: SillyEntityKind.User,
+      id: user.Attributes?.find((attribute) => attribute.Name === 'email')?.Value,
+    }))
+    //console.log(results.Users)
+    return mapped
+  }
+
+  /**
+   * Make this into a client function queryEmails that returns an array of emails
+   * Handle errors like missing userpool Id
+   */
+  async listUsers(query: string) {
+    const client = new CognitoIdentityProviderClient(config.oauth.cognito.CognitoIdentityProviderClient)
+
+    const command = new ListUsersCommand({
+      UserPoolId: config.oauth.cognito.userPoolId,
+      Filter: `"email"^="${query}"`,
+      AttributesToGet: ['email'],
+    })
+
+    const result = await client.send(command)
+    return result
   }
 
   async getEntities(user: UserDoc) {
