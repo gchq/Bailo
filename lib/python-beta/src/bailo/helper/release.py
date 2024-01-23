@@ -132,7 +132,7 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str) -> str:
+    def download(self, filename: str) -> Any:
         """Give returns a Reading object given the file id.
 
         :param filename: The name of the file to retrieve
