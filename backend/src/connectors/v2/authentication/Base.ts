@@ -2,7 +2,7 @@ import { RequestHandler } from 'express'
 
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { Unauthorized } from '../../../utils/v2/error.js'
+import { checkAuthentication, getTokenFromAuthHeader } from '../../../routes/middleware/defaultAuthentication.js'
 
 export const Roles = {
   Admin: 'admin',
@@ -29,21 +29,18 @@ export abstract class BaseAuthenticationConnector {
   }
 
   authenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
-    // Add Docker middleware with path that we currently use
     return [
       {
+        path: '/api/v2/token',
+        middleware: [getTokenFromAuthHeader],
+      },
+      {
         path: '/api/v2',
-        middleware: [
-          function (req, res, next) {
-            if (!req.user) {
-              throw Unauthorized('No user')
-            }
-            return next()
-          },
-        ],
+        middleware: [checkAuthentication],
       },
     ]
   }
+
   async getUserModelRoles(user: UserDoc, model: ModelDoc) {
     const entities = await this.getEntities(user)
 
