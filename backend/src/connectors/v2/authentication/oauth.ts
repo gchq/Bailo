@@ -1,4 +1,11 @@
+import parser from 'body-parser'
+import MongoStore from 'connect-mongo'
+import { NextFunction, Request, Response, Router } from 'express'
+import session from 'express-session'
+import grant from 'grant'
+
 import { UserDoc } from '../../../models/v2/User.js'
+import config from '../../../utils/v2/config.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
 import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
 
@@ -7,7 +14,7 @@ const SillyEntityKind = {
   Group: 'group',
 } as const
 
-export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
+export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   constructor() {
     super()
   }
@@ -15,15 +22,57 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   authenticationMiddleware() {
     return [
       {
-        path: '/api/v2',
         middleware: [
-          function (req, res, next) {
-            req.user = { dn: 'user' }
-            return next()
-          },
+          session({
+            secret: config.session.secret,
+            resave: true,
+            saveUninitialized: true,
+            cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
+            store: MongoStore.create({
+              mongoUrl: config.mongo.uri,
+            }),
+          }),
+          parser.urlencoded({ extended: true }),
+          grant.default.express(config.oauth.grant),
+          this.getRoutes(),
         ],
       },
+      {
+        path: '/api/v2',
+        middleware: [this.getUser],
+      },
+      ...super.authenticationMiddleware(),
     ]
+  }
+
+  getUser(req: Request, res: Response, next: NextFunction) {
+    // this function must never fail to call next, even when
+    // no user is found.
+    if (!req.session.grant?.response?.jwt) {
+      req.user = undefined
+    } else {
+      const jwt = req.session.grant.response.jwt
+      req.user = {
+        dn: jwt.id_token.payload.email,
+      }
+    }
+
+    return next()
+  }
+
+  getRoutes() {
+    const router = Router()
+    router.get('/api/login', (req, res) => {
+      res.redirect(`/api/connect/${config.oauth.provider}/login`)
+    })
+
+    router.get('/api/logout', (req, res) => {
+      req.session.destroy(function (err: unknown) {
+        if (err) throw err
+        res.redirect('/')
+      })
+    })
+    return router
   }
 
   async hasRole(_user: UserDoc, role: RoleKeys) {

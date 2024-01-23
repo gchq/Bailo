@@ -1,13 +1,9 @@
-import parser from 'body-parser'
-import MongoStore from 'connect-mongo'
 import express from 'express'
-import session from 'express-session'
-import grant from 'grant'
 
+import authentication from './connectors/v2/authentication/index.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
 import { getTokenFromAuthHeader } from './routes/middleware/getToken.js'
-import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -100,48 +96,23 @@ import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.j
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
-import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
+import config from './utils/v2/config.js'
 
 export const server = express()
-
-if (config.oauth.enabled) {
-  server.use(
-    session({
-      secret: config.session.secret,
-      resave: true,
-      saveUninitialized: true,
-      cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
-      store: MongoStore.create({
-        mongoUrl: config.mongo.uri,
-      }),
-    }),
-  )
-}
 
 server.use('/api/v1', getUser)
 server.use('/api/v1', expressLogger)
 
 if (config.experimental.v2) {
-  server.use('/api/v2', getUserV2)
   server.use('/api/v2', expressLoggerV2)
-}
-
-if (config.oauth.enabled) {
-  server.use(parser.urlencoded({ extended: true }))
-  server.use(grant.default.express(config.oauth.grant))
-
-  server.get('/api/login', (req, res) => {
-    res.redirect(`/api/connect/${config.oauth.provider}/login`)
-  })
-
-  server.get('/api/logout', (req, res) => {
-    req.session.destroy(function (err: unknown) {
-      if (err) throw err
-      res.redirect('/')
-    })
-  })
+  const middlewareConfigs = authentication.authenticationMiddleware()
+  //Need path so that user middleware doesn't break V1 but this will break login URLs
+  // Could have an array of [{ path, middlewares}] and for loop with a new server.use for each
+  for (const middlewareConf of middlewareConfigs) {
+    server.use(middlewareConf?.path || '/', middlewareConf.middleware)
+  }
 }
 
 // V1 APIs
