@@ -21,7 +21,7 @@ type PartialMessageAlertProps =
     }
 
 type MessageAlertProps = {
-  message: string
+  message?: string
   severity?: AlertProps['severity']
 } & PartialMessageAlertProps
 
@@ -30,11 +30,6 @@ export default function MessageAlert({ message, severity, linkText, href }: Mess
   const alertRef = useRef<HTMLDivElement>(null)
 
   const sendNotification = useNotification()
-
-  const copyErrorMsgToClipboard = () => {
-    copy(message)
-    sendNotification({ variant: 'success', msg: 'Copied error message to clipboard' })
-  }
 
   useEffect(() => {
     if (message && alertRef.current && alertRef.current.scrollIntoView) {
@@ -48,6 +43,11 @@ export default function MessageAlert({ message, severity, linkText, href }: Mess
 
   const handleContact = () => {
     setContact(!contact)
+  }
+
+  const copyErrorMsgToClipboard = () => {
+    copy(message)
+    sendNotification({ variant: 'success', msg: 'Copied error message to clipboard' })
   }
 
   return (
