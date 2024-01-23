@@ -132,14 +132,13 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str, buffer: BytesIO) -> str:
+    def download(self, filename: str) -> str:
         """Give returns a Reading object given the file id.
 
         :param filename: The name of the file to retrieve
-        :param buffer: A BytesIO object
         :return: A JSON response object
         """
-        return self.client.get_download_by_filename(self.model_id, str(self.version), filename, buffer)
+        return self.client.get_download_by_filename(self.model_id, str(self.version), filename)
 
     def upload(self, name: str, file: BytesIO) -> str:
         """Upload files in a given directory to the release.

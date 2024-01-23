@@ -16,17 +16,14 @@ def test_file_upload(example_model):
     with file as file:
         example_release.upload("test", file)
 
-    download_file = BytesIO()
-    example_release.download("test", download_file)
+    download_file = example_release.download("test")
 
     # Check that file uploaded has the same contents as the one downloaded
-    download_file.seek(0)
-    assert download_file.read() == byte_obj
+    assert download_file.content == byte_obj
 
 
 @pytest.mark.integration
 def test_source_target_doesnt_exist(example_model):
-    download_file = BytesIO()
     example_release = example_model.create_release("0.1.0", "test")
     with pytest.raises(BailoException):
-        example_release.download("non_existant_model", download_file)
+        example_release.download("non_existant_model")
