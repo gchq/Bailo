@@ -46,7 +46,7 @@ interface PostUserTokenResponse {
 export const postUserToken = [
   bodyParser.json(),
   async (req: Request, res: Response<PostUserTokenResponse>) => {
-    req.audit = AuditInfo.CreateSchema
+    req.audit = AuditInfo.CreateUserToken
     const { body } = parse(req, postUserTokenSchema)
 
     const token = await createToken(req.user, body)
