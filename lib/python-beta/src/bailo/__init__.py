@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = "0.4.3"
+__version__ = "0.4.2"
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
 from bailo.core.client import Client
