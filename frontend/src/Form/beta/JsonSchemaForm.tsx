@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { ArrayFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
+import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
 
@@ -56,6 +56,26 @@ function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
 
 function DescriptionFieldTemplate() {
   return <></>
+}
+
+function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
+  return (
+    <Box sx={{ pl: 2, borderRadius: 0.5, mb: 3 }}>
+      <Stack spacing={2}>
+        <div>
+          <Typography fontWeight='bold' variant='h6' component='h3'>
+            {props.title}
+          </Typography>
+          <Typography variant='caption'>{props.description}</Typography>
+        </div>
+        {props.properties.map((element) => (
+          <div key={element.name} className='property-wrapper'>
+            {element.content}
+          </div>
+        ))}
+      </Stack>
+    </Box>
+  )
 }
 
 // TODO - add validation BAI-866
@@ -131,8 +151,9 @@ export default function JsonSchemaForm({
               ? {
                   DescriptionFieldTemplate,
                   ArrayFieldTemplate,
+                  ObjectFieldTemplate,
                 }
-              : { ArrayFieldTemplate }
+              : { ArrayFieldTemplate, ObjectFieldTemplate }
           }
         >
           {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
