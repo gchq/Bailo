@@ -68,6 +68,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
+import { getModelCardExport } from './routes/v2/model/modelcard/getModelCardExport.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
@@ -218,6 +219,7 @@ if (config.experimental.v2) {
   server.patch('/api/v2/model/:modelId', ...patchModel)
 
   server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+  server.get('/api/v2/model/:modelId/model-card/:version/export', ...getModelCardExport)
   server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
   server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 

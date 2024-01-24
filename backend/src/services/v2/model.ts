@@ -1,9 +1,10 @@
 import { Validator } from 'jsonschema'
+import PDFDocument from 'pdfkit'
 
 import authentication from '../../connectors/v2/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import ModelModel from '../../models/v2/Model.js'
+import ModelModel, { ModelCardInterface } from '../../models/v2/Model.js'
 import Model, { ModelInterface } from '../../models/v2/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../models/v2/ModelCardRevision.js'
 import { UserDoc } from '../../models/v2/User.js'
@@ -16,6 +17,7 @@ import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
+import { toTitleCaseFromCamelCase } from '../../utils/v2/string.js'
 import { findSchemaById } from './schema.js'
 
 export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
@@ -102,9 +104,9 @@ export async function searchModels(
 
   for (const filter of filters) {
     // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustiviely matching all the enum options,
+    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
     // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guarenteed type consistency provided
+    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
     // by TypeScript.
     switch (filter) {
       case 'mine':
@@ -141,6 +143,135 @@ export async function getModelCard(user: UserDoc, modelId: string, version: numb
   } else {
     return getModelCardRevision(user, modelId, version)
   }
+}
+
+const FONT_BAILO = 'src/fonts/pacifico.ttf'
+const FONT_HEADING = 'Helvetica-Bold'
+const FONT_ANSWER = 'Helvetica'
+const FONT_SIZE_BAILO = 24
+const FONT_SIZE_SECTION_HEADING = 16
+const FONT_SIZE_QUESTION_HEADING = 14
+const FONT_SIZE_ANSWER = 12
+
+const extractTextFromObject = (obj: object, doc: PDFKit.PDFDocument, nestedLevel = 0) => {
+  const originalXPosition = doc.x
+  const indent = doc.x + (nestedLevel ? (nestedLevel - 1) * 10 : nestedLevel)
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value && Array.isArray(value)) {
+      doc
+        .font(FONT_HEADING, FONT_SIZE_QUESTION_HEADING)
+        .moveDown(1.5)
+        .text(toTitleCaseFromCamelCase(key), indent, doc.y)
+        .font(FONT_ANSWER, FONT_SIZE_ANSWER)
+        .moveDown(0.5)
+        .list(value)
+      return
+    }
+
+    if (value && typeof value === 'object') {
+      if (nestedLevel === 0) doc.addPage()
+
+      doc
+        .font(FONT_HEADING, FONT_SIZE_SECTION_HEADING)
+        .moveDown(1.5)
+        .text(toTitleCaseFromCamelCase(key), indent, doc.y, {
+          align: nestedLevel === 0 ? 'center' : 'left',
+        })
+
+      if (nestedLevel === 0) {
+        doc
+          .moveTo(doc.page.margins.left - 20, doc.y)
+          .lineTo(doc.page.width - doc.page.margins.right - 20, doc.y)
+          .stroke()
+      }
+
+      extractTextFromObject(value, doc, nestedLevel + 1)
+      return
+    }
+
+    doc
+      .font(FONT_HEADING, FONT_SIZE_QUESTION_HEADING)
+      .moveDown(1.5)
+      .text(toTitleCaseFromCamelCase(key), indent, doc.y)
+      .font(FONT_ANSWER, FONT_SIZE_ANSWER)
+      .moveDown(0.5)
+      .text(`${value}`, indent, doc.y)
+  })
+
+  doc.x = originalXPosition
+}
+
+const addHeaderToAllPages = (doc: PDFKit.PDFDocument) => {
+  const pageRange = doc.bufferedPageRange()
+
+  for (let i = pageRange.start; i < pageRange.count; i++) {
+    doc.switchToPage(i)
+
+    const headerAndFooterOffset = 20
+    const headerGradient = doc.linearGradient(
+      0,
+      doc.page.margins.top - headerAndFooterOffset,
+      doc.page.width,
+      doc.page.margins.top - headerAndFooterOffset,
+    )
+    headerGradient.stop(0, '#54278e').stop(1, '#d62560')
+
+    doc
+      .rect(0, 0, doc.page.width, doc.page.margins.top - headerAndFooterOffset)
+      .fill(headerGradient)
+      .fillColor('#fff')
+      .font(FONT_BAILO, FONT_SIZE_BAILO)
+      .text('Bailo', 20, doc.page.margins.top / 2 - 30)
+  }
+}
+
+export async function getModelCardExport(
+  user: UserDoc,
+  modelId: string,
+  version: number | GetModelCardVersionOptionsKeys,
+) {
+  let modelCard: ModelCardInterface
+  const model = await getModelById(user, modelId)
+
+  if (!model.card) {
+    throw NotFound('This model has no model card setup', { modelId, version })
+  }
+
+  if (version === GetModelCardVersionOptions.Latest) {
+    modelCard = model.card
+  } else {
+    modelCard = await getModelCardRevision(user, modelId, version)
+  }
+
+  if (!modelCard.metadata) {
+    throw NotFound('This model card has no metadata to export', { modelId, version })
+  }
+
+  const doc = new PDFDocument({
+    bufferPages: true,
+  })
+
+  doc
+    .font(FONT_HEADING, FONT_SIZE_QUESTION_HEADING)
+    .text('Model Name', { align: 'center' })
+    .font(FONT_ANSWER, FONT_SIZE_ANSWER)
+    .moveDown(0.5)
+    .text(model.name, { align: 'center' })
+    .font(FONT_HEADING, FONT_SIZE_QUESTION_HEADING)
+    .moveDown(1.5)
+    .text('Model Description', { align: 'center' })
+    .font(FONT_ANSWER, FONT_SIZE_ANSWER)
+    .moveDown(0.5)
+    .text(model.description, { align: 'center' })
+
+  extractTextFromObject(modelCard.metadata, doc)
+
+  addHeaderToAllPages(doc)
+
+  doc.end()
+
+  return doc
 }
 
 export async function getModelCardRevision(user: UserDoc, modelId: string, version: number) {
