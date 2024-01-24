@@ -77,23 +77,18 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
         <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (
-          <TopNavigation
-            drawerOpen={open}
-            pageTopStyling={pageTopStyling}
-            toggleDrawer={toggleDrawer}
-            currentUser={currentUser}
-          />
-        )}
-        {currentUser && (
-          <SideNavigation
-            page={page}
-            currentUser={currentUser}
-            drawerOpen={open}
-            pageTopStyling={pageTopStyling}
-            toggleDrawer={toggleDrawer}
-            onError={handleSideNavigationError}
-            onResetErrorMessage={resetErrorMessage}
-          />
+          <>
+            <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
+            <SideNavigation
+              page={page}
+              currentUser={currentUser}
+              drawerOpen={open}
+              pageTopStyling={pageTopStyling}
+              toggleDrawer={toggleDrawer}
+              onError={handleSideNavigationError}
+              onResetErrorMessage={resetErrorMessage}
+            />
+          </>
         )}
         <Box
           component='main'

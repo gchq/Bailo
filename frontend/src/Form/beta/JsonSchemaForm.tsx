@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  Divider,
   Grid,
   IconButton,
   List,
@@ -14,6 +13,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -73,6 +73,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -91,22 +92,9 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Stack
-      direction={{ xs: 'column', md: 'row' }}
-      spacing={{ sm: 2 }}
-      justifyContent='left'
-      divider={<Divider flexItem orientation='vertical' />}
-      sx={{ width: '100%' }}
-    >
-      <div>
-        <Stepper
-          activeStep={activeStep}
-          nonLinear
-          alternativeLabel
-          orientation='vertical'
-          connector={<Nothing />}
-          sx={{ minWidth: 'max-content' }}
-        >
+    <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
+      <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+        <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
@@ -120,35 +108,37 @@ export default function JsonSchemaForm({
             ))}
           </List>
         </Stepper>
-      </div>
-      <Form
-        schema={currentStep.schema}
-        formData={currentStep.state}
-        onChange={onFormChange}
-        validator={validator}
-        widgets={widgets}
-        uiSchema={currentStep.uiSchema}
-        liveValidate={currentStep.shouldValidate}
-        omitExtraData
-        disabled={!canEdit}
-        liveOmit
-        formContext={{
-          editMode: canEdit,
-          formSchema: currentStep.schema,
-          defaultCurrentUser: defaultCurrentUserInEntityList,
-        }}
-        templates={
-          !canEdit
-            ? {
-                DescriptionFieldTemplate,
-                ArrayFieldTemplate,
-              }
-            : { ArrayFieldTemplate }
-        }
-      >
-        {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-        <></>
-      </Form>
-    </Stack>
+      </Grid>
+      <Grid item xs={12} sm={9} md={10}>
+        <Form
+          schema={currentStep.schema}
+          formData={currentStep.state}
+          onChange={onFormChange}
+          validator={validator}
+          widgets={widgets}
+          uiSchema={currentStep.uiSchema}
+          liveValidate={currentStep.shouldValidate}
+          omitExtraData
+          disabled={!canEdit}
+          liveOmit
+          formContext={{
+            editMode: canEdit,
+            formSchema: currentStep.schema,
+            defaultCurrentUser: defaultCurrentUserInEntityList,
+          }}
+          templates={
+            !canEdit
+              ? {
+                  DescriptionFieldTemplate,
+                  ArrayFieldTemplate,
+                }
+              : { ArrayFieldTemplate }
+          }
+        >
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+          <></>
+        </Form>
+      </Grid>
+    </Grid>
   )
 }

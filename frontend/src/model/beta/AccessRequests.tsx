@@ -1,4 +1,4 @@
-import { Box, Button, Stack } from '@mui/material'
+import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo } from 'react'
 import Link from 'src/Link'
@@ -36,7 +36,7 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
   }
 
   return (
-    <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
+    <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/beta/model/${model.id}/access-request/schema`}>
@@ -48,6 +48,6 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
         {isAccessRequestsLoading && <Loading />}
         {accessRequestsList}
       </Stack>
-    </Box>
+    </Container>
   )
 }

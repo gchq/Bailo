@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -50,7 +50,7 @@ export default function Settings({ model }: SettingsProps) {
       spacing={{ sm: 2 }}
       divider={<Divider orientation='vertical' flexItem />}
     >
-      <List>
+      <List sx={{ width: '200px' }}>
         <ListItem disablePadding>
           <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
             Details
@@ -75,10 +75,10 @@ export default function Settings({ model }: SettingsProps) {
           </ListItemButton>
         </ListItem>
       </List>
-      <Box sx={{ width: '100%', maxWidth: '1000px' }}>
+      <Container sx={{ my: 2 }}>
         {selectedCategory === 'details' && <ModelDetails model={model} />}
         {selectedCategory === 'permissions' && <ModelAccess model={model} />}
-        {selectedCategory === 'access' && <AccessRequestSettings />}
+        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
         {selectedCategory === 'danger' && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
@@ -89,7 +89,7 @@ export default function Settings({ model }: SettingsProps) {
             </LoadingButton>
           </Stack>
         )}
-      </Box>
+      </Container>
     </Stack>
   )
 }

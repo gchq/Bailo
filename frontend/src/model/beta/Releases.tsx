@@ -1,4 +1,4 @@
-import { Box, Button, Stack } from '@mui/material'
+import { Box, Button, Container, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
@@ -38,7 +38,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
   }
 
   return (
-    <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
+    <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Button
@@ -54,6 +54,6 @@ export default function Releases({ model }: { model: ModelInterface }) {
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {releaseDisplays}
       </Stack>
-    </Box>
+    </Container>
   )
 }

@@ -4,13 +4,14 @@ import { headObject, isNoSuchKeyException } from '../clients/s3.js'
 import ApprovalModel from '../models/Approval.js'
 import DeploymentModelV1 from '../models/Deployment.js'
 import ModelModelV1 from '../models/Model.js'
+import AccessRequestModelV2 from '../models/v2/AccessRequest.js'
 import FileModel from '../models/v2/File.js'
 import ModelModelV2, { CollaboratorEntry, ModelVisibility } from '../models/v2/Model.js'
 import ModelCardRevisionV2 from '../models/v2/ModelCardRevision.js'
 import Release from '../models/v2/Release.js'
 import ReviewModel, { Decision, ReviewResponse } from '../models/v2/Review.js'
 import VersionModelV1 from '../models/Version.js'
-import { ApprovalCategory, ApprovalStates, ApprovalTypes, VersionDoc } from '../types/types.js'
+import { ApprovalCategory, ApprovalDoc, ApprovalStates, ApprovalTypes, VersionDoc } from '../types/types.js'
 import { ReviewKind } from '../types/v2/enums.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
@@ -30,12 +31,12 @@ const MODEL_SCHEMA_MAP = {
   },
 }
 
-const _DEPLOYMENT_SCHEMA_MAP = {
+const DEPLOYMENT_SCHEMA_MAP = {
   '/Minimal/Deployment/v6': {
     convert: (metadata) => {
       return {
         overview: {
-          name: metadata.highLevelDetails.title,
+          name: metadata.highLevelDetails.name,
           endDate: metadata.highLevelDetails.endDate.hasEndDate ? metadata.highLevelDetails.endDate.date : undefined,
           entities: metadata.contacts.owner.map((entity) => `${entity.kind}:${identityConversion(entity.id)}`),
         },
@@ -62,15 +63,40 @@ function identityConversion(old: string) {
   return old
 }
 
+function createReviewResponses(approval: ApprovalDoc) {
+  const responses: ReviewResponse[] = []
+  for (let i = 0; i < approval.approvers.length; i++) {
+    const approver = approval.approvers[i]
+    if (approval.status === ApprovalStates.Accepted) {
+      responses.push({
+        user: toEntity('user', approver.id),
+        decision: Decision.Approve,
+        comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+        createdAt: approval.createdAt,
+        updatedAt: approval.updatedAt,
+      })
+    } else if (approval.status === ApprovalStates.Declined) {
+      responses.push({
+        user: toEntity('user', approver.id),
+        decision: Decision.RequestChanges,
+        comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
+        createdAt: approval.createdAt,
+        updatedAt: approval.updatedAt,
+      })
+    }
+  }
+  return responses
+}
+
 export async function migrateAllModels() {
   const models = await ModelModelV1.find({})
   for (const model of models) {
-    await migrateModel(model.id)
+    await migrateModel(model.uuid)
   }
 }
 
 async function migrateModel(modelId: string) {
-  const model = await ModelModelV1.findOne({ _id: modelId }).populate('latestVersion')
+  const model = await ModelModelV1.findOne({ uuid: modelId }).populate('latestVersion')
   if (!model) throw new Error(`Model not found: ${modelId}`)
   model.latestVersion = model.latestVersion as VersionDoc
 
@@ -185,7 +211,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawBinaryPath.zip`,
+            name: `${version.version}-binary.zip`,
             mime: 'application/x-zip-compressed',
             size,
             bucket,
@@ -212,7 +238,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawCodePath.zip`,
+            name: `${version.version}-code.zip`,
             mime: 'application/x-zip-compressed',
             bucket,
             size,
@@ -239,7 +265,7 @@ async function migrateModel(modelId: string) {
           { modelId, bucket, path },
           {
             modelId,
-            name: `${version.version}-rawDockerPath.tar`,
+            name: `${version.version}-docker.tar`,
             mime: 'application/octet-stream',
             bucket,
             size,
@@ -280,7 +306,6 @@ async function migrateModel(modelId: string) {
         createdAt: version.createdAt,
         updatedAt: version.updatedAt,
       },
-
       {
         new: true,
         upsert: true, // Make this update into an upsert
@@ -300,28 +325,7 @@ async function migrateModel(modelId: string) {
       } else if (approval.approvalType === ApprovalTypes.Reviewer) {
         role = 'mtr'
       }
-
-      const responses: ReviewResponse[] = []
-      for (let i = 0; i < approval.approvers.length; i++) {
-        const approver = approval.approvers[i]
-        if (approval.status === ApprovalStates.Accepted) {
-          responses.push({
-            user: toEntity('user', approver.id),
-            decision: Decision.Approve,
-            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
-            createdAt: approval.createdAt,
-            updatedAt: approval.updatedAt,
-          })
-        } else if (approval.status === ApprovalStates.Declined) {
-          responses.push({
-            user: toEntity('user', approver.id),
-            decision: Decision.RequestChanges,
-            comment: `Migrated from V1. Overall V1 approval decision to V2 individual user responses for the given role.`,
-            createdAt: approval.createdAt,
-            updatedAt: approval.updatedAt,
-          })
-        }
-      }
+      const responses = createReviewResponses(approval)
       await ReviewModel.findOneAndUpdate(
         { modelId, semver, role },
         {
@@ -354,9 +358,78 @@ async function migrateModel(modelId: string) {
 
   await modelV2.save()
 
-  const _deployments = await DeploymentModelV1.find({
+  const deployments = await DeploymentModelV1.find({
     model,
   })
+
+  for (const deployment of deployments) {
+    if (!deployment.schemaRef) {
+      // This is an ungoverened deployment
+      continue
+    }
+
+    const { convert, schema } = DEPLOYMENT_SCHEMA_MAP[deployment.schemaRef]
+
+    await AccessRequestModelV2.findOneAndUpdate(
+      {
+        modelId,
+        id: deployment.uuid,
+      },
+      {
+        id: deployment.uuid,
+        modelId,
+
+        schemaId: schema,
+        metadata: convert(deployment.metadata),
+
+        comments: [],
+
+        createdBy: 'system',
+        createdAt: deployment.createdAt,
+        updatedAt: deployment.updatedAt,
+      },
+      {
+        new: true,
+        upsert: true, // Make this update into an upsert
+        timestamps: false,
+      },
+    )
+
+    const versionApprovals = await ApprovalModel.find({
+      deployment: deployment._id,
+      approvalCategory: ApprovalCategory.Deployment,
+    }).sort({ createdAt: 1 })
+
+    for (const approval of versionApprovals) {
+      let role
+      if (approval.approvalType === ApprovalTypes.Manager) {
+        role = 'msro'
+      } else if (approval.approvalType === ApprovalTypes.Reviewer) {
+        role = 'mtr'
+      }
+      const responses = createReviewResponses(approval)
+      await ReviewModel.findOneAndUpdate(
+        { modelId, accessRequestId: deployment.uuid, role },
+        {
+          accessRequestId: deployment.uuid,
+          modelId,
+
+          kind: ReviewKind.Access,
+          role,
+
+          responses,
+
+          createdAt: approval.createdAt,
+          updatedAt: approval.updatedAt,
+        },
+        {
+          new: true,
+          upsert: true, // Make this update into an upsert
+          timestamps: false,
+        },
+      )
+    }
+  }
 }
 
 await connectToMongoose()

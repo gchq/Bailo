@@ -43,3 +43,7 @@ export function NotFound(message: string, context?: BailoError['context'], logge
 export function InternalError(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(500, message, context, logger)
 }
+
+export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
+}
