@@ -9,7 +9,7 @@ import ReviewItem from 'src/reviews/ReviewItem'
 import { Decision, ReviewRequestInterface } from 'types/interfaces'
 
 type ReviewsListProps = {
-  kind?: 'release' | 'access' | 'all'
+  kind?: 'release' | 'access' | 'all' | 'archived'
 }
 
 export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
@@ -17,7 +17,7 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const doesNotContainUserApproval = useCallback(
+  const containsUserApproval = useCallback(
     (review: ReviewRequestInterface) => {
       return (
         currentUser &&
@@ -30,14 +30,14 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
   )
 
   useEffect(() => {
-    if (kind === 'all') {
-      setFilteredReviews(reviews)
+    if (kind === 'archived') {
+      setFilteredReviews(reviews.filter((filteredReview) => !containsUserApproval(filteredReview)))
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && doesNotContainUserApproval(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && containsUserApproval(filteredReview)),
       )
     }
-  }, [reviews, kind, doesNotContainUserApproval])
+  }, [reviews, kind, containsUserApproval])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
