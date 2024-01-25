@@ -150,6 +150,11 @@ class Model:
         res = self.client.get_model_card(model_id=self.model_id, version=version)
         self.__unpack_mc(res["modelCard"])
 
+    def create_experiment(
+        self,
+    ) -> Experiment:
+        pass
+
     def create_release(
         self,
         version: Version | str,
@@ -263,3 +268,27 @@ class Model:
             self.model_card = res["metadata"]
         except KeyError:
             self.model_card = None
+
+class Experiment:
+    def __init__():
+        pass
+
+    @classmethod
+    def create():
+        pass
+
+    @classmethod
+    def from_mlflow():
+        pass
+
+    def start_run():
+        pass
+
+    def log_param():
+        pass
+
+    def log_metric():
+        pass
+
+    def publish():
+        pass
