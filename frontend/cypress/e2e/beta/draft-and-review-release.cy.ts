@@ -20,6 +20,11 @@ describe('Draft and review a model release', () => {
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body.card).to.have.property('modelId', modelUuidForRelease)
+        cy.request('patch', `/api/v2/model/${modelUuidForRelease}`, {
+          collaborators: [{ entity: 'user:user', roles: ['owner', 'mtr', 'msro'] }],
+        }).then((response) => {
+          expect(response.status).to.eq(200)
+        })
       })
     })
   })
