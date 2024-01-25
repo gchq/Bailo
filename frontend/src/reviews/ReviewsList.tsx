@@ -22,7 +22,7 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
       return (
         currentUser &&
         !review.responses.find(
-          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
+          (response) => response.user !== `user:${currentUser.dn}` && response.decision === Decision.Approve,
         )
       )
     },
@@ -31,10 +31,10 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
 
   useEffect(() => {
     if (kind === 'archived') {
-      setFilteredReviews(reviews.filter((filteredReview) => !containsUserApproval(filteredReview)))
+      setFilteredReviews(reviews.filter((filteredReview) => containsUserApproval(filteredReview)))
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && containsUserApproval(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !containsUserApproval(filteredReview)),
       )
     }
   }, [reviews, kind, containsUserApproval])
