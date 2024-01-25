@@ -13,6 +13,9 @@ export interface ModelInterface {
   name: string
   teamId: string
   description: string
+  settings: {
+    ungovernedAccess: boolean
+  }
   card: ModelCardInterface
   visibility: ModelVisibilityKeys
   collaborators: CollaboratorEntry[]

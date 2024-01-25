@@ -50,7 +50,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === newValue.id)) {
+      if (newValue && !accessList.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`)) {
         const updatedAccessList = accessList
         const newAccess = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
         updatedAccessList.push(newAccess)
@@ -91,7 +91,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
-
   return (
     <>
       {users && (

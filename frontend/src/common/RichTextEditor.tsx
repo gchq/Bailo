@@ -41,7 +41,7 @@ export default function RichTextEditor({
 
   return (
     <>
-      <Box display='flex'>
+      <Box display='flex' overflow='auto'>
         {label}
         <Button size='small' onClick={toggleToolbar} sx={{ ml: 'auto' }}>
           {`${hideToolbar ? 'Show' : 'Hide'} Toolbar`}

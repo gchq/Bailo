@@ -1,15 +1,44 @@
 import { LoadingButton } from '@mui/lab'
 import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
+import { patchModel } from 'actions/model'
 import { useState } from 'react'
 
-export default function AccessRequestSettings() {
-  const [allowUngoverned, setAllowUngoverned] = useState(false)
-  const [loading, setLoading] = useState(false)
+import { ModelInterface } from '../../../../types/v2/types'
+import { getErrorMessage } from '../../../../utils/fetcher'
+import useNotification from '../../../common/Snackbar'
+import MessageAlert from '../../../MessageAlert'
 
-  const handleSave = () => {
+type ModelAccessProps = {
+  model: ModelInterface
+}
+
+export default function AccessRequestSettings({ model }: ModelAccessProps) {
+  const [allowUngoverned, setAllowUngoverned] = useState(model.settings.ungovernedAccess)
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const sendNotification = useNotification()
+
+  async function handleSave() {
     setLoading(true)
 
-    //TODO - Save settings API request and setLoading(false) on error
+    const updatedModelSettings = {
+      settings: {
+        ungovernedAccess: allowUngoverned,
+      },
+    }
+
+    const response = await patchModel(model.id, updatedModelSettings)
+
+    if (!response.ok) {
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Access request settings updated',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+    setLoading(false)
   }
 
   return (
@@ -22,16 +51,22 @@ export default function AccessRequestSettings() {
         control={
           <Checkbox
             onChange={(event) => setAllowUngoverned(event.target.checked)}
-            value={allowUngoverned}
+            checked={allowUngoverned}
             size='small'
           />
         }
       />
       <Divider />
       <div>
-        <LoadingButton onClick={handleSave} loading={loading}>
+        <LoadingButton
+          variant='contained'
+          aria-label='Save ungoverned access requests'
+          onClick={handleSave}
+          loading={loading}
+        >
           Save
         </LoadingButton>
+        <MessageAlert message={errorMessage} severity='error' />
       </div>
     </Stack>
   )

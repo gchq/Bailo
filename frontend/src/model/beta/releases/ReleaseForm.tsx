@@ -169,32 +169,29 @@ export default function ReleaseForm({
         )}
         {isReadOnly &&
           formData.files.map((file) => (
-            <Grid container spacing={1} alignItems='center' key={file.name}>
-              <Grid item xs>
-                {isFileInterface(file) && (
-                  <Tooltip title={file.name}>
-                    <Link
-                      href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                      data-test={`fileLink-${file.name}`}
-                    >
-                      <Typography noWrap textOverflow='ellipsis' display='inline'>
-                        {file.name}
-                      </Typography>
-                    </Link>
-                  </Tooltip>
-                )}
-                {!isFileInterface(file) && (
-                  <Tooltip title='There was a problem finding the ID for this file.'>
-                    <Typography noWrap textOverflow='ellipsis' display='inline'>
-                      {file.name}
-                    </Typography>
-                  </Tooltip>
-                )}
-              </Grid>
-              <Grid item xs={1} textAlign='right'>
-                <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-              </Grid>
-            </Grid>
+            <>
+              {isFileInterface(file) && (
+                <Grid container spacing={1} alignItems='center' key={file.name}>
+                  <Grid item xs={11}>
+                    {isFileInterface(file) && (
+                      <Tooltip title={file.name}>
+                        <Link
+                          href={`/api/v2/model/${model.id}/file/${file._id}/download`}
+                          data-test={`fileLink-${file.name}`}
+                        >
+                          <Typography noWrap textOverflow='ellipsis'>
+                            {file.name}
+                          </Typography>
+                        </Link>
+                      </Tooltip>
+                    )}
+                  </Grid>
+                  <Grid item xs={1} textAlign='right'>
+                    <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                  </Grid>
+                </Grid>
+              )}
+            </>
           ))}
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
