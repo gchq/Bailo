@@ -228,7 +228,7 @@ config:
     from: "bailo@example.com"
 
   build:
-    environment: openshift # or img for k8s | aws
+    environment: img # 'img' for k8s | eks and  'openshfit' for openshift
 
   app:
     protocol: "https"
