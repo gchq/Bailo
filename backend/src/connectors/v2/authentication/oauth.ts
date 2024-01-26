@@ -1,18 +1,18 @@
-import { CognitoIdentityProviderClient, ListUsersCommand } from '@aws-sdk/client-cognito-identity-provider'
 import parser from 'body-parser'
 import MongoStore from 'connect-mongo'
 import { NextFunction, Request, Response, Router } from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import { listUsers } from '../../../clients/cognito.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import config from '../../../utils/v2/config.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
+import { InternalError } from '../../../utils/v2/error.js'
+import { BaseAuthenticationConnector, RoleKeys, UserInformation } from './Base.js'
 
-const SillyEntityKind = {
+const OauthEntityKind = {
   User: 'user',
-  Group: 'group',
 } as const
 
 export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
@@ -47,8 +47,6 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   getUser(req: Request, res: Response, next: NextFunction) {
-    // this function must never fail to call next, even when
-    // no user is found.
     if (!req.session.grant?.response?.jwt) {
       req.user = undefined
     } else {
@@ -75,65 +73,39 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return router
   }
 
-  async hasRole(_user: UserDoc, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      return true
-    }
+  async hasRole(_user: UserDoc, _role: RoleKeys) {
     return false
   }
 
   async queryEntities(query: string) {
-    const results = await this.listUsers(query)
-    const mapped = results.Users?.map((user) => ({
-      kind: SillyEntityKind.User,
-      id: user.Attributes?.find((attribute) => attribute.Name === 'email')?.Value,
-    }))
-    //console.log(results.Users)
-    return mapped
-  }
-
-  /**
-   * Make this into a client function queryEmails that returns an array of emails
-   * Handle errors like missing userpool Id
-   */
-  async listUsers(query: string) {
-    const client = new CognitoIdentityProviderClient(config.oauth.cognito.CognitoIdentityProviderClient)
-
-    const command = new ListUsersCommand({
-      UserPoolId: config.oauth.cognito.userPoolId,
-      Filter: `"email"^="${query}"`,
-      AttributesToGet: ['email'],
-    })
-
-    const result = await client.send(command)
-    return result
+    const entities = (await listUsers(query)).map((info) => ({ kind: OauthEntityKind.User, id: info.dn }))
+    return entities
   }
 
   async getEntities(user: UserDoc) {
-    return [toEntity(SillyEntityKind.User, user.dn)]
+    return [toEntity(OauthEntityKind.User, user.dn)]
   }
 
   async getUserInformation(entity: string): Promise<UserInformation> {
-    const { kind, value } = fromEntity(entity)
+    const { kind, value: dn } = fromEntity(entity)
 
-    if (kind !== SillyEntityKind.User) {
+    if (kind !== OauthEntityKind.User) {
       throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
     }
 
-    return {
-      email: `${value}@example.com`,
-      name: 'Joe Bloggs',
-      organisation: 'Acme Corp',
+    const users = await listUsers(dn)
+    if (users.length !== 1) {
+      throw InternalError('Unable to find a single user.', { entity, lookupResult: users })
     }
+    const info: UserInformation = users[0]
+    return info
   }
 
   async getEntityMembers(entity: string): Promise<string[]> {
     const { kind } = fromEntity(entity)
     switch (kind) {
-      case SillyEntityKind.User:
+      case OauthEntityKind.User:
         return [entity]
-      case SillyEntityKind.Group:
-        return [toEntity(SillyEntityKind.User, 'user'), toEntity(SillyEntityKind.User, 'user2')]
       default:
         throw new Error(`Unable to get members, entity kind not recognised: ${entity}`)
     }

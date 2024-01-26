@@ -142,8 +142,9 @@ export interface Config {
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
     cognito: {
-      CognitoIdentityProviderClient: CognitoIdentityProviderClientConfig
+      identityProviderClient: CognitoIdentityProviderClientConfig
       userPoolId: string
+      userIdAttribute: string
     }
   }
 }
