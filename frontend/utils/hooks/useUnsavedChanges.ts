@@ -20,7 +20,11 @@ export default function useUnsavedChanges(): UnsavedChangesHook {
     }
     const handleBrowseAway = () => {
       if (!unsavedChanges) return
-      if (window.confirm(warningText)) return
+      const res = window.confirm(warningText)
+      if (res) {
+        setUnsavedChanges(false)
+        return
+      }
       router.events.emit('routeChangeError')
       throw 'routeChange aborted.'
     }
