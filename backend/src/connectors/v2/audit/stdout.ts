@@ -245,6 +245,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onDeleteSchema(req: Request, schemaId: string) {
+    this.checkEventType(AuditInfo.DeleteSchema, req)
+    const event = this.generateEvent(req, { id: schemaId })
+    req.log.info(event, req.audit.description)
+  }
+
   onSearchSchemas(req: Request, schemas: SchemaInterface[]) {
     this.checkEventType(AuditInfo.SearchSchemas, req)
     const event = this.generateEvent(req, {
