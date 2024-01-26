@@ -6,7 +6,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { Decision, ReviewRequestInterface } from 'types/interfaces'
+import { ReviewRequestInterface } from 'types/interfaces'
 
 type ReviewsListProps = {
   kind?: 'release' | 'access' | 'all' | 'archived'
@@ -19,12 +19,7 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
 
   const containsUserApproval = useCallback(
     (review: ReviewRequestInterface) => {
-      return (
-        currentUser &&
-        !review.responses.find(
-          (response) => response.user !== `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        )
-      )
+      return currentUser && review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
     [currentUser],
   )

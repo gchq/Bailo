@@ -13,7 +13,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { Decision, ReviewRequestInterface } from 'types/interfaces'
+import { ReviewRequestInterface } from 'types/interfaces'
 
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
@@ -81,12 +81,7 @@ export default function SideNavigation({
 
   const doesNotContainUserApproval = useCallback(
     (review: ReviewRequestInterface) => {
-      return (
-        currentUser &&
-        !review.responses.find(
-          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        )
-      )
+      return currentUser && !review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
     [currentUser],
   )
