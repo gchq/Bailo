@@ -57,7 +57,7 @@ export default function ModelImageList({ model, value, onChange, readOnly = fals
           multiple
           onChange={handleChange}
           data-test='imageListAutocomplete'
-          getOptionLabel={(option) => option.tag}
+          getOptionLabel={(option) => `${option.name}:${option.tag}`}
           groupBy={(option) => option.name}
           options={sortedImageList}
           value={value}
