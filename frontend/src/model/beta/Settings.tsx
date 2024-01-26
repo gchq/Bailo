@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -75,7 +75,7 @@ export default function Settings({ model }: SettingsProps) {
           </ListItemButton>
         </ListItem>
       </List>
-      <Box sx={{ width: '100%', maxWidth: '1000px' }}>
+      <Container sx={{ my: 2 }}>
         {selectedCategory === 'details' && <ModelDetails model={model} />}
         {selectedCategory === 'permissions' && <ModelAccess model={model} />}
         {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
@@ -89,7 +89,7 @@ export default function Settings({ model }: SettingsProps) {
             </LoadingButton>
           </Stack>
         )}
-      </Box>
+      </Container>
     </Stack>
   )
 }

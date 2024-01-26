@@ -1,4 +1,4 @@
-import { Box, Button, Stack } from '@mui/material'
+import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetModelImages } from 'actions/model'
 import { useMemo, useState } from 'react'
 import Forbidden from 'src/common/Forbidden'
@@ -48,7 +48,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
   return (
     <>
       {isModelImagesLoading && <Loading />}
-      <Box sx={{ maxWidth: 'md', mx: 'auto', my: 4 }}>
+      <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           <Box sx={{ textAlign: 'right' }}>
             <Button
@@ -67,7 +67,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
           </Box>
           {modelImageList}
         </Stack>
-      </Box>
+      </Container>
     </>
   )
 }
