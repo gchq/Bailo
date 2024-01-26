@@ -126,6 +126,7 @@ export abstract class BaseAuditConnector {
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
   abstract onCreateSchema(req: Request, schema: SchemaInterface)
   abstract onViewSchema(req: Request, schema: SchemaInterface)
+  abstract onDeleteSchema(req: Request, schemaId: string)
 
   abstract onViewModelImages(
     req: Request,

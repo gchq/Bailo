@@ -25,6 +25,28 @@ export async function findSchemaById(schemaId: string): Promise<SchemaInterface>
   return schema
 }
 
+export async function deleteSchemaById(user: UserDoc, schemaId: string): Promise<string> {
+  const schema = await Schema.findOne({
+    id: schemaId,
+  })
+
+  if (!schema) {
+    throw NotFound(`The requested schema was not found.`, { schemaId })
+  }
+
+  const auth = await authorisation.schema(user, schema, SchemaAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      schemaId: schema.id,
+    })
+  }
+
+  await schema.remove()
+
+  return schema.id
+}
+
 export async function createSchema(user: UserDoc, schema: Partial<SchemaInterface>, overwrite = false) {
   const schemaDoc = new Schema(schema)
 

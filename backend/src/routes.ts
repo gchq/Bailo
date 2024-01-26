@@ -88,9 +88,11 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
+import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
+import { putSchema as putSchemaV2 } from './routes/v2/schema/putSchema.js'
 import { getSpecification as getSpecificationV2 } from './routes/v2/specification.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
@@ -272,6 +274,8 @@ if (config.experimental.v2) {
   server.get('/api/v2/schemas', ...getSchemasV2)
   server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
   server.post('/api/v2/schemas', ...postSchemaV2)
+  server.put('/api/v2/schema/:schemaId', ...putSchemaV2)
+  server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
   server.get('/api/v2/reviews', ...getReviews)
 

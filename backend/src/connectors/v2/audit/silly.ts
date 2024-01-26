@@ -45,6 +45,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateReviewResponse(_req: Request, _review: ReviewInterface) {}
   onSearchSchemas(_req: Request, _schemas: SchemaInterface[]) {}
   onCreateSchema(_req: Request, _schema: SchemaInterface) {}
+  onDeleteSchema(_req: Request, _schemaId: string) {}
   onViewSchema(_req: Request, _schema: SchemaInterface) {}
   onViewModelImages(_req: Request, _modelId: string, _images: { repository: string; name: string; tags: string[] }[]) {}
   onError(_req: Request, _error: BailoError) {}
