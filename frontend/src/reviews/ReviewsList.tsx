@@ -9,15 +9,15 @@ import ReviewItem from 'src/reviews/ReviewItem'
 import { ReviewRequestInterface } from 'types/interfaces'
 
 type ReviewsListProps = {
-  kind?: 'release' | 'access' | 'all' | 'archived'
+  kind: 'release' | 'access' | 'archived'
 }
 
-export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
+export default function ReviewsList({ kind }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const containsUserApproval = useCallback(
+  const containsUserResponse = useCallback(
     (review: ReviewRequestInterface) => {
       return currentUser && review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
@@ -26,13 +26,13 @@ export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
 
   useEffect(() => {
     if (kind === 'archived') {
-      setFilteredReviews(reviews.filter((filteredReview) => containsUserApproval(filteredReview)))
+      setFilteredReviews(reviews.filter((filteredReview) => containsUserResponse(filteredReview)))
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && !containsUserApproval(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !containsUserResponse(filteredReview)),
       )
     }
-  }, [reviews, kind, containsUserApproval])
+  }, [reviews, kind, containsUserResponse])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />

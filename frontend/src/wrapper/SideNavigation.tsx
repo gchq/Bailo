@@ -79,7 +79,7 @@ export default function SideNavigation({
 
   const theme = useTheme()
 
-  const doesNotContainUserApproval = useCallback(
+  const doesNotContainUserResponse = useCallback(
     (review: ReviewRequestInterface) => {
       return currentUser && !review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
@@ -90,11 +90,11 @@ export default function SideNavigation({
     async function fetchReviewCount() {
       onResetErrorMessage()
       if (reviews) {
-        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserApproval(filteredReview)).length)
+        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserResponse(filteredReview)).length)
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, doesNotContainUserApproval, reviews])
+  }, [onResetErrorMessage, doesNotContainUserResponse, reviews])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
