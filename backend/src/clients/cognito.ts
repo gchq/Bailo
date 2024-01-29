@@ -1,22 +1,35 @@
-import { CognitoIdentityProviderClient, ListUsersCommand } from '@aws-sdk/client-cognito-identity-provider'
+import {
+  CognitoIdentityProviderClient,
+  ListUsersCommand,
+  ListUsersCommandOutput,
+} from '@aws-sdk/client-cognito-identity-provider'
 
 import { UserInformation } from '../connectors/v2/authentication/Base.js'
 import config from '../utils/v2/config.js'
-/**
- * Make this into a client function queryEmails that returns an array of emails
- * Handle errors like missing userpool Id
- */
-export async function listUsers(query: string) {
-  const dnName = config.oauth.cognito.userIdAttribute
+import { ConfigurationError, InternalError } from '../utils/v2/error.js'
+
+export async function listUsers(query: string, exactMatch = false) {
+  let dnName: string
+  let userPoolId: string
+  try {
+    dnName = config.oauth.cognito.userIdAttribute
+    userPoolId = config.oauth.cognito.userPoolId
+  } catch (e) {
+    throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
+  }
   const client = new CognitoIdentityProviderClient(config.oauth.cognito.identityProviderClient)
 
   const command = new ListUsersCommand({
-    UserPoolId: config.oauth.cognito.userPoolId,
-    Filter: `"${dnName}"^="${query}"`,
-    //AttributesToGet: ['${config.oauth.cognito.userIdAttribute}'],
+    UserPoolId: userPoolId,
+    Filter: exactMatch ? `"${dnName}"="${query}"` : `"${dnName}"^="${query}"`,
   })
 
-  const results = await client.send(command)
+  let results: ListUsersCommandOutput
+  try {
+    results = await client.send(command)
+  } catch (err) {
+    throw InternalError('Error when querying Cognito for users.', { err })
+  }
   if (!results.Users) {
     return []
   }

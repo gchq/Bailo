@@ -93,7 +93,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
       throw new Error(`Cannot get user information for a non-user entity: ${entity}`)
     }
 
-    const users = await listUsers(dn)
+    const users = await listUsers(dn, true)
     if (users.length !== 1) {
       throw InternalError('Unable to find a single user.', { entity, lookupResult: users })
     }
