@@ -204,27 +204,29 @@ const extractTextFromObject = (obj: object, doc: PDFKit.PDFDocument, nestedLevel
   doc.x = originalXPosition
 }
 
-const addHeaderToAllPages = (doc: PDFKit.PDFDocument) => {
+const addHeaderToAllPages = (doc: PDFKit.PDFDocument, disableBackground: boolean) => {
   const pageRange = doc.bufferedPageRange()
 
   for (let i = pageRange.start; i < pageRange.count; i++) {
     doc.switchToPage(i)
 
-    const headerAndFooterOffset = 20
-    const headerGradient = doc.linearGradient(
-      0,
-      doc.page.margins.top - headerAndFooterOffset,
-      doc.page.width,
-      doc.page.margins.top - headerAndFooterOffset,
-    )
-    headerGradient.stop(0, '#54278e').stop(1, '#d62560')
+    if (!disableBackground) {
+      const headerAndFooterOffset = 20
+      const headerGradient = doc.linearGradient(
+        0,
+        doc.page.margins.top - headerAndFooterOffset,
+        doc.page.width,
+        doc.page.margins.top - headerAndFooterOffset,
+      )
+      headerGradient.stop(0, '#54278e').stop(1, '#d62560')
 
-    doc
-      .rect(0, 0, doc.page.width, doc.page.margins.top - headerAndFooterOffset)
-      .fill(headerGradient)
-      .fillColor('#fff')
-      .font(FONT_BAILO, FONT_SIZE_BAILO)
-      .text('Bailo', 20, doc.page.margins.top / 2 - 30)
+      doc
+        .rect(0, 0, doc.page.width, doc.page.margins.top - headerAndFooterOffset)
+        .fill(headerGradient)
+        .fillColor('#fff')
+    }
+
+    doc.font(FONT_BAILO, FONT_SIZE_BAILO).text('Bailo', 20, doc.page.margins.top / 2 - 30)
   }
 }
 
@@ -232,6 +234,7 @@ export async function getModelCardExport(
   user: UserDoc,
   modelId: string,
   version: number | GetModelCardVersionOptionsKeys,
+  disableBackground = false,
 ) {
   let modelCard: ModelCardInterface
   const model = await getModelById(user, modelId)
@@ -265,7 +268,7 @@ export async function getModelCardExport(
 
   extractTextFromObject(modelCard.metadata, doc)
 
-  addHeaderToAllPages(doc)
+  addHeaderToAllPages(doc, disableBackground)
 
   doc.end()
 

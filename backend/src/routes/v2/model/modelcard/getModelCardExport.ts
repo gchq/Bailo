@@ -14,6 +14,12 @@ export const getModelCardExportSchema = z.object({
     modelId: z.string(),
     version: z.nativeEnum(GetModelCardVersionOptions).or(z.coerce.number()),
   }),
+  query: z.object({
+    disableBackground: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
+  }),
 })
 
 registerPath({
@@ -46,9 +52,10 @@ export const getModelCardExport = [
   async (req: Request, res: Response<GetModelCardExportResponse>) => {
     const {
       params: { modelId, version },
+      query: { disableBackground },
     } = parse(req, getModelCardExportSchema)
 
-    const doc = await getModelCardExportService(req.user, modelId, version)
+    const doc = await getModelCardExportService(req.user, modelId, version, disableBackground)
 
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', contentDisposition('modelCard.pdf', { type: 'attachment' }))
