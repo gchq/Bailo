@@ -41,7 +41,9 @@ export default function ModelImageList({ model, value, onChange, readOnly = fals
       <Loading />
     ) : (
       sortedImageList.map((modelImage) => (
-        <Typography key={`${modelImage.repository}-${modelImage.name}`}>{modelImage.tag}</Typography>
+        <Typography key={`${modelImage.repository}-${modelImage.name}`}>
+          {`${modelImage.name}:${modelImage.tag}`}
+        </Typography>
       ))
     )
   }, [isModelImagesLoading, sortedImageList])
