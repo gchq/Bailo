@@ -149,8 +149,8 @@ const FONT_BAILO = 'src/fonts/pacifico.ttf'
 const FONT_HEADING = 'Helvetica-Bold'
 const FONT_ANSWER = 'Helvetica'
 const FONT_SIZE_BAILO = 24
-const FONT_SIZE_MODEL_HEADING = 16
-const FONT_SIZE_MODEL_ANSWER = 14
+const FONT_SIZE_MODEL_NAME = 16
+const FONT_SIZE_MODEL_DESCRIPTION = 14
 const FONT_SIZE_SECTION_HEADING = 16
 const FONT_SIZE_QUESTION_HEADING = 14
 const FONT_SIZE_ANSWER = 12
@@ -257,16 +257,10 @@ export async function getModelCardExport(
   doc.y = doc.page.height / 3
 
   doc
-    .font(FONT_HEADING, FONT_SIZE_MODEL_HEADING)
-    .text('Model Name', { align: 'center' })
-    .font(FONT_ANSWER, FONT_SIZE_MODEL_ANSWER)
-    .moveDown(0.5)
+    .font(FONT_HEADING, FONT_SIZE_MODEL_NAME)
     .text(model.name, { align: 'center' })
-    .font(FONT_HEADING, FONT_SIZE_MODEL_HEADING)
     .moveDown(1.5)
-    .text('Model Description', { align: 'center' })
-    .font(FONT_ANSWER, FONT_SIZE_MODEL_ANSWER)
-    .moveDown(0.5)
+    .font(FONT_ANSWER, FONT_SIZE_MODEL_DESCRIPTION)
     .text(model.description, { align: 'center' })
 
   extractTextFromObject(modelCard.metadata, doc)
