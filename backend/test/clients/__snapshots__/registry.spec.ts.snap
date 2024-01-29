@@ -5,36 +5,7 @@ exports[`clients > registry > listImageTags > success 1`] = `
   [
     "https://localhost:5000/v2/modelId/image/tags/list",
     {
-      "agent": Agent {
-        "_events": {
-          "free": [Function],
-          "newListener": [Function],
-        },
-        "_eventsCount": 2,
-        "_maxListeners": undefined,
-        "_sessionCache": {
-          "list": [],
-          "map": {},
-        },
-        "defaultPort": 443,
-        "freeSockets": {},
-        "keepAlive": false,
-        "keepAliveMsecs": 1000,
-        "maxCachedSessions": 100,
-        "maxFreeSockets": 256,
-        "maxSockets": Infinity,
-        "maxTotalSockets": Infinity,
-        "options": {
-          "path": null,
-          "rejectUnauthorized": false,
-        },
-        "protocol": "https:",
-        "requests": {},
-        "scheduling": "lifo",
-        "sockets": {},
-        "totalSocketCount": 0,
-        Symbol(kCapture): false,
-      },
+      "agent": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
@@ -48,36 +19,7 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
   [
     "https://localhost:5000/v2/_catalog?n=100&last=modelId",
     {
-      "agent": Agent {
-        "_events": {
-          "free": [Function],
-          "newListener": [Function],
-        },
-        "_eventsCount": 2,
-        "_maxListeners": undefined,
-        "_sessionCache": {
-          "list": [],
-          "map": {},
-        },
-        "defaultPort": 443,
-        "freeSockets": {},
-        "keepAlive": false,
-        "keepAliveMsecs": 1000,
-        "maxCachedSessions": 100,
-        "maxFreeSockets": 256,
-        "maxSockets": Infinity,
-        "maxTotalSockets": Infinity,
-        "options": {
-          "path": null,
-          "rejectUnauthorized": false,
-        },
-        "protocol": "https:",
-        "requests": {},
-        "scheduling": "lifo",
-        "sockets": {},
-        "totalSocketCount": 0,
-        Symbol(kCapture): false,
-      },
+      "agent": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
