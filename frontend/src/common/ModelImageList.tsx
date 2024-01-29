@@ -2,12 +2,12 @@ import { Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
-import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useMemo } from 'react'
+import Loading from 'src/common/Loading'
 import { ModelInterface } from 'types/v2/types'
 import { sortByNameAscending } from 'utils/arrayUtils'
 
 import { FlattenedModelImage } from '../../types/interfaces'
-import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
 interface ModelImageListProps {
@@ -18,24 +18,35 @@ interface ModelImageListProps {
 }
 
 export default function ModelImageList({ model, value, onChange, readOnly = false }: ModelImageListProps) {
-  const [flattenedImageList, setFlattenedImageList] = useState<FlattenedModelImage[]>([])
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
-  useEffect(() => {
-    const updatedImageList: FlattenedModelImage[] = []
+  const sortedImageList = useMemo(() => {
+    const flattenedImageList: FlattenedModelImage[] = []
+
     for (const modelImage of modelImages) {
       for (const modelImageVersion of modelImage.tags) {
-        updatedImageList.push({
+        flattenedImageList.push({
           repository: modelImage.repository,
           name: modelImage.name,
           tag: modelImageVersion,
         })
       }
     }
-    setFlattenedImageList(updatedImageList)
+
+    return flattenedImageList.sort(sortByNameAscending)
   }, [modelImages])
 
-  const sortedImageList = useMemo(() => flattenedImageList.sort(sortByNameAscending), [flattenedImageList])
+  const readOnlyImageList = useMemo(() => {
+    return isModelImagesLoading ? (
+      <Loading />
+    ) : (
+      sortedImageList.map((modelImage) => (
+        <Typography key={`${modelImage.repository}-${modelImage.name}`}>
+          {`${modelImage.name}:${modelImage.tag}`}
+        </Typography>
+      ))
+    )
+  }, [isModelImagesLoading, sortedImageList])
 
   function handleChange(_event: SyntheticEvent<Element, Event>, flattenedImageList: FlattenedModelImage[]) {
     onChange(flattenedImageList)
@@ -47,21 +58,19 @@ export default function ModelImageList({ model, value, onChange, readOnly = fals
 
   return (
     <>
-      {isModelImagesLoading && <Loading />}
       {readOnly ? (
-        sortedImageList.map((modelImage) => (
-          <Typography key={`${modelImage.repository}-${modelImage.name}`}>{modelImage.tag}</Typography>
-        ))
+        readOnlyImageList
       ) : (
         <Autocomplete
           multiple
+          loading={isModelImagesLoading}
           onChange={handleChange}
           data-test='imageListAutocomplete'
           getOptionLabel={(option) => `${option.name}:${option.tag}`}
           groupBy={(option) => option.name}
           options={sortedImageList}
           value={value}
-          renderInput={(params) => <TextField {...params} size='small' value={flattenedImageList} />}
+          renderInput={(params) => <TextField {...params} size='small' />}
         />
       )}
     </>
