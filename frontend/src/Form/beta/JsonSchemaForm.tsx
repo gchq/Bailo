@@ -59,16 +59,18 @@ function DescriptionFieldTemplate() {
 }
 
 function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
+  const { title, properties, description } = props
+
   return (
-    <Box sx={{ pl: 2, borderRadius: 0.5, mb: 3 }}>
+    <Box sx={{ pl: 2, mb: 3 }}>
       <Stack spacing={2}>
         <div>
           <Typography fontWeight='bold' variant='h6' component='h3'>
-            {props.title}
+            {title}
           </Typography>
-          <Typography variant='caption'>{props.description}</Typography>
+          <Typography variant='caption'>{description}</Typography>
         </div>
-        {props.properties.map((element) => (
+        {properties.map((element) => (
           <div key={element.name} className='property-wrapper'>
             {element.content}
           </div>
