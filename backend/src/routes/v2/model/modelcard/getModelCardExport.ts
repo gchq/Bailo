@@ -3,7 +3,6 @@ import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { FileInterface } from '../../../../models/v2/File.js'
 import { getModelCardExport as getModelCardExportService } from '../../../../services/v2/model.js'
 import { registerPath } from '../../../../services/v2/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'
@@ -43,13 +42,9 @@ registerPath({
   },
 })
 
-interface GetModelCardExportResponse {
-  file: FileInterface
-}
-
 export const getModelCardExport = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelCardExportResponse>) => {
+  async (req: Request, res: Response) => {
     const {
       params: { modelId, version },
       query: { disableBackground },
