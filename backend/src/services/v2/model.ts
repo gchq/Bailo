@@ -14,7 +14,7 @@ import {
   GetModelFiltersKeys,
 } from '../../types/v2/enums.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { toEntity } from '../../utils/v2/entity.js'
+import { fromEntity, toEntity } from '../../utils/v2/entity.js'
 import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { toTitleCaseFromCamelCase } from '../../utils/v2/string.js'
@@ -155,6 +155,15 @@ const FONT_SIZE_SECTION_HEADING = 16
 const FONT_SIZE_QUESTION_HEADING = 14
 const FONT_SIZE_ANSWER = 12
 
+const extractUsernamesFromArray = (usernames: string[], doc: PDFKit.PDFDocument) => {
+  doc.font(FONT_ANSWER, FONT_SIZE_ANSWER)
+
+  usernames.forEach((username, index) => {
+    doc.text(username, { align: 'center' })
+    if (index < usernames.length - 1) doc.moveDown(0.5)
+  })
+}
+
 const extractTextFromObject = (obj: object, doc: PDFKit.PDFDocument, nestedLevel = 0) => {
   const originalXPosition = doc.x
   const indent = doc.x + (nestedLevel ? (nestedLevel - 1) * 10 : nestedLevel)
@@ -253,6 +262,16 @@ export async function getModelCardExport(
     throw NotFound('This model card has no metadata to export', { modelId, version })
   }
 
+  const { msroList, mtrList } = model.collaborators.reduce<{ msroList: string[]; mtrList: string[] }>(
+    (filteredCollaborators, collaborator) => {
+      const { msroList, mtrList } = filteredCollaborators
+      if (collaborator.roles.includes('msro')) msroList.push(fromEntity(collaborator.entity).value)
+      if (collaborator.roles.includes('mtr')) mtrList.push(fromEntity(collaborator.entity).value)
+      return filteredCollaborators
+    },
+    { msroList: [], mtrList: [] },
+  )
+
   const fileName = `${model.id}-${modelCard.version}.pdf`
 
   const doc = new PDFDocument({
@@ -267,6 +286,20 @@ export async function getModelCardExport(
     .moveDown(1.5)
     .font(FONT_ANSWER, FONT_SIZE_MODEL_DESCRIPTION)
     .text(model.description, { align: 'center' })
+    .moveDown(5)
+    .font(FONT_HEADING, FONT_SIZE_ANSWER)
+    .text('Model Senior Responsible Officers', { align: 'center' })
+    .moveDown(0.5)
+
+  extractUsernamesFromArray(msroList, doc)
+
+  doc
+    .moveDown(1.5)
+    .font(FONT_HEADING, FONT_SIZE_ANSWER)
+    .text('Model Technical Reviewers', { align: 'center' })
+    .moveDown(0.5)
+
+  extractUsernamesFromArray(mtrList, doc)
 
   extractTextFromObject(modelCard.metadata, doc)
 
