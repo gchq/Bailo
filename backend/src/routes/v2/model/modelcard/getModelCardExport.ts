@@ -50,10 +50,10 @@ export const getModelCardExport = [
       query: { disableBackground },
     } = parse(req, getModelCardExportSchema)
 
-    const doc = await getModelCardExportService(req.user, modelId, version, disableBackground)
+    const { doc, fileName } = await getModelCardExportService(req.user, modelId, version, disableBackground)
 
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', contentDisposition('modelCard.pdf', { type: 'attachment' }))
+    res.setHeader('Content-Disposition', contentDisposition(fileName, { type: 'attachment' }))
     doc.pipe(res)
   },
 ]

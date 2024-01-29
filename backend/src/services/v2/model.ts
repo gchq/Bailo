@@ -253,6 +253,8 @@ export async function getModelCardExport(
     throw NotFound('This model card has no metadata to export', { modelId, version })
   }
 
+  const fileName = `${model.id}-${modelCard.version}.pdf`
+
   const doc = new PDFDocument({
     bufferPages: true,
   })
@@ -272,7 +274,7 @@ export async function getModelCardExport(
 
   doc.end()
 
-  return doc
+  return { doc, fileName }
 }
 
 export async function getModelCardRevision(user: UserDoc, modelId: string, version: number) {
