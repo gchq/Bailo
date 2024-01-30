@@ -2,6 +2,13 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { listImageTags, listModelRepos } from '../../src/clients/registry.js'
 
+const mockHttpService = vi.hoisted(() => {
+  return {
+    getHttpsAgent: vi.fn(() => 'mock agent'),
+  }
+})
+vi.mock('../../src/services/v2/http.js', () => mockHttpService)
+
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
 }))
