@@ -23,6 +23,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
           },
         ],
       },
+      ...super.authenticationMiddleware(),
     ]
   }
 

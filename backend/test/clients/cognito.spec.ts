@@ -89,7 +89,7 @@ describe('clients > cognito', () => {
 
     await listUsers('dn', true)
 
-    expect(cognitoMock.ListUsersCommand.mock.calls.at(0)?.at(0)).toStrictEqual({
+    expect(cognitoMock.ListUsersCommand).toBeCalledWith({
       UserPoolId: 'email',
       Filter: `"email"="dn"`,
     })
