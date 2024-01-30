@@ -108,7 +108,7 @@ export abstract class BaseAuditConnector {
   abstract onViewRelease(req: Request, release: ReleaseDoc)
   abstract onUpdateRelease(req: Request, release: ReleaseDoc)
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
-  abstract onSearchReleases(req: Request, releases: ReleaseDoc[])
+  abstract onViewReleases(req: Request, releases: ReleaseDoc[])
 
   abstract onCreateUserToken(req: Request, token: TokenDoc)
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[])
@@ -118,7 +118,7 @@ export abstract class BaseAuditConnector {
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onDeleteAccessRequest(req: Request, accessRequestId: string)
-  abstract onSearchAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
+  abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
   abstract onCreateReviewResponse(req: Request, review: ReviewInterface)

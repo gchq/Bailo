@@ -49,7 +49,7 @@ export const getModelAccessRequests = [
 
     const accessRequests = await getAccessRequestsByModel(req.user, modelId)
 
-    await audit.onSearchAccessRequests(req, accessRequests)
+    await audit.onViewAccessRequests(req, accessRequests)
 
     return res.json({ accessRequests })
   },
