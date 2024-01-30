@@ -46,7 +46,7 @@ interface getReleasesResponse {
 export const getReleases = [
   bodyParser.json(),
   async (req: Request, res: Response<getReleasesResponse>) => {
-    req.audit = AuditInfo.SearchReleases
+    req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
     } = parse(req, getReleasesSchema)

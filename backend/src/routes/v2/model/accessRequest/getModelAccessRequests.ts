@@ -42,7 +42,7 @@ interface GetModelAccessRequestsResponse {
 export const getModelAccessRequests = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelAccessRequestsResponse>) => {
-    req.audit = AuditInfo.SearchAccessRequests
+    req.audit = AuditInfo.ViewAccessRequests
     const {
       params: { modelId },
     } = parse(req, getModelAccessRequestsSchema)
