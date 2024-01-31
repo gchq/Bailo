@@ -4,10 +4,9 @@ import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
+import authentication from './connectors/v2/authentication/index.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
-import { getTokenFromAuthHeader } from './routes/middleware/getToken.js'
-import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -100,12 +99,17 @@ import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.j
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
-import config from './utils/config.js'
 import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
+import config from './utils/v2/config.js'
 
 export const server = express()
 
+/**
+ * This is only required for V1 OAuth.
+ * V2 OAuth is handled separately.
+ * Having both V1 and V1 results in duplication but this does not affect functionality.
+ */
 if (config.oauth.enabled) {
   server.use(
     session({
@@ -118,17 +122,6 @@ if (config.oauth.enabled) {
       }),
     }),
   )
-}
-
-server.use('/api/v1', getUser)
-server.use('/api/v1', expressLogger)
-
-if (config.experimental.v2) {
-  server.use('/api/v2', getUserV2)
-  server.use('/api/v2', expressLoggerV2)
-}
-
-if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
   server.use(grant.default.express(config.oauth.grant))
 
@@ -142,6 +135,17 @@ if (config.oauth.enabled) {
       res.redirect('/')
     })
   })
+}
+
+server.use('/api/v1', getUser)
+server.use('/api/v1', expressLogger)
+
+if (config.experimental.v2) {
+  server.use('/api/v2', expressLoggerV2)
+  const middlewareConfigs = authentication.authenticationMiddleware()
+  for (const middlewareConf of middlewareConfigs) {
+    server.use(middlewareConf?.path || '/', middlewareConf.middleware)
+  }
 }
 
 // V1 APIs
@@ -231,11 +235,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
   server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
   // This is a temporary workaround to split out the URL to disable authorisation.
-  server.get(
-    '/api/v2/token/model/:modelId/release/:semver/file/:fileName/download',
-    getTokenFromAuthHeader,
-    ...getDownloadFile,
-  )
+  server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
   server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
   server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
   server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
@@ -252,7 +252,7 @@ if (config.experimental.v2) {
   server.get('/api/v2/model/:modelId/files', ...getFiles)
   server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
   // This is a temporary workaround to split out the URL to disable authorisation.
-  server.get('/api/v2/token/model/:modelId/file/:fileId/download', getTokenFromAuthHeader, ...getDownloadFile)
+  server.get('/api/v2/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
   server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
   server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)

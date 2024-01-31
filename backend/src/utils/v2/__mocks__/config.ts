@@ -18,6 +18,12 @@ const config = {
       internal: 'https://localhost:5000',
     },
   },
+  oauth: {
+    enabled: false,
+  },
+  experimental: {
+    v2: true,
+  },
 }
 
 export default config

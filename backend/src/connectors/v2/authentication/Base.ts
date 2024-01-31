@@ -1,8 +1,8 @@
-import { Request } from 'express'
+import { RequestHandler } from 'express'
 
 import { ModelDoc } from '../../../models/v2/Model.js'
 import { UserDoc } from '../../../models/v2/User.js'
-import { User } from '../../../types/v2/types.js'
+import { checkAuthentication, getTokenFromAuthHeader } from '../../../routes/middleware/defaultAuthentication.js'
 
 export const Roles = {
   Admin: 'admin',
@@ -16,7 +16,6 @@ export interface UserInformation {
 }
 
 export abstract class BaseAuthenticationConnector {
-  abstract getUserFromReq(req: Request): Promise<User>
   abstract hasRole(user: UserDoc, role: RoleKeys): Promise<boolean>
 
   abstract queryEntities(query: string): Promise<Array<{ kind: string; id: string }>>
@@ -28,6 +27,20 @@ export abstract class BaseAuthenticationConnector {
     const entities = await this.getEntityMembers(entity)
     return Promise.all(entities.map((member) => this.getUserInformation(member)))
   }
+
+  authenticationMiddleware(): Array<{ path?: string; middleware: Array<RequestHandler> }> {
+    return [
+      {
+        path: '/api/v2/token',
+        middleware: [getTokenFromAuthHeader],
+      },
+      {
+        path: '/api/v2',
+        middleware: [checkAuthentication],
+      },
+    ]
+  }
+
   async getUserModelRoles(user: UserDoc, model: ModelDoc) {
     const entities = await this.getEntities(user)
 
