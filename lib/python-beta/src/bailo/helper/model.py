@@ -153,7 +153,7 @@ class Model:
     def create_experiment(
         self,
     ) -> Experiment:
-        pass
+        return Experiment.create(model=self)
 
     def create_release(
         self,
@@ -269,26 +269,52 @@ class Model:
         except KeyError:
             self.model_card = None
 
+
+
 class Experiment:
-    def __init__():
-        pass
+    def __init__(
+        self,
+        model: Model,
+    ):
+        self.model = model
+        self.raw = []
 
     @classmethod
-    def create():
-        pass
+    def create(
+        cls,
+        model: Model,
+    ) -> Experiment:
+        
+        return cls(model=model)
 
     @classmethod
     def from_mlflow():
         pass
 
-    def start_run():
-        pass
+    def start_run(self):
+        try:
+            self.run = self.run + 1
+            self.raw.append(self.run_data)
+        except:
+            self.run = 0
 
-    def log_param():
-        pass
+        self.run_data = {
+            "run": self.run,
+            "params": [],
+            "metrics": [],
+            "artifacts": [],
+        }
 
-    def log_metric():
-        pass
+        print(f"Bailo tracking run {self.run}.")
 
-    def publish():
+    def log_params(self, params: dict[str, Any]):
+        self.run_data["params"].append(params)
+
+    def log_metrics(self, metrics: dict[str, Any]):
+        self.run_data["metrics"].append(metrics)
+
+    def log_artifacts(self, artifacts: str):
+        self.run_data["artifiacts"].append(artifacts)
+
+    def publish(release_version: str, card_version: str):
         pass
