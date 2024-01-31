@@ -14,10 +14,10 @@ export interface ModelSearchResult {
 
 export function useListModels(filters: string[], task: string, libraries: string[], search: string) {
   const queryParams = {
-    ...(filters.length > 0 ? { filters } : {}),
-    ...(task ? { task } : {}),
-    ...(libraries.length > 0 ? { libraries } : {}),
-    ...(search ? { search } : {}),
+    ...(filters.length > 0 && { filters }),
+    ...(task && { task }),
+    ...(libraries.length > 0 && { libraries }),
+    ...(search && { search }),
   }
   const { data, error, mutate } = useSWR<
     {
