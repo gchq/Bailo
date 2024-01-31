@@ -85,7 +85,7 @@ describe('connectors > authentication > oauth', () => {
   })
 
   test('getUserInformation > returns user information', async () => {
-    const user = { name: 'Joe Blogs', email: 'email@test.com', dn: 'dn' }
+    const user = { name: 'Joe Blogs', email: 'email@test.com' }
     mockCognitoClient.listUsers.mockReturnValueOnce([user])
 
     const connector = new OauthAuthenticationConnector()
@@ -102,7 +102,16 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('user:name')
 
-    expect(response).rejects.toThrowError('Unable to find a single user.')
+    expect(response).rejects.toThrowError('Cannot get user information. Found more than one user.')
+  })
+
+  test('getUserInformation > throws error no user is found', async () => {
+    mockCognitoClient.listUsers.mockReturnValueOnce([])
+
+    const connector = new OauthAuthenticationConnector()
+    const response = connector.getUserInformation('user:name')
+
+    expect(response).rejects.toThrowError('Cannot get user information. User not found.')
   })
 
   test('getEntityMembers > throws error if not a user', async () => {
