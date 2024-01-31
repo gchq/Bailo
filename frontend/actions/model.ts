@@ -12,7 +12,7 @@ export interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(filters: string[], task: string, libraries: string[], search: string) {
+export function useListModels(filters: string[] = [], task = '', libraries: string[] = [], search = '') {
   const queryParams = {
     ...(filters.length > 0 && { filters }),
     ...(task && { task }),
