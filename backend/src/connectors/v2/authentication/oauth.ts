@@ -97,7 +97,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     if (users.length !== 1) {
       throw InternalError('Unable to find a single user.', { entity, lookupResult: users })
     }
-    const info: UserInformation = users[0]
+    const { dn: _returnedDn, ...info } = users[0]
     return info
   }
 
