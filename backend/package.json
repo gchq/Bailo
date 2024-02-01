@@ -87,7 +87,7 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/lodash": "^4.14.197",
-    "@types/lodash-es": "^4.17.10",
+    "@types/lodash-es": "^4.17.12",
     "@types/memoizee": "^0.4.11",
     "@types/minio": "^7.1.1",
     "@types/mjml": "^4.7.1",
