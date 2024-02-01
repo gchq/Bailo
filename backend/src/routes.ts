@@ -310,7 +310,7 @@ if (config.experimental.v2) {
   // Python docs
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = path.dirname(__filename)
-  server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/html')))
+  server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
 } else {
   logger.info('Not using experimental V2 endpoints')
 }

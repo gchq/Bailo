@@ -141,3 +141,4 @@ src/scripts/temp
 
 # Python source caches
 doctrees
+.doctrees
