@@ -94,7 +94,7 @@
     "@types/mongoose-delete": "^1.0.1",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.7",
-    "@types/node": "^20.10.1",
+    "@types/node": "^20.11.15",
     "@types/nodemailer": "^6.4.14",
     "@types/pako": "^2.0.3",
     "@types/shelljs": "^0.8.15",
