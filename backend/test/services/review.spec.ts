@@ -106,6 +106,7 @@ describe('services > review', () => {
   test('createReleaseReviews > No entities found for required roles', async () => {
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
 
+    expect(smtpMock.requestReviewForRelease).not.toBeCalled()
     expect(result).resolves.not.toThrowError()
     expect(reviewModelMock.save).toBeCalled()
   })
