@@ -6,8 +6,14 @@ from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility
 from bailo.helper.release import Release
 from bailo.core.exceptions import BailoException
+
 from semantic_version import Version
 
+try:
+    import mlflow
+    ml_flow = 1
+except:
+    ml_flow = 0
 
 class Model:
     """Represent a model within Bailo.
@@ -287,14 +293,9 @@ class Experiment:
         
         return cls(model=model)
 
-    @classmethod
-    def from_mlflow():
-        pass
-
     def start_run(self):
         try:
             self.run = self.run + 1
-            self.raw.append(self.run_data)
         except:
             self.run = 0
 
@@ -304,6 +305,8 @@ class Experiment:
             "metrics": [],
             "artifacts": [],
         }
+
+        self.raw.append(self.run_data)
 
         print(f"Bailo tracking run {self.run}.")
 
@@ -315,6 +318,20 @@ class Experiment:
 
     def log_artifacts(self, artifacts: str):
         self.run_data["artifiacts"].append(artifacts)
+
+    def from_mlflow(self, tracking_uri: str, experiment_id: str):
+        if ml_flow == 1:
+            client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri) #should this be here? or passed in?
+            runs = client.search_runs(experiment_id)
+
+            for run in runs:
+                self.start_run()
+                data = run.data
+                self.log_params(data.params)
+                self.log_metrics(data.metrics)
+        else:
+            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
+
 
     def publish(release_version: str, card_version: str):
         pass
