@@ -86,6 +86,16 @@ jobs:
       - name: Run generator
         run: npm run generate
 
+      - name: Build sphinx docs
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+        run: |
+          python -m pip install --upgrade pip
+          cd lib/python-beta/docs
+          python -m pip install -r requirements.txt
+          make dirhtml
+
       - name: Build and export
         run: npm run export
         env:

@@ -44,6 +44,10 @@ const nextConfig = {
         source: '/api/:path*',
         destination: `${backend}/api/:path*`,
       },
+      {
+        source: '/docs/python/:path*',
+        destination: `${backend}/docs/python/:path*`,
+      },
     ]
   },
 

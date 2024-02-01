@@ -3,6 +3,8 @@ import MongoStore from 'connect-mongo'
 import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
@@ -304,6 +306,11 @@ if (config.experimental.v2) {
   server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
   server.get('/api/v2/specification', ...getSpecificationV2)
+
+  // Python docs
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/html')))
 } else {
   logger.info('Not using experimental V2 endpoints')
 }
