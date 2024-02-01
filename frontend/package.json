@@ -53,7 +53,7 @@
     "rehype-highlight": "^6.0.0",
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
-    "sharp": "^0.32.0",
+    "sharp": "^0.33.2",
     "shelljs": "^0.8.5",
     "swagger-ui-react": "^4.19.0",
     "swr": "^2.1.3",
