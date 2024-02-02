@@ -111,7 +111,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         size='small'
-        noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+        noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No users found'}
         onInputChange={debounceOnInputChange}
         groupBy={(option) => option.kind}
         getOptionLabel={(option) => option.id}
