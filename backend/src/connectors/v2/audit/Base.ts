@@ -16,7 +16,7 @@ const AuditKind = {
   Update: 'Update',
   Delete: 'Delete',
   Search: 'Search',
-}
+} as const
 export type AuditKindKeys = (typeof AuditKind)[keyof typeof AuditKind]
 
 export const AuditInfo = {
@@ -86,7 +86,7 @@ export const AuditInfo = {
   ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
-}
+} as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
 export abstract class BaseAuditConnector {
