@@ -62,11 +62,11 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       kind: ReviewKind.Release,
       role: roleInfo.role,
     })
-    try {
-      roleInfo.entities.forEach((entity) => requestReviewForRelease(entity, review, release))
-    } catch (error) {
-      log.warn('Error when sending notifications requesting review for release.', { error })
-    }
+    roleInfo.entities.forEach((entity) =>
+      requestReviewForRelease(entity, review, release).catch((error) =>
+        log.warn('Error when sending notifications requesting review for release.', { error }),
+      ),
+    )
     return review.save()
   })
   await Promise.all(createReviews)
@@ -82,11 +82,11 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
       kind: ReviewKind.Access,
       role: roleInfo.role,
     })
-    try {
-      roleInfo.entities.forEach((entity) => requestReviewForAccessRequest(entity, review, accessRequest))
-    } catch (error) {
-      log.warn('Error when sending notifications requesting review for Access Request.', { error })
-    }
+    roleInfo.entities.forEach((entity) =>
+      requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
+        log.warn('Error when sending notifications requesting review for Access Request.', { error }),
+      ),
+    )
     return review.save()
   })
   await Promise.all(createReviews)
@@ -144,7 +144,7 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
-  sendReviewResponseNotification(update, user)
+  await sendReviewResponseNotification(update, user)
 
   sendWebhooks(
     update.modelId,
@@ -166,11 +166,9 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
-      try {
-        notifyReviewResponseForAccess(review, access)
-      } catch (error) {
-        log.warn('Error when notifying collaborators about review response.', { error })
-      }
+      notifyReviewResponseForAccess(review, access).catch((error) =>
+        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+      )
       break
     }
     case ReviewKind.Release: {
@@ -180,11 +178,9 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      try {
-        notifyReviewResponseForRelease(review, release)
-      } catch (error) {
-        log.warn('Error when notifying collaborators about review response.', { error })
-      }
+      notifyReviewResponseForRelease(review, release).catch((error) =>
+        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+      )
       break
     }
     default:

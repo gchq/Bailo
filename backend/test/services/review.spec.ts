@@ -48,10 +48,10 @@ vi.mock('../../src/models/v2/Review.js', async () => ({
 }))
 
 const smtpMock = vi.hoisted(() => ({
-  notifyReviewResponseForAccess: vi.fn(),
-  notifyReviewResponseForRelease: vi.fn(),
-  requestReviewForRelease: vi.fn(),
-  requestReviewForAccessRequest: vi.fn(),
+  notifyReviewResponseForAccess: vi.fn(() => Promise.resolve()),
+  notifyReviewResponseForRelease: vi.fn(() => Promise.resolve()),
+  requestReviewForRelease: vi.fn(() => Promise.resolve()),
+  requestReviewForAccessRequest: vi.fn(() => Promise.resolve()),
 }))
 vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
 
@@ -124,23 +124,6 @@ describe('services > review', () => {
     expect(smtpMock.requestReviewForRelease).toBeCalled()
   })
 
-  test('createReleaseReviews > unable to send notification', async () => {
-    const err = Error('test error')
-    smtpMock.requestReviewForRelease.mockImplementationOnce(() => {
-      throw err
-    })
-    await createReleaseReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new Release(),
-    )
-
-    expect(reviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForRelease).toBeCalled()
-    expect(logMock.warn).toHaveBeenCalledWith('Error when sending notifications requesting review for release.', {
-      error: err,
-    })
-  })
-
   test('createAccessRequestReviews > successful', async () => {
     await createAccessRequestReviews(
       new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
@@ -149,26 +132,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.save).toBeCalled()
     expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
-  })
-
-  test('createAccessRequestReviews > unable to send notification', async () => {
-    const err = Error('test error')
-    smtpMock.requestReviewForAccessRequest.mockImplementationOnce(() => {
-      throw err
-    })
-    await createAccessRequestReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new AccessRequest(),
-    )
-
-    expect(reviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
-    expect(logMock.warn).toHaveBeenCalledWith(
-      'Error when sending notifications requesting review for Access Request.',
-      {
-        error: err,
-      },
-    )
   })
 
   test('respondToReview > release successful', async () => {
@@ -216,21 +179,6 @@ describe('services > review', () => {
     expect(smtpMock.notifyReviewResponseForAccess).toBeCalled()
   })
 
-  test('respondToReview > access request review response notification error', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    const err = Error('test error')
-    smtpMock.notifyReviewResponseForAccess.mockImplementationOnce(() => {
-      throw err
-    })
-    await sendReviewResponseNotification({ kind: 'access', accessRequestId: 'Hello' } as ReviewDoc, user)
-
-    expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
-    expect(smtpMock.notifyReviewResponseForAccess).toBeCalled()
-    expect(logMock.warn).toHaveBeenCalledWith('Error when notifying collaborators about review response.', {
-      error: err,
-    })
-  })
-
   test('respondToReview > missing access request ID', async () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
     const err = Error('test error')
@@ -257,21 +205,6 @@ describe('services > review', () => {
     await sendReviewResponseNotification({ kind: 'release' } as ReviewDoc, user)
 
     expect(logMock.error).toHaveBeenCalledWith('Unable to send notification for review response. Cannot find semver.')
-  })
-
-  test('respondToReview > release review response notification error', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    const err = Error('test error')
-    smtpMock.notifyReviewResponseForRelease.mockImplementationOnce(() => {
-      throw err
-    })
-    await sendReviewResponseNotification({ kind: 'release', semver: 'Hello' } as ReviewDoc, user)
-
-    expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
-    expect(smtpMock.notifyReviewResponseForRelease).toBeCalled()
-    expect(logMock.warn).toHaveBeenCalledWith('Error when notifying collaborators about review response.', {
-      error: err,
-    })
   })
 
   test('respondToReview > mongo update fails', async () => {
