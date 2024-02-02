@@ -189,9 +189,6 @@ function getRoleEntites(roles: string[], collaborators: CollaboratorEntry[]) {
     const entites = collaborators
       .filter((collaborator) => collaborator.roles.includes(role))
       .map((collaborator) => collaborator.entity)
-    if (entites.length === 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
-    }
     return { role, entites }
   })
 }
