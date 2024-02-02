@@ -99,7 +99,6 @@ import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.j
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
-import config from './utils/config.js'
 import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
 import config from './utils/v2/config.js'
@@ -125,10 +124,6 @@ if (config.oauth.enabled) {
   )
 }
 
-server.use('/api/v1', getUser)
-server.use('/api/v1', expressLogger)
-server.use('/api/v2', expressLoggerV2)
-
 if (config.oauth.enabled) {
   server.use(parser.urlencoded({ extended: true }))
   server.use(grant.default.express(config.oauth.grant))
@@ -147,13 +142,10 @@ if (config.oauth.enabled) {
 
 server.use('/api/v1', getUser)
 server.use('/api/v1', expressLogger)
-
-if (config.experimental.v2) {
-  server.use('/api/v2', expressLoggerV2)
-  const middlewareConfigs = authentication.authenticationMiddleware()
-  for (const middlewareConf of middlewareConfigs) {
-    server.use(middlewareConf?.path || '/', middlewareConf.middleware)
-  }
+server.use('/api/v2', expressLoggerV2)
+const middlewareConfigs = authentication.authenticationMiddleware()
+for (const middlewareConf of middlewareConfigs) {
+  server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
 
 // V1 APIs
@@ -239,11 +231,7 @@ server.get('/api/v2/model/:modelId/releases', ...getReleases)
 server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
 server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
-server.get(
-  '/api/v2/token/model/:modelId/release/:semver/file/:fileName/download',
-  getTokenFromAuthHeader,
-  ...getDownloadFile,
-)
+server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
