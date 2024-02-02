@@ -12,9 +12,9 @@ type PartialTagSelectorProps =
     }
   | {
       multiple?: false
-      tags: (string | '')[]
-      selectedTags: string | ''
-      onChange: (value: string | '') => void
+      tags: string[]
+      selectedTags: string
+      onChange: (value: string) => void
     }
 
 type TagSelectorProps = {
