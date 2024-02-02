@@ -3,7 +3,7 @@ import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
 
-import { AuditKindKeys } from '../../connectors/v2/audit/Base.js'
+import { AuditKindKeys } from '../../connectors/v2/audit/index.js'
 import { AuthenticationKindKeys } from '../../connectors/v2/authentication/index.js'
 import { AuthorisationKindKeys } from '../../connectors/v2/authorisation/index.js'
 import { deepFreeze } from './object.js'

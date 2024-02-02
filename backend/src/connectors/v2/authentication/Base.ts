@@ -6,7 +6,7 @@ import { checkAuthentication, getTokenFromAuthHeader } from '../../../routes/mid
 
 export const Roles = {
   Admin: 'admin',
-}
+} as const
 export type RoleKeys = (typeof Roles)[keyof typeof Roles]
 
 export interface UserInformation {

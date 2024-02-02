@@ -8,7 +8,7 @@ import { listUsers } from '../../../clients/cognito.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import config from '../../../utils/v2/config.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
-import { InternalError } from '../../../utils/v2/error.js'
+import { InternalError, NotFound } from '../../../utils/v2/error.js'
 import { BaseAuthenticationConnector, RoleKeys, UserInformation } from './Base.js'
 
 const OauthEntityKind = {
@@ -94,10 +94,13 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     }
 
     const users = await listUsers(dn, true)
-    if (users.length !== 1) {
-      throw InternalError('Unable to find a single user.', { entity, lookupResult: users })
+    if (users.length > 1) {
+      throw InternalError('Cannot get user information. Found more than one user.', { entity, lookupResult: users })
     }
-    const info: UserInformation = users[0]
+    if (users.length === 0) {
+      throw NotFound('Cannot get user information. User not found.', { entity })
+    }
+    const { dn: _returnedDn, ...info } = users[0]
     return info
   }
 

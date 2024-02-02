@@ -40,8 +40,11 @@ export async function listUsers(query: string, exactMatch = false) {
     if (!dn) {
       return acc
     }
+    const email = cognitoUser.Attributes?.find((attribute) => attribute.Name === 'email')?.Value
+    const name = cognitoUser.Attributes?.find((attribute) => attribute.Name === 'given_name')?.Value
     const info: UserInformation = {
-      email: cognitoUser.Attributes?.find((attribute) => attribute.Name === 'email')?.Value,
+      ...(email && { email }),
+      ...(name && { name }),
     }
     acc.push({ ...info, dn })
     return acc
