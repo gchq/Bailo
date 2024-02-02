@@ -161,7 +161,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
-        log.error('Unable to send notification for review response. Cannot find access request ID.')
+        log.error('Unable to send notification for review response. Cannot find access request ID.', { review })
         return
       }
 
@@ -173,7 +173,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
     }
     case ReviewKind.Release: {
       if (!review.semver) {
-        log.error('Unable to send notification for review response. Cannot find semver.')
+        log.error('Unable to send notification for review response. Cannot find semver.', { review })
         return
       }
 
@@ -196,7 +196,7 @@ function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
     if (entities.length === 0) {
       throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
     }
-    return { role, entities: entities }
+    return { role, entities }
   })
 }
 
