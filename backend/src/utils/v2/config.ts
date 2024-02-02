@@ -1,5 +1,7 @@
+import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
 import bunyan from 'bunyan'
 import _config from 'config'
+import grant from 'grant'
 
 import { AuditKindKeys } from '../../connectors/v2/audit/Base.js'
 import { AuthenticationKindKeys } from '../../connectors/v2/authentication/index.js'
@@ -7,6 +9,10 @@ import { AuthorisationKindKeys } from '../../connectors/v2/authorisation/index.j
 import { deepFreeze } from './object.js'
 
 export interface Config {
+  experimental: {
+    v2: string
+  }
+
   app: {
     protocol: string
     host: string
@@ -67,6 +73,10 @@ export interface Config {
     }
   }
 
+  mongo: {
+    uri: string
+  }
+
   registry: {
     connection: {
       internal: string
@@ -116,6 +126,26 @@ export interface Config {
       },
     ]
     maxModelSizeGB: number
+    session: {
+      secret: string
+    }
+  }
+
+  session: {
+    secret: string
+  }
+
+  oauth: {
+    // Enabled only included for backward support with V1.
+    // After V1, authentication connector config should be used.
+    enabled: boolean
+    provider: string
+    grant: grant.GrantConfig | grant.GrantOptions
+    cognito: {
+      identityProviderClient: CognitoIdentityProviderClientConfig
+      userPoolId: string
+      userIdAttribute: string
+    }
   }
 }
 

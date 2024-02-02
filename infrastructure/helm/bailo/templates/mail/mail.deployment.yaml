@@ -16,6 +16,12 @@ spec:
       labels:
         name: mail
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
       - name: {{ include "bailo.fullname" . }}-mail
         image: marlonb/mailcrab:latest
