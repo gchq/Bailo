@@ -2,8 +2,8 @@
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-> Bailo is still in development and we have not yet completed all of the features we want it to have. See the roadmap
-> for what we plan to build.
+> **NOTE: `main` branch now tracks `v2` by default. To access the original Bailo, see the `v1` branch. `v1` is in the
+> process of being removed from this project, see [migration]() for more information.**
 
 <!-- PROJECT LOGO -->
 <br />

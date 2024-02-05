@@ -234,9 +234,6 @@ config:
     protocol: "https"
     port: 443
 
-  experimental:
-    v2: false
-
 # logging https://github.com/gchq/stroom
 stroom:
   enabled: false

@@ -81,8 +81,6 @@ openshift-deploy:
             enabled: "true"
             text: "BAILO DEVELOPMENT"
             colour: "#2B71C7"
-        experimental:
-          v2: true
       # Bailo
       image:
         frontendRepository: "$FRONTEND_REPO"
