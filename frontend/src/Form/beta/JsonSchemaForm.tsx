@@ -58,9 +58,7 @@ function DescriptionFieldTemplate() {
   return <></>
 }
 
-function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
-  const { title, properties, description } = props
-
+function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
   return (
     <Box sx={{ pl: 2, mb: 3 }}>
       <Stack spacing={2}>
