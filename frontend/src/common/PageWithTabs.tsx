@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
@@ -12,7 +12,6 @@ export interface PageTab {
   view: ReactElement
   disabled?: boolean
   datatest?: string
-  disabledText?: string
 }
 
 export default function PageWithTabs({
@@ -88,19 +87,7 @@ export default function PageWithTabs({
         variant='scrollable'
       >
         {tabs.map((tab: PageTab) => {
-          return (
-            <Tab
-              key={tab.title}
-              disabled={tab.disabled}
-              value={tab.path}
-              data-test={`${tab.path}Tab`}
-              label={
-                <Tooltip title={tab.disabledText}>
-                  <span>{tab.title}</span>
-                </Tooltip>
-              }
-            />
-          )
+          return <Tab key={tab.title} disabled={tab.disabled} value={tab.path} data-test={`${tab.path}Tab`} />
         })}
       </Tabs>
       {tabs.map((tab: PageTab) => {
