@@ -59,7 +59,7 @@
     "multer-s3": "^3.0.1",
     "nanoid": "^5.0.4",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^6.9.8",
+    "nodemailer": "^6.9.9",
     "open": "^9.1.0",
     "openshift-rest-client": "^8.0.1",
     "p-mongo-queue": "^8.4.0",
