@@ -13,7 +13,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { Decision, ReviewRequestInterface } from 'types/interfaces'
+import { ReviewRequestInterface } from 'types/interfaces'
 
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
@@ -79,14 +79,9 @@ export default function SideNavigation({
 
   const theme = useTheme()
 
-  const doesNotContainUserApproval = useCallback(
+  const doesNotContainUserResponse = useCallback(
     (review: ReviewRequestInterface) => {
-      return (
-        currentUser &&
-        !review.responses.find(
-          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        )
-      )
+      return currentUser && !review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
     [currentUser],
   )
@@ -95,11 +90,11 @@ export default function SideNavigation({
     async function fetchReviewCount() {
       onResetErrorMessage()
       if (reviews) {
-        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserApproval(filteredReview)).length)
+        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserResponse(filteredReview)).length)
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, doesNotContainUserApproval, reviews])
+  }, [onResetErrorMessage, doesNotContainUserResponse, reviews])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
