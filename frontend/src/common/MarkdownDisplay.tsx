@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import ReactMarkdown from 'markdown-to-jsx'
 import { useMemo } from 'react'
 
-type MarkdownDisplayProps = {
+export type MarkdownDisplayProps = {
   children: string
 }
 

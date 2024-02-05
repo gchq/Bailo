@@ -1,6 +1,7 @@
 import { UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 import { ReviewComment } from 'types/types'
+import { ModelInterface } from 'types/v2/types'
 
 export interface SplitSchema {
   reference: string
@@ -78,19 +79,6 @@ export const ModelVisibility = {
 } as const
 
 export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
-
-export interface ModelInterface {
-  id: string
-
-  name: string
-  description: string
-
-  visibility: ModelVisibilityKeys
-  deleted: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
 
 export const Decision = {
   RequestChanges: 'request_changes',

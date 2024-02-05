@@ -54,10 +54,10 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
   )
 
   return {
-    mutateReviews: mutate,
     reviews: data ? data.reviews : [],
     isReviewsLoading: !error && !data,
     isReviewsError: error,
+    mutateReviews: mutate,
   }
 }
 

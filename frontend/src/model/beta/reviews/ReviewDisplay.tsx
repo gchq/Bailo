@@ -11,7 +11,7 @@ import { getRoleDisplay } from '../../../../utils/beta/roles'
 import Loading from '../../../common/Loading'
 import MessageAlert from '../../../MessageAlert'
 
-interface ReviewDisplayProps {
+export interface ReviewDisplayProps {
   review: ReviewRequestInterface
 }
 

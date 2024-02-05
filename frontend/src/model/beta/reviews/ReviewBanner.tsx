@@ -16,7 +16,7 @@ import { postReviewResponse } from '../../../../actions/review'
 import { ReleaseInterface } from '../../../../types/types'
 import ReviewWithComment, { ResponseTypeKeys } from '../../../common/ReviewWithComment'
 
-type ReviewBannerProps =
+export type ReviewBannerProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
