@@ -1,3 +1,4 @@
+import { EmotionJSX } from '@emotion/react/types/jsx-namespace'
 import { Done } from '@mui/icons-material'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
@@ -12,30 +13,33 @@ interface ApprovalsDisplayProps {
   acceptedReviewResponses: ReviewResponseWithRole[]
 }
 
+const staticRoles = ['owner', 'contributor', 'consumer']
+
 export default function ApprovalsDisplay({ modelId, acceptedReviewResponses }: ApprovalsDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
-  const roleApprovals = useMemo(() => {
-    const staticRoles = ['owner', 'contributor', 'consumer']
-    const dynamicRoles = modelRoles.filter((role) => !staticRoles.includes(role.id)).map((role) => role)
-    return dynamicRoles.map((dynamicRole) => {
-      const acceptedResponsesForRole = acceptedReviewResponses.filter(
-        (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
-      )
-      if (acceptedResponsesForRole.length > 0) {
-        return (
-          <>
+  const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role.id)), [modelRoles])
+
+  const roleApprovals = useMemo(
+    () =>
+      dynamicRoles.reduce<EmotionJSX.Element[]>((approvals, dynamicRole) => {
+        const hasRoleApproved = !!acceptedReviewResponses.find(
+          (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
+        )
+        if (hasRoleApproved) {
+          approvals.push(
             <Tooltip title={`${plural(acceptedReviewResponses.length, 'approval')}`} key={dynamicRole.id}>
               <Stack direction='row'>
                 <Done color='success' fontSize='small' />
                 <Typography variant='caption'>{`Approved by ${dynamicRole.name}`}</Typography>
               </Stack>
-            </Tooltip>
-          </>
-        )
-      }
-    })
-  }, [acceptedReviewResponses, modelRoles])
+            </Tooltip>,
+          )
+        }
+        return approvals
+      }, []),
+    [acceptedReviewResponses, dynamicRoles],
+  )
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
