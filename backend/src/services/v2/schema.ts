@@ -42,7 +42,7 @@ export async function deleteSchemaById(user: UserDoc, schemaId: string): Promise
     })
   }
 
-  await schema.remove()
+  await schema.delete()
 
   return schema.id
 }

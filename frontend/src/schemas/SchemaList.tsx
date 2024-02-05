@@ -22,9 +22,8 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const schemaList = useMemo(() => {
     const handleSetSchemaActive = async (schema: SchemaInterface) => {
       setErrorMessage('')
-      const updatedSchema = schema
-      updatedSchema.active = !schema.active
-      const res = await putSchema(updatedSchema)
+      schema.active = !schema.active
+      const res = await putSchema(schema)
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
@@ -32,14 +31,14 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       }
     }
 
-    const handleDeleteSchemaButtonOnClick = (schemaId) => {
+    const handleDeleteSchemaButtonOnClick = (schemaId: string) => {
       setOpen(true)
       setSchemaToBeDeleted(schemaId)
     }
 
-    const handleDeleteConfirm = async (schema: string) => {
+    const handleDeleteConfirm = async (schemaId: string) => {
       setErrorMessage('')
-      const res = await deleteSchema(schema)
+      const res = await deleteSchema(schemaId)
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
@@ -66,6 +65,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
           onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
           onCancel={() => setOpen(false)}
           errorMessage={errorMessage}
+          dialogMessage={'Deleting schemas can possibly break existing models, are you sure you want to do this?'}
         />
       </Stack>
     ))

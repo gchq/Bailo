@@ -58,7 +58,7 @@ interface PutSchemaResponse {
 export const putSchema = [
   bodyParser.json(),
   async (req: Request, res: Response<PutSchemaResponse>) => {
-    req.audit = AuditInfo.CreateSchema
+    req.audit = AuditInfo.UpdateSchema
     const { body } = parse(req, putSchemaSchema)
 
     const schema = await createSchema(req.user, body, true)

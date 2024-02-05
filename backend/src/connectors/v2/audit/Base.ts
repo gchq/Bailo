@@ -85,6 +85,7 @@ export const AuditInfo = {
   SearchSchemas: { typeId: 'SearchedSchemas', description: 'Schemas Searched', auditKind: AuditKind.Search },
   ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
   DeleteSchema: { typeId: 'DeleteSchema', description: 'Schema Deleted', auditKind: AuditKind.Delete },
+  UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 }
@@ -128,6 +129,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateSchema(req: Request, schema: SchemaInterface)
   abstract onViewSchema(req: Request, schema: SchemaInterface)
   abstract onDeleteSchema(req: Request, schemaId: string)
+  abstract onUpdateSchema(req: Request, schema: SchemaInterface)
 
   abstract onViewModelImages(
     req: Request,

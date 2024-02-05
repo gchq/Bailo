@@ -20,11 +20,11 @@ registerPath({
   method: 'delete',
   path: '/api/v2/schema/{schemaId}',
   tags: ['schema'],
-  description: 'Update an existing schema.',
+  description: 'Delete an existing schema.',
   schema: deleteSchemaSchema,
   responses: {
     200: {
-      description: 'The updated schema instance.',
+      description: 'Returns true if schema deleted.',
       content: {
         'application/json': {
           schema: z.object({
@@ -43,7 +43,7 @@ interface DeletedSchemaResponse {
 export const deleteSchema = [
   bodyParser.json(),
   async (req: Request, res: Response<DeletedSchemaResponse>) => {
-    req.audit = AuditInfo.CreateSchema
+    req.audit = AuditInfo.DeleteSchema
     const { params } = parse(req, deleteSchemaSchema)
 
     await deleteSchemaById(req.user, params.schemaId)
