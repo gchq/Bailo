@@ -221,7 +221,11 @@ export class BasicAuthorisationConnector {
           [FileAction.Download].includes(action) &&
           !model.settings.ungovernedAccess
         ) {
-          return { success: false, info: 'You need to have a valid access request to download a file.', id: file.id }
+          return {
+            success: false,
+            info: 'You need to have an approved access request to download a file.',
+            id: file.id,
+          }
         }
 
         return { success: true, id: file.id }
@@ -262,7 +266,7 @@ export class BasicAuthorisationConnector {
         ) {
           return {
             success: false,
-            info: 'You need to have a valid access request to download an image.',
+            info: 'You need to have an approved access request to download an image.',
             id: access.name,
           }
         }
