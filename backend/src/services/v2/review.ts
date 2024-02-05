@@ -4,7 +4,7 @@ import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
-import Review, { ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
+import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
@@ -186,6 +186,18 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
     default:
       throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
   }
+}
+
+export async function getApprovedAccessRequestReviews(accessRequestIds: string[]) {
+  const reviews = await Review.find({
+    accessRequestId: accessRequestIds,
+    responses: {
+      $elemMatch: {
+        decision: Decision.Approve,
+      },
+    },
+  })
+  return reviews.some((review) => review.role === 'msro')
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

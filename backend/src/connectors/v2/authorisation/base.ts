@@ -5,7 +5,8 @@ import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { Access, Action } from '../../../routes/v1/registryAuth.js'
-import { getAccessRequestsByModel } from '../../../services/v2/accessRequest.js'
+import { getModelAccessRequestsForUser } from '../../../services/v2/accessRequest.js'
+import { getApprovedAccessRequestReviews as hasApprovedAccessRequestReview } from '../../../services/v2/review.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 
@@ -68,15 +69,14 @@ export class BasicAuthorisationConnector {
     return true
   }
 
-  async hasAccessRequest(user: UserDoc, model: ModelDoc) {
-    const entities = await authentication.getEntities(user)
+  async hasApprovedAccessRequest(user: UserDoc, model: ModelDoc) {
+    const accessRequests = await getModelAccessRequestsForUser(user, model.id)
+    let result = false
+    if (accessRequests.length > 0) {
+      result = await hasApprovedAccessRequestReview(accessRequests.map((accessRequest) => accessRequest.id))
+    }
 
-    const accessRequests = await getAccessRequestsByModel(user, model.id)
-    const hasAccessRequest = accessRequests.some((request) =>
-      request.metadata.overview.entities.some((entity) => entities.includes(entity)),
-    )
-
-    return hasAccessRequest
+    return result
   }
 
   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
@@ -206,7 +206,7 @@ export class BasicAuthorisationConnector {
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 
     // Does the user have a valid access request for this model?
-    const hasAccessRequest = await this.hasAccessRequest(user, model)
+    const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       files.map(async (file) => {
@@ -216,7 +216,7 @@ export class BasicAuthorisationConnector {
         }
 
         if (
-          !hasAccessRequest &&
+          !hasApprovedAccessRequest &&
           !hasModelRole &&
           [FileAction.Download].includes(action) &&
           !model.settings.ungovernedAccess
@@ -234,7 +234,7 @@ export class BasicAuthorisationConnector {
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 
     // Does the user have a valid access request for this model?
-    const hasAccessRequest = await this.hasAccessRequest(user, model)
+    const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       accesses.map(async (access) => {
