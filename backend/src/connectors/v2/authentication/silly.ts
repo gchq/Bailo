@@ -1,5 +1,3 @@
-import { Request } from 'express'
-
 import { UserDoc } from '../../../models/v2/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
 import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
@@ -14,10 +12,19 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     super()
   }
 
-  async getUserFromReq(_req: Request) {
-    return {
-      dn: 'user',
-    }
+  authenticationMiddleware() {
+    return [
+      {
+        path: '/api/v2',
+        middleware: [
+          function (req, res, next) {
+            req.user = { dn: 'user' }
+            return next()
+          },
+        ],
+      },
+      ...super.authenticationMiddleware(),
+    ]
   }
 
   async hasRole(_user: UserDoc, role: RoleKeys) {

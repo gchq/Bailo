@@ -68,7 +68,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onViewModelCardRevisions(req: Request, modelCards: ModelCardInterface[]) {
+  onViewModelCardRevisions(req: Request, _modelId, modelCards: ModelCardInterface[]) {
     this.checkEventType(AuditInfo.ViewModelCardRevisions, req)
     const event = this.generateEvent(req, { url: req.originalUrl, results: modelCards.map((model) => model.version) })
     req.log.info(event, req.audit.description)
@@ -116,8 +116,8 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onSearchReleases(req: Request, releases: ReleaseDoc[]) {
-    this.checkEventType(AuditInfo.SearchReleases, req)
+  onViewReleases(req: Request, releases: ReleaseDoc[]) {
+    this.checkEventType(AuditInfo.ViewReleases, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
       results: releases.map((release) => ({ modelId: release.modelId, semver: release.semver })),
@@ -170,8 +170,8 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onSearchAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
-    this.checkEventType(AuditInfo.SearchAccessRequests, req)
+  onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]) {
+    this.checkEventType(AuditInfo.ViewAccessRequests, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,
       results: accessRequests.map((accessRequest) => ({

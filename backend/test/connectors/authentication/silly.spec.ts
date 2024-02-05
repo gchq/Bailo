@@ -1,14 +1,18 @@
-import { Request } from 'express'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { SillyAuthenticationConnector } from '../../../src/connectors/v2/authentication/silly.js'
 
-describe('connectors > user > silly', () => {
-  test('getUserFromReq', async () => {
-    const connector = new SillyAuthenticationConnector()
-    const user = await connector.getUserFromReq({} as Request)
+vi.mock('../../../src/routes/middleware/defaultAuthentication.js', () => ({
+  getTokenFromAuthHeader: 'Token Middleware',
+  checkAuthentication: 'Authentication Check Middleware',
+}))
 
-    expect(user).toStrictEqual({ dn: 'user' })
+describe('connectors > authentication > silly', () => {
+  test('authenticationMiddleware', async () => {
+    const connector = new SillyAuthenticationConnector()
+    const middleware = await connector.authenticationMiddleware()
+
+    expect(middleware).toMatchSnapshot()
   })
 
   test('queryEntities', async () => {

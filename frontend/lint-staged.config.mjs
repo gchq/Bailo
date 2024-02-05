@@ -6,7 +6,8 @@ const buildEslintCommand = (filenames) =>
     .join(' --file ')}`
 
 const config = {
-  '**/*.{ts,tsx,md,mdx}': [buildEslintCommand, 'prettier --check'],
+  '**/*.{ts,tsx,md}': [buildEslintCommand],
+  '**/*.{ts,tsx,md,mdx}': ['prettier --check'],
 }
 
 export default config

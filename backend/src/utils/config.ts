@@ -150,10 +150,6 @@ export interface Config {
     //max model size is calculated in gigabytes
     maxModelSizeGB: number
   }
-
-  experimental: {
-    v2: boolean
-  }
 }
 
 const config: Config = {
@@ -231,8 +227,6 @@ const config: Config = {
   session: _config.get('session'),
 
   ui: _config.get('ui'),
-
-  experimental: _config.get('experimental'),
 }
 
 export default config

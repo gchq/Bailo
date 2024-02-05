@@ -6,10 +6,9 @@ import grant from 'grant'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import authentication from './connectors/v2/authentication/index.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
-import { getTokenFromAuthHeader } from './routes/middleware/getToken.js'
-import { getUser as getUserV2 } from './routes/middleware/getUser.js'
 import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
 import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
 import {
@@ -102,12 +101,17 @@ import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.j
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
-import config from './utils/config.js'
-import logger, { expressErrorHandler, expressLogger } from './utils/logger.js'
+import { expressErrorHandler, expressLogger } from './utils/logger.js'
 import { getUser } from './utils/user.js'
+import config from './utils/v2/config.js'
 
 export const server = express()
 
+/**
+ * This is only required for V1 OAuth.
+ * V2 OAuth is handled separately.
+ * Having both V1 and V1 results in duplication but this does not affect functionality.
+ */
 if (config.oauth.enabled) {
   server.use(
     session({
@@ -120,14 +124,6 @@ if (config.oauth.enabled) {
       }),
     }),
   )
-}
-
-server.use('/api/v1', getUser)
-server.use('/api/v1', expressLogger)
-
-if (config.experimental.v2) {
-  server.use('/api/v2', getUserV2)
-  server.use('/api/v2', expressLoggerV2)
 }
 
 if (config.oauth.enabled) {
@@ -144,6 +140,14 @@ if (config.oauth.enabled) {
       res.redirect('/')
     })
   })
+}
+
+server.use('/api/v1', getUser)
+server.use('/api/v1', expressLogger)
+server.use('/api/v2', expressLoggerV2)
+const middlewareConfigs = authentication.authenticationMiddleware()
+for (const middlewareConf of middlewareConfigs) {
+  server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
 
 // V1 APIs
@@ -208,115 +212,119 @@ server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
 /**
  ** V2 API **
  */
+server.post('/api/v2/models', ...postModel)
+server.get('/api/v2/models/search', ...getModelsSearch)
+// server.post('/api/v2/models/import', ...postModelImport)
 
-if (config.experimental.v2) {
-  logger.info('Using experimental V2 endpoints')
+server.get('/api/v2/model/:modelId', ...getModel)
+server.patch('/api/v2/model/:modelId', ...patchModel)
 
-  server.post('/api/v2/models', ...postModel)
-  server.get('/api/v2/models/search', ...getModelsSearch)
-  // server.post('/api/v2/models/import', ...postModelImport)
+server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
+server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 
-  server.get('/api/v2/model/:modelId', ...getModel)
-  server.patch('/api/v2/model/:modelId', ...patchModel)
+// *server.get('/api/v2/template/models', ...getModelTemplates)
+// *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+// *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
-  server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
-  server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
-  server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
+server.post('/api/v2/model/:modelId/releases', ...postRelease)
+server.get('/api/v2/model/:modelId/releases', ...getReleases)
+server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+// This is a temporary workaround to split out the URL to disable authorisation.
+server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
+server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
+server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
+server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
-  // *server.get('/api/v2/template/models', ...getModelTemplates)
-  // *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
-  // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
-  server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
+server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
+server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
+server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
+server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
+server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
+server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
+server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
 
-  server.post('/api/v2/model/:modelId/releases', ...postRelease)
-  server.get('/api/v2/model/:modelId/releases', ...getReleases)
-  server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
-  server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-  // This is a temporary workaround to split out the URL to disable authorisation.
-  server.get(
-    '/api/v2/token/model/:modelId/release/:semver/file/:fileName/download',
-    getTokenFromAuthHeader,
-    ...getDownloadFile,
-  )
-  server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
-  server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
-  server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
-  server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
+server.get('/api/v2/model/:modelId/files', ...getFiles)
+server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
+// This is a temporary workaround to split out the URL to disable authorisation.
+server.get('/api/v2/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
+server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
+server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+server.post('/api/v2/model/:modelId/releases', ...postRelease)
+server.get('/api/v2/model/:modelId/releases', ...getReleases)
+server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
+server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+// This is a temporary workaround to split out the URL to disable authorisation.
+server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
+server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
+server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
+server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
-  server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
-  server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
-  server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
-  server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
-  server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
-  server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
-  server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
+server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
+server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
+server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
-  server.get('/api/v2/model/:modelId/files', ...getFiles)
-  server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
-  // This is a temporary workaround to split out the URL to disable authorisation.
-  server.get('/api/v2/token/model/:modelId/file/:fileId/download', getTokenFromAuthHeader, ...getDownloadFile)
-  server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
-  server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
-  server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
-  server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+server.get('/api/v2/model/:modelId/images', ...getImages)
+// *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+server.get('/api/v2/model/:modelId/files', ...getFiles)
+server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
+// This is a temporary workaround to split out the URL to disable authorisation.
+server.get('/api/v2/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
+server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
+server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
-  server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
-  server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
-  server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
-  server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
+// *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
+// *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
-  server.get('/api/v2/model/:modelId/images', ...getImages)
-  // *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+server.get('/api/v2/schemas', ...getSchemasV2)
+server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
+server.post('/api/v2/schemas', ...postSchemaV2)
 
-  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
-  // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
+server.get('/api/v2/reviews', ...getReviews)
 
-  server.get('/api/v2/schemas', ...getSchemasV2)
-  server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
-  server.post('/api/v2/schemas', ...postSchemaV2)
+server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
+server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 
-  server.get('/api/v2/reviews', ...getReviews)
+server.post('/api/v2/teams', ...postTeam)
+server.get('/api/v2/teams', ...getTeams)
+server.get('/api/v2/teams/mine', ...getTeams)
 
-  server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
-  server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
+server.get('/api/v2/team/:teamId', ...getTeam)
+server.patch('/api/v2/team/:teamId', ...patchTeam)
 
-  server.post('/api/v2/teams', ...postTeam)
-  server.get('/api/v2/teams', ...getTeams)
-  server.get('/api/v2/teams/mine', ...getTeams)
+// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
+// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
+// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
+// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
 
-  server.get('/api/v2/team/:teamId', ...getTeam)
-  server.patch('/api/v2/team/:teamId', ...patchTeam)
+// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
-  // server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
-  // server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
-  // server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
-  // server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
+server.get('/api/v2/entities', ...getEntities)
+server.get('/api/v2/entities/me', ...getCurrentUser)
+server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
-  // server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
+server.get('/api/v2/config/ui', ...getUiConfigV2)
 
-  server.get('/api/v2/entities', ...getEntities)
-  server.get('/api/v2/entities/me', ...getCurrentUser)
-  server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
+server.post('/api/v2/user/tokens', ...postUserToken)
+server.get('/api/v2/user/tokens', ...getUserTokens)
+// server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
+server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
-  server.get('/api/v2/config/ui', ...getUiConfigV2)
+server.get('/api/v2/specification', ...getSpecificationV2)
 
-  server.post('/api/v2/user/tokens', ...postUserToken)
-  server.get('/api/v2/user/tokens', ...getUserTokens)
-  // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
-  server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
-
-  server.get('/api/v2/specification', ...getSpecificationV2)
-
-  // Python docs
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-  server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
-} else {
-  logger.info('Not using experimental V2 endpoints')
-}
+// Python docs
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
 
 server.use('/api/v1', expressErrorHandler)
-
-if (config.experimental.v2) {
-  server.use('/api/v2', expressErrorHandlerV2)
-}
+server.use('/api/v2', expressErrorHandlerV2)

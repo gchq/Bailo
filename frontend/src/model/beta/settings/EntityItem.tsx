@@ -1,7 +1,7 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
-import { Autocomplete, Chip, IconButton, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import _ from 'lodash-es'
 import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -21,6 +21,8 @@ type EntityItemProps = {
 export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
 
+  const modelRoleOptions = useMemo(() => modelRoles.map((role) => role.id), [modelRoles])
+
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
@@ -30,10 +32,6 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
 
   function removeEntity() {
     onAccessListChange(accessList.filter((access) => access.entity !== entity.entity))
-  }
-
-  function getModelRoles() {
-    return modelRoles.map((role) => role.id)
   }
 
   function getRole(roleId: string) {
@@ -50,21 +48,21 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   return (
     <TableRow>
       <TableCell>
-        <EntityIcon entity={entity} />
-        <EntityNameDisplay entity={entity} />
+        <Stack direction='row' alignItems='center' spacing={0.5}>
+          <EntityIcon entity={entity} />
+          <EntityNameDisplay entity={entity} />
+        </Stack>
       </TableCell>
       <TableCell>
         {isModelRolesLoading && <Loading />}
         {!isModelRolesLoading && modelRoles.length > 0 && (
           <Autocomplete
-            id='role-selector'
-            sx={{ width: '100%' }}
             size='small'
             multiple
             aria-label={`role selector input for entity ${entity.entity}`}
             value={entity.roles}
-            data-test='accessListAutoselect'
-            options={getModelRoles() || []}
+            data-test='accessListAutocomplete'
+            options={modelRoleOptions}
             getOptionLabel={(role) => getRole(role).name}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
@@ -76,12 +74,12 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
           />
         )}
       </TableCell>
-      <TableCell>
+      <TableCell align='right'>
         <Tooltip title='Remove user' arrow>
           <IconButton
             onClick={removeEntity}
             aria-label={`Remove user ${entity.entity} from model access list`}
-            data-test='accesslistRemoveUser'
+            data-test='accessListRemoveUser'
           >
             <ClearIcon color='secondary' fontSize='inherit' />
           </IconButton>

@@ -20,6 +20,11 @@ describe('Make and approve an access request', () => {
         (response) => {
           expect(response.status).to.eq(200)
           expect(response.body.card).to.have.property('modelId', modelUuid)
+          cy.request('patch', `/api/v2/model/${modelUuid}`, {
+            collaborators: [{ entity: 'user:user', roles: ['owner', 'mtr', 'msro'] }],
+          }).then((response) => {
+            expect(response.status).to.eq(200)
+          })
         },
       )
     })

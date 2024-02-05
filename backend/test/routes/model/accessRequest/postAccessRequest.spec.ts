@@ -4,18 +4,13 @@ import audit from '../../../../src/connectors/v2/audit/__mocks__/index.js'
 import { postAccessRequestSchema } from '../../../../src/routes/v2/model/accessRequest/postAccessRequest.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/v2/config.js')
 vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/v2/audit/index.js')
 
-vi.mock('../../../../src/services/v2/accessRequest.js', async () => {
-  const actual = (await vi.importActual('../../../../src/services/v2/accessRequest.js')) as object
-  return {
-    ...actual,
-    createAccessRequest: vi.fn(() => ({ _id: 'test' })),
-  }
-})
+vi.mock('../../../../src/services/v2/accessRequest.js', async () => ({
+  createAccessRequest: vi.fn(() => ({ _id: 'test' })),
+}))
 
 describe('routes > accessRequest > postAccessRequest', () => {
   test('200 > ok', async () => {

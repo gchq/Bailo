@@ -18,8 +18,11 @@ describe('connectors > authorisation', () => {
   })
 
   test('invalid', () => {
-    config.connectors.authorisation.kind = 'invalid'
+    const invalidConnector = 'invalid'
+    config.connectors.authorisation.kind = invalidConnector
 
-    expect(() => getAuthorisationConnector(false)).toThrowError('No valid authorisation connector provided.')
+    expect(() => getAuthorisationConnector(false)).toThrowError(
+      `'${invalidConnector}' is not a valid authorisation kind.`,
+    )
   })
 })

@@ -51,7 +51,7 @@ export const getModelCardRevisions = [
 
     const modelCardRevisions = await getModelCardRevisionsService(req.user, modelId)
 
-    await audit.onViewModelCardRevisions(req, modelCardRevisions)
+    await audit.onViewModelCardRevisions(req, modelId, modelCardRevisions)
 
     return res.json({ modelCardRevisions })
   },
