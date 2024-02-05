@@ -94,7 +94,6 @@ export default function PageWithTabs({
               disabled={tab.disabled}
               value={tab.path}
               data-test={`${tab.path}Tab`}
-              sx={{ pointerEvents: 'auto' }}
               label={
                 <Tooltip title={tab.disabledText}>
                   <span>{tab.title}</span>
