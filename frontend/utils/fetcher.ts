@@ -9,21 +9,15 @@ export type ErrorInfo = Error & {
   status: number
 }
 
+type ErrorResponse = {
+  error: Error
+}
+
 export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
   const res = await fetch(input, init)
 
-  // If the status code is not in the range 200-299,
-  // we still try to parse and throw it.
   if (!res.ok) {
-    if (res.status === 401) {
-      redirectToLoginPage()
-    }
-    const error: ErrorInfo = {
-      ...new Error('An error occurred while fetching the data.'),
-      info: (await res.json()).error,
-      status: res.status,
-    }
-    throw error
+    await handleSWRError(res)
   }
 
   return res.text()
@@ -32,42 +26,57 @@ export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
 export const fetcher = async (input: RequestInfo, init: RequestInit) => {
   const res = await fetch(input, init)
 
-  // If the status code is not in the range 200-299,
-  // we still try to parse and throw it.
   if (!res.ok) {
-    if (res.status === 401) {
-      redirectToLoginPage()
-    }
-    try {
-      const error: ErrorInfo = {
-        ...new Error('An error occurred while fetching the data.'),
-        info: await res.json(),
-        status: res.status,
-      }
-      throw error
-    } catch (e) {
-      const error: ErrorInfo = {
-        ...new Error('An error occurred while fetching the data.'),
-        info: {
-          message: res.statusText,
-        },
-        status: res.status,
-      }
-      throw error
-    }
+    await handleSWRError(res)
   }
 
   return res.json()
 }
 
 export const getErrorMessage = async (res: Response) => {
-  let messageError = res.statusText
-  try {
-    messageError = `${res.statusText}: ${(await res.json()).error.message}`
-  } catch (e) {
-    // unable to identify error message, possibly a network failure
-    return 'Unknown error - Please contact Bailo support'
+  const body = await res.json()
+
+  return getErrorMessageFromBody(body, res.statusText)
+}
+
+const handleSWRError = async (res: Response) => {
+  if (res.status === 401) {
+    redirectToLoginPage()
   }
 
-  return messageError
+  let error: ErrorInfo
+  try {
+    const body = await res.json()
+    error = {
+      ...new Error('An error occurred while fetching the data.'),
+      info: {
+        ...body,
+        message: getErrorMessageFromBody(body, res.statusText),
+      },
+      status: res.status,
+    }
+  } catch (e) {
+    error = {
+      ...new Error('An error occurred while fetching the data.'),
+      info: {
+        message: res.statusText,
+      },
+      status: res.status,
+    }
+  }
+
+  throw error
+}
+
+const isErrorResponse = (value: unknown): value is ErrorResponse => {
+  return !!(value && (value as ErrorResponse).error && (value as ErrorResponse).error.message)
+}
+
+const getErrorMessageFromBody = (body: unknown, statusText: string) => {
+  if (isErrorResponse(body)) {
+    return `${statusText}: ${body.error.message}`
+  }
+
+  // unable to identify error message, possibly a network failure
+  return 'Unknown error - Please contact Bailo support'
 }

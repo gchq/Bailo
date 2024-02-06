@@ -12,21 +12,19 @@ export interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(types: string[], task?: string, libraries?: string[], search?: string) {
+export function useListModels(filters: string[] = [], task = '', libraries: string[] = [], search = '') {
+  const queryParams = {
+    ...(filters.length > 0 && { filters }),
+    ...(task && { task }),
+    ...(libraries.length > 0 && { libraries }),
+    ...(search && { search }),
+  }
   const { data, error, mutate } = useSWR<
     {
       models: ModelSearchResult[]
     },
     ErrorInfo
-  >(
-    `/api/v2/models/search?${qs.stringify({
-      types,
-      task,
-      libraries,
-      search,
-    })}`,
-    fetcher,
-  )
+  >(queryParams ? `/api/v2/models/search?${qs.stringify(queryParams)}` : `/api/v2/models/search`, fetcher)
 
   return {
     mutateModels: mutate,

@@ -13,7 +13,7 @@ class Client:
     """Create a Client object that can be used to talk to the website.
 
     :param url: Url of bailo website
-    :param agent:
+    :param agent: An agent object to handle requests
     """
 
     def __init__(self, url: str, agent: Agent = Agent()):
@@ -295,24 +295,45 @@ class Client:
         self,
         model_id: str,
         file_id: str,
-        buffer: BytesIO,
+    ):
+        """Download a specific file by it's id.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: The unique file ID
+        """
+        if isinstance(self.agent, TokenAgent):
+            return self.agent.get(
+                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+            )
+        else:
+            return self.agent.get(
+                f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+            )
+
+    def get_download_by_filename(
+        self,
+        model_id: str,
+        semver: str,
+        filename: str,
     ):
         """Download a specific file.
 
         :param model_id: Unique model ID
-        :param file_id: Unique file ID
-        :param buffer: BytesIO object for bailo to write to
-        :return: The unique file ID
+        :param semver: Semver of the release
+        :param filename: The filename trying to download from
+        :return: The filename
         """
         if isinstance(self.agent, TokenAgent):
-            req = self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+            return self.agent.get(
+                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
+                stream=True,
+                timeout=10_000,
             )
         else:
-            req = self.agent.get(f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000)
-
-        shutil.copyfileobj(req.raw, buffer)
-        return file_id
+            return self.agent.get(
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+            )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
         """Create a simple file upload.

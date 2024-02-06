@@ -215,10 +215,6 @@ data:
         maxModelSizeGB: 50,
       },
 
-      experimental: {
-        v2: {{ .Values.config.experimental.v2 }},
-      },
-
       connectors: {
         authentication: {
           kind: '{{ .Values.connectors.authentication.kind }}',

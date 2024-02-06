@@ -66,6 +66,15 @@ with open("yolo.onnx") as f:
     my_release.upload("yolo", f)
 ```
 
+## Documentation
+
+Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
+
+### Building locally
+
+From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
+default.
+
 ## Development
 
 ### Install and add precommit

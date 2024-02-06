@@ -21,14 +21,26 @@ export default function Model() {
       model
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
-            { title: 'Releases', path: 'releases', view: <Releases model={model} /> },
+            {
+              title: 'Releases',
+              path: 'releases',
+              view: <Releases model={model} />,
+              disabled: !model.card,
+              disabledText: 'Select a schema to view this tab',
+            },
             {
               title: 'Access Requests',
               path: 'access',
               view: <AccessRequests model={model} />,
               datatest: 'accessRequestTab',
+              disabled: !model.card,
+              disabledText: 'Select a schema to view this tab',
             },
-            { title: 'Registry', path: 'registry', view: <ModelImages model={model} /> },
+            {
+              title: 'Registry',
+              path: 'registry',
+              view: <ModelImages model={model} />,
+            },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],
@@ -51,7 +63,7 @@ export default function Model() {
         <PageWithTabs
           title={model.name}
           tabs={tabs}
-          displayActionButton
+          displayActionButton={model.card !== undefined}
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
           requiredUrlParams={{ modelId: model.id }}
