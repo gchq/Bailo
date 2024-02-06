@@ -1,10 +1,12 @@
 import config from '../../../utils/v2/config.js'
 import { ConfigurationError } from '../../../utils/v2/error.js'
 import { BaseAuthenticationConnector } from './Base.js'
+import { OauthAuthenticationConnector } from './oauth.js'
 import { SillyAuthenticationConnector } from './silly.js'
 
 export const AuthenticationKind = {
   Silly: 'silly',
+  Oauth: 'oauth',
 } as const
 export type AuthenticationKindKeys = (typeof AuthenticationKind)[keyof typeof AuthenticationKind]
 
@@ -17,6 +19,9 @@ export function getAuthenticationConnector(cache = true) {
   switch (config.connectors.authentication.kind) {
     case AuthenticationKind.Silly:
       authenticationConnector = new SillyAuthenticationConnector()
+      break
+    case AuthenticationKind.Oauth:
+      authenticationConnector = new OauthAuthenticationConnector()
       break
     default:
       throw ConfigurationError(`'${config.connectors.authentication.kind}' is not a valid authentication kind.`, {

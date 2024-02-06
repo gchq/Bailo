@@ -24,7 +24,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
-  onViewModelCardRevisions(_req: Request, _modelCards: ModelCardInterface[]) {}
+  onViewModelCardRevisions(_req: Request, _modelId: string, _modelCards: ModelCardInterface[]) {}
   onCreateFile(_req: Request, _file: FileInterfaceDoc) {}
   onViewFiles(_req: Request, _modelId: string, _files: FileInterface[]) {}
   onDeleteFile(_req: Request, _modelId: string, _fileId: string) {}
@@ -32,7 +32,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewRelease(_req: Request, _release: ReleaseDoc) {}
   onUpdateRelease(_req: Request, _release: ReleaseDoc) {}
   onDeleteRelease(_req: Request, _modelId: string, _semver: string) {}
-  onSearchReleases(_req: Request, _releases: ReleaseDoc[]) {}
+  onViewReleases(_req: Request, _releases: ReleaseDoc[]) {}
   onCreateUserToken(_req: Request, _token: TokenDoc) {}
   onViewUserTokens(_req: Request, _tokens: TokenDoc[]) {}
   onDeleteUserToken(_req: Request, _accessKey: string) {}
@@ -40,7 +40,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onUpdateAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onDeleteAccessRequest(_req: Request, _accessRequestId: string) {}
-  onSearchAccessRequests(_req: Request, _accessRequests: AccessRequestDoc[]) {}
+  onViewAccessRequests(_req: Request, _accessRequests: AccessRequestDoc[]) {}
   onSearchReviews(_req: Request, _reviews: (ReviewInterface & { model: ModelInterface })[]) {}
   onCreateReviewResponse(_req: Request, _review: ReviewInterface) {}
   onSearchSchemas(_req: Request, _schemas: SchemaInterface[]) {}

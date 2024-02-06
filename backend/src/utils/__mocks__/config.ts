@@ -23,9 +23,6 @@ const config = {
       uploads: 'uploads',
     },
   },
-  experimental: {
-    v2: true,
-  },
   oauth: {
     enabled: false,
   },

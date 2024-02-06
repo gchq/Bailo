@@ -16,7 +16,7 @@ const AuditKind = {
   Update: 'Update',
   Delete: 'Delete',
   Search: 'Search',
-}
+} as const
 export type AuditKindKeys = (typeof AuditKind)[keyof typeof AuditKind]
 
 export const AuditInfo = {
@@ -42,7 +42,7 @@ export const AuditInfo = {
   ViewRelease: { typeId: 'ViewRelease', description: 'Release Viewed', auditKind: AuditKind.View },
   UpdateRelease: { typeId: 'UpdateRelease', description: 'Release Updated', auditKind: AuditKind.Update },
   DeleteRelease: { typeId: 'DeleteRelease', description: 'Release Deleted', auditKind: AuditKind.Delete },
-  SearchReleases: { typeId: 'SearchReleases', description: 'Release Searched', auditKind: AuditKind.Search },
+  ViewReleases: { typeId: 'ViewReleases', description: 'Releases Viewed', auditKind: AuditKind.View },
 
   CreateUserToken: { typeId: 'CreateUserToken', description: 'Token Created', auditKind: AuditKind.Create },
   ViewUserTokens: { typeId: 'ViewUserToken', description: 'Token Viewed', auditKind: AuditKind.View },
@@ -64,10 +64,10 @@ export const AuditInfo = {
     description: 'Access Request Deleted',
     auditKind: AuditKind.Update,
   },
-  SearchAccessRequests: {
-    typeId: 'SearchAccessRequests',
-    description: 'Access Request Searched',
-    auditKind: AuditKind.Search,
+  ViewAccessRequests: {
+    typeId: 'ViewAccessRequests',
+    description: 'Access Requests Viewed',
+    auditKind: AuditKind.View,
   },
 
   SearchReviews: {
@@ -88,7 +88,7 @@ export const AuditInfo = {
   UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
-}
+} as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
 export abstract class BaseAuditConnector {
@@ -100,7 +100,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
-  abstract onViewModelCardRevisions(req: Request, modelCards: ModelCardInterface[])
+  abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
 
   abstract onCreateFile(req: Request, file: FileInterfaceDoc)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
@@ -110,7 +110,7 @@ export abstract class BaseAuditConnector {
   abstract onViewRelease(req: Request, release: ReleaseDoc)
   abstract onUpdateRelease(req: Request, release: ReleaseDoc)
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
-  abstract onSearchReleases(req: Request, releases: ReleaseDoc[])
+  abstract onViewReleases(req: Request, releases: ReleaseDoc[])
 
   abstract onCreateUserToken(req: Request, token: TokenDoc)
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[])
@@ -120,7 +120,7 @@ export abstract class BaseAuditConnector {
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onDeleteAccessRequest(req: Request, accessRequestId: string)
-  abstract onSearchAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
+  abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
   abstract onCreateReviewResponse(req: Request, review: ReviewInterface)

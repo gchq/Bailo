@@ -38,6 +38,16 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
     }
   }, [currentUserId, formContext])
 
+  useEffect(() => {
+    if (currentValue) {
+      const updatedEntities: EntityObject[] = currentValue.map((value) => {
+        const [kind, id] = value.split(':')
+        return { kind, id }
+      })
+      setSelectedEntities(updatedEntities)
+    }
+  }, [currentValue])
+
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
       onChange(newValues.map((value) => `${value.kind}:${value.id}`))

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bailo.helper package &mdash; Bailo Python Client Docs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Managing Access Requests" href="notebooks/access_requests_demo.html" />
+    <link rel="prev" title="bailo.core package" href="bailo.core.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Bailo Python Client Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="readme_link.html">Bailo Python Client</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Packages:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bailo.core.html">bailo.core package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">bailo.helper package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest"><code class="docutils literal notranslate"><span class="pre">AccessRequest</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest.create"><code class="docutils literal notranslate"><span class="pre">AccessRequest.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest.delete"><code class="docutils literal notranslate"><span class="pre">AccessRequest.delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest.from_id"><code class="docutils literal notranslate"><span class="pre">AccessRequest.from_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest.update"><code class="docutils literal notranslate"><span class="pre">AccessRequest.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bailo.helper.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.card_from_model"><code class="docutils literal notranslate"><span class="pre">Model.card_from_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.card_from_schema"><code class="docutils literal notranslate"><span class="pre">Model.card_from_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.card_from_template"><code class="docutils literal notranslate"><span class="pre">Model.card_from_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.create"><code class="docutils literal notranslate"><span class="pre">Model.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.create_release"><code class="docutils literal notranslate"><span class="pre">Model.create_release()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.from_id"><code class="docutils literal notranslate"><span class="pre">Model.from_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_card_latest"><code class="docutils literal notranslate"><span class="pre">Model.get_card_latest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_card_revision"><code class="docutils literal notranslate"><span class="pre">Model.get_card_revision()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_image"><code class="docutils literal notranslate"><span class="pre">Model.get_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_images"><code class="docutils literal notranslate"><span class="pre">Model.get_images()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_latest_release"><code class="docutils literal notranslate"><span class="pre">Model.get_latest_release()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_release"><code class="docutils literal notranslate"><span class="pre">Model.get_release()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_releases"><code class="docutils literal notranslate"><span class="pre">Model.get_releases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_roles"><code class="docutils literal notranslate"><span class="pre">Model.get_roles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.get_user_roles"><code class="docutils literal notranslate"><span class="pre">Model.get_user_roles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.update"><code class="docutils literal notranslate"><span class="pre">Model.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.model.Model.update_model_card"><code class="docutils literal notranslate"><span class="pre">Model.update_model_card()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bailo.helper.release.Release"><code class="docutils literal notranslate"><span class="pre">Release</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.__init__"><code class="docutils literal notranslate"><span class="pre">Release.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.create"><code class="docutils literal notranslate"><span class="pre">Release.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.delete"><code class="docutils literal notranslate"><span class="pre">Release.delete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.download"><code class="docutils literal notranslate"><span class="pre">Release.download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.from_version"><code class="docutils literal notranslate"><span class="pre">Release.from_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.update"><code class="docutils literal notranslate"><span class="pre">Release.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.release.Release.upload"><code class="docutils literal notranslate"><span class="pre">Release.upload()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bailo.helper.schema.Schema"><code class="docutils literal notranslate"><span class="pre">Schema</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.schema.Schema.create"><code class="docutils literal notranslate"><span class="pre">Schema.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.helper.schema.Schema.from_id"><code class="docutils literal notranslate"><span class="pre">Schema.from_id()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/access_requests_demo.html">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/models_and_releases_demo.html">Managing Models &amp; Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/schemas_demo.html">Managing Schemas</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Bailo Python Client Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">bailo.helper package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/bailo.helper.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-bailo.helper.access_request">
+<span id="bailo-helper-package"></span><h1>bailo.helper package<a class="headerlink" href="#module-bailo.helper.access_request" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bailo.helper.access_request.AccessRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.helper.access_request.</span></span><span class="sig-name descname"><span class="pre">AccessRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_request_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deleted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/access_request.html#AccessRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.access_request.AccessRequest" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represent a review within Bailo.</p>
+<p>A review can either be access to a model or to a specific release.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object that is used to make requests to bailo</p></li>
+<li><p><strong>name</strong> – The name of the access request</p></li>
+<li><p><strong>model_id</strong> – The unique model id of the model that the access request is being made with</p></li>
+<li><p><strong>schema_id</strong> – An ID for the schema within Bailo</p></li>
+<li><p><strong>metadata</strong> – A metadata object</p></li>
+<li><p><strong>access_request_id</strong> – The Unique ID for this access request</p></li>
+<li><p><strong>deleted</strong> – Whether the access request has been deleted</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.access_request.AccessRequest.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest" title="bailo.helper.access_request.AccessRequest"><span class="pre">AccessRequest</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/access_request.html#AccessRequest.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.access_request.AccessRequest.create" title="Link to this definition"></a></dt>
+<dd><p>Make an access request for the model.</p>
+<p>Posts an access request to Bailo to be reviewed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>name</strong> – The name of the access request</p></li>
+<li><p><strong>model_id</strong> – A unique model ID within Bailo</p></li>
+<li><p><strong>schema_id</strong> – A unique schema ID</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON response object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.access_request.AccessRequest.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/bailo/helper/access_request.html#AccessRequest.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.access_request.AccessRequest.delete" title="Link to this definition"></a></dt>
+<dd><p>Delete the access request on Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A message confirming the removal of the access request.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.access_request.AccessRequest.from_id">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_request_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.access_request.AccessRequest" title="bailo.helper.access_request.AccessRequest"><span class="pre">AccessRequest</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/access_request.html#AccessRequest.from_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.access_request.AccessRequest.from_id" title="Link to this definition"></a></dt>
+<dd><p>Return an existing review from Bailo given it’s unique ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A unique model ID within Bailo</p></li>
+<li><p><strong>access_request_id</strong> – A unique ID for an access request</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.access_request.AccessRequest.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/access_request.html#AccessRequest.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.access_request.AccessRequest.update" title="Link to this definition"></a></dt>
+<dd><p>Update the current state of the access request to Bailo.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-bailo.helper.model">
+<dt class="sig sig-object py" id="bailo.helper.model.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.helper.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.enums.ModelVisibility" title="bailo.core.enums.ModelVisibility"><span class="pre">ModelVisibility</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represent a model within Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A unique ID for the model</p></li>
+<li><p><strong>name</strong> – Name of model</p></li>
+<li><p><strong>description</strong> – Description of model</p></li>
+<li><p><strong>visibility</strong> – Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.card_from_model">
+<span class="sig-name descname"><span class="pre">card_from_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.card_from_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.card_from_model" title="Link to this definition"></a></dt>
+<dd><p>Copy a model card from a different model (not yet implemented).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Not implemented error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.card_from_schema">
+<span class="sig-name descname"><span class="pre">card_from_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.card_from_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.card_from_schema" title="Link to this definition"></a></dt>
+<dd><p>Create a model card using a schema on Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>schema_id</strong> – A unique schema ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.card_from_template">
+<span class="sig-name descname"><span class="pre">card_from_template</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.card_from_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.card_from_template" title="Link to this definition"></a></dt>
+<dd><p>Create a model card using a template (not yet implemented).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Not implemented error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">team_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.enums.ModelVisibility" title="bailo.core.enums.ModelVisibility"><span class="pre">ModelVisibility</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.model.Model" title="bailo.helper.model.Model"><span class="pre">Model</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.create" title="Link to this definition"></a></dt>
+<dd><p>Build a model from Bailo and uploads it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>name</strong> – Name of model</p></li>
+<li><p><strong>description</strong> – Description of model</p></li>
+<li><p><strong>team_id</strong> – A unique team ID</p></li>
+<li><p><strong>visibility</strong> – Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.create_release">
+<span class="sig-name descname"><span class="pre">create_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.release.Release" title="bailo.helper.release.Release"><span class="pre">Release</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.create_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.create_release" title="Link to this definition"></a></dt>
+<dd><p>Call the Release.create method to build a release from Bailo and upload it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> – A semantic version for the release</p></li>
+<li><p><strong>notes</strong> – Notes on release, defaults to “”</p></li>
+<li><p><strong>files</strong> – A list of files for release, defaults to []</p></li>
+<li><p><strong>images</strong> – A list of images for release, defaults to []</p></li>
+<li><p><strong>minor</strong> – Is a minor release?, defaults to False</p></li>
+<li><p><strong>draft</strong> – Is a draft release?, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Release object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.from_id">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.model.Model" title="bailo.helper.model.Model"><span class="pre">Model</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.from_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.from_id" title="Link to this definition"></a></dt>
+<dd><p>Return an existing model from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A unique model ID</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A model object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_card_latest">
+<span class="sig-name descname"><span class="pre">get_card_latest</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_card_latest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_card_latest" title="Link to this definition"></a></dt>
+<dd><p>Get the latest model card from Bailo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_card_revision">
+<span class="sig-name descname"><span class="pre">get_card_revision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_card_revision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_card_revision" title="Link to this definition"></a></dt>
+<dd><p>Get a specific model card revision from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> – Model card version</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_image">
+<span class="sig-name descname"><span class="pre">get_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_image" title="Link to this definition"></a></dt>
+<dd><p>Get a model image reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Not implemented error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_images">
+<span class="sig-name descname"><span class="pre">get_images</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_images" title="Link to this definition"></a></dt>
+<dd><p>Get all model image references for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of images</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_latest_release">
+<span class="sig-name descname"><span class="pre">get_latest_release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_latest_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_latest_release" title="Link to this definition"></a></dt>
+<dd><p>Get the latest release for the model from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Release object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_release">
+<span class="sig-name descname"><span class="pre">get_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.release.Release" title="bailo.helper.release.Release"><span class="pre">Release</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_release" title="Link to this definition"></a></dt>
+<dd><p>Call the Release.from_version method to return an existing release from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> – A semantic version for the release</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Release object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_releases">
+<span class="sig-name descname"><span class="pre">get_releases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bailo.helper.release.Release" title="bailo.helper.release.Release"><span class="pre">Release</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_releases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_releases" title="Link to this definition"></a></dt>
+<dd><p>Get all releases for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of Release objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_roles">
+<span class="sig-name descname"><span class="pre">get_roles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_roles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_roles" title="Link to this definition"></a></dt>
+<dd><p>Get all roles for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of roles</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.get_user_roles">
+<span class="sig-name descname"><span class="pre">get_user_roles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.get_user_roles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.get_user_roles" title="Link to this definition"></a></dt>
+<dd><p>Get all user roles for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of user roles</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.update" title="Link to this definition"></a></dt>
+<dd><p>Upload and retrieves any changes to the model summary on Bailo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.model.Model.update_model_card">
+<span class="sig-name descname"><span class="pre">update_model_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_card</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/model.html#Model.update_model_card"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.model.Model.update_model_card" title="Link to this definition"></a></dt>
+<dd><p>Upload and retrieves any changes to the model card on Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_card</strong> – Model card dictionary, defaults to None</p>
+</dd>
+</dl>
+<p>..note:: If a model card is not provided, the current model card attribute value is used</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-bailo.helper.release">
+<dt class="sig sig-object py" id="bailo.helper.release.Release">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.helper.release.</span></span><span class="sig-name descname"><span class="pre">Release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_card_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/release.html#Release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_card_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.__init__" title="Link to this definition"></a></dt>
+<dd><p>Represent a release within Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A unique model ID</p></li>
+<li><p><strong>version</strong> – A semantic version for the release</p></li>
+<li><p><strong>model_card_version</strong> – Version of the model card</p></li>
+<li><p><strong>notes</strong> – Notes on release</p></li>
+<li><p><strong>files</strong> – (optional) A list of files for release</p></li>
+<li><p><strong>images</strong> – (optional) A list of images for release</p></li>
+<li><p><strong>minor</strong> – Is a minor release?</p></li>
+<li><p><strong>draft</strong> – Is a draft release?</p></li>
+</ul>
+</dd>
+</dl>
+<p>..note:: Currently files and images are stored as string references</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_card_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.release.Release" title="bailo.helper.release.Release"><span class="pre">Release</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.create" title="Link to this definition"></a></dt>
+<dd><p>Build a release from Bailo and uploads it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A Unique Model ID</p></li>
+<li><p><strong>version</strong> – A semantic version of a model release</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.delete" title="Link to this definition"></a></dt>
+<dd><p>Delete a release from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON Response object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BytesIO</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.download" title="Link to this definition"></a></dt>
+<dd><p>Give returns a Reading object given the file id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – The name of the file to retrieve</p></li>
+<li><p><strong>buffer</strong> – A BytesIO object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.from_version">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Version</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.release.Release" title="bailo.helper.release.Release"><span class="pre">Release</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.from_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.from_version" title="Link to this definition"></a></dt>
+<dd><p>Return an existing release from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>model_id</strong> – A Unique Model ID</p></li>
+<li><p><strong>version</strong> – A semantic version of a model release</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.update" title="Link to this definition"></a></dt>
+<dd><p>Update the any changes to this release on Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON Response object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.release.Release.upload">
+<span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BytesIO</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/bailo/helper/release.html#Release.upload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.release.Release.upload" title="Link to this definition"></a></dt>
+<dd><p>Upload files in a given directory to the release.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the file to upload to bailo</p></li>
+<li><p><strong>f</strong> – A BytesIO object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The unique file ID of the file uploaded</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-bailo.helper.schema">
+<dt class="sig sig-object py" id="bailo.helper.schema.Schema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.helper.schema.</span></span><span class="sig-name descname"><span class="pre">Schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.enums.SchemaKind" title="bailo.core.enums.SchemaKind"><span class="pre">SchemaKind</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bailo/helper/schema.html#Schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.schema.Schema" title="Link to this definition"></a></dt>
+<dd><p>Represent a schema within Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>schema_id</strong> – A unique schema ID</p></li>
+<li><p><strong>name</strong> – Name of schema</p></li>
+<li><p><strong>description</strong> – Description of the schema</p></li>
+<li><p><strong>kind</strong> – Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)</p></li>
+<li><p><strong>json_schema</strong> – Schema JSON</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.schema.Schema.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.enums.SchemaKind" title="bailo.core.enums.SchemaKind"><span class="pre">SchemaKind</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.schema.Schema" title="bailo.helper.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/schema.html#Schema.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.schema.Schema.create" title="Link to this definition"></a></dt>
+<dd><p>Build a schema from Bailo and uploads it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>schema_id</strong> – A unique schema ID</p></li>
+<li><p><strong>name</strong> – Name of schema</p></li>
+<li><p><strong>description</strong> – Description of schema</p></li>
+<li><p><strong>kind</strong> – Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)</p></li>
+<li><p><strong>json_schema</strong> – Schema JSON</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Schema object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.helper.schema.Schema.from_id">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bailo.core.html#bailo.core.client.Client" title="bailo.core.client.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bailo.helper.schema.Schema" title="bailo.helper.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="_modules/bailo/helper/schema.html#Schema.from_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.helper.schema.Schema.from_id" title="Link to this definition"></a></dt>
+<dd><p>Return an existing schema from Bailo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – A client object used to interact with Bailo</p></li>
+<li><p><strong>schema_id</strong> – A unique schema ID</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Schema object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bailo.core.html" class="btn btn-neutral float-left" title="bailo.core package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="notebooks/access_requests_demo.html" class="btn btn-neutral float-right" title="Managing Access Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, GCHQ.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

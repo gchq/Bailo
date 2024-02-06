@@ -40,9 +40,7 @@ createSchemaIndexes()
 
 // lazily add default schemas
 addDefaultSchemas()
-if (config.experimental.v2) {
-  addDefaultSchemasv2()
-}
+addDefaultSchemasv2()
 
 await Promise.all([processUploads(), processDeployments()])
 

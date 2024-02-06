@@ -1,5 +1,3 @@
-//import { release } from 'node:os'
-
 import nodemailer, { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer/index.js'
 
@@ -8,6 +6,7 @@ import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewDoc } from '../../../models/v2/Review.js'
 import config from '../../../utils/v2/config.js'
+import { toEntity } from '../../../utils/v2/entity.js'
 import log from '../log.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
@@ -103,7 +102,7 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
       { name: 'See Reviews', url: 'TODO' },
     ],
   )
-  await dispatchEmail(release.createdBy, emailContent)
+  await dispatchEmail(toEntity('user', release.createdBy), emailContent)
 }
 
 export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
@@ -129,7 +128,7 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
       { name: 'See Reviews', url: 'TODO' },
     ],
   )
-  await dispatchEmail(accessRequest.createdBy, emailContent)
+  await dispatchEmail(toEntity('user', accessRequest.createdBy), emailContent)
 }
 
 async function sendEmail(email: Mail.Options) {

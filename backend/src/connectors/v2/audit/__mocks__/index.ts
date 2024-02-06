@@ -19,13 +19,13 @@ const audit = {
   onViewRelease: vi.fn(),
   onUpdateRelease: vi.fn(),
   onDeleteRelease: vi.fn(),
-  onSearchReleases: vi.fn(),
+  onViewReleases: vi.fn(),
 
   onCreateAccessRequest: vi.fn(),
   onViewAccessRequest: vi.fn(),
   onUpdateAccessRequest: vi.fn(),
   onDeleteAccessRequest: vi.fn(),
-  onSearchAccessRequests: vi.fn(),
+  onViewAccessRequests: vi.fn(),
 
   onSearchReviews: vi.fn(),
   onCreateReviewResponse: vi.fn(),

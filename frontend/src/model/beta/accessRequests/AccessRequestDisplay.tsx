@@ -1,4 +1,5 @@
-import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
+import CommentIcon from '@mui/icons-material/ChatBubble'
+import { Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -100,9 +101,17 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               </Card>
             </Stack>
             {reviewsWithLatestResponses.length > 0 && <Divider sx={{ my: 2 }} />}
-            {reviewsWithLatestResponses.map((review) => (
-              <ReviewDisplay review={review} key={review.accessRequestId} />
-            ))}
+            <Stack direction='row' justifyContent='space-between' spacing={2}>
+              <ReviewDisplay reviews={reviewsWithLatestResponses} />
+              {accessRequest.comments.length > 0 && (
+                <Tooltip title='Comments'>
+                  <Stack direction='row' spacing={1}>
+                    <CommentIcon color='primary' />
+                    <Typography variant='caption'>{accessRequest.comments.length}</Typography>
+                  </Stack>
+                </Tooltip>
+              )}
+            </Stack>
           </Stack>
         </Card>
       </Stack>

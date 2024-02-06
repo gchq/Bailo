@@ -31,10 +31,10 @@ export async function findReviews(
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
   const reviews = await Review.aggregate()
     .match({
-      ...(modelId ? { modelId } : {}),
-      ...(semver ? { semver } : {}),
-      ...(accessRequestId ? { accessRequestId } : {}),
-      ...(kind ? { kind } : {}),
+      ...(modelId && { modelId }),
+      ...(semver && { semver }),
+      ...(accessRequestId && { accessRequestId }),
+      ...(kind && { kind }),
     })
     .sort({ createdAt: -1 })
     // Populate model entries
@@ -53,7 +53,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  const roleEntities = getRoleEntites(['mtr', 'msro'], model.collaborators)
+  const roleEntities = getRoleEntities(['mtr', 'msro'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -62,18 +62,18 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       kind: ReviewKind.Release,
       role: roleInfo.role,
     })
-    try {
-      roleInfo.entites.forEach((entity) => requestReviewForRelease(entity, review, release))
-    } catch (error) {
-      log.warn('Error when sending notifications requesting review for release.', { error })
-    }
+    roleInfo.entities.forEach((entity) =>
+      requestReviewForRelease(entity, review, release).catch((error) =>
+        log.warn('Error when sending notifications requesting review for release.', { error }),
+      ),
+    )
     return review.save()
   })
   await Promise.all(createReviews)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntites(['msro'], model.collaborators)
+  const roleEntities = getRoleEntities(['msro'], model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -82,11 +82,11 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
       kind: ReviewKind.Access,
       role: roleInfo.role,
     })
-    try {
-      roleInfo.entites.forEach((entity) => requestReviewForAccessRequest(entity, review, accessRequest))
-    } catch (error) {
-      log.warn('Error when sending notifications requesting review for Access Request.', { error })
-    }
+    roleInfo.entities.forEach((entity) =>
+      requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
+        log.warn('Error when sending notifications requesting review for Access Request.', { error }),
+      ),
+    )
     return review.save()
   })
   await Promise.all(createReviews)
@@ -144,7 +144,7 @@ export async function respondToReview(
   if (!update) {
     throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
   }
-  sendReviewResponseNotification(update, user)
+  await sendReviewResponseNotification(update, user)
 
   sendWebhooks(
     update.modelId,
@@ -161,22 +161,26 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
-        log.error('Unable to send notification for review response. Cannot find access request ID.')
+        log.error('Unable to send notification for review response. Cannot find access request ID.', { review })
         return
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
-      notifyReviewResponseForAccess(review, access)
+      notifyReviewResponseForAccess(review, access).catch((error) =>
+        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+      )
       break
     }
     case ReviewKind.Release: {
       if (!review.semver) {
-        log.error('Unable to send notification for review response.Cannot find semver')
+        log.error('Unable to send notification for review response. Cannot find semver.', { review })
         return
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      notifyReviewResponseForRelease(review, release)
+      notifyReviewResponseForRelease(review, release).catch((error) =>
+        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+      )
       break
     }
     default:
@@ -184,21 +188,18 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   }
 }
 
-function getRoleEntites(roles: string[], collaborators: CollaboratorEntry[]) {
+function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
   return roles.map((role) => {
-    const entites = collaborators
+    const entities = collaborators
       .filter((collaborator) => collaborator.roles.includes(role))
       .map((collaborator) => collaborator.entity)
-    if (entites.length === 0) {
-      throw BadReq('Unable to create Review Request. Could not find any entities for the role.', { role })
-    }
-    return { role, entites }
+    return { role, entities }
   })
 }
 
 /**
  * Requires the model attribute.
- * Return the models where one of the user's entities is in the model's collaberators
+ * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
 async function findUserInCollaborators(user: UserDoc) {

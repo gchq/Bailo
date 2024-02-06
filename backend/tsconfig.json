@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

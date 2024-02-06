@@ -7,9 +7,7 @@ vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/utils/v2/config.js')
 
 const authenticationMocks = vi.hoisted(() => ({
-  getUserFromReq: vi.fn(() => ({
-    dn: 'user',
-  })),
+  authenticationMiddleware: vi.fn(() => []),
   getUserInformation: vi.fn(() => ({
     email: `jb@example.com`,
     name: 'Joe Bloggs',

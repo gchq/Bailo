@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bailo.helper.release &mdash; Bailo Python Client Docs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Bailo Python Client Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">Bailo Python Client</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Packages:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../bailo.core.html">bailo.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bailo.helper.html">bailo.helper package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/access_requests_demo.html">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/models_and_releases_demo.html">Managing Models &amp; Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/schemas_demo.html">Managing Schemas</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Bailo Python Client Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">bailo.helper.release</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for bailo.helper.release</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">bailo.core.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">semantic_version</span> <span class="kn">import</span> <span class="n">Version</span>
+
+
+<div class="viewcode-block" id="Release">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release">[docs]</a>
+<span class="k">class</span> <span class="nc">Release</span><span class="p">:</span>
+<div class="viewcode-block" id="Release.__init__">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span>
+        <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="n">Version</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">model_card_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">notes</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">minor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Represent a release within Bailo.</span>
+
+<span class="sd">        :param client: A client object used to interact with Bailo</span>
+<span class="sd">        :param model_id: A unique model ID</span>
+<span class="sd">        :param version: A semantic version for the release</span>
+<span class="sd">        :param model_card_version: Version of the model card</span>
+<span class="sd">        :param notes: Notes on release</span>
+<span class="sd">        :param files: (optional) A list of files for release</span>
+<span class="sd">        :param images: (optional) A list of images for release</span>
+<span class="sd">        :param minor: Is a minor release?</span>
+<span class="sd">        :param draft: Is a draft release?</span>
+
+<span class="sd">        ..note:: Currently files and images are stored as string references</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_id</span> <span class="o">=</span> <span class="n">model_id</span>
+
+        <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_card_version</span> <span class="o">=</span> <span class="n">model_card_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minor</span> <span class="o">=</span> <span class="n">minor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">notes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="n">images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draft</span> <span class="o">=</span> <span class="n">draft</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span></div>
+
+
+<div class="viewcode-block" id="Release.create">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.create">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span>
+        <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="n">Version</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">notes</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">model_card_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">minor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Release</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a release from Bailo and uploads it.</span>
+
+<span class="sd">        :param client: A client object used to interact with Bailo</span>
+<span class="sd">        :param model_id: A Unique Model ID</span>
+<span class="sd">        :param version: A semantic version of a model release</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">post_release</span><span class="p">(</span>
+            <span class="n">model_id</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">),</span>
+            <span class="n">notes</span><span class="p">,</span>
+            <span class="n">files</span><span class="p">,</span>
+            <span class="n">images</span><span class="p">,</span>
+            <span class="n">model_card_version</span><span class="p">,</span>
+            <span class="n">minor</span><span class="p">,</span>
+            <span class="n">draft</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">client</span><span class="p">,</span>
+            <span class="n">model_id</span><span class="p">,</span>
+            <span class="n">version</span><span class="p">,</span>
+            <span class="n">model_card_version</span><span class="p">,</span>
+            <span class="n">notes</span><span class="p">,</span>
+            <span class="n">files</span><span class="p">,</span>
+            <span class="n">images</span><span class="p">,</span>
+            <span class="n">minor</span><span class="p">,</span>
+            <span class="n">draft</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Release.from_version">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.from_version">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_version</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Version</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Release</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an existing release from Bailo.</span>
+
+<span class="sd">        :param client: A client object used to interact with Bailo</span>
+<span class="sd">        :param model_id: A Unique Model ID</span>
+<span class="sd">        :param version: A semantic version of a model release</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_release</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">))[</span><span class="s2">&quot;release&quot;</span><span class="p">]</span>
+
+        <span class="n">model_card_version</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;modelCardVersion&quot;</span><span class="p">]</span>
+        <span class="n">notes</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;notes&quot;</span><span class="p">]</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;fileIds&quot;</span><span class="p">]</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span>
+        <span class="n">minor</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;minor&quot;</span><span class="p">]</span>
+        <span class="n">draft</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;draft&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">client</span><span class="p">,</span>
+            <span class="n">model_id</span><span class="p">,</span>
+            <span class="n">version</span><span class="p">,</span>
+            <span class="n">model_card_version</span><span class="p">,</span>
+            <span class="n">notes</span><span class="p">,</span>
+            <span class="n">files</span><span class="p">,</span>
+            <span class="n">images</span><span class="p">,</span>
+            <span class="n">minor</span><span class="p">,</span>
+            <span class="n">draft</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Release.download">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.download">[docs]</a>
+    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="n">BytesIO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Give returns a Reading object given the file id.</span>
+
+<span class="sd">        :param file_name: The name of the file to retrieve</span>
+<span class="sd">        :param buffer: A BytesIO object</span>
+<span class="sd">        :return: A JSON response object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_download_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="n">file_id</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Release.upload">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.upload">[docs]</a>
+    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">BytesIO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Upload files in a given directory to the release.</span>
+
+<span class="sd">        :param name: The name of the file to upload to bailo</span>
+<span class="sd">        :param f: A BytesIO object</span>
+
+<span class="sd">        :return: The unique file ID of the file uploaded</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">simple_upload</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;file&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;file&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Release.update">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the any changes to this release on Bailo.</span>
+
+<span class="sd">        :return: JSON Response object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put_release</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">draft</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Release.delete">
+<a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.release.Release.delete">[docs]</a>
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a release from Bailo.</span>
+
+<span class="sd">        :return: JSON Response object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete_release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> v</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">!=</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="k">def</span> <span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, GCHQ.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
