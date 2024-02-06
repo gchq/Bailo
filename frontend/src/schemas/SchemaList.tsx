@@ -1,6 +1,6 @@
 import { Button, List, Stack, Typography } from '@mui/material'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -19,8 +19,8 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [open, setOpen] = useState(false)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
 
-  const schemaList = useMemo(() => {
-    const handleSetSchemaActive = async (schema: SchemaInterface) => {
+  const handleSetSchemaActive = useCallback(
+    async (schema: SchemaInterface) => {
       setErrorMessage('')
       schema.active = !schema.active
       const res = await patchSchema(schema.id, { active: schema.active })
@@ -29,14 +29,17 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       } else {
         mutateSchemas()
       }
-    }
+    },
+    [mutateSchemas],
+  )
 
-    const handleDeleteSchemaButtonOnClick = (schemaId: string) => {
-      setOpen(true)
-      setSchemaToBeDeleted(schemaId)
-    }
+  const handleDeleteSchemaButtonOnClick = useCallback((schemaId: string) => {
+    setOpen(true)
+    setSchemaToBeDeleted(schemaId)
+  }, [])
 
-    const handleDeleteConfirm = async (schemaId: string) => {
+  const handleDeleteConfirm = useCallback(
+    async (schemaId: string) => {
       setErrorMessage('')
       const res = await deleteSchema(schemaId)
       if (!res.ok) {
@@ -45,8 +48,11 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         mutateSchemas()
         setOpen(false)
       }
-    }
+    },
+    [mutateSchemas],
+  )
 
+  const schemaList = useMemo(() => {
     return schemas.map((schema) => (
       <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center' justifyContent='space-between' key={schema.id}>
         <Typography>{schema.name}</Typography>
@@ -69,7 +75,15 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         />
       </Stack>
     ))
-  }, [schemas, errorMessage, mutateSchemas, open, schemaToBeDeleted])
+  }, [
+    schemas,
+    errorMessage,
+    open,
+    schemaToBeDeleted,
+    handleDeleteConfirm,
+    handleDeleteSchemaButtonOnClick,
+    handleSetSchemaActive,
+  ])
 
   if (isSchemasLoading) {
     return <Loading />
