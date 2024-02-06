@@ -22,8 +22,8 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const handleSetSchemaActive = useCallback(
     async (schema: SchemaInterface) => {
       setErrorMessage('')
-      schema.active = !schema.active
-      const res = await patchSchema(schema.id, { active: schema.active })
+      const updatedSchema = { ...schema, active: !schema.active }
+      const res = await patchSchema(updatedSchema.id, { active: updatedSchema.active })
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
