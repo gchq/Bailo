@@ -6,7 +6,7 @@ Bailo is a ecosystem for managing the lifecycle of managing machine learning mod
 """
 from __future__ import annotations
 
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
 from bailo.core.client import Client
