@@ -42,7 +42,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
             </Typography>
           </Stack>
           <ReviewRoleDisplay review={review} />
-          <ReviewDisplay review={review} />
+          <ReviewDisplay reviews={[review]} />
         </Stack>
       </ListItemButton>
     </ListItem>
