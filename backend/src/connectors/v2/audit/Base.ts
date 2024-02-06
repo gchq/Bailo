@@ -5,7 +5,7 @@ import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
-import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { SchemaDoc, SchemaInterface } from '../../../models/v2/Schema.js'
 import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
@@ -129,7 +129,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateSchema(req: Request, schema: SchemaInterface)
   abstract onViewSchema(req: Request, schema: SchemaInterface)
   abstract onDeleteSchema(req: Request, schemaId: string)
-  abstract onUpdateSchema(req: Request, schema: SchemaInterface)
+  abstract onUpdateSchema(req: Request, schema: SchemaDoc)
 
   abstract onViewModelImages(
     req: Request,

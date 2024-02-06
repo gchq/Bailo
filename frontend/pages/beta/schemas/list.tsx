@@ -6,7 +6,7 @@ import Wrapper from 'src/Wrapper.beta'
 
 export default function SchemasPage() {
   return (
-    <Wrapper title='Schemas' page='schemas' fullWidth>
+    <Wrapper title='Schemas' page='beta/schemas' fullWidth>
       <Schemas />
     </Wrapper>
   )

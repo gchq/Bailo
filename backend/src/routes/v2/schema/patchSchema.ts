@@ -75,7 +75,6 @@ export const patchSchema = [
   async (req: Request, res: Response<PatchSchemaResponse>) => {
     req.audit = AuditInfo.UpdateSchema
     const { body, params } = parse(req, patchSchemaSchema)
-
     const schema = await updateSchema(req.user, params.schemaId, body)
     await audit.onUpdateSchema(req, schema)
 

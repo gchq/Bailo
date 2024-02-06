@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
-import { putSchemaSchema } from '../../../src/routes/v2/schema/patchSchema.js'
-import { createFixture, testPut } from '../../testUtils/routes.js'
+import { patchSchemaSchema } from '../../../src/routes/v2/schema/patchSchema.js'
+import { createFixture, testPatch } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/utils/config.js')
@@ -12,17 +12,16 @@ vi.mock('../../../src/connectors/v2/authorisation/index.js')
 
 const mockSchemaService = vi.hoisted(() => {
   return {
-    createSchema: vi.fn(),
+    updateSchema: vi.fn(),
   }
 })
 vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
 
 describe('routes > schema > putSchema', async () => {
   test('successfully updates the schema', async () => {
-    const fixture = createFixture(putSchemaSchema)
-    fixture.body.active = false
-    mockSchemaService.createSchema.mockResolvedValue(fixture.body)
-    const res = await testPut(`/api/v2/schema/${fixture.body.id}`, fixture)
+    const fixture = createFixture(patchSchemaSchema)
+    mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
+    const res = await testPatch('/api/v2/schema/my-schema', { body: { active: false } })
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -30,12 +29,12 @@ describe('routes > schema > putSchema', async () => {
   })
 
   test('audit > expected call', async () => {
-    const fixture = createFixture(putSchemaSchema)
-    mockSchemaService.createSchema.mockResolvedValue(fixture.body)
-    const res = await testPut(`/api/v2/schema/${fixture.body.id}`, fixture)
+    const fixture = createFixture(patchSchemaSchema)
+    mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
+    const res = await testPatch('/api/v2/schema/my-schema', fixture)
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateSchema).toBeCalled()
-    expect(audit.onCreateSchema.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onUpdateSchema).toBeCalled()
+    expect(audit.onUpdateSchema.mock.calls.at(0).at(1)).toMatchSnapshot()
   })
 })

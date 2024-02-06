@@ -6,7 +6,7 @@ import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
-import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { SchemaDoc, SchemaInterface } from '../../../models/v2/Schema.js'
 import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
@@ -46,7 +46,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onSearchSchemas(_req: Request, _schemas: SchemaInterface[]) {}
   onCreateSchema(_req: Request, _schema: SchemaInterface) {}
   onDeleteSchema(_req: Request, _schemaId: string) {}
-  onUpdateSchema(_req: Request, _schema: SchemaInterface) {}
+  onUpdateSchema(_req: Request, _schema: SchemaDoc) {}
   onViewSchema(_req: Request, _schema: SchemaInterface) {}
   onViewModelImages(_req: Request, _modelId: string, _images: { repository: string; name: string; tags: string[] }[]) {}
   onError(_req: Request, _error: BailoError) {}
