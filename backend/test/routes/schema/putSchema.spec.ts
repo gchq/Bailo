@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
-import { putSchemaSchema } from '../../../src/routes/v2/schema/putSchema.js'
+import { putSchemaSchema } from '../../../src/routes/v2/schema/patchSchema.js'
 import { createFixture, testPut } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/user.js')

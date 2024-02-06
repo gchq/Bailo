@@ -13,7 +13,7 @@ export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaIn
   return baseSchemas
 }
 
-export async function findSchemaById(schemaId: string): Promise<SchemaInterface> {
+export async function findSchemaById(schemaId: string) {
   const schema = await Schema.findOne({
     id: schemaId,
   })
@@ -68,6 +68,25 @@ export async function createSchema(user: UserDoc, schema: Partial<SchemaInterfac
     handleDuplicateKeys(error)
     throw error
   }
+}
+
+export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
+
+export async function updateSchema(user: UserDoc, schemaId: string, diff: Partial<UpdateSchemaParams>) {
+  const schema = await findSchemaById(schemaId)
+
+  const auth = await authorisation.schema(user, schema, SchemaAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      schemaId: schema.id,
+    })
+  }
+
+  Object.assign(schema, diff)
+  await schema.save()
+
+  return schema
 }
 
 export async function addDefaultSchemas() {

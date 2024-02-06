@@ -36,6 +36,7 @@ export type AccessRequestActionKeys = (typeof AccessRequestAction)[keyof typeof 
 export const SchemaAction = {
   Create: 'create',
   Delete: 'delete',
+  Update: 'update',
 }
 export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
 

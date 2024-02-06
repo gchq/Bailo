@@ -56,11 +56,11 @@ export async function postSchema(data: PostSchemaParams) {
   })
 }
 
-export async function putSchema(schema: SchemaInterface) {
-  return fetch(`/api/v2/schema/${schema.id}`, {
-    method: 'put',
+export async function patchSchema(schemaId: string, diff: Partial<SchemaInterface>) {
+  return fetch(`/api/v2/schema/${schemaId}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(schema),
+    body: JSON.stringify(diff),
   })
 }
 

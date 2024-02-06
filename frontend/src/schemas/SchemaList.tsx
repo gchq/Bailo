@@ -1,5 +1,5 @@
 import { Button, List, Stack, Typography } from '@mui/material'
-import { deleteSchema, putSchema, useGetSchemas } from 'actions/schema'
+import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -23,7 +23,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     const handleSetSchemaActive = async (schema: SchemaInterface) => {
       setErrorMessage('')
       schema.active = !schema.active
-      const res = await putSchema(schema)
+      const res = await patchSchema(schema.id, { active: schema.active })
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
