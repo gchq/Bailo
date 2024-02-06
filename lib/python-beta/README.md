@@ -72,7 +72,8 @@ Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Ba
 
 ### Building locally
 
-From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by default.
+From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
+default.
 
 ## Development
 
