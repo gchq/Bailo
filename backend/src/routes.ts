@@ -3,6 +3,8 @@ import MongoStore from 'connect-mongo'
 import express from 'express'
 import session from 'express-session'
 import grant from 'grant'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import authentication from './connectors/v2/authentication/index.js'
 import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
@@ -318,6 +320,11 @@ server.get('/api/v2/user/tokens', ...getUserTokens)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecificationV2)
+
+// Python docs
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
 
 server.use('/api/v1', expressErrorHandler)
 server.use('/api/v2', expressErrorHandlerV2)
