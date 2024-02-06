@@ -71,7 +71,9 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
           onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
           onCancel={() => setOpen(false)}
           errorMessage={errorMessage}
-          dialogMessage={'Deleting schemas can possibly break existing models, are you sure you want to do this?'}
+          dialogMessage={
+            'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
+          }
         />
       </Stack>
     ))
