@@ -13,10 +13,10 @@ import Stack from '@mui/system/Stack'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
+import Wrapper from 'src/WrapperBeta'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Copyright from '../Copyright'
-import Wrapper from '../WrapperBeta'
 
 type DocsWrapperProps = {
   children?: ReactNode
