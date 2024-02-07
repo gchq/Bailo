@@ -150,7 +150,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Stack justifyContent='center' alignItems='left'>
-              <Image src='/../public/horizontal-light.png' alt='bailo logo' width={170} height={65} />
+              <Image src='/../public/logo-horizontal-light.png' alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
         </Box>

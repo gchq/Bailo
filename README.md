@@ -11,7 +11,7 @@
   <a href="https://github.com/gchq/bailo">
     <h1>
       <!-- TODO: Fix #gh-dark-mode-only -->
-      <img src="frontend/public/vertical-dark-transparent.png" alt="Logo" width="170">
+      <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
     </h1>
   </a>
 
