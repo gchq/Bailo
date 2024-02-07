@@ -83,6 +83,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
+
+  // V2
+  { title: 'V2', slug: 'v2', header: true },
+  { title: 'Model Images', slug: 'v2/model-images' },
 ]
 
 export interface DirectoryTree {
