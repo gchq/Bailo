@@ -16,7 +16,7 @@ import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Copyright from '../Copyright'
-import Wrapper from '../Wrapper'
+import Wrapper from '../Wrapper.beta'
 
 type DocsWrapperProps = {
   children?: ReactNode
