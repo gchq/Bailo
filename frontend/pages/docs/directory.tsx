@@ -20,15 +20,15 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Getting Started', slug: 'getting-started', header: true },
 
   { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2`, slug: 'getting-started/whats-new-v2' },
+  { title: `What's new in V2?`, slug: 'getting-started/whats-new-v2' },
 
   // Users
   { title: 'Users', slug: 'users', header: true },
 
-  { title: 'Managing Models and Releases', slug: 'users/managing-models', header: true },
-  { title: 'Using a Model', slug: 'users/using-models', header: true },
+  { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
+  { title: 'Using a Model', slug: 'users/using-a-model', header: true },
   { title: 'Reviews', slug: 'users/reviews', header: true },
-  { title: 'Programatically using Bailo', slug: 'users/automation', header: true },
+  { title: 'Programatically using Bailo', slug: 'users/programatically-using-bailo', header: true },
 
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
