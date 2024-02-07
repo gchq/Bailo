@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
 import SchemaTab from 'src/schemas/SchemaTab'
-import Wrapper from 'src/WrapperBeta'
+import Wrapper from 'src/Wrapper.beta'
 
 export default function SchemasPage() {
   return (

@@ -23,7 +23,7 @@ import { useListModels } from '../../actions/model'
 import ChipSelector from '../../src/common/ChipSelector'
 import EmptyBlob from '../../src/common/EmptyBlob'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import Wrapper from '../../src/WrapperBeta'
+import Wrapper from '../../src/Wrapper.beta'
 import useDebounce from '../../utils/hooks/useDebounce'
 
 interface KeyAndLabel {

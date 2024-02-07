@@ -9,7 +9,7 @@ import Link from 'src/Link'
 import EditableAccessRequestForm from 'src/model/beta/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/WrapperBeta'
+import Wrapper from 'src/Wrapper.beta'
 
 export default function AccessRequest() {
   const router = useRouter()

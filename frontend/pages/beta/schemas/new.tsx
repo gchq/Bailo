@@ -9,7 +9,7 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/WrapperBeta'
+import Wrapper from 'src/Wrapper.beta'
 import { getErrorMessage } from 'utils/fetcher'
 
 const VisuallyHiddenInput = styled('input')({

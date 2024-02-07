@@ -14,7 +14,7 @@ import Link from 'next/link'
 import Loading from 'src/common/Loading'
 
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import Wrapper from '../../src/WrapperBeta'
+import Wrapper from '../../src/Wrapper.beta'
 
 export default function Help() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()

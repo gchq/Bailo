@@ -9,7 +9,7 @@ import ModelImages from 'src/model/beta/ModelImages'
 import Overview from 'src/model/beta/Overview'
 import Releases from 'src/model/beta/Releases'
 import Settings from 'src/model/beta/Settings'
-import Wrapper from 'src/WrapperBeta'
+import Wrapper from 'src/Wrapper.beta'
 
 export default function Model() {
   const router = useRouter()
