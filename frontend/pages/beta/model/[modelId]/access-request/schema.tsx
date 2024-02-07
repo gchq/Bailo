@@ -12,7 +12,7 @@ import { useGetSchemas } from '../../../../../actions/schema'
 import EmptyBlob from '../../../../../src/common/EmptyBlob'
 import Loading from '../../../../../src/common/Loading'
 import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
-import Wrapper from '../../../../../src/Wrapper.beta'
+import Wrapper from '../../../../../src/WrapperBeta'
 import { SchemaKind } from '../../../../../types/v2/types'
 
 export default function NewSchemaSelection() {

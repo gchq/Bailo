@@ -9,7 +9,7 @@ import Link from 'src/Link'
 import EditableRelease from 'src/model/beta/releases/EditableRelease'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/WrapperBeta'
 
 export default function Release() {
   const router = useRouter()

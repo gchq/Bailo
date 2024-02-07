@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
 import ReviewsList from 'src/reviews/ReviewsList'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/WrapperBeta'
 
 export default function Review() {
   const tabs = useMemo(

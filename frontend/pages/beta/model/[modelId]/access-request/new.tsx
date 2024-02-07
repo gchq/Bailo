@@ -15,7 +15,7 @@ import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
 import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
 import MessageAlert from '../../../../../src/MessageAlert'
-import Wrapper from '../../../../../src/Wrapper.beta'
+import Wrapper from '../../../../../src/WrapperBeta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
 

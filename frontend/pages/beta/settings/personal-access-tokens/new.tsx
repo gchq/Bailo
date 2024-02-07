@@ -20,7 +20,7 @@ import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'rea
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/beta/authentication/TokenDialog'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/WrapperBeta'
 import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'

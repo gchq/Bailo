@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 import dynamic from 'next/dynamic'
 import React from 'react'
 
-import Wrapper from '../../../src/Wrapper.beta'
+import Wrapper from '../../../src/WrapperBeta'
 
 const SwaggerUI = dynamic(import('swagger-ui-react'), { ssr: false })
 

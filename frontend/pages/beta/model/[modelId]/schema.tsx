@@ -15,7 +15,7 @@ import { useGetSchemas } from '../../../../actions/schema'
 import { useGetCurrentUser } from '../../../../actions/user'
 import EmptyBlob from '../../../../src/common/EmptyBlob'
 import Loading from '../../../../src/common/Loading'
-import Wrapper from '../../../../src/Wrapper.beta'
+import Wrapper from '../../../../src/WrapperBeta'
 import { SchemaInterface } from '../../../../types/types'
 import { SchemaKind } from '../../../../types/v2/types'
 
