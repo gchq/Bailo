@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 import Copyright from 'src/Copyright'
-import Wrapper from 'src/WrapperBeta'
+import Wrapper from 'src/Wrapper'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 

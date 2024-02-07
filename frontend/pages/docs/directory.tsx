@@ -17,31 +17,31 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
 
-  { title: 'Getting Started', slug: 'getting-started', header: true },
+  { title: 'Getting Started', slug: 'v2/getting-started', header: true },
 
-  { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2?`, slug: 'getting-started/whats-new-v2' },
+  { title: 'FAQ', slug: 'v2/getting-started/faq' },
+  { title: `What's new in V2?`, slug: 'v2/getting-started/whats-new-v2' },
 
   // Users
-  { title: 'Users', slug: 'users', header: true },
+  { title: 'Users', slug: 'v2/users', header: true },
 
-  { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
-  { title: 'Using a Model', slug: 'users/using-a-model', header: true },
-  { title: 'Reviews', slug: 'users/reviews', header: true },
-  { title: 'Programatically using Bailo', slug: 'users/programatically-using-bailo', header: true },
+  { title: 'Managing Models and Releases', slug: 'v2/users/managing-models-and-releases', header: true },
+  { title: 'Using a Model', slug: 'v2/users/using-a-model', header: true },
+  { title: 'Reviews', slug: 'v2/users/reviews', header: true },
+  { title: 'Programatically using Bailo', slug: 'v2/users/programatically-using-bailo', header: true },
 
   // Administration
-  { title: 'Administration', slug: 'administration', header: true },
+  { title: 'Administration', slug: 'v2/administration', header: true },
 
-  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+  { title: 'Managing Bailo', slug: 'v2/administration/managing-bailo', header: true },
 
   // Developers
-  { title: 'Developers', slug: 'developers', header: true },
+  { title: 'Developers', slug: 'v2/developers', header: true },
 
-  { title: 'Bailo Development', slug: 'developers/bailo-development', header: true },
+  { title: 'Bailo Development', slug: 'v2/developers/bailo-development', header: true },
 
   // Markdown
-  { title: 'Markdown Examples', slug: 'markdown-examples' },
+  { title: 'Markdown Examples', slug: 'v2/markdown-examples' },
 ]
 
 export interface DirectoryTree {
