@@ -47,15 +47,23 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
   { title: 'Building The Bailo Image', slug: 'administration/getting-started/building-the-bailo-image' },
-  { title: 'Authentication', slug: 'administration/getting-started/authentication' },
-  { title: 'Helm Deployments', slug: 'administration/getting-started/helm-deployments' },
-  { title: 'Isolated Network Deployment', slug: 'administration/getting-started/isolated-network-deployment' },
-  { title: 'Configuration', slug: 'administration/getting-started/configuration', header: true },
-  { title: 'App Configuration', slug: 'administration/getting-started/configuration/app-configuration' },
-  { title: 'Making A Schema', slug: 'administration/getting-started/configuration/making-a-schema' },
+
+  /// Helm
+  { title: 'Helm', slug: 'administration/helm', header: true },
+  { title: 'Basic Usage', slug: 'administration/helm/basic-usage' },
+  { title: 'Configuration', slug: 'administration/helm/configuration' },
+  { title: 'Isolated Environments', slug: 'administration/helm/isolated-environments' },
+
+  /// Schema Management
+  { title: 'Schema', slug: 'administration/schemas', header: true },
+  { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
+  { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
+
+  { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
   { title: 'Migrations', slug: 'administration/migrations', header: true },
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
+  { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
 
   // Developers
   { title: 'Developers', slug: 'developers', header: true },

@@ -4,6 +4,10 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 ## Configuration Files
 
+> ⚠️ Note: If you use Helm this information does not apply to you. We use Helm to automatically configure the
+> application for you. Within helm you can manually alter this configuration in
+> `infrastructure/helm/bailo/templates/bailo/bailo.configmap.yaml`
+
 Bailo uses [`node-config`](https://github.com/node-config/node-config#readme) for application configuration.
 `node-config` organizes hierarchical configurations, allowing the user to set a series of overides over a base
 configuration.
