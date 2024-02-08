@@ -37,6 +37,7 @@ import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useM
 import { useGetNumApprovals } from '../data/approvals'
 import { useGetUiConfig } from '../data/uiConfig'
 import { useGetCurrentUser } from '../data/user'
+import bailoLogo from '../public/bailo-logo.png'
 import { EntityKind } from '../types/types'
 import Banner from './Banner'
 import UserAvatar from './common/UserAvatar'
@@ -211,7 +212,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             </IconButton>
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
               <Link href='/' color='inherit' underline='none'>
-                <Image src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
+                <Image src={bailoLogo} alt='Logo' width={35} height={45} priority />
               </Link>
             </Box>
             <Box sx={{ flexGrow: 1, ml: 2, display: { xs: 'none', md: 'flex', cursor: 'pointer' } }}>
