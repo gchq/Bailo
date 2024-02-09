@@ -55,7 +55,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-interface SideNavigationProps {
+export interface SideNavigationProps {
   page: string
   currentUser: User
   toggleDrawer: () => void
