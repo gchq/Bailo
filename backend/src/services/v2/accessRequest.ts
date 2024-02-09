@@ -135,10 +135,25 @@ export async function updateAccessRequest(
 
 export async function newAccessRequestComment(user: UserDoc, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
-  accessRequest.comments = []
-  accessRequest.comments.push({ message, user: user.dn, createdAt: new Date().toISOString() })
 
-  await accessRequest.save()
+  if (!accessRequest) {
+    throw NotFound(`The requested access request was not found.`, { accessRequestId })
+  }
 
-  return accessRequest
+  const comment = {
+    message,
+    user: user.dn,
+    createdAt: new Date().toISOString(),
+  }
+
+  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
+    { _id: accessRequest._id },
+    {
+      $push: {
+        comments: comment,
+      },
+    },
+  )
+
+  return updatedAccessRequest
 }
