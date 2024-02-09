@@ -7,7 +7,7 @@ import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -154,6 +154,10 @@ export async function newAccessRequestComment(user: UserDoc, accessRequestId: st
       },
     },
   )
+
+  if (!updatedAccessRequest) {
+    throw InternalError(`Updated of access request failed.`, { accessRequestId })
+  }
 
   return updatedAccessRequest
 }
