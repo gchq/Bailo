@@ -46,7 +46,7 @@ describe('EditableAccessRequestForm', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('Edit Access Request')).not.toBeUndefined()
+      expect(await screen.findByText('Edit Access Request')).toBeDefined()
     })
   })
 })

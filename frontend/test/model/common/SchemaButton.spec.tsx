@@ -17,11 +17,11 @@ describe('SchemaButton', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('Select schema')).not.toBeUndefined()
+      expect(await screen.findByText('Select schema')).toBeDefined()
     })
   })
 
-  it('renders a loading SchemaButton component', async () => {
+  it('enters a loading state when the loading prop is true', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} loading />
@@ -29,7 +29,7 @@ describe('SchemaButton', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByRole('progressbar')).not.toBeUndefined()
+      expect(await screen.findByRole('progressbar')).toBeDefined()
     })
   })
 })

@@ -8,8 +8,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('src/common/MarkdownDisplay.tsx', () => ({ default: (_props: MarkdownDisplayProps) => <></> }))
 
-describe('Va;idationError', () => {
-  it('renders a ValidationError component', async () => {
+describe('ValidationErrorIcon', () => {
+  it('renders a ValidationErrorIcon component', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <ValidationErrorIcon step={testAccessRequestSchemaStepNoRender} />
@@ -17,11 +17,11 @@ describe('Va;idationError', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('This step is unfinished')).not.toBeUndefined()
+      expect(await screen.findByLabelText('This step is unfinished')).toBeDefined()
     })
   })
 
-  it('does not render a ValidationError component when step is marked as complete', async () => {
+  it('does not render anything when step is marked as complete', async () => {
     const updatedStep = testAccessRequestSchemaStepNoRender
     updatedStep.isComplete = () => true
     const { container } = render(

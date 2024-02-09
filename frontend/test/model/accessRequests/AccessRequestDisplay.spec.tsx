@@ -32,7 +32,7 @@ describe('AccessRequestDisplay', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText(testAccessRequest.metadata.overview.name)).not.toBeUndefined()
+      expect(await screen.findByText(testAccessRequest.metadata.overview.name)).toBeDefined()
     })
   })
 })
