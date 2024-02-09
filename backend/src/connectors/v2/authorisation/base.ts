@@ -6,7 +6,7 @@ import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { Access, Action } from '../../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../../services/v2/accessRequest.js'
-import { getApprovedAccessRequestReviews as hasApprovedAccessRequestReview } from '../../../services/v2/review.js'
+import { checkAccessRequestsApproved } from '../../../services/v2/review.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 
@@ -71,12 +71,10 @@ export class BasicAuthorisationConnector {
 
   async hasApprovedAccessRequest(user: UserDoc, model: ModelDoc) {
     const accessRequests = await getModelAccessRequestsForUser(user, model.id)
-    let result = false
-    if (accessRequests.length > 0) {
-      result = await hasApprovedAccessRequestReview(accessRequests.map((accessRequest) => accessRequest.id))
+    if (accessRequests.length === 0) {
+      return false
     }
-
-    return result
+    return await checkAccessRequestsApproved(accessRequests.map((accessRequest) => accessRequest.id))
   }
 
   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {

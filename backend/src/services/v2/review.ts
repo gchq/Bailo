@@ -188,7 +188,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   }
 }
 
-export async function getApprovedAccessRequestReviews(accessRequestIds: string[]) {
+export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   const reviews = await Review.find({
     accessRequestId: accessRequestIds,
     responses: {
