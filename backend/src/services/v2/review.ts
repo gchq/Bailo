@@ -22,6 +22,12 @@ import {
 } from './smtp/smtp.js'
 import { sendWebhooks } from './webhook.js'
 
+// This should be replaced by using the dynamic schema
+const requiredRoles = {
+  release: ['mtr', 'msro'],
+  accessRequest: ['msro'],
+}
+
 export async function findReviews(
   user: UserDoc,
   modelId?: string,
@@ -53,7 +59,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  const roleEntities = getRoleEntities(['mtr', 'msro'], model.collaborators)
+  const roleEntities = getRoleEntities(requiredRoles.release, model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -73,7 +79,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntities(['msro'], model.collaborators)
+  const roleEntities = getRoleEntities(requiredRoles.accessRequest, model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -197,7 +203,7 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
       },
     },
   })
-  return reviews.some((review) => review.role === 'msro')
+  return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
