@@ -41,7 +41,10 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { title: 'Model ID', data: release.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Semver', data: release.semver },
-      { title: 'Created By', data: release.createdBy },
+      {
+        title: 'Created By',
+        data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || 'Unknown user',
+      },
     ],
     [
       { name: 'Open Release', url: 'TODO' },
@@ -68,7 +71,11 @@ export async function requestReviewForAccessRequest(
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Entities Requesting Access', data: accessRequest.metadata.overview.entities.toString() },
-      { title: 'Created By', data: accessRequest.createdBy },
+      {
+        title: 'Created By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', accessRequest.createdBy))).name || 'Unknown user',
+      },
     ],
     [
       { name: 'Open Access Request', url: 'TODO' },
