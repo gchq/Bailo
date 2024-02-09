@@ -43,7 +43,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { title: 'Semver', data: release.semver },
       {
         title: 'Created By',
-        data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || 'Unknown user',
+        data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || release.createdBy,
       },
     ],
     [
@@ -74,7 +74,8 @@ export async function requestReviewForAccessRequest(
       {
         title: 'Created By',
         data:
-          (await authentication.getUserInformation(toEntity('user', accessRequest.createdBy))).name || 'Unknown user',
+          (await authentication.getUserInformation(toEntity('user', accessRequest.createdBy))).name ||
+          accessRequest.createdBy,
       },
     ],
     [
