@@ -1,9 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { UserDoc } from '../../src/models/v2/User.js'
 import {
   createAccessRequest,
   getAccessRequestsByModel,
+  getModelAccessRequestsForUser,
   newAccessRequestComment,
   removeAccessRequest,
 } from '../../src/services/v2/accessRequest.js'
@@ -126,5 +128,12 @@ describe('services > accessRequest', () => {
     expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
       /^You do not have permission to delete this access request./,
     )
+  })
+
+  test('getModelAccessRequestsForUser > query as expected', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    await getModelAccessRequestsForUser(user, 'test-model')
+
+    expect(accessRequestModelMocks.find.mock.calls).matchSnapshot()
   })
 })

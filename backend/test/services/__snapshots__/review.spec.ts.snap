@@ -1,5 +1,41 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > review > checkAccessRequestsApproved > approved access request exists 1`] = `
+[
+  [
+    {
+      "accessRequestId": [
+        "access-1",
+        "access-2",
+      ],
+      "responses": {
+        "$elemMatch": {
+          "decision": "approve",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`services > review > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
+[
+  [
+    {
+      "accessRequestId": [
+        "access-1",
+        "access-2",
+      ],
+      "responses": {
+        "$elemMatch": {
+          "decision": "approve",
+        },
+      },
+    },
+  ],
+]
+`;
+
 exports[`services > review > findReviews > active 1`] = `
 [
   {},

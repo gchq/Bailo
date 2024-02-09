@@ -5,6 +5,7 @@ import Model from '../../src/models/v2/Model.js'
 import Release from '../../src/models/v2/Release.js'
 import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/v2/Review.js'
 import {
+  checkAccessRequestsApproved,
   createAccessRequestReviews,
   createReleaseReviews,
   findReviews,
@@ -246,5 +247,23 @@ describe('services > review', () => {
 
     expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
     expect(reviewModelMock.findByIdAndUpdate).not.toBeCalled()
+  })
+
+  test('checkAccessRequestsApproved > approved access request exists', async () => {
+    reviewModelMock.find.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }])
+
+    const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
+
+    expect(result).toBe(true)
+    expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
+  })
+
+  test('checkAccessRequestsApproved > no approved access requests with a required role', async () => {
+    reviewModelMock.find.mockReturnValueOnce([{ role: 'random' }])
+
+    const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
+
+    expect(result).toBe(false)
+    expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
   })
 })
