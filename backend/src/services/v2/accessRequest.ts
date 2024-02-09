@@ -119,7 +119,7 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
