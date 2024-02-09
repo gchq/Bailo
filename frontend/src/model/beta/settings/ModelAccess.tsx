@@ -93,7 +93,13 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     setLoading(false)
   }
 
-  if (isUsersError) {
+  const noOptionsText = useMemo(() => {
+    if (userListQuery.length < 3) return 'Please enter at least three characters'
+    if (isUsersError?.status === 413) return 'Too many results, please refine your search'
+    return 'No options'
+  }, [userListQuery, isUsersError])
+
+  if (isUsersError && isUsersError.status !== 413) {
     return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
@@ -111,7 +117,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         size='small'
-        noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No users found'}
+        noOptionsText={noOptionsText}
         onInputChange={debounceOnInputChange}
         groupBy={(option) => option.kind}
         getOptionLabel={(option) => option.id}

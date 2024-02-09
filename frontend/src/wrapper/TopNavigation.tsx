@@ -26,6 +26,7 @@ import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
+import bailoLogo from '../../public/logo-horizontal-light.png'
 import { EntityKind } from '../../types/types'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
@@ -75,6 +76,10 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   const theme = useTheme()
   const { toggleDarkMode } = useContext(ThemeModeContext)
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
+
+  function imageLoader({ src }: { src: string }) {
+    return src
+  }
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -150,7 +155,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Stack justifyContent='center' alignItems='left'>
-              <Image src='/../public/logo-horizontal-light.png' alt='bailo logo' width={142} height={60} />
+              <Image loader={imageLoader} src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
         </Box>
