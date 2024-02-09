@@ -77,10 +77,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   const { toggleDarkMode } = useContext(ThemeModeContext)
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
-  function imageLoader({ src }: { src: string }) {
-    return src
-  }
-
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
   }
@@ -155,7 +151,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Stack justifyContent='center' alignItems='left'>
-              <Image loader={imageLoader} src={bailoLogo} alt='bailo logo' width={142} height={60} />
+              <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
         </Box>
