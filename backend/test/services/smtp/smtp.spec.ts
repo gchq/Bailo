@@ -62,6 +62,7 @@ vi.mock('nodemailer', async () => ({
 
 const authenticationMock = vi.hoisted(() => ({
   getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
+  getUserInformation: vi.fn(() => [Promise.resolve({ name: 'Joe Blogs' })]),
 }))
 vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: authenticationMock }))
 
@@ -123,6 +124,7 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent for Access Request Reviews', async () => {
     await requestReviewForAccessRequest('user:user', review, access)
+    authenticationMock.getUserInformation.mockReturnValueOnce([Promise.resolve({ name: 'Joe Blogs' })])
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
