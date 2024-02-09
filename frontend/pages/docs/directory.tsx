@@ -20,7 +20,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Getting Started', slug: 'getting-started', header: true },
 
   { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2?`, slug: 'getting-started/whats-new-v2' },
+  { title: `What's new in V2?`, slug: 'getting-started/whats-new-in-v2' },
 
   // Users
   { title: 'Users', slug: 'users', header: true },
@@ -34,6 +34,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Administration', slug: 'administration', header: true },
 
   { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+
+  { title: 'Migrations', slug: 'administration/migrations', header: true },
+  { title: 'Bailo 0.4', slug: 'administration/migrations/bailo-0.4' },
+  { title: 'Bailo 2.0', slug: 'administration/migrations/bailo-2.0' },
 
   // Developers
   { title: 'Developers', slug: 'developers', header: true },
