@@ -26,7 +26,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Users', slug: 'users', header: true },
 
   { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
+
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Programatically using Bailo', slug: 'users/programatically-using-bailo', header: true },
 
