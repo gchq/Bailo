@@ -21,6 +21,7 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
@@ -91,12 +92,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
     setUserMenuAnchorEl(null)
   }
 
-  const betaAdornment = (
-    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
-      beta
-    </Box>
-  )
-
   return (
     <AppBar
       open={drawerOpen}
@@ -154,10 +149,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         )}
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
           <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-            <Typography variant='h5' component='div'>
-              <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
-              {betaAdornment}
-            </Typography>
+            <Stack justifyContent='center' alignItems='left'>
+              <Image src='/../public/logo-horizontal-light.png' alt='bailo logo' width={142} height={60} />
+            </Stack>
           </Link>
         </Box>
         {isSmOrLarger && (

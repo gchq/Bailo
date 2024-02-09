@@ -2,8 +2,8 @@
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-> Bailo is still in development and we have not yet completed all of the features we want it to have. See the roadmap
-> for what we plan to build.
+> **NOTE: `main` branch now tracks `v2` by default. To access the original Bailo, see the `v1` branch. `v1` is in the
+> process of being removed from this project, see [migration]() for more information.**
 
 <!-- PROJECT LOGO -->
 <br />
@@ -11,7 +11,7 @@
   <a href="https://github.com/gchq/bailo">
     <h1>
       <!-- TODO: Fix #gh-dark-mode-only -->
-      <img src="frontend/public/Bailo-logo-full-no-box.png" alt="Logo" width="170">
+      <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
     </h1>
   </a>
 

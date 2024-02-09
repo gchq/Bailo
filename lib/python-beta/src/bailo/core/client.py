@@ -13,7 +13,7 @@ class Client:
     """Create a Client object that can be used to talk to the website.
 
     :param url: Url of bailo website
-    :param agent:
+    :param agent: An agent object to handle requests
     """
 
     def __init__(self, url: str, agent: Agent = Agent()):
