@@ -35,7 +35,7 @@ import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
-type TopNavigationProps = {
+export type TopNavigationProps = {
   drawerOpen?: boolean
   pageTopStyling?: CSSProperties
   currentUser: User
