@@ -4,7 +4,6 @@ import audit from '../../../../src/connectors/v2/audit/__mocks__/index.js'
 import { postAccessRequestCommentSchema } from '../../../../src/routes/v2/model/accessRequest/postAccessRequestComment.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/v2/config.js')
 vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/v2/audit/index.js')

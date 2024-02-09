@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 
+import authentication from '../../connectors/v2/authentication/index.js'
 import { AccessRequestAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
@@ -118,7 +119,7 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -141,4 +142,13 @@ export async function newAccessRequestComment(user: UserDoc, accessRequestId: st
   await accessRequest.save()
 
   return accessRequest
+}
+
+export async function getModelAccessRequestsForUser(user: UserDoc, modelId: string) {
+  const accessRequests = await AccessRequest.find({
+    modelId,
+    'metadata.overview.entities': { $in: await authentication.getEntities(user) },
+  })
+
+  return accessRequests
 }
