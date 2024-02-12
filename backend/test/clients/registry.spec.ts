@@ -36,15 +36,34 @@ describe('clients > registry', () => {
     expect(response).rejects.toThrowError('Unable to communicate with the registry.')
   })
 
-  test('listModelRepos > non-200 response', async () => {
+  test('listModelRepos > unrecognised error response', async () => {
     fetchMock.default.mockReturnValueOnce({
       ok: false,
-      text: vi.fn(() => 'oh no something went wrong...'),
+      text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Non-200 response returned by the registry.')
+    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+  })
+
+  test('listModelRepos > unrecognised error response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'Unrecognised response'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'NAME_UNKNOWN',
+            message: 'repository name not known to registry',
+            detail: [Object],
+          },
+        ],
+      })),
+    })
+    const response = listModelRepos('token', 'modelId')
+
+    expect(response).rejects.toThrowError('Error response received from registry.')
   })
 
   test('listModelRepos > malformed response', async () => {
@@ -106,5 +125,45 @@ describe('clients > registry', () => {
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
 
     expect(response).rejects.toThrowError('Unrecognised response body when listing image tags.')
+  })
+
+  test('listImageTags > unknown name return empty list', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'NAME_UNKNOWN',
+            message: 'repository name not known to registry',
+            detail: {},
+          },
+        ],
+      })),
+    })
+
+    const response = await listImageTags('token', { namespace: 'modelId', image: 'image' })
+
+    expect(response).toStrictEqual([])
+  })
+
+  test('listImageTags > throw all errors apart from unknown name', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'You are not authorized.',
+            detail: {},
+          },
+        ],
+      })),
+    })
+
+    const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
+
+    expect(response).rejects.toThrowError('Error response received from registry.')
   })
 })

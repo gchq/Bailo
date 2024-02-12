@@ -36,17 +36,16 @@ async function registryRequest(token: string, endpoint: string) {
   }
   const body = await res.json()
   if (!res.ok) {
+    const context = {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+    }
     if (isRegistryErrorResponse(body)) {
-      throw RegistryError(body, {
-        url: res.url,
-        status: res.status,
-        statusText: res.statusText,
-      })
+      throw RegistryError(body, context)
     } else {
       throw InternalError('Unrecognised response returned by the registry.', {
-        url: res.url,
-        status: res.status,
-        statusText: res.statusText,
+        ...context,
         body: JSON.stringify(body),
       })
     }

@@ -51,7 +51,7 @@ export function ConfigurationError(message: string, context?: BailoError['contex
 }
 
 export function RegistryError(error: RegistryErrorResponse, context: BailoError['context']) {
-  const registryError = GenericError(500, `Error response received from registry`, {
+  const registryError = GenericError(500, `Error response received from registry.`, {
     errors: error.errors,
     ...context,
   }) as RegistryError
