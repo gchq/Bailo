@@ -1,0 +1,17 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import bailoSwaggerDocs from 'public/docs/bailo_swagger_docs.png'
+
+# Open API Docs
+
+Bailo provides an Open API Specification for all Bailo endpoints [here](/docs/api).
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoSwaggerDocs} />
+</Box>
+
+Full Documentation on using the UI can be found [here](https://swagger.io/tools/swagger-ui/).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

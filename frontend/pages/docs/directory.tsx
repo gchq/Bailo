@@ -26,10 +26,16 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Users', slug: 'users', header: true },
 
   { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
+  { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
+  { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
+  { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
+
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
   { title: 'Reviews', slug: 'users/reviews', header: true },
-  { title: 'Programatically using Bailo', slug: 'users/programatically-using-bailo', header: true },
-
+  { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
+  { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
+  { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
+  { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
