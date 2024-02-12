@@ -71,5 +71,5 @@ napoleon_include_private_with_doc = True
 # Disable execution in Github actions
 nbsphinx_execute = "never"
 
-html_logo = 'vertical-white.png'
-html_favicon = 'favicon.png'
+html_logo = "vertical-white.png"
+html_favicon = "favicon.png"
