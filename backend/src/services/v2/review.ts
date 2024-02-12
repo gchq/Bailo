@@ -4,7 +4,7 @@ import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'
-import Review, { ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
+import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
@@ -21,6 +21,12 @@ import {
   requestReviewForRelease,
 } from './smtp/smtp.js'
 import { sendWebhooks } from './webhook.js'
+
+// This should be replaced by using the dynamic schema
+const requiredRoles = {
+  release: ['mtr', 'msro'],
+  accessRequest: ['msro'],
+}
 
 export async function findReviews(
   user: UserDoc,
@@ -53,7 +59,7 @@ export async function findReviews(
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  const roleEntities = getRoleEntities(['mtr', 'msro'], model.collaborators)
+  const roleEntities = getRoleEntities(requiredRoles.release, model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -73,7 +79,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntities(['msro'], model.collaborators)
+  const roleEntities = getRoleEntities(requiredRoles.accessRequest, model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -186,6 +192,18 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
     default:
       throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
   }
+}
+
+export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
+  const reviews = await Review.find({
+    accessRequestId: accessRequestIds,
+    responses: {
+      $elemMatch: {
+        decision: Decision.Approve,
+      },
+    },
+  })
+  return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

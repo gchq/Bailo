@@ -31,7 +31,7 @@ export default function ReviewDecisionDisplay({ response }: ReviewDecisionDispla
           <Stack direction='row' spacing={1} alignItems='center'>
             <Typography>
               <UserDisplay dn={username} />
-              {` ${isApproved ? 'has approved this release' : 'has requested changes'}`}
+              {` ${isApproved ? 'has approved' : 'has requested changes'}`}
             </Typography>
             {isApproved ? (
               <Done color='success' fontSize='small' />
