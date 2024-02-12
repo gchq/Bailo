@@ -7,7 +7,6 @@ import audit from '../../../connectors/v2/audit/index.js'
 import { SchemaInterface } from '../../../models/v2/Schema.js'
 import { updateSchema } from '../../../services/v2/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
-import { SchemaKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const patchSchemaSchema = z.object({
@@ -17,37 +16,14 @@ export const patchSchemaSchema = z.object({
     }),
   }),
   body: z.object({
-    id: z
-      .string({
-        required_error: 'Must specify schema ID',
-      })
-      .optional(),
-    name: z
-      .string({
-        required_error: 'Must specify schema name',
-      })
-      .optional(),
-    description: z
-      .string({
-        required_error: 'Must specify schema description',
-      })
-      .optional(),
-    kind: z
-      .nativeEnum(SchemaKind, {
-        required_error: 'Must specify schema kind',
-      })
-      .optional(),
-    active: z
-      .boolean({
-        required_error: 'Must specify is schema is active or not',
-      })
-      .optional(),
-    jsonSchema: z.object({}).passthrough().optional(),
+    active: z.boolean({
+      required_error: 'Must specify is schema is active or not',
+    }),
   }),
 })
 
 registerPath({
-  method: 'put',
+  method: 'patch',
   path: '/api/v2/schema/{schemaId}',
   tags: ['schema'],
   description: 'Update partial fields for an existing schema.',
