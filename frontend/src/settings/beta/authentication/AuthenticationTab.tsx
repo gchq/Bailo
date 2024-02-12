@@ -5,6 +5,7 @@ import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/v2/types'
@@ -27,32 +28,36 @@ export default function AuthenticationTab() {
 
   const tokenList = useMemo(
     () =>
-      tokens.map((token, index) => (
-        <Fragment key={token.accessKey}>
-          <Stack direction='row' alignItems='center' justifyContent='space-between'>
-            <Typography>{token.description}</Typography>
-            <Box pl={1}>
-              <Typography variant='caption' mr={1}>
-                Created on
-                <Typography variant='caption' fontWeight='bold'>
-                  {` ${formatDateString(token.createdAt)}`}
+      tokens.length > 0 && !isTokensLoading ? (
+        tokens.map((token, index) => (
+          <Fragment key={token.accessKey}>
+            <Stack direction='row' alignItems='center' justifyContent='space-between'>
+              <Typography>{token.description}</Typography>
+              <Box pl={1}>
+                <Typography variant='caption' mr={1}>
+                  Created on
+                  <Typography variant='caption' fontWeight='bold'>
+                    {` ${formatDateString(token.createdAt)}`}
+                  </Typography>
                 </Typography>
-              </Typography>
-              <Tooltip title='Delete token'>
-                <IconButton
-                  color='primary'
-                  onClick={() => handleOpenConfirmationDialog(token.accessKey)}
-                  aria-label='delete access key'
-                >
-                  <Delete />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Stack>
-          {index !== tokens.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} />}
-        </Fragment>
-      )),
-    [handleOpenConfirmationDialog, tokens],
+                <Tooltip title='Delete token'>
+                  <IconButton
+                    color='primary'
+                    onClick={() => handleOpenConfirmationDialog(token.accessKey)}
+                    aria-label='delete access key'
+                  >
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Stack>
+            {index !== tokens.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} />}
+          </Fragment>
+        ))
+      ) : (
+        <EmptyBlob text='No tokens found' />
+      ),
+    [handleOpenConfirmationDialog, isTokensLoading, tokens],
   )
 
   const handleAddToken = () => {
