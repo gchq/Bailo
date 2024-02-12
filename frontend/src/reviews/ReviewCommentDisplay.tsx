@@ -1,19 +1,20 @@
-import { Box, Card, Divider, Stack, Typography } from '@mui/material'
+import { Card, Divider, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
+import UserDisplay from 'src/common/UserDisplay'
 import { EntityKind, ReviewComment } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
-type ReviewCommentsProps = {
+type ReviewCommentDisplayProps = {
   response: ReviewComment
 }
 
-export default function ReviewComment({ response }: ReviewCommentsProps) {
+export default function ReviewCommentDisplay({ response }: ReviewCommentDisplayProps) {
   const username = response.user
 
   return (
     <Stack direction='row' spacing={2} alignItems='center'>
-      <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
+      <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />
       <Card
         sx={{
           width: '100%',
@@ -22,9 +23,7 @@ export default function ReviewComment({ response }: ReviewCommentsProps) {
       >
         <Stack direction='row' spacing={1} alignItems='center' sx={{ width: '100%' }} justifyContent='space-between'>
           <Typography>
-            <Box component='span' fontWeight='bold'>
-              {username}
-            </Box>
+            <UserDisplay dn={username} />
             {' has left a comment'}
           </Typography>
           <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
