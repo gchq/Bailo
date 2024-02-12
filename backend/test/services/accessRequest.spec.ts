@@ -28,6 +28,7 @@ const accessRequestModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
@@ -89,11 +90,11 @@ describe('services > accessRequest', () => {
 
   test('newAccessRequestComment > success', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
+    accessRequestModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
 
-    expect(accessRequestModelMocks.save).toBeCalled()
+    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
   })
 
   test('getAccessRequestsByModel > good', async () => {
