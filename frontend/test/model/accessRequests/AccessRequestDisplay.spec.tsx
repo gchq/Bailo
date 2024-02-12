@@ -18,7 +18,7 @@ vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProp
 vi.mock('src/model/beta/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
 
 describe('AccessRequestDisplay', () => {
-  it('correctly displays the access request metadata', async () => {
+  it('displays the metadata for an access request metadata object when display component is rendered', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,
@@ -36,7 +36,7 @@ describe('AccessRequestDisplay', () => {
     })
   })
 
-  it('displays a comments icon with the correct number of comments next to it', async () => {
+  it('displays a comments icon when the provided access request has comment responses', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,
@@ -55,7 +55,7 @@ describe('AccessRequestDisplay', () => {
     })
   })
 
-  it('does not display the comment icon when there are no comments', async () => {
+  it('does not display a comments icon when the provided access request has no comment responses', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,

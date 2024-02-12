@@ -10,7 +10,7 @@ vi.mock('src/common/MarkdownDisplay.tsx', () => ({ default: (_props: MarkdownDis
 const consoleMock = vi.spyOn(console, 'log').mockImplementation(() => undefined)
 
 describe('SchemaButton', () => {
-  it('enters a loading state when the loading prop is true', async () => {
+  it('enters loading state when the loading prop is true', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} loading />
@@ -22,7 +22,7 @@ describe('SchemaButton', () => {
     })
   })
 
-  it('is not in a loading state when the loading prop is false', async () => {
+  it('does not enter a loading state when the loading prop is false', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} />
@@ -35,20 +35,7 @@ describe('SchemaButton', () => {
     })
   })
 
-  it('is not in a loading state when the loading prop is false', async () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} />
-      </ThemeProvider>,
-    )
-
-    await waitFor(async () => {
-      const loadingSpinner = await screen.queryByRole('progressbar')
-      expect(loadingSpinner).toBeNull()
-    })
-  })
-
-  it('fires the onClick event', async () => {
+  it('fires the onClick event when the schema button is clicked', async () => {
     const testMessage = 'The schema button has been clicked!'
 
     function onClick() {
