@@ -3,11 +3,6 @@
 exports[`routes > schema > putSchema > audit > expected call 1`] = `
 {
   "active": false,
-  "description": "recusandae",
-  "id": "recusandae",
-  "jsonSchema": {},
-  "kind": "accessRequest",
-  "name": "Jaime Hilll",
 }
 `;
 
@@ -15,11 +10,6 @@ exports[`routes > schema > putSchema > successfully updates the schema 1`] = `
 {
   "schema": {
     "active": false,
-    "description": "recusandae",
-    "id": "recusandae",
-    "jsonSchema": {},
-    "kind": "accessRequest",
-    "name": "Jaime Hilll",
   },
 }
 `;
