@@ -7,7 +7,14 @@ import {
 } from 'types/interfaces'
 import { ModelCardInterface, ModelInterface } from 'types/v2/types'
 
-import { ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind, SchemaInterface } from '../../types/types'
+import {
+  ApprovalCategory,
+  ApprovalStates,
+  ApprovalTypes,
+  EntityKind,
+  ReviewComment,
+  SchemaInterface,
+} from '../../types/types'
 
 export const testId = 'testId'
 
@@ -120,6 +127,29 @@ export const testAccessRequest: AccessRequestInterface = {
   schemaId: accessRequestSchemaId,
   deleted: false,
   comments: [],
+  createdBy: testEntity,
+  metadata: {
+    overview: {
+      name: 'My Access Request',
+      entities: [testEntity],
+    },
+  },
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toDateString(),
+}
+
+const testComment: ReviewComment = {
+  message: 'This is a comment',
+  user: 'Joe Blogs',
+  createdAt: new Date().toISOString(),
+}
+
+export const testAccessRequestWithComments: AccessRequestInterface = {
+  id: 'my-access-request',
+  modelId: modelId,
+  schemaId: accessRequestSchemaId,
+  deleted: false,
+  comments: [testComment],
   createdBy: testEntity,
   metadata: {
     overview: {

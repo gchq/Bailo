@@ -6,6 +6,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
+import { plural } from 'utils/stringUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
 import Loading from '../../../common/Loading'
@@ -107,7 +108,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 <Tooltip title='Comments'>
                   <Stack direction='row' spacing={1}>
                     <CommentIcon color='primary' />
-                    <Typography variant='caption'>{accessRequest.comments.length}</Typography>
+                    <Typography variant='caption'>{plural(accessRequest.comments.length, 'comment')}</Typography>
                   </Stack>
                 </Tooltip>
               )}
