@@ -14,7 +14,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
 
   function handleListItemClick() {
     const tab = review.kind === 'release' ? 'releases' : 'access'
-    router.push(`/beta/model/${review.model.id}?tab=${tab}`)
+    router.push(`/model/${review.model.id}?tab=${tab}`)
   }
 
   function editedAdornment() {

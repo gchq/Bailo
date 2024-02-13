@@ -17,7 +17,7 @@ export default function ModelCardRevisionListDisplay({ modelCard }: revisionProp
   return (
     <TableBody>
       <TableRow
-        onClick={() => router.push(`/beta/model/${modelCard.modelId}/history/${modelCard.version}`)}
+        onClick={() => router.push(`/model/${modelCard.modelId}/history/${modelCard.version}`)}
         sx={{ '&:hover': { cursor: 'pointer' } }}
         hover
       >
