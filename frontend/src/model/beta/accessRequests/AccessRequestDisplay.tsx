@@ -54,7 +54,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
         <Card sx={{ width: '100%' }}>
           {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
-            <Link href={`/beta/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
+            <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>
                 {accessRequest.metadata.overview.name}
               </Typography>

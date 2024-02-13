@@ -41,33 +41,6 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
 export const lightTheme = createTheme({
   components: {
     ...defaultComponentOverrides,
-  },
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#27598e',
-    },
-    secondary: {
-      main: '#f37f58',
-    },
-    error: {
-      main: red.A400,
-    },
-    container: {
-      main: '#f3f1f1',
-    },
-    customTextInput: {
-      main: '#535353',
-    },
-    topNavigation: {
-      main: '#fff',
-    },
-  },
-})
-
-export const betaLightTheme = createTheme({
-  components: {
-    ...defaultComponentOverrides,
     MuiMenuItem: {
       styleOverrides: {
         root: {

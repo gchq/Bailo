@@ -62,7 +62,7 @@ export default function AuthenticationTab() {
 
   const handleAddToken = () => {
     setIsLoading(true)
-    router.push('/beta/settings/personal-access-tokens/new')
+    router.push('/settings/personal-access-tokens/new')
   }
 
   const handleDeleteToken = async () => {
