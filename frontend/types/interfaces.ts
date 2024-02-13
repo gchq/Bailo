@@ -92,6 +92,39 @@ export interface ModelInterface {
   updatedAt: Date
 }
 
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
+  createdAt: string
+  updatedAt: string
+}
+
+type PartialReviewRequestInterface =
+  | {
+      accessRequestId: string
+      semver?: never
+    }
+  | {
+      accessRequestId?: never
+      semver: string
+    }
+
+export type ReviewRequestInterface = {
+  model: ModelInterface
+  role: string
+  kind: 'release' | 'access'
+  responses: ReviewResponse[]
+  createdAt: string
+  updatedAt: string
+} & PartialReviewRequestInterface
+
 export interface AccessRequestMetadata {
   overview: {
     name: string
