@@ -7,10 +7,9 @@ import { testAccessRequestSchema } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('src/common/MarkdownDisplay.tsx', () => ({ default: (_props: MarkdownDisplayProps) => <></> }))
-const consoleMock = vi.spyOn(console, 'log').mockImplementation(() => undefined)
 
 describe('SchemaButton', () => {
-  it('enters loading state when the loading prop is true', async () => {
+  it('displays a loading spinner when loading prop is true', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} loading />
@@ -22,7 +21,7 @@ describe('SchemaButton', () => {
     })
   })
 
-  it('does not enter a loading state when the loading prop is false', async () => {
+  it('does not display a loading spinner when loading prop is false', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} />
@@ -36,23 +35,17 @@ describe('SchemaButton', () => {
   })
 
   it('fires the onClick event when the schema button is clicked', async () => {
-    const testMessage = 'The schema button has been clicked!'
-
-    function onClick() {
-      // eslint-disable-next-line no-console
-      console.log(testMessage)
-    }
+    const handleClickSpy = vi.fn()
     render(
       <ThemeProvider theme={lightTheme}>
-        <SchemaButton schema={testAccessRequestSchema} onClick={onClick} />
+        <SchemaButton schema={testAccessRequestSchema} onClick={handleClickSpy} />
       </ThemeProvider>,
     )
 
     await waitFor(async () => {
       const schemaButton = screen.getByTestId('selectSchemaButton-access-request-schema')
       fireEvent.click(schemaButton)
-      expect(consoleMock).toHaveBeenCalledOnce()
-      expect(consoleMock).toHaveBeenLastCalledWith(testMessage)
+      expect(handleClickSpy).toHaveBeenCalledOnce()
     })
   })
 })

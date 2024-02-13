@@ -11,7 +11,7 @@ import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
-interface EntitySelectorBetaProps {
+export interface EntitySelectorBetaProps {
   label?: string
   required?: boolean
   value: string[]
@@ -106,6 +106,7 @@ export default function EntitySelectorBeta(props: EntitySelectorBetaProps) {
             <TextField
               {...params}
               placeholder='Username or group name'
+              data-test='entitySelector'
               label={label + (required ? ' *' : '')}
               onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {

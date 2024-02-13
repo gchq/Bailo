@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('src/common/MarkdownDisplay.tsx', () => ({ default: (_props: MarkdownDisplayProps) => <></> }))
 
 describe('ValidationErrorIcon', () => {
-  it('shows a validation warning message and icon when the form step is marked as incomplete', async () => {
+  it('displays a validation warning message or icon when the form step is marked as incomplete', async () => {
     render(
       <ThemeProvider theme={lightTheme}>
         <ValidationErrorIcon step={testAccessRequestSchemaStepNoRender} />
@@ -17,16 +17,18 @@ describe('ValidationErrorIcon', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('This step is unfinished')).toBeDefined()
+      expect(await screen.findByTestId('formStepValidationWarning')).toBeDefined()
     })
   })
 
-  it('does not display a validation warning message and icon when the form step is marked as complete', async () => {
-    const updatedStep = testAccessRequestSchemaStepNoRender
-    updatedStep.isComplete = () => true
+  it('does not display a validation warning message or icon when the form step is marked as complete', async () => {
+    const step = {
+      ...testAccessRequestSchemaStepNoRender,
+      isComplete: () => true,
+    }
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
-        <ValidationErrorIcon step={testAccessRequestSchemaStepNoRender} />
+        <ValidationErrorIcon step={step} />
       </ThemeProvider>,
     )
 

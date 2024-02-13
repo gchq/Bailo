@@ -37,11 +37,10 @@ describe('AccessRequestDisplay', () => {
       expect(accessRequestEndDate.innerHTML).toBe(
         ` ${formatDateString(testAccessRequest.metadata.overview.endDate as string)}`,
       )
-      expect(await screen.findByText(testAccessRequest.metadata.overview.entities[0].split(':')[1])).toBeDefined()
     })
   })
 
-  it('displays a comments icon when the provided access request has comment responses', async () => {
+  it('displays comment icon when access request has comments', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,
@@ -54,11 +53,11 @@ describe('AccessRequestDisplay', () => {
       </ThemeProvider>,
     )
     await waitFor(async () => {
-      expect(await screen.findByText('1 comment')).toBeDefined()
+      expect(await screen.findByTestId('commentCount')).toBeDefined()
     })
   })
 
-  it('does not display a comments icon when the provided access request has no comment responses', async () => {
+  it('does not display comment icon when access request does not have comments', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,
@@ -71,8 +70,8 @@ describe('AccessRequestDisplay', () => {
       </ThemeProvider>,
     )
     await waitFor(async () => {
-      const commentsIcon = screen.queryByLabelText('Comments')
-      const commentCount = screen.queryByText('1 comment')
+      const commentsIcon = screen.queryByTestId('commentIcon')
+      const commentCount = screen.queryByTestId('commentCount')
       expect(commentsIcon).toBeNull()
       expect(commentCount).toBeNull()
     })

@@ -106,8 +106,10 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               <ReviewDisplay reviews={reviewsWithLatestResponses} />
               {accessRequest.comments.length > 0 && (
                 <Stack direction='row' spacing={1}>
-                  <CommentIcon color='primary' />
-                  <Typography variant='caption'>{plural(accessRequest.comments.length, 'comment')}</Typography>
+                  <CommentIcon color='primary' data-test='commentIcon' />
+                  <Typography variant='caption' data-test='commentCount'>
+                    {plural(accessRequest.comments.length, 'comment')}
+                  </Typography>
                 </Stack>
               )}
             </Stack>
