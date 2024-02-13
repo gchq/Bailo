@@ -1,26 +1,28 @@
 import { Validator } from 'jsonschema'
-import dropRight from 'lodash/dropRight'
-import get from 'lodash/get'
-import omit from 'lodash/omit'
-import remove from 'lodash/remove'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
+import CustomTextInput from 'src/MuiForms/CustomTextInput'
+import DateSelector from 'src/MuiForms/DateSelector'
+import Dropdown from 'src/MuiForms/Dropdown'
 import EntitySelector from 'src/MuiForms/EntitySelector'
+import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
-import SeldonVersionSelector from 'src/MuiForms/SeldonVersionSelector'
+import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 import UserSelector from 'src/MuiForms/UserSelector'
 
-import RenderButtons, { RenderButtonsInterface } from '../src/Form/RenderButtons'
-import RenderForm from '../src/Form/RenderForm'
-import { RenderInterface, SplitSchema, Step, StepType } from '../types/interfaces'
+import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets = {
-  tagSelector: TagSelector,
+  TextWidget: CustomTextInput,
+  TextareaWidget: RichTextInput,
+  DateWidget: DateSelector,
+  tagSelectorBeta: TagSelector, // TODO me - update schemas to use tagSelector
   userSelector: UserSelector,
-  entitySelector: EntitySelector,
-  seldonVersionSelector: SeldonVersionSelector,
+  entitySelectorBeta: EntitySelector, // TODO me - update schemas to use entitySelector
+  SelectWidget: Dropdown,
+  multiSelector: MultipleDropdown,
   nothing: Nothing,
 }
 
@@ -30,25 +32,19 @@ export function createStep({
   state,
   type,
   section,
-  render,
-  renderBasic,
-  renderButtons = RenderButtons,
   index,
   schemaRef,
   isComplete,
 }: {
   schema: any
   uiSchema?: any
-  state: any
+  state: unknown
   type: StepType
   section: string
-  render: (props: RenderInterface) => JSX.Element | null
-  renderBasic?: (props: RenderInterface) => JSX.Element | null
-  renderButtons?: (props: RenderButtonsInterface) => JSX.Element | null
   index: number
   schemaRef: string
-  isComplete: (step: Step) => boolean
-}): Step {
+  isComplete: (step: StepNoRender) => boolean
+}): StepNoRender {
   return {
     schema,
     uiSchema,
@@ -62,23 +58,16 @@ export function createStep({
     shouldValidate: false,
 
     isComplete,
-    render,
-    renderBasic: renderBasic ?? render,
-    renderButtons,
   }
 }
 
 export function setStepState(
-  _splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
-  step: Step,
+  _splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
+  step: StepNoRender,
   state: any,
 ) {
   setSplitSchema((oldSchema) => {
-    if (oldSchema.reference !== step.schemaRef) {
-      return oldSchema
-    }
-
     const index = oldSchema.steps.findIndex((iStep) => step.section === iStep.section)
 
     const duplicatedSteps = [...oldSchema.steps]
@@ -96,9 +85,9 @@ export function setStepState(
 }
 
 export function setStepValidate(
-  splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
-  step: Step,
+  splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
+  step: StepNoRender,
   validate: boolean,
 ) {
   const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
@@ -118,8 +107,8 @@ export function getStepsFromSchema(
   baseUiSchema: any = {},
   omitFields: Array<string> = [],
   state: any = {},
-): Array<Step> {
-  const schemaDupe = omit(schema.schema, omitFields) as any
+): Array<StepNoRender> {
+  const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
   for (const field of omitFields) {
     const fields = field.split('.')
@@ -131,7 +120,7 @@ export function getStepsFromSchema(
     ['object', 'array'].includes(schemaDupe.properties[key].type),
   )
 
-  const steps: Array<Step> = []
+  const steps: Array<StepNoRender> = []
   props.forEach((prop: any, index: number) => {
     const createdStep = createStep({
       schema: {
@@ -145,8 +134,6 @@ export function getStepsFromSchema(
       schemaRef: schema.reference,
 
       section: prop,
-      render: RenderForm,
-      renderBasic: RenderForm,
       isComplete: validateForm,
     })
 
@@ -156,7 +143,7 @@ export function getStepsFromSchema(
   return steps
 }
 
-export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
+export function getStepsData(splitSchema: SplitSchemaNoRender, includeAll = false) {
   const data: any = {}
 
   splitSchema.steps.forEach((step) => {
@@ -170,8 +157,8 @@ export function getStepsData(splitSchema: SplitSchema, includeAll = false) {
 }
 
 export function setStepsData(
-  splitSchema: SplitSchema,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchema>>,
+  splitSchema: SplitSchemaNoRender,
+  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
   data: any,
 ) {
   const newSteps = splitSchema.steps.map((step) => {
@@ -191,7 +178,7 @@ export function setStepsData(
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }
 
-export function validateForm(step: Step) {
+export function validateForm(step: StepNoRender) {
   const validator = new Validator()
   const sectionErrors = validator.validate(step.state, step.schema)
 

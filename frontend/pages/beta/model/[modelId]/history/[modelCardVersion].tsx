@@ -7,10 +7,10 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { useModelCard } from '../../../../../actions/modelCard'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
-import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../../../src/Form/JsonSchemaForm'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsFromSchema } from '../../../../../utils/beta/formUtils'
+import { getStepsFromSchema } from '../../../../../utils/formUtils'
 
 export default function ViewModelCardVersion() {
   const router = useRouter()

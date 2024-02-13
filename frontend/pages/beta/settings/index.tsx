@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import AuthenticationTab from 'src/settings/beta/authentication/AuthenticationTab'
-import ProfileTab from 'src/settings/beta/ProfileTab'
+import AuthenticationTab from 'src/settings/authentication/AuthenticationTab'
+import ProfileTab from 'src/settings/ProfileTab'
 import Wrapper from 'src/Wrapper.beta'
 
 export default function Settings() {

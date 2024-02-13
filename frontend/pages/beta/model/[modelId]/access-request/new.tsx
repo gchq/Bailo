@@ -13,11 +13,11 @@ import { postAccessRequest } from '../../../../../actions/accessRequest'
 import { useGetModel } from '../../../../../actions/model'
 import { useGetSchema } from '../../../../../actions/schema'
 import Loading from '../../../../../src/common/Loading'
-import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from '../../../../../src/Form/JsonSchemaForm'
 import MessageAlert from '../../../../../src/MessageAlert'
 import Wrapper from '../../../../../src/Wrapper.beta'
 import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
+import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()

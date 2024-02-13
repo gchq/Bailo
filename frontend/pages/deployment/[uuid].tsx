@@ -40,7 +40,6 @@ import { useGetUiConfig } from '../../data/uiConfig'
 import { useGetCurrentUser } from '../../data/user'
 import ApprovalsChip from '../../src/common/ApprovalsChip'
 import DisabledElementTooltip from '../../src/common/DisabledElementTooltip'
-import useNotification from '../../src/common/Snackbar'
 import DeploymentOverview from '../../src/DeploymentOverview'
 import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
 import RawModelExportList from '../../src/RawModelExportList'
@@ -49,6 +48,7 @@ import Wrapper from '../../src/Wrapper'
 import { ApprovalCategory, Model, ModelUploadType } from '../../types/types'
 import { createDeploymentComplianceFlow } from '../../utils/complianceFlow'
 import { getErrorMessage } from '../../utils/fetcher'
+import useNotification from '../../utils/hooks/useNotification'
 
 const ComplianceFlow = dynamic(() => import('../../src/ComplianceFlow'))
 

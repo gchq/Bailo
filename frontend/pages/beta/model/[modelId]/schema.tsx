@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import SchemaButton from 'src/model/beta/common/SchemaButton'
+import SchemaButton from 'src/model/common/SchemaButton'
 
 import { useGetModel } from '../../../../actions/model'
 import { postFromSchema } from '../../../../actions/modelCard'

@@ -1,6 +1,5 @@
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
-import React from 'react'
 
 export default function Copyright(props: Record<string, unknown>) {
   return (
@@ -8,8 +7,8 @@ export default function Copyright(props: Record<string, unknown>) {
       {'Copyright © '}
       <Link color='inherit' href='https://www.gchq.gov.uk/'>
         Crown Copyright
-      </Link>{' '}
-      {new Date().getFullYear()}.
+      </Link>
+      {` ${new Date().getFullYear()}.`}
     </Typography>
   )
 }
