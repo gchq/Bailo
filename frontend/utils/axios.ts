@@ -1,7 +1,5 @@
 import axios, { AxiosError } from 'axios'
 
-// TODO me - Do we want to use axios everywhere or not at all? Currently not used at all for v2 stuff
-// If not going with axios, remove this file
 export function handleAxiosError(error: AxiosError | unknown) {
   if (axios.isAxiosError(error)) {
     if (error.response) {

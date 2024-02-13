@@ -9,7 +9,6 @@ import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
-import UserSelector from 'src/MuiForms/UserSelector'
 
 import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/interfaces'
 import { createUiSchema } from './uiSchemaUtils'
@@ -18,9 +17,8 @@ export const widgets = {
   TextWidget: CustomTextInput,
   TextareaWidget: RichTextInput,
   DateWidget: DateSelector,
-  tagSelectorBeta: TagSelector, // TODO me - update schemas to use tagSelector
-  userSelector: UserSelector,
-  entitySelectorBeta: EntitySelector, // TODO me - update schemas to use entitySelector
+  tagSelector: TagSelector,
+  entitySelector: EntitySelector,
   SelectWidget: Dropdown,
   multiSelector: MultipleDropdown,
   nothing: Nothing,
