@@ -12,9 +12,8 @@ import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import Loading from 'src/common/Loading'
-
-import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
-import Wrapper from '../../src/Wrapper.beta'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import Wrapper from 'src/Wrapper'
 
 export default function Help() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
