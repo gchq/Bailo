@@ -1,11 +1,5 @@
-import {
-  AccessRequestInterface,
-  ModelVisibility,
-  ReviewRequestInterface,
-  ReviewResponse,
-  StepNoRender,
-} from 'types/interfaces'
-import { ModelCardInterface, ModelInterface, Role } from 'types/v2/types'
+import { AccessRequestInterface, ModelVisibility, StepNoRender } from 'types/interfaces'
+import { ModelCardInterface, ModelInterface, ReviewRequestInterface, ReviewResponse, Role } from 'types/v2/types'
 
 import { ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind, SchemaInterface } from '../../types/types'
 

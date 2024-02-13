@@ -1,6 +1,7 @@
 import { Document, Types } from 'mongoose'
+import { ReviewResponse } from 'types/v2/types'
 
-import { FlattenedModelImage, ReviewResponse } from './interfaces'
+import { FlattenedModelImage } from './interfaces'
 import { SchemaKindKeys } from './v2/types'
 
 export enum ModelUploadType {

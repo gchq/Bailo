@@ -6,7 +6,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { Decision, ReviewRequestInterface } from 'types/interfaces'
+import { Decision, ReviewRequestInterface } from 'types/v2/types'
 
 type ReviewsListProps = {
   kind?: 'release' | 'access' | 'all'

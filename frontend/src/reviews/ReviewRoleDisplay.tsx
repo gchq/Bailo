@@ -1,8 +1,8 @@
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined'
 import { Stack, Typography } from '@mui/material'
+import { ReviewRequestInterface } from 'types/v2/types'
 
 import { useGetModelRoles } from '../../actions/model'
-import { ReviewRequestInterface } from '../../types/interfaces'
 import { getRoleDisplay } from '../../utils/beta/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'

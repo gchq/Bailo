@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { ReviewRequestInterface, ReviewResponse } from 'types/v2/types'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../../actions/review'
