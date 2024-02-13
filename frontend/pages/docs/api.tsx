@@ -12,7 +12,7 @@ export default function API() {
   return (
     <Wrapper title='API Documentation' page='api'>
       <Box sx={{ backgroundColor: '#f5f5f5', pt: '5px', pb: '5px', borderRadius: 4 }}>
-        <SwaggerUI url='/api/v1/specification' />
+        <SwaggerUI url='/api/v2/specification' />
       </Box>
     </Wrapper>
   )

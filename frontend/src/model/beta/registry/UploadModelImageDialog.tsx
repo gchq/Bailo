@@ -49,7 +49,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
                 docker login command.
               </Typography>
               <Box mb={1}>
-                <Link href={'/beta/settings?tab=authentication'}>Manage user tokens</Link>
+                <Link href={'/settings?tab=authentication'}>Manage user tokens</Link>
               </Box>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Logging in</Typography>

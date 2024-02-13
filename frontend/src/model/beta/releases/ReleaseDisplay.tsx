@@ -94,14 +94,14 @@ export default function ReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Link href={`/beta/model/${model.id}/release/${release.semver}`}>
+                <Link href={`/model/${model.id}/release/${release.semver}`}>
                   <Typography component='h2' variant='h6' color='primary'>
                     {model.name} - {release.semver}
                   </Typography>
                 </Link>
                 {latestVersionAdornment()}
               </Stack>
-              <Button onClick={() => router.push(`/beta/model/${model.id}/history/${release.modelCardVersion}`)}>
+              <Button onClick={() => router.push(`/model/${model.id}/history/${release.modelCardVersion}`)}>
                 View Model Card
               </Button>
             </Stack>

@@ -80,7 +80,7 @@ export default function MessageAlert({ message = '', severity, linkText, href }:
             <Collapse unmountOnExit in={showContactMessage} timeout='auto'>
               <Typography>
                 {'Having trouble? Please copy the error message and report it to the '}
-                <Link href={'/beta/help'}>Bailo support team</Link>.
+                <Link href={'/help'}>Bailo support team</Link>.
               </Typography>
             </Collapse>
           </>
