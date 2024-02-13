@@ -1,10 +1,8 @@
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Stack, Typography } from '@mui/material'
-import { Tooltip } from '@mui/material'
+import { Stack, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import ApprovalsDisplay from 'src/model/beta/reviews/ApprovalsDisplay'
-import { ReviewResponseWithRole } from 'types/interfaces'
-import { ReviewRequestInterface } from 'types/v2/types'
+import { ReviewRequestInterface, ReviewResponseWithRole } from 'types/v2/types'
 import { plural } from 'utils/stringUtils'
 
 interface ReviewDisplayProps {

@@ -140,6 +140,10 @@ export interface ReviewResponse {
   updatedAt: string
 }
 
+export interface ReviewResponseWithRole extends ReviewResponse {
+  role: string
+}
+
 type PartialReviewRequestInterface =
   | {
       accessRequestId: string
