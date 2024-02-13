@@ -140,7 +140,7 @@ module.exports = {
       },
     ],
     v2: {
-      model: [
+      modelCards: [
         {
           name: 'Minimal Schema v10 Beta',
           id: 'minimal-general-v10-beta',
@@ -149,7 +149,7 @@ module.exports = {
           jsonSchema: require('../src/scripts/example_schemas/minimal_upload_schema_beta.json'),
         },
       ],
-      accessRequest: [
+      accessRequests: [
         {
           name: 'Minimal Access Request Schema v10 Beta',
           id: 'minimal-access-request-general-v10-beta',

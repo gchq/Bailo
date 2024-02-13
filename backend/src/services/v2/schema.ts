@@ -58,7 +58,7 @@ export async function createSchema(user: UserDoc, schema: Partial<SchemaInterfac
 }
 
 export async function addDefaultSchemas() {
-  for (const schema of config.defaultSchemas.v2.model) {
+  for (const schema of config.defaultSchemas.v2.modelCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
     const modelSchema = new Schema({
       ...schema,
@@ -70,7 +70,7 @@ export async function addDefaultSchemas() {
     await modelSchema.save()
   }
 
-  for (const schema of config.defaultSchemas.v2.accessRequest) {
+  for (const schema of config.defaultSchemas.v2.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
     const modelSchema = new Schema({
       ...schema,

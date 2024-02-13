@@ -151,8 +151,8 @@ export interface Config {
 
   defaultSchemas: {
     v2: {
-      model: Array<DefaultSchema>
-      accessRequest: Array<DefaultSchema>
+      modelCards: Array<DefaultSchema>
+      accessRequests: Array<DefaultSchema>
     }
   }
 }
