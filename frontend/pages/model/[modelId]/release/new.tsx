@@ -10,7 +10,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/beta/releases/ReleaseForm'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
 import { FileInterface, isFileInterface } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -84,7 +84,7 @@ export default function NewRelease() {
       setLoading(false)
     } else {
       const body = await response.json()
-      router.push(`/beta/model/${modelId}/release/${body.release.semver}`)
+      router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
   }
 
@@ -101,7 +101,7 @@ export default function NewRelease() {
           <Card sx={{ my: 4, p: 4 }}>
             <Box component='form' onSubmit={handleSubmit}>
               <Stack spacing={4}>
-                <Link href={`/beta/model/${modelId}?tab=releases`}>
+                <Link href={`/model/${modelId}?tab=releases`}>
                   <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                     Back to model
                   </Button>

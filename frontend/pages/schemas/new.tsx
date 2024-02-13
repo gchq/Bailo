@@ -9,7 +9,7 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 import { getErrorMessage } from 'utils/fetcher'
 
 const VisuallyHiddenInput = styled('input')({
@@ -76,7 +76,7 @@ export default function NewSchema() {
           return setErrorMessage(error)
         }
 
-        router.push('/beta/schemas/list')
+        router.push('/schemas/list')
       } catch (e) {
         if (e instanceof SyntaxError) {
           setErrorMessage('Unable to parse JSON. Please make sure the file you have used is valid JSON.')
@@ -92,7 +92,7 @@ export default function NewSchema() {
     <Wrapper title='Upload a new Schema' page='upload'>
       <Container maxWidth='sm' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
-          <Link href={`/beta/schemas/list`}>
+          <Link href={`/schemas/list`}>
             <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
               Back to schema list
             </Button>

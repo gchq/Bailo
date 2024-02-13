@@ -10,7 +10,7 @@ import Link from 'src/Link'
 import EditableRelease from 'src/model/beta/releases/EditableRelease'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 
 export default function Release() {
   const router = useRouter()
@@ -47,7 +47,7 @@ export default function Release() {
                 spacing={2}
                 divider={<Divider flexItem orientation='vertical' />}
               >
-                <Link href={`/beta/model/${modelId}?tab=releases`}>
+                <Link href={`/model/${modelId}?tab=releases`}>
                   <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                     Back to model
                   </Button>

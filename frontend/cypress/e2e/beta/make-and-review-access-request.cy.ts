@@ -1,4 +1,4 @@
-const baseURL = '/beta'
+const baseURL = '/'
 let modelUuid = ''
 let accessRequestUuid = ''
 const modelName = 'Test Model'
@@ -38,7 +38,7 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=accessTab]').click()
     cy.get('[data-test=requestAccessButton]').click()
     cy.log('Setting a schema for the access request')
-    cy.url().should('contain', `/beta/model/${modelUuid}/access-request/schema`)
+    cy.url().should('contain', `/model/${modelUuid}/access-request/schema`)
     cy.get(`[data-test=selectSchemaButton-${schemaId}]`).click({
       force: true,
     })
@@ -50,11 +50,11 @@ describe('Make and approve an access request', () => {
     cy.get('#root_name').type('Test access request')
     cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
 
-    cy.url().should('contain', `/beta/model/${modelUuid}/access-request`)
+    cy.url().should('contain', `/model/${modelUuid}/access-request`)
     cy.get('[data-test=accessRequestContainer]').contains('Test access request')
 
     cy.url()
-      .should('contain', `/beta/model/${modelUuid}/access-request`)
+      .should('contain', `/model/${modelUuid}/access-request`)
       .then((url) => {
         const splitUrl = url.split('/')
         accessRequestUuid = splitUrl[splitUrl.length - 1]

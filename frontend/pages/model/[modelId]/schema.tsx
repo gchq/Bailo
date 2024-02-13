@@ -1,23 +1,22 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import { useGetModel } from 'actions/model'
+import { postFromSchema } from 'actions/modelCard'
+import { useGetSchemas } from 'actions/schema'
+import { useGetCurrentUser } from 'actions/user'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaButton from 'src/model/beta/common/SchemaButton'
-
-import { useGetModel } from '../../../../actions/model'
-import { postFromSchema } from '../../../../actions/modelCard'
-import { useGetSchemas } from '../../../../actions/schema'
-import { useGetCurrentUser } from '../../../../actions/user'
-import EmptyBlob from '../../../../src/common/EmptyBlob'
-import Loading from '../../../../src/common/Loading'
-import Wrapper from '../../../../src/Wrapper.beta'
-import { SchemaInterface } from '../../../../types/types'
-import { SchemaKind } from '../../../../types/v2/types'
+import Wrapper from 'src/Wrapper'
+import { SchemaInterface } from 'types/types'
+import { SchemaKind } from 'types/v2/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
@@ -44,7 +43,7 @@ export default function NewSchemaSelection() {
 
       if (response.status && response.status < 400) {
         await mutateModel()
-        router.push(`/beta/model/${modelId}`)
+        router.push(`/model/${modelId}`)
       } else {
         setErrorMessage(response.data)
         setLoading(false)
@@ -65,7 +64,7 @@ export default function NewSchemaSelection() {
       {!isLoadingData && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-            <Link href={`/beta/model/${modelId}`}>
+            <Link href={`/model/${modelId}`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
               </Button>

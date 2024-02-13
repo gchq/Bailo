@@ -5,7 +5,7 @@ import PageWithTabs from 'src/common/PageWithTabs'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AuthenticationTab from 'src/settings/beta/authentication/AuthenticationTab'
 import ProfileTab from 'src/settings/beta/ProfileTab'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 
 export default function Settings() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()

@@ -28,7 +28,7 @@ describe('Make and approve an access request', () => {
     }
 
     cy.log('Navigating to token generation page')
-    cy.visit(`${BASE_URL}/beta/settings/personal-access-tokens/new`)
+    cy.visit(`${BASE_URL}/settings/personal-access-tokens/new`)
     cy.get('[data-test=tokenDescriptionTextField]').type('This token works for all models')
     cy.get('[data-test=allModelsCheckbox]').click()
     cy.get('[data-test=imagereadActionCheckbox]').click()
@@ -54,7 +54,7 @@ describe('Make and approve an access request', () => {
 
   it('can select the image when drafting a release', () => {
     cy.log('Navigating to the model page and then to the releases tab')
-    cy.visit(`${BASE_URL}/beta/model/${modelUuidForRegistry}`)
+    cy.visit(`${BASE_URL}/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
     cy.get('[data-test=releasesTab]').click({ force: true })
     cy.log('Opening the draft release page to see if we can see our image in the drop down list')

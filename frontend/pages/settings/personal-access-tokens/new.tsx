@@ -20,7 +20,7 @@ import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'rea
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/beta/authentication/TokenDialog'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
@@ -121,7 +121,7 @@ export default function NewToken() {
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
             <div>
-              <Link href={'/beta/settings?tab=authentication&category=personal'}>
+              <Link href={'/settings?tab=authentication&category=personal'}>
                 <Button startIcon={<ArrowBack />}>Back to settings</Button>
               </Link>
             </div>

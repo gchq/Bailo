@@ -9,7 +9,7 @@ import ModelImages from 'src/model/beta/ModelImages'
 import Overview from 'src/model/beta/Overview'
 import Releases from 'src/model/beta/Releases'
 import Settings from 'src/model/beta/Settings'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 
 export default function Model() {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function Model() {
   )
 
   function requestAccess() {
-    router.push(`/beta/model/${modelId}/access-request/schema`)
+    router.push(`/model/${modelId}/access-request/schema`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {

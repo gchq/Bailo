@@ -1,6 +1,7 @@
-import ArticleIcon from '@mui/icons-material/ArticleTwoTone'
-import BugReportIcon from '@mui/icons-material/BugReportTwoTone'
-import ContactSupportIcon from '@mui/icons-material/ContactSupportTwoTone'
+import ArticleIcon from '@mui/icons-material/Article'
+import BugReportIcon from '@mui/icons-material/BugReport'
+import ContactSupportIcon from '@mui/icons-material/ContactSupport'
+import { Paper } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -8,15 +9,15 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
+import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
-import React from 'react'
+import Loading from 'src/common/Loading'
 
-import { useGetUiConfig } from '../data/uiConfig'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import Wrapper from '../src/Wrapper'
+import MultipleErrorWrapper from '../../src/errors/MultipleErrorWrapper'
+import Wrapper from '../../src/Wrapper.beta'
 
 export default function Help() {
-  const { uiConfig, isUiConfigError } = useGetUiConfig()
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const error = MultipleErrorWrapper(`Unable to load help page`, {
     isUiConfigError,
@@ -25,17 +26,20 @@ export default function Help() {
 
   return (
     <Wrapper title='Help' page='help'>
+      {isUiConfigLoading && <Loading />}
       {uiConfig && (
-        <>
-          <Box sx={{ p: 5, textAlign: 'center' }}>
-            <Typography variant='h2'>Contact us</Typography>
+        <Paper sx={{ py: 5, px: 5 }}>
+          <Box sx={{ mb: 5, textAlign: 'center' }}>
+            <Typography variant='h2' component='h1' color='primary'>
+              Contact us
+            </Typography>
           </Box>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={12} md={12} lg={4}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Bug reports
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -58,7 +62,7 @@ export default function Help() {
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Documentation
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -78,7 +82,7 @@ export default function Help() {
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
-                  <Typography sx={{ p: 2 }} variant='h4'>
+                  <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Get in touch
                   </Typography>
                   <Typography sx={{ p: 2, mb: 1 }} variant='body1' component='p'>
@@ -97,7 +101,7 @@ export default function Help() {
               </Card>
             </Grid>
           </Grid>
-        </>
+        </Paper>
       )}
     </Wrapper>
   )

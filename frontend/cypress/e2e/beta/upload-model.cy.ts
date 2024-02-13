@@ -1,6 +1,6 @@
 import getUuidFromUrl from '../../utils/getUuidFromUrl'
 
-const newModelUrl = '/beta/model/new'
+const newModelUrl = '/model/new'
 
 let modelUuid = ''
 const schemaId = 'minimal-general-v10-beta'
@@ -44,11 +44,11 @@ describe('Beta create new model', () => {
   })
 
   it('can set a schema for a newly created model', () => {
-    cy.visit(`/beta/model/${modelUuid}`)
+    cy.visit(`/model/${modelUuid}`)
     cy.contains('Create a model card')
     cy.get('[data-test=createSchemaFromScratchButton]').click()
     cy.log('Checking URL has been updated')
-    cy.url().should('contain', `/beta/model/${modelUuid}/schema`)
+    cy.url().should('contain', `/model/${modelUuid}/schema`)
     cy.get(`[data-test=selectSchemaButton-${schemaId}]`).click({
       multiple: true,
       force: true,
@@ -59,7 +59,7 @@ describe('Beta create new model', () => {
 
   it('can edit an existing model', () => {
     cy.log('Navigating to an existing model')
-    cy.visit(`/beta/model/${modelUuid}`)
+    cy.visit(`/model/${modelUuid}`)
     cy.contains('Edit Model card')
     cy.log('Test that we can edit the model card')
     cy.get('[data-test=editModelCardButton]').click()

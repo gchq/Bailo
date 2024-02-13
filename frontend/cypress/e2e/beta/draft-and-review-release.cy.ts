@@ -1,4 +1,4 @@
-const baseURLForRelease = '/beta/'
+const baseURLForRelease = '/'
 let modelUuidForRelease = ''
 const modelNameForRelease = 'Test Model'
 const releaseVersion = '1.0.0'

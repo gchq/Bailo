@@ -1,23 +1,22 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
 import { Button, Card, Stack, Typography } from '@mui/material'
+import { postAccessRequest } from 'actions/accessRequest'
+import { useGetModel } from 'actions/model'
+import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import JsonSchemaForm from 'src/Form/beta/JsonSchemaForm'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
+import Wrapper from 'src/Wrapper'
+import { SplitSchemaNoRender } from 'types/interfaces'
+import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/beta/formUtils'
 import { getErrorMessage } from 'utils/fetcher'
-
-import { postAccessRequest } from '../../../../../actions/accessRequest'
-import { useGetModel } from '../../../../../actions/model'
-import { useGetSchema } from '../../../../../actions/schema'
-import Loading from '../../../../../src/common/Loading'
-import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
-import MessageAlert from '../../../../../src/MessageAlert'
-import Wrapper from '../../../../../src/Wrapper.beta'
-import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from '../../../../../utils/beta/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()
@@ -96,7 +95,7 @@ export default function NewAccessRequest() {
     setSubmitButtonLoading(false)
 
     const body = await res.json()
-    router.push(`/beta/model/${modelId}/access-request/${body.accessRequest.id}`)
+    router.push(`/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
@@ -116,7 +115,7 @@ export default function NewAccessRequest() {
           )}
           {model && model.card && (
             <Stack spacing={4}>
-              <Link href={`/beta/model/${modelId}/access-request/schema`}>
+              <Link href={`/model/${modelId}/access-request/schema`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                   Select a different schema
                 </Button>

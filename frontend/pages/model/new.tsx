@@ -19,7 +19,7 @@ import MessageAlert from 'src/MessageAlert'
 import ModelDescriptionInput from 'src/model/beta/ModelDescriptionInput'
 import ModelNameInput from 'src/model/beta/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 import { TeamInterface } from 'types/interfaces'
 import { ModelForm, ModelVisibility } from 'types/v2/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -53,7 +53,7 @@ export default function NewModel() {
       setLoading(false)
     } else {
       const data = await response.json()
-      router.push(`/beta/model/${data.model.id}`)
+      router.push(`/model/${data.model.id}`)
     }
   }
 

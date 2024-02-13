@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
 import SchemaTab from 'src/schemas/SchemaTab'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 
 export default function SchemasPage() {
   return (
@@ -30,7 +30,7 @@ function Schemas() {
         tabs={tabs}
         displayActionButton
         actionButtonTitle='Upload a new schema'
-        actionButtonOnClick={() => router.push('/beta/schemas/new')}
+        actionButtonOnClick={() => router.push('/schemas/new')}
       />
     </>
   )

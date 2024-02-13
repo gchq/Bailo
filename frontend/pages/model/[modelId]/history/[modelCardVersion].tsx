@@ -1,16 +1,15 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { Box, Button, Card, Container } from '@mui/material'
+import { useModelCard } from 'actions/modelCard'
+import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-
-import { useModelCard } from '../../../../../actions/modelCard'
-import { useGetSchema } from '../../../../../actions/schema'
-import Loading from '../../../../../src/common/Loading'
-import JsonSchemaForm from '../../../../../src/Form/beta/JsonSchemaForm'
-import Wrapper from '../../../../../src/Wrapper.beta'
-import { SplitSchemaNoRender } from '../../../../../types/interfaces'
-import { getStepsFromSchema } from '../../../../../utils/beta/formUtils'
+import JsonSchemaForm from 'src/Form/beta/JsonSchemaForm'
+import Wrapper from 'src/Wrapper'
+import { SplitSchemaNoRender } from 'types/interfaces'
+import { getStepsFromSchema } from 'utils/beta/formUtils'
 
 export default function ViewModelCardVersion() {
   const router = useRouter()
@@ -45,7 +44,7 @@ export default function ViewModelCardVersion() {
         {!isSchemaLoading && (
           <Container>
             <Card sx={{ p: 4 }}>
-              <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/beta/model/${modelId}`)}>
+              <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/model/${modelId}`)}>
                 Back To Model
               </Button>
               <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />

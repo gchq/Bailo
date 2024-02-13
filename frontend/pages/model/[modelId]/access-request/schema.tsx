@@ -1,19 +1,18 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Box, Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import { useGetSchemas } from 'actions/schema'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import SchemaButton from 'src/model/beta/common/SchemaButton'
+import Wrapper from 'src/Wrapper'
 import { SchemaInterface } from 'types/types'
-
-import { useGetSchemas } from '../../../../../actions/schema'
-import EmptyBlob from '../../../../../src/common/EmptyBlob'
-import Loading from '../../../../../src/common/Loading'
-import SchemaButton from '../../../../../src/model/beta/common/SchemaButton'
-import Wrapper from '../../../../../src/Wrapper.beta'
-import { SchemaKind } from '../../../../../types/v2/types'
+import { SchemaKind } from 'types/v2/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()
@@ -24,7 +23,7 @@ export default function NewSchemaSelection() {
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])
 
   async function handleSchemaSelectionOnClick(newSchema: SchemaInterface) {
-    router.push(`/beta/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
+    router.push(`/model/${modelId}/access-request/new?schemaId=${newSchema.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
@@ -38,7 +37,7 @@ export default function NewSchemaSelection() {
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-            <Link href={`/beta/model/${modelId}`}>
+            <Link href={`/model/${modelId}`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
               </Button>

@@ -10,7 +10,7 @@ import Link from 'src/Link'
 import EditableAccessRequestForm from 'src/model/beta/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/model/beta/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper.beta'
+import Wrapper from 'src/Wrapper'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function AccessRequest() {
                   spacing={2}
                   divider={<Divider flexItem orientation='vertical' />}
                 >
-                  <Link href={`/beta/model/${modelId}?tab=access`}>
+                  <Link href={`/model/${modelId}?tab=access`}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                       Back to model
                     </Button>
