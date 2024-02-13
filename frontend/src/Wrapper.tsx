@@ -15,7 +15,7 @@ import Copyright from './Copyright'
 import SideNavigation from './wrapper/SideNavigation'
 import TopNavigation from './wrapper/TopNavigation'
 
-type WrapperProps = {
+export type WrapperProps = {
   title: string
   page: string
   children?: ReactNode
