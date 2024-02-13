@@ -35,7 +35,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
 
   const handleClose = () => {
     setIsLoading(true)
-    router.push('/beta/settings?tab=authentication&category=personal')
+    router.push('/settings?tab=authentication&category=personal')
   }
 
   const handleCopyAccessKey = () => {

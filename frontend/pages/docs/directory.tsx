@@ -31,6 +31,8 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
@@ -52,6 +54,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
+
+  // V2
+  { title: 'V2', slug: 'v2', header: true },
+  { title: 'Model Images', slug: 'v2/model-images' },
 ]
 
 export interface DirectoryTree {

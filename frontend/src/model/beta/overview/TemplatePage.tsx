@@ -55,7 +55,7 @@ export default function TemplatePage({ model }: TemplatePageProps) {
                 Create from scratch
               </Typography>
               <Typography>Create a model from scratch using a predefined schema.</Typography>
-              <Link href={`/beta/model/${model.id}/schema`}>
+              <Link href={`/model/${model.id}/schema`}>
                 <Button sx={{ width: '100%' }} variant='contained' data-test='createSchemaFromScratchButton'>
                   Create
                 </Button>
