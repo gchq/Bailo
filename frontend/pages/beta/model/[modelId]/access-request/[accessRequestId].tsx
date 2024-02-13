@@ -3,6 +3,7 @@ import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/mater
 import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -13,8 +14,9 @@ import Wrapper from 'src/Wrapper.beta'
 
 export default function AccessRequest() {
   const router = useRouter()
-
   const { modelId, accessRequestId }: { modelId?: string; accessRequestId?: string } = router.query
+
+  const [isEdit, setIsEdit] = useState(false)
 
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -55,8 +57,10 @@ export default function AccessRequest() {
                     {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                   </Typography>
                 </Stack>
-                {accessRequest && <EditableAccessRequestForm accessRequest={accessRequest} />}
-                <ReviewComments accessRequest={accessRequest} />
+                {accessRequest && (
+                  <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
+                )}
+                <ReviewComments accessRequest={accessRequest} isEdit={isEdit} />
               </Stack>
             </>
           )}

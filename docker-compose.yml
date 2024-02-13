@@ -93,8 +93,8 @@ services:
       - NODE_CONFIG_ENV=docker_compose
   webhook-tester:
     image: tarampampam/webhook-tester
-    command: serve --port 8081 --create-session 00000000-0000-0000-0000-000000000000
-    ports: ['8081:8081/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
+    command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
+    ports: ['8082:8082/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
 
 volumes:
   minioVolume:
