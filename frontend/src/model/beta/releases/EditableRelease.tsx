@@ -14,10 +14,11 @@ import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {
   release: ReleaseInterface
+  isEdit: boolean
+  onIsEditChange: (value: boolean) => void
 }
 
-export default function EditableRelease({ release }: EditableReleaseProps) {
-  const [isEdit, setIsEdit] = useState(false)
+export default function EditableRelease({ release, isEdit, onIsEditChange }: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -59,12 +60,12 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
   }
 
   const handleEdit = () => {
-    setIsEdit(true)
+    onIsEditChange(true)
   }
 
   const handleCancel = () => {
     resetForm()
-    setIsEdit(false)
+    onIsEditChange(false)
   }
 
   const handleSubmit = async () => {
@@ -108,7 +109,7 @@ export default function EditableRelease({ release }: EditableReleaseProps) {
     } else {
       mutateReleases()
       mutateRelease()
-      setIsEdit(false)
+      onIsEditChange(false)
     }
     setIsLoading(false)
   }
