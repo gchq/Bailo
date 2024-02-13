@@ -138,3 +138,7 @@ config/local.cjs
 
 src/scripts/tar
 src/scripts/temp
+
+# Python source caches
+doctrees
+.doctrees

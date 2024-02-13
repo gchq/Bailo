@@ -130,3 +130,7 @@ export interface FileWithMetadata {
   fileName: string
   metadata?: string
 }
+
+export interface ReviewResponseWithRole extends ReviewResponse {
+  role: string
+}

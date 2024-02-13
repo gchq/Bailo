@@ -51,12 +51,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           <Box sx={{ textAlign: 'right' }}>
-            <Button
-              variant='outlined'
-              onClick={() => setOpenUploadImageDialog(true)}
-              disabled={!model.card}
-              data-test='pushImageButton'
-            >
+            <Button variant='outlined' onClick={() => setOpenUploadImageDialog(true)} data-test='pushImageButton'>
               Push image
             </Button>
             <UploadModelImageDialog

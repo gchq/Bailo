@@ -1,0 +1,120 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## Bailo Migration to v0.4
+
+Whilst Bailo v0.4 does not introduce any database or major code changes, it does feature a reorganisation of the
+project. Instead of the existing format where we had a single 'app', we now split it into two images:
+
+- frontend
+- backend
+
+The frontend section handles rendering the UI. When run in production, it is entirely statically built, simply sending
+raw HTML files to the user. The backend handles all API requests and provides the interactivity of the service.
+
+The code originally in `server` is now stored in the `backend` folder.
+
+### Turbo
+
+To handle multiple repositories, we now use the `turborepo` build system. It provides us with high performance and
+reproducible builds, only compiling what has changed since the last compilation. The monorepo is comprised of 'apps':
+
+- frontend
+- backend
+
+And libraries:
+
+- lib/shared
+- lib/p-mongo-queue
+- lib/node
+
+These are each individual npm packages, with their own `package.json` files, scripts and more. A script can be run in
+individual repositories by using `--workspace`, or in all by omitting it:
+
+```bash
+# From the root directory
+
+# Will run only in the 'backend' app
+npm run script -- exampleSetAllSchemas
+# Will run in all packages, both apps and libraries
+npm run style
+```
+
+Most commands, like `npm install` will default to running in all workspaces. This allows you to run `npm install` a
+single time in the root directory and it will install all dependencies across all applications.
+
+Workspaces is a standard NPM function, read more about it on the
+[Workspaces page](https://docs.npmjs.com/cli/v7/using-npm/workspaces). In addition, the `turbopack` docs can be found
+[here](https://turbo.build/repo/docs).
+
+### ESM
+
+The 'backend' application now runs entirely as ESM. This requires a modern NodeJS version, at least v14+. Some changes
+are also made to how tests are written. Specifically, to mock dependencies there is now a need to mock the dependency
+_first_ using `unstable_mockModule` and then dynamically import it:
+
+```javascript
+const version = await import('../../services/version.js')
+jest.unstable_mockModule('../../services/version.js', () => {
+  return {
+    ...version,
+    findVersionByName: jest.fn(),
+  }
+})
+
+const { findVersionByName } = await import('../../services/version.js')
+```
+
+There is an intention to possibly switch to an alternative test runner to alleviate this issue (e.g. Vitest). More can
+be read on how Jest works with ESM [here](https://jestjs.io/docs/ecmascript-modules). No other changes should be seen
+within the application, beyond imports requiring a `.js` ending. We have `esModuleInterop` enabled, which should mean we
+remain compatible with both old and new packages.
+
+#### What is ESM?
+
+ESM, or ECMEAScript Modules, is the latest standard for packaging / modularising JS code, as opposed to CJS, or Common
+JavaScript. ESM has a number of benefits that include nicer import/export syntax, better code reusability, and also the
+ability to import modules asynchronously.
+
+For more information about ESM, we recommend visiting:
+
+- [nodejs.org](https://nodejs.org/api/esm.html)
+- [webpack.js.org](https://webpack.js.org/guides/ecma-script-modules/)
+
+### Helm
+
+To support running two containers, minor changes have been made to our `helm` charts. These changes add a new 'frontend'
+container, which requires no environment variables / setup. All traffic should route to the frontend container EXCEPT:
+
+- `/api`, which should be sent to the backend container.
+- `/v2`, which should be sent to the Docker registry.
+
+The backend environment variables / mount locations remain unchanged. The frontend serves static files, so requires
+minimal setup.
+
+The helm folder has changed, it is now stored in `infrastructure/helm`, this change was made to allow other deploy
+methods.
+
+### Config
+
+We've taken the time to reduce the number of duplicate configuration options we have, and try to standardise the
+existing values. If you are using a service such as helm, you may not need to make any changes.
+
+The configuration is now also labelled to help advise on what each setting changes. Some major changes:
+
+- `minio` connection options are now stored under `minio.connection` and passed directly to the `minio` library.
+- `minio.uploadBucket` is now called `minio.buckets.uploads`
+- `minio.registryBucket` is now called `minio.buckets.registry`
+- `minio.createBuckets` is now called `minio.automaticallyCreateBuckets`
+
+- `smtp` connection options are now stored under `smtp.connection` and passed directly to the `node-mailer` library.
+
+- `s2i.builderImage` has been moved to `ui.seldonVersions` and is now an array of names and images. These are to allow
+  users to select the correct Seldon version to build from
+
+- `openshift.appPublicRoute` is removed in favour of `app.protocol`, `app.host` and `app.port`
+- `openshift` is now under `build.openshift`.
+- `uiConfig` is now `ui`
+
+- `listen` has been split into `app.port` for the frontend and `api.port` for the backend
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

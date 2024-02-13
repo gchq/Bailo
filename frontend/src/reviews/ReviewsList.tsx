@@ -6,38 +6,33 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { Decision, ReviewRequestInterface } from 'types/v2/types'
+import { ReviewRequestInterface } from 'types/v2/types'
 
 type ReviewsListProps = {
-  kind?: 'release' | 'access' | 'all'
+  kind: 'release' | 'access' | 'archived'
 }
 
-export default function ReviewsList({ kind = 'all' }: ReviewsListProps) {
+export default function ReviewsList({ kind }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const doesNotContainUserApproval = useCallback(
+  const containsUserResponse = useCallback(
     (review: ReviewRequestInterface) => {
-      return (
-        currentUser &&
-        !review.responses.find(
-          (response) => response.user === `user:${currentUser.dn}` && response.decision === Decision.Approve,
-        )
-      )
+      return currentUser && review.responses.find((response) => response.user === `user:${currentUser.dn}`)
     },
     [currentUser],
   )
 
   useEffect(() => {
-    if (kind === 'all') {
-      setFilteredReviews(reviews)
+    if (kind === 'archived') {
+      setFilteredReviews(reviews.filter((filteredReview) => containsUserResponse(filteredReview)))
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && doesNotContainUserApproval(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !containsUserResponse(filteredReview)),
       )
     }
-  }, [reviews, kind, doesNotContainUserApproval])
+  }, [reviews, kind, containsUserResponse])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />

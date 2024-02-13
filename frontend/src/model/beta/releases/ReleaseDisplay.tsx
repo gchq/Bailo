@@ -161,9 +161,7 @@ export default function ReleaseDisplay({
               {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider sx={{ my: 2 }} />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
-                  {reviewsWithLatestResponses.map((review) => (
-                    <ReviewDisplay review={review} key={`${review.role}-${review.createdAt}`} />
-                  ))}
+                  <ReviewDisplay reviews={reviewsWithLatestResponses} />
                 </div>
                 {release.comments.length > 0 && (
                   <Tooltip title='Comments'>

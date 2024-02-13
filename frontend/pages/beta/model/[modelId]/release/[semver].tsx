@@ -3,6 +3,7 @@ import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/mater
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -14,6 +15,8 @@ import Wrapper from 'src/Wrapper.beta'
 export default function Release() {
   const router = useRouter()
   const { modelId, semver }: { modelId?: string; semver?: string } = router.query
+
+  const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -53,8 +56,8 @@ export default function Release() {
                   {release ? release.semver : 'Loading...'}
                 </Typography>
               </Stack>
-              {release && <EditableRelease release={release} />}
-              <ReviewComments release={release} />
+              {release && <EditableRelease release={release} isEdit={isEdit} onIsEditChange={setIsEdit} />}
+              <ReviewComments release={release} isEdit={isEdit} />
             </Stack>
           </>
         </Paper>
