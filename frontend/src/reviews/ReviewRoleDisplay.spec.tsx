@@ -1,7 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetModelRoles } from 'actions/model'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
-import { testAccessRequestReviewNoResponses, testManagerRole } from 'utils/test/testModels'
+import {
+  testAccessRequestReview,
+  testAccessRequestReviewNoResponses,
+  testManagerRole,
+  testReleaseReview,
+  testReleaseReviewNoResponses,
+} from 'utils/test/testModels'
 import { describe, expect, vi } from 'vitest'
 
 const mockRoleUtils = vi.hoisted(() => {
@@ -16,14 +22,10 @@ vi.mock('actions/model', () => ({
 }))
 
 describe('ReviewRoleDisplay', () => {
-  const testMessage = 'This access needs to be reviewed by the Manager.'
+  const testMessageAccess = 'This access needs to be reviewed by the Manager.'
+  const testMessageRelease = 'This release needs to be reviewed by the Manager.'
 
-  //do test to make sure that message should/does not show
-  it('the notification should not show', () => {
-    render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
-    expect(screen.queryByText(testMessage)).toBeNull()
-  })
-  it('shows a notification when a release or access request is created', async () => {
+  it('shows a message when an access request has no responses', async () => {
     vi.mocked(useGetModelRoles).mockReturnValue({
       modelRoles: [testManagerRole],
       isModelRolesLoading: false,
@@ -33,9 +35,51 @@ describe('ReviewRoleDisplay', () => {
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
     await waitFor(async () => {
-      expect(await screen.findByText(testMessage)).toBeDefined()
+      expect(await screen.findByText(testMessageAccess)).toBeDefined()
     })
   })
 
-  //message should dissappear when release/access request is approved
+  it('shows a message when an release has no responses', async () => {
+    vi.mocked(useGetModelRoles).mockReturnValue({
+      modelRoles: [testManagerRole],
+      isModelRolesLoading: false,
+      isModelRolesError: undefined,
+      mutateModelRoles: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
+    await waitFor(async () => {
+      expect(await screen.findByText(testMessageRelease)).toBeDefined()
+    })
+  })
+
+  it('does not show a message when an access request has responses', async () => {
+    vi.mocked(useGetModelRoles).mockReturnValue({
+      modelRoles: [testManagerRole],
+      isModelRolesLoading: false,
+      isModelRolesError: undefined,
+      mutateModelRoles: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    render(<ReviewRoleDisplay review={testAccessRequestReview} />)
+
+    await waitFor(async () => {
+      expect(screen.queryByText(testMessageAccess)).toBeNull()
+    })
+  })
+
+  it('does not show a message when an release has responses', async () => {
+    vi.mocked(useGetModelRoles).mockReturnValue({
+      modelRoles: [testManagerRole],
+      isModelRolesLoading: false,
+      isModelRolesError: undefined,
+      mutateModelRoles: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    render(<ReviewRoleDisplay review={testReleaseReview} />)
+
+    await waitFor(async () => {
+      expect(screen.queryByText(testMessageRelease)).toBeNull()
+    })
+  })
 })

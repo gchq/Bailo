@@ -167,6 +167,15 @@ export const testAccessRequestReview: ReviewRequestInterface = {
   model: testV2Model,
   role: 'mrso',
   semver: '1.0.0',
+  kind: 'access',
+  responses: [testReviewResponse],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}
+export const testReleaseReview: ReviewRequestInterface = {
+  model: testV2Model,
+  role: 'mrso',
+  semver: '1.0.0',
   kind: 'release',
   responses: [testReviewResponse],
   createdAt: new Date().toISOString(),
@@ -181,6 +190,15 @@ export const testAccessRequestReviewNoResponses: ReviewRequestInterface = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   accessRequestId: 'my-access-request',
+}
+export const testReleaseReviewNoResponses: ReviewRequestInterface = {
+  model: testV2Model,
+  role: 'mrso',
+  kind: 'release',
+  responses: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  accessRequestId: 'my-release',
 }
 
 export const testAccessRequestSchema: SchemaInterface = {
