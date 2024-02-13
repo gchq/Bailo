@@ -5,6 +5,7 @@ import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDis
 import { ReviewBannerProps } from 'src/model/beta/reviews/ReviewBanner'
 import { ReviewDisplayProps } from 'src/model/beta/reviews/ReviewDisplay'
 import { lightTheme } from 'src/theme'
+import { formatDateString } from 'utils/dateUtils'
 import { testAccessRequest, testAccessRequestReview, testAccessRequestWithComments } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -18,7 +19,7 @@ vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProp
 vi.mock('src/model/beta/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
 
 describe('AccessRequestDisplay', () => {
-  it('displays the metadata for an access request metadata object when display component is rendered', async () => {
+  it('displays access request metadata when not loading and no errors', async () => {
     vi.mocked(useGetReviewRequestsForModel).mockReturnValue({
       reviews: [testAccessRequestReview],
       isReviewsLoading: false,
@@ -30,9 +31,13 @@ describe('AccessRequestDisplay', () => {
         <AccessRequestDisplay accessRequest={testAccessRequest} />
       </ThemeProvider>,
     )
-
+    const accessRequestEndDate = await screen.findByTestId('accessRequestEndDate')
     await waitFor(async () => {
       expect(await screen.findByText(testAccessRequest.metadata.overview.name)).toBeDefined()
+      expect(accessRequestEndDate.innerHTML).toBe(
+        ` ${formatDateString(testAccessRequest.metadata.overview.endDate as string)}`,
+      )
+      expect(await screen.findByText(testAccessRequest.metadata.overview.entities[0].split(':')[1])).toBeDefined()
     })
   })
 
@@ -48,9 +53,7 @@ describe('AccessRequestDisplay', () => {
         <AccessRequestDisplay accessRequest={testAccessRequestWithComments} />
       </ThemeProvider>,
     )
-
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Comments')).toBeDefined()
       expect(await screen.findByText('1 comment')).toBeDefined()
     })
   })

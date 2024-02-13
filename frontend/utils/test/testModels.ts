@@ -131,6 +131,7 @@ export const testAccessRequest: AccessRequestInterface = {
   metadata: {
     overview: {
       name: 'My Access Request',
+      endDate: new Date().toISOString(),
       entities: [testEntity],
     },
   },

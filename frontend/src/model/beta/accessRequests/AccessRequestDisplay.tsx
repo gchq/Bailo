@@ -1,5 +1,5 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import { Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -69,7 +69,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               {accessRequest.metadata.overview.endDate && (
                 <Typography variant='caption'>
                   End Date:
-                  <Typography variant='caption' fontWeight='bold'>
+                  <Typography variant='caption' fontWeight='bold' data-test='accessRequestEndDate'>
                     {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
                 </Typography>
@@ -105,12 +105,10 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             <Stack direction='row' justifyContent='space-between' spacing={2}>
               <ReviewDisplay reviews={reviewsWithLatestResponses} />
               {accessRequest.comments.length > 0 && (
-                <Tooltip title='Comments'>
-                  <Stack direction='row' spacing={1}>
-                    <CommentIcon color='primary' />
-                    <Typography variant='caption'>{plural(accessRequest.comments.length, 'comment')}</Typography>
-                  </Stack>
-                </Tooltip>
+                <Stack direction='row' spacing={1}>
+                  <CommentIcon color='primary' />
+                  <Typography variant='caption'>{plural(accessRequest.comments.length, 'comment')}</Typography>
+                </Stack>
               )}
             </Stack>
           </Stack>
