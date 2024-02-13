@@ -115,30 +115,15 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             }}
           >
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' passHref color='inherit' underline='none'>
-                <Image loader={imageLoader} src='/bailo-logo.png' alt='Logo' width={35} height={45} priority />
-              </Link>
-            </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-                ml: 2,
-                display: { xs: 'none', md: 'flex', cursor: 'pointer' },
-              }}
-            >
-              <Link
-                href='/'
-                passHref
-                color='inherit'
-                underline='none'
-                style={{
-                  color: 'inherit',
-                  textDecoration: 'inherit',
-                  fontSize: '1.25rem',
-                  fontWeight: 500,
-                }}
-              >
-                Bailo
+              <Link href='/' color='inherit' underline='none'>
+                <Image
+                  loader={imageLoader}
+                  src='/logo-horizontal-light.png'
+                  alt='Logo'
+                  width={142}
+                  height={60}
+                  priority
+                />
               </Link>
             </Box>
             Documentation
