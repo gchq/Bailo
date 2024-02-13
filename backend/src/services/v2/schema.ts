@@ -1,12 +1,21 @@
+import { Schema as JsonSchema } from 'jsonschema'
+
 import { SchemaAction } from '../../connectors/v2/authorisation/base.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
 import { UserDoc } from '../../models/v2/User.js'
-import accessRequestSchemaBeta from '../../scripts/example_schemas/minimal_access_request_schema_beta.json' assert { type: 'json' }
-import modelSchemaBeta from '../../scripts/example_schemas/minimal_upload_schema_beta.json' assert { type: 'json' }
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
+import config from '../../utils/v2/config.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { handleDuplicateKeys } from '../../utils/v2/mongo.js'
+import log from './log.js'
+
+export interface DefaultSchema {
+  name: string
+  id: string
+  description: string
+  jsonSchema: JsonSchema
+}
 
 export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
@@ -49,35 +58,27 @@ export async function createSchema(user: UserDoc, schema: Partial<SchemaInterfac
 }
 
 export async function addDefaultSchemas() {
-  const uploadSchemaDoc = new Schema({
-    name: 'Minimal Schema v10 Beta',
-    id: 'minimal-general-v10-beta',
-    description:
-      "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
-    jsonSchema: modelSchemaBeta,
-    kind: SchemaKind.Model,
-    active: true,
-    hidden: false,
-  })
+  for (const schema of config.defaultSchemas.v2.model) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    const modelSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.Model,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await modelSchema.save()
+  }
 
-  const accessSchemaDoc = new Schema({
-    name: 'Minimal Access Request Schema v10 Beta',
-    id: 'minimal-access-request-general-v10-beta',
-    description:
-      'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
-    jsonSchema: accessRequestSchemaBeta,
-    kind: SchemaKind.AccessRequest,
-    active: true,
-    hidden: false,
-  })
-
-  await Schema.deleteMany({ $or: [{ id: uploadSchemaDoc.id }, { id: accessSchemaDoc.id }] })
-
-  try {
-    await uploadSchemaDoc.save()
-    await accessSchemaDoc.save()
-  } catch (error) {
-    handleDuplicateKeys(error)
-    throw error
+  for (const schema of config.defaultSchemas.v2.accessRequest) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    const modelSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.AccessRequest,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await modelSchema.save()
   }
 }
