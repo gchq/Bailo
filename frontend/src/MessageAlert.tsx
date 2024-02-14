@@ -6,7 +6,7 @@ import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import useNotification from 'utils/hooks/useNotification'
+import useNotification from 'src/hooks/useNotification'
 
 type PartialMessageAlertProps =
   | {

@@ -22,8 +22,8 @@ import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useDebounce from 'src/hooks/useDebounce'
 import Wrapper from 'src/Wrapper'
-import useDebounce from 'utils/hooks/useDebounce'
 
 interface KeyAndLabel {
   key: string

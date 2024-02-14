@@ -32,7 +32,6 @@ describe('ValidationErrorIcon', () => {
       </ThemeProvider>,
     )
 
-    screen.debug()
     await waitFor(async () => {
       expect(container.childElementCount).toEqual(0)
     })

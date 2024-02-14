@@ -4,9 +4,9 @@ import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import useDebounce from 'src/hooks/useDebounce'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import useDebounce from 'utils/hooks/useDebounce'
 
 const Search = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,

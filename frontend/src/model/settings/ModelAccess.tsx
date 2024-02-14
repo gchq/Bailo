@@ -17,7 +17,7 @@ import { patchModel, useGetModel } from '../../../actions/model'
 import { useListUsers } from '../../../actions/user'
 import { CollaboratorEntry, EntityObject, ModelInterface } from '../../../types/v2/types'
 import { getErrorMessage } from '../../../utils/fetcher'
-import useNotification from '../../../utils/hooks/useNotification'
+import useNotification from '../../hooks/useNotification'
 import MessageAlert from '../../MessageAlert'
 import EntityItem from './EntityItem'
 
