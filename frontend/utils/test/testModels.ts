@@ -1,12 +1,4 @@
-import {
-  AccessRequestInterface,
-  ModelVisibility,
-  ReviewRequestInterface,
-  ReviewResponse,
-  StepNoRender,
-} from 'types/interfaces'
-import { ModelCardInterface, ModelInterface } from 'types/v2/types'
-
+import { AccessRequestInterface, ModelVisibility, StepNoRender } from 'types/interfaces'
 import {
   ApprovalCategory,
   ApprovalStates,
@@ -14,7 +6,8 @@ import {
   EntityKind,
   ReviewComment,
   SchemaInterface,
-} from '../../types/types'
+} from 'types/types'
+import { ModelCardInterface, ModelInterface, ReviewRequestInterface, ReviewResponse, Role } from 'types/v2/types'
 
 export const testId = 'testId'
 
@@ -198,10 +191,39 @@ export const testAccessRequestReview: ReviewRequestInterface = {
   model: testV2Model,
   role: 'mrso',
   semver: '1.0.0',
+  kind: 'access',
+  responses: [testReviewResponse],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}
+
+export const testReleaseReview: ReviewRequestInterface = {
+  model: testV2Model,
+  role: 'mrso',
+  semver: '1.0.0',
   kind: 'release',
   responses: [testReviewResponse],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+}
+
+export const testAccessRequestReviewNoResponses: ReviewRequestInterface = {
+  model: testV2Model,
+  role: 'mrso',
+  kind: 'access',
+  responses: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  accessRequestId: 'my-access-request',
+}
+export const testReleaseReviewNoResponses: ReviewRequestInterface = {
+  model: testV2Model,
+  role: 'mrso',
+  kind: 'release',
+  responses: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  accessRequestId: 'my-release',
 }
 
 export const testAccessRequestSchema: SchemaInterface = {
@@ -249,4 +271,9 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
   schemaRef: testAccessRequestSchema.id,
   shouldValidate: false,
   isComplete: () => false,
+}
+
+export const testManagerRole: Role = {
+  id: 'mngr',
+  name: 'Manager',
 }

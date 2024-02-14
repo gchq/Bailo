@@ -22,7 +22,7 @@ export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaIn
   return baseSchemas
 }
 
-export async function findSchemaById(schemaId: string): Promise<SchemaInterface> {
+export async function findSchemaById(schemaId: string) {
   const schema = await Schema.findOne({
     id: schemaId,
   })
@@ -32,6 +32,28 @@ export async function findSchemaById(schemaId: string): Promise<SchemaInterface>
   }
 
   return schema
+}
+
+export async function deleteSchemaById(user: UserDoc, schemaId: string): Promise<string> {
+  const schema = await Schema.findOne({
+    id: schemaId,
+  })
+
+  if (!schema) {
+    throw NotFound(`The requested schema was not found.`, { schemaId })
+  }
+
+  const auth = await authorisation.schema(user, schema, SchemaAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      schemaId: schema.id,
+    })
+  }
+
+  await schema.delete()
+
+  return schema.id
 }
 
 export async function createSchema(user: UserDoc, schema: Partial<SchemaInterface>, overwrite = false) {
@@ -55,6 +77,25 @@ export async function createSchema(user: UserDoc, schema: Partial<SchemaInterfac
     handleDuplicateKeys(error)
     throw error
   }
+}
+
+export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
+
+export async function updateSchema(user: UserDoc, schemaId: string, diff: Partial<UpdateSchemaParams>) {
+  const schema = await findSchemaById(schemaId)
+
+  const auth = await authorisation.schema(user, schema, SchemaAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      schemaId: schema.id,
+    })
+  }
+
+  Object.assign(schema, diff)
+  await schema.save()
+
+  return schema
 }
 
 export async function addDefaultSchemas() {

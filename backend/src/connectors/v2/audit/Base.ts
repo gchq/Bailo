@@ -5,7 +5,7 @@ import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
-import { SchemaInterface } from '../../../models/v2/Schema.js'
+import { SchemaDoc, SchemaInterface } from '../../../models/v2/Schema.js'
 import { TokenDoc } from '../../../models/v2/Token.js'
 import { ModelSearchResult } from '../../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../../types/v2/error.js'
@@ -84,6 +84,8 @@ export const AuditInfo = {
   CreateSchema: { typeId: 'CreateSchema', description: 'Schema Created', auditKind: AuditKind.Create },
   SearchSchemas: { typeId: 'SearchedSchemas', description: 'Schemas Searched', auditKind: AuditKind.Search },
   ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
+  DeleteSchema: { typeId: 'DeleteSchema', description: 'Schema Deleted', auditKind: AuditKind.Delete },
+  UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 } as const
@@ -126,6 +128,8 @@ export abstract class BaseAuditConnector {
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
   abstract onCreateSchema(req: Request, schema: SchemaInterface)
   abstract onViewSchema(req: Request, schema: SchemaInterface)
+  abstract onDeleteSchema(req: Request, schemaId: string)
+  abstract onUpdateSchema(req: Request, schema: SchemaDoc)
 
   abstract onViewModelImages(
     req: Request,

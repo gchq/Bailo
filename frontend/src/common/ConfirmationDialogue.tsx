@@ -11,6 +11,7 @@ type ConfirmationDialogProps = {
   title: string
   onCancel: () => void
   onConfirm: () => void
+  dialogMessage?: string
   errorMessage?: string
 }
 
@@ -20,12 +21,13 @@ export default function ConfirmationDialogue({
   onCancel,
   onConfirm,
   errorMessage = '',
+  dialogMessage = 'Are you sure you want to perform this action?',
 }: ConfirmationDialogProps) {
   return (
     <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <Typography>Are you sure you want to perform this action?</Typography>
+        <Typography>{dialogMessage}</Typography>
         <MessageAlert message={errorMessage} severity='error' />
       </DialogContent>
       <DialogActions>
