@@ -1,4 +1,9 @@
 const config = {
+  app: {
+    protocol: '',
+    host: '',
+    port: 3000,
+  },
   connectors: {
     authentication: {
       kind: 'silly',
