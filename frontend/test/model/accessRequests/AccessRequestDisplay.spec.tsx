@@ -1,9 +1,9 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { UserDisplayProps } from 'src/common/UserDisplay'
-import AccessRequestDisplay from 'src/model/beta/accessRequests/AccessRequestDisplay'
-import { ReviewBannerProps } from 'src/model/beta/reviews/ReviewBanner'
-import { ReviewDisplayProps } from 'src/model/beta/reviews/ReviewDisplay'
+import AccessRequestDisplay from 'src/model/accessRequests/AccessRequestDisplay'
+import { ReviewBannerProps } from 'src/model/reviews/ReviewBanner'
+import { ReviewDisplayProps } from 'src/model/reviews/ReviewDisplay'
 import { lightTheme } from 'src/theme'
 import { formatDateString } from 'utils/dateUtils'
 import { testAccessRequest, testAccessRequestReview, testAccessRequestWithComments } from 'utils/test/testModels'
@@ -14,9 +14,9 @@ import { useGetReviewRequestsForModel } from '../../../actions/review'
 vi.mock('../../../actions/review', () => ({
   useGetReviewRequestsForModel: vi.fn(),
 }))
-vi.mock('src/model/beta/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
+vi.mock('src/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
 vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProps) => <></> }))
-vi.mock('src/model/beta/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
+vi.mock('src/model/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
 
 describe('AccessRequestDisplay', () => {
   it('displays access request metadata when not loading and no errors', async () => {
@@ -31,8 +31,9 @@ describe('AccessRequestDisplay', () => {
         <AccessRequestDisplay accessRequest={testAccessRequest} />
       </ThemeProvider>,
     )
-    const accessRequestEndDate = await screen.findByTestId('accessRequestEndDate')
+
     await waitFor(async () => {
+      const accessRequestEndDate = await screen.findByTestId('accessRequestEndDate')
       expect(await screen.findByText(testAccessRequest.metadata.overview.name)).toBeDefined()
       expect(accessRequestEndDate.innerHTML).toBe(
         ` ${formatDateString(testAccessRequest.metadata.overview.endDate as string)}`,

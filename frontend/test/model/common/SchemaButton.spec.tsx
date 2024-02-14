@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MarkdownDisplayProps } from 'src/common/MarkdownDisplay'
-import SchemaButton from 'src/model/beta/common/SchemaButton'
+import SchemaButton from 'src/model/common/SchemaButton'
 import { lightTheme } from 'src/theme'
 import { testAccessRequestSchema } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
