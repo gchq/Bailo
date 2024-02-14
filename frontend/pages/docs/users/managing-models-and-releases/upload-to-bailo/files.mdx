@@ -1,0 +1,37 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Box from '@mui/material/Box'
+import Image from 'next/legacy/image'
+
+import bailoUploadFile from 'public/docs/bailo_upload_new_release_file.png'
+import bailoUploadedFile from 'public/docs/bailo_created_release_upload_file.png'
+
+# Uploading files
+
+A file can be anything to do with the model data. This can be model binaries or other infomation that allows users of
+Bailo to build and use your prepared models.
+
+## Adding files to a new release
+
+Files are unique for each release. Therefore if you decide to create a new release you can use the same file name, with
+the updated parameters or information. In this example we'll be adding `yolov4.onnx` to a new release.
+
+<br />
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoUploadFile} />
+</Box>
+
+## Adding files to an existing release
+
+Similarly you can upload and delete a file to an existing release by clicking edit release.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoUploadedFile} />
+</Box>
+
+## Uploading files programatically
+
+If you intend to download and use this in a notebook or other Python project you can use Bailo's Python Client. You can
+find out how to do this [here](/docs/python/notebooks/models_and_releases_demo/index.html).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -16,7 +16,7 @@
         },
         "tags": {
           "title": "Descriptive tags for the model.",
-          "description": "These tags will be searchable and will help others find this model.",
+          "description": "These tags will be searchable and will help others find this model.  Type in a tag, then press the 'enter key' to add it.",
           "type": "array",
           "widget": "tagSelector",
           "items": {
