@@ -1,6 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
-import _, { groupBy } from 'lodash'
+import { groupBy } from 'lodash-es'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
