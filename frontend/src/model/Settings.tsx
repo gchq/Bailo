@@ -1,89 +1,95 @@
-import { Box, Button, Stack, Typography } from '@mui/material'
-import copy from 'copy-to-clipboard'
-import { deleteEndpoint } from 'data/api'
+import { LoadingButton } from '@mui/lab'
+import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import DisabledElementTooltip from 'src/common/DisabledElementTooltip'
-import useNotification from 'src/common/Snackbar'
-import { Version } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
+import { useEffect, useState } from 'react'
 
-interface Props {
-  version: Version
-  isPotentialUploader: boolean
+import { ModelInterface } from '../../types/v2/types'
+import AccessRequestSettings from './settings/AccessRequestSettings'
+import ModelAccess from './settings/ModelAccess'
+import ModelDetails from './settings/ModelDetails'
+
+type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
+
+function isSettingsCategory(settingsCategory: string | string[] | undefined): settingsCategory is SettingsCategory {
+  return (settingsCategory as SettingsCategory) !== undefined
 }
 
-export default function Settings({ version, isPotentialUploader }: Props) {
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deleteModelErrorMessage, setDeleteModelErrorMessage] = useState('')
-  const sendNotification = useNotification()
+type SettingsProps = {
+  model: ModelInterface
+}
+
+export default function Settings({ model }: SettingsProps) {
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const copyModelCardToClipboard = () => {
-    copy(JSON.stringify(version?.metadata, null, 2))
-    sendNotification({ variant: 'success', msg: 'Copied model card to clipboard' })
-  }
+  const { section } = router.query
 
-  const handleDelete = () => {
-    setDeleteModelErrorMessage('')
-    setDeleteConfirmOpen(true)
-  }
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('details')
 
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false)
-  }
-
-  const handleDeleteConfirm = async () => {
-    const response = await deleteEndpoint(`/api/v1/version/${version._id}`)
-
-    if (response.ok) {
-      router.push('/')
-    } else {
-      setDeleteModelErrorMessage(await getErrorMessage(response))
+  useEffect(() => {
+    if (isSettingsCategory(section)) {
+      setSelectedCategory(section ?? 'details')
     }
+  }, [section, setSelectedCategory])
+
+  const handleListItemClick = (category: SettingsCategory) => {
+    setSelectedCategory(category)
+    router.replace({
+      query: { ...router.query, section: category },
+    })
   }
 
+  const handleDeleteModel = () => {
+    setLoading(true)
+
+    // TODO - Delete model API request and setLoading(false) on error
+  }
   return (
-    <Box data-test='modelSettingsPage'>
-      <Typography variant='h6' sx={{ mb: 1 }}>
-        General
-      </Typography>
-      <Box mb={2}>
-        <Button variant='outlined' onClick={copyModelCardToClipboard}>
-          Copy model card to clipboard
-        </Button>
-      </Box>
-      <Box sx={{ mb: 4 }} />
-      <ConfirmationDialogue
-        open={deleteConfirmOpen}
-        title='Delete version'
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-        errorMessage={deleteModelErrorMessage}
-      />
-      <Typography variant='h6' sx={{ mb: 1 }}>
-        Danger Zone
-      </Typography>
-      <Stack direction='row' spacing={2}>
-        <DisabledElementTooltip
-          conditions={[!isPotentialUploader ? 'You do not have permission to delete this version' : '']}
-          placement='bottom'
-        >
-          <Button
-            variant='contained'
-            disabled={!isPotentialUploader}
-            color='error'
-            onClick={handleDelete}
-            data-test='deleteVersionButton'
+    <Stack
+      direction={{ xs: 'column', sm: 'row' }}
+      spacing={{ sm: 2 }}
+      divider={<Divider orientation='vertical' flexItem />}
+    >
+      <List sx={{ width: '200px' }}>
+        <ListItem disablePadding>
+          <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
+            Details
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            selected={selectedCategory === 'permissions'}
+            onClick={() => handleListItemClick('permissions')}
           >
-            Delete version
-          </Button>
-        </DisabledElementTooltip>
-        <Button variant='contained' color='error' disabled data-test='deleteModelButton'>
-          Delete model
-        </Button>
-      </Stack>
-    </Box>
+            Model Access
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
+            Access Requests
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
+            Danger Zone
+          </ListItemButton>
+        </ListItem>
+      </List>
+      <Container sx={{ my: 2 }}>
+        {selectedCategory === 'details' && <ModelDetails model={model} />}
+        {selectedCategory === 'permissions' && <ModelAccess model={model} />}
+        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
+        {selectedCategory === 'danger' && (
+          <Stack spacing={2}>
+            <Typography variant='h6' component='h2'>
+              Danger Zone!
+            </Typography>
+            <LoadingButton variant='contained' disabled onClick={handleDeleteModel} loading={loading}>
+              Delete model
+            </LoadingButton>
+          </Stack>
+        )}
+      </Container>
+    </Stack>
   )
 }

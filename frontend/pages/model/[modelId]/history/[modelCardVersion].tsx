@@ -6,10 +6,10 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import JsonSchemaForm from 'src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Wrapper from 'src/Wrapper'
 import { SplitSchemaNoRender } from 'types/interfaces'
-import { getStepsFromSchema } from 'utils/beta/formUtils'
+import { getStepsFromSchema } from 'utils/formUtils'
 
 export default function ViewModelCardVersion() {
   const router = useRouter()
