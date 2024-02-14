@@ -5,8 +5,8 @@ import { useMemo } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import { ReviewResponse } from 'types/interfaces'
 import { EntityKind } from 'types/types'
-import { ReviewResponse } from 'types/v2/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type ReviewDecisionDisplayProps = {

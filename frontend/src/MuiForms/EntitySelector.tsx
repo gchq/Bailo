@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { EntityObject } from 'types/v2/types'
+import { EntityObject } from 'types/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'

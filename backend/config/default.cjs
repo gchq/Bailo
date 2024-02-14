@@ -211,32 +211,11 @@ module.exports = {
       host: 'localhost:8080',
     },
 
-    // A configurable checkbox on the last page when uploading a model
-    uploadWarning: {
-      showWarning: true,
-      checkboxText: 'By checking here you confirm that the information is correct',
-    },
-
-    // A configurable checkbox on the last page when requesting a deployment
-    deploymentWarning: {
-      showWarning: true,
-      checkboxText: 'By checking here you confirm that the information is correct',
-    },
-
     // Used by some admin pages (e.g. the logs) to directly open the correct page in your IDE
     // Not needed in production
     development: {
       logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
     },
-
-    // The available seldon versions that can be used to build images
-    seldonVersions: [
-      {
-        name: 'seldonio - 1.10.0',
-        image: 'seldonio/seldon-core-s2i-python37:1.10.0',
-      },
-    ],
-    maxModelSizeGB: 50,
   },
 
   connectors: {

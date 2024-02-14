@@ -15,7 +15,7 @@ import Loading from 'src/common/Loading'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/registry/CodeLine'
-import { ModelInterface } from 'types/v2/types'
+import { ModelInterface } from 'types/interfaces'
 
 interface UploadModelImageDialogProps {
   open: boolean

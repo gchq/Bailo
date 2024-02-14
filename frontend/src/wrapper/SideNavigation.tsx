@@ -13,7 +13,8 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { ReviewRequestInterface, User } from 'types/v2/types'
+import { ReviewRequestInterface } from 'types/interfaces'
+import { User } from 'types/types'
 
 import { DRAWER_WIDTH } from '../../utils/constants'
 

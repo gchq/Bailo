@@ -8,8 +8,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { ReleaseInterface } from 'types/types'
-import { FileInterface, isFileInterface } from 'types/v2/types'
+import { FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {

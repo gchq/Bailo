@@ -15,8 +15,7 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaButton from 'src/model/common/SchemaButton'
 import Wrapper from 'src/Wrapper'
-import { SchemaInterface } from 'types/types'
-import { SchemaKind } from 'types/v2/types'
+import { SchemaInterface, SchemaKind } from 'types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()

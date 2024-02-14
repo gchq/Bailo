@@ -15,7 +15,8 @@ import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react
 
 import { patchModel, useGetModel } from '../../../actions/model'
 import { useListUsers } from '../../../actions/user'
-import { CollaboratorEntry, EntityObject, ModelInterface } from '../../../types/v2/types'
+import { CollaboratorEntry, ModelInterface } from '../../../types/interfaces'
+import { EntityObject } from '../../../types/types'
 import { getErrorMessage } from '../../../utils/fetcher'
 import useNotification from '../../hooks/useNotification'
 import MessageAlert from '../../MessageAlert'

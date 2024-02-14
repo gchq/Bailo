@@ -12,7 +12,7 @@ import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
 import Wrapper from 'src/Wrapper'
 import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { FileInterface, isFileInterface } from 'types/v2/types'
+import { FileInterface, isFileInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
 

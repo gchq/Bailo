@@ -1,9 +1,9 @@
 import axios from 'axios'
 import useSWR from 'swr'
-
-import { ModelCardInterface, ModelCardRevisionInterface } from '../types/v2/types'
-import { handleAxiosError } from '../utils/axios'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { ModelCardInterface } from 'types/interfaces'
+import { ModelCardRevisionInterface } from 'types/types'
+import { handleAxiosError } from 'utils/axios'
+import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export async function postFromSchema(modelId: string, schemaId: string) {
   try {
