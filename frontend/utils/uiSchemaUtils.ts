@@ -7,7 +7,7 @@ export function createUiSchema(schema: any, customSchema: any) {
   return uiSchema
 }
 
-export function createBaseSchema(schema: any) {
+function createBaseSchema(schema: any) {
   const uiSchema = {}
 
   if (schema.maxLength > 140) {

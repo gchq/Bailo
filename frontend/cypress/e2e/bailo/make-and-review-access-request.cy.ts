@@ -1,8 +1,7 @@
-const baseURL = '/'
 let modelUuid = ''
 let accessRequestUuid = ''
 const modelName = 'Test Model'
-const schemaId = 'minimal-access-request-general-v10-beta'
+const schemaId = 'minimal-access-request-general-v10'
 
 describe('Make and approve an access request', () => {
   before(() => {
@@ -16,7 +15,7 @@ describe('Make and approve an access request', () => {
       expect(response.status).to.eq(200)
       expect(response.body.model).to.have.property('name', modelName)
       modelUuid = response.body.model.id
-      cy.request('POST', `/api/v2/model/${modelUuid}/setup/from-schema`, { schemaId: 'minimal-general-v10-beta' }).then(
+      cy.request('POST', `/api/v2/model/${modelUuid}/setup/from-schema`, { schemaId: 'minimal-general-v10' }).then(
         (response) => {
           expect(response.status).to.eq(200)
           expect(response.body.card).to.have.property('modelId', modelUuid)
@@ -32,7 +31,7 @@ describe('Make and approve an access request', () => {
 
   it('can make an access request', () => {
     cy.log('Navigating to the model page')
-    cy.visit(`${baseURL}/model/${modelUuid}`)
+    cy.visit(`/model/${modelUuid}`)
     cy.contains(modelName)
     cy.log('Navigating to the access request list tab and clicking the request access button')
     cy.get('[data-test=accessTab]').click()
@@ -63,7 +62,7 @@ describe('Make and approve an access request', () => {
 
   it('can review an access request', () => {
     cy.log('Navigating to the access request page')
-    cy.visit(`${baseURL}/model/${modelUuid}/access-request/${accessRequestUuid}`)
+    cy.visit(`/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.log('Reviewing the access request and leaving comments')
     cy.get('[data-test=reviewButton]').click({ force: true })
     cy.get('[data-test=releaseReviewDialog]').contains('Access Request Review')

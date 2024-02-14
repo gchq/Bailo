@@ -6,6 +6,7 @@ import grant from 'grant'
 import { AuditKindKeys } from '../../connectors/v2/audit/index.js'
 import { AuthenticationKindKeys } from '../../connectors/v2/authentication/index.js'
 import { AuthorisationKindKeys } from '../../connectors/v2/authorisation/index.js'
+import { DefaultSchema } from '../../services/v2/schema.js'
 import { deepFreeze } from './object.js'
 
 export interface Config {
@@ -145,6 +146,13 @@ export interface Config {
       identityProviderClient: CognitoIdentityProviderClientConfig
       userPoolId: string
       userIdAttribute: string
+    }
+  }
+
+  defaultSchemas: {
+    v2: {
+      modelCards: Array<DefaultSchema>
+      accessRequests: Array<DefaultSchema>
     }
   }
 }
