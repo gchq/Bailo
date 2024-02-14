@@ -1,0 +1,38 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+
+import modelOverview from 'public/docs/bailo_model_overview.png'
+import selectAccessRequestSchema from 'public/docs/bailo_select_access_request_schema.png'
+import createAccessRequest from 'public/docs/bailo_create_access_request.png'
+
+## What is an Access Request?
+
+In order to use a model you must first request access to the model.
+
+## How to make an Access Request
+
+Visit the model overview page. From here you can click the "Request Access" button to create a new access request:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={modelOverview} />
+</Box>
+
+Select a schema for your access request:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={selectAccessRequestSchema} />
+</Box>
+
+Fill out the form and submit your access request:
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={createAccessRequest} />
+</Box>
+
+## Review Process
+
+Once this request has been approved by a Model Senior Responsible Officer you will be able to download Release artefacts
+and push docker images.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

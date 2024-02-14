@@ -31,6 +31,8 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
+  { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
