@@ -55,3 +55,18 @@ export async function postSchema(data: PostSchemaParams) {
     body: JSON.stringify(data),
   })
 }
+
+export async function patchSchema(schemaId: string, diff: Partial<SchemaInterface>) {
+  return fetch(`/api/v2/schema/${schemaId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(diff),
+  })
+}
+
+export async function deleteSchema(schemaId: string) {
+  return fetch(`/api/v2/schema/${schemaId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
