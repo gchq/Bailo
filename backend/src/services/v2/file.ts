@@ -80,6 +80,9 @@ export async function getFilesByModel(user: UserDoc, modelId: string) {
 
 export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: string[]) {
   const model = await getModelById(user, modelId)
+  if (fileIds.length === 0) {
+    return []
+  }
   const files = await FileModel.find({ _id: { $in: fileIds } })
 
   if (files.length !== fileIds.length) {

@@ -1,13 +1,20 @@
 import fetch from 'node-fetch'
 
 import { getHttpsAgent } from '../services/v2/http.js'
+import { isRegistryError } from '../types/v2/RegistryError.js'
 import config from '../utils/v2/config.js'
-import { InternalError } from '../utils/v2/error.js'
+import { InternalError, RegistryError } from '../utils/v2/error.js'
 
 interface RepoRef {
   namespace: string
   image: string
 }
+
+export type RegistryErrorResponse = {
+  errors: Array<ErrorInfo>
+}
+
+export type ErrorInfo = { code: string; message: string; details: Array<unknown> }
 
 const registry = config.registry.connection.internal
 
@@ -27,16 +34,24 @@ async function registryRequest(token: string, endpoint: string) {
   } catch (err) {
     throw InternalError('Unable to communicate with the registry.', { err })
   }
-
+  const body = await res.json()
   if (!res.ok) {
-    throw InternalError('Non-200 response returned by the registry.', {
+    const context = {
+      url: res.url,
       status: res.status,
       statusText: res.statusText,
-      body: await res.text(),
-    })
+    }
+    if (isRegistryErrorResponse(body)) {
+      throw RegistryError(body, context)
+    } else {
+      throw InternalError('Unrecognised response returned by the registry.', {
+        ...context,
+        body: JSON.stringify(body),
+      })
+    }
   }
 
-  return await res.json()
+  return body
 }
 
 // Currently limited to a maximum 100 image names
@@ -65,7 +80,16 @@ type ListImageTagResponse = { tags: Array<string> }
 export async function listImageTags(token: string, imageRef: RepoRef) {
   const repo = `${imageRef.namespace}/${imageRef.image}`
 
-  const responseBody = await registryRequest(token, `${repo}/tags/list`)
+  let responseBody
+  try {
+    responseBody = await registryRequest(token, `${repo}/tags/list`)
+  } catch (error) {
+    if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
+      return []
+    }
+    throw error
+  }
+
   if (!isListImageTagResponse(responseBody)) {
     throw InternalError('Unrecognised response body when listing image tags.', { responseBody: responseBody })
   }
@@ -77,6 +101,19 @@ function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
     return false
   }
   if (!('tags' in resp) || !Array.isArray(resp.tags)) {
+    return false
+  }
+  return true
+}
+
+function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
+  if (typeof resp !== 'object' || resp === null) {
+    return false
+  }
+  if (!('errors' in resp) || !Array.isArray(resp.errors)) {
+    return false
+  }
+  if (!resp.errors.every((item) => 'code' in item && 'message' in item && 'detail' in item)) {
     return false
   }
   return true

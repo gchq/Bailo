@@ -1,9 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { UserDoc } from '../../src/models/v2/User.js'
 import {
   createAccessRequest,
   getAccessRequestsByModel,
+  getModelAccessRequestsForUser,
   newAccessRequestComment,
   removeAccessRequest,
 } from '../../src/services/v2/accessRequest.js'
@@ -26,6 +28,7 @@ const accessRequestModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
@@ -87,11 +90,11 @@ describe('services > accessRequest', () => {
 
   test('newAccessRequestComment > success', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
+    accessRequestModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
 
-    expect(accessRequestModelMocks.save).toBeCalled()
+    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
   })
 
   test('getAccessRequestsByModel > good', async () => {
@@ -126,5 +129,12 @@ describe('services > accessRequest', () => {
     expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
       /^You do not have permission to delete this access request./,
     )
+  })
+
+  test('getModelAccessRequestsForUser > query as expected', async () => {
+    const user = { dn: 'testUser' } as UserDoc
+    await getModelAccessRequestsForUser(user, 'test-model')
+
+    expect(accessRequestModelMocks.find.mock.calls).matchSnapshot()
   })
 })

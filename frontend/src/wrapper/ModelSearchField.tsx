@@ -49,7 +49,7 @@ export default function ModelSearchField() {
     () =>
       models.map((model) => (
         <Box key={model.id} sx={{ maxWidth: '300px' }}>
-          <Link href={`/beta/model/${model.id}`} noLinkStyle>
+          <Link href={`/model/${model.id}`} noLinkStyle>
             <ListItemButton>
               <ListItemText
                 primary={model.name}

@@ -14,10 +14,15 @@ import MessageAlert from '../../../MessageAlert'
 
 type EditableAccessRequestFormProps = {
   accessRequest: AccessRequestInterface
+  isEdit: boolean
+  onIsEditChange: (value: boolean) => void
 }
 
-export default function EditableAccessRequestForm({ accessRequest }: EditableAccessRequestFormProps) {
-  const [isEdit, setIsEdit] = useState(false)
+export default function EditableAccessRequestForm({
+  accessRequest,
+  isEdit,
+  onIsEditChange,
+}: EditableAccessRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -36,7 +41,7 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
-        setIsEdit(false)
+        onIsEditChange(false)
         mutateAccessRequest()
       }
       setIsLoading(false)
@@ -54,11 +59,11 @@ export default function EditableAccessRequestForm({ accessRequest }: EditableAcc
   }, [accessRequest.metadata, schema])
 
   function handleEdit() {
-    setIsEdit(true)
+    onIsEditChange(true)
   }
 
   function handleCancel() {
-    setIsEdit(false)
+    onIsEditChange(false)
     resetForm()
   }
 

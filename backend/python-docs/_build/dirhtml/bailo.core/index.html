@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -36,6 +37,7 @@
           
           <a href="../" class="icon icon-home">
             Bailo Python Client Docs
+              <img src="../_static/vertical-white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
@@ -88,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_all_releases"><code class="docutils literal notranslate"><span class="pre">Client.get_all_releases()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_all_schemas"><code class="docutils literal notranslate"><span class="pre">Client.get_all_schemas()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_all_teams"><code class="docutils literal notranslate"><span class="pre">Client.get_all_teams()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_download_by_filename"><code class="docutils literal notranslate"><span class="pre">Client.get_download_by_filename()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_download_file"><code class="docutils literal notranslate"><span class="pre">Client.get_download_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_files"><code class="docutils literal notranslate"><span class="pre">Client.get_files()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.get_model"><code class="docutils literal notranslate"><span class="pre">Client.get_model()</span></code></a></li>
@@ -453,15 +456,32 @@ Defaults request timeout to 5 seconds.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="bailo.core.client.Client.get_download_file">
-<span class="sig-name descname"><span class="pre">get_download_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BytesIO</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.get_download_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.get_download_file" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="bailo.core.client.Client.get_download_by_filename">
+<span class="sig-name descname"><span class="pre">get_download_by_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.get_download_by_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.get_download_by_filename" title="Link to this definition"></a></dt>
 <dd><p>Download a specific file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_id</strong> – Unique model ID</p></li>
+<li><p><strong>semver</strong> – Semver of the release</p></li>
+<li><p><strong>filename</strong> – The filename trying to download from</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The filename</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bailo.core.client.Client.get_download_file">
+<span class="sig-name descname"><span class="pre">get_download_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.get_download_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.get_download_file" title="Link to this definition"></a></dt>
+<dd><p>Download a specific file by it’s id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_id</strong> – Unique model ID</p></li>
 <li><p><strong>file_id</strong> – Unique file ID</p></li>
-<li><p><strong>buffer</strong> – BytesIO object for bailo to write to</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

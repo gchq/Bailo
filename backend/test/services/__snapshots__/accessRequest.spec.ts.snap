@@ -7,3 +7,18 @@ exports[`services > accessRequest > getAccessRequestsByModel > good 1`] = `
   },
 ]
 `;
+
+exports[`services > accessRequest > getModelAccessRequestsForUser > query as expected 1`] = `
+[
+  [
+    {
+      "metadata.overview.entities": {
+        "$in": [
+          "user:testUser",
+        ],
+      },
+      "modelId": "test-model",
+    },
+  ],
+]
+`;

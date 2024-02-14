@@ -152,6 +152,18 @@ describe('services > file', () => {
     expect(files).toMatchSnapshot()
   })
 
+  test('getFilesByIds > no file ids', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+
+    const user = { dn: 'testUser' } as UserDoc
+    const modelId = 'testModelId'
+    const fileIds = []
+
+    const files = await getFilesByIds(user, modelId, fileIds)
+
+    expect(files).toStrictEqual(fileIds)
+  })
+
   test('getFilesByIds > files not found', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
 
