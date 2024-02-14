@@ -8,7 +8,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
 dayjs.extend(customParseFormat)
 
-interface CustomTextInputProps {
+interface DateSelectorProps {
   label?: string
   required?: boolean
   disabled?: boolean
@@ -19,7 +19,7 @@ interface CustomTextInputProps {
   InputProps?: any
 }
 
-export default function DateInput(props: CustomTextInputProps) {
+export default function DateSelector(props: DateSelectorProps) {
   const { onChange, value, label, formContext, required } = props
 
   const theme = useTheme()

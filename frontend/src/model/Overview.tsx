@@ -1,10 +1,23 @@
-import ModelOverview from 'src/ModelOverview'
-import { Version } from 'types/types'
+import { Container } from '@mui/material'
+import { useMemo } from 'react'
+import { ModelInterface } from 'types/v2/types'
 
-interface Props {
-  version: Version
+import FormEditPage from './overview/FormEditPage'
+import TemplatePage from './overview/TemplatePage'
+
+type OverviewPage = 'form' | 'template'
+
+type OverviewProps = {
+  model: ModelInterface
 }
 
-export default function Overview({ version }: Props) {
-  return <ModelOverview version={version} />
+export default function Overview({ model }: OverviewProps) {
+  const page: OverviewPage = useMemo(() => (model.card && model.card.schemaId ? 'form' : 'template'), [model.card])
+
+  return (
+    <Container sx={{ my: 2 }}>
+      {page === 'template' && <TemplatePage model={model} />}
+      {page === 'form' && <FormEditPage model={model} />}
+    </Container>
+  )
 }
