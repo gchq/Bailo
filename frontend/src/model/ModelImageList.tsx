@@ -6,7 +6,7 @@ import { SyntheticEvent, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import { sortByNameAscending } from 'utils/arrayUtils'
 
-import { FlattenedModelImage, ModelInterface } from '../../types/interfaces'
+import { FlattenedModelImage, ModelInterface } from '../../types/types'
 import MessageAlert from '../MessageAlert'
 
 interface ModelImageListProps {

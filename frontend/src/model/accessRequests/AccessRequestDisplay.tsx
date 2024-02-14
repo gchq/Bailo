@@ -4,7 +4,7 @@ import { groupBy } from 'lodash-es'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/types'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 import { plural } from 'utils/stringUtils'
 

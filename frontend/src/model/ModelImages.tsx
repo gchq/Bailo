@@ -3,7 +3,7 @@ import { useGetModelImages } from 'actions/model'
 import { useMemo, useState } from 'react'
 import Forbidden from 'src/common/Forbidden'
 
-import { ModelInterface } from '../../types/interfaces'
+import { ModelInterface } from '../../types/types'
 import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'

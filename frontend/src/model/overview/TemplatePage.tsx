@@ -2,7 +2,7 @@ import { PostAdd } from '@mui/icons-material'
 import { Box, Button, Card, Divider, Stack, Typography } from '@mui/material'
 import Link from 'src/Link'
 
-import { ModelInterface } from '../../../types/interfaces'
+import { ModelInterface } from '../../../types/types'
 
 type TemplatePageProps = {
   model: ModelInterface

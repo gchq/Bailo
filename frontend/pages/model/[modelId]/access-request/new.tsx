@@ -14,7 +14,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
-import { SplitSchemaNoRender } from 'types/interfaces'
+import { SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
 

@@ -1,9 +1,8 @@
 import qs from 'querystring'
 import { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import useSWR from 'swr'
-import { ReleaseInterface } from 'types/types'
+import { AccessRequestInterface, ModelInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
 
-import { AccessRequestInterface, ModelInterface, ReviewRequestInterface } from '../types/interfaces'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReviewRequestsForUser() {

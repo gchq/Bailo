@@ -6,7 +6,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import ModelDescriptionInput from 'src/model/ModelDescriptionInput'
 import ModelNameInput from 'src/model/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
-import { ModelForm, ModelInterface, TeamInterface } from 'types/interfaces'
+import { ModelForm, ModelInterface, TeamInterface } from 'types/types'
 
 import { patchModel } from '../../../actions/model'
 import { getErrorMessage } from '../../../utils/fetcher'

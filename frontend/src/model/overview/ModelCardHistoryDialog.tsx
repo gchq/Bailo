@@ -14,7 +14,7 @@ import { useTheme } from '@mui/material/styles'
 import { useMemo } from 'react'
 
 import { useGetModelCardRevisions } from '../../../actions/modelCard'
-import { ModelInterface } from '../../../types/interfaces'
+import { ModelInterface } from '../../../types/types'
 import { sortByCreatedAtDescending } from '../../../utils/dateUtils'
 import Loading from '../../common/Loading'
 import MessageAlert from '../../MessageAlert'

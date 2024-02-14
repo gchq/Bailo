@@ -6,7 +6,7 @@ import MessageAlert from 'src/MessageAlert'
 import AccessRequestDisplay from 'src/model/accessRequests/AccessRequestDisplay'
 import { sortByCreatedAtDescending } from 'utils/dateUtils'
 
-import { ModelInterface } from '../../types/interfaces'
+import { ModelInterface } from '../../types/types'
 import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
 

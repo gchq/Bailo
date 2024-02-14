@@ -7,8 +7,7 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
-import { FileWithMetadata, FlattenedModelImage } from 'types/interfaces'
-import { FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
+import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {

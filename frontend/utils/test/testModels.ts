@@ -1,6 +1,15 @@
-import { AccessRequestInterface, ModelVisibility, StepNoRender } from 'types/interfaces'
-import { ModelCardInterface, ModelInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
-import { ReviewComment, Role, SchemaInterface } from 'types/types'
+import {
+  AccessRequestInterface,
+  ModelCardInterface,
+  ModelInterface,
+  ModelVisibility,
+  ReviewComment,
+  ReviewRequestInterface,
+  ReviewResponse,
+  Role,
+  SchemaInterface,
+  StepNoRender,
+} from 'types/types'
 
 /******** V2 ********/
 

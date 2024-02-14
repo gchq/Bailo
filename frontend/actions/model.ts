@@ -1,8 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { ModelForm, ModelImage, ModelInterface } from '../types/interfaces'
-import { Role } from '../types/types'
+import { ModelForm, ModelImage, ModelInterface, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export interface ModelSearchResult {

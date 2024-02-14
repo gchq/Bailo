@@ -1,8 +1,7 @@
 import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
-import { FileWithMetadata } from 'types/interfaces'
-import { FileInterface } from 'types/types'
+import { FileInterface, FileWithMetadata } from 'types/types'
 
 interface MultiFileInputDisplayProps {
   file: File | FileInterface

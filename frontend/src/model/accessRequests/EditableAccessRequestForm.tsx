@@ -6,7 +6,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetSchema } from '../../../actions/schema'
-import { AccessRequestInterface, SplitSchemaNoRender } from '../../../types/interfaces'
+import { AccessRequestInterface, SplitSchemaNoRender } from '../../../types/types'
 import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import Loading from '../../common/Loading'
 import JsonSchemaForm from '../../Form/JsonSchemaForm'

@@ -11,8 +11,7 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ModelImageList from 'src/model/ModelImageList'
-import { FileWithMetadata, FlattenedModelImage, ModelInterface } from 'types/interfaces'
-import { FileInterface, isFileInterface } from 'types/types'
+import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface, ModelInterface } from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {

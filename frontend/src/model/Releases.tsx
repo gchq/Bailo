@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
 import { useGetReleasesForModelId } from '../../actions/release'
-import { ModelInterface } from '../../types/interfaces'
+import { ModelInterface } from '../../types/types'
 import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
 import ReleaseDisplay from './releases/ReleaseDisplay'

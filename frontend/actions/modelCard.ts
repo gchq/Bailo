@@ -1,7 +1,6 @@
 import axios from 'axios'
 import useSWR from 'swr'
-import { ModelCardInterface } from 'types/interfaces'
-import { ModelCardRevisionInterface } from 'types/types'
+import { ModelCardInterface, ModelCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 

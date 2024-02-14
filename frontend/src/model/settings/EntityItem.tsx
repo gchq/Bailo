@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 
 import { useGetModelRoles } from '../../../actions/model'
-import { CollaboratorEntry, ModelInterface } from '../../../types/interfaces'
+import { CollaboratorEntry, ModelInterface } from '../../../types/types'
 import Loading from '../../common/Loading'
 import MessageAlert from '../../MessageAlert'
 
