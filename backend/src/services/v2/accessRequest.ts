@@ -8,7 +8,7 @@ import AccessRequest from '../../models/v2/AccessRequest.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -102,7 +102,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -119,7 +119,7 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -136,12 +136,31 @@ export async function updateAccessRequest(
 
 export async function newAccessRequestComment(user: UserDoc, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
-  accessRequest.comments = []
-  accessRequest.comments.push({ message, user: user.dn, createdAt: new Date().toISOString() })
 
-  await accessRequest.save()
+  if (!accessRequest) {
+    throw NotFound(`The requested access request was not found.`, { accessRequestId })
+  }
 
-  return accessRequest
+  const comment = {
+    message,
+    user: user.dn,
+    createdAt: new Date().toISOString(),
+  }
+
+  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
+    { _id: accessRequest._id },
+    {
+      $push: {
+        comments: comment,
+      },
+    },
+  )
+
+  if (!updatedAccessRequest) {
+    throw InternalError(`Updated of access request failed.`, { accessRequestId })
+  }
+
+  return updatedAccessRequest
 }
 
 export async function getModelAccessRequestsForUser(user: UserDoc, modelId: string) {

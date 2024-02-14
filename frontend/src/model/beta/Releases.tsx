@@ -30,7 +30,7 @@ export default function Releases({ model }: { model: ModelInterface }) {
   }, [model, releases])
 
   function handleDraftNewRelease() {
-    router.push(`/beta/model/${model.id}/release/new`)
+    router.push(`/model/${model.id}/release/new`)
   }
 
   if (isReleasesError) {

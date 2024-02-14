@@ -8,7 +8,7 @@ import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2
 import { UserDoc } from '../../models/v2/User.js'
 import { WebhookEvent } from '../../models/v2/Webhook.js'
 import { findDuplicates } from '../../utils/v2/array.js'
-import { BadReq, Forbidden, NotFound } from '../../utils/v2/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -172,6 +172,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
 
 export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, message: string) {
   const release = await getReleaseBySemver(user, modelId, semver)
+
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -181,6 +182,7 @@ export async function newReleaseComment(user: UserDoc, modelId: string, semver: 
     user: user.dn,
     createdAt: new Date().toISOString(),
   }
+
   const updatedRelease = await Release.findOneAndUpdate(
     { _id: release._id },
     {
@@ -189,6 +191,11 @@ export async function newReleaseComment(user: UserDoc, modelId: string, semver: 
       },
     },
   )
+
+  if (!updatedRelease) {
+    throw InternalError(`Update of release failed.`, { modelId, semver })
+  }
+
   return updatedRelease
 }
 
