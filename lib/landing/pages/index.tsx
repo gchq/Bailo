@@ -17,7 +17,8 @@ import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../src/Slideshow'
 import React from 'react'
 
-import bailoLogo from '../public/bailo-logo.png'
+import bailoLogo from '../public/vertical-white.png'
+import { Bellota_Text } from '@next/font/google'
 
 const nunitoSansFont = localFont({
   src: '../public/fonts/NunitoSans-Black.ttf',
@@ -36,7 +37,7 @@ export default function Home() {
       <Box
         sx={{
           backgroundColor: '#f8e6dc',
-          background: 'linear-gradient(#3a545c, #473cff)',
+          background: 'linear-gradient(#54278e, #d62560)',
           backgroundSize: '400% 400%',
           minHeight: '100vh',
         }}
@@ -63,10 +64,7 @@ export default function Home() {
           spacing={1}
         >
           <Stack justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 2 }}>
-            <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={300} />
-            <Typography className={nunitoSansFont.className} variant='h1' sx={{ color: 'white' }}>
-              Bailo
-            </Typography>
+            <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={250} height={350} />
             <Typography variant='h5' sx={{ color: 'white' }}>
               Making it easy to compliantly manage the machine learning lifecycle
             </Typography>
@@ -96,7 +94,7 @@ export default function Home() {
           borderLeft: '50px solid transparent',
           borderRight: '50px solid transparent',
           margin: 'auto',
-          borderTop: '50px solid #3d4e83',
+          borderTop: '50px solid #742783',
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
