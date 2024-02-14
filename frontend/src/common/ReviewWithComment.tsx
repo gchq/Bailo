@@ -12,10 +12,11 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { SyntheticEvent, useMemo, useState } from 'react'
+import { ReviewRequestInterface } from 'types/v2/types'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
-import { AccessRequestInterface, ReviewRequestInterface } from '../../types/interfaces'
+import { AccessRequestInterface } from '../../types/interfaces'
 import { ReleaseInterface } from '../../types/types'
 import { getRoleDisplay } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'

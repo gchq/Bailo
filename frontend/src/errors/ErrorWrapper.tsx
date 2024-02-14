@@ -9,7 +9,11 @@ type ErrorWrapperProps = {
 export default function ErrorWrapper({ message }: ErrorWrapperProps) {
   return (
     <Wrapper title='Error' page='error'>
-      <MessageAlert message={message || 'Unable to communicate with server.'} severity='error' />
+      <MessageAlert
+        message={message || 'Unable to communicate with server.'}
+        severity='error'
+        data-test='errorWrapperMessage'
+      />
     </Wrapper>
   )
 }

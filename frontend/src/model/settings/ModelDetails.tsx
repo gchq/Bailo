@@ -11,7 +11,7 @@ import { TeamInterface } from 'types/interfaces'
 import { patchModel } from '../../../actions/model'
 import { ModelForm, ModelInterface } from '../../../types/v2/types'
 import { getErrorMessage } from '../../../utils/fetcher'
-import useNotification from '../../../utils/hooks/useNotification'
+import useNotification from '../../hooks/useNotification'
 import MessageAlert from '../../MessageAlert'
 
 type ModelAccessProps = {

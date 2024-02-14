@@ -1,11 +1,13 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import { Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Card, Divider, Grid, Stack, Typography } from '@mui/material'
 import { groupBy } from 'lodash-es'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
+import { AccessRequestInterface } from 'types/interfaces'
+import { ReviewRequestInterface, ReviewResponse } from 'types/v2/types'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
+import { plural } from 'utils/stringUtils'
 
 import { useGetReviewRequestsForModel } from '../../../actions/review'
 import Loading from '../../common/Loading'
@@ -68,7 +70,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
               {accessRequest.metadata.overview.endDate && (
                 <Typography variant='caption'>
                   End Date:
-                  <Typography variant='caption' fontWeight='bold'>
+                  <Typography variant='caption' fontWeight='bold' data-test='accessRequestEndDate'>
                     {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
                   </Typography>
                 </Typography>
@@ -104,12 +106,12 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
             <Stack direction='row' justifyContent='space-between' spacing={2}>
               <ReviewDisplay reviews={reviewsWithLatestResponses} />
               {accessRequest.comments.length > 0 && (
-                <Tooltip title='Comments'>
-                  <Stack direction='row' spacing={1}>
-                    <CommentIcon color='primary' />
-                    <Typography variant='caption'>{accessRequest.comments.length}</Typography>
-                  </Stack>
-                </Tooltip>
+                <Stack direction='row' spacing={1}>
+                  <CommentIcon color='primary' data-test='commentIcon' />
+                  <Typography variant='caption' data-test='commentCount'>
+                    {plural(accessRequest.comments.length, 'comment')}
+                  </Typography>
+                </Stack>
               )}
             </Stack>
           </Stack>

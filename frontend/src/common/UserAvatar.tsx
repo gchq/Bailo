@@ -56,6 +56,7 @@ export default function UserAvatar({
         width: avatarSize,
         fontSize,
       }}
+      data-test='userAvatar'
     >
       <Typography>{entity.id.charAt(0).toUpperCase()}</Typography>
     </Avatar>

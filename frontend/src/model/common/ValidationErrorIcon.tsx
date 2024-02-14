@@ -11,7 +11,7 @@ export default function ValidationErrorIcon({ step }: ValidationErrorIconProps) 
   const theme = useTheme()
 
   return !step.isComplete(step) ? (
-    <Tooltip title='This step is unfinished'>
+    <Tooltip title='This step is unfinished' data-test='formStepValidationWarning'>
       <ErrorIcon sx={{ color: theme.palette.error.main }} />
     </Tooltip>
   ) : (

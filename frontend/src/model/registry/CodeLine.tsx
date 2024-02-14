@@ -3,7 +3,7 @@ import CodeIcon from '@mui/icons-material/Code'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ReactElement } from 'react'
-import useNotification from 'utils/hooks/useNotification'
+import useNotification from 'src/hooks/useNotification'
 
 interface CodeLineProps {
   line: string

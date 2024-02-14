@@ -4,7 +4,7 @@ import { SnackbarProvider } from 'notistack'
 import React from 'react'
 import { describe, expect, it } from 'vitest'
 
-import useNotification from './useNotification'
+import useNotification from '../../src/hooks/useNotification'
 
 describe('Snackbar', () => {
   function TestComponent() {
@@ -16,7 +16,7 @@ describe('Snackbar', () => {
     return <Box>test</Box>
   }
 
-  it('renders a Snackbar component', async () => {
+  it('displays a snackbar when a notification is sent', async () => {
     render(
       <SnackbarProvider>
         <TestComponent />
@@ -24,7 +24,7 @@ describe('Snackbar', () => {
     )
 
     await waitFor(async () => {
-      expect(await screen.findByText('Notification message')).not.toBeUndefined()
+      expect(await screen.findByText('Notification message')).toBeDefined()
     })
   })
 })
