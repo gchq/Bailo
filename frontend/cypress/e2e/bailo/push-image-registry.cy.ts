@@ -17,7 +17,7 @@ describe('Make and approve an access request', () => {
       expect(response.body.model).to.have.property('name', modelNameForRegistry)
       modelUuidForRegistry = response.body.model.id
       cy.request('POST', `/api/v2/model/${modelUuidForRegistry}/setup/from-schema`, {
-        schemaId: 'minimal-general-v10-beta',
+        schemaId: 'minimal-general-v10',
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body.card).to.have.property('modelId', modelUuidForRegistry)

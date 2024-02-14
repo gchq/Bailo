@@ -15,7 +15,7 @@ describe('Draft and review a model release', () => {
       expect(response.body.model).to.have.property('name', modelNameForRelease)
       modelUuidForRelease = response.body.model.id
       cy.request('POST', `/api/v2/model/${modelUuidForRelease}/setup/from-schema`, {
-        schemaId: 'minimal-general-v10-beta',
+        schemaId: 'minimal-general-v10',
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body.card).to.have.property('modelId', modelUuidForRelease)

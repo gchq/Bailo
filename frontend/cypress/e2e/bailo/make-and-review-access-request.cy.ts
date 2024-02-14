@@ -1,7 +1,7 @@
 let modelUuid = ''
 let accessRequestUuid = ''
 const modelName = 'Test Model'
-const schemaId = 'minimal-access-request-general-v10-beta'
+const schemaId = 'minimal-access-request-general-v10'
 
 describe('Make and approve an access request', () => {
   before(() => {
@@ -15,7 +15,7 @@ describe('Make and approve an access request', () => {
       expect(response.status).to.eq(200)
       expect(response.body.model).to.have.property('name', modelName)
       modelUuid = response.body.model.id
-      cy.request('POST', `/api/v2/model/${modelUuid}/setup/from-schema`, { schemaId: 'minimal-general-v10-beta' }).then(
+      cy.request('POST', `/api/v2/model/${modelUuid}/setup/from-schema`, { schemaId: 'minimal-general-v10' }).then(
         (response) => {
           expect(response.status).to.eq(200)
           expect(response.body.card).to.have.property('modelId', modelUuid)

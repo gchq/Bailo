@@ -3,7 +3,7 @@ import getUuidFromUrl from '../../utils/getUuidFromUrl'
 const newModelUrl = '/model/new'
 
 let modelUuid = ''
-const schemaId = 'minimal-general-v10-beta'
+const schemaId = 'minimal-general-v10'
 
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {
