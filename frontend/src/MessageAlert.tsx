@@ -21,9 +21,16 @@ type PartialMessageAlertProps =
 type MessageAlertProps = {
   message?: string
   severity?: AlertProps['severity']
+  'data-test'?: string
 } & PartialMessageAlertProps
 
-export default function MessageAlert({ message = '', severity, linkText, href }: MessageAlertProps) {
+export default function MessageAlert({
+  message = '',
+  severity,
+  linkText,
+  href,
+  'data-test': dataTest,
+}: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
   const sendNotification = useNotification()
@@ -48,7 +55,7 @@ export default function MessageAlert({ message = '', severity, linkText, href }:
   if (!message) return null
 
   return (
-    <Alert severity={severity} sx={{ mb: 2, mt: 2 }} ref={alertRef}>
+    <Alert severity={severity} sx={{ mb: 2, mt: 2 }} ref={alertRef} data-test={dataTest}>
       <Stack spacing={1}>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>{message}</Typography>
