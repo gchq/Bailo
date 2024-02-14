@@ -34,6 +34,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
   { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+  { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
