@@ -41,7 +41,10 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { title: 'Model ID', data: release.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Semver', data: release.semver },
-      { title: 'Created By', data: release.createdBy },
+      {
+        title: 'Created By',
+        data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || release.createdBy,
+      },
     ],
     [
       { name: 'Open Release', url: getReleaseUrl(release) },
@@ -68,7 +71,12 @@ export async function requestReviewForAccessRequest(
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Entities Requesting Access', data: accessRequest.metadata.overview.entities.toString() },
-      { title: 'Created By', data: accessRequest.createdBy },
+      {
+        title: 'Created By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', accessRequest.createdBy))).name ||
+          accessRequest.createdBy,
+      },
     ],
     [
       {
@@ -93,8 +101,11 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     log.info('response not found')
     return
   }
+
   const emailContent = buildEmail(
-    `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
+    `Release ${release.semver} has been reviewed by ${
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+    }`,
     [
       { title: 'Model ID', data: release.modelId },
       { title: 'Reviewer Role', data: review.role.toUpperCase() },
@@ -120,7 +131,9 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     return
   }
   const emailContent = buildEmail(
-    `Access request for model ${accessRequest.modelId} has been reviewed by ${reviewResponse.user}`,
+    `Access request for model ${accessRequest.modelId} has been reviewed by ${
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+    }`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Reviewer Role', data: review.role.toUpperCase() },
