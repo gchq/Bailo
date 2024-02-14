@@ -15,7 +15,7 @@ const mockRoleUtils = vi.hoisted(() => {
     getRoleDisplay: vi.fn(),
   }
 })
-vi.mock('utils/beta/roles.ts', () => mockRoleUtils)
+vi.mock('utils/roles.ts', () => mockRoleUtils)
 
 vi.mock('actions/model', () => ({
   useGetModelRoles: vi.fn(),
