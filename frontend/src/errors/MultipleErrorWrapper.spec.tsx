@@ -1,8 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import mockRouter from 'next-router-mock'
-import { describe, expect, it } from 'vitest'
+import { WrapperProps } from 'src/Wrapper'
+import { describe, expect, it, vi } from 'vitest'
 
 import MultipleErrorWrapper from './MultipleErrorWrapper'
+
+vi.mock('src/Wrapper.tsx', () => ({
+  default: ({ children, ..._other }: WrapperProps) => <>{children}</>,
+}))
 
 describe('MultipleErrorWrapper', () => {
   const error1 = {}

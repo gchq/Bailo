@@ -1,6 +1,6 @@
 import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import ReviewDisplay from 'src/model/beta/reviews/ReviewDisplay'
+import ReviewDisplay from 'src/model/reviews/ReviewDisplay'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewRequestInterface } from 'types/interfaces'
 import { timeDifference } from 'utils/dateUtils'
@@ -14,7 +14,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
 
   function handleListItemClick() {
     const tab = review.kind === 'release' ? 'releases' : 'access'
-    router.push(`/beta/model/${review.model.id}?tab=${tab}`)
+    router.push(`/model/${review.model.id}?tab=${tab}`)
   }
 
   function editedAdornment() {

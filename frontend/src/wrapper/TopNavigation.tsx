@@ -21,10 +21,12 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { styled, useTheme } from '@mui/material/styles'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
+import bailoLogo from '../../public/logo-horizontal-light.png'
 import { EntityKind } from '../../types/types'
 import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
@@ -33,7 +35,7 @@ import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
-type TopNavigationProps = {
+export type TopNavigationProps = {
   drawerOpen?: boolean
   pageTopStyling?: CSSProperties
   currentUser: User
@@ -84,18 +86,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   }
 
   const handleNewModelClicked = () => {
-    router.push('/beta/model/new')
+    router.push('/model/new')
   }
 
   const handleMenuClose = () => {
     setUserMenuAnchorEl(null)
   }
-
-  const betaAdornment = (
-    <Box component='span' sx={{ marginLeft: 1, color: '#cecece', fontSize: 15 }}>
-      beta
-    </Box>
-  )
 
   return (
     <AppBar
@@ -122,7 +118,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
             </IconButton>
             <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-              <Link href='/beta/model/new'>
+              <Link href='/model/new'>
                 <MenuItem>
                   <ListItemIcon>
                     <Add fontSize='small' />
@@ -153,11 +149,10 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           </Box>
         )}
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
-            <Typography variant='h5' component='div'>
-              <span style={{ fontFamily: 'Pacifico' }}>Bailo</span>
-              {betaAdornment}
-            </Typography>
+          <Link href='/' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+            <Stack justifyContent='center' alignItems='left'>
+              <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+            </Stack>
           </Link>
         </Box>
         {isSmOrLarger && (
@@ -194,7 +189,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                           </MenuItem>
                         </span>
                       </Tooltip>
-                      <Link href='/beta/settings' color='inherit' underline='none'>
+                      <Link href='/settings' color='inherit' underline='none'>
                         <MenuItem data-test='settingsLink'>
                           <ListItemIcon>
                             <Settings fontSize='small' />

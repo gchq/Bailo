@@ -5,7 +5,8 @@ import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { SchemaDoc } from '../../../models/v2/Schema.js'
 import { UserDoc } from '../../../models/v2/User.js'
 import { Access, Action } from '../../../routes/v1/registryAuth.js'
-import { getAccessRequestsByModel } from '../../../services/v2/accessRequest.js'
+import { getModelAccessRequestsForUser } from '../../../services/v2/accessRequest.js'
+import { checkAccessRequestsApproved } from '../../../services/v2/review.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 
@@ -70,15 +71,12 @@ export class BasicAuthorisationConnector {
     return true
   }
 
-  async hasAccessRequest(user: UserDoc, model: ModelDoc) {
-    const entities = await authentication.getEntities(user)
-
-    const accessRequests = await getAccessRequestsByModel(user, model.id)
-    const hasAccessRequest = accessRequests.some((request) =>
-      request.metadata.overview.entities.some((entity) => entities.includes(entity)),
-    )
-
-    return hasAccessRequest
+  async hasApprovedAccessRequest(user: UserDoc, model: ModelDoc) {
+    const accessRequests = await getModelAccessRequestsForUser(user, model.id)
+    if (accessRequests.length === 0) {
+      return false
+    }
+    return await checkAccessRequestsApproved(accessRequests.map((accessRequest) => accessRequest.id))
   }
 
   async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
@@ -220,7 +218,7 @@ export class BasicAuthorisationConnector {
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 
     // Does the user have a valid access request for this model?
-    const hasAccessRequest = await this.hasAccessRequest(user, model)
+    const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       files.map(async (file) => {
@@ -230,12 +228,16 @@ export class BasicAuthorisationConnector {
         }
 
         if (
-          !hasAccessRequest &&
+          !hasApprovedAccessRequest &&
           !hasModelRole &&
           [FileAction.Download].includes(action) &&
           !model.settings.ungovernedAccess
         ) {
-          return { success: false, info: 'You need to have a valid access request to download a file.', id: file.id }
+          return {
+            success: false,
+            info: 'You need to have an approved access request to download a file.',
+            id: file.id,
+          }
         }
 
         return { success: true, id: file.id }
@@ -248,7 +250,7 @@ export class BasicAuthorisationConnector {
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 
     // Does the user have a valid access request for this model?
-    const hasAccessRequest = await this.hasAccessRequest(user, model)
+    const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       accesses.map(async (access) => {
@@ -276,7 +278,7 @@ export class BasicAuthorisationConnector {
         ) {
           return {
             success: false,
-            info: 'You need to have a valid access request to download an image.',
+            info: 'You need to have an approved access request to download an image.',
             id: access.name,
           }
         }

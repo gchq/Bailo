@@ -40,7 +40,7 @@ def test_create_get_from_version_and_update(
         team_id=team_id,
         visibility=visibility,
     )
-    model.card_from_schema("minimal-general-v10-beta")
+    model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
 
     # Check that a model can be changed
@@ -64,11 +64,11 @@ def test_get_and_update_latest_model_card(integration_client):
         visibility=ModelVisibility.PUBLIC,
     )
 
-    model.card_from_schema("minimal-general-v10-beta")
+    model.card_from_schema("minimal-general-v10")
 
     model.get_card_latest()
 
-    assert model.model_card_schema == "minimal-general-v10-beta"
+    assert model.model_card_schema == "minimal-general-v10"
 
 
 @pytest.mark.integration
@@ -80,7 +80,7 @@ def get_model_card_without_creation(integration_client):
         team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
-    model.card_from_schema("minimal-general-v10-beta")
+    model.card_from_schema("minimal-general-v10")
 
     with pytest.raises(BailoException):
         model.get_card_latest()
@@ -95,7 +95,7 @@ def test_get_releases(integration_client):
         team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
-    model.card_from_schema("minimal-general-v10-beta")
+    model.card_from_schema("minimal-general-v10")
     # Add two releases to the model
     release_1 = model.create_release("1.0.1", "test")
     release_2 = model.create_release("1.0.0", "test")

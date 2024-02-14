@@ -8,6 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -33,6 +34,7 @@
           
           <a href="../../../../" class="icon icon-home">
             Bailo Python Client Docs
+              <img src="../../../../_static/vertical-white.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search/" method="get">
@@ -422,24 +424,48 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="n">BytesIO</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download a specific file by it&#39;s id.</span>
+
+<span class="sd">        :param model_id: Unique model ID</span>
+<span class="sd">        :param file_id: Unique file ID</span>
+<span class="sd">        :return: The unique file ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span> <span class="n">TokenAgent</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/token/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Client.get_download_by_filename">
+<a class="viewcode-back" href="../../../../bailo.core/#bailo.core.client.Client.get_download_by_filename">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_download_by_filename</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">semver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Download a specific file.</span>
 
 <span class="sd">        :param model_id: Unique model ID</span>
-<span class="sd">        :param file_id: Unique file ID</span>
-<span class="sd">        :param buffer: BytesIO object for bailo to write to</span>
-<span class="sd">        :return: The unique file ID</span>
+<span class="sd">        :param semver: Semver of the release</span>
+<span class="sd">        :param filename: The filename trying to download from</span>
+<span class="sd">        :return: The filename</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span> <span class="n">TokenAgent</span><span class="p">):</span>
-            <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/token/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/token/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/release/</span><span class="si">{</span><span class="n">semver</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span>
+                <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">file_id</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span><span class="p">)</span>
-
-        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">file_id</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">/release/</span><span class="si">{</span><span class="n">semver</span><span class="si">}</span><span class="s2">/file/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">/download&quot;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10_000</span>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Client.simple_upload">

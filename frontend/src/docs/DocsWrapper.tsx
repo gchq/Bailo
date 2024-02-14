@@ -8,15 +8,15 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
+import Stack from '@mui/material/Stack'
 import { styled, useTheme } from '@mui/material/styles'
-import Stack from '@mui/system/Stack'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
+import Copyright from 'src/Copyright'
+import Wrapper from 'src/Wrapper'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
-import Copyright from '../Copyright'
-import Wrapper from '../Wrapper'
 
 type DocsWrapperProps = {
   children?: ReactNode
