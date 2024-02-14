@@ -1,4 +1,3 @@
-const baseURLForRelease = '/'
 let modelUuidForRelease = ''
 const modelNameForRelease = 'Test Model'
 const releaseVersion = '1.0.0'
@@ -30,7 +29,7 @@ describe('Draft and review a model release', () => {
   })
 
   it('drafts a new release for a model', () => {
-    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}`)
+    cy.visit(`/model/${modelUuidForRelease}`)
     cy.contains(modelNameForRelease)
 
     cy.log('Navigating to releases tab to draft a new release')
@@ -51,7 +50,7 @@ describe('Draft and review a model release', () => {
 
   it('can review a release', () => {
     cy.log('Navigating to the release page')
-    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}/release/${releaseVersion}`)
+    cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.log('Clicking the review button')
     cy.get('[data-test=reviewButton]').click({ force: true })
@@ -71,7 +70,7 @@ describe('Draft and review a model release', () => {
   })
 
   it('can edit an existing release', () => {
-    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}/release/${releaseVersion}`)
+    cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
 
     cy.log('Editing an existing release')
@@ -89,7 +88,7 @@ describe('Draft and review a model release', () => {
 
   it('can download a release artefact', () => {
     cy.log('Navigating to the releases tab for a model')
-    cy.visit(`${baseURLForRelease}/model/${modelUuidForRelease}?tab=releases  `)
+    cy.visit(`/model/${modelUuidForRelease}?tab=releases  `)
     cy.contains('Draft new Release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.log('Clicking the test file that is attached to a release')
