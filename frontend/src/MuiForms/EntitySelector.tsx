@@ -1,50 +1,71 @@
+import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
-import CircularProgress from '@mui/material/CircularProgress'
+import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import * as React from 'react'
-import MessageAlert from 'src/MessageAlert'
+import { FormContextType } from '@rjsf/utils'
+import { debounce } from 'lodash-es'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { EntityObject } from 'types/v2/types'
 
-import { useListUsers } from '../../data/user'
-import { EntityKind } from '../../types/types'
-
-export interface Entity {
-  kind: string
-  id: string
-  data?: unknown
-}
-
-type MinimalEntity = Omit<Entity, 'data'>
+import { useGetCurrentUser, useListUsers } from '../../actions/user'
+import Loading from '../common/Loading'
+import MessageAlert from '../MessageAlert'
 
 interface EntitySelectorProps {
   label?: string
   required?: boolean
-  value: Array<Entity>
-  onChange: (newValue: Array<MinimalEntity>) => void
+  value: string[]
+  onChange: (newValue: string[]) => void
+  formContext?: FormContextType
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { users, isUsersLoading: isLoading, isUsersError } = useListUsers()
-  const [open, setOpen] = React.useState(false)
+  const { onChange, value: currentValue, required, label, formContext } = props
 
-  const entities = React.useMemo(() => {
-    let tempEntities: Array<Entity> = []
+  const [open, setOpen] = useState(false)
+  const [userListQuery, setUserListQuery] = useState('')
+  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-    if (users)
-      tempEntities = tempEntities.concat(
-        users.map((user) => ({
-          kind: EntityKind.USER,
-          id: user.id,
-          data: user,
-        })),
-      )
+  const { users, isUsersError } = useListUsers(userListQuery)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-    return tempEntities
-  }, [users])
+  const theme = useTheme()
+  const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
-  const { onChange, value: currentValue, required, label } = props
+  useEffect(() => {
+    if (formContext && formContext.defaultCurrentUser) {
+      setSelectedEntities([{ id: currentUserId, kind: 'user' }])
+    }
+  }, [currentUserId, formContext])
 
-  const _onChange = (_event: React.SyntheticEvent<Element, Event>, newValues: Array<MinimalEntity>) => {
-    onChange(newValues.map((value) => ({ kind: value.kind, id: value.id })))
+  useEffect(() => {
+    if (currentValue) {
+      const updatedEntities: EntityObject[] = currentValue.map((value) => {
+        const [kind, id] = value.split(':')
+        return { kind, id }
+      })
+      setSelectedEntities(updatedEntities)
+    }
+  }, [currentValue])
+
+  const handleUserChange = useCallback(
+    (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
+      onChange(newValues.map((value) => `${value.kind}:${value.id}`))
+      setSelectedEntities(newValues)
+    },
+    [onChange],
+  )
+
+  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, [])
+
+  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
+    handleInputChange(event, value)
+  }, 500)
+
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
   if (isUsersError) {
@@ -52,37 +73,74 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   return (
-    <Autocomplete
-      multiple
-      open={open}
-      onOpen={() => {
-        setOpen(true)
-      }}
-      onClose={() => {
-        setOpen(false)
-      }}
-      // we might get a string or an object back
-      isOptionEqualToValue={(option: Entity, value: Entity) => option.id === value.id}
-      getOptionLabel={(option) => option.id}
-      value={currentValue || []}
-      onChange={_onChange}
-      options={entities || []}
-      loading={isLoading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label + (required ? ' *' : '')}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
+    <>
+      {isCurrentUserLoading && <Loading />}
+      {currentUser && formContext && formContext.editMode && (
+        <Autocomplete<EntityObject, true, true>
+          multiple
+          data-test='entitySelector'
+          open={open}
+          size='small'
+          onOpen={() => {
+            setOpen(true)
           }}
+          onClose={() => {
+            setOpen(false)
+          }}
+          disableClearable
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          getOptionLabel={(option) => option.id}
+          value={selectedEntities || []}
+          onChange={handleUserChange}
+          noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+          onInputChange={debounceOnInputChange}
+          options={users || []}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Box key={option.id} sx={{ maxWidth: '200px' }}>
+                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.id} />
+              </Box>
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder='Username or group name'
+              label={label + (required ? ' *' : '')}
+              onKeyDown={(event: KeyboardEvent) => {
+                if (event.key === 'Backspace') {
+                  event.stopPropagation()
+                }
+              }}
+            />
+          )}
         />
       )}
-    />
+      {formContext && !formContext.editMode && (
+        <>
+          <Typography fontWeight='bold'>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+          {currentValue.length === 0 && (
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+                color: theme.palette.customTextInput.main,
+              }}
+            >
+              Unanswered
+            </Typography>
+          )}
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {currentValue.map((entity) => (
+                <Chip label={entity.split(':')[1] || entity} key={entity} sx={{ width: 'fit-content' }} />
+              ))}
+            </Stack>
+          </Box>
+        </>
+      )}
+    </>
   )
 }

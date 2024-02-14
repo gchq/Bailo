@@ -30,5 +30,5 @@ def example_model(integration_client):
         team_id="team_id",
         visibility=ModelVisibility.PUBLIC,
     )
-    model.card_from_schema("minimal-general-v10-beta")
+    model.card_from_schema("minimal-general-v10")
     return model

@@ -1,9 +1,7 @@
 import Card from '@mui/material/Card'
-
-import { useGetUiConfig } from '../data/uiConfig'
+import { useGetUiConfig } from 'actions/uiConfig'
 
 function Banner() {
-  // TODO: Use v2 UI config endpoint when we remove v1
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const style = {
