@@ -8,7 +8,8 @@ import createAccessRequest from 'public/docs/bailo_create_access_request.png'
 
 ## What is an Access Request?
 
-In order to use a model you must first request access to the model.
+In order to use a model you must first request access to the model. This is so that those managing the model can
+authorise and keep tracking of anyone who wants to request access.
 
 ## How to make an Access Request
 
@@ -18,13 +19,13 @@ Visit the model overview page. From here you can click the "Request Access" butt
   <Image src={modelOverview} />
 </Box>
 
-Select a schema for your access request:
+Much like creating a model, access requests forms require a schema, this can be selected like so:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image src={selectAccessRequestSchema} />
 </Box>
 
-Fill out the form and submit your access request:
+Finally, fill out the form and submit your access request:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image src={createAccessRequest} />
@@ -32,7 +33,7 @@ Fill out the form and submit your access request:
 
 ## Review Process
 
-Once this request has been approved by a Model Senior Responsible Officer you will be able to download Release artefacts
-and push docker images.
+Once this request has been approved by the necessary role you will be able to download Release artefacts and push docker
+images.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
