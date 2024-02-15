@@ -15,7 +15,7 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
-import { TokenInterface } from 'types/v2/types'
+import { TokenInterface } from 'types/types'
 
 type TokenDialogProps = {
   token?: TokenInterface

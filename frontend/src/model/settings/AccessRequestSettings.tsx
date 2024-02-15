@@ -3,7 +3,7 @@ import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/mat
 import { patchModel } from 'actions/model'
 import { useState } from 'react'
 
-import { ModelInterface } from '../../../types/v2/types'
+import { ModelInterface } from '../../../types/types'
 import { getErrorMessage } from '../../../utils/fetcher'
 import useNotification from '../../hooks/useNotification'
 import MessageAlert from '../../MessageAlert'

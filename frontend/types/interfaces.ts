@@ -79,17 +79,39 @@ export const ModelVisibility = {
 
 export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
 
+export interface ModelCardInterface {
+  schemaId: string
+  version: number
+  createdBy: string
+
+  metadata: unknown
+}
+
+export interface CollaboratorEntry {
+  entity: string
+  roles: Array<'owner' | 'contributor' | 'consumer' | string>
+}
+
 export interface ModelInterface {
   id: string
-
   name: string
+  teamId: string
   description: string
-
+  settings: {
+    ungovernedAccess: boolean
+  }
+  card: ModelCardInterface
   visibility: ModelVisibilityKeys
-  deleted: boolean
-
+  collaborators: CollaboratorEntry[]
+  createdBy: string
   createdAt: Date
-  updatedAt: Date
+}
+
+export interface ModelForm {
+  name: string
+  teamId: string
+  description: string
+  visibility: ModelVisibilityKeys
 }
 
 export interface AccessRequestMetadata {
@@ -130,3 +152,40 @@ export interface FileWithMetadata {
   fileName: string
   metadata?: string
 }
+
+export const Decision = {
+  RequestChanges: 'request_changes',
+  Approve: 'approve',
+} as const
+export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
+
+export interface ReviewResponse {
+  user: string
+  decision: DecisionKeys
+  comment?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ReviewResponseWithRole extends ReviewResponse {
+  role: string
+}
+
+type PartialReviewRequestInterface =
+  | {
+      accessRequestId: string
+      semver?: never
+    }
+  | {
+      accessRequestId?: never
+      semver: string
+    }
+
+export type ReviewRequestInterface = {
+  model: ModelInterface
+  role: string
+  kind: 'release' | 'access'
+  responses: ReviewResponse[]
+  createdAt: string
+  updatedAt: string
+} & PartialReviewRequestInterface

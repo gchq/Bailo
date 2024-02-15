@@ -21,7 +21,7 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
 import Wrapper from 'src/Wrapper'
-import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/v2/types'
+import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 

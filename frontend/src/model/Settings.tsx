@@ -3,7 +3,7 @@ import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography }
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
-import { ModelInterface } from '../../types/v2/types'
+import { ModelInterface } from '../../types/types'
 import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 import ModelDetails from './settings/ModelDetails'

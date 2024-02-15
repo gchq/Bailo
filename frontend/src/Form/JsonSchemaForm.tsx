@@ -19,7 +19,7 @@ import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
 
-import { SplitSchemaNoRender } from '../../types/interfaces'
+import { SplitSchemaNoRender } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
 import { widgets } from '../../utils/formUtils'
 import ValidationErrorIcon from '../model/common/ValidationErrorIcon'

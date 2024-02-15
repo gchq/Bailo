@@ -2,8 +2,7 @@ import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
 import React, { useEffect, useState } from 'react'
-
-import { Entity } from '../../types/types'
+import { Entity } from 'types/types'
 
 export default function UserAvatar({
   entity,

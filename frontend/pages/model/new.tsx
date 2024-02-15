@@ -20,8 +20,7 @@ import ModelDescriptionInput from 'src/model/ModelDescriptionInput'
 import ModelNameInput from 'src/model/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
 import Wrapper from 'src/Wrapper'
-import { TeamInterface } from 'types/interfaces'
-import { ModelForm, ModelVisibility } from 'types/v2/types'
+import { ModelForm, ModelVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function NewModel() {

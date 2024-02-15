@@ -2,7 +2,7 @@ import ErrorIcon from '@mui/icons-material/ErrorOutline'
 import { Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-import { StepNoRender } from '../../../types/interfaces'
+import { StepNoRender } from '../../../types/types'
 
 interface ValidationErrorIconProps {
   step: StepNoRender

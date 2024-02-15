@@ -1,6 +1,6 @@
 import { Container } from '@mui/material'
 import { useMemo } from 'react'
-import { ModelInterface } from 'types/v2/types'
+import { ModelInterface } from 'types/types'
 
 import FormEditPage from './overview/FormEditPage'
 import TemplatePage from './overview/TemplatePage'

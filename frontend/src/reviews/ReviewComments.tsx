@@ -9,9 +9,14 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
-import { AccessRequestInterface } from 'types/interfaces'
-import { isReviewResponse, ReleaseInterface, ReviewComment, ReviewResponseKind } from 'types/types'
-import { ReviewResponse } from 'types/v2/types'
+import {
+  AccessRequestInterface,
+  isReviewResponse,
+  ReleaseInterface,
+  ReviewComment,
+  ReviewResponse,
+  ReviewResponseKind,
+} from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 

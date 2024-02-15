@@ -5,7 +5,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/registry/CodeLine'
 
-import { ModelImage } from '../../../types/interfaces'
+import { ModelImage } from '../../../types/types'
 
 type ModelImageDisplayProps = {
   modelImage: ModelImage
