@@ -253,4 +253,15 @@ module.exports = {
       registry: 'registry',
     },
   },
+
+  inference: {
+    // Enable / disable the inferencing service
+    enabled: true,
+
+    connection: {
+      host: 'example.com',
+    },
+
+    gpus: {},
+  },
 }

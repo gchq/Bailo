@@ -155,6 +155,15 @@ export interface Config {
       accessRequests: Array<DefaultSchema>
     }
   }
+
+  inference: {
+    enabled: boolean
+    connection: {
+      host: string
+    }
+
+    gpus: { [key: string]: string }
+  }
 }
 
 const config: Config = _config.util.toObject()
