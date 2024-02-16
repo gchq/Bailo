@@ -220,7 +220,7 @@ describe('services > release', () => {
 
   test('newReleaseComment > success', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    releaseModelMocks.findOne.mockResolvedValue({})
+    releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
 

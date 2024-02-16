@@ -3,19 +3,26 @@ import { Box, Divider, Stack } from '@mui/material'
 import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
-import { AccessRequestInterface, ReviewResponse } from 'types/interfaces'
-import { isReviewResponse, ReleaseInterface, ReviewComment, ReviewResponseKind } from 'types/types'
+import {
+  AccessRequestInterface,
+  isReviewResponse,
+  ReleaseInterface,
+  ReviewComment,
+  ReviewResponse,
+  ReviewResponseKind,
+} from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
-type ReviewCommentsProps =
+type ReviewCommentsProps = {
+  isEdit: boolean
+} & (
   | {
       release: ReleaseInterface
       accessRequest?: never
@@ -24,12 +31,12 @@ type ReviewCommentsProps =
       release?: never
       accessRequest: AccessRequestInterface
     }
+)
 
-export default function ReviewComments({ release, accessRequest }: ReviewCommentsProps) {
+export default function ReviewComments({ release, accessRequest, isEdit }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
 
@@ -45,6 +52,12 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     modelId,
     ...semverOrAccessRequestIdObject,
   })
+
+  const hasResponseOrComment = useMemo(() => {
+    const hasReviewResponse = !!reviews.find((review) => review.responses.length > 0)
+    const hasComment = release ? release.comments.length > 0 : accessRequest.comments.length > 0
+    return hasReviewResponse || hasComment
+  }, [accessRequest, release, reviews])
 
   const reviewDetails = useMemo(() => {
     let decisionsAndComments: Array<ReviewResponseKind> = []
@@ -70,11 +83,6 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
   async function submitReviewComment() {
     setCommentSubmissionError('')
     setSubmitButtonLoading(true)
-    if (!newReviewComment) {
-      setCommentSubmissionError('Please provide a comment before submitting.')
-      setSubmitButtonLoading(false)
-      return
-    }
     if (release) {
       const res = await postReleaseComment(modelId, release.semver, newReviewComment)
       if (res.ok) {
@@ -101,37 +109,32 @@ export default function ReviewComments({ release, accessRequest }: ReviewComment
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {reviews.length > 0 && <Divider />}
-      {isReviewsLoading && isCurrentUserLoading && <Loading />}
+      {(hasResponseOrComment || !isEdit) && <Divider />}
+      {isReviewsLoading && <Loading />}
       {reviewDetails}
-      <>
-        {currentUser && (
-          <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
-            <Box sx={{ width: '100%' }}>
-              <RichTextEditor
-                value={newReviewComment}
-                onChange={(e) => setNewReviewComment(e)}
-                textareaProps={{ placeholder: 'Add a comment' }}
-              />
-            </Box>
-            <LoadingButton
-              sx={{ mt: 1 }}
-              variant='contained'
-              onClick={submitReviewComment}
-              loading={submitButtonLoading}
-            >
-              Submit comment
-            </LoadingButton>
-            <MessageAlert severity='error' message={commentSubmissionError} />
-          </Stack>
-        )}
-      </>
+      {!isEdit && (
+        <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
+          <Box sx={{ width: '100%' }}>
+            <RichTextEditor
+              value={newReviewComment}
+              onChange={(e) => setNewReviewComment(e)}
+              textareaProps={{ placeholder: 'Add your comment here...' }}
+            />
+          </Box>
+          <LoadingButton
+            sx={{ mt: 1 }}
+            variant='contained'
+            onClick={submitReviewComment}
+            loading={submitButtonLoading}
+            disabled={!newReviewComment}
+          >
+            Add comment
+          </LoadingButton>
+          <MessageAlert severity='error' message={commentSubmissionError} />
+        </Stack>
+      )}
     </>
   )
 }

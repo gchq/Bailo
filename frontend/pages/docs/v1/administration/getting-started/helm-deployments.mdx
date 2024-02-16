@@ -1,0 +1,63 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Helm Deployments
+
+> At the moment `helm/bailo` is configured for OpenShift deployment, our default deployment target. Support for
+> Kubernetes is on the way. We have heard that external organisations have had success already by disabling 'routes' and
+> setting 'ingresses' instead.
+
+## Requirements
+
+- [HELM CLI](https://github.com/helm/helm/releases)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/)
+
+### Optional
+
+OC is required for deployments to OpenShift
+
+- [OpenShift CLI](https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz)
+
+## Deployment
+
+### Setup
+
+All commands assume they are run in the `helm/bailo` directory. The user should have already authenticated `kubectl` to
+their cluster and changed to the correct context:
+
+1. `kubectl config set-context --current --namespace=bailo`
+
+To deploy to `OpenShift`, `oc` must also be configured correctly.
+
+### Configuration
+
+Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by
+using `--set <option>=<value>`.
+
+We do not host built images of Bailo, thus at the very minimum the configuration should include the location of a Bailo
+image:
+
+```yaml
+---
+image:
+  repository: some.repository.com/bailo
+  tag: 'latest'
+```
+
+This image can be built with `docker build -t bailo .` in the root directory. This guide assumes the overrides file is
+called `local.yaml` in the `helm/bailo` folder.
+
+#### Installing Bailo
+
+1. `helm dependency update`
+2. `helm install --values ./local.yaml bailo .`
+3. `helm list # list current deployments`
+
+#### Upgrading Bailo
+
+1. `helm upgrade --values ./local.yaml bailo .`
+
+#### Removing Bailo
+
+1. `helm uninstall bailo`
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

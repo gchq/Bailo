@@ -15,33 +15,29 @@ export interface DirectoryEntry {
 
 export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
-  { title: 'Docs', slug: '', header: true },
+  { title: 'Overview', slug: '', header: true },
+
+  { title: 'Getting Started', slug: 'getting-started', header: true },
+
+  { title: 'FAQ', slug: 'getting-started/faq' },
+  { title: `What's new in V2?`, slug: 'getting-started/whats-new-in-v2' },
 
   // Users
   { title: 'Users', slug: 'users', header: true },
 
-  { title: 'Upload a Model', slug: 'users/upload-a-model', header: true },
-  { title: 'Why Upload A Model', slug: 'users/upload-a-model/why-upload-a-model' },
-  { title: 'Requirements', slug: 'users/upload-a-model/requirements' },
-  { title: 'Model Wrapper', slug: 'users/upload-a-model/model-wrapper' },
-  { title: 'Preparing The Code', slug: 'users/upload-a-model/preparing-the-code' },
-  { title: 'Upload To Bailo', slug: 'users/upload-a-model/upload-to-bailo' },
-  { title: 'Updating A Model', slug: 'users/upload-a-model/updating-a-model' },
+  { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
+  { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
+  { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
+  { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
-  { title: 'Deployments', slug: 'users/deployments', header: true },
-  { title: 'Requesting A Deployment', slug: 'users/deployments/requesting-a-deployment' },
-  { title: 'Compliance', slug: 'users/deployments/compliance' },
-  { title: 'Using A Deployment', slug: 'users/deployments/using-a-deployment', header: true },
-  { title: 'Docker', slug: 'users/deployments/using-a-deployment/docker' },
+  { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
 
-  { title: 'Approvals', slug: 'users/approvals' },
-
-  { title: 'Automation', slug: 'users/automation', header: true },
-  { title: 'Key Workflows', slug: 'users/automation/key-workflows' },
-  { title: 'Python Client', slug: 'users/automation/python-client' },
-
-  { title: 'Marketplace', slug: 'users/marketplace' },
-
+  { title: 'Reviews', slug: 'users/reviews', header: true },
+  { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
+  { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
+  { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
+  { title: 'Python Client', slug: 'users/programmatically-using-bailo/python-client' },
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
@@ -65,32 +61,19 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
 
+  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+
   // Developers
   { title: 'Developers', slug: 'developers', header: true },
-  { title: 'Contributing', slug: 'developers/contributing' },
-  { title: 'Dev Setup', slug: 'developers/dev-setup' },
 
-  { title: 'Main Concepts', slug: 'developers/main-concepts', header: true },
-  { title: 'Logical Flow', slug: 'developers/main-concepts/logical-flow' },
-  { title: 'Building Models', slug: 'developers/main-concepts/building-models' },
-
-  { title: 'Processes', slug: 'developers/processes', header: true },
-  { title: 'Adding An Endpoint', slug: 'developers/processes/adding-an-endpoint' },
-
-  { title: 'Testing', slug: 'developers/testing', header: true },
-  { title: 'Unit Testing', slug: 'developers/testing/unit-testing' },
-  { title: 'E2e Testing', slug: 'developers/testing/e2e-testing' },
-  { title: 'Manual Testing', slug: 'developers/testing/manual-testing' },
-
-  { title: 'Useful Commands', slug: 'developers/useful-commands' },
-  { title: 'Dev Notes', slug: 'developers/dev-notes' },
-
-  // Errors
-  { title: 'Common Errors', slug: 'errors', header: true },
-  { title: 'Duplicate Version', slug: 'errors/duplicate-version' },
+  { title: 'Bailo Development', slug: 'developers/bailo-development', header: true },
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
+
+  // V2
+  { title: 'V2', slug: 'v2', header: true },
+  { title: 'Model Images', slug: 'v2/model-images' },
 ]
 
 export interface DirectoryTree {

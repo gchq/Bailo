@@ -1,9 +1,8 @@
 import qs from 'querystring'
 import { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import useSWR from 'swr'
-import { ModelInterface, ReleaseInterface } from 'types/types'
+import { AccessRequestInterface, ModelInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
 
-import { AccessRequestInterface, ReviewRequestInterface } from '../types/interfaces'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReviewRequestsForUser() {
@@ -54,10 +53,10 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
   )
 
   return {
-    mutateReviews: mutate,
     reviews: data ? data.reviews : [],
     isReviewsLoading: !error && !data,
     isReviewsError: error,
+    mutateReviews: mutate,
   }
 }
 

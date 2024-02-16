@@ -1,16 +1,19 @@
-import Alert from '@mui/material/Alert'
-import React from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 import Wrapper from '../Wrapper'
 
-export default function ErrorWrapper({ message }: { message?: string }) {
-  return (
-    <Wrapper title='Error' page='error'>
-      <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
-    </Wrapper>
-  )
+type ErrorWrapperProps = {
+  message?: string
 }
 
-export function MinimalErrorWrapper({ message }: { message?: string }) {
-  return <Alert severity='error'>{message || 'Unable to communicate with server.'}</Alert>
+export default function ErrorWrapper({ message }: ErrorWrapperProps) {
+  return (
+    <Wrapper title='Error' page='error'>
+      <MessageAlert
+        message={message || 'Unable to communicate with server.'}
+        severity='error'
+        data-test='errorWrapperMessage'
+      />
+    </Wrapper>
+  )
 }

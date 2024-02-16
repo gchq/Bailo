@@ -26,15 +26,15 @@ import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
-import { EntityKind } from '../../types/types'
-import { User } from '../../types/v2/types'
+import bailoLogo from '../../public/logo-horizontal-light.png'
+import { EntityKind, User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
-type TopNavigationProps = {
+export type TopNavigationProps = {
   drawerOpen?: boolean
   pageTopStyling?: CSSProperties
   currentUser: User
@@ -85,7 +85,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
   }
 
   const handleNewModelClicked = () => {
-    router.push('/beta/model/new')
+    router.push('/model/new')
   }
 
   const handleMenuClose = () => {
@@ -117,7 +117,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
             </IconButton>
             <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-              <Link href='/beta/model/new'>
+              <Link href='/model/new'>
                 <MenuItem>
                   <ListItemIcon>
                     <Add fontSize='small' />
@@ -148,9 +148,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           </Box>
         )}
         <Box sx={{ flexGrow: 1, ml: 2, cursor: 'pointer' }}>
-          <Link href='/beta' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
+          <Link href='/' color='inherit' underline='none' style={{ color: 'inherit', textDecoration: 'inherit' }}>
             <Stack justifyContent='center' alignItems='left'>
-              <Image src='/../public/logo-horizontal-light.png' alt='bailo logo' width={142} height={60} />
+              <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
         </Box>
@@ -188,7 +188,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                           </MenuItem>
                         </span>
                       </Tooltip>
-                      <Link href='/beta/settings' color='inherit' underline='none'>
+                      <Link href='/settings' color='inherit' underline='none'>
                         <MenuItem data-test='settingsLink'>
                           <ListItemIcon>
                             <Settings fontSize='small' />

@@ -62,6 +62,7 @@ export default function CustomTextInput(props: CustomTextInputProps) {
         InputProps={{
           ...props.InputProps,
           ...(!formContext.editMode && { disableUnderline: true }),
+          'data-test': id,
         }}
       />
     </Fragment>

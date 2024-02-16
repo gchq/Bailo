@@ -13,9 +13,8 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { ReviewRequestInterface } from 'types/interfaces'
+import { ReviewRequestInterface, User } from 'types/types'
 
-import { User } from '../../types/v2/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 
 const StyledList = styled(List)(({ theme }) => ({
@@ -55,7 +54,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   },
 }))
 
-interface SideNavigationProps {
+export interface SideNavigationProps {
   page: string
   currentUser: User
   toggleDrawer: () => void
@@ -115,7 +114,7 @@ export default function SideNavigation({
         <Stack sx={{ height: '100%' }} justifyContent='space-between'>
           <StyledList>
             <NavMenuItem
-              href='/beta'
+              href='/'
               selectedPage={page}
               primaryText='Marketplace'
               drawerOpen={drawerOpen}
@@ -124,31 +123,31 @@ export default function SideNavigation({
               icon={<DashboardIcon />}
             />
             <NavMenuItem
-              href='/beta/review'
+              href='/review'
               selectedPage={page}
               primaryText='Reviews'
               drawerOpen={drawerOpen}
-              menuPage='beta/review'
+              menuPage='review'
               title='Review'
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
             <Divider />
             <NavMenuItem
-              href='/beta/docs/api'
+              href='/docs/api'
               selectedPage={page}
               primaryText='API'
               drawerOpen={drawerOpen}
-              menuPage='beta/api'
+              menuPage='api'
               title='API'
               icon={<LinkIcon />}
             />
             <NavMenuItem
-              href='/beta/help'
+              href='/help'
               selectedPage={page}
               primaryText='Support'
               drawerOpen={drawerOpen}
-              menuPage='beta/help'
+              menuPage='help'
               title='Help & Support'
               icon={<ContactSupportIcon />}
             />
@@ -157,11 +156,11 @@ export default function SideNavigation({
             {currentUser && (
               <>
                 <NavMenuItem
-                  href='/beta/schemas/list'
+                  href='/schemas/list'
                   selectedPage={page}
                   primaryText='Schemas'
                   drawerOpen={drawerOpen}
-                  menuPage='beta/schemas'
+                  menuPage='schemas'
                   title='Schemas'
                   icon={<SchemaIcon />}
                 />
@@ -172,11 +171,11 @@ export default function SideNavigation({
           <StyledList>
             <Divider />
             <NavMenuItem
-              href='/beta/settings'
+              href='/settings'
               selectedPage={page}
               primaryText='Settings'
               drawerOpen={drawerOpen}
-              menuPage='beta/settings'
+              menuPage='settings'
               title='User settings'
               icon={<SettingsIcon />}
             />

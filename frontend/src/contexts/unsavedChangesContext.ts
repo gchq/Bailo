@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-import { UnsavedChangesHook } from '../../utils/hooks/useUnsavedChanges'
+import { UnsavedChangesHook } from '../hooks/useUnsavedChanges'
 
 const UnsavedChangesContext = createContext<UnsavedChangesHook>({
   unsavedChanges: false,

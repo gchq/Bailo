@@ -139,6 +139,26 @@ module.exports = {
         schema: require('../src/scripts/example_schemas/minimal_deployment_schema.json'),
       },
     ],
+    v2: {
+      modelCards: [
+        {
+          name: 'Minimal Schema v10',
+          id: 'minimal-general-v10',
+          description:
+            "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
+          jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+        },
+      ],
+      accessRequests: [
+        {
+          name: 'Minimal Access Request Schema v10',
+          id: 'minimal-access-request-general-v10',
+          description:
+            'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
+          jsonSchema: require('../src/scripts/example_schemas/minimal_access_request_schema.json'),
+        },
+      ],
+    },
   },
 
   session: {
@@ -191,32 +211,11 @@ module.exports = {
       host: 'localhost:8080',
     },
 
-    // A configurable checkbox on the last page when uploading a model
-    uploadWarning: {
-      showWarning: true,
-      checkboxText: 'By checking here you confirm that the information is correct',
-    },
-
-    // A configurable checkbox on the last page when requesting a deployment
-    deploymentWarning: {
-      showWarning: true,
-      checkboxText: 'By checking here you confirm that the information is correct',
-    },
-
     // Used by some admin pages (e.g. the logs) to directly open the correct page in your IDE
     // Not needed in production
     development: {
       logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
     },
-
-    // The available seldon versions that can be used to build images
-    seldonVersions: [
-      {
-        name: 'seldonio - 1.10.0',
-        image: 'seldonio/seldon-core-s2i-python37:1.10.0',
-      },
-    ],
-    maxModelSizeGB: 50,
   },
 
   connectors: {

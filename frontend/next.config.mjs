@@ -27,7 +27,7 @@ const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  transpilePackages: ['nanoid', 'lodash-es', '@uiw/react-textarea-code-editor'],
+  transpilePackages: ['nanoid', 'lodash-es'],
 
   modularizeImports: {
     '@mui/material': {

@@ -1,45 +1,73 @@
 import SearchIcon from '@mui/icons-material/Search'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import IconButton from '@mui/material/IconButton'
-import InputBase from '@mui/material/InputBase'
-import MuiLink from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
+import {
+  Box,
+  Button,
+  Chip,
+  FilledInput,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Link as MuiLink,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Typography from '@mui/material/Typography'
+import { useListModels } from 'actions/model'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
+import ChipSelector from 'src/common/ChipSelector'
+import EmptyBlob from 'src/common/EmptyBlob'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useDebounce from 'src/hooks/useDebounce'
+import Wrapper from 'src/Wrapper'
 
-import { ListModelType, useListModels } from '../data/model'
-import EmptyBlob from '../src/common/EmptyBlob'
-import MultipleErrorWrapper from '../src/errors/MultipleErrorWrapper'
-import Wrapper from '../src/Wrapper'
-import { Model, Version } from '../types/types'
-import useDebounce from '../utils/hooks/useDebounce'
+interface KeyAndLabel {
+  key: string
+  label: string
+}
 
-export default function ExploreModels() {
-  const [group, setGroup] = useState<ListModelType>('all')
+const searchFilterTypeLabels: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
+
+export default function HomePage() {
+  return (
+    <Wrapper title='Explore Models' page='marketplace'>
+      <Marketplace />
+    </Wrapper>
+  )
+}
+
+function Marketplace() {
+  // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
+  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
+  const [selectedTask, setSelectedTask] = useState('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError, mutateModels } = useListModels(group, debouncedFilter)
+  const { models, isModelsError } = useListModels(selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
 
   const theme = useTheme()
 
-  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
-    isModelsError,
-  })
-  if (error) return error
+  const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
+    if (selected.length > 0) {
+      const types: string[] = []
+      selected.forEach((value) => {
+        const typeToAdd = searchFilterTypeLabels.find((typeLabel) => typeLabel.label === value)
+        if (typeToAdd && typeToAdd.label) {
+          types.push(typeToAdd.key)
+        }
+      })
+      setSelectedTypes(types)
+    } else {
+      setSelectedTypes([])
+    }
+  }, [])
 
-  const handleGroupChange = (_event: React.SyntheticEvent, newValue: ListModelType) => {
-    setGroup(newValue)
-    mutateModels()
-  }
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value)
   }
 
@@ -47,68 +75,123 @@ export default function ExploreModels() {
     e.preventDefault()
   }
 
+  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
+    isModelsError,
+  })
+  if (error) return error
+
   return (
-    <Wrapper title='Explore Models' page='marketplace'>
-      <Paper
-        component='form'
-        onSubmit={onFilterSubmit}
-        sx={{
-          p: '2px 4px',
-          display: 'flex',
-          alignItems: 'center',
-          width: '70%',
-          maxWidth: '400px',
-          margin: 'auto',
-          marginRight: 0,
-          marginBottom: 3,
-        }}
-      >
-        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Filter Models' value={filter} onChange={handleFilterChange} />
-        <IconButton color='primary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-          <SearchIcon />
-        </IconButton>
-      </Paper>
-      <Box>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <Stack spacing={2} sx={{ maxWidth: '250px' }}>
+        <Button component={Link} href='/model/new' variant='contained'>
+          Add new model
+        </Button>
+        <FormControl
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: '400px',
+            marginBottom: 3,
+          }}
+          variant='filled'
+          onSubmit={onFilterSubmit}
+        >
+          <InputLabel htmlFor='model-filter-input'>Filter models</InputLabel>
+          <FilledInput
+            sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}
+            id='model-filter-input'
+            value={filter}
+            disableUnderline
+            onChange={handleFilterChange}
+            endAdornment={
+              <InputAdornment position='end'>
+                <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+        <Box>
+          <ChipSelector
+            label='Tasks'
+            // TODO fetch all model tags
+            tags={[
+              'Translation',
+              'Image Classification',
+              'Summarization',
+              'Tokenisation',
+              'Text to Speech',
+              'Tabular Regression',
+            ]}
+            expandThreshold={10}
+            selectedTags={selectedTask}
+            onChange={setSelectedTask}
+            size='small'
+          />
+        </Box>
+        <Box>
+          <ChipSelector
+            label='Libraries'
+            // TODO fetch all model libraries
+            tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+            expandThreshold={10}
+            multiple
+            selectedTags={selectedLibraries}
+            onChange={setSelectedLibraries}
+            size='small'
+          />
+        </Box>
+        <Box>
+          <ChipSelector
+            label='Other'
+            multiple
+            tags={[...searchFilterTypeLabels.map((type) => type.label)]}
+            onChange={handleSelectedTypesOnChange}
+            selectedTags={searchFilterTypeLabels
+              .filter((label) => selectedTypes.includes(label.key))
+              .map((type) => type.label)}
+            size='small'
+          />
+        </Box>
+      </Stack>
+      <Box sx={{ width: '100%' }}>
         <Paper sx={{ py: 2, px: 4 }}>
           <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-            <Tabs value={group} onChange={handleGroupChange} aria-label='basic tabs example'>
-              <Tab label='All Models' value='all' />
-              <Tab label='My Models' value='user' />
-              <Tab label='Favourites' value='favourites' data-test='favouriteModelsTab' />
+            <Tabs value={'bailo'} indicatorColor='secondary'>
+              <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
             </Tabs>
           </Box>
-          <Box data-test='modelListBox'>
-            {models &&
-              models.map((model: Model, index: number) => {
-                const latestVersion = model.latestVersion as Version
-                return (
-                  <Box key={model.uuid}>
-                    <Link href={`/model/${model.uuid}`} passHref legacyBehavior>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-                      >
-                        {latestVersion.metadata.highLevelDetails.name}
-                      </MuiLink>
-                    </Link>
-                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                      {latestVersion.metadata.highLevelDetails.modelInASentence}
-                    </Typography>
-                    <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                      {latestVersion.metadata.highLevelDetails.tags.map((tag: string) => (
-                        <Chip color='primary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                      ))}
-                    </Stack>
-                    {index !== models.length - 1 && (
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                    )}
-                  </Box>
-                )
-              })}
-            {models?.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-          </Box>
+          <div data-test='modelListBox'>
+            {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
+            {models.map((model, index) => {
+              return (
+                <Fragment key={model.id}>
+                  <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
+                    <MuiLink
+                      variant='h5'
+                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+                    >
+                      {model.name}
+                    </MuiLink>
+                  </Link>
+                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                    {model.description}
+                  </Typography>
+                  <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                    {model.tags.map((tag) => (
+                      <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                    ))}
+                  </Stack>
+                  {index !== models.length - 1 && (
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                  )}
+                </Fragment>
+              )
+            })}
+          </div>
         </Paper>
       </Box>
-    </Wrapper>
+    </Stack>
   )
 }

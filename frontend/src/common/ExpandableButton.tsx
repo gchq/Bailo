@@ -60,9 +60,11 @@ export default function ExpandableButton({ label, icon, onClick, ariaLabel, heig
       >
         {icon}
         {hover ? (
-          <StyledHoverSpan className='test-open'>{label}</StyledHoverSpan>
+          <StyledHoverSpan className='test-open' data-test='expandedButtonContent'>
+            {label}
+          </StyledHoverSpan>
         ) : (
-          <StyledSpan className='test-closed'></StyledSpan>
+          <StyledSpan className='test-closed' data-test='collapsedButtonContent' />
         )}
       </Button>
     </Box>

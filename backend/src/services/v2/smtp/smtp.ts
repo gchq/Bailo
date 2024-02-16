@@ -28,7 +28,7 @@ async function dispatchEmail(entity: string, emailContent: EmailContent) {
   await Promise.all(sendEmailResponses)
 }
 
-//const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
+const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
@@ -41,11 +41,14 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { title: 'Model ID', data: release.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Semver', data: release.semver },
-      { title: 'Created By', data: release.createdBy },
+      {
+        title: 'Created By',
+        data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || release.createdBy,
+      },
     ],
     [
-      { name: 'Open Release', url: 'TODO' },
-      { name: 'See Reviews', url: 'TODO' },
+      { name: 'Open Release', url: getReleaseUrl(release) },
+      { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
 
@@ -68,11 +71,19 @@ export async function requestReviewForAccessRequest(
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Entities Requesting Access', data: accessRequest.metadata.overview.entities.toString() },
-      { title: 'Created By', data: accessRequest.createdBy },
+      {
+        title: 'Created By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', accessRequest.createdBy))).name ||
+          accessRequest.createdBy,
+      },
     ],
     [
-      { name: 'Open Access Request', url: 'TODO' },
-      { name: 'See Reviews', url: 'TODO' },
+      {
+        name: 'Open Access Request',
+        url: getAccessRequestUrl(accessRequest),
+      },
+      { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
 
@@ -90,16 +101,19 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     log.info('response not found')
     return
   }
+
   const emailContent = buildEmail(
-    `Release ${release.semver} has been reviewed by ${reviewResponse?.user}`,
+    `Release ${release.semver} has been reviewed by ${
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+    }`,
     [
       { title: 'Model ID', data: release.modelId },
       { title: 'Reviewer Role', data: review.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
-      { name: 'Open Release', url: 'TODO' },
-      { name: 'See Reviews', url: 'TODO' },
+      { name: 'Open Release', url: getReleaseUrl(release) },
+      { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
   await dispatchEmail(toEntity('user', release.createdBy), emailContent)
@@ -117,15 +131,17 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     return
   }
   const emailContent = buildEmail(
-    `Access request for model ${accessRequest.modelId} has been reviewed by ${reviewResponse.user}`,
+    `Access request for model ${accessRequest.modelId} has been reviewed by ${
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+    }`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Reviewer Role', data: review.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
-      { name: 'Open Release', url: 'TODO' },
-      { name: 'See Reviews', url: 'TODO' },
+      { name: 'Open Access Request', url: getAccessRequestUrl(accessRequest) },
+      { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
   )
   await dispatchEmail(toEntity('user', accessRequest.createdBy), emailContent)
@@ -153,4 +169,12 @@ async function sendEmail(email: Mail.Options) {
     log.warn(`Unable to send email`, content)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
+}
+
+function getReleaseUrl(release: ReleaseDoc) {
+  return `${appBaseUrl}/model/${release.modelId}/release/${release.semver}`
+}
+
+function getAccessRequestUrl(accessRequest: AccessRequestDoc) {
+  return `${appBaseUrl}/model/${accessRequest.modelId}/access-request/${accessRequest.id}`
 }

@@ -1,9 +1,7 @@
 import '../public/css/fonts.css'
 import '../public/css/layouting.css'
 import '../public/css/table.css'
-import '../public/css/terminal.css'
 import '../public/css/highlight.css'
-import 'reactflow/dist/style.css'
 
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -14,12 +12,12 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
+import createEmotionCache from 'utils/createEmotionCache'
 
-import createEmotionCache from '../components/createEmotionCache'
 import ThemeModeContext from '../src/contexts/themeModeContext'
 import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
-import useThemeMode from '../utils/hooks/useThemeMode'
-import useUnsavedChanges from '../utils/hooks/useUnsavedChanges'
+import useThemeMode from '../src/hooks/useThemeMode'
+import useUnsavedChanges from '../src/hooks/useUnsavedChanges'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
@@ -28,9 +26,7 @@ interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-export default function MyApp(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
-
+export default function MyApp({ Component, emotionCache = clientSideEmotionCache, pageProps }: MyAppProps) {
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
 
