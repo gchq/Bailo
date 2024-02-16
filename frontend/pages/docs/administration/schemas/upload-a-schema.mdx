@@ -1,0 +1,34 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+
+import bailoResetApprovals from '../../../../public/docs/bailo_upload_new_schema.png'
+
+## Upload a Schema
+
+By default Bailo comes with a default schema for both a model card and an access request. These are added on startup in
+`backend/src/services/v2/schema.ts`. These contain a small number of questions, and are not expected to be used on a
+production system.
+
+To add a new schema, visit [/schemas/list](/schemas/list) on a Bailo instance. To manage schemas you will need to hold
+the 'admin' role on the Bailo instance. Click the 'Upload a new Schema' button in the top left.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoResetApprovals} />
+</Box>
+
+This will bring up a form to create a new schema. A description of each field is below:
+
+| Field       | Description                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| Id          | A globally unique schema identifier, should include the schema version.                            |
+| Name        | A user facing name for the schema, should include the schema version.                              |
+| Description | This is displayed to the user to help them decide which schema to pick. This can include markdown. |
+| Schema Type | Either 'Model' or 'Access Request'.                                                                |
+| Schema      | Select a 'JSON Schema' that includes the questions you require.                                    |
+
+From the schema list page you can also convert a schema to inactive by pressing the 'make inactive' button. If a schema
+is deleted, any models associated with it will be deleted. Converting a schema to 'inactive' reduces it's priority
+within the UI but does not break any existing models uploaded with it.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
