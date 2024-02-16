@@ -41,11 +41,27 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
-  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+  { title: 'Getting Started', slug: 'administration/getting-started', header: true },
+  { title: 'Building The Bailo Image', slug: 'administration/getting-started/building-the-bailo-image' },
+
+  /// Helm
+  { title: 'Helm', slug: 'administration/helm', header: true },
+  { title: 'Basic Usage', slug: 'administration/helm/basic-usage' },
+  { title: 'Configuration', slug: 'administration/helm/configuration' },
+  { title: 'Isolated Environments', slug: 'administration/helm/isolated-environments' },
+
+  /// Schema Management
+  { title: 'Schema', slug: 'administration/schemas', header: true },
+  { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
+  { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
+
+  { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
   { title: 'Migrations', slug: 'administration/migrations', header: true },
-  { title: 'Bailo 0.4', slug: 'administration/migrations/bailo-0.4' },
-  { title: 'Bailo 2.0', slug: 'administration/migrations/bailo-2.0' },
+  { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
+  { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
+
+  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
 
   // Developers
   { title: 'Developers', slug: 'developers', header: true },

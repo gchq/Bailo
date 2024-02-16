@@ -10,13 +10,13 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import JsonSchemaForm from 'src/Form/beta/JsonSchemaForm'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
-import { SplitSchemaNoRender } from 'types/interfaces'
-import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/beta/formUtils'
+import { SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
 
 export default function NewAccessRequest() {
   const router = useRouter()

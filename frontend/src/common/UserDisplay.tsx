@@ -14,7 +14,7 @@ export interface UserInformation {
   email?: string
 }
 
-type UserDisplayProps = {
+export type UserDisplayProps = {
   dn: string
   hidePopover?: boolean
 }

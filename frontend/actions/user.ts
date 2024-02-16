@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, ModelInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/v2/types'
+import { EntityObject, ModelInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 

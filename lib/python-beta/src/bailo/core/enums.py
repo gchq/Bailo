@@ -26,5 +26,5 @@ class Role(ValuedEnum):
     """A reviewing role."""
 
     OWNER = "owner"
-    MODEL_TECNICAL_REVIEWER = "mtr"
-    MODEL_SENIOR_RESPONSABILITY_OFFICER = "msro"
+    MODEL_TECHNICAL_REVIEWER = "mtr"
+    MODEL_SENIOR_RESPONSIBLE_OFFICER = "msro"

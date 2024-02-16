@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > putSchema > audit > expected call 1`] = `
+{
+  "active": false,
+}
+`;
+
+exports[`routes > schema > putSchema > successfully updates the schema 1`] = `
+{
+  "schema": {
+    "active": false,
+  },
+}
+`;

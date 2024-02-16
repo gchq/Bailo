@@ -9,10 +9,9 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import SchemaButton from 'src/model/beta/common/SchemaButton'
+import SchemaButton from 'src/model/common/SchemaButton'
 import Wrapper from 'src/Wrapper'
-import { SchemaInterface } from 'types/types'
-import { SchemaKind } from 'types/v2/types'
+import { SchemaInterface, SchemaKind } from 'types/types'
 
 export default function NewSchemaSelection() {
   const router = useRouter()

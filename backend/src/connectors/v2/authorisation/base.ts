@@ -36,6 +36,8 @@ export type AccessRequestActionKeys = (typeof AccessRequestAction)[keyof typeof 
 
 export const SchemaAction = {
   Create: 'create',
+  Delete: 'delete',
+  Update: 'update',
 }
 export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
 
@@ -131,14 +133,14 @@ export class BasicAuthorisationConnector {
   }
 
   async schemas(user: UserDoc, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
-    if (action === SchemaAction.Create) {
+    if (action === SchemaAction.Create || action === SchemaAction.Delete) {
       const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
       if (!isAdmin) {
         return schemas.map((schema) => ({
           id: schema.id,
           success: false,
-          info: 'You cannot upload a schema if you are not an admin.',
+          info: 'You cannot upload or modify a schema if you are not an admin.',
         }))
       }
     }

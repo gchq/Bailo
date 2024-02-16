@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import marketplaceImage from '../public/images/bailo-marketplace.png'
 import apiImage from '../public/images/bailo-api.png'
 import modelImage from '../public/images/bailo-model.png'
-import deploymentImage from '../public/images/bailo-deployment.png'
+import releasesImage from '../public/images/bailo-releases.png'
 
 const StyledSwiper = styled(Swiper)`
   border-radius: 1rem;
@@ -30,9 +30,9 @@ const slides = [
     alt: 'Bailo displays a configurable set of information for a model',
   },
   {
-    image: deploymentImage,
+    image: releasesImage,
     text: '',
-    alt: 'Bailo allows models to be deployed through Docker',
+    alt: 'Draft releases for models',
   },
   {
     image: apiImage,

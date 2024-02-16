@@ -14,7 +14,7 @@ export default function Review() {
   )
 
   return (
-    <Wrapper title='Review' page='beta/review' fullWidth>
+    <Wrapper title='Review' page='review' fullWidth>
       <PageWithTabs title='Your Reviews' tabs={tabs} />
     </Wrapper>
   )

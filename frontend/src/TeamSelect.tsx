@@ -3,7 +3,7 @@ import { useGetTeams } from 'actions/team'
 import { SyntheticEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import MessageAlert from 'src/MessageAlert'
-import { TeamInterface } from 'types/interfaces'
+import { TeamInterface } from 'types/types'
 
 const htmlId = 'team-input'
 

@@ -1,10 +1,9 @@
 import { Box, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
-import { styled } from '@mui/system'
+import { styled } from '@mui/material/styles'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
-import { FileWithMetadata } from 'types/interfaces'
-import { FileInterface } from 'types/v2/types'
+import { FileInterface, FileWithMetadata } from 'types/types'
 
 const Input = styled('input')({
   display: 'none',

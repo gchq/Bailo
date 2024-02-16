@@ -89,8 +89,10 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
+import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
 import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
+import { patchSchema as patchSchemaV2 } from './routes/v2/schema/patchSchema.js'
 import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
 import { getSpecification as getSpecificationV2 } from './routes/v2/specification.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
@@ -288,6 +290,8 @@ server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 server.get('/api/v2/schemas', ...getSchemasV2)
 server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
 server.post('/api/v2/schemas', ...postSchemaV2)
+server.patch('/api/v2/schema/:schemaId', ...patchSchemaV2)
+server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
 
