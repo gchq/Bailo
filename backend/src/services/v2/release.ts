@@ -1,3 +1,4 @@
+import semver from 'semver'
 import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../../connectors/v2/authorisation/base.js'
@@ -18,6 +19,10 @@ import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
+  if (!semver.valid(release.semver)) {
+    throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
+  }
+
   if (release.images) {
     const registryImages = await listModelImages(user, release.modelId)
 
