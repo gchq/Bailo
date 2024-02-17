@@ -5,7 +5,7 @@ import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import imageLoader from '../src/imageLoader'
 import Image from 'next/image'
-import localFont from '@next/font/local'
+import localFont from 'next/font/local'
 import Link from '../src/Link'
 import { createRef } from 'react'
 import Tooltip from '@mui/material/Tooltip'
@@ -18,7 +18,7 @@ import Slideshow from '../src/Slideshow'
 import React from 'react'
 
 import bailoLogo from '../public/vertical-white.png'
-import { Bellota_Text } from '@next/font/google'
+import { Bellota_Text } from 'next/font/google'
 
 const nunitoSansFont = localFont({
   src: '../public/fonts/NunitoSans-Black.ttf',
