@@ -1,6 +1,8 @@
+import { Code } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
+import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 import { useGetModel } from '../../../actions/model'
@@ -25,7 +27,8 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { isModelError, mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
@@ -74,6 +77,17 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  function handleJsonFormOnSubmit(jsonInput: string) {
+    setJsonUploadDialogOpen(false)
+    if (schema) {
+      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], JSON.parse(jsonInput))
+      for (const step of steps) {
+        step.steps = steps
+      }
+      setSplitSchema({ reference: schema.id, steps })
+    }
+  }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -104,7 +118,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
-              <Button variant='outlined' onClick={() => setDialogOpen(true)}>
+              <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
               <Button
@@ -125,6 +139,15 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
+              <Button
+                variant='contained'
+                startIcon={<Code />}
+                color='secondary'
+                onClick={() => setJsonUploadDialogOpen(true)}
+                data-test='cancelEditModelCardButton'
+              >
+                Add JSON to form
+              </Button>
               <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
                 Cancel
               </Button>
@@ -137,7 +160,14 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
       </Box>
-      <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
+      <ModelCardHistoryDialog model={model} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      <TextInputDialog
+        open={jsonUploadDialogOpen}
+        setOpen={setJsonUploadDialogOpen}
+        onSubmit={handleJsonFormOnSubmit}
+        helperText='Paste in raw JSON to fill in the model card form'
+        submitButtonText='Add JSON to form'
+      />
     </>
   )
 }
