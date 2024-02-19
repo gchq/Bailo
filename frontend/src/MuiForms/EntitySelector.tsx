@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 import { EntityObject } from 'types/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
@@ -98,7 +99,11 @@ export default function EntitySelector(props: EntitySelectorProps) {
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
               <Box key={option.id} sx={{ maxWidth: '200px' }}>
-                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.id} />
+                <Chip
+                  {...getTagProps({ index })}
+                  sx={{ textOverflow: 'ellipsis' }}
+                  label={<UserDisplay dn={option.id} />}
+                />
               </Box>
             ))
           }
@@ -135,7 +140,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
-                <Chip label={entity.split(':')[1] || entity} key={entity} sx={{ width: 'fit-content' }} />
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>
