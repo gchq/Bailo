@@ -44,7 +44,7 @@ describe('Make and approve an access request', () => {
 
     cy.log('Creating the access request')
     cy.get('body').contains('Select a different schema')
-    cy.get('[data-test=entitySelector]').contains('Joe Blogs')
+    cy.get('[data-test=entitySelector]').contains('Joe Bloggs')
     cy.get('#root_name-label').contains('What is the name of the access request?')
     cy.get('#root_name').type('Test access request')
     cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
