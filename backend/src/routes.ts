@@ -287,7 +287,7 @@ server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartM
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
-if (config.inference.enabled) {
+if (config.ui.inference.enabled) {
   server.get('/api/v2/model/:modelId/inferences', ...getInferences)
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference', ...putInference)

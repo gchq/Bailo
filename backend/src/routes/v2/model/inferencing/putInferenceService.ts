@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { InferenceInterface, ProcessorType } from '../../../../models/v2/Inference.js'
+import { InferenceInterface } from '../../../../models/v2/Inference.js'
 import { updateInference } from '../../../../services/v2/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/v2/validate.js'
@@ -18,7 +18,7 @@ export const putInferenceSchema = z.object({
     tag: z.string(),
     description: z.string(),
     settings: z.object({
-      processorType: z.nativeEnum(ProcessorType),
+      processorType: z.string(),
       memory: z.number().optional(),
       port: z.number(),
     }),

@@ -130,6 +130,14 @@ export interface Config {
     session: {
       secret: string
     }
+    inference: {
+      enabled: boolean
+      connection: {
+        host: string
+      }
+
+      gpus: { [key: string]: string }
+    }
   }
 
   session: {
@@ -154,15 +162,6 @@ export interface Config {
       modelCards: Array<DefaultSchema>
       accessRequests: Array<DefaultSchema>
     }
-  }
-
-  inference: {
-    enabled: boolean
-    connection: {
-      host: string
-    }
-
-    gpus: { [key: string]: string }
   }
 }
 

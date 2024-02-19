@@ -216,6 +216,14 @@ module.exports = {
     development: {
       logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
     },
+    inference: {
+      enabled: true,
+      connection: {
+        host: 'example.com',
+      },
+
+      gpus: {},
+    },
   },
 
   connectors: {
@@ -252,16 +260,5 @@ module.exports = {
       uploads: 'uploads',
       registry: 'registry',
     },
-  },
-
-  inference: {
-    // Enable / disable the inferencing service
-    enabled: true,
-
-    connection: {
-      host: 'example.com',
-    },
-
-    gpus: {},
   },
 }

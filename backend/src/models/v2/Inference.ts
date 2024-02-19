@@ -1,16 +1,7 @@
 import { Document, model, Schema } from 'mongoose'
 
-import config from '../../utils/v2/config.js'
-
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
-export const ProcessorType = { CPU: 'cpu', ...config.inference.gpus }
-
-export type ProcessorTypeKeys = (typeof ProcessorType)[keyof typeof ProcessorType]
-
 export interface InferenceSetting {
-  processorType: ProcessorTypeKeys
+  processorType: string
   memory?: number
   port: number
 }
@@ -44,10 +35,10 @@ const InferenceSchema = new Schema<InferenceInterface>(
       memory: {
         type: Number,
         required: function (this: InferenceInterface): boolean {
-          return this.settings.processorType === ProcessorType.CPU
+          return this.settings.processorType === 'cpu'
         },
         validate: function (this: InferenceInterface, val: any): boolean {
-          if (this.settings.processorType === ProcessorType.CPU && val) {
+          if (this.settings.processorType === 'cpu' && val) {
             return true
           }
           throw new Error(`Cannot specify memory allocation without choosing cpu as the processor type`)
