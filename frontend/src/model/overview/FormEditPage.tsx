@@ -4,6 +4,7 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import useNotification from 'src/hooks/useNotification'
 
 import { useGetModel } from '../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../actions/modelCard'
@@ -30,8 +31,8 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [jsonUploadErrorText, setJsonUploadErrorText] = useState('')
 
+  const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
@@ -80,7 +81,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
 
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
-    setJsonUploadErrorText('')
     try {
       const jsonInput = JSON.parse(formData)
       if (schema) {
@@ -91,7 +91,11 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         setSplitSchema({ reference: schema.id, steps })
       }
     } catch (_e) {
-      setJsonUploadErrorText('Please make sure to use valid JSON')
+      sendNotification({
+        variant: 'error',
+        msg: 'Could not update form - please make sure to use valid JSON.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
   }
 
@@ -175,7 +179,6 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         helperText='Paste in raw JSON to fill in the model card form'
         submitButtonText='Add JSON to form'
       />
-      {jsonUploadErrorText && <MessageAlert message={jsonUploadErrorText} severity='error' />}
     </>
   )
 }
