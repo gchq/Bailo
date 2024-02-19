@@ -155,7 +155,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
                 startIcon={<Code />}
                 color='secondary'
                 onClick={() => setJsonUploadDialogOpen(true)}
-                data-test='cancelEditModelCardButton'
+                data-test='addJsonToFormButton'
               >
                 Add JSON to form
               </Button>
