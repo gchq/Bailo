@@ -1,6 +1,7 @@
 import Image from 'next/legacy/image'
 import Box from '@mui/material/Box'
 import bailoModelAccess from 'public/docs/bailo_model_access.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
 
 ## **Completing the Model**
 
@@ -14,3 +15,7 @@ approval.
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image src={bailoModelAccess} />
 </Box>
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper
+
+>

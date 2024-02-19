@@ -1,6 +1,7 @@
 import Image from 'next/legacy/image'
 import Box from '@mui/material/Box'
 import bailoMarketIcon from 'public/docs/bailo_market_icon.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
 
 ## **Bailo Marketplace**
 
@@ -53,3 +54,5 @@ the option to select which **_*schema*_** they wish to use.
 
 To change model name or description, select the model and go to **_*Settings'*_** and amend the **_*Name*_** and / or
 **_*Description*_**.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -2,6 +2,7 @@ import Image from 'next/legacy/image'
 import Box from '@mui/material/Box'
 import bailoNewRelease from 'public/docs/bailo_new_release.png'
 import bailoNewReleaseForm from 'public/docs/bailo_new_release_form.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
 
 ## **Creating a release.**
 
@@ -19,3 +20,5 @@ files and images.
 </Box>
 
 Once the form is filled out, click on **_Create Release_** to submit all details.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

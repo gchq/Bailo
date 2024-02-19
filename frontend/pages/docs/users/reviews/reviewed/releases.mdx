@@ -1,3 +1,5 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
 ## **What is a Release?**
 
 A release is a different version of a model and there can be multiple released versions from the same model. Having a
@@ -7,7 +9,8 @@ interfering with the original state of the model.
 ## **How are the Releases reviewed?**
 
 Releases are reviewed by who the owner has chosen, to be the Model Technical Reviewer and the Model Senior Responsible
-Officer. See [Completing The Model](../../users/managing-moodels-and-releases/completing-the-model) for more details.
+Officer. See [Completing The Model](../../managing-models-and-releases/upload-to-bailo/completing-the-model) for more
+details.
 
 ## **Who can create one?**
 
@@ -18,4 +21,6 @@ Only the owner of the uploaded model can create a release.
 When the Model Technical Reviewer and Model Senior Responsible Officer review a release, one or both will leave a
 request for changes and/or approve. When approved by both roles, the release will be moved to **_Archived_**
 
-See [here](docs/python/notebook/models_and_releases_demo/index.html) on how to do this in Python
+See [here](https://gchq.github.io/Bailo/docs/python/notebook/models_and_releases_demo) on how to do this in Python
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

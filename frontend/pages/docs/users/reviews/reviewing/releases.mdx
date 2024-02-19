@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import bailoReviewPage from 'public/docs/bailo_review_page.png'
 import bailoReview from 'public/docs/bailo_review.png'
 import bailoReviewForm from 'public/docs/bailo_review_form.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
 
 ## **Release**
 
@@ -27,3 +28,7 @@ You have the option of approving or requesting changes.
 </Box>
 
 When you have made your decision, an email will be sent to the owner to notify them of your response.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper
+
+>
