@@ -30,6 +30,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [jsonUploadErrorText, setJsonUploadErrorText] = useState('')
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -77,14 +78,20 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
-  function handleJsonFormOnSubmit(jsonInput: string) {
+  function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
-    if (schema) {
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], JSON.parse(jsonInput))
-      for (const step of steps) {
-        step.steps = steps
+    setJsonUploadErrorText('')
+    try {
+      const jsonInput = JSON.parse(formData)
+      if (schema) {
+        const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], JSON.parse(jsonInput))
+        for (const step of steps) {
+          step.steps = steps
+        }
+        setSplitSchema({ reference: schema.id, steps })
       }
-      setSplitSchema({ reference: schema.id, steps })
+    } catch (_e) {
+      setJsonUploadErrorText('Please make sure to use valid JSON')
     }
   }
 
@@ -168,6 +175,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         helperText='Paste in raw JSON to fill in the model card form'
         submitButtonText='Add JSON to form'
       />
+      {jsonUploadErrorText && <MessageAlert message={jsonUploadErrorText} severity='error' />}
     </>
   )
 }
