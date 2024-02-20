@@ -76,7 +76,7 @@ export default function TokenTabs({ token }: TokenTabProps) {
           onChange={handleChange}
           aria-label='Vertical tabs example'
           sx={{ borderRight: 1, borderColor: 'divider' }}
-          //   selectionFollowsFocus
+          selectionFollowsFocus
         >
           <Tab label='Item One' {...a11yProps(0)} />
           <Tab label='Item Two' {...a11yProps(1)} />
