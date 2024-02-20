@@ -2,6 +2,7 @@ import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
+import { InferenceDoc } from '../../../models/v2/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
@@ -88,6 +89,11 @@ export const AuditInfo = {
   UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
+
+  CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
+  UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
+  ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
+  ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -130,6 +136,11 @@ export abstract class BaseAuditConnector {
   abstract onViewSchema(req: Request, schema: SchemaInterface)
   abstract onDeleteSchema(req: Request, schemaId: string)
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
+
+  abstract onCreateInference(req: Request, inference: InferenceDoc)
+  abstract onUpdateInference(req: Request, inference: InferenceDoc)
+  abstract onViewInference(req: Request, inference: InferenceDoc)
+  abstract onViewInferences(req: Request, inference: InferenceDoc[])
 
   abstract onViewModelImages(
     req: Request,

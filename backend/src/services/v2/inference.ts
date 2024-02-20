@@ -44,6 +44,16 @@ export type CreateInferenceParams = Pick<InferenceInterface, 'image' | 'tag' | '
 export async function createInference(user: UserDoc, modelId: string, inferenceParams: CreateInferenceParams) {
   const model = await getModelById(user, modelId)
 
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      modelId: modelId,
+      image: inferenceParams.image,
+      tag: inferenceParams.tag,
+    })
+  }
+
   // Check that an image exists in the registry
   const images = await listModelImages(user, modelId)
 
@@ -74,15 +84,6 @@ export async function createInference(user: UserDoc, modelId: string, inferenceP
     throw error
   }
 
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, {
-      userDn: user.dn,
-      modelId: modelId,
-      image: inferenceParams.image,
-      tag: inferenceParams.tag,
-    })
-  }
   return inference
 }
 

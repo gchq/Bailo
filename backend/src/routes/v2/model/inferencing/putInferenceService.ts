@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
 import { InferenceInterface } from '../../../../models/v2/Inference.js'
 import { updateInference } from '../../../../services/v2/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
@@ -50,12 +52,16 @@ interface PutInferenceService {
 export const putInference = [
   bodyParser.json(),
   async (req: Request, res: Response<PutInferenceService>) => {
+    req.audit = AuditInfo.UpdateInference
     const {
       params: { modelId },
       body,
     } = parse(req, putInferenceSchema)
 
     const inference = await updateInference(req.user, modelId, body)
+
+    await audit.onUpdateInference(req, inference)
+
     return res.json({
       inference,
     })

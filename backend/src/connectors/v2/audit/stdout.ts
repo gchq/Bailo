@@ -2,6 +2,7 @@ import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
+import { InferenceDoc } from '../../../models/v2/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
@@ -272,6 +273,33 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.ViewInference, req)
+    const event = this.generateEvent(req, { imageName: inference.image, imageTag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewInferences(req: Request, inferences: InferenceDoc[]) {
+    this.checkEventType(AuditInfo.ViewInferences, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: inferences.map((inference) => ({ image: inference.image, tag: inference.tag })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.CreateInference, req)
+    const event = this.generateEvent(req, { image: inference.image, tag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.UpdateInference, req)
+    const event = this.generateEvent(req, { image: inference.image, tag: inference.tag })
     req.log.info(event, req.audit.description)
   }
 }

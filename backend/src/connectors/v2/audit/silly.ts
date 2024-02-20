@@ -3,6 +3,7 @@ import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../../models/v2/File.js'
+import { InferenceDoc } from '../../../models/v2/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../models/v2/Model.js'
 import { ReleaseDoc } from '../../../models/v2/Release.js'
 import { ReviewInterface } from '../../../models/v2/Review.js'
@@ -49,5 +50,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateSchema(_req: Request, _schema: SchemaDoc) {}
   onViewSchema(_req: Request, _schema: SchemaInterface) {}
   onViewModelImages(_req: Request, _modelId: string, _images: { repository: string; name: string; tags: string[] }[]) {}
+  onViewInferences(_req: Request, _inferences: InferenceDoc[]) {}
+  onViewInference(_req: Request, _inferences: InferenceDoc) {}
+  onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
+  onCreateInference(_req: Request, _inferences: InferenceDoc) {}
   onError(_req: Request, _error: BailoError) {}
 }
