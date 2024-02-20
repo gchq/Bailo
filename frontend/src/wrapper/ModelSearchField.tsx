@@ -82,7 +82,7 @@ export default function ModelSearchField() {
   }
 
   if (isModelsError) {
-    return <MessageAlert message={isModelsError.info.message} severity='error' />
+    return <MessageAlert message={isModelsError.info.message} severity='error' hideContactUs />
   }
 
   return (

@@ -154,6 +154,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             </Stack>
           </Link>
         </Box>
+        <span style={{ width: '100%' }}></span>
         {isSmOrLarger && (
           <Box>
             <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>

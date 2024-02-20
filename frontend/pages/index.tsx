@@ -21,8 +21,8 @@ import Link from 'next/link'
 import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
+import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
 
 interface KeyAndLabel {
@@ -74,11 +74,6 @@ function Marketplace() {
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
-
-  const error = MultipleErrorWrapper(`Unable to load marketplace page`, {
-    isModelsError,
-  })
-  if (error) return error
 
   return (
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -163,6 +158,7 @@ function Marketplace() {
             </Tabs>
           </Box>
           <div data-test='modelListBox'>
+            {isModelsError && <MessageAlert message={isModelsError.info.message} severity='error' />}
             {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
             {models.map((model, index) => {
               return (

@@ -22,6 +22,7 @@ type MessageAlertProps = {
   message?: string
   severity?: AlertProps['severity']
   'data-test'?: string
+  hideContactUs?: boolean
 } & PartialMessageAlertProps
 
 export default function MessageAlert({
@@ -30,6 +31,7 @@ export default function MessageAlert({
   linkText,
   href,
   'data-test': dataTest,
+  hideContactUs = false,
 }: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
@@ -73,7 +75,7 @@ export default function MessageAlert({
           )}
         </Stack>
         <Typography>{!!(href && linkText) && <Link href={href}>{linkText}</Link>}</Typography>
-        {severity === 'error' && (
+        {severity === 'error' && !hideContactUs && (
           <>
             <div>
               <Button
