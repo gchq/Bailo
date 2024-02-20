@@ -53,30 +53,40 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   )
 
   const schemaList = useMemo(() => {
-    return schemas.map((schema) => (
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center' justifyContent='space-between' key={schema.id}>
-        <Typography>{schema.name}</Typography>
-        <Stack spacing={1} direction={{ xs: 'column', md: 'row' }}>
-          <Button variant='outlined' onClick={() => handleSetSchemaActive(schema)}>
-            {schema.active ? 'Mark as inactive' : 'Mark as active'}
-          </Button>
-          <Button variant='contained' onClick={() => handleDeleteSchemaButtonOnClick(schema.id)}>
-            Delete
-          </Button>
-        </Stack>
-        <MessageAlert message={errorMessage} severity='error' />
-        <ConfirmationDialogue
-          open={open}
-          title='Delete schema'
-          onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
-          onCancel={() => setOpen(false)}
-          errorMessage={errorMessage}
-          dialogMessage={
-            'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
-          }
-        />
+    return (
+      <Stack spacing={2}>
+        {schemas.map((schema) => (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems='center'
+            justifyContent='space-between'
+            key={schema.id}
+          >
+            <Typography>{schema.name}</Typography>
+            <Stack spacing={1} direction={{ xs: 'column', md: 'row' }}>
+              <Button variant='outlined' onClick={() => handleSetSchemaActive(schema)}>
+                {schema.active ? 'Mark as inactive' : 'Mark as active'}
+              </Button>
+              <Button variant='contained' onClick={() => handleDeleteSchemaButtonOnClick(schema.id)}>
+                Delete
+              </Button>
+            </Stack>
+            <MessageAlert message={errorMessage} severity='error' />
+            <ConfirmationDialogue
+              open={open}
+              title='Delete schema'
+              onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
+              onCancel={() => setOpen(false)}
+              errorMessage={errorMessage}
+              dialogMessage={
+                'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
+              }
+            />
+          </Stack>
+        ))}
       </Stack>
-    ))
+    )
   }, [
     schemas,
     errorMessage,
