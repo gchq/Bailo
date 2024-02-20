@@ -136,7 +136,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 'code.hljs': {
                   fontStyle: 'italic',
                   background: grey.A200,
-                  borderLeft: `2px solid ${grey.A400}`,
+                  borderLeft: `2px solid ${theme.palette.secondary.main}`,
                 },
                 '.hljs-attr': {
                   color: grey[900],
