@@ -2,6 +2,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import ArrowForward from '@mui/icons-material/ArrowForward'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { grey } from '@mui/material/colors'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import List from '@mui/material/List'
@@ -131,6 +132,20 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 },
                 'a:visited': {
                   color: theme.palette.primary.main,
+                },
+                'code.hljs': {
+                  fontStyle: 'italic',
+                  background: grey.A200,
+                  borderLeft: `2px solid ${grey.A400}`,
+                },
+                '.hljs-attr': {
+                  color: grey[900],
+                },
+                '.hljs-string': {
+                  color: grey.A700,
+                },
+                '.hljs-punctuation': {
+                  color: grey.A700,
                 },
               }}
             >
