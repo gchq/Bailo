@@ -1,0 +1,32 @@
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+import bailoReviewPage from 'public/docs/bailo_review_page.png'
+import bailoReview from 'public/docs/bailo_review.png'
+import bailoReviewForm from 'public/docs/bailo_review_form.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## **Release**
+
+When reviewing a release, there will be a message in the **_Release Reviews_** tab, on the **_Review_** page, that will
+state who needs to review the release.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoReviewPage} />
+</Box>
+
+Click on the release that applies to your role and this will take you to the **_Releases_** page. On the banner there is
+a **_REVIEW_** button, where you can start your review.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoReview} />
+</Box>
+
+You have the option of approving or requesting changes.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoReviewForm} />
+</Box>
+
+When you have made your decision, an email will be sent to the owner to notify them of your response.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

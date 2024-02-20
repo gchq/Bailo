@@ -27,6 +27,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
   { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
+  { title: 'Creating a Model', slug: 'users/managing-models-and-releases/upload-to-bailo/creating-a-model' },
+  { title: 'Completing the Model', slug: 'users/managing-models-and-releases/upload-to-bailo/completing-the-model' },
+  { title: 'Creating a Release', slug: 'users/managing-models-and-releases/upload-to-bailo/create-a-release' },
   { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
@@ -34,6 +37,13 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
+  { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
+  { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
+  { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
+  { title: 'Reviewed Releases and Access Requests', slug: 'users/reviews/reviewed', header: true },
+  { title: 'Releases', slug: 'users/reviews/reviewed/releases' },
+  { title: 'Access Requests', slug: 'users/reviews/reviewed/access-request' },
+
   { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
