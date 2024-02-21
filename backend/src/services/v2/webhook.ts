@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-import { ModelAction } from '../../connectors/v2/authorisation/base.js'
+import { ModelAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
 import { ReleaseDoc } from '../../models/v2/Release.js'

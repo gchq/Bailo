@@ -1,5 +1,5 @@
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
-import { FileAction } from '../../connectors/v2/authorisation/base.js'
+import { FileAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import FileModel from '../../models/v2/File.js'
 import { UserDoc } from '../../models/v2/User.js'
