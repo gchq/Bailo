@@ -27,7 +27,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -80,6 +80,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
         <Autocomplete<EntityObject, true, true>
           multiple
           data-test='entitySelector'
+          loading={userListQuery.length > 3 && isUsersLoading}
           open={open}
           size='small'
           onOpen={() => {
