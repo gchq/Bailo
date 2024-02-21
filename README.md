@@ -246,4 +246,4 @@ information.
 [issues-url]: https://github.com/gchq/bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
 [license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
-[product-screenshot]: frontend/public/docs/bailo_product_screenshot.png
+[product-screenshot]: frontend/public/images/bailo_marketplace.png
