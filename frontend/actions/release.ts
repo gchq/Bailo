@@ -83,3 +83,10 @@ export async function postFile(file: File, modelId: string, name: string, mime: 
     },
   )
 }
+
+export function deleteRelease(modelId: string, semver: string) {
+  return fetch(`/api/v2/model/${modelId}/release/${semver}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
