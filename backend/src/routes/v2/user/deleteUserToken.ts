@@ -41,7 +41,7 @@ interface DeleteUserTokenResponse {
 export const deleteUserToken = [
   bodyParser.json(),
   async (req: Request, res: Response<DeleteUserTokenResponse>) => {
-    req.audit = AuditInfo.DeleteAccessRequest
+    req.audit = AuditInfo.DeleteUserToken
     const {
       params: { accessKey },
     } = parse(req, deleteUserTokenSchema)
