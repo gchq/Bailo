@@ -67,7 +67,7 @@ TokenSchema.pre('save', function userPreSave(next) {
     return
   }
 
-  bcrypt.hash(this.secretKey, 10, (err: Error | undefined, hash: string) => {
+  bcrypt.hash(this.secretKey, 8, (err: Error | undefined, hash: string) => {
     if (err) {
       next(err)
       return
