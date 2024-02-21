@@ -36,7 +36,12 @@ export default function TextInputDialog({
         ></TextField>
       </DialogContent>
       <DialogActions sx={{ pr: 2, pt: 0 }}>
-        <Button variant='contained' disabled={formData.length === 0} onClick={handleSubmit}>
+        <Button
+          variant='contained'
+          disabled={formData.length === 0}
+          onClick={handleSubmit}
+          data-test='dialogSubmitButton'
+        >
           {submitButtonText}
         </Button>
       </DialogActions>
