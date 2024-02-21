@@ -3,6 +3,7 @@ import { Box, InputBase, List, ListItemButton, ListItemText, Popover, Stack } fr
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import useDebounce from 'src/hooks/useDebounce'
 import Link from 'src/Link'
@@ -82,7 +83,7 @@ export default function ModelSearchField() {
   }
 
   if (isModelsError) {
-    return <MessageAlert message={isModelsError.info.message} severity='error' hideContactUs />
+    return <MessageAlert message={isModelsError.info.message} severity='error' slimView />
   }
 
   return (
@@ -105,14 +106,14 @@ export default function ModelSearchField() {
           anchorEl={anchorEl}
           disableAutoFocus
           disableEnforceFocus
-          sx={{ maxHeight: '400px' }}
+          sx={{ maxHeight: '400px', minWidth: '272px' }}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'center',
+            horizontal: 152,
           }}
         >
           {isModelsLoading && <Loading />}
@@ -120,6 +121,11 @@ export default function ModelSearchField() {
             <List dense disablePadding>
               {modelList}
             </List>
+          )}
+          {!isModelsLoading && modelList.length === 0 && (
+            <Box sx={{ p: 4, minWidth: '272px' }}>
+              <EmptyBlob text='No models found' />
+            </Box>
           )}
         </Popover>
       )}
