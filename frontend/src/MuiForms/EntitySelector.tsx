@@ -70,12 +70,17 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
+    if (isUsersError.status !== 413) {
+      return <MessageAlert message={isUsersError.info.message} severity='error' />
+    }
   }
 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
+      {isUsersError && isUsersError.status === 413 && (
+        <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
+      )}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete<EntityObject, true, true>
           multiple
