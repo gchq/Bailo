@@ -22,7 +22,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     super()
   }
 
-  onCreateModel(req: Request, model: ModelDoc) {
+  async onCreateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.CreateModel, req)
     const event = this.generateEvent(req, { id: model.id })
     req.log.info(event, req.audit.description)

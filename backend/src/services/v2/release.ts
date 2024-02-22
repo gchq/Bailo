@@ -1,6 +1,6 @@
 import { Optional } from 'utility-types'
 
-import { ReleaseAction } from '../../connectors/v2/authorisation/base.js'
+import { ReleaseAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { FileInterface } from '../../models/v2/File.js'
 import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'

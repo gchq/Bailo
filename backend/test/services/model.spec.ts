@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelAction } from '../../src/connectors/v2/authorisation/base.js'
+import { ModelAction } from '../../src/connectors/v2/authorisation/actions.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   _setModelCard,
