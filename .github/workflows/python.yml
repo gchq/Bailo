@@ -23,23 +23,23 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
-          cd lib/python-beta
+          cd lib/python
           python -m pip install -e .[test]
 
       # Black
       - name: Check formatting
         run: |
-          cd lib/python-beta
+          cd lib/python
           black --check --verbose .
 
       # Pylint
       - name: Check linting
         run: |
-          cd lib/python-beta
+          cd lib/python
           pylint src/bailo --verbose --exit-zero --fail-on=F,E
 
       # Pytest
       - name: Run basic testing
         run: |
-          cd lib/python-beta
+          cd lib/python
           python -m pytest
