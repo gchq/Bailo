@@ -6,6 +6,7 @@ from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility
 from bailo.helper.release import Release
 from bailo.core.exceptions import BailoException
+from bailo.core.utils import NestedDict
 
 from semantic_version import Version
 
@@ -316,12 +317,12 @@ class Experiment:
     def log_metrics(self, metrics: dict[str, Any]):
         self.run_data["metrics"].append(metrics)
 
-    def log_artifacts(self, artifacts: str):
+    def log_artifacts(self, artifacts: dict[str, Any]):
         self.run_data["artifiacts"].append(artifacts)
 
     def from_mlflow(self, tracking_uri: str, experiment_id: str):
         if ml_flow == 1:
-            client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri) #should this be here? or passed in?
+            client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
             runs = client.search_runs(experiment_id)
 
             for run in runs:
@@ -333,5 +334,17 @@ class Experiment:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
 
-    def publish(release_version: str, card_version: str):
-        pass
+    def publish(self, mc_loc: str, run_id: str):
+        mc = self.model.model_card
+        mc = NestedDict(mc)
+
+        for run in self.raw:
+            if run["run"] == run_id:
+                sel_run = run
+            else:
+                continue
+
+        sel_run = sel_run['params'] + sel_run['metrics'] 
+
+        mc[tuple(mc_loc.split('.'))] = sel_run
+        self.model.update_model_card(model_card=mc)
