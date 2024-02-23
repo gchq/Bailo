@@ -3,7 +3,6 @@ import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
-import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../connectors/v2/audit/index.js'
@@ -11,14 +10,11 @@ import authorisation from '../connectors/v2/authorisation/index.js'
 import { ModelDoc } from '../models/v2/Model.js'
 import { TokenActions, TokenDoc } from '../models/v2/Token.js'
 import { UserDoc as UserDocV2 } from '../models/v2/User.js'
-import { findDeploymentByUuid } from '../services/deployment.js'
 import log from '../services/v2/log.js'
 import { getModelById } from '../services/v2/model.js'
 import { validateTokenForModel } from '../services/v2/token.js'
 import { ModelId, UserDoc } from '../types/types.js'
 import config from '../utils/config.js'
-import { isUserInEntityList } from '../utils/entity.js'
-import logger from '../utils/logger.js'
 import { Forbidden, Unauthorised } from '../utils/result.js'
 import { getUserFromAuthHeader } from '../utils/user.js'
 import { bailoErrorGuard } from './middleware/expressErrorHandler.js'
@@ -193,43 +189,10 @@ async function checkAccessV2(access: Access, user: UserDocV2, token: TokenDoc | 
 
 async function checkAccess(access: Access, user: UserDoc, token: TokenDoc | undefined) {
   const modelUuid = access.name.split('/')[0]
-  try {
-    const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
-    await getModelById(v2User, modelUuid)
-    return checkAccessV2(access, v2User, token)
-  } catch (e) {
-    // do nothing, assume v1 authorisation
-    log.warn({ userId: user.id, access, e }, 'Falling back to V1 authorisation')
-  }
+  const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
 
-  if (access.type !== 'repository') {
-    // not a repository request
-    log.warn({ userId: user.id, access }, 'Refusing non-repository request')
-    return false
-  }
-
-  const deploymentUuid = access.name.split('/')[0]
-  const deployment = await findDeploymentByUuid(user, deploymentUuid)
-
-  if (!deployment) {
-    // no deployment found
-    log.warn({ userId: user.id, access }, 'No deployment found')
-    return false
-  }
-
-  if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
-    // user not in access list
-    log.warn({ userId: user.id, access }, 'User not in deployment list')
-    return false
-  }
-
-  if (!isEqual(access.actions, ['pull'])) {
-    // users should only be able to pull images
-    log.warn({ userId: user.id, access }, 'User tried to request permissions beyond pulling')
-    return false
-  }
-
-  return true
+  await getModelById(v2User, modelUuid)
+  return checkAccessV2(access, v2User, token)
 }
 
 export const getDockerRegistryAuth = [
@@ -238,7 +201,7 @@ export const getDockerRegistryAuth = [
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
 
-    let rlog = logger.child({ account, clientId, isOfflineToken, service, scope })
+    let rlog = log.child({ account, clientId, isOfflineToken, service, scope })
     rlog.trace({ url: req.originalUrl }, 'Received docker registry authentication request')
 
     const authorization = req.get('authorization')

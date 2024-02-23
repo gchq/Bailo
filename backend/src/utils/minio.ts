@@ -1,7 +1,7 @@
 import * as Minio from 'minio'
 
+import log from '../services/v2/log.js'
 import config from './config.js'
-import logger from './logger.js'
 
 export function getClient(): Minio.Client {
   return new Minio.Client(config.minio.connection)
@@ -17,14 +17,14 @@ export async function ensureBucketExists(bucket: string) {
       exists = await client.bucketExists(bucket)
       waitForMinio = false
     } catch (e) {
-      logger.error({ e }, 'Could not check bucket exists. Sleeping then trying again.')
+      log.error({ e }, 'Could not check bucket exists. Sleeping then trying again.')
       await new Promise((r) => {
         setTimeout(r, 1000)
       })
     }
   }
   if (!exists) {
-    logger.info({ bucket }, 'Bucket does not exist, creating.')
+    log.info({ bucket }, 'Bucket does not exist, creating.')
     await client.makeBucket(bucket, config.minio.connection.region)
   }
 }
@@ -32,23 +32,23 @@ export async function ensureBucketExists(bucket: string) {
 export async function emptyBucket(bucket: string) {
   const client = getClient()
 
-  logger.info({ bucket }, 'Listing items in bucket')
+  log.info({ bucket }, 'Listing items in bucket')
   const stream = client.listObjectsV2(bucket)
 
   const files: Array<Minio.BucketItem> = []
   stream.on('data', (obj) => files.push(obj))
-  stream.on('error', (err) => logger.error({ error: err, bucket }, 'Error listing Minio files'))
+  stream.on('error', (err) => log.error({ error: err, bucket }, 'Error listing Minio files'))
 
   await new Promise((resolve) => {
     stream.on('close', resolve)
   })
-  logger.info({ bucket }, 'Finished listing files in bucket')
+  log.info({ bucket }, 'Finished listing files in bucket')
 
   await client.removeObjects(
     bucket,
     files.map((file) => file.name).filter((item): item is string => !!item),
   )
-  logger.info({ bucket }, 'Removed all files from bucket')
+  log.info({ bucket }, 'Removed all files from bucket')
 }
 
 export async function copyFile(bucket: string, from: string, to: string) {

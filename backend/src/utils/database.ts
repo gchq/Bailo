@@ -4,8 +4,8 @@ import mongoose, { Types } from 'mongoose'
 import { join } from 'path'
 
 import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
+import log from '../services/v2/log.js'
 import config from './config.js'
-import logger from './logger.js'
 
 export async function connectToMongoose() {
   // is it already connected
@@ -17,16 +17,16 @@ export async function connectToMongoose() {
     mongoose.set('strictQuery', false)
     mongoose.set('strictPopulate', false)
     await mongoose.connect(config.mongo.uri)
-    logger.info('Connected to Mongoose')
+    log.info('Connected to Mongoose')
   } catch (error) {
-    logger.error({ error }, 'Error')
+    log.error({ error }, 'Error')
     throw error
   }
 }
 
 export async function disconnectFromMongoose() {
   await mongoose.disconnect()
-  logger.info({ log: false }, 'Disconnected from Mongoose')
+  log.info({ log: false }, 'Disconnected from Mongoose')
 }
 
 export async function runMigrations() {
@@ -46,7 +46,7 @@ export async function runMigrations() {
     }
 
     if (!(await doesMigrationExist(file))) {
-      logger.info({ file }, `Running migration ${file}`)
+      log.info({ file }, `Running migration ${file}`)
 
       // run migration
       const migration = await import(join(base, file))
@@ -54,11 +54,11 @@ export async function runMigrations() {
 
       await markMigrationComplete(file)
 
-      logger.info({ file }, `Finished migration ${file}`)
+      log.info({ file }, `Finished migration ${file}`)
     }
   }
 
-  logger.info('Finished running all migrations')
+  log.info('Finished running all migrations')
 }
 
 export function isObjectId(value: unknown): value is Types.ObjectId {

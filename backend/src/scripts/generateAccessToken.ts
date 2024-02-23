@@ -1,5 +1,5 @@
 import { getAccessToken } from '../routes/registryAuth.js'
-import { consoleLog } from '../utils/logger.js'
+import log from '../services/v2/log.js'
 
 async function main() {
   const model = 'nginx'
@@ -8,7 +8,7 @@ async function main() {
     { type: 'repository', name: model, actions: ['push', 'pull'] },
   ])
 
-  consoleLog(token)
+  log.info(token)
 }
 
 main()

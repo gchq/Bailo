@@ -4,10 +4,10 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import shelljs from 'shelljs'
 import { z } from 'zod'
 
+import log from './services/v2/log.js'
 import { addDefaultSchemas } from './services/v2/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
-import logger from './utils/logger.js'
 import { ensureBucketExists } from './utils/minio.js'
 import { registerSigTerminate } from './utils/signals.js'
 
@@ -34,7 +34,7 @@ addDefaultSchemas()
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
-  logger.info('Listening on port', config.api.port)
+  log.info('Listening on port', config.api.port)
 })
 
 registerSigTerminate(httpServer)

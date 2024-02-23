@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { TextEncoder } from 'util'
 
-import UserModel from '../../models/User.js'
 import { ApprovalCategory, ApprovalStates, ApprovalTypes, EntityKind } from '../../types/types.js'
 
 global.TextEncoder = TextEncoder
@@ -63,8 +62,6 @@ export const testUser: any = {
   email: 'test@example.com',
   roles: ['user'],
 }
-
-export const userDoc = new UserModel(testUser)
 
 export const testUser2: any = {
   id: 'user2',

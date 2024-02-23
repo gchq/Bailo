@@ -2,9 +2,9 @@ import fetch from 'node-fetch'
 
 import { getAccessToken } from '../routes/registryAuth.js'
 import { getHttpsAgent } from '../services/v2/http.js'
+import log from '../services/v2/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import logger from '../utils/logger.js'
 
 const httpsAgent = getHttpsAgent({
   rejectUnauthorized: !config.registry.insecure,
@@ -28,7 +28,7 @@ async function script() {
     agent: httpsAgent,
   }).then((res) => res.json())
 
-  logger.info(catalog, 'Current catalog')
+  log.info(catalog, 'Current catalog')
 
   setTimeout(disconnectFromMongoose, 50)
 }
