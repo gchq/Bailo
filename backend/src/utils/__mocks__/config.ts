@@ -1,40 +1,33 @@
 const config = {
   app: {
-    api: {
-      port: 123,
+    protocol: '',
+    host: '',
+    port: 3000,
+  },
+  connectors: {
+    authentication: {
+      kind: 'silly',
     },
-    app: {
-      protocol: '',
+    audit: {
+      kind: 'silly',
+    },
+    authorisation: {
+      kind: 'basic',
     },
   },
-  logging: {
-    stroom: {
-      enabled: false,
-    },
-    file: {
-      enabled: false,
-    },
+  log: {
+    level: 'debug',
   },
-  minio: {
+  registry: {
     connection: {
-      endPoint: 'fake',
-    },
-    buckets: {
-      uploads: 'uploads',
+      internal: 'https://localhost:5000',
     },
   },
   oauth: {
     enabled: false,
   },
-  ui: {
-    seldonVersions: [
-      {
-        name: 'seldonio - 1.10.0',
-        image: 'seldonio/seldon-core-s2i-python37:1.10.0',
-      },
-    ],
-    banner: '',
-    registry: '',
+  experimental: {
+    v2: true,
   },
 }
 

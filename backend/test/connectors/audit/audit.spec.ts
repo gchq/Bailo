@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { getAuditConnector } from '../../../src/connectors/v2/audit/index.js'
+import { getAuditConnector } from '../../../src/connectors/audit/index.js'
 
 const configMock = vi.hoisted(() => ({
   connectors: {

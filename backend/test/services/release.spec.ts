@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ReleaseAction } from '../../src/connectors/v2/authorisation/actions.js'
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   createRelease,
   deleteRelease,
@@ -11,9 +11,9 @@ import {
   newReleaseComment,
   removeFileFromReleases,
   updateRelease,
-} from '../../src/services/v2/release.js'
+} from '../../src/services/release.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),

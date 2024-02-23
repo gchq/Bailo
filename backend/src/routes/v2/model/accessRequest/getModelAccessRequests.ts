@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
-import audit from '../../../../connectors/v2/audit/index.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
-import { getAccessRequestsByModel } from '../../../../services/v2/accessRequest.js'
-import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { getAccessRequestsByModel } from '../../../../services/accessRequest.js'
+import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getModelAccessRequestsSchema = z.object({
   params: z.object({

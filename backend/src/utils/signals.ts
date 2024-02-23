@@ -1,4 +1,4 @@
-import log from '../services/v2/log.js'
+import log from '../services/log.js'
 
 process.on('SIGINT', () => {
   log.info('SIGINT signal received: Interrupted')

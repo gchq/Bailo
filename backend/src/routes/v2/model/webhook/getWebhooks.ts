@@ -3,9 +3,9 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { WebhookInterface } from '../../../../models/Webhook.js'
-import { registerPath, webhookInterfaceSchema } from '../../../../services/v2/specification.js'
-import { getWebhooksByModel } from '../../../../services/v2/webhook.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { registerPath, webhookInterfaceSchema } from '../../../../services/specification.js'
+import { getWebhooksByModel } from '../../../../services/webhook.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getWebhooksSchema = z.object({
   params: z.object({

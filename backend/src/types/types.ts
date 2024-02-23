@@ -1,3 +1,13 @@
+export interface User {
+  dn: string
+}
+
+export interface Role {
+  id: string
+  name: string
+  short?: string
+}
+
 export interface UiConfig {
   banner: {
     enabled: boolean
@@ -14,20 +24,4 @@ export interface UiConfig {
   registry: {
     host: string
   }
-
-  uploadWarning: {
-    showWarning: boolean
-    checkboxText: string
-  }
-
-  deploymentWarning: {
-    showWarning: boolean
-    checkboxText: string
-  }
-
-  development: {
-    logUrl: string
-  }
-
-  maxModelSizeGB: number
 }

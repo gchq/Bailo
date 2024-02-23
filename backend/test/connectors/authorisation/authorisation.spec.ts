@@ -1,11 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { getAuthorisationConnector } from '../../../src/connectors/v2/authorisation/index.js'
-import config from '../../../src/utils/v2/__mocks__/config.js'
+import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
+import config from '../../../src/utils/__mocks__/config.js'
 
 vi.mock('../../../src/utils/v2/config.js')
 
-vi.mock('../../../src/connectors/v2/authentication/index.js', () => ({
+vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: {
     getUserModelRoles: vi.fn(),
   },

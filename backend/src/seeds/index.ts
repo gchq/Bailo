@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb'
 import { Model, UpdateQuery } from 'mongoose'
 
-import log from '../services/v2/log.js'
+import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import BasicModel from './basic.js'
 import DisableUngovernedModel from './disable_ungoverned.js'

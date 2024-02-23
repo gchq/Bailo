@@ -4,11 +4,11 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import shelljs from 'shelljs'
 import { z } from 'zod'
 
-import log from './services/v2/log.js'
-import { addDefaultSchemas } from './services/v2/schema.js'
+import { ensureBucketExists } from './clients/s3.js'
+import log from './services/log.js'
+import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
-import { ensureBucketExists } from './utils/minio.js'
 import { registerSigTerminate } from './utils/signals.js'
 
 // Update certificates based on mount
@@ -20,9 +20,9 @@ extendZodWithOpenApi(z)
 // technically, we do need to wait for this, but it's so quick
 // that nobody should notice unless they want to upload an image
 // within the first few milliseconds of the _first_ time it's run
-if (config.minio.automaticallyCreateBuckets) {
-  ensureBucketExists(config.minio.buckets.uploads)
-  ensureBucketExists(config.minio.buckets.registry)
+if (config.s3.automaticallyCreateBuckets) {
+  ensureBucketExists(config.s3.buckets.uploads)
+  ensureBucketExists(config.s3.buckets.registry)
 }
 
 // connect to Mongo
@@ -33,8 +33,8 @@ await runMigrations()
 addDefaultSchemas()
 
 const { server } = await import('./routes.js')
-const httpServer = server.listen(config.api.port, () => {
-  log.info('Listening on port', config.api.port)
+const httpServer = server.listen(config.app.port, () => {
+  log.info('Listening on port', config.app.port)
 })
 
 registerSigTerminate(httpServer)

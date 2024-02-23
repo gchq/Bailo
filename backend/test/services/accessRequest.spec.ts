@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
@@ -8,9 +8,9 @@ import {
   getModelAccessRequestsForUser,
   newAccessRequestComment,
   removeAccessRequest,
-} from '../../src/services/v2/accessRequest.js'
+} from '../../src/services/accessRequest.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),

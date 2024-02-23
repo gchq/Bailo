@@ -1,13 +1,13 @@
 import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { FileAction } from '../../src/connectors/v2/authorisation/actions.js'
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { FileAction } from '../../src/connectors/authorisation/actions.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
+import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/file.js'
 
 vi.mock('../../src/utils/config.js')
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),

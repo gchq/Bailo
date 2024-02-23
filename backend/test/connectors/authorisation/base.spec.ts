@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { BasicAuthorisationConnector } from '../../../src/connectors/v2/authorisation/base.js'
+import { BasicAuthorisationConnector } from '../../../src/connectors/authorisation/base.js'
 import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
@@ -23,7 +23,7 @@ const mockAuthentication = vi.hoisted(() => ({
   getUserModelRoles: vi.fn(() => [] as Array<string>),
   hasRole: vi.fn(),
 }))
-vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: mockAuthentication }))
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
 
 describe('connectors > authorisation > base', () => {
   const user = { dn: 'testUser' } as UserInterface

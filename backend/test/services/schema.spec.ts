@@ -1,12 +1,12 @@
 import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
+import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const mockSchema = vi.hoisted(() => {
   const mockedMethods = {

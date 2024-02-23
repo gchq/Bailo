@@ -1,5 +1,5 @@
-import { getAccessToken } from '../routes/registryAuth.js'
-import log from '../services/v2/log.js'
+import { getAccessToken } from '../routes/v1/registryAuth.js'
+import log from '../services/log.js'
 
 async function main() {
   const model = 'nginx'

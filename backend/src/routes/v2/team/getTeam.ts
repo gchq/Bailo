@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { TeamInterface } from '../../../models/Team.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getTeamSchema = z.object({
   params: z.object({

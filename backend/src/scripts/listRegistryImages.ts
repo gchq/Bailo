@@ -1,8 +1,8 @@
 import fetch from 'node-fetch'
 
-import { getAccessToken } from '../routes/registryAuth.js'
-import { getHttpsAgent } from '../services/v2/http.js'
-import log from '../services/v2/log.js'
+import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { getHttpsAgent } from '../services/http.js'
+import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 

@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { getAuthenticationConnector } from '../../../src/connectors/v2/authentication/index.js'
+import { getAuthenticationConnector } from '../../../src/connectors/authentication/index.js'
 
 const configMock = vi.hoisted(() => ({
   connectors: {
@@ -14,11 +14,11 @@ vi.mock('../../../src/utils/v2/config.js', () => ({
   default: configMock,
 }))
 
-vi.mock('../../../src/connectors/v2/authentication/Base.js', () => ({ BaseAuthenticationConnector: vi.fn() }))
-vi.mock('../../../src/connectors/v2/authentication/silly.js', () => ({
+vi.mock('../../../src/connectors/authentication/Base.js', () => ({ BaseAuthenticationConnector: vi.fn() }))
+vi.mock('../../../src/connectors/authentication/silly.js', () => ({
   SillyAuthenticationConnector: vi.fn(() => ({ constructor: { name: 'silly' } })),
 }))
-vi.mock('../../../src/connectors/v2/authentication/oauth.js', () => ({
+vi.mock('../../../src/connectors/authentication/oauth.js', () => ({
   OauthAuthenticationConnector: vi.fn(() => ({ constructor: { name: 'oauth' } })),
 }))
 

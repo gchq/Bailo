@@ -18,7 +18,7 @@ const authenticationMocks = vi.hoisted(() => ({
     },
   ]),
 }))
-vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
 }))
 

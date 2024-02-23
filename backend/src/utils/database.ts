@@ -3,8 +3,8 @@ import { readdir } from 'fs/promises'
 import mongoose, { Types } from 'mongoose'
 import { join } from 'path'
 
+import log from '../services/log.js'
 import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
-import log from '../services/v2/log.js'
 import config from './config.js'
 
 export async function connectToMongoose() {

@@ -11,11 +11,11 @@ import {
   findReviews,
   respondToReview,
   sendReviewResponseNotification,
-} from '../../src/services/v2/review.js'
-import { ReviewKind } from '../../src/types/v2/enums.js'
+} from '../../src/services/review.js'
+import { ReviewKind } from '../../src/types/enums.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
-vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
+vi.mock('../../src/connectors/authorisation/index.js')
+vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 

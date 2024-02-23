@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelAction } from '../../src/connectors/v2/authorisation/actions.js'
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { ModelAction } from '../../src/connectors/authorisation/actions.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -9,9 +9,9 @@ import {
   getModelById,
   getModelCardRevision,
   searchModels,
-} from '../../src/services/v2/model.js'
+} from '../../src/services/model.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelCardRevisionModel = vi.hoisted(() => {
   const obj: any = {}
@@ -56,7 +56,7 @@ vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks }))
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
 }))
-vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
+vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
 }))
 

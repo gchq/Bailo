@@ -8,8 +8,8 @@ import {
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
   requestReviewForRelease,
-} from '../../../src/services/v2/smtp/smtp.js'
-import config from '../../../src/utils/v2/config.js'
+} from '../../../src/services/smtp/smtp.js'
+import config from '../../../src/utils/config.js'
 
 vi.mock('../../../src/utils/v2/config.js', () => {
   return {
@@ -64,7 +64,7 @@ const authenticationMock = vi.hoisted(() => ({
   getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
   getUserInformation: vi.fn(() => [Promise.resolve({ name: 'Joe Blogs' })]),
 }))
-vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: authenticationMock }))
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: authenticationMock }))
 
 const emailBuilderMock = vi.hoisted(() => ({
   buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
