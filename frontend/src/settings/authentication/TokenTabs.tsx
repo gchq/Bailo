@@ -1,66 +1,107 @@
-import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
-import { Box, Dialog, DialogActions, DialogTitle, Tab } from '@mui/material'
+import { Box, Container, Dialog, DialogTitle, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useEffect, useState } from 'react'
+import DockerToken from 'src/settings/authentication/DockerToken'
+import KubernetesToken from 'src/settings/authentication/KubernetesToken'
+import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
 import { TokenInterface } from 'types/v2/types'
 
+type TokenCategory = 'personal access' | 'docker' | 'kubernetes'
+
+function isTokenCategory(tokenCategory: string | string[] | undefined): tokenCategory is TokenCategory {
+  return (tokenCategory as TokenCategory) !== undefined
+}
+
 type TokenTabProps = {
-  token?: TokenInterface
+  token: TokenInterface
 }
 
 export default function TokenTabs({ token }: TokenTabProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [showValue, setShowValue] = useState('1')
-  // const [showAccessKey, setShowAccessKey] = useState(false)
-  // const [showSecretKey, setShowSecretKey] = useState(false)
+  const { tab } = router.query
+  const [tokenCategory, setTokenCategory] = useState<TokenCategory>('personal access')
+  const [kubernetesToken, setKubernetesToken] = useState('')
 
   useEffect(() => {
     if (token) setOpen(true)
   }, [token])
 
-  const handleClose = () => {
-    setIsLoading(true)
-    router.push('/settings?tab=authentication&category=personal')
+  useEffect(() => {
+    if (isTokenCategory(tab)) {
+      setTokenCategory(tab ?? 'personal access')
+    }
+  }, [tab, setTokenCategory])
+
+  const handleListItemClick = (category: TokenCategory) => {
+    setTokenCategory(category)
+    router.replace({
+      query: { ...router.query, section: category },
+    })
+  }
+  function handleKubernetesTokenOnChange(value: string): void {
+    setKubernetesToken(value)
   }
 
-  const handleChange = (event, newValue) => {
-    setShowValue(newValue)
-  }
-
-  // replace existing popup, with a larger on of tabbed items
-  // have an icon for each tab
-  // make sure tabbing is implemented for accessibility
+  // const handleClose = () => {
+  //   setIsLoading(true)
+  //   router.push('/settings?tab=authentication&category=personal')
+  // }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
+    <Dialog
+      open={open}
+      onClose={() => {
+        setOpen(false)
+      }}
+      fullWidth
+      maxWidth='md'
+    >
       <DialogTitle>Token Created</DialogTitle>
-      <TabContext value={showValue}>
-        <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}>
-          <TabList
-            orientation='vertical'
-            value={showValue}
-            onChange={handleChange}
-            aria-label='Vertical tabs example'
-            sx={{ borderRight: 1, borderColor: 'divider' }}
-            selectionFollowsFocus
-          >
-            <Tab label='Item One' value='1' />
-            <Tab label='Item Two' value='2' />
-            <Tab label='Item Three' value='3' />
-          </TabList>
-          <TabPanel value='1'>Item One </TabPanel>
-          <TabPanel value='2'>Item Two </TabPanel>
-          <TabPanel value='3'>Item Three </TabPanel>
-        </Box>
-      </TabContext>
-      <DialogActions>
+      <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex' }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ sm: 2 }}
+          divider={<Divider orientation='vertical' flexItem />}
+        >
+          <List sx={{ width: '225px', minWidth: 'max-content' }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={tokenCategory === 'personal access'}
+                onClick={() => handleListItemClick('personal access')}
+              >
+                Personal Access
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton selected={tokenCategory === 'docker'} onClick={() => handleListItemClick('docker')}>
+                Docker
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={tokenCategory === 'kubernetes'}
+                onClick={() => handleListItemClick('kubernetes')}
+              >
+                Kubernetes
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <Container sx={{ my: 2 }}>
+            {tokenCategory === 'personal access' && <PersonalAccessToken token={token} />}
+            {tokenCategory === 'docker' && <DockerToken />}
+            {tokenCategory === 'kubernetes' && (
+              <KubernetesToken onChange={handleKubernetesTokenOnChange} value={kubernetesToken} />
+            )}
+          </Container>
+        </Stack>
+      </Box>
+      {/* <DialogActions>
         <LoadingButton variant='contained' loading={isLoading} onClick={handleClose}>
           Continue
         </LoadingButton>
-      </DialogActions>
+      </DialogActions> */}
     </Dialog>
   )
 }
