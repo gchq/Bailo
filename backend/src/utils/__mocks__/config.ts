@@ -4,6 +4,12 @@ const config = {
     host: '',
     port: 3000,
   },
+  s3: {
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
+  },
   connectors: {
     authentication: {
       kind: 'silly',
