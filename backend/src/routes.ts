@@ -291,7 +291,7 @@ server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 server.get('/api/v2/model/:modelId/inferences', ...getInferences)
 server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
 server.post('/api/v2/model/:modelId/inference', ...postInference)
-server.put('/api/v2/model/:modelId/inference', ...putInference)
+server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)

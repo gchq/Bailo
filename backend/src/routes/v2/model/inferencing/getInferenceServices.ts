@@ -9,11 +9,9 @@ import { getInferencesByModel } from '../../../../services/v2/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/v2/validate.js'
 
-export const getInferenceSchema = z.object({
+export const getInferencesSchema = z.object({
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+    modelId: z.string(),
   }),
 })
 
@@ -22,7 +20,7 @@ registerPath({
   path: '/api/v2/model/{modelId}/inferences',
   tags: ['inference'],
   description: 'Get all of the inferencing services associated with a model.',
-  schema: getInferenceSchema,
+  schema: getInferencesSchema,
   responses: {
     200: {
       description: 'An array of inferencing services.',
@@ -45,7 +43,7 @@ export const getInferences = [
   bodyParser.json(),
   async (req: Request, res: Response<GetInferenceService>) => {
     req.audit = AuditInfo.ViewInferences
-    const { params } = parse(req, getInferenceSchema)
+    const { params } = parse(req, getInferencesSchema)
 
     const inferences = await getInferencesByModel(req.user, params.modelId)
 

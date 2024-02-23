@@ -44,7 +44,7 @@ export type CreateInferenceParams = Pick<InferenceInterface, 'image' | 'tag' | '
 export async function createInference(user: UserDoc, modelId: string, inferenceParams: CreateInferenceParams) {
   const model = await getModelById(user, modelId)
 
-  const auth = await authorisation.model(user, model, ModelAction.Update)
+  const auth = await authorisation.model(user, model, ModelAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -59,8 +59,8 @@ export async function createInference(user: UserDoc, modelId: string, inferenceP
 
   const image = images.find((image) => image.repository === modelId && image.name === inferenceParams.image)
 
-  if (image?.tags.indexOf(inferenceParams.tag) === -1) {
-    throw NotFound(`Image ${modelId}:${inferenceParams.tag} was not found on this model.`, {
+  if (!image?.tags.includes(inferenceParams.tag)) {
+    throw NotFound(`Image ${inferenceParams.image}:${inferenceParams.tag} was not found on this model.`, {
       modelId: modelId,
     })
   }
@@ -87,20 +87,22 @@ export async function createInference(user: UserDoc, modelId: string, inferenceP
   return inference
 }
 
-export type UpdateInferenceParams = Pick<InferenceInterface, 'image' | 'tag' | 'description' | 'settings'>
+export type UpdateInferenceParams = Pick<InferenceInterface, 'description' | 'settings'>
 export async function updateInference(
   user: UserDoc,
   modelId: string,
+  image: string,
+  tag: string,
   inferenceParams: UpdateInferenceParams,
 ): Promise<InferenceDoc> {
   const model = await getModelById(user, modelId)
 
-  const inference = await getInferenceByImage(user, modelId, inferenceParams.image, inferenceParams.tag)
   const auth = await authorisation.model(user, model, ModelAction.Update)
 
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId: modelId })
   }
+  const inference = await getInferenceByImage(user, modelId, image, tag)
 
   const updatedInference = await Inference.findOneAndUpdate(
     { modelId: inference.modelId, image: inference.image, tag: inference.tag },
@@ -108,7 +110,7 @@ export async function updateInference(
     { new: true },
   )
   if (!updatedInference) {
-    throw NotFound(`The requested webhook was not found.`, { updatedInference })
+    throw NotFound(`The requested inference service was not found.`, { updatedInference })
   }
   return updatedInference
 }

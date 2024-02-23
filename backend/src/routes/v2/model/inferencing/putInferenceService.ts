@@ -11,13 +11,11 @@ import { parse } from '../../../../utils/v2/validate.js'
 
 export const putInferenceSchema = z.object({
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
-  }),
-  body: z.object({
+    modelId: z.string(),
     image: z.string(),
     tag: z.string(),
+  }),
+  body: z.object({
     description: z.string(),
     settings: z.object({
       processorType: z.string(),
@@ -29,7 +27,7 @@ export const putInferenceSchema = z.object({
 
 registerPath({
   method: 'put',
-  path: '/api/v2/model/{modelId}/inference',
+  path: '/api/v2/model/{modelId}/inference/{image}/{tag}',
   tags: ['inference'],
   description: 'Update a inferencing service within Bailo',
   schema: putInferenceSchema,
@@ -54,11 +52,11 @@ export const putInference = [
   async (req: Request, res: Response<PutInferenceService>) => {
     req.audit = AuditInfo.UpdateInference
     const {
-      params: { modelId },
+      params: { modelId, image, tag },
       body,
     } = parse(req, putInferenceSchema)
 
-    const inference = await updateInference(req.user, modelId, body)
+    const inference = await updateInference(req.user, modelId, image, tag, body)
 
     await audit.onUpdateInference(req, inference)
 
