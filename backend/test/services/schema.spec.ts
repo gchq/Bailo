@@ -28,7 +28,7 @@ const mockSchema = vi.hoisted(() => {
     Schema,
   }
 })
-vi.mock('../../src/models/v2/Schema.js', () => ({
+vi.mock('../../src/models/Schema.js', () => ({
   default: mockSchema.Schema,
 }))
 
@@ -37,7 +37,7 @@ const mockMongoUtils = vi.hoisted(() => {
     isMongoServerError: vi.fn(),
   }
 })
-vi.mock('../../utils/v2/mongo.js', () => mockMongoUtils)
+vi.mock('../../utils/mongo.js', () => mockMongoUtils)
 
 describe('services > schema', () => {
   const testUser = { dn: 'user' } as UserInterface

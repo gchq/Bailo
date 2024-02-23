@@ -9,15 +9,15 @@ import { UserInterface } from '../../../src/models/User.js'
 const mockAccessRequestService = vi.hoisted(() => ({
   getModelAccessRequestsForUser: vi.fn(),
 }))
-vi.mock('../../../src/services/v2/accessRequest.js', () => mockAccessRequestService)
+vi.mock('../../../src/services/accessRequest.js', () => mockAccessRequestService)
 
 const mockModelService = vi.hoisted(() => ({}))
-vi.mock('../../../src/services/v2/model.js', () => mockModelService)
+vi.mock('../../../src/services/model.js', () => mockModelService)
 
 const mockReviewService = vi.hoisted(() => ({
   checkAccessRequestsApproved: vi.fn(),
 }))
-vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../../src/services/review.js', () => mockReviewService)
 
 const mockAuthentication = vi.hoisted(() => ({
   getUserModelRoles: vi.fn(() => [] as Array<string>),

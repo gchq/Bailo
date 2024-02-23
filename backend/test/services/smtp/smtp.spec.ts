@@ -11,7 +11,7 @@ import {
 } from '../../../src/services/smtp/smtp.js'
 import config from '../../../src/utils/config.js'
 
-vi.mock('../../../src/utils/v2/config.js', () => {
+vi.mock('../../../src/utils/config.js', () => {
   return {
     __esModule: true,
     default: {
@@ -44,7 +44,7 @@ const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
 }))
-vi.mock('../../../src/services/v2/log.js', async () => ({
+vi.mock('../../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
@@ -69,7 +69,7 @@ vi.mock('../../../src/connectors/authentication/index.js', async () => ({ defaul
 const emailBuilderMock = vi.hoisted(() => ({
   buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
 }))
-vi.mock('../../../src/services/v2/smtp/emailBuilder.js', async () => emailBuilderMock)
+vi.mock('../../../src/services/smtp/emailBuilder.js', async () => emailBuilderMock)
 
 describe('services > smtp > smtp', () => {
   const review = new Review({ role: 'owner', responses: [{ decision: 'approve' }] })

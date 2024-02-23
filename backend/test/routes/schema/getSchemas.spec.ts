@@ -6,7 +6,7 @@ import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModel
 
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
 
@@ -16,7 +16,7 @@ const mockSchemaService = vi.hoisted(() => {
     findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
-vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
+vi.mock('../../../src/services/schema.js', () => mockSchemaService)
 
 describe('routes > schema > getSchemas', () => {
   test('returns all schemas', async () => {

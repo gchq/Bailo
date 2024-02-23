@@ -15,12 +15,12 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', () => modelMocks)
+vi.mock('../../src/services/model.js', () => modelMocks)
 
 const schemaMocks = vi.hoisted(() => ({
   findSchemaById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/schema.js', () => schemaMocks)
+vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 const accessRequestModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -36,21 +36,21 @@ const accessRequestModelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/AccessRequest.js', () => ({ default: accessRequestModelMocks }))
+vi.mock('../../src/models/AccessRequest.js', () => ({ default: accessRequestModelMocks }))
 
 const mockReviewService = vi.hoisted(() => {
   return {
     createAccessRequestReviews: vi.fn(),
   }
 })
-vi.mock('../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../src/services/review.js', () => mockReviewService)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
     sendWebhooks: vi.fn(),
   }
 })
-vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 const accessRequest = {
   metadata: {

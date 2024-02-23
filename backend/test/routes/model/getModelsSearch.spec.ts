@@ -7,10 +7,10 @@ import { createFixture, testGet } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 
-vi.mock('../../../src/services/v2/model.js', () => ({
+vi.mock('../../../src/services/model.js', () => ({
   searchModels: vi.fn(() => [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }]),
 }))
 

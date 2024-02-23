@@ -24,12 +24,12 @@ const modelCardRevisionModel = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/ModelCardRevision.js', () => ({
+vi.mock('../../src/models/ModelCardRevision.js', () => ({
   default: modelCardRevisionModel,
 }))
 
 const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'model-id') }))
-vi.mock('../../src/utils/v2/id.js', () => ({
+vi.mock('../../src/utils/id.js', () => ({
   convertStringToId: idMocks.convertStringToId,
 }))
 
@@ -51,7 +51,7 @@ const modelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/Model.js', () => ({ default: modelMocks }))
+vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),

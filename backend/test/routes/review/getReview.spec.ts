@@ -4,7 +4,7 @@ import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testReleaseReview, testReleaseReviewWithResponses } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
@@ -16,7 +16,7 @@ const mockReviewService = vi.hoisted(() => {
     findReviews: vi.fn(() => reviews),
   }
 })
-vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../../src/services/review.js', () => mockReviewService)
 
 describe('routes > review > getReviews', () => {
   const endpoint = `/api/v2/reviews`

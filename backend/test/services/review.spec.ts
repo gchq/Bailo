@@ -43,8 +43,8 @@ const reviewModelMock = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/Review.js', async () => ({
-  ...((await vi.importActual('../../src/models/v2/Review.js')) as object),
+vi.mock('../../src/models/Review.js', async () => ({
+  ...((await vi.importActual('../../src/models/Review.js')) as object),
   default: reviewModelMock,
 }))
 
@@ -54,42 +54,42 @@ const smtpMock = vi.hoisted(() => ({
   requestReviewForRelease: vi.fn(() => Promise.resolve()),
   requestReviewForAccessRequest: vi.fn(() => Promise.resolve()),
 }))
-vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
+vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', async () => modelMock)
+vi.mock('../../src/services/model.js', async () => modelMock)
 
 const accessRequestServiceMock = vi.hoisted(() => ({
   getAccessRequestById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/accessRequest.js', async () => accessRequestServiceMock)
+vi.mock('../../src/services/accessRequest.js', async () => accessRequestServiceMock)
 
 const releaseRequestServiceMock = vi.hoisted(() => ({
   getReleaseBySemver: vi.fn(),
 }))
-vi.mock('../../src/services/v2/release.js', async () => releaseRequestServiceMock)
+vi.mock('../../src/services/release.js', async () => releaseRequestServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/v2/log.js', async () => ({
+vi.mock('../../src/services/log.js', async () => ({
   default: logMock,
 }))
 const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))
-vi.mock('../../src/utils/v2/array.js', async () => arrayUtilMock)
+vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
     sendWebhooks: vi.fn(),
   }
 })
-vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }

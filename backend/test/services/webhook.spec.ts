@@ -16,14 +16,14 @@ const logMock = vi.hoisted(() => ({
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/v2/log.js', async () => ({
+vi.mock('../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
 const modelServiceMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', () => modelServiceMock)
+vi.mock('../../src/services/model.js', () => modelServiceMock)
 
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true })),
@@ -43,7 +43,7 @@ const webhookModelMock = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/Webhook.js', () => ({ default: webhookModelMock }))
+vi.mock('../../src/models/Webhook.js', () => ({ default: webhookModelMock }))
 
 describe('services > webhook', () => {
   const user: any = { dn: 'test' }

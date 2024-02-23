@@ -7,7 +7,7 @@ import { testModelSchema } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
 
@@ -17,7 +17,7 @@ const mockSchemaService = vi.hoisted(() => {
     findSchemaById: vi.fn(),
   }
 })
-vi.mock('../../../src/services/v2/schema.js', () => mockSchemaService)
+vi.mock('../../../src/services/schema.js', () => mockSchemaService)
 
 describe('routes > schema > getSchema', () => {
   test('returns the schema with the matching ID', async () => {

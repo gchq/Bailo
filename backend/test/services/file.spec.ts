@@ -18,12 +18,12 @@ vi.mock('../../src/clients/s3.js', () => s3Mocks)
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', () => modelMocks)
+vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseServiceMocks = vi.hoisted(() => ({
   removeFileFromReleases: vi.fn(),
 }))
-vi.mock('../../src/services/v2/release.js', () => releaseServiceMocks)
+vi.mock('../../src/services/release.js', () => releaseServiceMocks)
 
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -38,7 +38,7 @@ const fileModelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/File.js', () => ({ default: fileModelMocks }))
+vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {

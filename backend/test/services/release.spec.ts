@@ -19,18 +19,18 @@ const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
   getModelCardRevision: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', () => modelMocks)
+vi.mock('../../src/services/model.js', () => modelMocks)
 
 const registryMocks = vi.hoisted(() => ({
   listModelImages: vi.fn(),
 }))
-vi.mock('../../src/services/v2/registry.js', () => registryMocks)
+vi.mock('../../src/services/registry.js', () => registryMocks)
 
 const fileMocks = vi.hoisted(() => ({
   getFileById: vi.fn(),
   getFilesByIds: vi.fn(),
 }))
-vi.mock('../../src/services/v2/file.js', () => fileMocks)
+vi.mock('../../src/services/file.js', () => fileMocks)
 
 const releaseModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -54,21 +54,21 @@ const releaseModelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/Release.js', () => ({ default: releaseModelMocks }))
+vi.mock('../../src/models/Release.js', () => ({ default: releaseModelMocks }))
 
 const mockReviewService = vi.hoisted(() => {
   return {
     createReleaseReviews: vi.fn(),
   }
 })
-vi.mock('../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../src/services/review.js', () => mockReviewService)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
     sendWebhooks: vi.fn(),
   }
 })
-vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
+vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 describe('services > release', () => {
   test('createRelease > simple', async () => {
