@@ -98,6 +98,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.id}
           value={selectedEntities || []}
+          filterOptions={(x) => x}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
