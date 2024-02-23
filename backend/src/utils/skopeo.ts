@@ -1,4 +1,4 @@
-import { Access, getAccessToken } from '../routes/v1/registryAuth.js'
+import { Access, getAccessToken } from '../routes/registryAuth.js'
 import { runCommand } from './build/build.js'
 import config from './config.js'
 

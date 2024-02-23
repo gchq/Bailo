@@ -4,12 +4,7 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import shelljs from 'shelljs'
 import { z } from 'zod'
 
-import { createModelIndexes } from './models/Model.js'
-import { createSchemaIndexes } from './models/Schema.js'
-import processDeployments from './processors/processDeployments.js'
-import processUploads from './processors/processUploads.js'
-import { addDefaultSchemas } from './services/schema.js'
-import { addDefaultSchemas as addDefaultSchemasv2 } from './services/v2/schema.js'
+import { addDefaultSchemas } from './services/v2/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
 import logger from './utils/logger.js'
@@ -34,15 +29,8 @@ if (config.minio.automaticallyCreateBuckets) {
 await connectToMongoose()
 await runMigrations()
 
-// lazily create indexes for full text search
-createModelIndexes()
-createSchemaIndexes()
-
 // lazily add default schemas
 addDefaultSchemas()
-addDefaultSchemasv2()
-
-await Promise.all([processUploads(), processDeployments()])
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

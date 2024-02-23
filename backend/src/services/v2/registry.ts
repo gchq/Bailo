@@ -2,7 +2,7 @@ import { listImageTags, listModelRepos } from '../../clients/registry.js'
 import { ImageAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../models/v2/User.js'
-import { Action, getAccessToken } from '../../routes/v1/registryAuth.js'
+import { Action, getAccessToken } from '../../routes/registryAuth.js'
 import { Forbidden } from '../../utils/v2/error.js'
 import { getModelById } from './model.js'
 

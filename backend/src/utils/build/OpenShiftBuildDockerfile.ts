@@ -3,7 +3,7 @@ import AdmZip from 'adm-zip'
 import { createReadStream } from 'fs'
 import OpenShift from 'openshift-rest-client'
 
-import { getAdminToken } from '../../routes/v1/registryAuth.js'
+import { getAdminToken } from '../../routes/registryAuth.js'
 import { ModelDoc, VersionDoc } from '../../types/types.js'
 import config from '../config.js'
 import { BuildLogger } from './BuildLogger.js'
