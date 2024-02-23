@@ -133,19 +133,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 'a:visited': {
                   color: theme.palette.primary.main,
                 },
-                'code.hljs': {
+                blockquote: {
                   fontStyle: 'italic',
                   background: grey.A200,
-                  borderLeft: `2px solid ${theme.palette.secondary.main}`,
-                },
-                '.hljs-attr': {
-                  color: grey[900],
-                },
-                '.hljs-string': {
-                  color: grey.A700,
-                },
-                '.hljs-punctuation': {
-                  color: grey.A700,
+                  borderLeft: `2px solid ${grey[900]}`,
+                  px: 1,
+                  py: 0.5,
                 },
               }}
             >
