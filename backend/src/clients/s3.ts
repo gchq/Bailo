@@ -6,7 +6,6 @@ import {
   HeadBucketCommand,
   HeadBucketRequest,
   HeadObjectRequest,
-  NoSuchBucket,
   NoSuchKey,
   S3Client,
 } from '@aws-sdk/client-s3'
@@ -116,7 +115,7 @@ export async function ensureBucketExists(bucket: string) {
     await headBucket(bucket)
     log.info({ bucket }, `Bucket ${bucket} already exists`)
   } catch (error) {
-    if (error instanceof NoSuchBucket) {
+    if ((error as any)['$metadata'].httpStatusCode === 404) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
