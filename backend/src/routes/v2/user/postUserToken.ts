@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
-import { TokenActions, TokenInterface, TokenScope } from '../../../models/v2/Token.js'
+import { TokenActions, TokenInterface, TokenScope } from '../../../models/Token.js'
 import { registerPath, userTokenSchema } from '../../../services/v2/specification.js'
 import { createToken } from '../../../services/v2/token.js'
 import { parse } from '../../../utils/v2/validate.js'

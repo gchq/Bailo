@@ -2,7 +2,7 @@ import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
-import { UserDoc } from '../../src/models/v2/User.js'
+import { UserInterface } from '../../src/models/User.js'
 import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
@@ -40,7 +40,7 @@ const mockMongoUtils = vi.hoisted(() => {
 vi.mock('../../utils/v2/mongo.js', () => mockMongoUtils)
 
 describe('services > schema', () => {
-  const testUser = { dn: 'user' } as UserDoc
+  const testUser = { dn: 'user' } as UserInterface
 
   test('that all schemas can be retrieved', async () => {
     const result = await findSchemasByKind('model')

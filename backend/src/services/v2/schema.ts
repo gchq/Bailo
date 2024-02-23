@@ -2,8 +2,8 @@ import { Schema as JsonSchema } from 'jsonschema'
 
 import { SchemaAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import Schema, { SchemaInterface } from '../../models/v2/Schema.js'
-import { UserDoc } from '../../models/v2/User.js'
+import Schema, { SchemaInterface } from '../../models/Schema.js'
+import { UserInterface } from '../../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
 import config from '../../utils/v2/config.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
@@ -34,7 +34,7 @@ export async function findSchemaById(schemaId: string) {
   return schema
 }
 
-export async function deleteSchemaById(user: UserDoc, schemaId: string): Promise<string> {
+export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
   const schema = await Schema.findOne({
     id: schemaId,
   })
@@ -56,7 +56,7 @@ export async function deleteSchemaById(user: UserDoc, schemaId: string): Promise
   return schema.id
 }
 
-export async function createSchema(user: UserDoc, schema: Partial<SchemaInterface>, overwrite = false) {
+export async function createSchema(user: UserInterface, schema: Partial<SchemaInterface>, overwrite = false) {
   const schemaDoc = new Schema(schema)
 
   const auth = await authorisation.schema(user, schemaDoc, SchemaAction.Create)
@@ -81,7 +81,7 @@ export async function createSchema(user: UserDoc, schema: Partial<SchemaInterfac
 
 export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
 
-export async function updateSchema(user: UserDoc, schemaId: string, diff: Partial<UpdateSchemaParams>) {
+export async function updateSchema(user: UserInterface, schemaId: string, diff: Partial<UpdateSchemaParams>) {
   const schema = await findSchemaById(schemaId)
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)

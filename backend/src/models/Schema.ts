@@ -1,7 +1,7 @@
 import { Schema as JsonSchema } from 'jsonschema'
 import { Document, model, Schema } from 'mongoose'
 
-import { SchemaKind, SchemaKindKeys } from '../../types/v2/enums.js'
+import { SchemaKind, SchemaKindKeys } from '../types/v2/enums.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the

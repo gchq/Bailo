@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
 import audit from '../../../../connectors/v2/audit/index.js'
-import { ModelCardInterface } from '../../../../models/v2/Model.js'
+import { ModelCardInterface } from '../../../../models/Model.js'
 import { getModelCard as getModelCardService } from '../../../../services/v2/model.js'
 import { modelCardInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'

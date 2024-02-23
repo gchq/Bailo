@@ -1,7 +1,7 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
+import { ReviewKind, ReviewKindKeys } from '../types/v2/enums.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',

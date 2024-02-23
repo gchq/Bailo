@@ -15,9 +15,7 @@ async function script() {
 
   const registry = `https://localhost:5000/v2`
 
-  const token = await getAccessToken({ id: 'user', _id: 'user' }, [
-    { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
-  ])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
 
   const authorisation = `Bearer ${token}`
 

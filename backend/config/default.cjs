@@ -125,20 +125,6 @@ module.exports = {
   },
 
   defaultSchemas: {
-    upload: [
-      {
-        name: 'Minimal Schema v10',
-        reference: '/Minimal/General/v10',
-        schema: require('../src/scripts/example_schemas/minimal_upload_schema.json'),
-      },
-    ],
-    deployment: [
-      {
-        name: 'Minimal Deployment Schema v6',
-        reference: '/Minimal/Deployment/v6',
-        schema: require('../src/scripts/example_schemas/minimal_deployment_schema.json'),
-      },
-    ],
     v2: {
       modelCards: [
         {

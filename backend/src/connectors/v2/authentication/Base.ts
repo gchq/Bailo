@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express'
 
-import { ModelDoc } from '../../../models/v2/Model.js'
-import { UserDoc } from '../../../models/v2/User.js'
+import { ModelDoc } from '../../../models/Model.js'
+import { UserInterface } from '../../../models/User.js'
 import { checkAuthentication, getTokenFromAuthHeader } from '../../../routes/middleware/defaultAuthentication.js'
 
 export const Roles = {
@@ -16,10 +16,10 @@ export interface UserInformation {
 }
 
 export abstract class BaseAuthenticationConnector {
-  abstract hasRole(user: UserDoc, role: RoleKeys): Promise<boolean>
+  abstract hasRole(user: UserInterface, role: RoleKeys): Promise<boolean>
 
   abstract queryEntities(query: string): Promise<Array<{ kind: string; id: string }>>
-  abstract getEntities(user: UserDoc): Promise<Array<string>>
+  abstract getEntities(user: UserInterface): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<UserInformation>
   abstract getEntityMembers(entity: string): Promise<Array<string>>
 
@@ -41,7 +41,7 @@ export abstract class BaseAuthenticationConnector {
     ]
   }
 
-  async getUserModelRoles(user: UserDoc, model: ModelDoc) {
+  async getUserModelRoles(user: UserInterface, model: ModelDoc) {
     const entities = await this.getEntities(user)
 
     return model.collaborators

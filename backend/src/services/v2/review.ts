@@ -1,12 +1,12 @@
 import authentication from '../../connectors/v2/authentication/index.js'
 import { ModelAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
-import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/v2/Model.js'
-import { ReleaseDoc } from '../../models/v2/Release.js'
-import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/v2/Review.js'
-import { UserDoc } from '../../models/v2/User.js'
-import { WebhookEvent } from '../../models/v2/Webhook.js'
+import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { CollaboratorEntry, ModelDoc, ModelInterface } from '../../models/Model.js'
+import { ReleaseDoc } from '../../models/Release.js'
+import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../../models/Review.js'
+import { UserInterface } from '../../models/User.js'
+import { WebhookEvent } from '../../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../../types/v2/enums.js'
 import { toEntity } from '../../utils/v2/entity.js'
 import { BadReq, GenericError, NotFound } from '../../utils/v2/error.js'
@@ -29,7 +29,7 @@ const requiredRoles = {
 }
 
 export async function findReviews(
-  user: UserDoc,
+  user: UserInterface,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
@@ -100,7 +100,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
 
 export type ReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
 export async function respondToReview(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
   role: string,
   response: ReviewResponseParams,
@@ -162,7 +162,7 @@ export async function respondToReview(
   return update
 }
 
-export async function sendReviewResponseNotification(review: ReviewDoc, user: UserDoc) {
+export async function sendReviewResponseNotification(review: ReviewDoc, user: UserInterface) {
   let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {
@@ -220,7 +220,7 @@ function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
  * Return the models where one of the user's entities is in the model's collaborators
  * and the role in the review is in the list of roles in that collaborator entry.
  */
-async function findUserInCollaborators(user: UserDoc) {
+async function findUserInCollaborators(user: UserInterface) {
   return {
     $expr: {
       $gt: [

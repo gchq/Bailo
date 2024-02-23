@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { TeamInterface } from '../../../models/v2/Team.js'
+import { TeamInterface } from '../../../models/Team.js'
 import { parse } from '../../../utils/v2/validate.js'
 
 export const postTeamSchema = z.object({

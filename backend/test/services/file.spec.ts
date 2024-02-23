@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/v2/authorisation/actions.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
-import { UserDoc } from '../../src/models/v2/User.js'
+import { UserInterface } from '../../src/models/User.js'
 import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
 
 vi.mock('../../src/utils/config.js')
@@ -42,7 +42,7 @@ vi.mock('../../src/models/v2/File.js', () => ({ default: fileModelMocks }))
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const name = 'testFile'
     const mime = 'text/plain'
@@ -69,7 +69,7 @@ describe('services > file', () => {
   })
 
   test('removeFile > success', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
@@ -80,7 +80,7 @@ describe('services > file', () => {
   })
 
   test('removeFile > no release permission', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
@@ -101,7 +101,7 @@ describe('services > file', () => {
       return { success: false, info: 'Unknown action.', id: '' }
     })
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
@@ -114,7 +114,7 @@ describe('services > file', () => {
   test('getFilesByModel > success', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
     const result = await getFilesByModel(user, modelId)
@@ -133,7 +133,7 @@ describe('services > file', () => {
 
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
     const files = await getFilesByModel(user, modelId)
@@ -143,7 +143,7 @@ describe('services > file', () => {
   test('getFilesByIds > success', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileIds = ['testFileId']
 
@@ -155,7 +155,7 @@ describe('services > file', () => {
   test('getFilesByIds > no file ids', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileIds = []
 
@@ -167,7 +167,7 @@ describe('services > file', () => {
   test('getFilesByIds > files not found', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileIds = ['testFileId', 'testFileId2']
 
@@ -186,7 +186,7 @@ describe('services > file', () => {
     ])
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
 
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileIds = ['testFileId']
 
@@ -195,7 +195,7 @@ describe('services > file', () => {
   })
 
   test('downloadFile > success', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
 
@@ -205,7 +205,7 @@ describe('services > file', () => {
   })
 
   test('downloadFile > no permission', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
 

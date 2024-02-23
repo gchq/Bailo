@@ -1,4 +1,4 @@
-import { UserDoc } from '../../../models/v2/User.js'
+import { UserInterface } from '../../../models/User.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
 import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
 
@@ -27,7 +27,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     ]
   }
 
-  async hasRole(_user: UserDoc, role: RoleKeys) {
+  async hasRole(_user: UserInterface, role: RoleKeys) {
     if (role === Roles.Admin) {
       return true
     }
@@ -55,7 +55,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
     ]
   }
 
-  async getEntities(user: UserDoc) {
+  async getEntities(user: UserInterface) {
     return [toEntity(SillyEntityKind.User, user.dn)]
   }
 

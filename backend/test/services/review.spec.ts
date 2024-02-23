@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../src/models/v2/AccessRequest.js'
-import Model from '../../src/models/v2/Model.js'
-import Release from '../../src/models/v2/Release.js'
-import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/v2/Review.js'
+import AccessRequest from '../../src/models/AccessRequest.js'
+import Model from '../../src/models/Model.js'
+import Release from '../../src/models/Release.js'
+import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/Review.js'
 import {
   checkAccessRequestsApproved,
   createAccessRequestReviews,

@@ -1,4 +1,4 @@
-import { Decision } from '../../src/models/v2/Review.js'
+import { Decision } from '../../src/models/Review.js'
 import { ReviewKind, SchemaKind } from '../../src/types/v2/enums.js'
 
 export const testModelSchema = {

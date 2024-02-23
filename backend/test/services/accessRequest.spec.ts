@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
-import { UserDoc } from '../../src/models/v2/User.js'
+import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
   getAccessRequestsByModel,
@@ -132,7 +132,7 @@ describe('services > accessRequest', () => {
   })
 
   test('getModelAccessRequestsForUser > query as expected', async () => {
-    const user = { dn: 'testUser' } as UserDoc
+    const user = { dn: 'testUser' } as UserInterface
     await getModelAccessRequestsForUser(user, 'test-model')
 
     expect(accessRequestModelMocks.find.mock.calls).matchSnapshot()

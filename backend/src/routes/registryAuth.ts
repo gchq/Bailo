@@ -7,13 +7,12 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../connectors/v2/audit/index.js'
 import authorisation from '../connectors/v2/authorisation/index.js'
-import { ModelDoc } from '../models/v2/Model.js'
-import { TokenActions, TokenDoc } from '../models/v2/Token.js'
-import { UserDoc as UserDocV2 } from '../models/v2/User.js'
+import { ModelDoc } from '../models/Model.js'
+import { TokenActions, TokenDoc } from '../models/Token.js'
+import { UserInterface } from '../models/User.js'
 import log from '../services/v2/log.js'
 import { getModelById } from '../services/v2/model.js'
 import { validateTokenForModel } from '../services/v2/token.js'
-import { ModelId, UserDoc } from '../types/types.js'
 import config from '../utils/config.js'
 import { Forbidden, Unauthorised } from '../utils/result.js'
 import { getUserFromAuthHeader } from '../utils/user.js'
@@ -112,11 +111,11 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
   )
 }
 
-export function getRefreshToken(user: UserDoc) {
+export function getRefreshToken(user: UserInterface) {
   return encodeToken(
     {
-      sub: user.id,
-      user: String(user._id),
+      sub: user.dn,
+      user: String(user.dn),
       usage: 'refresh_token',
     },
     {
@@ -135,16 +134,11 @@ export interface Access {
   actions: Array<Action>
 }
 
-export interface User {
-  _id: ModelId
-  id: string
-}
-
-export function getAccessToken(user: User, access: Array<Access>) {
+export function getAccessToken(user: UserInterface, access: Array<Access>) {
   return encodeToken(
     {
-      sub: user.id,
-      user: String(user._id),
+      sub: user.dn,
+      user: String(user.dn),
       access,
     },
     {
@@ -164,7 +158,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccessV2(access: Access, user: UserDocV2, token: TokenDoc | undefined) {
+async function checkAccess(access: Access, user: UserInterface, token: TokenDoc | undefined) {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -185,14 +179,6 @@ async function checkAccessV2(access: Access, user: UserDocV2, token: TokenDoc | 
 
   const auth = await authorisation.image(user, model, access)
   return auth.success
-}
-
-async function checkAccess(access: Access, user: UserDoc, token: TokenDoc | undefined) {
-  const modelUuid = access.name.split('/')[0]
-  const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
-
-  await getModelById(v2User, modelUuid)
-  return checkAccessV2(access, v2User, token)
 }
 
 export const getDockerRegistryAuth = [

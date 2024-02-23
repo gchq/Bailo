@@ -69,7 +69,7 @@ An example authorisation implemention:
 ```javascript
 // backend/src/connectors/Authorisation.ts
 import AuthorisationBase from '../utils/AuthorisationBase.js'
-import { UserDoc } from '../models/User.js'
+import { UserInterface } from '../models/User.js'
 import { VersionDoc } from '../models/Version.js'
 
 class Authorisation extends AuthorisationBase {
@@ -81,7 +81,7 @@ class Authorisation extends AuthorisationBase {
     }
   }
 
-  async canUserSeeVersion(user: UserDoc, model: VersionDoc) {
+  async canUserSeeVersion(user: UserInterface, model: VersionDoc) {
     // we can access the roles from the user document
     const userRoles = user.data.roles
     // our schema has a 'role' field we need users to have to see it

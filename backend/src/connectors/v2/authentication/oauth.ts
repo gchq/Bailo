@@ -5,7 +5,7 @@ import session from 'express-session'
 import grant from 'grant'
 
 import { listUsers } from '../../../clients/cognito.js'
-import { UserDoc } from '../../../models/v2/User.js'
+import { UserInterface } from '../../../models/User.js'
 import config from '../../../utils/v2/config.js'
 import { fromEntity, toEntity } from '../../../utils/v2/entity.js'
 import { InternalError, NotFound } from '../../../utils/v2/error.js'
@@ -73,7 +73,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return router
   }
 
-  async hasRole(_user: UserDoc, _role: RoleKeys) {
+  async hasRole(_user: UserInterface, _role: RoleKeys) {
     return false
   }
 
@@ -82,7 +82,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return entities
   }
 
-  async getEntities(user: UserDoc) {
+  async getEntities(user: UserInterface) {
     return [toEntity(OauthEntityKind.User, user.dn)]
   }
 

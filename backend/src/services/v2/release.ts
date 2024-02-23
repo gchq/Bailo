@@ -2,11 +2,11 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { FileInterface } from '../../models/v2/File.js'
-import { ModelDoc, ModelInterface } from '../../models/v2/Model.js'
-import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/v2/Release.js'
-import { UserDoc } from '../../models/v2/User.js'
-import { WebhookEvent } from '../../models/v2/Webhook.js'
+import { FileInterface } from '../../models/File.js'
+import { ModelDoc, ModelInterface } from '../../models/Model.js'
+import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
+import { UserInterface } from '../../models/User.js'
+import { WebhookEvent } from '../../models/Webhook.js'
 import { findDuplicates } from '../../utils/v2/array.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/v2/error.js'
 import { isMongoServerError } from '../../utils/v2/mongo.js'
@@ -17,7 +17,7 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-async function validateRelease(user: UserDoc, model: ModelDoc, release: ReleaseDoc) {
+async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (release.images) {
     const registryImages = await listModelImages(user, release.modelId)
 
@@ -84,7 +84,7 @@ export type CreateReleaseParams = Optional<
   >,
   'modelCardVersion'
 >
-export async function createRelease(user: UserDoc, releaseParams: CreateReleaseParams) {
+export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
 
   if (releaseParams.modelCardVersion) {
@@ -146,7 +146,7 @@ export async function createRelease(user: UserDoc, releaseParams: CreateReleaseP
 }
 
 export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
-export async function updateRelease(user: UserDoc, modelId: string, semver: string, delta: UpdateReleaseParams) {
+export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
   const release = await getReleaseBySemver(user, modelId, semver)
 
@@ -170,7 +170,7 @@ export async function updateRelease(user: UserDoc, modelId: string, semver: stri
   return updatedRelease
 }
 
-export async function newReleaseComment(user: UserDoc, modelId: string, semver: string, message: string) {
+export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
   const release = await getReleaseBySemver(user, modelId, semver)
 
   if (!release) {
@@ -200,7 +200,7 @@ export async function newReleaseComment(user: UserDoc, modelId: string, semver: 
 }
 
 export async function getModelReleases(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
   const results = await Release.aggregate()
@@ -216,7 +216,7 @@ export async function getModelReleases(
   return results.filter((_, i) => auths[i].success)
 }
 
-export async function getReleaseBySemver(user: UserDoc, modelId: string, semver: string) {
+export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const release = await Release.findOne({
     modelId,
@@ -235,7 +235,7 @@ export async function getReleaseBySemver(user: UserDoc, modelId: string, semver:
   return release
 }
 
-export async function deleteRelease(user: UserDoc, modelId: string, semver: string) {
+export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const release = await getReleaseBySemver(user, modelId, semver)
 
@@ -253,7 +253,7 @@ export function getReleaseName(release: ReleaseDoc): string {
   return `${release.modelId} - v${release.semver}`
 }
 
-export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fileId: string) {
+export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
   const query = {
     modelId: model.id,
     // Match documents where the element exists in the array
@@ -277,7 +277,7 @@ export async function removeFileFromReleases(user: UserDoc, model: ModelDoc, fil
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
 }
 
-export async function getFileByReleaseFileName(user: UserDoc, modelId: string, semver: string, fileName: string) {
+export async function getFileByReleaseFileName(user: UserInterface, modelId: string, semver: string, fileName: string) {
   const release = await getReleaseBySemver(user, modelId, semver)
   const files = await getFilesByIds(user, modelId, release.fileIds)
 

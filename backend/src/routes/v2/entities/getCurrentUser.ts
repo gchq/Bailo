@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { UserDoc } from '../../../models/v2/User.js'
+import { UserInterface } from '../../../models/User.js'
 import { registerPath, userInterfaceSchema } from '../../../services/v2/specification.js'
 import { parse } from '../../../utils/v2/validate.js'
 
@@ -27,7 +27,7 @@ registerPath({
 })
 
 interface GetCurrentUserResponses {
-  user: UserDoc
+  user: UserInterface
 }
 
 export const getCurrentUser = [

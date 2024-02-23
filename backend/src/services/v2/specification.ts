@@ -1,8 +1,8 @@
 import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
-import { Decision } from '../../models/v2/Review.js'
-import { TokenActions, TokenScope } from '../../models/v2/Token.js'
+import { Decision } from '../../models/Review.js'
+import { TokenActions, TokenScope } from '../../models/Token.js'
 import { SchemaKind } from '../../types/v2/enums.js'
 
 export const registry = new OpenAPIRegistry()

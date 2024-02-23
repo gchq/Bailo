@@ -2,12 +2,12 @@ import fetch from 'node-fetch'
 
 import { ModelAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { AccessRequestDoc } from '../../models/v2/AccessRequest.js'
-import { ReleaseDoc } from '../../models/v2/Release.js'
-import { ReviewInterface } from '../../models/v2/Review.js'
-import { UserDoc } from '../../models/v2/User.js'
-import { WebhookEventKeys, WebhookInterface } from '../../models/v2/Webhook.js'
-import WebhookModel from '../../models/v2/Webhook.js'
+import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { ReleaseDoc } from '../../models/Release.js'
+import { ReviewInterface } from '../../models/Review.js'
+import { UserInterface } from '../../models/User.js'
+import { WebhookEventKeys, WebhookInterface } from '../../models/Webhook.js'
+import WebhookModel from '../../models/Webhook.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
 import { getHttpsAgent } from './http.js'
@@ -18,7 +18,7 @@ export type CreateWebhookParams = Pick<
   WebhookInterface,
   'name' | 'modelId' | 'uri' | 'token' | 'insecureSSL' | 'events' | 'active'
 >
-export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookParams) {
+export async function createWebhook(user: UserInterface, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to update it
   const model = await getModelById(user, webhookParams.modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -36,7 +36,7 @@ export async function createWebhook(user: UserDoc, webhookParams: CreateWebhookP
   return webhook
 }
 
-export async function updateWebhook(user: UserDoc, webhookId: string, webhookParams: CreateWebhookParams) {
+export async function updateWebhook(user: UserInterface, webhookId: string, webhookParams: CreateWebhookParams) {
   //Check model exists and user has the permisson to update it
   const model = await getModelById(user, webhookParams.modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -52,7 +52,7 @@ export async function updateWebhook(user: UserDoc, webhookId: string, webhookPar
   return webhook
 }
 
-export async function getWebhooksByModel(user: UserDoc, modelId: string) {
+export async function getWebhooksByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
   const auth = await authorisation.model(user, model, ModelAction.View)
   if (!auth.success) {
@@ -62,7 +62,7 @@ export async function getWebhooksByModel(user: UserDoc, modelId: string) {
   return await WebhookModel.find({ modelId })
 }
 
-export async function removeWebhook(user: UserDoc, modelId: string, webhookId: string) {
+export async function removeWebhook(user: UserInterface, modelId: string, webhookId: string) {
   const auth = await authorisation.model(user, await getModelById(user, modelId), ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(`You do not have permission to update this model.`, { userDn: user.dn })

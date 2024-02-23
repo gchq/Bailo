@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { WebhookEvent, WebhookInterface } from '../../../../models/v2/Webhook.js'
+import { WebhookEvent, WebhookInterface } from '../../../../models/Webhook.js'
 import { registerPath, webhookInterfaceSchema } from '../../../../services/v2/specification.js'
 import { createWebhook } from '../../../../services/v2/webhook.js'
 import { parse } from '../../../../utils/v2/validate.js'

@@ -3,10 +3,10 @@ import { Validator } from 'jsonschema'
 import authentication from '../../connectors/v2/authentication/index.js'
 import { AccessRequestAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
-import AccessRequest from '../../models/v2/AccessRequest.js'
-import { UserDoc } from '../../models/v2/User.js'
-import { WebhookEvent } from '../../models/v2/Webhook.js'
+import { AccessRequestInterface } from '../../models/AccessRequest.js'
+import AccessRequest from '../../models/AccessRequest.js'
+import { UserInterface } from '../../models/User.js'
+import { WebhookEvent } from '../../models/Webhook.js'
 import { isValidatorResultError } from '../../types/v2/ValidatorResultError.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../../utils/v2/error.js'
 import { convertStringToId } from '../../utils/v2/id.js'
@@ -18,7 +18,7 @@ import { sendWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
   accessRequestInfo: CreateAccessRequestParams,
 ) {
@@ -72,7 +72,7 @@ export async function createAccessRequest(
   return accessRequest
 }
 
-export async function removeAccessRequest(user: UserDoc, accessRequestId: string) {
+export async function removeAccessRequest(user: UserInterface, accessRequestId: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
@@ -86,7 +86,7 @@ export async function removeAccessRequest(user: UserDoc, accessRequestId: string
   return { accessRequestId }
 }
 
-export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
+export async function getAccessRequestsByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
   const accessRequests = await AccessRequest.find({ modelId })
 
@@ -94,7 +94,7 @@ export async function getAccessRequestsByModel(user: UserDoc, modelId: string) {
   return accessRequests.filter((_, i) => auths[i].success)
 }
 
-export async function getAccessRequestById(user: UserDoc, accessRequestId: string) {
+export async function getAccessRequestById(user: UserInterface, accessRequestId: string) {
   const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
   if (!accessRequest) {
     throw NotFound('The requested access request was not found.', { accessRequestId })
@@ -112,7 +112,7 @@ export async function getAccessRequestById(user: UserDoc, accessRequestId: strin
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
-  user: UserDoc,
+  user: UserInterface,
   accessRequestId: string,
   diff: Partial<UpdateAccessRequestParams>,
 ) {
@@ -134,7 +134,7 @@ export async function updateAccessRequest(
   return accessRequest
 }
 
-export async function newAccessRequestComment(user: UserDoc, accessRequestId: string, message: string) {
+export async function newAccessRequestComment(user: UserInterface, accessRequestId: string, message: string) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
 
   if (!accessRequest) {
@@ -163,7 +163,7 @@ export async function newAccessRequestComment(user: UserDoc, accessRequestId: st
   return updatedAccessRequest
 }
 
-export async function getModelAccessRequestsForUser(user: UserDoc, modelId: string) {
+export async function getModelAccessRequestsForUser(user: UserInterface, modelId: string) {
   const accessRequests = await AccessRequest.find({
     modelId,
     'metadata.overview.entities': { $in: await authentication.getEntities(user) },

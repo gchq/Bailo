@@ -3,10 +3,10 @@ import { Validator } from 'jsonschema'
 import authentication from '../../connectors/v2/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import ModelModel from '../../models/v2/Model.js'
-import Model, { ModelInterface } from '../../models/v2/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../models/v2/ModelCardRevision.js'
-import { UserDoc } from '../../models/v2/User.js'
+import ModelModel from '../../models/Model.js'
+import Model, { ModelInterface } from '../../models/Model.js'
+import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
+import { UserInterface } from '../../models/User.js'
 import {
   GetModelCardVersionOptions,
   GetModelCardVersionOptionsKeys,
@@ -19,7 +19,7 @@ import { convertStringToId } from '../../utils/v2/id.js'
 import { findSchemaById } from './schema.js'
 
 export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
-export async function createModel(user: UserDoc, modelParams: CreateModelParams) {
+export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
   // TODO - Find team by teamId to check it's valid. Throw error if not found.
@@ -45,7 +45,7 @@ export async function createModel(user: UserDoc, modelParams: CreateModelParams)
   return model
 }
 
-export async function getModelById(user: UserDoc, modelId: string) {
+export async function getModelById(user: UserInterface, modelId: string) {
   const model = await Model.findOne({
     id: modelId,
   })
@@ -62,7 +62,7 @@ export async function getModelById(user: UserDoc, modelId: string) {
   return model
 }
 
-export async function canUserActionModelById(user: UserDoc, modelId: string, action: ModelActionKeys) {
+export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
   // In most cases this function could be done in a single trip by the previous
   // query to the database.  An aggregate query with a 'lookup' can access this
   // data without having to wait.
@@ -76,7 +76,7 @@ export async function canUserActionModelById(user: UserDoc, modelId: string, act
 }
 
 export async function searchModels(
-  user: UserDoc,
+  user: UserInterface,
   libraries: Array<string>,
   filters: Array<GetModelFiltersKeys>,
   search: string,
@@ -129,7 +129,11 @@ export async function searchModels(
   return results.filter((_, i) => auths[i].success)
 }
 
-export async function getModelCard(user: UserDoc, modelId: string, version: number | GetModelCardVersionOptionsKeys) {
+export async function getModelCard(
+  user: UserInterface,
+  modelId: string,
+  version: number | GetModelCardVersionOptionsKeys,
+) {
   if (version === GetModelCardVersionOptions.Latest) {
     const card = (await getModelById(user, modelId)).card
 
@@ -143,7 +147,7 @@ export async function getModelCard(user: UserDoc, modelId: string, version: numb
   }
 }
 
-export async function getModelCardRevision(user: UserDoc, modelId: string, version: number) {
+export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
   const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
   const model = await getModelById(user, modelId)
 
@@ -159,7 +163,7 @@ export async function getModelCardRevision(user: UserDoc, modelId: string, versi
   return modelCard
 }
 
-export async function getModelCardRevisions(user: UserDoc, modelId: string) {
+export async function getModelCardRevisions(user: UserInterface, modelId: string) {
   const modelCardRevisions = await ModelCardRevisionModel.find({ modelId })
 
   if (!modelCardRevisions) {
@@ -179,7 +183,7 @@ export async function getModelCardRevisions(user: UserDoc, modelId: string) {
 // This function would benefit from transactions, but we currently do not rely on the underlying
 // database being a replica set.
 export async function _setModelCard(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
   schemaId: string,
   version: number,
@@ -217,7 +221,7 @@ export async function _setModelCard(
 }
 
 export async function updateModelCard(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
@@ -253,7 +257,7 @@ export type UpdateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
 >
-export async function updateModel(user: UserDoc, modelId: string, diff: Partial<UpdateModelParams>) {
+export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -268,7 +272,7 @@ export async function updateModel(user: UserDoc, modelId: string, diff: Partial<
 }
 
 export async function createModelCardFromSchema(
-  user: UserDoc,
+  user: UserInterface,
   modelId: string,
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {

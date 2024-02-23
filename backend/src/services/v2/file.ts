@@ -1,15 +1,21 @@
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
 import { FileAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
-import FileModel from '../../models/v2/File.js'
-import { UserDoc } from '../../models/v2/User.js'
+import FileModel from '../../models/File.js'
+import { UserInterface } from '../../models/User.js'
 import config from '../../utils/v2/config.js'
 import { Forbidden, NotFound } from '../../utils/v2/error.js'
 import { longId } from '../../utils/v2/id.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
 
-export async function uploadFile(user: UserDoc, modelId: string, name: string, mime: string, stream: ReadableStream) {
+export async function uploadFile(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  mime: string,
+  stream: ReadableStream,
+) {
   const model = await getModelById(user, modelId)
 
   const fileId = longId()
@@ -39,7 +45,7 @@ export async function uploadFile(user: UserDoc, modelId: string, name: string, m
   return file
 }
 
-export async function downloadFile(user: UserDoc, fileId: string, range?: { start: number; end: number }) {
+export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
   const file = await getFileById(user, fileId)
   const model = await getModelById(user, file.modelId)
 
@@ -51,7 +57,7 @@ export async function downloadFile(user: UserDoc, fileId: string, range?: { star
   return getObjectStream(file.bucket, file.path, range)
 }
 
-export async function getFileById(user: UserDoc, fileId: string) {
+export async function getFileById(user: UserInterface, fileId: string) {
   const file = await FileModel.findOne({
     _id: fileId,
   })
@@ -70,7 +76,7 @@ export async function getFileById(user: UserDoc, fileId: string) {
   return file
 }
 
-export async function getFilesByModel(user: UserDoc, modelId: string) {
+export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
   const files = await FileModel.find({ modelId })
 
@@ -78,7 +84,7 @@ export async function getFilesByModel(user: UserDoc, modelId: string) {
   return files.filter((_, i) => auths[i].success)
 }
 
-export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: string[]) {
+export async function getFilesByIds(user: UserInterface, modelId: string, fileIds: string[]) {
   const model = await getModelById(user, modelId)
   if (fileIds.length === 0) {
     return []
@@ -94,7 +100,7 @@ export async function getFilesByIds(user: UserDoc, modelId: string, fileIds: str
   return files.filter((_, i) => auths[i].success)
 }
 
-export async function removeFile(user: UserDoc, modelId: string, fileId: string) {
+export async function removeFile(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   const file = await getFileById(user, fileId)
 

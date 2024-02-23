@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { BasicAuthorisationConnector } from '../../../src/connectors/v2/authorisation/base.js'
-import { ModelDoc } from '../../../src/models/v2/Model.js'
-import { ReleaseDoc } from '../../../src/models/v2/Release.js'
-import { SchemaDoc } from '../../../src/models/v2/Schema.js'
-import { UserDoc } from '../../../src/models/v2/User.js'
+import { ModelDoc } from '../../../src/models/Model.js'
+import { ReleaseDoc } from '../../../src/models/Release.js'
+import { SchemaDoc } from '../../../src/models/Schema.js'
+import { UserInterface } from '../../../src/models/User.js'
 
 const mockAccessRequestService = vi.hoisted(() => ({
   getModelAccessRequestsForUser: vi.fn(),
@@ -26,7 +26,7 @@ const mockAuthentication = vi.hoisted(() => ({
 vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: mockAuthentication }))
 
 describe('connectors > authorisation > base', () => {
-  const user = { dn: 'testUser' } as UserDoc
+  const user = { dn: 'testUser' } as UserInterface
   const model = { id: 'testModel' } as ModelDoc
 
   test('hasApprovedAccessRequest > no access requests for model', async () => {

@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
 import audit from '../../../../connectors/v2/audit/index.js'
-import { AccessRequestInterface } from '../../../../models/v2/AccessRequest.js'
+import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
 import { newAccessRequestComment } from '../../../../services/v2/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
 import { parse } from '../../../../utils/v2/validate.js'

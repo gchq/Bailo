@@ -1,8 +1,8 @@
 import { customAlphabet } from 'nanoid'
 
-import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../../models/v2/Token.js'
-import Token from '../../models/v2/Token.js'
-import { UserDoc } from '../../models/v2/User.js'
+import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../../models/Token.js'
+import Token from '../../models/Token.js'
+import { UserInterface } from '../../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../../utils/v2/error.js'
 import { getModelById } from './model.js'
 
@@ -15,7 +15,7 @@ interface CreateTokenProps {
 }
 
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZ')
-export async function createToken(user: UserDoc, { description, scope, modelIds, actions }: CreateTokenProps) {
+export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
   const accessKey = `BAC_${nanoid(8)}`
   const secretKey = `BSK_${nanoid(12)}`
 
@@ -44,13 +44,13 @@ export async function createToken(user: UserDoc, { description, scope, modelIds,
   return token
 }
 
-export async function findUserTokens(user: UserDoc) {
+export async function findUserTokens(user: UserInterface) {
   return Token.find({
     user: user.dn,
   })
 }
 
-export async function removeToken(user: UserDoc, accessKey: string) {
+export async function removeToken(user: UserInterface, accessKey: string) {
   const token = await findTokenByAccessKey(accessKey)
 
   if (token.user !== user.dn) {

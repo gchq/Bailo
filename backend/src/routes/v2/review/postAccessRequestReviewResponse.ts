@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
 import audit from '../../../connectors/v2/audit/index.js'
-import { Decision, ReviewInterface } from '../../../models/v2/Review.js'
+import { Decision, ReviewInterface } from '../../../models/Review.js'
 import { respondToReview } from '../../../services/v2/review.js'
 import { ReviewKind } from '../../../types/v2/enums.js'
 import { parse } from '../../../utils/v2/validate.js'

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'crypto'
 
-import { TokenDoc } from '../models/v2/Token.js'
+import { TokenDoc } from '../models/Token.js'
+import { UserInterface } from '../models/User.js'
 import { bailoErrorGuard } from '../routes/middleware/expressErrorHandler.js'
 import { getAdminToken } from '../routes/registryAuth.js'
 import { getTokenFromAuthHeader } from '../services/v2/token.js'
@@ -25,7 +26,7 @@ function safelyCompareTokens(expected: string, actual: string) {
 // - the password is not hashed, so comparisons _must_ be done in constant time
 export async function getUserFromAuthHeader(
   header: string,
-): Promise<{ error?: string; user?: any; admin?: boolean; token?: TokenDoc }> {
+): Promise<{ error?: string; user?: UserInterface; admin?: boolean; token?: TokenDoc }> {
   const [method, code] = header.split(' ')
 
   if (method.toLowerCase() !== 'basic') {
@@ -39,7 +40,7 @@ export async function getUserFromAuthHeader(
   }
 
   if (safelyCompareTokens(await getAdminToken(), token)) {
-    return { user: { _id: '', id: '' }, admin: true }
+    return { user: { dn: '' }, admin: true }
   }
 
   let tokenDoc: TokenDoc | undefined = undefined
@@ -60,8 +61,6 @@ export async function getUserFromAuthHeader(
   return {
     token: tokenDoc,
     user: {
-      _id: tokenDoc.user,
-      id: tokenDoc.user,
       dn: tokenDoc.user,
     },
   }

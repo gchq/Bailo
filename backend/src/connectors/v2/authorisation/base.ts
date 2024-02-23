@@ -1,9 +1,9 @@
-import { AccessRequestDoc } from '../../../models/v2/AccessRequest.js'
-import { FileInterfaceDoc } from '../../../models/v2/File.js'
-import { ModelDoc, ModelVisibility } from '../../../models/v2/Model.js'
-import { ReleaseDoc } from '../../../models/v2/Release.js'
-import { SchemaDoc } from '../../../models/v2/Schema.js'
-import { UserDoc } from '../../../models/v2/User.js'
+import { AccessRequestDoc } from '../../../models/AccessRequest.js'
+import { FileInterfaceDoc } from '../../../models/File.js'
+import { ModelDoc, ModelVisibility } from '../../../models/Model.js'
+import { ReleaseDoc } from '../../../models/Release.js'
+import { SchemaDoc } from '../../../models/Schema.js'
+import { UserInterface } from '../../../models/User.js'
 import { Access, Action } from '../../../routes/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../../services/v2/accessRequest.js'
 import { checkAccessRequestsApproved } from '../../../services/v2/review.js'
@@ -26,7 +26,7 @@ import {
 type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
 export class BasicAuthorisationConnector {
-  async hasModelVisibilityAccess(user: UserDoc, model: ModelDoc) {
+  async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
     if (model.visibility === ModelVisibility.Public) {
       return true
     }
@@ -37,7 +37,7 @@ export class BasicAuthorisationConnector {
     return true
   }
 
-  async hasApprovedAccessRequest(user: UserDoc, model: ModelDoc) {
+  async hasApprovedAccessRequest(user: UserInterface, model: ModelDoc) {
     const accessRequests = await getModelAccessRequestsForUser(user, model.id)
     if (accessRequests.length === 0) {
       return false
@@ -45,20 +45,20 @@ export class BasicAuthorisationConnector {
     return await checkAccessRequestsApproved(accessRequests.map((accessRequest) => accessRequest.id))
   }
 
-  async model(user: UserDoc, model: ModelDoc, action: ModelActionKeys) {
+  async model(user: UserInterface, model: ModelDoc, action: ModelActionKeys) {
     return (await this.models(user, [model], action))[0]
   }
 
-  async schema(user: UserDoc, schema: SchemaDoc, action: SchemaActionKeys) {
+  async schema(user: UserInterface, schema: SchemaDoc, action: SchemaActionKeys) {
     return (await this.schemas(user, [schema], action))[0]
   }
 
-  async release(user: UserDoc, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
+  async release(user: UserInterface, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
     return (await this.releases(user, model, [release], action))[0]
   }
 
   async accessRequest(
-    user: UserDoc,
+    user: UserInterface,
     model: ModelDoc,
     accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
@@ -66,15 +66,15 @@ export class BasicAuthorisationConnector {
     return (await this.accessRequests(user, model, [accessRequest], action))[0]
   }
 
-  async file(user: UserDoc, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
+  async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
     return (await this.files(user, model, [file], action))[0]
   }
 
-  async image(user: UserDoc, model: ModelDoc, access: Access) {
+  async image(user: UserInterface, model: ModelDoc, access: Access) {
     return (await this.images(user, model, [access]))[0]
   }
 
-  async models(user: UserDoc, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
+  async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
         const roles = await authentication.getUserModelRoles(user, model)
@@ -98,7 +98,7 @@ export class BasicAuthorisationConnector {
     )
   }
 
-  async schemas(user: UserDoc, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
+  async schemas(user: UserInterface, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
     if (action === SchemaAction.Create || action === SchemaAction.Delete) {
       const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
@@ -118,7 +118,7 @@ export class BasicAuthorisationConnector {
   }
 
   async releases(
-    user: UserDoc,
+    user: UserInterface,
     model: ModelDoc,
     releases: Array<ReleaseDoc>,
     action: ReleaseActionKeys,
@@ -136,7 +136,7 @@ export class BasicAuthorisationConnector {
   }
 
   async accessRequests(
-    user: UserDoc,
+    user: UserInterface,
     model: ModelDoc,
     accessRequests: Array<AccessRequestDoc>,
     action: AccessRequestActionKeys,
@@ -163,7 +163,7 @@ export class BasicAuthorisationConnector {
   }
 
   async files(
-    user: UserDoc,
+    user: UserInterface,
     model: ModelDoc,
     files: Array<FileInterfaceDoc>,
     action: FileActionKeys,
@@ -199,7 +199,7 @@ export class BasicAuthorisationConnector {
     )
   }
 
-  async images(user: UserDoc, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
+  async images(user: UserInterface, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
     // Does the user hold a role on the image's model?
     const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
 
