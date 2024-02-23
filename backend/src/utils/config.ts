@@ -10,6 +10,11 @@ import { DefaultSchema } from '../services/schema.js'
 import { deepFreeze } from './object.js'
 
 export interface Config {
+  api: {
+    host: string
+    port: number
+  }
+
   app: {
     protocol: string
     host: string

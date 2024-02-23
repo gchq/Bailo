@@ -33,8 +33,8 @@ await runMigrations()
 addDefaultSchemas()
 
 const { server } = await import('./routes.js')
-const httpServer = server.listen(config.app.port, () => {
-  log.info('Listening on port', config.app.port)
+const httpServer = server.listen(config.api.port, () => {
+  log.info('Listening on port', config.api.port)
 })
 
 registerSigTerminate(httpServer)
