@@ -1,4 +1,4 @@
-import { ModelAction } from '../../connectors/v2/authorisation/base.js'
+import { ModelAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceInterface } from '../../models/v2/Inference.js'
 import Inference from '../../models/v2/Inference.js'
