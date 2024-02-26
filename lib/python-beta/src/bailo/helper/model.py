@@ -279,6 +279,11 @@ class Model:
 
 
 class Experiment:
+    """Represent an experiment locally.
+
+    :param model: A Bailo model object which the experiment is being run on
+    :param raw: Raw information about the experiment runs
+    """    
     def __init__(
         self,
         model: Model,
@@ -291,10 +296,17 @@ class Experiment:
         cls,
         model: Model,
     ) -> Experiment:
+        """Create an experiment locally.
+
+        :param model: A Bailo model object which the experiment is being run on
+        :return: Experiment object
+        """        
         
         return cls(model=model)
 
     def start_run(self):
+        """Starts a new experiment run.
+        """        
         try:
             self.run = self.run + 1
         except:
@@ -305,6 +317,7 @@ class Experiment:
             "params": [],
             "metrics": [],
             "artifacts": [],
+            "dataset": ""
         }
 
         self.raw.append(self.run_data)
@@ -312,15 +325,40 @@ class Experiment:
         print(f"Bailo tracking run {self.run}.")
 
     def log_params(self, params: dict[str, Any]):
+        """Logs parameters to the current run.
+
+        :param params: Dictionary of parameters to be logged
+        """        
         self.run_data["params"].append(params)
 
     def log_metrics(self, metrics: dict[str, Any]):
+        """Logs metrics to the current run.
+
+        :param metrics: Dictionary of metrics to be logged
+        """        
         self.run_data["metrics"].append(metrics)
 
     def log_artifacts(self, artifacts: dict[str, Any]):
+        """Logs artifacts to the current run.
+
+        :param artifacts: A dictionary of artifacts to be logged
+        """        
         self.run_data["artifiacts"].append(artifacts)
 
+    def log_dataset(self, dataset: str):
+        """Logs a dataset to the current run.
+
+        :param dataset: Arbitrary title of dataset
+        """        
+        self.run_data["dataset"] = dataset
+
     def from_mlflow(self, tracking_uri: str, experiment_id: str):
+        """Imports information from an MLFlow Tracking experiment.
+
+        :param tracking_uri: MLFlow Tracking server URI
+        :param experiment_id: MLFlow Tracking experiment ID
+        :raises ImportError: Import error if MLFlow not installed
+        """        
         if ml_flow == 1:
             client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
             runs = client.search_runs(experiment_id)
@@ -335,6 +373,13 @@ class Experiment:
 
 
     def publish(self, mc_loc: str, run_id: str):
+        """Publishes a given experiments results to the model card.
+
+        :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
+        :param run_id: Local experiment run ID to be selected
+
+        ..note:: mc_loc is dependent on the model card schema being used
+        """        
         mc = self.model.model_card
         mc = NestedDict(mc)
 
@@ -344,7 +389,12 @@ class Experiment:
             else:
                 continue
 
-        sel_run = sel_run['params'] + sel_run['metrics'] 
+        values = []
 
-        mc[tuple(mc_loc.split('.'))] = sel_run
+        for metric in sel_run['metrics']:
+            for k, v in metric.items():
+                values.append({"name": k, "value": v})
+
+        parsed_values = [{'dataset': sel_run['dataset'], 'datasetMetrics': values}]
+        mc[tuple(mc_loc.split('.'))] = parsed_values
         self.model.update_model_card(model_card=mc)
